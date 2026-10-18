@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-12",
+  "seed": 20261012,
+  "binding": {
+    "dataset": "SPG1_STRSG_Wu_2016",
+    "pool_size": 4096,
+    "evaluation_pools": 20,
+    "development_pool_size": 4096,
+    "initial_labels": 8,
+    "batch_size": 8,
+    "maximum_labels": 128,
+    "checkpoints": [8, 16, 32, 64, 128],
+    "policies": ["random", "diverse", "greedy", "ucb", "agent"],
+    "feedback_delays": [0, 3],
+    "forest_trees": 64,
+    "ucb_beta": 1.0,
+    "top_fraction": 0.01
+  },
+  "structure": {
+    "development_proteins": 4,
+    "evaluation_proteins": 8,
+    "minimum_length": 50,
+    "maximum_length": 250,
+    "stride": 5,
+    "block_frames": 20,
+    "sphere_points": 240,
+    "initial_blocks_per_protein": 2,
+    "additional_blocks": 64,
+    "policies": ["static", "uniform", "uncertainty", "agent"],
+    "top_residues": 10
+  }
+}
