@@ -120,15 +120,22 @@ and the completion accounting counts only the configured grid.
 
 ### 1.5 What this design does and does not model
 
-Worth stating plainly, because it governs §2:
+Worth stating plainly, because it governs §2.
 
-| The dataset models | The dataset does not model |
-| --- | --- |
-| Iterative small-batch assay follow-up | A single large display selection round |
-| Dense, fully-enumerated candidate space (4 sites × 20 canonical AAs) | ~10¹² sparse macrocyclic library |
-| Per-candidate quantitative scores | Enrichment ratios across selection rounds |
-| 20 canonical amino acids | Non-canonical residues, cyclisation chemistry |
-| Synthetic delay in decision rounds | Real reagent and assay turnaround |
+What the dataset models is **iterative small-batch assay follow-up** over a dense,
+fully-enumerated candidate space — four sites by twenty canonical amino acids — where
+every candidate carries a quantitative score and feedback arrives after a synthetic
+delay measured in decision rounds.
+
+What it does not model is a **single large display selection round**: a sparse library of
+order 10¹² macrocycles, read out as enrichment ratios across successive rounds rather
+than as per-candidate scores, built from non-canonical residues and a cyclisation
+chemistry the encoding has no representation for, and returned on real reagent and assay
+turnaround rather than a round counter.
+
+The gap is not a detail of scale. Nothing in the pilot exercises the two features that
+define the SynX platform — non-canonical chemistry and enrichment-based readout — so no
+result from it can speak to either.
 
 ---
 
@@ -153,9 +160,6 @@ No macrocyclic peptide, no non-canonical amino acid and no pathogen target appea
 anywhere in the codebase or results.
 
 ### 2.2 The argument for keeping the binding arm
-
-Your skepticism is largely right, but three things survive substrate-independently and
-are worth defending:
 
 **(a) It is a validated scoring harness, and the training plan requires one.** The
 Week 8–10 harness work depends on baseline parity — a scorer cannot be validated against
