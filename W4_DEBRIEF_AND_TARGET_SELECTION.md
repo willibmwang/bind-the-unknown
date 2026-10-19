@@ -1,7 +1,7 @@
 # Dataset engineering, biological debrief, target selection, and co-scientist architecture
 
-**Prepared 18 October 2026.** Feeds gates B07 (two prototype families, opens Oct 19),
-D01 (single-round experimental question, Oct 22–23) and A06 (feasibility and novelty
+**Prepared 18 October 2026.** Feeds gates COSCI-07 (two prototype families, opens Oct 19),
+LAB-01 (single-round experimental question, Oct 22–23) and GATE-06 (feasibility and novelty
 review, Oct 23).
 
 No claim of therapeutic efficacy, antiviral activity, binding affinity or full-system
@@ -247,6 +247,56 @@ difference of 0.0022 and a maximum of 0.027 on Spearman. Pool-level summary mean
 by at most 0.0011, so no figure quoted above changes. The ridge column is a secondary
 comparator and no claim rests on it alone.
 
+### 2.5 What the pathogen re-point actually measured — added 19 October
+
+Action 2 below is done, and the result is not the one I expected. 240 paired replays
+(3 landscapes × 4 policies × 10 disjoint pools × 2 delay conditions) now exist under
+`runs/targets/`, summarised in `runs/summary/target_metrics.csv`.
+
+**The selected-versus-returned finding replicates.** At a three-round delay the
+retrospective metric overstates the realtime one by 1.12–1.38× across all three
+landscapes and all four policies, against roughly 1.4× on GB1, and by exactly 1.00× at
+zero delay as it must. This is substrate-independent and endpoint-independent. It is the
+one quantitative result from the pilot that survived the move to pathogen targets.
+
+**The 8× policy gain does not replicate, and the reason is a metric artifact I should
+have caught earlier.** Random top-fraction recall is simply the labelled fraction of the
+pool, which the data confirms to two decimal places:
+
+| pool | labelled fraction | predicted random recall | observed random recall | headroom (1/fraction) |
+| --- | --- | --- | --- | --- |
+| GB1, 4,096 candidates | 128/4096 = 0.031 | 0.031 | 0.032 | 32× |
+| pathogen, 512 candidates | 128/512 = 0.250 | 0.250 | 0.223 | 4.0× |
+
+So "8.7× better than random" is bounded above by 32× on GB1 and by 4× on a 512-candidate
+pool. **The multiple-over-random is not comparable across pool geometries**, and the GB1
+headline figure must never be quoted without its budget ratio. That is a second
+measurement-design finding of the same kind as §2.2(b), and it partly undercuts §2.2(c).
+
+Normalising as `(policy − random) / (1 − random)` removes the bound and the gain is still
+smaller on pathogen landscapes — 0.25 on GB1 against 0.09 for greedy on Mpro — so this is
+not purely an artifact. Paired per-pool differences at 128 labels, zero delay:
+
+| landscape | greedy vs random | UCB vs random | diverse vs random |
+| --- | --- | --- | --- |
+| Mpro | +0.065 ± 0.152 (7/10 pools) | +0.038 ± 0.120 (5/10) | −0.027 ± 0.065 (3/10) |
+| HA H3 | +0.104 ± 0.085 (8/10) | +0.050 ± 0.093 (6/10) | −0.031 ± 0.065 (1/10) |
+| HA H1 | −0.004 ± 0.118 (6/10) | +0.046 ± 0.107 (7/10) | +0.019 ± 0.084 (3/10) |
+
+**Verdict.** At a 25% labelled fraction, acquisition policy delivers a small and
+inconsistent gain on pathogen landscapes: best on HA H3, at chance for greedy on HA H1,
+and with pool-to-pool spread larger than the mean difference everywhere. Diversity-seeking
+is actively harmful on two of three. The likely cause is representational: a
+single-substitution scan encoded as (position, residue) over 303–566 positions gives the
+forest far less to generalise from than GB1's four co-varying sites, where every candidate
+shares positions with every other.
+
+Two consequences for GATE-06. First, the geometry is a forced trade-off at 5,725 rows —
+many small pools compress the headroom, one large pool removes the pool-to-pool spread —
+and the honest comparison reports recall at a matched *budget fraction*, not at a matched
+absolute budget. Second, **do not carry the 8× figure into the paper.** The defensible
+claims are the two measurement-design findings, not the magnitude.
+
 ---
 
 ## 3. Next targets
@@ -278,7 +328,7 @@ conservation of an immune-evasion surface cannot be engineered around.
 
 ### 3.2 Selection rubric
 
-B07's acceptance condition requires documented selection criteria. Proposed rubric —
+COSCI-07's acceptance condition requires documented selection criteria. Proposed rubric —
 these seven axes are also the backbone of the target dossier in core deliverable 2:
 
 | Axis | What it asks | Why it gates |
@@ -450,7 +500,7 @@ entirely because RNA secondary structure is under far stronger constraint than a
 glycoprotein epitope. Against it: non-standard reagent and assay, a less certain
 functional readout, and no public landscape. Worth putting to Askar even if declined.
 
-### 3.8 Recommendation for the single display round (D01, due Oct 23)
+### 3.8 Recommendation for the single display round (LAB-01, due Oct 23)
 
 **Mpro.** Cheapest and best-behaved reagent, strongest conservation case, an orthogonal
 functional assay available if the schedule allows, and interpretable failure. Report
@@ -627,18 +677,29 @@ ablation (c) are W8–W9 at the earliest and only if access and spend gates clea
 
 ### 4.4 Ordered actions
 
-1. **Oct 19 — B07.** Put Mpro + influenza to Askar with the §3.2 rubric as the
-   documented selection criteria and §3.5 as the availability argument. Gates C06, D01
-   and A06.
-2. **Re-point the binding harness** at Mpro and the two HA landscapes. Mostly a config
-   change plus pool-size rework for the smaller landscapes; the policy is
-   dataset-agnostic. Converts a methods demo into a result about pathogen targets.
+1. **Oct 19 — COSCI-07.** Put Mpro + influenza to Askar with the §3.2 rubric as the
+   documented selection criteria and §3.5 as the availability argument. Gates MOL-06, LAB-01
+   and GATE-06. **Packets now exist** — `hpc_pilots/targets.py` encodes 11 targets across
+   three families against the seven axes, with each claim's provenance and three claims
+   flagged as needing a citation. The decision itself is still Askar's.
+2. ~~Re-point the binding harness~~ — **done.** Mpro, HA H1 and HA H3 are staged as
+   decision environments in `hpc_pilots/configs/targets.json`. The pool-size rework was
+   real: 20 × 4,096 disjoint pools is impossible at 5,725 rows, so pools are 512
+   candidates and the geometry shrinks rather than reusing candidates — 10 disjoint pools
+   for Mpro, 19 for HA H1, 20 for HA H3. Top fraction moves to 5% because 1% of 512 is
+   about five members; those figures must not be compared with the GB1 1% figures.
 3. **Retire the structural arm** as a scientific component, per §2.3. Keep the
    cost-accounting and evidence-isolation code.
-4. **Write the dossier schema before the policy that consumes it.** The §3.2 axes are
-   deliverable 2. Building B06 first produces another bandit.
-5. **Specify the episode format once**, so molecular and transcriptomic episodes share
-   it. This is what makes (a) and (e) in §4.2 compose instead of forking.
+4. ~~Write the dossier schema before the policy that consumes it~~ — **done.**
+   `hpc_pilots/dossier.py` holds the seven axes as the decision state with per-axis
+   citations, timestamps, retained conflicts and hard-gate blocking, and the six-action
+   space replacing `{greedy, explore, diverse}`. COSCI-06 now depends on it in the plan,
+   so the policy cannot be built first.
+5. ~~Specify the episode format once~~ — **done for the molecular side.**
+   `hpc_pilots/emergency.py` defines the episode: timed evidence release, a deadline, an
+   action budget, and scoring on updating under relevant evidence versus holding under
+   irrelevant evidence. The transcriptomic episodes in SAFE-04 must adopt this format
+   rather than forking it.
 6. ~~Restore the calibration scripts~~ — **done.** `hpc_pilots/calibration.py` now
    regenerates both studies; see §2.4 for the one column that does not reproduce exactly.
 7. **Pull Rogers, Passioura & Suga (2018)** nonproteinogenic DMS (PNAS 115(43),
@@ -652,15 +713,29 @@ ablation (c) are W8–W9 at the earliest and only if access and spend gates clea
 
 ## 5. Open items
 
+- **Pool geometry for the pathogen landscapes is unresolved.** §2.5 shows the
+  multiple-over-random is bounded by the labelled fraction, so the current 512-candidate
+  pools cannot reproduce a GB1-scale effect even in principle. Decide at GATE-06 between
+  many small pools with compressed headroom and few large pools with no spread, and report
+  matched budget fractions either way.
+- **The LLM policy has no non-smoke result anywhere.** `runs/summary/binding_metrics.csv`
+  contains only the four heuristic baselines; the only agent run on disk is a Haiku smoke
+  run. The emergency episodes have been run with the two deterministic policies only, and
+  those are stable under irrelevant evidence by construction, so the stability metric has
+  not yet been tested against anything that could fail it. COSCI-06 is where that happens.
+- The non-canonical building-block registry carries literature block *classes* only. Every
+  chemical identifier, codon assignment, Rosetta parameter and rotamer library is null
+  pending the MOL-01 export, so no macrocycle has been represented concretely, let alone
+  measured.
 - The ridge comparator in §2.4 does not reproduce bit-exactly (mean absolute
   difference 0.0022); the forest and calibration columns do.
-- No prototype family, target, assay or chemical alphabet selected. B07 is the blocker.
+- No prototype family, target, assay or chemical alphabet selected. COSCI-07 is the blocker.
 - The entire physics-based ncAA track remains untouched — Flex ddG, FakeRotLib,
   MakeRotLib, Dunbrack rotamer libraries, the RosettaCommons ncAA interface protocol.
   Nothing in the repository approaches it.
 - Macrocyclic-peptide precedent against Mpro is asserted from memory in §3.3 and must be
   verified before it is used as a positive-control argument.
-- A06 additionally depends on the lab route and data-return terms, live trainable model
+- GATE-06 additionally depends on the lab route and data-return terms, live trainable model
   access and spend cap, and the novelty review — all external to this repository.
 - ATLAS data is CC BY-NC 4.0; this work is scoped to noncommercial research. Commercial
   use requires separate terms from the dataset owner.
