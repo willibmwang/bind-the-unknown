@@ -15,6 +15,8 @@ import html
 import re
 import subprocess
 import sys
+import tempfile
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -259,10 +261,27 @@ def build(source):
     pdf = source.with_suffix(".pdf")
     staged = ROOT / "output" / (source.stem + ".build.html")
     staged.write_text(page)
-    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
-                    "--virtual-time-budget=4000", f"--print-to-pdf={pdf}",
-                    staged.as_uri()], check=True, capture_output=True)
-    staged.unlink()
+    # A throwaway profile, so the build works whether or not the user has Chrome open;
+    # sharing the default profile makes headless fail on the singleton lock.
+    started = time.time()
+    try:
+        with tempfile.TemporaryDirectory(prefix="debrief-chrome-") as profile:
+            result = subprocess.run(
+                [CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
+                 f"--user-data-dir={profile}", "--no-first-run", "--no-default-browser-check",
+                 "--virtual-time-budget=4000", f"--print-to-pdf={pdf}", staged.as_uri()],
+                capture_output=True, text=True)
+    finally:
+        staged.unlink(missing_ok=True)
+
+    # Chrome on macOS often writes the PDF correctly and then fails during teardown, so the
+    # artifact is the authority on success, not the exit code. A complete PDF ends with %%EOF.
+    fresh = pdf.exists() and pdf.stat().st_mtime >= started and pdf.stat().st_size > 0
+    if not (fresh and pdf.read_bytes().rstrip().endswith(b"%%EOF")):
+        raise SystemExit(f"Chrome exited {result.returncode} without a complete PDF\n"
+                         f"{result.stderr.strip()[-2000:]}")
+    if result.returncode != 0:
+        print(f"note: chrome exited {result.returncode} after writing the PDF (teardown only)")
     print(f"{pdf.relative_to(ROOT)}  {pdf.stat().st_size / 1024:.0f} KB  "
           f"from {len(section_mds)} sections, {len(markdown.splitlines())} source lines")
 

@@ -18,64 +18,66 @@ before the detail begins.
 
 ## Summary for review
 
-**What the October work actually tested.** Two small computational pilots, and neither one
-is about whether a molecule binds anything. They test a narrower question: when you can
-only afford a limited number of measurements and results come back slowly, does the *rule
-you use to choose what to measure next* make a difference? Everything was run on published
-measurement datasets, so the right answer is already known for every candidate and the
-computer's choices can be graded automatically, with no new laboratory work.
+**Scope of the October work.** Two small computational pilots were conducted. Neither
+concerns whether a molecule binds anything. Both address a narrower question: under a
+limited measurement budget and delayed results, does the *rule used to select what to
+measure next* materially affect the outcome? Both were run against published measurement
+datasets in which the result for every candidate is already known, so the selections can be
+graded automatically and no new laboratory work was required.
 
-**One result held up, and it is the useful one.** If you grade a decision system on
-everything it *chose* to measure, you flatter it compared with grading it on what had
-actually come back by the time it had to decide. The gap is about 1.2 to 1.4 times. This
-sounds like bookkeeping and it is not: it is the difference between asking "were those good
-choices, with hindsight?" and "were those good choices, given what was known at the time?"
-Only the second question is fair to an emergency decision-maker, and the first is what most
-evaluations accidentally measure. The effect reproduced on every dataset tried, including
-SARS-CoV-2 Mpro and both influenza haemagglutinin datasets.
+**First finding: a measurement-design result, which replicates.** Grading a decision system
+on everything it *selected* overstates its performance relative to grading it on what had
+actually returned at the time each decision was made. The discrepancy is a factor of
+approximately 1.2 to 1.4. The distinction is not bookkeeping. It separates the question
+"were these good selections in hindsight?" from "were these good selections on the evidence
+then available?" Only the latter is a fair test of an emergency decision-maker, and the
+former is what most evaluations measure inadvertently. The effect reproduced on every
+dataset examined, including SARS-CoV-2 Mpro and both influenza haemagglutinin datasets.
 
-**One result broke, and I am reporting it rather than burying it.** An earlier figure said
-the selection rule found roughly eight times more of the best candidates than picking at
-random. That number was mostly an artefact of pool size. If you measure 128 candidates out
-of 4,096, random picking finds about 3% of the good ones, so there is a great deal of room
-to look impressive. If you measure 128 out of 512, random picking already finds about 25%,
-and no method can beat it by more than fourfold even in principle. Corrected for this, the
-advantage on real pathogen datasets is small and inconsistent — clearest on influenza H3,
-absent on H1 — and one of the four rules is actively worse than random. **The eightfold
-figure should not appear in a paper or a presentation.** §2.5 gives the arithmetic.
+**Second finding: an earlier headline result does not survive scrutiny.** A previous figure
+reported that the selection rule recovered approximately eight times more of the best
+candidates than random selection. That figure is substantially an artefact of pool size. At
+128 measurements drawn from 4,096 candidates, random selection recovers about 3% of the
+strong candidates, leaving considerable scope for apparent improvement. At 128 drawn from
+512, random selection already recovers about 25%, and no method can exceed it by more than
+fourfold even in principle. Once corrected, the advantage on pathogen datasets is small and
+inconsistent — clearest on influenza H3, absent on H1 — and one of the four rules performs
+worse than random. **The eightfold figure should not appear in any paper or presentation.**
+The supporting arithmetic is given in §2.5.
 
-**The system now reasons about biology, which it previously did not.** Until 19 October the
-software chose between three abstract strategies while seeing candidates only as numbered
-items — it could not have told you it was working on a protease. It now works from a target
-dossier built on the seven criteria in §3.2 (reagent tractability, essentiality,
-conservation, accessibility, assay availability, public data, precedent), tracks which claim
-rests on which source, refuses evidence dated later than the decision it is making, keeps
-contradictory evidence side by side instead of overwriting it, and states what a single
-selection round can and cannot establish. Run on the coronavirus packet it proposes **Mpro**,
-notes that a cytosolic target requires a membrane-permeability argument, limits what one
-round would show to enrichment, and flags that its own claim about prior macrocycle
-campaigns against Mpro is uncited and must be checked.
+**System capability as of 19 October.** Until that date the software selected among three
+abstract strategies while representing candidates only as numbered items; it held no
+representation of the biology involved. It now operates on a target dossier structured
+around the seven criteria in §3.2 — reagent tractability, essentiality, conservation,
+accessibility, assay availability, public data and precedent. It records which claim rests
+on which source, refuses evidence dated later than the decision under consideration,
+retains contradictory evidence alongside the claim it contests rather than overwriting it,
+and states what a single selection round can and cannot establish. Applied to the
+coronavirus packet it proposes **Mpro**, notes that a cytosolic target requires a
+membrane-permeability argument, limits the claim available from one round to enrichment,
+and flags that its own assertion regarding prior macrocycle campaigns against Mpro is
+uncited and requires verification.
 
-**What I am asking you to decide this week.**
+**Decisions required this week.**
 
-1. **Two prototype families.** I propose Coronaviridae via Mpro plus Orthomyxoviridae via
-   the haemagglutinin stem or neuraminidase, with Nipah held back as a stretch. The
-   reasoning is in §3.3 and §3.4. The deciding argument is availability of public
-   measurement data, which lets the method work proceed without waiting on SynX; Nipah has
-   the better story and no such data.
-2. **The question for the single display round** (§3.8). I propose Mpro: cheapest
-   well-behaved reagent, strongest conservation case, and an orthogonal functional assay
-   available if scheduling allows.
-3. **Three things only you can unblock**, all of which have already slipped their dates: a
+1. **Two prototype families.** The proposal is Coronaviridae via Mpro together with
+   Orthomyxoviridae via the haemagglutinin stem or neuraminidase, with Nipah retained as a
+   stretch option. The reasoning is set out in §3.3 and §3.4. The deciding consideration is
+   the availability of public measurement data, which allows method development to proceed
+   without dependency on SynX; Nipah offers the stronger narrative and no such data.
+2. **The question for the single display round** (§3.8). The proposal is Mpro: the least
+   expensive well-behaved reagent, the strongest conservation case, and an orthogonal
+   functional assay available if scheduling permits.
+3. **Three dependencies outside this project's control**, each already past its date: a
    named experimental owner with a booked slot; the campaign export, without which the
-   platform-improvement deliverable cannot start; and confirmation of trainable model access
-   with a spending ceiling.
+   platform-improvement deliverable cannot begin; and confirmation of trainable model access
+   with an approved spending ceiling.
 
-**What is not claimed anywhere in this document.** No binding affinity, no functional
-inhibition, no antiviral activity, no therapeutic efficacy. No macrocyclic peptide and no
-non-canonical amino acid has been measured or modelled — the building-block work so far is a
-catalogue structure awaiting real chemistry from the platform. The pilots measure
-decision-making procedure, and a measurement of procedure is not evidence about a molecule.
+**Claims not made in this document.** No binding affinity, functional inhibition, antiviral
+activity or therapeutic efficacy is asserted. No macrocyclic peptide and no non-canonical
+amino acid has been measured or modelled; the building-block work to date is a catalogue
+structure awaiting chemistry from the platform. The pilots measure decision procedure, and a
+measurement of procedure is not evidence about a molecule.
 
 ---
 
@@ -87,11 +89,11 @@ substrates, so that is what this section documents.
 
 ### 1.1 Binding dataset
 
-What follows describes a simulated experiment campaign. We take a published dataset in which
-every variant's result is already known, hide all of those results, let the system request
-them a few at a time under a fixed budget, and then grade the choices it made. Almost all of
-the detail below exists to guarantee one thing: that the system cannot reach an answer it has
-not earned.
+What follows describes a simulated experiment campaign. A published dataset in which every
+variant's result is already known is taken as the substrate; all results are withheld; the
+system requests them a few at a time under a fixed budget; and its selections are then graded
+against the withheld values. Almost all of the detail below exists to guarantee a single
+property: that the system cannot reach an answer it has not earned.
 
 **Source.** ProteinGym v1.3, assay `SPG1_STRSG_Wu_2016` — 149,360 measured variants.
 ProteinGym records `selection_assay: Binding (IgG)`, `selection_type: binding`, so the
@@ -195,7 +197,7 @@ and the completion accounting counts only the configured grid.
 
 ### 1.5 What this design does and does not model
 
-Worth stating plainly, because it governs §2.
+This bears statement, because it governs §2.
 
 What the dataset models is **iterative small-batch assay follow-up** over a dense,
 fully-enumerated candidate space — four sites by twenty canonical amino acids — where
@@ -274,7 +276,7 @@ recall figures as a scientific result.
 
 ### 2.3 The argument against keeping the structural arm
 
-I cannot construct a good one.
+No persuasive argument for retention could be constructed. The case for retirement follows.
 
 The arm measures how fast mean per-residue SASA estimates converge to a held-out MD
 replicate, under different block-allocation policies, on twelve human proteins chosen for
@@ -333,9 +335,9 @@ comparator and no claim rests on it alone.
 This subsection moves the simulated campaign off the bacterial test protein and onto
 SARS-CoV-2 Mpro and two influenza haemagglutinin datasets. One earlier finding survived the
 move; the headline one did not, for a reason that is arithmetic rather than biological. Of
-the technical subsections, this is the one that changes what we are allowed to claim.
+the technical subsections, this is the one that constrains what may be claimed.
 
-Action 2 below is done, and the result is not the one I expected. 240 paired replays
+Action 2 below is complete, and the outcome contradicts the expected result. 240 paired replays
 (3 landscapes × 4 policies × 10 disjoint pools × 2 delay conditions) now exist under
 `runs/targets/`, summarised in `runs/summary/target_metrics.csv`.
 
@@ -345,9 +347,9 @@ landscapes and all four policies, against roughly 1.4× on GB1, and by exactly 1
 zero delay as it must. This is substrate-independent and endpoint-independent. It is the
 one quantitative result from the pilot that survived the move to pathogen targets.
 
-**The 8× policy gain does not replicate, and the reason is a metric artifact I should
-have caught earlier.** Random top-fraction recall is simply the labelled fraction of the
-pool, which the data confirms to two decimal places:
+**The 8× policy gain does not replicate, and the cause is a metric artefact that should
+have been identified earlier.** Random top-fraction recall is simply the labelled fraction
+of the pool, which the data confirms to two decimal places:
 
 | pool | labelled fraction | predicted random recall | observed random recall | headroom (1/fraction) |
 | --- | --- | --- | --- | --- |
@@ -445,7 +447,7 @@ specificity that has no close human protease counterpart, which helps selectivit
 | Public labels | **Yes** — `R1AB_SARS2_Flynn_2022`, 5,725 mutants, FRET + growth readout, already downloaded. |
 | Precedent | Published macrocyclic peptide campaigns exist, including RaPID-derived work. **Verify specific citations before treating any as a positive control.** |
 
-The cytosolic liability is arguably an asset for this project. It forces a genuinely
+The cytosolic liability may be an asset for this project. It forces a genuinely
 multi-objective decision — affinity against predicted permeability — which is a harder
 and more interesting problem for a co-scientist than single-score ranking, and it
 activates an entire section of the reading list that would otherwise go unused.
@@ -465,7 +467,8 @@ interface is therefore a protein–protein interaction that macrocycles are
 constitutionally better suited to than small molecules are. Conserved, essential for
 immune evasion. Harder reagent (two-protein complex), no public DMS, cytosolic.
 
-Worth flagging because "macrocycles beat small molecules at flat PPI interfaces" is the
+This merits attention because "macrocycles outperform small molecules at flat PPI
+interfaces" is the
 strongest mechanistic argument for the modality, and a PPI target lets the project make
 that argument rather than competing with small molecules on an enzyme active site.
 
@@ -492,7 +495,7 @@ druggable. Harder reagent — needs a stabilised construct or peptide presentati
 than whole prefusion spike — and no public DMS. This is the right answer if the project
 needs a conserved *extracellular* coronavirus target.
 
-### 3.4 Family 2 — two options, and the obvious choice is not the better experiment
+### 3.4 Family 2 — two options, of which the more obvious is not the better experiment
 
 #### Henipavirus (Nipah) — better narrative
 
@@ -623,18 +626,18 @@ already built becomes the resource accounting underneath that policy.
 
 ### 4.2 Architecture brainstorm: treating this as a data problem, not a prompting problem
 
-This section asks how one would *train* a model to make these decisions well, rather than
-write better instructions for an existing one. It is the least settled part of the document.
-The practical content is in the first two items: public measurement datasets can be turned
+This section considers how a model might be *trained* to make these decisions well, rather
+than instructed more effectively. It is the least settled part of the document. The
+practical content lies in the first two items: public measurement datasets can be converted
 into an effectively unlimited supply of automatically gradeable practice problems, which is
-cheap and is the part I believe is genuinely novel; and an expensive model can then act as a
-teacher for a cheap one, which is what would make searching over many candidate next actions
-affordable. The remaining items refine the training and evaluation plan. Only the first is a
-ten-week deliverable, as §4.3 states plainly.
+inexpensive and appears to be the genuinely novel element; and an expensive model can then
+serve as a teacher for a cheaper one, which is what would render a search over many
+candidate next actions affordable. The remaining items refine the training and evaluation
+plan. Only the first is a ten-week deliverable, as §4.3 states.
 
-The five capabilities you flagged map onto the existing Week 8–10 harness more cleanly
-than I expected. Below, each one, what it means here, and honestly how much of it is
-already planned versus genuinely new.
+The five capabilities raised in review map onto the existing Week 8–10 harness more closely
+than anticipated. Each is set out below with its interpretation here and an assessment of
+how much is already planned as against genuinely new.
 
 #### (a) Scale synthetic episodes with containerised verification
 
@@ -658,7 +661,7 @@ mechanism shift, evidence corruption, longer horizon).
 the transcriptomic worlds, which would let the applied SynX case and the forecasting
 testbed share one episode format.
 
-**Honest scope check:** the pattern scales to trillions of tokens in a pretraining
+**Scope qualification:** the pattern scales to trillions of tokens in a pretraining
 context. This project budgets ~12.5M training tokens total. The verification
 architecture is the transferable part; the scale is not, and claiming otherwise in a
 paper would be indefensible.
@@ -765,7 +768,7 @@ pattern — a verified, auto-graded decision environment built from a public lan
 enforced label isolation. It was built as a biology pilot, which is why it looks weak.
 As infrastructure it is the prototype for (a).
 
-**Risk, stated plainly:** a mid-training data programme is not a ten-week deliverable.
+**Principal risk:** a mid-training data programme is not a ten-week deliverable.
 The minimum viable version is the episode generator plus containerised oracle over two or
 three landscapes, feeding the eval conditions in (e). Distillation (b) and mixture
 ablation (c) are W8–W9 at the earliest and only if access and spend gates clear.
@@ -894,8 +897,9 @@ was choosing. **Returned** counts only what had actually arrived. Selected is th
 hindsight-flattered version; returned is the fair one. The gap between them is the finding
 in §2.2(b) and §2.5.
 
-**Enrichment ratio.** How much richer in good candidates your recovered set is than the
-library you started from. 1.0 means no better than the starting library. This is the shape
+**Enrichment ratio.** The degree to which the recovered set is richer in strong candidates
+than the library it was drawn from. A value of 1.0 indicates no improvement over the
+starting library. This is the form
 of number an mRNA display round actually produces, which is why it was added.
 
 **Normalised gain.** A policy's improvement expressed as a share of the improvement that was
