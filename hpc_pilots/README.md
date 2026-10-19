@@ -1,6 +1,33 @@
-# Emergency co-scientist: first HPC pilots
+# Emergency co-scientist: pilots and domain layer
 
-Prepared 12 October 2026. Two isolated decision-policy experiments support the emergency scientist project: binding-assay acquisition under limited/delayed feedback, and structural-evidence allocation. These are pilot components; they do not establish therapeutic effectiveness or full-system performance.
+Prepared 12 October 2026, extended 19 October 2026. Two isolated decision-policy experiments support the emergency scientist project: binding-assay acquisition under limited/delayed feedback, and structural-evidence allocation. These are pilot components; they do not establish therapeutic effectiveness or full-system performance.
+
+## Domain layer, added 19 October
+
+The pilots above measure resource allocation over opaque integer candidates. That is deliberate — it is what keeps the acquisition comparison clean — but it is also domain-free: nothing in it is specific to an emergency, to a pathogen, or to macrocyclic chemistry. These four modules add that specificity, and each one states what it does not establish.
+
+| Module | What it adds | What it is not |
+| --- | --- | --- |
+| `dossier.py` | The seven-axis target dossier as the decision state, with per-axis citations, timestamps, retained conflicts and open uncertainties, plus the six-action space: retrieve evidence, request structure, rerank, invoke design tool, recommend experiment, stop. Evidence dated after the decision clock is refused and the refusal is recorded. | Readiness is evidence coverage of a rubric. It is not binding, inhibition, antiviral activity or efficacy. Named targets reintroduce pretrained-hindsight risk that the date boundary does **not** control. |
+| `targets.py` | Evidence packets for three families (Coronaviridae, Orthomyxoviridae, Henipavirus): 11 targets, 59 sourced entries, 8 synthetic update probes. | Most assessments are the project's own write-up pending expert review, not independent citations. Three claims are flagged `verified=false` and must not be used as positive controls. |
+| `emergency.py` | Timed episodes with a deadline and an action budget, scoring whether a policy updates on relevant evidence, holds its recommendation under irrelevant evidence, and retains contradictory evidence. The recommendation's endpoint claim is gated by the assay-availability axis. | Deterministic baselines are stable by construction; the metric earns its value on the LLM policy. No structure backend is wired in, so `request_structure` records a charged request and returns no structural claim. |
+| `chemistry.py` | Building-block registry over canonical and non-canonical classes with initiator/closure roles, a thioether library specification, and an encoding that extends past the canonical twenty. | Literature block classes, **not** the SynX catalog. Chemical identifiers, CCD codes, codons, Rosetta parameters and rotamer libraries are explicitly null pending the platform export. Library enumeration predicts nothing. |
+
+Pathogen decision environments are configured separately in `configs/targets.json`, which leaves `configs/today.json` byte-identical so the recorded GB1 and calibration runs still verify against their embedded config hash.
+
+```bash
+.venv-hpc/bin/python -m hpc_pilots chemistry                     # build the block registry
+.venv-hpc/bin/python -m hpc_pilots targets                       # build the family packets
+.venv-hpc/bin/python -m hpc_pilots prepare-target --landscape mpro
+.venv-hpc/bin/python -m hpc_pilots target --landscape mpro --pool 0 --policy ucb --delay 3
+.venv-hpc/bin/python -m hpc_pilots emergency --family coronaviridae --policy rubric
+```
+
+**Endpoint discipline across landscapes.** GB1 is an IgG binding selection, Mpro is FRET cleavage plus growth, and both haemagglutinin scans are viral replication. These are different endpoints and their metrics are never pooled. Pathogen pools hold 512 candidates and use a 5% top fraction, because 1% of 512 is about five members; those figures must not be compared with the GB1 1% figures. Pool geometry shrinks rather than reusing candidates across pools described as disjoint: Mpro supports 10 disjoint pools, HA H1 19, HA H3 20.
+
+**Enrichment.** Acquisition checkpoints now also report an enrichment ratio against the pool baseline, which is the readout shape a display round produces. An enrichment ratio is not an affinity, a functional inhibition or an antiviral activity, and no macrocycle has been measured anywhere in this repository.
+
+**Read the recall multiples with care.** Random top-fraction recall equals the labelled fraction of the pool, so a multiple over random is bounded by the reciprocal of that fraction: 32× for GB1 at 128 labels from 4,096 candidates, but only 4× for a pathogen pool at 128 from 512. The two are not comparable, and the GB1 figure must not be quoted without its budget ratio. Compare recall at matched budget *fractions*, or use the normalised gain `(policy − random) / (1 − random)`. The measured consequence is in §2.5 of the Week 4 debrief.
 
 ## Cluster and launch
 

@@ -52,6 +52,13 @@ PROVIDERS = {
 NO_TEMPERATURE = {"anthropic"}
 MAX_TOKENS_KEY = {"openai": "max_completion_tokens"}
 
+# The original domain-free prompt for the budgeted-acquisition pilots. Kept verbatim so the
+# recorded binding replays remain reproducible; the emergency policy supplies its own.
+BUDGET_SYSTEM = ("You allocate a limited scientific evidence budget. Use only the supplied state. "
+                 "Do not infer hidden experimental outcomes. Return one JSON object containing "
+                 "action (one of the supplied allowed actions) and rationale (a short string). "
+                 "Choose an action that improves decision quality per unit of evidence cost.")
+
 
 def load_env(path=ROOT / ".env"):
     """Fill unset variables from a gitignored KEY=value file; real environment variables win."""
@@ -98,23 +105,27 @@ class Agent:
         self.tokens = {"prompt_tokens": 0, "completion_tokens": 0}
         self.history = []
 
-    def choose(self, task, state, allowed):
+    def act(self, task, state, allowed, fields=None, system=None):
+        """Return the validated action object. `fields` adds enum-constrained arguments.
+
+        An action or argument outside the allowed set raises; it never degrades into a
+        default or baseline choice.
+        """
         import requests
-        system = ("You allocate a limited scientific evidence budget. Use only the supplied state. "
-                  "Do not infer hidden experimental outcomes. Return one JSON object containing "
-                  "action (one of the supplied allowed actions) and rationale (a short string). "
-                  "Choose an action that improves decision quality per unit of evidence cost.")
+        properties = {"action": {"type": "string", "enum": list(allowed)},
+                      "rationale": {"type": "string"}}
+        for name, values in (fields or {}).items():
+            properties[name] = {"type": "string", "enum": list(values)}
         payload = {"model": self.model, MAX_TOKENS_KEY.get(self.provider, "max_tokens"): self.max_tokens,
-                   "messages": [{"role": "system", "content": system},
+                   "messages": [{"role": "system", "content": system or BUDGET_SYSTEM},
                                 {"role": "user", "content": json.dumps({"task": task,
                                  "state": state, "allowed_actions": allowed})}]}
         if self.provider not in NO_TEMPERATURE:
             payload["temperature"] = 0
         payload["response_format"] = {"type": "json_schema", "json_schema": {
             "name": "scientific_action", "strict": True, "schema": {"type": "object",
-            "properties": {"action": {"type": "string", "enum": allowed},
-                           "rationale": {"type": "string"}},
-            "required": ["action", "rationale"], "additionalProperties": False}}}
+            "properties": properties,
+            "required": list(properties), "additionalProperties": False}}}
         headers = {}
         token = os.environ.get("PILOT_LLM_TOKEN")
         if not token and self.token_file:
@@ -138,8 +149,15 @@ class Agent:
         answer = json.loads(content[first:last + 1])
         if answer.get("action") not in allowed:
             raise ValueError("Agent returned an action outside the allowed set")
+        for name, values in (fields or {}).items():
+            if answer.get(name) not in values:
+                raise ValueError(f"Agent returned {name} outside the allowed set")
         self.history.append({"state": state, "response": answer})
-        return answer["action"]
+        return answer
+
+    def choose(self, task, state, allowed):
+        """Action-only interface retained so the existing binding replays reproduce exactly."""
+        return self.act(task, state, allowed)["action"]
 
     def report(self):
         return {"provider": self.provider, "model": self.model, "calls": self.calls, "seconds": self.seconds,

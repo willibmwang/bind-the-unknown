@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-19",
+  "seed": 20261019,
+  "note": "Pathogen-target decision environments. Kept in a separate file so configs/today.json stays byte-identical and the recorded GB1 and calibration runs remain reproducible against their embedded config hash.",
+  "pool_size": 512,
+  "max_evaluation_pools": 20,
+  "initial_labels": 8,
+  "batch_size": 8,
+  "maximum_labels": 128,
+  "checkpoints": [8, 16, 32, 64, 128],
+  "feedback_delays": [0, 3],
+  "forest_trees": 64,
+  "ucb_beta": 1.0,
+  "top_fraction": 0.05,
+  "top_fraction_note": "A 512-candidate pool holds about five members at the 1% threshold used for GB1, too few for a stable recall estimate. Pathogen pools use 5%. These figures must never be compared with the GB1 1% figures.",
+  "policies": ["random", "diverse", "greedy", "ucb", "agent"],
+  "landscapes": {
+    "mpro": {
+      "dms_id": "R1AB_SARS2_Flynn_2022",
+      "target": "Mpro (nsp5)",
+      "pathogen": "SARS-CoV-2",
+      "family": "Coronaviridae",
+      "endpoint": "FRET peptide cleavage and growth; enzymatic function, not binding affinity",
+      "compartment": "cytosolic"
+    },
+    "ha_h1": {
+      "dms_id": "A0A2Z5U3Z0_9INFA_Doud_2016",
+      "target": "Haemagglutinin (H1N1)",
+      "pathogen": "Influenza A H1N1",
+      "family": "Orthomyxoviridae",
+      "endpoint": "viral replication; growth fitness, not binding affinity",
+      "compartment": "extracellular"
+    },
+    "ha_h3": {
+      "dms_id": "C6KNH7_9INFA_Lee_2018",
+      "target": "Haemagglutinin (H3N2)",
+      "pathogen": "Influenza A H3N2",
+      "family": "Orthomyxoviridae",
+      "endpoint": "viral replication; growth fitness, not binding affinity",
+      "compartment": "extracellular"
+    }
+  },
+  "transfer_test": {
+    "source": "ha_h1",
+    "target": "ha_h3",
+    "grouping": "Entire landscape held out, never random rows. H1 and H3 are separate subtypes measured in separate studies, so this is a grouped study-and-subtype shift, not an interpolation split.",
+    "limits": "Two landscapes with the same replication endpoint support one shift test. They do not establish family-wide generalisation, and neither is a macrocycle measurement."
+  },
+  "limitations": [
+    "Every landscape here is a canonical single-substitution scan of a viral protein. None contains a non-canonical residue, a cyclised peptide or an enrichment readout.",
+    "These environments make the decision policy specific to pathogen targets. They do not make it specific to macrocyclic chemistry; that is what the building-block registry and the enrichment readout address, and neither is yet backed by measured macrocycle outcomes.",
+    "Measured endpoints are enzymatic function or replication fitness. Binding, functional inhibition and antiviral activity remain separate endpoints requiring separate assays."
+  ]
+}

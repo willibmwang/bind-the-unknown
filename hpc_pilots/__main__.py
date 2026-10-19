@@ -25,6 +25,22 @@ def main():
     p.add_argument("--agent-only", action="store_true")
     sub.add_parser("calibration")
     sub.add_parser("summarize")
+    # Domain layer: building-block registry, family evidence packets, pathogen landscapes
+    # and the emergency decision episodes that consume the dossier state.
+    sub.add_parser("chemistry")
+    sub.add_parser("targets")
+    p = sub.add_parser("prepare-target")
+    p.add_argument("--landscape", required=True)
+    p = sub.add_parser("target")
+    p.add_argument("--landscape", required=True)
+    p.add_argument("--pool", type=int, default=0)
+    p.add_argument("--policy", default="greedy")
+    p.add_argument("--delay", type=int, default=0)
+    p.add_argument("--smoke", action="store_true")
+    p = sub.add_parser("emergency")
+    p.add_argument("--family", default="coronaviridae")
+    p.add_argument("--policy", default="rubric")
+    p.add_argument("--smoke", action="store_true")
     args = parser.parse_args()
     if args.command == "prepare":
         from .data import prepare_binding, prepare_atlas_manifest
@@ -53,6 +69,21 @@ def main():
     elif args.command == "calibration":
         from .calibration import run_calibration
         run_calibration()
+    elif args.command == "chemistry":
+        from .chemistry import build_registry
+        build_registry()
+    elif args.command == "targets":
+        from .targets import build_packets
+        build_packets()
+    elif args.command == "prepare-target":
+        from .data import prepare_target
+        prepare_target(args.landscape)
+    elif args.command == "target":
+        from .binding import run_target
+        run_target(args.landscape, args.pool, args.policy, args.delay, args.smoke)
+    elif args.command == "emergency":
+        from .emergency import run_emergency
+        run_emergency(args.family, args.policy, args.smoke)
     else:
         from .summarize import summarize
         summarize()

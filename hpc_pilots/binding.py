@@ -8,10 +8,22 @@ from sklearn.ensemble import RandomForestRegressor
 from .common import ROOT, Agent, config, digest, write_json
 
 
-def predictions(features, observed_indices, observed_values, seed, trees=64):
+def design_matrix(features, cardinalities=None):
+    """One-hot the integer encoding.
+
+    The default of 20 per column reproduces the canonical four-site GB1 encoding exactly.
+    Pathogen landscapes are single-substitution scans encoded as (position, residue), so
+    they pass explicit per-column cardinalities instead.
+    """
+    x = np.asarray(features)
+    cards = list(cardinalities) if cardinalities else [20] * x.shape[1]
+    return np.concatenate([np.eye(c, dtype=np.float32)[x[:, j]] for j, c in enumerate(cards)], axis=1)
+
+
+def predictions(features, observed_indices, observed_values, seed, trees=64, cardinalities=None):
     model = RandomForestRegressor(n_estimators=trees, min_samples_leaf=2,
                                   max_features=1.0, n_jobs=1, random_state=seed)
-    x = np.eye(20, dtype=np.float32)[features].reshape(len(features), -1)
+    x = design_matrix(features, cardinalities)
     model.fit(x[observed_indices], observed_values)
     estimates = np.array([tree.predict(x) for tree in model.estimators_])
     return estimates.mean(axis=0), estimates.std(axis=0)
@@ -22,7 +34,7 @@ def distances(features, observed_indices):
 
 
 def pick_batch(features, observed_indices, observed_values, available, policy, size, seed, agent=None,
-               decision_context=None):
+               decision_context=None, cardinalities=None):
     """The policy interface accepts only revealed values, never the hidden outcome vector."""
     rng = np.random.default_rng(seed)
     if policy == "random":
@@ -36,7 +48,8 @@ def pick_batch(features, observed_indices, observed_values, available, policy, s
             chosen.append(int(rng.choice(best)))
         return np.array(chosen), {"action": "diverse"}
     bc = config()["binding"]
-    mean, uncertainty = predictions(features, observed_indices, observed_values, seed, bc["forest_trees"])
+    mean, uncertainty = predictions(features, observed_indices, observed_values, seed,
+                                    bc["forest_trees"], cardinalities)
     d = distances(features, observed_indices)
     action = "explore" if policy == "ucb" else "greedy"
     if policy == "agent":
@@ -71,8 +84,26 @@ def evaluate(hidden_outcomes, selected, fraction):
             "top_recall": float(hits[selected].sum() / hits.sum())}
 
 
+def enrichment(hidden_outcomes, selected, fraction):
+    """Hit fraction among the recovered set over the hit fraction in the pool.
+
+    This is the readout shape a display selection round actually produces: a ratio
+    against the library baseline, not a per-candidate score. 1.0 means no better than
+    the starting library. An enrichment ratio is not an affinity, a functional
+    inhibition or an antiviral activity, and a single round cannot establish any of them.
+    """
+    if len(selected) == 0:
+        return None
+    threshold = np.quantile(hidden_outcomes, 1 - fraction)
+    base = float((hidden_outcomes >= threshold).mean())
+    if base <= 0:
+        return None
+    return float((hidden_outcomes[selected] >= threshold).mean() / base)
+
+
 def replay(features, hidden_outcomes, policy, seed, maximum=128, initial=8, batch=8,
-           delay=0, checkpoints=(8, 16, 32, 64, 128), agent=None):
+           delay=0, checkpoints=(8, 16, 32, 64, 128), agent=None, fraction=None,
+           cardinalities=None):
     rng = np.random.default_rng(seed)
     first = rng.choice(len(features), size=initial, replace=False).tolist()
     queried, observed = first.copy(), first.copy()
@@ -80,14 +111,19 @@ def replay(features, hidden_outcomes, policy, seed, maximum=128, initial=8, batc
     round_number = 0
     started = time.perf_counter()
     bc = config()["binding"]
+    fraction = bc["top_fraction"] if fraction is None else fraction
 
     def snapshot():
-        metric = evaluate(hidden_outcomes, np.array(queried), bc["top_fraction"])
-        returned = evaluate(hidden_outcomes, np.array(observed), bc["top_fraction"])
+        metric = evaluate(hidden_outcomes, np.array(queried), fraction)
+        returned = evaluate(hidden_outcomes, np.array(observed), fraction)
         metric.update({"round": round_number, "revealed_labels": len(observed),
                        "returned_best_score": returned["best_score"],
                        "returned_top_recall": returned["top_recall"],
                        "pending_labels": len(queried) - len(observed),
+                       # Enrichment-ratio view of the same acquisitions, for comparability with
+                       # a display selection readout. Retrospective and realtime kept separate.
+                       "selected_enrichment": enrichment(hidden_outcomes, np.array(queried), fraction),
+                       "returned_enrichment": enrichment(hidden_outcomes, np.array(observed), fraction),
                        "policy_wall_seconds": time.perf_counter() - started})
         records.append(metric)
 
@@ -104,7 +140,8 @@ def replay(features, hidden_outcomes, policy, seed, maximum=128, initial=8, batc
                                    policy, count, seed + round_number, agent,
                                    {"remaining_label_budget": maximum - len(queried),
                                     "pending_labels": len(queried) - len(observed),
-                                    "feedback_delay_rounds": delay, "decision_round": round_number})
+                                    "feedback_delay_rounds": delay, "decision_round": round_number},
+                                   cardinalities)
         ids = ids.tolist()
         if len(set(ids)) != count or set(ids) & set(queried):
             raise ValueError("Repeated or invalid acquisition")
@@ -142,5 +179,51 @@ def run_binding(pool, policy, delay=0, smoke=False):
         result["agent"] = agent.report()
     label = "smoke_" if smoke else ""
     output = ROOT / "runs/binding" / f"{label}{policy}_pool{pool:02d}_delay{delay}.json"
+    write_json(output, result)
+    print(json.dumps({"output": str(output), "final": result["metrics"][-1]}))
+
+
+def target_config():
+    return json.loads((ROOT / "hpc_pilots/configs/targets.json").read_text())
+
+
+def run_target(landscape, pool, policy, delay=0, smoke=False):
+    """Replay the acquisition policies against a pathogen landscape.
+
+    The surrogate hyperparameters are deliberately the same fixed forest the GB1 pilot
+    used, so a substrate change is not confounded by a model change. Each landscape
+    carries its own assay endpoint and results from different endpoints are never pooled.
+    """
+    tc = target_config()
+    if landscape not in tc["landscapes"]:
+        raise ValueError(f"Unknown landscape {landscape!r}")
+    spec = tc["landscapes"][landscape]
+    path = ROOT / "data/processed/targets" / landscape
+    manifest = json.loads((path / "manifest.json").read_text())
+    split = np.load(path / "splits.npz")["evaluation"][pool]
+    features = np.load(path / "features.npy")[split]
+    hidden = pd.read_csv(path / "outcomes.csv", usecols=["DMS_score"]).DMS_score.to_numpy()[split]
+    agent = Agent() if policy == "agent" else None
+    result = replay(features, hidden, policy, tc["seed"] + pool,
+                    maximum=16 if smoke else tc["maximum_labels"],
+                    initial=tc["initial_labels"], batch=tc["batch_size"], delay=delay,
+                    checkpoints=tuple(tc["checkpoints"]), agent=agent,
+                    fraction=tc["top_fraction"],
+                    cardinalities=manifest["cardinalities"])
+    policy = agent.label if agent else policy
+    result.update({"experiment": "target", "landscape": landscape, "pool": pool, "policy": policy,
+                   "delay": delay, "smoke": smoke, "status": "complete",
+                   "target": spec["target"], "pathogen": spec["pathogen"], "family": spec["family"],
+                   "endpoint": spec["endpoint"],
+                   "endpoint_warning": "Do not pool metrics across landscapes with different "
+                                       "assay endpoints, and do not compare these top-fraction "
+                                       "figures with the GB1 1% figures.",
+                   "dataset_manifest_sha256": digest(path / "manifest.json"),
+                   "targets_config_sha256": digest(ROOT / "hpc_pilots/configs/targets.json"),
+                   "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json")})
+    if agent:
+        result["agent"] = agent.report()
+    label = "smoke_" if smoke else ""
+    output = ROOT / "runs/targets" / f"{label}{landscape}_{policy}_pool{pool:02d}_delay{delay}.json"
     write_json(output, result)
     print(json.dumps({"output": str(output), "final": result["metrics"][-1]}))

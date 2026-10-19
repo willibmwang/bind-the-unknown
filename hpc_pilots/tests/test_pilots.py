@@ -3,11 +3,16 @@ import json
 import numpy as np
 import pytest
 
-from hpc_pilots.binding import pick_batch, replay
+from hpc_pilots.binding import design_matrix, enrichment, pick_batch, replay
 from hpc_pilots.calibration import calibration_metrics, trajectory
+from hpc_pilots.chemistry import alphabet, encode, library_spec, registry, sample_library
 from hpc_pilots.common import ROOT
 from hpc_pilots.common import Agent
+from hpc_pilots.data import pool_geometry
+from hpc_pilots.dossier import Dossier, evidence, rank
+from hpc_pilots.emergency import run_episode
 from hpc_pilots.structure import structure_replay
+from hpc_pilots.targets import packet
 
 
 def test_shared_initialization_unique_queries_and_delayed_observations():
@@ -129,6 +134,122 @@ def test_calibration_audits_only_held_out_candidates_and_shares_initial_labels()
         for row in trajectory(x, y, regime, 3, 8, (8, 16, 32), 8):
             assert row['n_eval'] == len(x) - row['budget']
             assert 0.0 <= row['coverage_1sigma'] <= row['coverage_2sigma'] <= 1.0
+
+
+def test_design_matrix_reproduces_the_canonical_four_site_encoding():
+    rng = np.random.default_rng(4)
+    features = rng.integers(0, 20, size=(32, 4))
+    np.testing.assert_array_equal(design_matrix(features),
+                                  np.eye(20, dtype=np.float32)[features].reshape(32, -1))
+    wide = np.stack([rng.integers(0, 303, size=16), rng.integers(0, 20, size=16)], axis=1)
+    assert design_matrix(wide, [303, 20]).shape == (16, 323)
+
+
+def test_enrichment_is_a_ratio_against_the_pool_baseline():
+    outcomes = np.arange(200.0)
+    fraction = 0.05
+    hits = np.argsort(-outcomes)[:10]
+    # Recovering only hits enriches by the inverse of the baseline hit rate.
+    assert enrichment(outcomes, hits, fraction) == pytest.approx(1 / fraction)
+    # Recovering the whole pool cannot enrich over the pool it came from.
+    assert enrichment(outcomes, np.arange(200), fraction) == pytest.approx(1.0)
+    assert enrichment(outcomes, np.array([], dtype=int), fraction) is None
+
+
+def test_pool_geometry_shrinks_rather_than_overlapping():
+    # GB1 supports the original twenty disjoint 4,096-candidate pools.
+    assert pool_geometry(149360, 4096, 20)["evaluation_pools"] == 20
+    # Mpro cannot: the pool size must fall rather than reuse candidates across "disjoint" pools.
+    mpro = pool_geometry(5725, 4096, 20)
+    assert mpro["disjoint"] and mpro["reduced"]
+    assert mpro["pool_size"] < 4096
+    assert mpro["candidates_used"] <= 5725
+    assert mpro["pool_size"] * (mpro["evaluation_pools"] + 1) == mpro["candidates_used"]
+    with pytest.raises(ValueError, match="disjoint"):
+        pool_geometry(100, 4096, 20)
+
+
+def test_dossier_refuses_evidence_dated_after_the_decision_clock():
+    d = Dossier("Mpro (nsp5)", "SARS-CoV-2", "Coronaviridae", "cytosolic")
+    future = evidence("e1", "conservation", "later finding", "strong", "src", available_from=5)
+    assert d.observe(future, now=2) is False
+    assert d.assess("conservation")["assessment"] == "unknown"
+    assert d.state(2)["refused_future_evidence"] == 1
+    assert d.observe(future, now=5) is True
+    assert d.assess("conservation")["assessment"] == "strong"
+
+
+def test_contradictory_evidence_coexists_instead_of_overwriting():
+    d = Dossier("Mpro (nsp5)", "SARS-CoV-2", "Coronaviridae")
+    first = evidence("e1", "conservation", "conserved across the family", "strong", "a", 0)
+    second = evidence("e2", "conservation", "divergent clade reported", "weak", "b", 3,
+                      conflicts_with="e1")
+    d.observe(first, 0)
+    d.observe(second, 3)
+    assert len(d.axis_evidence("conservation")) == 2
+    conflict = d.conflicts()
+    assert len(conflict) == 1 and conflict[0]["timestamps"] == {"e1": 0, "e2": 3}
+    assert d.assess("conservation")["conflict"] is True
+    assert {"axis": "conservation", "issue": "contradictory evidence retained"} in d.open_uncertainties()
+
+
+def test_hard_gate_blocks_ranking_and_claims_stay_cited():
+    strong = Dossier("tractable", "P", "F")
+    blocked = Dossier("untractable", "P", "F")
+    for axis in ("reagent_tractability", "essentiality", "conservation"):
+        strong.observe(evidence(f"s:{axis}", axis, "c", "strong", "src", 0), 0)
+        if axis != "reagent_tractability":
+            blocked.observe(evidence(f"b:{axis}", axis, "c", "strong", "src", 0), 0)
+    ordered = rank([blocked, strong], now=0)
+    assert ordered[0]["target"] == "tractable"
+    assert ordered[1]["blocking_axes"] == ["reagent_tractability"]
+    assert strong.unsupported() == [] and blocked.unsupported() == []
+
+
+def test_episode_holds_recommendation_under_irrelevant_evidence_and_gates_the_endpoint():
+    result = run_episode("coronaviridae", "rubric", deadline=8, call_budget=8)
+    held = [s for s in result["probe_scores"] if s["kind"] == "irrelevant"]
+    assert held and all(s["held_recommendation"] for s in held)
+    retained = [s for s in result["probe_scores"] if s["kind"] == "contradictory"]
+    assert all(s["conflict_retained"] for s in retained)
+    assert result["metrics"]["unsupported_assessments"] == 0
+    recommendation = result["recommendation"]
+    assert recommendation is not None
+    # A cytosolic target must carry the permeability requirement, and an unsubstantiated
+    # orthogonal assay must limit the claim to enrichment.
+    if recommendation["compartment"] == "cytosolic":
+        assert recommendation["permeability_story_required"]
+    strong_assay = recommendation["readiness"] and "enrichment" in recommendation["one_round_substantiates"]
+    assert strong_assay
+
+
+def test_packets_flag_every_uncited_claim_and_registry_marks_platform_fields_pending():
+    for name in ("coronaviridae", "orthomyxoviridae"):
+        spec, dossiers, entries, probes = packet(name)
+        unverified = [e["id"] for _, e in entries if not e["verified"]]
+        assert all("precedent" in i for i in unverified), unverified
+        assert probes, "each prototype family needs at least one update probe"
+    blocks = {b["code"]: b for b in registry()}
+    assert blocks["ClAc-D-Tyr"]["role"] == "initiator"
+    for code in ("NMe-Ala", "D-Phe", "beta-Ala"):
+        assert blocks[code]["block_class"] != "canonical"
+        for field in ("reprogrammed_codon", "rosetta_params", "chemical_identifier"):
+            assert blocks[code][field] is None
+    spec = library_spec()
+    assert spec["closure_residue"] == "C"
+    assert "C" not in spec["elongator_alphabet"]
+    assert any(c.startswith("NMe-") for c in spec["elongator_alphabet"])
+
+
+def test_macrocycle_encoding_covers_noncanonical_blocks():
+    rng = np.random.default_rng(11)
+    members = sample_library(library_spec(), 12, rng)
+    assert all(m[0].startswith("ClAc-") and m[-1] == "C" for m in members)
+    matrix, cardinality = encode(members)
+    assert cardinality == len(alphabet()) + 1
+    assert cardinality > 21, "alphabet must extend past the canonical twenty plus padding"
+    with pytest.raises(KeyError, match="registry"):
+        encode([["ClAc-D-Tyr", "Not-A-Block", "C"]])
 
 
 def test_calibration_metrics_ignore_hidden_outcomes_of_observed_labels():
