@@ -141,11 +141,18 @@ class Agent:
         self.seconds += time.perf_counter() - start
         for k in self.tokens:
             self.tokens[k] += int(body.get("usage", {}).get(k, 0))
-        content = body["choices"][0]["message"]["content"]
+        choice = body["choices"][0]
+        content = choice["message"]["content"]
         # Accept fenced JSON or surrounding text, but not an invented/fallback action.
         first, last = content.find("{"), content.rfind("}")
         if first < 0 or last < first:
-            raise ValueError("Agent did not return a JSON object")
+            # The usual cause is truncation at the output-token ceiling, which leaves an
+            # opening brace and no closing one. Say so, rather than only that parsing failed.
+            reason = choice.get("finish_reason")
+            hint = (f" The response hit the {self.max_tokens}-token output ceiling; raise "
+                    "PILOT_LLM_MAX_TOKENS." if reason == "length" else "")
+            raise ValueError(f"Agent did not return a JSON object (finish_reason={reason!r},"
+                             f" {len(content)} chars).{hint} Content began: {content[:200]!r}")
         answer = json.loads(content[first:last + 1])
         if answer.get("action") not in allowed:
             raise ValueError("Agent returned an action outside the allowed set")
