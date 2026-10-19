@@ -187,6 +187,49 @@ def target_config():
     return json.loads((ROOT / "hpc_pilots/configs/targets.json").read_text())
 
 
+def run_method(landscape, pool, policy, delay=0, smoke=False):
+    """Replay the acquisition policies against a method-development landscape.
+
+    Identical machinery and the same fixed surrogate as every other replay, so a change of
+    substrate is not confounded by a change of model. These landscapes carry measured
+    binding endpoints, which the pathogen landscapes do not; that is the point of them.
+    """
+    mc = json.loads((ROOT / "hpc_pilots/configs/method.json").read_text())
+    if landscape not in mc["landscapes"]:
+        raise ValueError(f"Unknown method landscape {landscape!r}")
+    spec = mc["landscapes"][landscape]
+    path = ROOT / "data/processed/method" / landscape
+    manifest = json.loads((path / "manifest.json").read_text())
+    split = np.load(path / "splits.npz")["evaluation"][pool]
+    features = np.load(path / "features.npy")[split]
+    hidden = pd.read_csv(path / "outcomes.csv", usecols=["DMS_score"]).DMS_score.to_numpy()[split]
+    agent = Agent() if policy == "agent" else None
+    result = replay(features, hidden, policy, mc["seed"] + pool,
+                    maximum=16 if smoke else mc["maximum_labels"],
+                    initial=mc["initial_labels"], batch=mc["batch_size"], delay=delay,
+                    checkpoints=tuple(mc["checkpoints"]), agent=agent,
+                    fraction=spec["top_fraction"], cardinalities=manifest["cardinalities"])
+    policy = agent.label if agent else policy
+    result.update({"experiment": "method", "landscape": landscape, "pool": pool,
+                   "policy": policy, "delay": delay, "smoke": smoke, "status": "complete",
+                   "protein": spec["protein"], "interface": spec["interface"],
+                   "endpoint": spec["endpoint"], "top_fraction": spec["top_fraction"],
+                   "pool_size": manifest["pool_geometry"]["pool_size"],
+                   "role": "method development substrate; not a pathogen target proposal",
+                   "endpoint_warning": "Do not pool metrics across landscapes with different "
+                                       "assay endpoints or different pool geometries; the "
+                                       "multiple over random is bounded by the labelled "
+                                       "fraction of the pool.",
+                   "dataset_manifest_sha256": digest(path / "manifest.json"),
+                   "method_config_sha256": digest(ROOT / "hpc_pilots/configs/method.json")})
+    if agent:
+        result["agent"] = agent.report()
+    label = "smoke_" if smoke else ""
+    output = ROOT / "runs/method" / f"{label}{landscape}_{policy}_pool{pool:02d}_delay{delay}.json"
+    write_json(output, result)
+    print(json.dumps({"output": str(output), "final": result["metrics"][-1]}))
+
+
 def run_target(landscape, pool, policy, delay=0, smoke=False):
     """Replay the acquisition policies against a pathogen landscape.
 

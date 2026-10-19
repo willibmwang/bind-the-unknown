@@ -150,6 +150,100 @@ def prepare_target(landscape):
                       "manifest": str(out / "manifest.json")}))
 
 
+def _read_landscape(dms_id):
+    """Fetch one ProteinGym assay table and its metadata row, with provenance."""
+    raw = ROOT / "data/raw"
+    provenance = [download(PG_META, raw / "proteingym_metadata.csv"),
+                  download(PG_BASE + "DMS_ProteinGym_substitutions.zip", raw / "proteingym_v1.3.zip")]
+    meta = pd.read_csv(raw / "proteingym_metadata.csv")
+    row = meta.loc[meta.DMS_id == dms_id].iloc[0]
+    with zipfile.ZipFile(raw / "proteingym_v1.3.zip") as z:
+        df = pd.read_csv(z.open("DMS_ProteinGym_substitutions/" + row.DMS_filename),
+                         usecols=["mutant", "DMS_score", "DMS_score_bin"])
+    if df.mutant.duplicated().any() or not np.isfinite(df.DMS_score).all():
+        raise ValueError(f"{dms_id}: duplicated mutant identifiers or non-finite outcomes")
+    return row, df, provenance
+
+
+def encode_variants(df, target_seq):
+    """Integer-encode variants, choosing the narrower encoding when it is sufficient.
+
+    Single-substitution landscapes are encoded as (position, residue), which is complete
+    and keeps the surrogate small. Landscapes containing combined substitutions need the
+    residue identity at every variable position instead, because a variant is no longer
+    described by one change. Both stay deliberately weak: no sequence context, no
+    structure, no evolutionary features.
+    """
+    split = [s.split(":") for s in df.mutant]
+    positions = sorted({int(m[1:-1]) for parts in split for m in parts})
+    index = {p: i for i, p in enumerate(positions)}
+    for parts in split:
+        for m in parts:
+            match = re.fullmatch(r"([A-Z])(\d+)([A-Z])", m)
+            if not match or match[1] != target_seq[int(match[2]) - 1]:
+                raise ValueError(f"Invalid mutation or reference-sequence mismatch: {m}")
+    if max(len(parts) for parts in split) == 1:
+        features = np.array([[index[int(parts[0][1:-1])], AA.index(parts[0][-1])]
+                             for parts in split], dtype=np.int16)
+        return (features, [len(positions), len(AA)], len(positions),
+                "(position index, substituted residue index) for a single substitution")
+    wildtype = np.array([AA.index(target_seq[p - 1]) for p in positions], dtype=np.int16)
+    features = np.tile(wildtype, (len(split), 1))
+    for i, parts in enumerate(split):
+        for m in parts:
+            features[i, index[int(m[1:-1])]] = AA.index(m[-1])
+    return (features, [len(AA)] * len(positions), len(positions),
+            "residue identity at each variable position, supporting combined substitutions")
+
+
+def _split_pools(rows, geometry, seed):
+    order = np.random.default_rng(seed).permutation(rows)
+    dev = order[:geometry["development_pool_size"]]
+    pools = order[geometry["development_pool_size"]:geometry["candidates_used"]].reshape(
+        geometry["evaluation_pools"], geometry["pool_size"])
+    if len(np.unique(np.r_[dev, pools.ravel()])) != geometry["candidates_used"]:
+        raise ValueError("Pools are not disjoint")
+    return dev, pools
+
+
+def prepare_method(landscape):
+    """Stage one method-development landscape. These are substrates, not target proposals."""
+    mc = json.loads((ROOT / "hpc_pilots/configs/method.json").read_text())
+    spec = mc["landscapes"][landscape]
+    out = ROOT / "data/processed/method" / landscape
+    out.mkdir(parents=True, exist_ok=True)
+    row, df, provenance = _read_landscape(spec["dms_id"])
+    features, cardinalities, n_positions, encoding = encode_variants(df, row.target_seq)
+    combined = int((df.mutant.str.count(":") > 0).sum())
+    geometry = pool_geometry(len(df), spec["pool_size"], mc["max_evaluation_pools"])
+    dev, pools = _split_pools(len(df), geometry, mc["seed"])
+    df.to_csv(out / "outcomes.csv", index=False)
+    np.save(out / "features.npy", features)
+    np.savez(out / "splits.npz", development=dev, evaluation=pools)
+    write_json(out / "manifest.json", {
+        "landscape": landscape, "dataset": row.DMS_id, "rows": len(df),
+        "protein": spec["protein"], "interface": spec["interface"],
+        "role": "method development substrate; not a pathogen target proposal",
+        "variable_positions": n_positions, "sequence_length": int(row.seq_len),
+        "combined_substitution_variants": combined,
+        "feature_encoding": encoding, "cardinalities": cardinalities,
+        "endpoint": spec["endpoint"], "reported_selection_assay": str(row.selection_assay),
+        "reported_selection_type": str(row.selection_type),
+        "direction": "higher DMS_score is better within this assay only",
+        "pool_geometry": geometry, "top_fraction": spec["top_fraction"],
+        "rationale": spec["why"], "sources": provenance,
+        "method_config_sha256": digest(ROOT / "hpc_pilots/configs/method.json"),
+        "outcomes_sha256": digest(out / "outcomes.csv"),
+        "features_sha256": digest(out / "features.npy"),
+        "splits_sha256": digest(out / "splits.npz"),
+        "limitations": mc["limitations"] + [
+            f"The measured endpoint is {spec['endpoint']}. It is not a macrocycle "
+            "measurement and establishes nothing about non-canonical chemistry."]})
+    print(json.dumps({"landscape": landscape, "rows": len(df), "positions": n_positions,
+                      "combined_substitution_variants": combined, "encoding": encoding,
+                      "geometry": geometry}))
+
+
 def prepare_atlas_manifest():
     c, out = config(), ROOT / "data/processed/atlas"
     out.mkdir(parents=True, exist_ok=True)

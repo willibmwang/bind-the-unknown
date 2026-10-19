@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-19",
+  "seed": 20261019,
+  "note": "Method-development substrates, kept in their own file so configs/targets.json stays purely a record of proposed pathogen targets. Nothing here is a target proposal. These landscapes exist to develop and stress the acquisition machinery on measured binding endpoints, which the pathogen landscapes do not provide: Mpro is scored by enzymatic function and both haemagglutinin scans by replication fitness.",
+  "max_evaluation_pools": 20,
+  "initial_labels": 8,
+  "batch_size": 8,
+  "maximum_labels": 128,
+  "checkpoints": [8, 16, 32, 64, 128],
+  "feedback_delays": [0, 3],
+  "forest_trees": 64,
+  "ucb_beta": 1.0,
+  "policies": ["random", "diverse", "greedy", "ucb", "agent"],
+  "landscapes": {
+    "spike_rbd_ace2": {
+      "dms_id": "SPIKE_SARS2_Starr_2020_binding",
+      "protein": "SARS-CoV-2 spike receptor-binding domain",
+      "interface": "RBD against human ACE2",
+      "endpoint": "ACE2 binding; change in log10 apparent dissociation constant",
+      "pool_size": 512,
+      "top_fraction": 0.05,
+      "why": "The only measured binding-affinity landscape on disk for a viral protein. Used for method development only: the RBD is under strong positive immune selection and is the wrong basis for any conservation or family-transfer claim."
+    },
+    "dlg4_pdz3_peptide": {
+      "dms_id": "DLG4_RAT_McLaughlin_2012",
+      "protein": "PSD-95 PDZ3 domain",
+      "interface": "PDZ3 against its natural CRIPT peptide ligand",
+      "endpoint": "peptide binding against a natural ligand",
+      "pool_size": 256,
+      "top_fraction": 0.05,
+      "why": "A peptide-protein interface rather than an antibody-protein one, so the measured endpoint is the kind of interaction this project is trying to design. Small, and singles only."
+    },
+    "yap1_ww_peptide": {
+      "dms_id": "YAP1_HUMAN_Araya_2012",
+      "protein": "YAP1 WW domain",
+      "interface": "WW domain against a proline-rich peptide ligand",
+      "endpoint": "peptide binding",
+      "pool_size": 512,
+      "top_fraction": 0.05,
+      "why": "A 34-residue binding module, close to macrocycle scale, and 96 percent of its variants carry more than one substitution. That makes it the only landscape on disk where combined substitutions across a peptide-binding interface can be studied."
+    },
+    "spg1_olson_igg": {
+      "dms_id": "SPG1_STRSG_Olson_2014",
+      "protein": "Streptococcal protein G B1 domain",
+      "interface": "GB1 against immunoglobulin G Fc",
+      "endpoint": "IgG binding selection",
+      "pool_size": 4096,
+      "top_fraction": 0.01,
+      "why": "536,962 variants over a 55-residue interface, almost all of them multiple substitutions. Large enough to keep the GB1 pilot's 4096-candidate pools and 1 percent threshold, which restores the 32x headroom that the small pathogen pools cannot provide. Same protein as the original pilot, so the geometry is matched and only the variant complexity changes."
+    }
+  },
+  "limitations": [
+    "None of these is a pathogen target proposal. Spike RBD appears here for method development and is explicitly rejected in the target write-up as a basis for conservation claims.",
+    "Every landscape is canonical amino acids on a folded protein domain. None contains a macrocycle, a non-canonical residue or a cyclisation, so none supports a claim about macrocyclic chemistry.",
+    "The peptide-binding landscapes mutate the protein side of the interface, not the peptide ligand. They measure how an interface tolerates substitution, which is adjacent to but not the same as designing a binder against a fixed target.",
+    "Assay endpoints differ across these landscapes and across the pathogen landscapes. Metrics are never pooled between them."
+  ]
+}

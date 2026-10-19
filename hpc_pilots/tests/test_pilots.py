@@ -1,6 +1,7 @@
 import json
 
 import numpy as np
+import pandas as pd
 import pytest
 
 from hpc_pilots.binding import design_matrix, enrichment, pick_batch, replay
@@ -8,7 +9,7 @@ from hpc_pilots.calibration import calibration_metrics, trajectory
 from hpc_pilots.chemistry import alphabet, encode, library_spec, registry, sample_library
 from hpc_pilots.common import ROOT
 from hpc_pilots.common import Agent
-from hpc_pilots.data import pool_geometry
+from hpc_pilots.data import AA, encode_variants, pool_geometry
 from hpc_pilots.dossier import Dossier, evidence, rank
 from hpc_pilots.emergency import run_episode
 from hpc_pilots.structure import structure_replay
@@ -262,3 +263,25 @@ def test_calibration_metrics_ignore_hidden_outcomes_of_observed_labels():
     corrupted[observed] = 10000
     assert calibration_metrics(y, mean, sigma, observed) == \
         calibration_metrics(corrupted, mean, sigma, observed)
+
+
+def test_encoding_narrows_for_singles_and_widens_for_combined_substitutions():
+    sequence = "MKTAYIAKQR"
+    singles = pd.DataFrame({"mutant": ["K2A", "T3G", "Y5V"]})
+    features, cardinalities, positions, note = encode_variants(singles, sequence)
+    assert features.shape == (3, 2) and cardinalities == [3, 20] and positions == 3
+    assert "single substitution" in note
+    # The same three sites, but now with combined variants, must switch representation:
+    # a variant is no longer described by one change, so every site carries its identity.
+    combined = pd.DataFrame({"mutant": ["K2A", "T3G:Y5V", "K2A:T3G:Y5V"]})
+    features, cardinalities, positions, note = encode_variants(combined, sequence)
+    assert features.shape == (3, 3) and cardinalities == [20] * 3
+    assert "combined substitutions" in note
+    wildtype = [AA.index(sequence[p - 1]) for p in (2, 3, 5)]
+    assert features[0].tolist() == [AA.index("A"), wildtype[1], wildtype[2]]
+    assert features[2].tolist() == [AA.index("A"), AA.index("G"), AA.index("V")]
+
+
+def test_encoding_rejects_a_reference_sequence_mismatch():
+    with pytest.raises(ValueError, match="mismatch"):
+        encode_variants(pd.DataFrame({"mutant": ["Q2A"]}), "MKTAYIAKQR")

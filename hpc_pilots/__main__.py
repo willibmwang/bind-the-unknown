@@ -37,6 +37,14 @@ def main():
     p.add_argument("--policy", default="greedy")
     p.add_argument("--delay", type=int, default=0)
     p.add_argument("--smoke", action="store_true")
+    p = sub.add_parser("prepare-method")
+    p.add_argument("--landscape", required=True)
+    p = sub.add_parser("method")
+    p.add_argument("--landscape", required=True)
+    p.add_argument("--pool", type=int, default=0)
+    p.add_argument("--policy", default="greedy")
+    p.add_argument("--delay", type=int, default=0)
+    p.add_argument("--smoke", action="store_true")
     p = sub.add_parser("emergency")
     p.add_argument("--family", default="coronaviridae")
     p.add_argument("--policy", default="rubric")
@@ -81,6 +89,12 @@ def main():
     elif args.command == "target":
         from .binding import run_target
         run_target(args.landscape, args.pool, args.policy, args.delay, args.smoke)
+    elif args.command == "prepare-method":
+        from .data import prepare_method
+        prepare_method(args.landscape)
+    elif args.command == "method":
+        from .binding import run_method
+        run_method(args.landscape, args.pool, args.policy, args.delay, args.smoke)
     elif args.command == "emergency":
         from .emergency import run_emergency
         run_emergency(args.family, args.policy, args.smoke)

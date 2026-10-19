@@ -27,6 +27,23 @@ Pathogen decision environments are configured separately in `configs/targets.jso
 
 **Enrichment.** Acquisition checkpoints now also report an enrichment ratio against the pool baseline, which is the readout shape a display round produces. An enrichment ratio is not an affinity, a functional inhibition or an antiviral activity, and no macrocycle has been measured anywhere in this repository.
 
+## Method-development landscapes, added 19 October
+
+Every pathogen landscape above is scored by enzymatic function or replication fitness, so none of them measures binding. Four landscapes in `configs/method.json` do, and they exist to develop and stress the acquisition machinery rather than to propose targets. They are staged under `data/processed/method/` and run with `prepare-method` and `method`.
+
+| Landscape | Interface | Variants | Pool geometry |
+| --- | --- | --- | --- |
+| `spike_rbd_ace2` | SARS-CoV-2 RBD against human ACE2 | 3,802 singles | 6 × 512, top 5% |
+| `dlg4_pdz3_peptide` | PSD-95 PDZ3 against its CRIPT peptide ligand | 1,576 singles | 5 × 256, top 5% |
+| `yap1_ww_peptide` | YAP1 WW domain against a proline-rich peptide | 10,075, of which 9,713 combined | 18 × 512, top 5% |
+| `spg1_olson_igg` | GB1 against IgG Fc | 536,962, of which 535,917 combined | 20 × 4,096, top 1% |
+
+Three reasons these were added. The two peptide landscapes measure a peptide–protein interface, which is the kind of interaction the project is ultimately designing against, where GB1's IgG selection is not. `spg1_olson_igg` is large enough to keep the original pilot's 4,096-candidate pools and 1% threshold, which restores the 32× headroom that the small pathogen pools cannot offer — the same protein as the GB1 pilot, so the geometry is matched and only the variant complexity changes. And `spike_rbd_ace2` is the only measured binding-affinity landscape on disk for a viral protein.
+
+**Two encodings.** Single-substitution landscapes keep the compact (position, residue) pair. Landscapes containing combined substitutions cannot: a variant is no longer described by one change, so they switch to residue identity at every variable position. `encode_variants` picks between them and records which was used in the manifest.
+
+**These are substrates, not proposals.** None is a pathogen target recommendation. Spike RBD appears here only for method development and is explicitly rejected in the target write-up as a basis for any conservation or family-transfer claim. All four are canonical residues on folded protein domains, so none supports a claim about macrocyclic or non-canonical chemistry. The peptide landscapes mutate the protein side of the interface rather than the peptide ligand.
+
 **Read the recall multiples with care.** Random top-fraction recall equals the labelled fraction of the pool, so a multiple over random is bounded by the reciprocal of that fraction: 32× for GB1 at 128 labels from 4,096 candidates, but only 4× for a pathogen pool at 128 from 512. The two are not comparable, and the GB1 figure must not be quoted without its budget ratio. Compare recall at matched budget *fractions*, or use the normalised gain `(policy − random) / (1 − random)`. The measured consequence is in §2.5 of the Week 4 debrief.
 
 ## Cluster and launch
