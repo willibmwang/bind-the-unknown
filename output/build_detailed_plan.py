@@ -370,7 +370,8 @@ if fragment.exists():
 
 register = ROOT/'TEN_WEEK_DELIVERY_PLAN.md'
 if register.exists():
-    intro = register.read_text().split('<!-- GENERATED REGISTER -->')[0]
+    # rstrip so repeated runs cannot accumulate blank lines ahead of the marker.
+    intro = register.read_text().split('<!-- GENERATED REGISTER -->')[0].rstrip() + '\n'
     lines = [intro, '<!-- GENERATED REGISTER -->', '## Capacity and reserved buffer\n',
              f"Hours below are work **remaining**. The {plan['completed_hours']} hours already "
              "delivered against tasks marked Complete are excluded.\n",

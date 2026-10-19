@@ -133,14 +133,6 @@ W9 includes November 26–27, the U.S. Thanksgiving period. Book the result revi
 
 The task register has been checked for missing/cyclic dependencies, task-window ordering and the fixed W7/W10 boundaries; the generator asserts all three and fails rather than emitting an inconsistent chart. The register now holds 82 tasks and 273 estimated hands-on hours, of which 14 are delivered and excluded from the weekly load. An earlier effort-allocation check found a feasible distribution of the then-261 hours within eight-hour working days, with no coding capacity on the proposed arrival day and four hours on the proposed return day. That validates the estimates' internal consistency; it does not verify biological turnaround or API throughput, and it does not rescue W4, which is overcommitted for the reason given under capacity below. Weekly chart values are uniform-window workload estimates, not fixed appointments. The interactive chart was last checked at desktop and mobile widths before the October 19 re-adjustment; its task-detail controls have not been re-exercised since.
 
-
-
-
-
-
-
-
-
 <!-- GENERATED REGISTER -->
 ## Capacity and reserved buffer
 
