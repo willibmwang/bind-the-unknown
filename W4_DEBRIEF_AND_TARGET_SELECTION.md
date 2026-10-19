@@ -1,12 +1,81 @@
 # Dataset engineering, biological debrief, target selection, and co-scientist architecture
 
-**Prepared 18 October 2026.** Feeds gates COSCI-07 (two prototype families, opens Oct 19),
-LAB-01 (single-round experimental question, Oct 22–23) and GATE-06 (feasibility and novelty
-review, Oct 23).
+**Prepared 18 October 2026; §2.5 and the summary added 19 October.** Feeds gates COSCI-07
+(two prototype families, opens Oct 19), LAB-01 (single-round experimental question,
+Oct 22–23) and GATE-06 (feasibility and novelty review, Oct 23).
 
 No claim of therapeutic efficacy, antiviral activity, binding affinity or full-system
 performance is made anywhere below. Targets in §3 are proposals for review with Askar
 and the SynX experimental lead, not selections.
+
+**Reading this document.** The summary that follows is self-contained. §3, on targets, is
+ordinary target-selection argument and assumes no computational background. The remaining
+sections use machine-learning and statistics vocabulary, each term of which is defined in
+the glossary at §6; those sections open with a paragraph setting out what they establish
+before the detail begins.
+
+---
+
+## Summary for review
+
+**What the October work actually tested.** Two small computational pilots, and neither one
+is about whether a molecule binds anything. They test a narrower question: when you can
+only afford a limited number of measurements and results come back slowly, does the *rule
+you use to choose what to measure next* make a difference? Everything was run on published
+measurement datasets, so the right answer is already known for every candidate and the
+computer's choices can be graded automatically, with no new laboratory work.
+
+**One result held up, and it is the useful one.** If you grade a decision system on
+everything it *chose* to measure, you flatter it compared with grading it on what had
+actually come back by the time it had to decide. The gap is about 1.2 to 1.4 times. This
+sounds like bookkeeping and it is not: it is the difference between asking "were those good
+choices, with hindsight?" and "were those good choices, given what was known at the time?"
+Only the second question is fair to an emergency decision-maker, and the first is what most
+evaluations accidentally measure. The effect reproduced on every dataset tried, including
+SARS-CoV-2 Mpro and both influenza haemagglutinin datasets.
+
+**One result broke, and I am reporting it rather than burying it.** An earlier figure said
+the selection rule found roughly eight times more of the best candidates than picking at
+random. That number was mostly an artefact of pool size. If you measure 128 candidates out
+of 4,096, random picking finds about 3% of the good ones, so there is a great deal of room
+to look impressive. If you measure 128 out of 512, random picking already finds about 25%,
+and no method can beat it by more than fourfold even in principle. Corrected for this, the
+advantage on real pathogen datasets is small and inconsistent — clearest on influenza H3,
+absent on H1 — and one of the four rules is actively worse than random. **The eightfold
+figure should not appear in a paper or a presentation.** §2.5 gives the arithmetic.
+
+**The system now reasons about biology, which it previously did not.** Until 19 October the
+software chose between three abstract strategies while seeing candidates only as numbered
+items — it could not have told you it was working on a protease. It now works from a target
+dossier built on the seven criteria in §3.2 (reagent tractability, essentiality,
+conservation, accessibility, assay availability, public data, precedent), tracks which claim
+rests on which source, refuses evidence dated later than the decision it is making, keeps
+contradictory evidence side by side instead of overwriting it, and states what a single
+selection round can and cannot establish. Run on the coronavirus packet it proposes **Mpro**,
+notes that a cytosolic target requires a membrane-permeability argument, limits what one
+round would show to enrichment, and flags that its own claim about prior macrocycle
+campaigns against Mpro is uncited and must be checked.
+
+**What I am asking you to decide this week.**
+
+1. **Two prototype families.** I propose Coronaviridae via Mpro plus Orthomyxoviridae via
+   the haemagglutinin stem or neuraminidase, with Nipah held back as a stretch. The
+   reasoning is in §3.3 and §3.4. The deciding argument is availability of public
+   measurement data, which lets the method work proceed without waiting on SynX; Nipah has
+   the better story and no such data.
+2. **The question for the single display round** (§3.8). I propose Mpro: cheapest
+   well-behaved reagent, strongest conservation case, and an orthogonal functional assay
+   available if scheduling allows.
+3. **Three things only you can unblock**, all of which have already slipped their dates: a
+   named experimental owner with a booked slot; the campaign export, without which the
+   platform-improvement deliverable cannot start; and confirmation of trainable model access
+   with a spending ceiling.
+
+**What is not claimed anywhere in this document.** No binding affinity, no functional
+inhibition, no antiviral activity, no therapeutic efficacy. No macrocyclic peptide and no
+non-canonical amino acid has been measured or modelled — the building-block work so far is a
+catalogue structure awaiting real chemistry from the platform. The pilots measure
+decision-making procedure, and a measurement of procedure is not evidence about a molecule.
 
 ---
 
@@ -17,6 +86,12 @@ value is almost entirely in the **leakage controls and the accounting**, not in 
 substrates, so that is what this section documents.
 
 ### 1.1 Binding dataset
+
+What follows describes a simulated experiment campaign. We take a published dataset in which
+every variant's result is already known, hide all of those results, let the system request
+them a few at a time under a fixed budget, and then grade the choices it made. Almost all of
+the detail below exists to guarantee one thing: that the system cannot reach an answer it has
+not earned.
 
 **Source.** ProteinGym v1.3, assay `SPG1_STRSG_Wu_2016` — 149,360 measured variants.
 ProteinGym records `selection_assay: Binding (IgG)`, `selection_type: binding`, so the
@@ -222,6 +297,12 @@ display campaign*, scored against something other than another MD replicate.
 
 ### 2.4 Calibration detail, for the record
 
+Calibration asks whether a predictor's own confidence can be trusted — whether it is
+reliably wrong more often when it reports being unsure. The two tables below say that at
+small numbers of measurements this predictor is severely overconfident, understating its own
+error roughly sixtyfold, but that the order in which it ranks candidates becomes informative
+once about 64 measurements are in. Its ranking is usable; its error bars are not.
+
 | budget | overconfidence ratio | 1σ coverage | Spearman(σ, abs err) |
 | --- | --- | --- | --- |
 | 8 | 63.5 | 0.56 | 0.21 |
@@ -248,6 +329,11 @@ by at most 0.0011, so no figure quoted above changes. The ridge column is a seco
 comparator and no claim rests on it alone.
 
 ### 2.5 What the pathogen re-point actually measured — added 19 October
+
+This subsection moves the simulated campaign off the bacterial test protein and onto
+SARS-CoV-2 Mpro and two influenza haemagglutinin datasets. One earlier finding survived the
+move; the headline one did not, for a reason that is arithmetic rather than biological. Of
+the technical subsections, this is the one that changes what we are allowed to claim.
 
 Action 2 below is done, and the result is not the one I expected. 240 paired replays
 (3 landscapes × 4 policies × 10 disjoint pools × 2 delay conditions) now exist under
@@ -537,6 +623,15 @@ already built becomes the resource accounting underneath that policy.
 
 ### 4.2 Architecture brainstorm: treating this as a data problem, not a prompting problem
 
+This section asks how one would *train* a model to make these decisions well, rather than
+write better instructions for an existing one. It is the least settled part of the document.
+The practical content is in the first two items: public measurement datasets can be turned
+into an effectively unlimited supply of automatically gradeable practice problems, which is
+cheap and is the part I believe is genuinely novel; and an expensive model can then act as a
+teacher for a cheap one, which is what would make searching over many candidate next actions
+affordable. The remaining items refine the training and evaluation plan. Only the first is a
+ten-week deliverable, as §4.3 states plainly.
+
 The five capabilities you flagged map onto the existing Week 8–10 harness more cleanly
 than I expected. Below, each one, what it means here, and honestly how much of it is
 already planned versus genuinely new.
@@ -739,3 +834,133 @@ ablation (c) are W8–W9 at the earliest and only if access and spend gates clea
   access and spend cap, and the novelty review — all external to this repository.
 - ATLAS data is CC BY-NC 4.0; this work is scoped to noncommercial research. Commercial
   use requires separate terms from the dataset owner.
+
+---
+
+## 6. Glossary
+
+Every machine-learning and statistics term used above, defined without assuming a
+computational background. Grouped by where the terms appear rather than alphabetically.
+
+### The simulated campaign (§1, §2.2, §2.5)
+
+**Candidate / pool.** A candidate is one variant whose measurement could be requested. A
+pool is a fixed set of candidates treated as one self-contained trial. Pools are
+**disjoint**, meaning no candidate appears in two of them, so each pool is an independent
+repeat of the same exercise.
+
+**Decision policy / acquisition policy.** The rule for choosing which candidates to measure
+next. This is the object under study. Four were compared: **random** (pick blindly, the
+control), **greedy** (pick whatever the predictor rates highest), **UCB** (pick things that
+are either rated highly or poorly understood, so it deliberately spends some budget on
+reducing its own ignorance), and **diverse** (pick things chemically unlike what has already
+been measured).
+
+**Predictor / surrogate.** A cheap statistical model that guesses a candidate's result
+before it is measured, fitted only on results already revealed. It stands in for the real
+measurement, hence "surrogate". Deliberately kept weak and simple here, so that any
+advantage is attributable to the choosing rule rather than to a clever model.
+
+**Random forest.** A standard off-the-shelf predictor that averages many simple decision
+trees. **Ridge regression** is a much simpler standard predictor, included only as a sanity
+check: if the simple one does as well as the complicated one, the complicated one is not
+contributing anything.
+
+**Features / encoding.** How a candidate is converted into numbers a model can take as
+input. Here it is minimal on purpose: only which position is mutated and to which residue.
+No structure, no evolutionary information, no sequence context.
+
+**Budget / batch / decision round.** The campaign may request 128 measurements in total,
+eight at a time. Each request-and-wait cycle is one decision round.
+
+**Delayed feedback.** Results arriving some rounds after they were requested, so the policy
+must keep choosing while earlier requests are still outstanding. The delays used (zero and
+three rounds) are deliberately artificial stress settings, not estimates of real assay
+turnaround.
+
+**Held out.** Data deliberately withheld so it can be used to test whether a method
+generalises. A **grouped** holdout withholds an entire natural group — a whole protein, a
+whole study, a whole subtype — rather than a random scattering of rows, which is a much
+harder and more honest test.
+
+### Scoring (§2.2, §2.4, §2.5)
+
+**Top-fraction recall.** Of all the genuinely best candidates in a pool — say the best 5% —
+what share did the campaign actually find? This is the primary score.
+
+**Selected versus returned.** Two ways of computing that score. **Selected** counts
+everything the policy chose, including requests whose results had not yet come back when it
+was choosing. **Returned** counts only what had actually arrived. Selected is the
+hindsight-flattered version; returned is the fair one. The gap between them is the finding
+in §2.2(b) and §2.5.
+
+**Enrichment ratio.** How much richer in good candidates your recovered set is than the
+library you started from. 1.0 means no better than the starting library. This is the shape
+of number an mRNA display round actually produces, which is why it was added.
+
+**Normalised gain.** A policy's improvement expressed as a share of the improvement that was
+available to it, rather than as a raw multiple. Used in §2.5 because raw multiples are not
+comparable between pools of different sizes.
+
+**Spearman correlation.** Agreement in *ranking*, from 0 (no relationship) to 1 (identical
+order). It ignores whether the predicted values are the right size and asks only whether
+things are put in the right order.
+
+**Calibration, overconfidence ratio, 1σ coverage.** Calibration is whether a predictor's
+stated uncertainty matches its real error. The overconfidence ratio is how many times
+larger the real error is than the predictor claims; 1.0 would be honest, 63 is not. 1σ
+coverage is the share of cases falling inside the predictor's own stated error bar, which
+should be about 0.68 if those bars are trustworthy.
+
+**Paired comparison, ± spread, "7/10 pools".** All policies start each pool from the same
+eight initial measurements, so they can be compared pool by pool rather than only on
+averages. The ± figure is the spread of that per-pool difference, and "7/10 pools" is how
+many pools the method actually won. When the spread is larger than the average difference
+and the method wins only 7 of 10 pools, the effect is weak — which is the honest reading of
+§2.5.
+
+### The decision system (§4.1, §4.2)
+
+**Bandit.** A family of algorithms that decide only which option to try next and contain no
+understanding of the subject matter. Calling the earlier system "a bandit-strategy selector"
+means it chose between abstract strategies without knowing it was doing biology. Replacing
+that was the point of the 19 October work.
+
+**LLM (large language model).** A model trained on text that can follow instructions and
+produce reasoning in prose; the component here that reads a dossier and proposes the next
+action.
+
+**Decision state / action space.** The decision state is everything the system can see when
+it chooses; the action space is the set of moves available. The state is now the seven-axis
+target dossier, and the moves are: retrieve evidence, request a structure calculation,
+re-rank targets, propose a library, recommend the experiment, stop.
+
+**Episode.** One simulated decision scenario from start to finish: a set of candidate
+targets, evidence arriving on a timetable, a deadline, and a budget of actions.
+
+**Tokens / context.** Tokens are the units of text a model reads and writes, used as the
+unit of cost. Context is how much text it can hold in working memory at once — which matters
+because a dossier grows as evidence accumulates, and something eventually has to be dropped.
+
+**Checkpoint.** A saved snapshot of a model partway through training, so that performance
+can be measured as a function of how much training has been done.
+
+**Distillation.** Running an expensive, capable model to generate worked examples, then
+training a cheap model to imitate them. The motivation here is cost: searching over many
+possible next actions requires hundreds of model calls per decision, which is unaffordable
+at expensive-model prices.
+
+**Mid-training data mixture.** The proportions of different kinds of text a model is trained
+on before any task-specific tuning. The claim it raises is that a model which has never seen
+an assay protocol cannot learn to sequence experiments, however it is rewarded afterwards.
+
+**Reinforcement learning (RL).** Training by reward rather than by imitation: the model acts,
+is scored, and is adjusted toward whatever scored well. Needs a reliable scorer, which is
+why the auto-gradeable datasets in §4.2(a) matter.
+
+**Uplift.** How much better a trained model is than the same model untrained, measured on
+the same problems. The project's headline measurement.
+
+**Containerised oracle.** A sealed program that holds the hidden answers and will only
+confirm or score what it is asked, so the system being tested cannot read them. The software
+equivalent of keeping the answer key in another room.
