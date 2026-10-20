@@ -591,9 +591,11 @@ You are right that the output has been sitting locally, and that is a problem wo
 properly rather than by sending more attachments. Proposed:
 
 1. **Repository access.** The work is a git repository with full history — code, configurations,
-   frozen splits, result manifests and the documents. I can grant access to whatever is most
-   convenient for you, or mirror it to a private remote. Happy to do this immediately; I have
-   not done so unilaterally because I would rather agree where it lives and who else sees it.
+   frozen splits, result manifests and these documents — and it already has a private GitHub
+   remote, so this is one invitation away. Tell me which account to add, and whether anyone at
+   SynX should have it too. I have not added anyone unilaterally because the repository will
+   eventually carry campaign-derived material, and I would rather agree who sees it before that
+   arrives than afterwards.
 2. **A fixed weekly written update**, delivered the day before our call: what was decided, what
    was measured, what changed, what is blocked, and what I need. Short, and in the same honest
    register as §4.
