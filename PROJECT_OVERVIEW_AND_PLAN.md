@@ -609,14 +609,56 @@ Ten pathogen landscapes are already on disk:
 the strongest conservation case, an orthogonal functional assay if scheduling permits, and
 interpretable failure. One round substantiates enrichment and must be reported as enrichment.
 
-### 5.3 Prototype and priority pathogens
+### 5.3 Prototype and priority pathogens — and an uncomfortable finding
 
 The comparison you suggested is in
 [PROTOTYPE_AND_PRIORITY_PATHOGENS.md](PROTOTYPE_AND_PRIORITY_PATHOGENS.md), covering WHO, UKHSA,
-NIAID, CEPI, HERA/ECDC, the US operational and regulatory lists, other national frameworks and
-the academic literature — with the conceptual distinction between the two kinds of list, an
-overlap matrix, and an assessment of whether "tractability and data availability" is a defensible
-prototype-selection criterion or a convenience argument.
+NIAID, CEPI, HERA, the US operational and regulatory lists, other national frameworks and the
+academic literature. Three things from it belong here rather than in a companion document.
+
+**The two kinds of list answer different questions and are not two tiers of one ranking.** A
+*priority* pathogen is selected by risk: how bad, how likely. A *prototype* pathogen is selected
+by representativeness and tractability: if we build tools against this one, do they transfer to
+its relatives, and can we work on it today? The mismatch runs both ways and is explicit in the
+sources. WHO names vaccinia a Poxviridae prototype partly because it offers a BSL-2 route, and
+*Vesiculovirus* a Rhabdoviridae prototype because it is a useful vaccine vector — tool-value
+criteria applied to a family WHO rates low risk. Conversely variola is a priority pathogen and
+explicitly not a prototype. A prototype list is not a ranking of danger, and citing it as one
+inverts its meaning.
+
+**NIAID excluded both of the families we chose, by name, for a reason that applies to us.** I
+verified this against the primary source rather than taking it from the survey. The NIAID
+workshop that operationalised the prototype approach covered ten families — Arenaviridae,
+Hantaviridae, Nairoviridae, Peribunyaviridae, Phenuiviridae, Filoviridae, Flaviviridae,
+Paramyxoviridae, Picornaviridae and Togaviridae — and states:
+
+> "Although Orthomyxoviridae and Coronaviridae have a very high pandemic risk, they were not
+> included in this prototype pathogen exercise since significant resources are already allocated
+> to characterize these families, and there are licensed or advanced clinical stage development
+> MCMs available for viruses within them."
+>
+> — [Deschamps, DeRocco, Bok & Patterson, *J Infect Dis* 2023;228(Suppl 6):S355–S358](https://doi.org/10.1093/infdis/jiac465)
+
+NIAID's criteria are *inverse* to resourcing: the better-studied a family, the lower it ranks as
+a prototype. Our selection criterion — public measurement data exist — is close to the exact
+quantity that caused the exclusion. A reviewer aligned with NIAID will not ask whether the choice
+is risky enough; they will ask why not Nairoviridae or Picornaviridae, where the field is
+demonstrably unprepared and where ReVAMPP actually spends.
+
+That is not fatal, and the answer I would give is that NIAID's exclusion concerns *product*
+resourcing for countermeasure development, not benchmark availability for *method* validation —
+a family with dense public quantitative data is the right place to validate a method whose
+intended destination is the data-poor families. But that answer is only credible if the method is
+then shown to transfer out of distribution, and if the data-poor destination is stated as the
+goal rather than left implicit. It is worth ten minutes on Thursday.
+
+**Two corrections to how the project states its targets.** WHO prioritises Coronaviridae at
+**subgenus** level, so the Mpro conservation argument should be made across *Sarbecovirus* and
+*Merbecovirus*, not against SARS-CoV-2 alone — which is a stronger claim and the one WHO's own
+molecular rationale invites. And "influenza haemagglutinin stem" is not a WHO unit: WHO
+prioritises influenza by HA subtype. The project needs to say which subtype, and whether the
+conservation claim is within an HA group or across groups. Both are free improvements to the
+framing.
 
 ### 5.4 On the target-identification analogy
 
@@ -774,9 +816,12 @@ Ordered by how much they block.
    says nothing about a selection round over a 10¹¹-member library. That is a deliberately
    narrow reading of my own result and I would rather you tell me it is too narrow than find out
    at review that it was too broad.
-6. **Is tractability a legitimate prototype-selection criterion?** The two families were chosen
-   substantially because public data exists for them. §5.3 examines whether the literature
-   supports that or whether it is convenience dressed as principle.
+6. **NIAID excluded both our families from its prototype list, by name** (§5.3), because they
+   are already well resourced — which is close to the exact reason we chose them. I have an
+   answer, which is that their exclusion concerns product resourcing and ours concerns benchmark
+   availability for method validation. I would like to know whether you find that convincing or
+   whether it sounds like special pleading, because it is the one place where our target choice
+   is in direct tension with a published framework rather than merely unsupported by one.
 7. **The dossier eviction problem.** Evidence accumulates monotonically within an episode and
    conflicts are retained rather than overwritten, so context eventually has to be dropped —
    and what to drop is itself a decision the policy should be making. I do not have a good
