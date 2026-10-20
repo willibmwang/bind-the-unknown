@@ -371,9 +371,13 @@ fact that a job was staged.
 
 ## 4. What has actually been measured
 
-Four weeks of evidence, separated into what survives, what does not, and what has not been
-attempted. The detail and arithmetic are in
-[W4_DEBRIEF_AND_TARGET_SELECTION.md](W4_DEBRIEF_AND_TARGET_SELECTION.md) §2.
+Four weeks of evidence, separated into what has been withdrawn, what survives, and what has not
+been attempted at all. This section supersedes §2 of the
+[Week 4 debrief](W4_DEBRIEF_AND_TARGET_SELECTION.md), which is left unrevised as the record of
+what was believed on 19 October and carries a correction notice at its head. The intervention
+tests behind §4.2 are set out in
+[ADJUDICATION_COMBINATORIAL_GAIN.md](ADJUDICATION_COMBINATORIAL_GAIN.md), and the replication
+prediction in [PREREGISTRATION_COVERAGE.md](PREREGISTRATION_COVERAGE.md).
 
 ### 4.1 Three claims withdrawn
 
