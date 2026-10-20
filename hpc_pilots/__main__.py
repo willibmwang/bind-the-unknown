@@ -60,6 +60,12 @@ def main():
                    help="Memorisation probe: forbid retrieval and push no evidence")
     p.add_argument("--repeat", type=int, default=1,
                    help="Independent episodes, each to its own artifact")
+    p = sub.add_parser("sweep", help="Run the acquisition grid in parallel on this machine")
+    p.add_argument("--arms", default="binding,target,method")
+    p.add_argument("--workers", type=int, default=8)
+    p.add_argument("--max-pools", type=int)
+    p.add_argument("--no-controls", action="store_true")
+    p.add_argument("--dry-run", action="store_true")
     p = sub.add_parser("manifest", help="Rewrite the source digest record, or report its drift")
     p.add_argument("--check", action="store_true", help="Report drift and exit non-zero; write nothing")
     args = parser.parse_args()
@@ -111,6 +117,10 @@ def main():
     elif args.command == "emergency":
         from .emergency import run_emergency
         run_emergency(args.family, args.policy, args.smoke, args.control, args.repeat)
+    elif args.command == "sweep":
+        from .sweep import run_sweep
+        run_sweep([a for a in args.arms.split(",") if a], args.workers,
+                  not args.no_controls, args.max_pools, args.dry_run)
     elif args.command == "manifest":
         from .common import source_manifest
         path, drift = source_manifest(check=args.check)

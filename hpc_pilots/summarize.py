@@ -3,6 +3,7 @@ import json
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
 
@@ -29,28 +30,44 @@ def headroom(labelled_fraction, top_fraction):
 
 
 def with_bounds(frame):
-    """Attach the geometry-dependent ceiling to every checkpoint row, not just the last.
+    """Attach the attainable ceiling and `attainment` to every checkpoint row.
 
     Recall at a budget is not comparable across environment instances on its own. Two
     landscapes with different pool sizes and hit thresholds have different attainable
-    maxima, so the same raw recall can mean a policy recovered almost everything it
-    could have or almost nothing. Carrying the ceiling beside every number, at every
-    checkpoint, is what stops a raw figure being read without the bound that limits it --
-    the omission that produced the eightfold figure the project had to withdraw.
+    maxima, so the same raw recall can mean a policy recovered almost everything it could
+    have or almost nothing. Carrying the ceiling beside every number, at every checkpoint,
+    is what stops a raw figure being read without the bound that limits it.
 
-    `ceiling_normalised_recall` is the share of the reachable hits that were reached. It
-    is on a common scale across pool geometries where raw recall and raw multiple over
-    random are not.
+    `attainment` = recall / min(1, (n/N)/f) is the share of the reachable hits that were
+    reached. It reduces to recall exactly when n/N >= f, which is where most of the
+    literature sits, so it is a correction in a corner rather than a wholesale revision.
+    The quantity is not new: shortfall-from-maximum over shortfall-from-random is the
+    "deficiency" of Baram, El-Yaniv & Luz (JMLR 5, 2004, Eq. 1), the Active Learning
+    Challenge's globalscore = (ALC - Arand)/(Amax - Arand) (Guyon et al., JMLR W&CP 16,
+    2011), and normalised enrichment in the virtual-screening lineage. What is carried
+    here is the two-sided ceiling under a budget-coupled selection fraction.
+
+    Where the counted hit total is recorded the ceiling is exact -- min(1, n/H) from the
+    H the metric actually divided by. The continuum form min(1, (n/N)/f) is the fallback
+    for older rows, and the two differ whenever a tied plateau sits on the threshold.
     """
     if not {"labels", "pool_size", "top_fraction", "top_recall"} <= set(frame.columns):
         return frame
     out = frame.copy()
     out["labelled_fraction"] = out.labels / out.pool_size
-    bounds = [headroom(labelled, fraction)
-              for labelled, fraction in zip(out.labelled_fraction, out.top_fraction)]
-    out["recall_ceiling"] = [b["recall_ceiling"] for b in bounds]
-    out["headroom_multiple"] = [b["headroom_multiple"] for b in bounds]
-    out["ceiling_normalised_recall"] = out.top_recall / out.recall_ceiling
+    if "hits_in_pool" in out.columns and out.hits_in_pool.notna().all():
+        out["recall_ceiling"] = np.minimum(1.0, out.labels / out.hits_in_pool)
+        out["ceiling_basis"] = "counted hits"
+    else:
+        bounds = [headroom(labelled, fraction)
+                  for labelled, fraction in zip(out.labelled_fraction, out.top_fraction)]
+        out["recall_ceiling"] = [b["recall_ceiling"] for b in bounds]
+        out["ceiling_basis"] = "nominal top_fraction"
+    # Against the analytic random rate n/N, not against a sampled random arm. A sampled
+    # baseline carries its own protocol quirks -- a free positive in the warm start, a
+    # pre-filtered pool -- straight into the normaliser.
+    out["headroom_multiple"] = out.recall_ceiling / out.labelled_fraction
+    out["attainment"] = out.top_recall / out.recall_ceiling
     return out
 
 
@@ -110,47 +127,73 @@ def summarize_method(directory):
         return
     df = with_bounds(pd.DataFrame(rows))
     df.to_csv(directory / "method_metrics.csv", index=False)
-    # Per landscape, since the checkpoint grids differ: taking a global max silently
-    # dropped any landscape whose grid ends elsewhere.
-    final = df[(df.delay == 0) & (df.labels == df.groupby("landscape").labels.transform("max"))]
+    # Every checkpoint, not only the terminal one. Filtering to the last checkpoint made
+    # the ceiling correction inert by construction: at 128 labels the budget exceeds every
+    # landscape's hit count, so the ceiling is exactly 1.0 in every row and the correction
+    # could not move a number it was applied to. It bites at 16 and 32 labels or nowhere.
     summary = []
-    for landscape, part in final.groupby("landscape"):
+    for (landscape, labels), part in df[df.delay == 0].groupby(["landscape", "labels"]):
         wide = part.pivot_table(index="pool", columns="policy", values="top_recall")
         if "random" not in wide:
             continue
-        labelled = part.labels.iloc[0] / part.pool_size.iloc[0]
-        bound = headroom(labelled, part.top_fraction.iloc[0])
-        baseline = wide["random"].mean()
-        for policy in [p for p in ("greedy", "ucb", "diverse") if p in wide]:
+        ceiling = float(part.recall_ceiling.mean())
+        labelled = float(part.labelled_fraction.mean())
+        baseline = float(wide["random"].mean())
+        arms = [p for p in ("greedy", "ucb", "diverse") if p in wide]
+        # At a small budget the surrogate has no discriminative power and every arm
+        # returns the same recall. Those rows carry no policy information, and saying so
+        # in the table is better than leaving a reader to notice the values are identical.
+        degenerate = all(np.allclose(wide[p], wide["random"]) for p in arms) if arms else False
+        for policy in arms:
             gain = wide[policy] - wide["random"]
             nonzero = gain[gain != 0]
             summary.append({
-                "landscape": landscape, "protein": part.protein.iloc[0],
-                "endpoint": part.endpoint.iloc[0], "pool_size": part.pool_size.iloc[0],
-                "labelled_fraction": round(labelled, 4),
+                "landscape": landscape, "labels": int(labels),
+                "protein": part.protein.iloc[0],
+                "endpoint": part.endpoint.iloc[0], "pool_size": int(part.pool_size.iloc[0]),
                 "top_fraction": part.top_fraction.iloc[0],
-                "recall_ceiling": round(bound["recall_ceiling"], 4),
-                "headroom_multiple": round(bound["headroom_multiple"], 1),
+                "hits_in_pool": int(part.hits_in_pool.mean())
+                if "hits_in_pool" in part.columns and part.hits_in_pool.notna().all() else None,
+                "labelled_fraction": round(labelled, 4),
+                "recall_ceiling": round(ceiling, 4),
+                "headroom_multiple": round(ceiling / labelled, 2) if labelled else None,
                 "policy": policy, "pools": len(gain),
                 "random_recall": round(baseline, 4),
-                "policy_recall": round(wide[policy].mean(), 4),
-                "multiple_over_random": round(wide[policy].mean() / baseline, 2)
+                "policy_recall": round(float(wide[policy].mean()), 4),
+                "multiple_over_random": round(float(wide[policy].mean()) / baseline, 2)
                 if baseline else None,
-                # Normalised against the recall the budget can actually reach, not against
-                # 1.0: a policy cannot recover more hits than it has labels to spend, so
-                # dividing by (1 - random) understates the gain at early checkpoints.
-                "normalised_gain": round((wide[policy].mean() - baseline)
-                                         / (bound["recall_ceiling"] - baseline), 4)
-                if bound["recall_ceiling"] > baseline else None,
-                "mean_paired_gain": round(gain.mean(), 4),
-                "paired_sd": round(gain.std(), 4),
+                # Attainment against the analytic ceiling. This is the quantity that is
+                # comparable across landscapes; the raw multiple above is not.
+                "policy_attainment": round(float(wide[policy].mean()) / ceiling, 4)
+                if ceiling else None,
+                "random_attainment": round(baseline / ceiling, 4) if ceiling else None,
+                "ceiling_is_slack": ceiling >= 1.0,
+                "all_arms_identical": degenerate,
+                "mean_paired_gain": round(float(gain.mean()), 4),
+                "paired_sd": round(float(gain.std()), 4) if len(gain) > 1 else None,
                 "pools_improved": int((gain > 0).sum()),
-                # Pools are one seeded partition of a single assay table, so this is a
-                # paired test over sub-samples and not a replication across experiments.
                 "wilcoxon_p": round(float(wilcoxon(nonzero).pvalue), 4)
                 if len(nonzero) >= 6 else None})
     if summary:
         pd.DataFrame(summary).to_csv(directory / "method_policy_gain.csv", index=False)
+        write_json(directory / "method_policy_gain_note.json", {
+            "unit_of_analysis": "Pools are one seeded partition of a single assay table. A "
+                                "paired test over them describes variation across sub-samples "
+                                "of one measurement set, not replication across experiments, "
+                                "and a sub-sampled metric is inconsistent with the full-pool "
+                                "metric rather than merely noisier. The landscape, not the "
+                                "pool, is the independent unit for a cross-landscape claim.",
+            "attainment": "recall / min(1, (n/N)/f), against the analytic random rate n/N "
+                          "rather than a sampled random arm. Reduces to recall when n/N >= f.",
+            "prior_art": "The chance-and-ceiling normalisation is published: Baram, El-Yaniv & "
+                         "Luz, JMLR 5 (2004) Eq. 1; Guyon et al., JMLR W&CP 16 (2011) "
+                         "globalscore; normalised enrichment in the virtual-screening "
+                         "lineage. Nothing here claims the normalisation as novel.",
+            "where_the_correction_is_inert": "Wherever n/N >= f the ceiling is 1.0 and "
+                                             "attainment equals recall exactly. At the terminal "
+                                             "checkpoint of every configured landscape the "
+                                             "budget exceeds the hit count, so the correction "
+                                             "matters only at the early checkpoints."})
 
 
 def summarize_delay(directory):

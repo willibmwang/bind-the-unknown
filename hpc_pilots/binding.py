@@ -93,11 +93,24 @@ def pick_batch(features, observed_indices, observed_values, available, policy, s
 
 
 def evaluate(hidden_outcomes, selected, fraction):
+    """Recall against the hit set, with the denominator it was computed from.
+
+    `hits_in_pool` is recorded rather than left to be reconstructed as `fraction * len`.
+    The two differ: the cut is a quantile compared with `>=`, so a tied plateau sitting on
+    the threshold puts every tied candidate in the hit set and H exceeds f*N. Two pools of
+    the same size can therefore divide by different denominators, which makes a recall
+    figure unreadable without the H it used -- and H is what the attainable ceiling
+    min(1, n/H) is computed from, so it has to travel with the metric.
+    """
     threshold = np.quantile(hidden_outcomes, 1 - fraction)
     hits = hidden_outcomes >= threshold
     return {"labels": len(selected), "best_score": float(hidden_outcomes[selected].max()),
             "top_fraction": fraction, "top_hits": int(hits[selected].sum()),
-            "top_recall": float(hits[selected].sum() / hits.sum())}
+            "top_recall": float(hits[selected].sum() / hits.sum()),
+            "hits_in_pool": int(hits.sum()), "pool_candidates": int(len(hidden_outcomes)),
+            "threshold": float(threshold),
+            "ties_at_threshold": int((hidden_outcomes == threshold).sum()),
+            "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="}
 
 
 def enrichment(hidden_outcomes, selected, fraction):
