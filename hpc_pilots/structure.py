@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from .common import ROOT, Agent, config, digest, provenance, write_json
+from .streams import stream
 from .data import fetch_atlas
 
 
@@ -75,7 +76,7 @@ def structure_replay(proteins, policy, additional_blocks=64, seed=0, agent=None)
                         "next": 0, "static": data["static"]}
     trace, metrics = [], []
     measured_cpu_cost = 0.0
-    rng = np.random.default_rng(seed)
+    rng = stream(seed, "structure-allocation")
     started = time.perf_counter()
 
     def request(name):

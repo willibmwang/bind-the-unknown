@@ -14,6 +14,8 @@ def main():
     p.add_argument("--policy", choices=config()["binding"]["policies"], default="greedy")
     p.add_argument("--delay", type=int, default=0)
     p.add_argument("--smoke", action="store_true")
+    p.add_argument("--control", choices=["permuted"],
+                   help="Falsification arm: shuffle outcomes, then grade against the shuffle")
     p = sub.add_parser("binding-array")
     p.add_argument("--agent-only", action="store_true")
     p = sub.add_parser("preprocess-atlas")
@@ -38,6 +40,8 @@ def main():
     p.add_argument("--policy", default="greedy")
     p.add_argument("--delay", type=int, default=0)
     p.add_argument("--smoke", action="store_true")
+    p.add_argument("--control", choices=["permuted"],
+                   help="Falsification arm: shuffle outcomes, then grade against the shuffle")
     p = sub.add_parser("prepare-method")
     p.add_argument("--landscape", required=True)
     p = sub.add_parser("method")
@@ -46,6 +50,8 @@ def main():
     p.add_argument("--policy", default="greedy")
     p.add_argument("--delay", type=int, default=0)
     p.add_argument("--smoke", action="store_true")
+    p.add_argument("--control", choices=["permuted"],
+                   help="Falsification arm: shuffle outcomes, then grade against the shuffle")
     p = sub.add_parser("emergency")
     p.add_argument("--family", default="coronaviridae")
     p.add_argument("--policy", default="rubric")
@@ -70,7 +76,7 @@ def main():
                      for delay in bc["feedback_delays"] for policy in policies]
             run_binding(*tasks[int(os.environ["SLURM_ARRAY_TASK_ID"])])
         else:
-            run_binding(args.pool, args.policy, args.delay, args.smoke)
+            run_binding(args.pool, args.policy, args.delay, args.smoke, args.control)
     elif args.command == "preprocess-atlas":
         from .structure import preprocess
         preprocess(args.index, args.smoke)
@@ -95,13 +101,13 @@ def main():
         prepare_target(args.landscape)
     elif args.command == "target":
         from .binding import run_target
-        run_target(args.landscape, args.pool, args.policy, args.delay, args.smoke)
+        run_target(args.landscape, args.pool, args.policy, args.delay, args.smoke, args.control)
     elif args.command == "prepare-method":
         from .data import prepare_method
         prepare_method(args.landscape)
     elif args.command == "method":
         from .binding import run_method
-        run_method(args.landscape, args.pool, args.policy, args.delay, args.smoke)
+        run_method(args.landscape, args.pool, args.policy, args.delay, args.smoke, args.control)
     elif args.command == "emergency":
         from .emergency import run_emergency
         run_emergency(args.family, args.policy, args.smoke, args.control, args.repeat)

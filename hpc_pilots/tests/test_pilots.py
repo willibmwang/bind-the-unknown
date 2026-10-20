@@ -14,6 +14,7 @@ from hpc_pilots.common import (Agent, COMMITTED_MODEL_MANIFEST, STAGED_MODEL_MAN
 from hpc_pilots.data import AA, encode_variants, pool_geometry
 from hpc_pilots.dossier import Dossier, evidence, rank
 from hpc_pilots.emergency import run_episode
+from hpc_pilots.streams import stream, stream_int
 from hpc_pilots.structure import structure_replay
 from hpc_pilots.summarize import headroom
 from hpc_pilots.targets import packet
@@ -435,6 +436,42 @@ def test_encoding_narrows_for_singles_and_widens_for_combined_substitutions():
 def test_encoding_rejects_a_reference_sequence_mismatch():
     with pytest.raises(ValueError, match="mismatch"):
         encode_variants(pd.DataFrame({"mutant": ["Q2A"]}), "MKTAYIAKQR")
+
+
+def test_streams_do_not_collide_along_the_pool_round_diagonal():
+    # The defect this replaces: streams were derived by ADDING a coordinate to the base
+    # seed, so pool p at round r and pool p+r at initialisation got the same integer and
+    # the same draws. Verified before the fix: pool 0 round 1 matched pool 1 init exactly.
+    base = 20261012
+    for pool in range(4):
+        for round_number in range(1, 4):
+            acquire = stream(base + pool, 'acquire', round_number).integers(0, 1000, size=12)
+            collided = stream(base + pool + round_number, 'initial').integers(0, 1000, size=12)
+            assert not np.array_equal(acquire, collided), (pool, round_number)
+    # The surrogate's bootstrap must not share a stream with the tie-break that exists to
+    # decorrelate its tied plateaus from index order.
+    assert stream_int(base, 'surrogate', 2) != stream_int(base, 'acquire', 2)
+    # Same coordinate, same stream: the scheme is reproducible, not merely scattered.
+    assert np.array_equal(stream(base, 'acquire', 3).integers(0, 1000, size=8),
+                          stream(base, 'acquire', 3).integers(0, 1000, size=8))
+    # A string coordinate must survive a process boundary, so it cannot use salted hash().
+    # Recorded from the implementation: this fails if the derivation changes, which is the
+    # point -- a silent change would re-randomise every run without anyone noticing.
+    assert stream_int(base, 'surrogate', 1) == 817098475
+
+
+def test_all_policies_still_open_from_identical_observations():
+    # The invariant the whole matched comparison rests on, re-pinned after the seed
+    # rework: initialisation must not be a function of the policy.
+    rng = np.random.default_rng(3)
+    x = rng.integers(0, 20, size=(256, 4))
+    y = rng.normal(size=256)
+    runs = [replay(x, y, policy, 11, maximum=32, checkpoints=(32,))
+            for policy in ('random', 'diverse', 'greedy', 'ucb')]
+    assert all(r['initial_indices'] == runs[0]['initial_indices'] for r in runs)
+    # And the permuted control must not perturb which labels the episode opens from.
+    control = replay(x, y, 'greedy', 11, maximum=32, checkpoints=(32,), control='permuted')
+    assert control['initial_indices'] == runs[0]['initial_indices']
 
 
 def test_permuted_control_destroys_a_learnable_signal():

@@ -24,6 +24,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import RidgeCV
 
 from .common import ROOT, config, digest, provenance, write_json
+from .streams import stream, stream_int
 
 SURROGATE_BUDGETS = (8, 16, 32, 64, 128, 256, 512, 1024)
 # Log-spaced grid for the linear comparator. RidgeCV selects per budget by leave-one-out,
@@ -73,7 +74,9 @@ def trajectory(design, outcomes, regime, seed, trees, budgets, batch):
     biased toward low indices where the pilot's is not. Kept deliberately, so the audit
     reports the acquisition rule in its plainest form.
     """
-    rng = np.random.default_rng(seed)
+    # Not a function of the regime, so both regimes open from the same labels, which is
+    # what makes their first checkpoint comparable and is asserted by a test.
+    rng = stream(seed, "calibration-initial")
     observed = rng.choice(len(design), size=budgets[0], replace=False).tolist()
     rows = []
     for budget in budgets:
@@ -83,12 +86,14 @@ def trajectory(design, outcomes, regime, seed, trees, budgets, batch):
             if regime == "random":
                 observed += rng.choice(available, size=count, replace=False).tolist()
             elif regime == "greedy":
-                mean, _ = forest(design, outcomes, observed, seed, trees)
+                mean, _ = forest(design, outcomes, observed,
+                                 stream_int(seed, "calibration-surrogate", len(observed)), trees)
                 order = np.argsort(-mean[available], kind="stable")[:count]
                 observed += available[order].tolist()
             else:
                 raise ValueError(f"Unknown acquisition regime {regime!r}")
-        mean, sigma = forest(design, outcomes, observed, seed, trees)
+        mean, sigma = forest(design, outcomes, observed,
+                             stream_int(seed, "calibration-surrogate", len(observed)), trees)
         rows.append({"budget": budget, "regime": regime,
                      **calibration_metrics(outcomes, mean, sigma, observed)})
     return rows
@@ -119,7 +124,7 @@ def surrogate_skill():
         k = int(hits.sum())
         # One stream, an independent draw per budget. These are label-count curves, so a
         # budget must not inherit the particular labels an earlier budget happened to draw.
-        rng = np.random.default_rng(c["seed"] + pool)
+        rng = stream(c["seed"], "skill", pool)
         for budget in SURROGATE_BUDGETS:
             if budget >= len(design):
                 continue
@@ -127,7 +132,8 @@ def surrogate_skill():
             held_out = np.setdiff1d(np.arange(len(design)), observed)
             for name in ("forest", "ridge"):
                 if name == "forest":
-                    mean, sigma = forest(design, outcomes, observed, c["seed"] + pool,
+                    mean, sigma = forest(design, outcomes, observed,
+                                         stream_int(c["seed"], "skill-surrogate", pool, budget),
                                          bc["forest_trees"])
                     ranking = float(spearmanr(sigma[held_out],
                                               np.abs(mean[held_out] - outcomes[held_out])).statistic)

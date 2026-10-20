@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
 from .common import ROOT, Agent, config, digest, provenance, write_json
+from .streams import stream, stream_int
 
 
 def design_matrix(features, cardinalities=None):
@@ -34,9 +35,14 @@ def distances(features, observed_indices):
 
 
 def pick_batch(features, observed_indices, observed_values, available, policy, size, seed, agent=None,
-               decision_context=None, cardinalities=None, surrogate=None):
-    """The policy interface accepts only revealed values, never the hidden outcome vector."""
-    rng = np.random.default_rng(seed)
+               decision_context=None, cardinalities=None, surrogate=None, round_number=0):
+    """The policy interface accepts only revealed values, never the hidden outcome vector.
+
+    `seed` is the episode's base seed and `round_number` a coordinate within it. They are
+    kept apart rather than added together, because adding them made the acquisition stream
+    of one pool identical to the initialisation stream of another (see `streams`).
+    """
+    rng = stream(seed, "acquire", round_number)
     if policy == "random":
         return rng.choice(available, size=size, replace=False), {"action": "random"}
     if policy == "diverse":
@@ -52,7 +58,10 @@ def pick_batch(features, observed_indices, observed_values, available, policy, s
     # each carried `forest_trees` and `ucb_beta` that nothing read; the values coincided, so
     # no recorded result was wrong, but the keys described an intent the code did not honour.
     sc = surrogate or config()["binding"]
-    mean, uncertainty = predictions(features, observed_indices, observed_values, seed,
+    # A stream of its own, so the surrogate's bootstrap is independent of the tie-break
+    # that exists to stop its tied plateaus resolving in index order.
+    mean, uncertainty = predictions(features, observed_indices, observed_values,
+                                    stream_int(seed, "surrogate", round_number),
                                     sc["forest_trees"], cardinalities)
     d = distances(features, observed_indices)
     action = "explore" if policy == "ucb" else "greedy"
@@ -73,7 +82,10 @@ def pick_batch(features, observed_indices, observed_values, available, policy, s
         action = agent.choose("Choose the next acquisition strategy for a binding-assay batch.", state,
                               ["greedy", "explore", "diverse"])
     if action == "diverse":
-        return pick_batch(features, observed_indices, observed_values, available, "diverse", size, seed)
+        # Same coordinates as the diverse baseline would use, so an agent delegating to it
+        # produces the identical batch and the two remain comparable.
+        return pick_batch(features, observed_indices, observed_values, available, "diverse",
+                          size, seed, round_number=round_number)
     acquisition = mean + (sc["ucb_beta"] * uncertainty if action == "explore" else 0)
     # Randomize ties reproducibly without perturbing score ordering.
     shuffled = rng.permutation(available)
@@ -121,11 +133,13 @@ def replay(features, hidden_outcomes, policy, seed, maximum=128, initial=8, batc
     that the measured gain is a gain.
     """
     if control == "permuted":
-        hidden_outcomes = np.random.default_rng(seed + 10_000_000).permutation(hidden_outcomes)
+        hidden_outcomes = stream(seed, "permute").permutation(hidden_outcomes)
     elif control is not None:
         raise ValueError(f"Unknown control arm {control!r}")
-    rng = np.random.default_rng(seed)
-    first = rng.choice(len(features), size=initial, replace=False).tolist()
+    # Deliberately not a function of the policy: every policy must open from the identical
+    # observations at a given seed, which is what removes initialisation variance from the
+    # comparison and is what the shared-initialisation test pins.
+    first = stream(seed, "initial").choice(len(features), size=initial, replace=False).tolist()
     queried, observed = first.copy(), first.copy()
     pending, trace, records = [], [], []
     round_number = 0
@@ -157,11 +171,11 @@ def replay(features, hidden_outcomes, policy, seed, maximum=128, initial=8, batc
         available = np.setdiff1d(np.arange(len(features)), queried)
         count = min(batch, maximum - len(queried), len(available))
         ids, decision = pick_batch(features, np.array(observed), hidden_outcomes[observed], available,
-                                   policy, count, seed + round_number, agent,
+                                   policy, count, seed, agent,
                                    {"remaining_label_budget": maximum - len(queried),
                                     "pending_labels": len(queried) - len(observed),
                                     "feedback_delay_rounds": delay, "decision_round": round_number},
-                                   cardinalities, surrogate)
+                                   cardinalities, surrogate, round_number)
         ids = ids.tolist()
         if len(set(ids)) != count or set(ids) & set(queried):
             raise ValueError("Repeated or invalid acquisition")
