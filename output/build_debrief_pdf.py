@@ -1,4 +1,4 @@
-"""Render the Week 4 debrief Markdown to a presentation-quality PDF.
+"""Render a project Markdown document to a presentation-quality PDF.
 
 The original PDF was produced by headless Chrome (Skia/PDF), and this reproduces that
 pipeline deterministically and offline: Markdown to styled HTML here, then Chrome's
@@ -9,7 +9,7 @@ with alignment, blockquotes, bullet and ordered lists, thematic breaks, fenced c
 inline bold/italic/code/strikethrough. Each top-level section becomes a page-breaking
 <section> so the document reads as a deck of sections rather than a continuous wall.
 
-    python3 output/build_debrief_pdf.py [source.md]
+    python3 output/build_debrief_pdf.py [source.md]   # default: the Week 4 debrief
 """
 import html
 import re
@@ -21,7 +21,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-EYEBROW = "SynX Therapeutics · MATS 11.0 · Week 4 review"
+
+# The running head, by source stem. Each document says which review it belongs to, so a
+# printed page is identifiable once it has been separated from the others.
+EYEBROWS = {
+    "W4_DEBRIEF_AND_TARGET_SELECTION": "SynX Therapeutics · MATS 11.0 · Week 4 review",
+    "PROJECT_OVERVIEW_AND_PLAN": "SynX Therapeutics · MATS 11.0 · Project overview and plan",
+    "ARCHITECTURE": "SynX Therapeutics · MATS 11.0 · System architecture",
+    "PROTOTYPE_AND_PRIORITY_PATHOGENS": "SynX Therapeutics · MATS 11.0 · Background note",
+}
+DEFAULT_EYEBROW = "SynX Therapeutics · MATS 11.0"
 
 CSS = """
 @page { size: Letter; margin: 19mm 18mm 20mm; }
@@ -101,6 +110,10 @@ pre {
 pre code { background: none; padding: 0; font-size: 1em; }
 del { color: var(--muted); }
 strong { font-weight: 600; }
+a { color: var(--accent); text-decoration: none; border-bottom: .5pt solid #a8bdd2; }
+/* A reference to a companion document in the repository: named, but not pretending to be
+   a working link for someone reading the printed page. */
+.xref { font-style: italic; color: var(--muted); }
 """
 
 BULLET = re.compile(r"^(\s*)[-*] (.*)$")
@@ -108,6 +121,17 @@ NUMBER = re.compile(r"^(\s*)\d+\. (.*)$")
 RULE = re.compile(r"^-{3,}\s*$")
 HEADING = re.compile(r"^(#{1,6}) (.*)$")
 SEPARATOR = re.compile(r"^:?-{2,}:?$")
+
+
+def link(match):
+    """One markdown link. A web address becomes an anchor; a link to a companion file in the
+    repository becomes plain marked-up text, because that target does not exist for a reader
+    holding only the PDF and a dead blue link is worse than none."""
+    label, target = match.group(1), match.group(2)
+    if target.startswith(("http://", "https://", "mailto:")):
+        # Ampersands are already escaped by the caller; only quotes still need handling.
+        return f'<a href="{target.replace(chr(34), "&quot;")}">{label}</a>'
+    return f'<span class="xref">{label}</span>'
 
 
 def inline(text):
@@ -120,6 +144,7 @@ def inline(text):
 
     text = re.sub(r"`([^`]+)`", stash, text)
     text = html.escape(text, quote=False)
+    text = re.sub(r"\[([^\]]+)\]\(([^)\s]+)\)", link, text)
     text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text, flags=re.S)
     text = re.sub(r"~~(.+?)~~", r"<del>\1</del>", text, flags=re.S)
     text = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"<em>\1</em>", text, flags=re.S)
@@ -243,7 +268,8 @@ def build(source):
         raise ValueError("No '# ' title found")
     intro = re.sub(r"^# .+$", "", title_md, count=1, flags=re.M)
     intro = re.sub(r"^-{3,}\s*$", "", intro, flags=re.M).strip()
-    parts = [f'<div class="title-block"><div class="eyebrow">{html.escape(EYEBROW)}</div>'
+    eyebrow = EYEBROWS.get(source.stem, DEFAULT_EYEBROW)
+    parts = [f'<div class="title-block"><div class="eyebrow">{html.escape(eyebrow)}</div>'
              f"<h1>{inline(title.group(1).strip())}</h1>{convert(intro)}</div>"]
 
     for chunk in section_mds:
@@ -287,4 +313,6 @@ def build(source):
 
 
 if __name__ == "__main__":
-    build(Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "W4_DEBRIEF_AND_TARGET_SELECTION.md")
+    # Resolved, so a relative argument still reports a path relative to the project root.
+    build(Path(sys.argv[1]).resolve() if len(sys.argv) > 1
+          else ROOT / "W4_DEBRIEF_AND_TARGET_SELECTION.md")
