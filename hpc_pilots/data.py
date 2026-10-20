@@ -206,6 +206,99 @@ def _split_pools(rows, geometry, seed):
     return dev, pools
 
 
+def encode_library(sequences, separator=None):
+    """Encode a library given as whole sequences rather than mutation strings.
+
+    Display libraries are not scans around a wild type: every member is a draw from a
+    randomised region, so there is no reference sequence to diff against and the
+    `(position, substituted residue)` encoding used for deep mutational scans does not
+    apply. Each position becomes a categorical over whatever symbols actually occur at it.
+
+    `separator` splits a sequence into monomer tokens, for libraries built from named
+    building blocks rather than single letters. With `separator=None` each character is a
+    token, which recovers the canonical-residue case. Either way the alphabet is read off
+    the data instead of being assumed, so non-canonical monomers need no special casing.
+    """
+    tokens = [list(s) if separator is None else s.split(separator) for s in sequences]
+    widths = {len(t) for t in tokens}
+    if len(widths) != 1:
+        raise ValueError(f"Library members differ in length: {sorted(widths)}")
+    vocabularies = [sorted({t[i] for t in tokens}) for i in range(widths.pop())]
+    lookup = [{symbol: index for index, symbol in enumerate(v)} for v in vocabularies]
+    features = np.array([[lookup[i][symbol] for i, symbol in enumerate(t)] for t in tokens],
+                        dtype=np.int16)
+    cardinalities = [len(v) for v in vocabularies]
+    note = ("categorical symbol at each randomised position, vocabulary read from the "
+            "library itself")
+    return features, cardinalities, vocabularies, note
+
+
+def prepare_display(landscape):
+    """Stage one display-selection library: whole sequences with a measured endpoint.
+
+    Unlike `prepare_method`, nothing here comes from ProteinGym. The input is a local
+    two-column table of sequence and outcome, because the datasets of the molecule class
+    this project actually designs -- macrocyclic, built from named monomers -- are not
+    distributed in a mutation-string format and could not be expressed in one.
+    """
+    dc = json.loads((ROOT / "hpc_pilots/configs/display.json").read_text())
+    spec = dc["landscapes"][landscape]
+    source = ROOT / spec["path"]
+    if not source.exists():
+        raise FileNotFoundError(f"{source} is absent; see the acquisition note in display.json")
+    out = ROOT / "data/processed/display" / landscape
+    out.mkdir(parents=True, exist_ok=True)
+
+    raw = pd.read_csv(source)
+    df = raw[[spec["sequence_column"], spec["outcome_column"]]].copy()
+    df.columns = ["sequence", "outcome"]
+    df = df.dropna()
+    if not np.isfinite(df.outcome).all():
+        raise ValueError("Non-finite outcome values")
+    # Duplicate members would break pool disjointness, which is enforced downstream by
+    # index rather than by sequence, so they are collapsed here and the count recorded.
+    duplicates = int(df.sequence.duplicated().sum())
+    df = df.drop_duplicates(subset="sequence").reset_index(drop=True)
+
+    features, cardinalities, vocabularies, encoding = encode_library(
+        df.sequence.tolist(), spec.get("monomer_separator"))
+    # A set too small for two disjoint pools is staged without them rather than being
+    # forced into a geometry it cannot support. It is then usable for paired comparison
+    # and nothing else, which the manifest states.
+    if spec.get("pooled", True):
+        geometry = pool_geometry(len(df), spec["pool_size"], dc["max_evaluation_pools"])
+        dev, pools = _split_pools(len(df), geometry, dc["seed"])
+    else:
+        geometry = {"pooled": False, "rows": len(df),
+                    "reason": "too few members for two disjoint pools; no replay is possible"}
+        dev, pools = np.empty(0, dtype=int), np.empty((0, 0), dtype=int)
+
+    df.to_csv(out / "outcomes.csv", index=False)
+    np.save(out / "features.npy", features)
+    np.savez(out / "splits.npz", development=dev, evaluation=pools)
+    write_json(out / "manifest.json", {
+        "landscape": landscape, "rows": len(df), "duplicates_collapsed": duplicates,
+        "target": spec["target"], "modality": spec["modality"],
+        "cyclisation": spec["cyclisation"], "noncanonical": spec["noncanonical"],
+        "randomised_positions": len(cardinalities),
+        "feature_encoding": encoding, "cardinalities": cardinalities,
+        "vocabularies": vocabularies,
+        "endpoint": spec["endpoint"], "direction": spec["direction"],
+        "censoring": spec.get("censoring"),
+        "pool_geometry": geometry, "top_fraction": spec["top_fraction"],
+        "rationale": spec["why"], "source": spec["source"],
+        "display_config_sha256": digest(ROOT / "hpc_pilots/configs/display.json"),
+        "input_sha256": digest(source),
+        "outcomes_sha256": digest(out / "outcomes.csv"),
+        "features_sha256": digest(out / "features.npy"),
+        "splits_sha256": digest(out / "splits.npz"),
+        "limitations": dc["limitations"] + spec.get("limitations", [])})
+    print(json.dumps({"landscape": landscape, "rows": len(df),
+                      "randomised_positions": len(cardinalities),
+                      "cardinalities": cardinalities, "duplicates_collapsed": duplicates,
+                      "geometry": geometry}))
+
+
 def prepare_method(landscape):
     """Stage one method-development landscape. These are substrates, not target proposals."""
     mc = json.loads((ROOT / "hpc_pilots/configs/method.json").read_text())

@@ -26,6 +26,9 @@ import numpy as np
 from .common import ROOT, config, provenance, write_json
 
 POLICIES = ("random", "diverse", "greedy", "ucb")
+# arm -> (staged directory, config file). `binding` is the single GB1 pilot and has neither.
+ARMS = {"target": ("targets", "targets.json"), "method": ("method", "method.json"),
+        "display": ("display", "display.json")}
 
 
 def available_pools(arm, landscape=None):
@@ -33,31 +36,31 @@ def available_pools(arm, landscape=None):
 
     Read from the splits on disk rather than from the config, because `pool_geometry`
     shrinks the pool count to keep pools disjoint and the config records what was
-    requested, not what was built.
+    requested, not what was built. A landscape too small for two disjoint pools is staged
+    with an empty split and reports zero, which is how it drops out of the grid rather
+    than failing in it.
     """
     if arm == "binding":
         path = ROOT / "data/processed/binding/splits.npz"
     else:
-        path = ROOT / "data/processed" / ("targets" if arm == "target" else "method") / landscape / "splits.npz"
+        path = ROOT / "data/processed" / ARMS[arm][0] / landscape / "splits.npz"
     if not path.exists():
         return 0
     with np.load(path) as splits:
-        return int(splits["evaluation"].shape[0])
+        evaluation = splits["evaluation"]
+        return int(evaluation.shape[0]) if evaluation.ndim == 2 and evaluation.shape[1] else 0
 
 
-def grid(arms=("binding", "target", "method"), controls=True, policies=POLICIES,
+def grid(arms=("binding", "target", "method", "display"), controls=True, policies=POLICIES,
          max_pools=None):
     """Every cell the staged data supports, as (arm, landscape, pool, policy, delay, control)."""
-    targets = json.loads((ROOT / "hpc_pilots/configs/targets.json").read_text())
-    method = json.loads((ROOT / "hpc_pilots/configs/method.json").read_text())
     tasks = []
     for arm in arms:
         if arm == "binding":
             landscapes, delays = [None], config()["binding"]["feedback_delays"]
-        elif arm == "target":
-            landscapes, delays = list(targets["landscapes"]), targets["feedback_delays"]
         else:
-            landscapes, delays = list(method["landscapes"]), method["feedback_delays"]
+            spec = json.loads((ROOT / "hpc_pilots/configs" / ARMS[arm][1]).read_text())
+            landscapes, delays = list(spec["landscapes"]), spec["feedback_delays"]
         for landscape in landscapes:
             pools = available_pools(arm, landscape)
             if max_pools:
@@ -86,6 +89,8 @@ def execute(task):
                 binding.run_binding(pool, policy, delay, False, control)
             elif arm == "target":
                 binding.run_target(landscape, pool, policy, delay, False, control)
+            elif arm == "display":
+                binding.run_display(landscape, pool, policy, delay, False, control)
             else:
                 binding.run_method(landscape, pool, policy, delay, False, control)
     except Exception as error:

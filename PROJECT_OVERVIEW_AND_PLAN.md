@@ -45,9 +45,19 @@ no data availability statement, no accession, no supplementary table, only colou
 also 0.3% the size the Week 4 debrief assumed and entirely single-substitution. §2.2 gives the
 detail. The only clean route is to ask the authors, which is now an action rather than a plan.
 
-So **both routes to the primary arm are currently shut**: the platform's chemistry waits on the
-export, and the one public dataset of the right class has no usable file. That is the single most
-important fact in this document and §10 asks for a decision on it.
+**A different route opened the same day.** The last unchecked lead led to a code repository
+carrying three macrocyclic peptide libraries the article itself does not advertise: an 18,429-member
+mRNA display selection against IL-17C, an 8,448-member cyclic library against thrombin whose
+features are **named non-canonical monomers rather than amino-acid letters**, and a 62-member
+bioactivity set that shares 51 peptides with the first — a paired enrichment-to-bioactivity link.
+All three are staged. The first measured result on the correct molecule class follows: greedy
+recovers **+0.473 over random on 10 of 10 pools** for IL-17C and +0.372 on 8 of 10 for thrombin,
+the largest gains anywhere in this project. §2.2 gives the detail and the limits, which are
+substantial — these are secondary distributions with no replicate structure, and enrichment is
+not affinity.
+
+**The export still blocks the mandatory deliverables.** Public data now carries the prediction
+work, but the platform-improvement deliverable needs SynX's own chemistry and has no substitute.
 
 **Three of the project's headline claims failed this week, including one I made yesterday.**
 The eightfold recovery over random selection is an artefact of pool size. The
@@ -326,15 +336,51 @@ at Copenhagen, did the data analysis; Hiroaki Suga is corresponding. That is a r
 for a 2018 paper by an active group, and it is a week-scale dependency with no guarantee. §10
 carries it as an action rather than a plan.
 
-**What is on disk instead, as of today.** [PepBenchmark](https://arxiv.org/abs/2604.10531)'s
-`nc-PpI_ba` set: 277 peptide–protein pairs with measured pK_d, peptides given as full SMILES
-including non-canonical residues, hydrocarbon staples and disulfide macrocycles. I downloaded and
-checked it — pK_d 2.80 to 13.77, every row stereochemically specified, 20 stapled and 14
-disulfide-cyclised. It is the only labeled ncAA-binding data obtainable in one command. Its limit
-is decisive for landscape work: **176 distinct targets across 277 rows, a median of one
-measurement per target**, so it supports a general affinity regressor and cannot be staged as
-pools over a single target at all. Its real use is to build and test the SMILES encoding path in
-`data.py` now, so that a Rogers table could be ingested the day it arrives.
+**What was found instead, and it is better.** Chasing the last unchecked lead — the PepExplainer
+paper, whose text is paywalled — led to the authors' code repository, which carries the data the
+article does not advertise ([github.com/zhaisilong/PepExplainer](https://github.com/zhaisilong/PepExplainer),
+MIT licence). Three tables, now staged:
+
+| Landscape | Members | Features | Endpoint | Pools of 512 |
+| --- | ---: | --- | --- | ---: |
+| `il17c_display` | 18,429 | 12 randomised positions | selection enrichment, IL-17C | **20** |
+| `thrombin_cyclic` | 8,448 | **6 named monomer fields** — 2 cyclisation chemistries × 30 × 30 building blocks × linker × terminal | reported activity, thrombin | **15** |
+| `il17c_bioactivity` | 62 | 12 positions | measured bioactivity | none — too small, staged unpooled |
+
+This closes the gap that four weeks of work had left open. `il17c_display` is an actual mRNA
+display selection against a real target, and **18,364 of its 18,429 members carry more than one
+substitution from consensus**, so it is combinatorial at landscape scale rather than a
+single-substitution scan. `thrombin_cyclic` is the first landscape in this project whose features
+are **named non-canonical monomers rather than amino-acid letters**, with the cyclisation
+chemistry as a modelled field — which no 20-letter encoding could express, and which is why
+`data.py` now has a separate `encode_library` path that reads its alphabet off the data.
+
+And 51 of the 62 bioactivity members also carry an enrichment value, giving a **paired
+enrichment-to-bioactivity link on one target** — the only material in the project that bears on
+whether display enrichment predicts an orthogonal endpoint, which the brief insists is a separate
+claim.
+
+**First measured result on the right molecule class** (128 of 512 labels, top-5%, paired per pool
+against random on the same pool, ten pools each):
+
+| Landscape | Random | Greedy | UCB | Diverse | Pools improved |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `il17c_display` | 0.254 | **+0.473 ± 0.065** | +0.438 ± 0.087 | −0.215 | 10/10, 10/10 |
+| `thrombin_cyclic` | 0.287 | **+0.372 ± 0.243** | +0.352 ± 0.218 | −0.039 | 8/10, 9/10 |
+
+These are the largest gains measured anywhere in this project, they are on macrocycles rather
+than folded protein domains, and they are consistent with the §4.2 mechanism — `il17c_display`
+has in-pool surrogate Spearman 0.55, inside the learnable band, which is why it was expected to
+work before it was run.
+
+**What these do not establish.** They are secondary distributions from a model paper's
+repository, not original measurements: no replicate structure, no assay protocol and no
+measurement error is available for any of them. Enrichment is not affinity, which is not
+functional inhibition. Half of `il17c_display` sits at exactly zero, so its bottom end is
+censored rather than resolved. The thrombin monomer codes are identifiers, not structures, so a
+model over them learns which building blocks work and not why — per-monomer descriptors would be
+needed for any mechanistic claim. And none of this is the SynX platform's chemistry, which is
+still blocked on the export.
 
 **What would still change things.** The campaign export, which is the only route to the
 platform's own chemistry — its building-block catalogue, codon mappings, stereochemistry and
@@ -950,8 +996,9 @@ chemistry, which is what the platform-improvement deliverable requires.
 | Risk | Current state | Consequence | Mitigation |
 | --- | --- | --- | --- |
 | **No booked display round** | Overdue since 16 Oct. No named SynX owner, no slot. | The one mandatory experimental deliverable does not happen. Backward planning from a usable 18 Nov readout is already tight. | Needs a name and a date this week. No internal workaround exists. |
-| **The public ncAA dataset is unusable — this risk has materialised** | Checked 20 Oct. Rogers 2018 has no deposited per-variant data: no availability statement, no accession, heatmaps only (§2.2). | The primary arm now has no substrate from either direction — the export is blocked and the public fallback has no file. | Request the ENRICH tables from the authors (§10). Meanwhile build the SMILES/41-symbol encoding path against `nc-PpI_ba`, which is on disk, so a Rogers table is ingestible the day it arrives. |
-| **No public dataset may exist with macrocycles + ncAAs + per-target binding at landscape scale** | Searched 20 Oct and none was found. `nc-PpI_ba` has 176 targets for 277 rows; CycPeptMPDB has 7,334 cyclic peptides but measures permeability, not binding. | If true, the project cannot validate a macrocycle binding predictor on public data at all, and the SynX export becomes the only route rather than the preferred one. | Verify the one unchecked lead (PepExplainer, a RaPID selection dataset; ScienceDirect refused retrieval). Otherwise state the limitation plainly in the paper rather than working around it. |
+| **Rogers 2018 is unusable** | Checked 20 Oct: no deposited per-variant data, heatmaps only (§2.2). | Removes the dataset the Week 4 debrief named as the molecular substrate. | Superseded in practice by the PepExplainer libraries. The request to the authors is still worth sending, since Rogers remains the only *non-canonical deep mutational scan* in existence. |
+| **The display libraries are secondary distributions** | Taken from a model paper's code repository, not from the originating measurements. No replicate structure, assay protocol or measurement error for any of the three. | Limits what can be claimed: ranking and policy comparison are defensible, statements about measurement reliability are not. | State the provenance in every manifest, which it now is. For publication, trace each back to its originating study and cite that. |
+| **Enrichment is being used where affinity is meant** | `il17c_display` measures selection enrichment; half of it sits at exactly zero. | The project's own rule is that enrichment, affinity, inhibition and antiviral activity are four distinct endpoints. | The 51 paired enrichment-to-bioactivity members are the only internal check available; use them before any claim that enrichment predicts activity. |
 | **Trainable model access unconfirmed** | No confirmed account, model list or spend ceiling. | Cannot commit to model identities or an experiment matrix. | Verify live availability; the local pilot model is not automatically a supported training model. |
 | **The mechanism rests on few independent landscapes** | §4.2. Now four against four with no overlap and a pre-registered replication on two unrelated proteins, but the permutation test sits at its floor (p = 1/70). | The claim is supported rather than established; a reviewer will ask for the within-protein control. | *Largely addressed on 20 October.* What remains is the 2×2 that separates coverage from combinatorial structure within one protein — PDZ doubles against the staged PDZ singles, coverage matched. ~60 replays, about two minutes. |
 | **Further headline claims may be artefacts** | Three fell in two days. | Credibility, and wasted weeks building on a number that is not real. | The controls are now in the code rather than in a document: a delay-effect table carrying the identity and the null band, a corrected headroom ceiling, a permuted-outcome falsification run, and a zero-retrieval control. Every new claim gets an intervention test before it is written down. |

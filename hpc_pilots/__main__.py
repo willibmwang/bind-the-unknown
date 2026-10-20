@@ -42,6 +42,16 @@ def main():
     p.add_argument("--smoke", action="store_true")
     p.add_argument("--control", choices=["permuted"],
                    help="Falsification arm: shuffle outcomes, then grade against the shuffle")
+    p = sub.add_parser("prepare-display")
+    p.add_argument("--landscape", required=True)
+    p = sub.add_parser("display")
+    p.add_argument("--landscape", required=True)
+    p.add_argument("--pool", type=int, default=0)
+    p.add_argument("--policy", default="greedy")
+    p.add_argument("--delay", type=int, default=0)
+    p.add_argument("--smoke", action="store_true")
+    p.add_argument("--control", choices=["permuted"], default=None,
+                   help="Falsification arm: shuffle outcomes, then grade against the shuffle")
     p = sub.add_parser("prepare-method")
     p.add_argument("--landscape", required=True)
     p = sub.add_parser("method")
@@ -108,6 +118,12 @@ def main():
     elif args.command == "target":
         from .binding import run_target
         run_target(args.landscape, args.pool, args.policy, args.delay, args.smoke, args.control)
+    elif args.command == "prepare-display":
+        from .data import prepare_display
+        prepare_display(args.landscape)
+    elif args.command == "display":
+        from .binding import run_display
+        run_display(args.landscape, args.pool, args.policy, args.delay, args.smoke, args.control)
     elif args.command == "prepare-method":
         from .data import prepare_method
         prepare_method(args.landscape)

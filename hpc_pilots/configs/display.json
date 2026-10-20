@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-20",
+  "seed": 20261020,
+  "note": "Display-selection libraries: the first landscapes in this project that are the molecule class it designs. Kept separate from method.json because these are not ProteinGym deep mutational scans and share none of its assumptions -- no wild type to diff against, no 20-letter alphabet, and for thrombin no single-letter representation at all. Staged 20 October after the Rogers 2018 non-canonical scan proved to have no deposited per-variant data.",
+  "max_evaluation_pools": 20,
+  "initial_labels": 8,
+  "batch_size": 8,
+  "maximum_labels": 128,
+  "checkpoints": [
+    8,
+    16,
+    32,
+    64,
+    128
+  ],
+  "feedback_delays": [
+    0,
+    3
+  ],
+  "forest_trees": 64,
+  "ucb_beta": 1.0,
+  "policies": [
+    "random",
+    "diverse",
+    "greedy",
+    "ucb",
+    "agent"
+  ],
+  "landscapes": {
+    "il17c_display": {
+      "path": "data/raw/pepexplainer/il17c_origin_data_del2_reg.csv",
+      "sequence_column": "peptide",
+      "outcome_column": "target",
+      "target": "IL-17C, against the IL-17C/IL-17RE interaction",
+      "modality": "macrocyclic peptide, mRNA display selection",
+      "cyclisation": "Reported as a selection-based macrocyclic library. The released sequences give the randomised region in single-letter code only; the cyclisation chemistry and any initiator are not encoded in the released file and must not be inferred from it.",
+      "noncanonical": "Not represented in the released sequences, which use the 20 canonical letters. Non-canonical content of the underlying library is not recoverable from this file.",
+      "endpoint": "selection enrichment from the focused library",
+      "direction": "higher is better; enrichment is not affinity, inhibition or antiviral activity",
+      "censoring": "Half the library sits at exactly 0.0 (9,192 of 18,429). These are non-enriched members, not measurements of zero affinity, and the bottom of the range is therefore censored rather than resolved.",
+      "pool_size": 512,
+      "top_fraction": 0.05,
+      "why": "18,429 unique 12-mer members with 18,364 of them carrying more than one substitution from the consensus, so it is combinatorial at landscape scale rather than a single-substitution scan. It is the first substrate in this project drawn from an actual display selection against a real target. In-pool surrogate Spearman at 128 labels is 0.55, inside the learnable band identified in the coverage work.",
+      "limitations": [
+        "Enrichment from a focused library reflects that library's composition and the selection conditions. It is not a population-wide measurement and does not transfer to a naive library.",
+        "The consensus sequence is a statistical mode over the released members, not a declared wild type."
+      ],
+      "source": "Zhai et al., PepExplainer: an explainable deep learning model for selection-based macrocyclic peptide bioactivity prediction and optimization, Eur J Med Chem 2024;275:116628, doi:10.1016/j.ejmech.2024.116524. Data file taken from the authors' code repository, github.com/zhaisilong/PepExplainer (MIT licence), retrieved 20 October 2026."
+    },
+    "il17c_bioactivity": {
+      "path": "data/raw/pepexplainer/il17c_origin_data_bio_reg.csv",
+      "sequence_column": "peptide",
+      "outcome_column": "target",
+      "target": "IL-17C, against the IL-17C/IL-17RE interaction",
+      "modality": "macrocyclic peptide, measured bioactivity",
+      "cyclisation": "As above; not encoded in the released file.",
+      "noncanonical": "Not represented in the released sequences.",
+      "endpoint": "measured bioactivity against the IL-17C/IL-17RE interaction",
+      "direction": "higher is better",
+      "censoring": "Unknown; no limits are stated in the released file.",
+      "top_fraction": 0.1,
+      "why": "Only 75 members, so it cannot support a replay and is staged for one reason: 51 of them also carry an enrichment value in il17c_display. That is a paired enrichment-to-bioactivity link on one target, which is the only material in this project that bears on whether display enrichment predicts an orthogonal endpoint. Use it for that comparison, not for acquisition experiments.",
+      "limitations": [
+        "75 members cannot support disjoint pools at any useful geometry. Any pool statistic computed from it is descriptive.",
+        "The 51 paired members are those somebody chose to synthesise and assay, so they are a selected subset of the display library and not a random sample of it."
+      ],
+      "source": "Zhai et al., PepExplainer: an explainable deep learning model for selection-based macrocyclic peptide bioactivity prediction and optimization, Eur J Med Chem 2024;275:116628, doi:10.1016/j.ejmech.2024.116524. Data file taken from the authors' code repository, github.com/zhaisilong/PepExplainer (MIT licence), retrieved 20 October 2026.",
+      "pooled": false
+    },
+    "thrombin_cyclic": {
+      "path": "data/raw/pepexplainer/thrombin_origin_data_thrombin.csv",
+      "sequence_column": "peptide",
+      "outcome_column": "target",
+      "monomer_separator": "-",
+      "target": "thrombin",
+      "modality": "cyclic peptide library built from named non-canonical monomers",
+      "cyclisation": "Explicit in the representation: a ThiomalicAcid or Cysteine anchor at one end and Cysteamine at the other, so the cyclisation chemistry is a modelled field rather than an unstated property. Two distinct cyclisation chemistries appear.",
+      "noncanonical": "Yes, and this is why the landscape is here. Members are six named monomer tokens, not amino-acid letters: two variable building-block positions over 30 monomers each, a linker over 4, and a terminal group over 11. No single-letter alphabet can express this, which is exactly the gap every other landscape in this project leaves open.",
+      "endpoint": "reported activity against thrombin",
+      "direction": "higher is better; the units are as released and are not a dissociation constant",
+      "censoring": "Not stated in the released file.",
+      "pool_size": 512,
+      "top_fraction": 0.05,
+      "why": "8,448 unique cyclic peptides with non-canonical building blocks named explicitly and a quantitative endpoint. It is the only landscape in the project where cyclisation chemistry and non-canonical monomers are both represented in the features, so it is the only one that can test whether anything learned on canonical residues transfers to a genuinely non-canonical alphabet.",
+      "limitations": [
+        "The monomer codes X1-X30, L1-L4 and A0-A14 are identifiers, not structures. A token index carries no chemistry, so a model over these features learns which monomers work and not why. Per-monomer descriptors or SMILES would be required for any mechanistic claim.",
+        "The released endpoint units are not stated as a dissociation constant and are not comparable with any other landscape in this project.",
+        "9,293 rows collapse to 8,448 unique members; duplicates are recorded in the manifest."
+      ],
+      "source": "Zhai et al., PepExplainer: an explainable deep learning model for selection-based macrocyclic peptide bioactivity prediction and optimization, Eur J Med Chem 2024;275:116628, doi:10.1016/j.ejmech.2024.116524. Data file taken from the authors' code repository, github.com/zhaisilong/PepExplainer (MIT licence), retrieved 20 October 2026."
+    }
+  },
+  "limitations": [
+    "These libraries were released as part of a published model's code repository. They are secondary distributions, not the original measurements, and no replicate structure, assay protocol or measurement error is available for any of them.",
+    "Enrichment, bioactivity and reported activity are three different endpoints on two different targets. Metrics are never pooled across these landscapes.",
+    "None of these is a pathogen target. They are substrates for developing and testing binding prediction on the correct molecule class, and establish nothing about Coronaviridae or Orthomyxoviridae.",
+    "No result from these landscapes speaks to the SynX platform's own chemistry, which remains blocked on the campaign export."
+  ]
+}

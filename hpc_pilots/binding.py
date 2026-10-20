@@ -291,6 +291,56 @@ def run_method(landscape, pool, policy, delay=0, smoke=False, control=None):
     print(json.dumps({"output": str(output), "final": result["metrics"][-1]}))
 
 
+def run_display(landscape, pool, policy, delay=0, smoke=False, control=None):
+    """Replay the acquisition policies against a display-selection library.
+
+    Same machinery, same fixed surrogate and the same seeded initial labels as every other
+    replay, so the change of substrate is not confounded by a change of model. What differs
+    is the substrate itself: these are the first landscapes in this project that are
+    macrocyclic, and in the thrombin case the first whose features are named non-canonical
+    monomers rather than amino-acid letters.
+    """
+    dc = json.loads((ROOT / "hpc_pilots/configs/display.json").read_text())
+    if landscape not in dc["landscapes"]:
+        raise ValueError(f"Unknown display landscape {landscape!r}")
+    spec = dc["landscapes"][landscape]
+    path = ROOT / "data/processed/display" / landscape
+    manifest = json.loads((path / "manifest.json").read_text())
+    if not manifest["pool_geometry"].get("disjoint"):
+        raise ValueError(f"{landscape} was staged without pools and cannot be replayed; "
+                         f"{manifest['pool_geometry'].get('reason', '')}")
+    split = np.load(path / "splits.npz")["evaluation"][pool]
+    features = np.load(path / "features.npy")[split]
+    hidden = pd.read_csv(path / "outcomes.csv", usecols=["outcome"]).outcome.to_numpy()[split]
+    agent = Agent() if policy == "agent" else None
+    result = replay(features, hidden, policy, dc["seed"] + pool,
+                    maximum=16 if smoke else dc["maximum_labels"],
+                    initial=dc["initial_labels"], batch=dc["batch_size"], delay=delay,
+                    checkpoints=tuple(dc["checkpoints"]), agent=agent,
+                    fraction=spec["top_fraction"], cardinalities=manifest["cardinalities"],
+                    surrogate=dc, control=control)
+    policy = agent.label if agent else policy
+    result.update({"experiment": "display", "landscape": landscape, "pool": pool,
+                   "policy": policy, "delay": delay, "smoke": smoke, "status": "complete",
+                   "target": spec["target"], "modality": spec["modality"],
+                   "endpoint": spec["endpoint"], "top_fraction": spec["top_fraction"],
+                   "pool_size": manifest["pool_geometry"]["pool_size"],
+                   "noncanonical_features": bool(spec.get("monomer_separator")),
+                   "endpoint_warning": "Enrichment is not affinity, functional inhibition or "
+                                       "antiviral activity. Do not pool metrics across "
+                                       "landscapes with different endpoints or geometries.",
+                   "dataset_manifest_sha256": digest(path / "manifest.json"),
+                   "display_config_sha256": digest(ROOT / "hpc_pilots/configs/display.json"),
+                   "provenance": provenance()})
+    if agent:
+        result["agent"] = agent.report()
+    label = "smoke_" if smoke else ""
+    output = (ROOT / "runs/display" / f"{label}{landscape}_{policy}_pool{pool:02d}"
+              f"_delay{delay}{f'_{control}' if control else ''}.json")
+    write_json(output, result)
+    print(json.dumps({"output": str(output), "final": result["metrics"][-1]}))
+
+
 def run_target(landscape, pool, policy, delay=0, smoke=False, control=None):
     """Replay the acquisition policies against a pathogen landscape.
 
