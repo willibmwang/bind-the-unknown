@@ -7,7 +7,36 @@ import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
 
+from .arms import arm as arm_spec
 from .common import ROOT, config, provenance, write_json
+
+
+def collect(name):
+    """Every real checkpoint from one arm, flattened into rows.
+
+    One collector rather than one per arm, because the exclusions are the part that must
+    not vary and they had already varied: `summarize_display` dropped the permuted control
+    runs, `summarize_targets` and `summarize_method` did not, so 196 control replays were
+    pooled into the pathogen metrics and 436 into the method metrics as though they were
+    results. A falsification arm exists to be compared against a result, never averaged
+    into one, and the only way that stays true is for the test to live in one place.
+
+    Smoke runs and anything not marked complete are excluded on the same principle.
+    """
+    a = arm_spec(name)
+    rows = []
+    for path in sorted((ROOT / a.runs).glob("*.json")):
+        data = json.loads(path.read_text())
+        if data.get("smoke") or data.get("status") != "complete" or data.get("control"):
+            continue
+        base = {"policy": data["policy"], "pool": data["pool"], "delay": data["delay"],
+                "pool_size": data.get("pool_size"), "file": str(path.relative_to(ROOT))}
+        if a.per_landscape:
+            base["landscape"] = data["landscape"]
+        base.update({k: data.get(k) for k in a.identity})
+        for row in data["metrics"]:
+            rows.append({**base, **{k: v for k, v in row.items() if k != "per_protein"}})
+    return with_bounds(pd.DataFrame(rows)) if rows else pd.DataFrame()
 
 
 def headroom(labelled_fraction, top_fraction):
@@ -73,20 +102,9 @@ def with_bounds(frame):
 
 def summarize_targets(directory):
     """Pathogen landscapes are summarised per landscape and never pooled across endpoints."""
-    rows = []
-    for path in (ROOT / "runs/targets").glob("*.json"):
-        data = json.loads(path.read_text())
-        if data.get("smoke") or data.get("status") != "complete":
-            continue
-        for row in data["metrics"]:
-            rows.append({"landscape": data["landscape"], "target": data["target"],
-                         "endpoint": data["endpoint"], "policy": data["policy"],
-                         "pool_size": data.get("pool_size"),
-                         "pool": data["pool"], "delay": data["delay"],
-                         "file": str(path.relative_to(ROOT)), **row})
-    if not rows:
+    df = collect("target")
+    if df.empty:
         return
-    df = with_bounds(pd.DataFrame(rows))
     df.to_csv(directory / "target_metrics.csv", index=False)
     for landscape, part in df.groupby("landscape"):
         fig, axes = plt.subplots(1, 3, figsize=(14, 4), layout="constrained")
@@ -114,21 +132,9 @@ def summarize_display(directory):
     the other -- and an enrichment ratio is not an affinity or a functional inhibition, so
     nothing here is pooled across landscapes and every figure carries its endpoint.
     """
-    rows = []
-    for path in (ROOT / "runs/display").glob("*.json"):
-        data = json.loads(path.read_text())
-        if data.get("smoke") or data.get("status") != "complete" or data.get("control"):
-            continue
-        for row in data["metrics"]:
-            rows.append({"landscape": data["landscape"], "target": data["target"],
-                         "modality": data["modality"], "endpoint": data["endpoint"],
-                         "noncanonical_features": data.get("noncanonical_features"),
-                         "pool_size": data["pool_size"], "policy": data["policy"],
-                         "pool": data["pool"], "delay": data["delay"],
-                         "file": str(path.relative_to(ROOT)), **row})
-    if not rows:
+    df = collect("display")
+    if df.empty:
         return
-    df = with_bounds(pd.DataFrame(rows))
     df.to_csv(directory / "display_metrics.csv", index=False)
     summary = []
     for (landscape, labels), part in df[df.delay == 0].groupby(["landscape", "labels"]):
@@ -185,21 +191,9 @@ def summarize_method(directory):
     over random is bounded by the labelled fraction of the pool, so the headroom column
     is carried alongside every comparison rather than left for the reader to reconstruct.
     """
-    rows = []
-    for path in (ROOT / "runs/method").glob("*.json"):
-        data = json.loads(path.read_text())
-        if data.get("smoke") or data.get("status") != "complete":
-            continue
-        for row in data["metrics"]:
-            rows.append({"landscape": data["landscape"], "protein": data["protein"],
-                         "interface": data["interface"], "endpoint": data["endpoint"],
-                         "pool_size": data["pool_size"], "top_fraction": data["top_fraction"],
-                         "policy": data["policy"],
-                         "pool": data["pool"], "delay": data["delay"],
-                         "file": str(path.relative_to(ROOT)), **row})
-    if not rows:
+    df = collect("method")
+    if df.empty:
         return
-    df = with_bounds(pd.DataFrame(rows))
     df.to_csv(directory / "method_metrics.csv", index=False)
     # Every checkpoint, not only the terminal one. Filtering to the last checkpoint made
     # the ceiling correction inert by construction: at 128 labels the budget exceeds every

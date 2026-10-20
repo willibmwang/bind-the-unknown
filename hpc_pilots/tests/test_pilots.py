@@ -18,7 +18,7 @@ from hpc_pilots.dossier import Dossier, evidence, rank
 from hpc_pilots.emergency import run_episode
 from hpc_pilots.streams import stream, stream_int
 from hpc_pilots.structure import structure_replay
-from hpc_pilots.summarize import headroom
+from hpc_pilots.summarize import collect, headroom
 from hpc_pilots.targets import packet
 
 
@@ -631,3 +631,24 @@ def test_staged_landscapes_carry_a_stable_content_hash():
         assert manifest.get('content_sha256'), f'{path.parent.name} has no content hash'
         # Recomputing from the file on disk must reproduce the value the file records.
         assert content_digest(manifest) == manifest['content_sha256']
+
+
+def test_collect_never_pools_a_falsification_run_into_a_result():
+    """A permuted-control replay exists to be compared against a result, never averaged in.
+
+    The exclusion used to be written once per summariser and two of them had lost it, so
+    196 control replays were pooled into the pathogen metrics and 436 into the method
+    metrics. One collector means one test can hold the line for every arm.
+    """
+    for name in ARMS:
+        frame = collect(name)
+        if frame.empty:
+            continue
+        assert not frame.file.str.contains('_permuted').any(), f'{name} pooled a control run'
+        assert not frame.file.str.contains('smoke_').any(), f'{name} pooled a smoke run'
+        # Identity columns must survive into the rows, or a reader cannot tell which
+        # substrate and endpoint produced a number without going back to the run files.
+        for column in ARMS[name].identity:
+            assert column in frame.columns, f'{name} dropped {column}'
+        if ARMS[name].per_landscape:
+            assert 'landscape' in frame.columns and frame.landscape.notna().all()

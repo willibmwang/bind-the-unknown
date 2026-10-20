@@ -58,6 +58,9 @@ class Arm:
     """Carried in every result, so a caveat travels with the number rather than the paper."""
     extra_hashes: tuple = field(default_factory=tuple)
     """(result key, config filename) pairs hashed into every result for provenance."""
+    identity: tuple = field(default_factory=tuple)
+    """Result keys carried into each summary row beyond the common ones, so a row says
+    which substrate and which endpoint produced it without a lookup."""
 
     def staged(self, landscape=None):
         return f"{self.processed}/{landscape}" if self.per_landscape else self.processed
@@ -76,12 +79,12 @@ ARMS = {
     "binding": Arm(
         name="binding", processed="data/processed/binding", runs="runs/binding",
         outcome_column="DMS_score", section="binding", per_landscape=False,
-        fraction_from_spec=False,
+        fraction_from_spec=False, identity=(),
         extra_hashes=(("config_sha256", "today.json"),)),
     "target": Arm(
         name="target", processed="data/processed/targets", runs="runs/targets",
         outcome_column="DMS_score", config="targets.json", fraction_from_spec=False,
-        describe=_target_fields,
+        describe=_target_fields, identity=("target", "endpoint"),
         warning="Do not pool metrics across landscapes with different assay endpoints, and "
                 "do not compare these top-fraction figures with the GB1 1% figures.",
         extra_hashes=(("targets_config_sha256", "targets.json"),
@@ -89,6 +92,7 @@ ARMS = {
     "method": Arm(
         name="method", processed="data/processed/method", runs="runs/method",
         outcome_column="DMS_score", config="method.json", describe=_method_fields,
+        identity=("protein", "interface", "endpoint"),
         warning="Do not pool metrics across landscapes with different assay endpoints or "
                 "different pool geometries; the multiple over random is bounded by the "
                 "labelled fraction of the pool.",
@@ -96,6 +100,7 @@ ARMS = {
     "display": Arm(
         name="display", processed="data/processed/display", runs="runs/display",
         outcome_column="outcome", config="display.json", describe=_display_fields,
+        identity=("target", "modality", "endpoint", "noncanonical_features"),
         warning="Enrichment is not affinity, functional inhibition or antiviral activity. "
                 "Do not pool metrics across landscapes with different endpoints or geometries.",
         extra_hashes=(("display_config_sha256", "display.json"),)),
