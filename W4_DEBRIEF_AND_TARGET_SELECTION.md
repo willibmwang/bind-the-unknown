@@ -32,6 +32,14 @@ Oct 22–23) and GATE-06 (feasibility and novelty review, Oct 23).
 > tests and [PROJECT_OVERVIEW_AND_PLAN.md](PROJECT_OVERVIEW_AND_PLAN.md) §4 for the current
 > position.
 >
+> **Action 7 in §4.4 rests on a false premise.** It recommends pulling the Rogers, Passioura &
+> Suga (2018) nonproteinogenic DMS as "a far better substrate for low-label ranking work than
+> GB1". Checked on 20 October: the paper is real and is the right molecule class, but its
+> per-variant data was **never deposited** — no availability statement, no accession, no
+> supplementary table, only rasterised heatmaps. It is also 1,828 variants against GB1's 536,962,
+> about 0.3% the size rather than larger, and it is entirely single-substitution. A request to
+> the authors is drafted at [output/data_request_rogers_suga.md](output/data_request_rogers_suga.md).
+>
 > Unaffected: everything in §1 (dataset engineering), §3 (targets) and §4 (architecture).
 
 No claim of therapeutic efficacy, antiviral activity, binding affinity or full-system

@@ -37,12 +37,17 @@ what got built, and earlier drafts of this document then described the sub-arm a
 contribution. That was an inversion and §2.1 corrects it. The practical consequence is that the
 export is the critical path rather than a risk-table row.
 
-**The fix that does not need SynX, now in progress.** The bibliography contains one labeled
-dataset of the right molecule class — Rogers, Passioura & Suga, *PNAS* 2018, a deep mutational
-scan of linear **and cyclic** peptides **including non-canonical residues**. It was recorded as
-an action in the Week 4 debrief and never done. Acquiring and characterising it is under way; it
-would let binding prediction start on macrocycles with ncAAs this week rather than on the wrong
-molecule class.
+**The fix that did not need SynX has failed, which matters.** The bibliography names one labeled
+dataset of the right molecule class — Rogers, Passioura & Suga, *PNAS* 2018, a scan of linear
+**and cyclic** peptides **including non-canonical residues**. I went to get it on 20 October. The
+paper is real and is the right chemistry, but **the per-variant numbers were never deposited**:
+no data availability statement, no accession, no supplementary table, only colour heatmaps. It is
+also 0.3% the size the Week 4 debrief assumed and entirely single-substitution. §2.2 gives the
+detail. The only clean route is to ask the authors, which is now an action rather than a plan.
+
+So **both routes to the primary arm are currently shut**: the platform's chemistry waits on the
+export, and the one public dataset of the right class has no usable file. That is the single most
+important fact in this document and §10 asks for a decision on it.
 
 **Three of the project's headline claims failed this week, including one I made yesterday.**
 The eightfold recovery over random selection is an artefact of pool size. The
@@ -293,12 +298,43 @@ which is to say, none of the features that define the molecule the project desig
 landscapes support claims about sequence-to-binding learnability in general. They support no
 claim about macrocyclic chemistry, and §4.5 keeps that boundary explicit.
 
-**What is being done about it, this week.** The bibliography contains one labeled dataset of the
-right class — Rogers, Passioura & Suga, *PNAS* 2018;115(43):10959–64, a deep mutational scan of
-**linear and cyclic peptides including non-canonical residues**. It needs no SynX data. It was
-recorded as an action in the Week 4 debrief and never done, which in hindsight is the single
-clearest symptom of the inversion described in §2.1. Acquiring and characterising it is now in
-progress, and §10 asks what to do if it turns out to be unusable.
+**The dataset we were counting on does not exist in usable form.** The bibliography names one
+labeled dataset of the right class — Rogers, Passioura & Suga, *PNAS* 2018;115(43):10959–64, a
+deep mutational scan of linear **and cyclic** peptides including non-canonical residues. I went
+to get it on 20 October. The paper is real and is exactly the right molecule class: CP2 is a
+genuine RaPID-derived macrocycle, thioether-cyclised, scanned across 21 non-canonical residues
+with a quantitative sequencing-derived endpoint.
+
+**But the per-variant numbers were never deposited.** There is no data availability statement, no
+SRA/GEO/BioProject/Zenodo/Dryad accession, and no Dataset S1 — verified directly against the
+article's own full text, not inferred. The Europe PMC supplementary package is eleven files: ten
+figure rasters and one SI PDF. The complete ΔΔG matrices exist **only as colour heatmaps**, at
+198–809 dpi. Tables S1–S3 give just 24 individually-synthesised SPR points (14 PUMA, 10 CP2).
+Recovering the matrix would mean inverting colours against a colour bar, which produces estimates,
+and this project does not present estimates as measurements.
+
+Two further corrections to what the Week 4 debrief assumed about it. It called the set "a far
+better substrate for low-label ranking work than GB1"; it is **1,828 variants against GB1's
+536,962**, about 0.3% the size, and the macrocyclic half is only 468 of those. And it is **100%
+single-substitution** — one codon change per molecule, zero combinatorial variants — so it would
+close the chemistry gap and contribute nothing to the coverage work in §4.2. At 468 variants over
+12 positions, CP2 supports two disjoint pools of 128, not the 512-candidate geometry everything
+else uses.
+
+**The only clean route is to ask the authors** for the ENRICH output tables — Joseph Rogers, now
+at Copenhagen, did the data analysis; Hiroaki Suga is corresponding. That is a reasonable request
+for a 2018 paper by an active group, and it is a week-scale dependency with no guarantee. §10
+carries it as an action rather than a plan.
+
+**What is on disk instead, as of today.** [PepBenchmark](https://arxiv.org/abs/2604.10531)'s
+`nc-PpI_ba` set: 277 peptide–protein pairs with measured pK_d, peptides given as full SMILES
+including non-canonical residues, hydrocarbon staples and disulfide macrocycles. I downloaded and
+checked it — pK_d 2.80 to 13.77, every row stereochemically specified, 20 stapled and 14
+disulfide-cyclised. It is the only labeled ncAA-binding data obtainable in one command. Its limit
+is decisive for landscape work: **176 distinct targets across 277 rows, a median of one
+measurement per target**, so it supports a general affinity regressor and cannot be staged as
+pools over a single target at all. Its real use is to build and test the SMILES encoding path in
+`data.py` now, so that a Rogers table could be ingested the day it arrives.
 
 **What would still change things.** The campaign export, which is the only route to the
 platform's own chemistry — its building-block catalogue, codon mappings, stereochemistry and
@@ -914,7 +950,8 @@ chemistry, which is what the platform-improvement deliverable requires.
 | Risk | Current state | Consequence | Mitigation |
 | --- | --- | --- | --- |
 | **No booked display round** | Overdue since 16 Oct. No named SynX owner, no slot. | The one mandatory experimental deliverable does not happen. Backward planning from a usable 18 Nov readout is already tight. | Needs a name and a date this week. No internal workaround exists. |
-| **The public ncAA dataset may not be usable** | Being acquired and characterised now; the project's description of it is from memory and unverified. | If it has no quantitative per-variant endpoint, or too few independent scaffolds, the molecular arm has no substrate at all until the export lands. | §10 asks for the fallback. Candidates: other mRNA-display selection datasets, cyclic-peptide permeability sets, or accepting that prediction work waits on SynX. |
+| **The public ncAA dataset is unusable — this risk has materialised** | Checked 20 Oct. Rogers 2018 has no deposited per-variant data: no availability statement, no accession, heatmaps only (§2.2). | The primary arm now has no substrate from either direction — the export is blocked and the public fallback has no file. | Request the ENRICH tables from the authors (§10). Meanwhile build the SMILES/41-symbol encoding path against `nc-PpI_ba`, which is on disk, so a Rogers table is ingestible the day it arrives. |
+| **No public dataset may exist with macrocycles + ncAAs + per-target binding at landscape scale** | Searched 20 Oct and none was found. `nc-PpI_ba` has 176 targets for 277 rows; CycPeptMPDB has 7,334 cyclic peptides but measures permeability, not binding. | If true, the project cannot validate a macrocycle binding predictor on public data at all, and the SynX export becomes the only route rather than the preferred one. | Verify the one unchecked lead (PepExplainer, a RaPID selection dataset; ScienceDirect refused retrieval). Otherwise state the limitation plainly in the paper rather than working around it. |
 | **Trainable model access unconfirmed** | No confirmed account, model list or spend ceiling. | Cannot commit to model identities or an experiment matrix. | Verify live availability; the local pilot model is not automatically a supported training model. |
 | **The mechanism rests on few independent landscapes** | §4.2. Now four against four with no overlap and a pre-registered replication on two unrelated proteins, but the permutation test sits at its floor (p = 1/70). | The claim is supported rather than established; a reviewer will ask for the within-protein control. | *Largely addressed on 20 October.* What remains is the 2×2 that separates coverage from combinatorial structure within one protein — PDZ doubles against the staged PDZ singles, coverage matched. ~60 replays, about two minutes. |
 | **Further headline claims may be artefacts** | Three fell in two days. | Credibility, and wasted weeks building on a number that is not real. | The controls are now in the code rather than in a document: a delay-effect table carrying the identity and the null band, a corrected headroom ceiling, a permuted-outcome falsification run, and a zero-retrieval control. Every new claim gets an intervention test before it is written down. |
@@ -970,10 +1007,17 @@ Ordered by how much they block.
    the contribution, which was an inversion, and §2.1 explains how it happened. The corrected
    position is that molecular prediction for macrocycles is the research object and the
    co-scientist is the allocation layer. Tell me if that is still not the balance you want.
-6. **The fallback if the public ncAA dataset is unusable.** It is being characterised now and
-   the project's description of it is from memory. If it has no quantitative per-variant endpoint
-   or too few independent scaffolds, the molecular arm has no substrate until the export lands,
-   and I would rather agree the fallback in advance than improvise it.
+6. **The public ncAA dataset is unusable, so the primary arm has no substrate from either
+   direction** (§2.2). Four options, and I would like your view rather than my guess:
+   (a) request the ENRICH tables from Rogers and Suga — I have a draft ready to send and it needs
+   your sign-off on how we describe the project;
+   (b) make the export the whole of Thursday's agenda and treat everything else as secondary;
+   (c) build the SMILES encoding path against the small `nc-PpI_ba` set so the pipeline is ready
+   for whichever table lands first — this is real work but it validates nothing on its own;
+   (d) accept that macrocycle binding prediction cannot be validated on public data, state that
+   as a finding, and scope the paper accordingly.
+   My inclination is (a) and (c) in parallel this week, with (b) on Thursday — but (d) is a real
+   possibility and I would rather raise it now than in week 8.
 7. **Have I scoped §4.2 correctly?** My reading is that the result describes focused pools of
    hundreds to a few thousand candidates — deconvolution and focused maturation — and says
    nothing about a selection round over a 10¹¹-member library. That is a deliberately narrow
