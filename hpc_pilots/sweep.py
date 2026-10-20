@@ -99,7 +99,7 @@ def execute(task):
     return {"task": task, "ok": True, "seconds": time.perf_counter() - started}
 
 
-def run_sweep(arms=("binding", "target", "method"), workers=8, controls=True,
+def run_sweep(arms=("binding", "target", "method", "display"), workers=8, controls=True,
               max_pools=None, dry_run=False):
     tasks = grid(arms, controls=controls, max_pools=max_pools)
     counts = {}

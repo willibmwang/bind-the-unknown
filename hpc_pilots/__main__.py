@@ -71,7 +71,7 @@ def main():
     p.add_argument("--repeat", type=int, default=1,
                    help="Independent episodes, each to its own artifact")
     p = sub.add_parser("sweep", help="Run the acquisition grid in parallel on this machine")
-    p.add_argument("--arms", default="binding,target,method")
+    p.add_argument("--arms", default="binding,target,method,display")
     p.add_argument("--workers", type=int, default=8)
     p.add_argument("--max-pools", type=int)
     p.add_argument("--no-controls", action="store_true")

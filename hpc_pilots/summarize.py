@@ -104,6 +104,80 @@ def summarize_targets(directory):
         plt.close(fig)
 
 
+def summarize_display(directory):
+    """Display-selection libraries, summarised per landscape and never pooled.
+
+    These are the first macrocyclic substrates in the project, and one of them carries a
+    selection-enrichment readout rather than a per-candidate score, so the enrichment
+    columns are reported here beside recall. The endpoints differ from each other as well
+    as from every other arm -- selection enrichment on one landscape, reported activity on
+    the other -- and an enrichment ratio is not an affinity or a functional inhibition, so
+    nothing here is pooled across landscapes and every figure carries its endpoint.
+    """
+    rows = []
+    for path in (ROOT / "runs/display").glob("*.json"):
+        data = json.loads(path.read_text())
+        if data.get("smoke") or data.get("status") != "complete" or data.get("control"):
+            continue
+        for row in data["metrics"]:
+            rows.append({"landscape": data["landscape"], "target": data["target"],
+                         "modality": data["modality"], "endpoint": data["endpoint"],
+                         "noncanonical_features": data.get("noncanonical_features"),
+                         "pool_size": data["pool_size"], "policy": data["policy"],
+                         "pool": data["pool"], "delay": data["delay"],
+                         "file": str(path.relative_to(ROOT)), **row})
+    if not rows:
+        return
+    df = with_bounds(pd.DataFrame(rows))
+    df.to_csv(directory / "display_metrics.csv", index=False)
+    summary = []
+    for (landscape, labels), part in df[df.delay == 0].groupby(["landscape", "labels"]):
+        wide = part.pivot_table(index="pool", columns="policy", values="top_recall")
+        if "random" not in wide:
+            continue
+        ceiling = float(part.recall_ceiling.mean())
+        baseline = float(wide["random"].mean())
+        for policy in [p for p in ("greedy", "ucb", "diverse") if p in wide]:
+            gain = wide[policy] - wide["random"]
+            nonzero = gain[gain != 0]
+            summary.append({
+                "landscape": landscape, "labels": int(labels),
+                "target": part.target.iloc[0], "endpoint": part.endpoint.iloc[0],
+                "noncanonical_features": bool(part.noncanonical_features.iloc[0]),
+                "pool_size": int(part.pool_size.iloc[0]),
+                "top_fraction": part.top_fraction.iloc[0],
+                "recall_ceiling": round(ceiling, 4),
+                "policy": policy, "pools": len(gain),
+                "random_recall": round(baseline, 4),
+                "policy_recall": round(float(wide[policy].mean()), 4),
+                "policy_attainment": round(float(wide[policy].mean()) / ceiling, 4)
+                if ceiling else None,
+                "random_attainment": round(baseline / ceiling, 4) if ceiling else None,
+                "all_arms_identical": bool(all(
+                    np.allclose(wide[p], wide["random"])
+                    for p in ("greedy", "ucb", "diverse") if p in wide)),
+                "mean_paired_gain": round(float(gain.mean()), 4),
+                "pools_improved": int((gain > 0).sum()),
+                "wilcoxon_p": round(float(wilcoxon(nonzero).pvalue), 4)
+                if len(nonzero) >= 6 else None})
+    if summary:
+        pd.DataFrame(summary).to_csv(directory / "display_policy_gain.csv", index=False)
+    for landscape, part in df.groupby("landscape"):
+        fig, axes = plt.subplots(1, 3, figsize=(14, 4), layout="constrained")
+        for policy, p in part.groupby("policy"):
+            curve = p.groupby("labels")[["top_recall", "attainment",
+                                         "returned_enrichment"]].mean()
+            for ax, metric in zip(axes, curve.columns):
+                ax.plot(curve.index, curve[metric], marker="o", label=policy)
+                ax.set(xlabel="Total queried measurements", ylabel=metric.replace("_", " "))
+        axes[2].axhline(1.0, color="0.6", lw=0.8, ls="--")
+        axes[0].legend(fontsize=8)
+        fig.suptitle(f"{part.target.iloc[0]} ({part.modality.iloc[0]}) — endpoint: "
+                     f"{part.endpoint.iloc[0]}", fontsize=10)
+        fig.savefig(directory / f"display_{landscape}.png", dpi=180)
+        plt.close(fig)
+
+
 def summarize_method(directory):
     """Method-development landscapes, summarised per landscape and never pooled.
 
@@ -217,7 +291,7 @@ def summarize_delay(directory):
     difference must be exactly zero, and anything else there is a harness artefact.
     """
     rows = []
-    for experiment in ("binding", "targets", "method"):
+    for experiment in ("binding", "targets", "method", "display"):
         for path in (ROOT / "runs" / experiment).glob("*.json"):
             data = json.loads(path.read_text())
             if data.get("smoke") or data.get("status") != "complete" or data.get("control"):
@@ -426,6 +500,7 @@ def summarize():
         plt.close(fig)
     summarize_targets(directory)
     summarize_method(directory)
+    summarize_display(directory)
     summarize_delay(directory)
     summarize_emergency(directory)
     bc, sc = config()["binding"], config()["structure"]
