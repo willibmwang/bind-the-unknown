@@ -487,7 +487,7 @@ and UCB +0.373, 10 of 10 pools — from a surrogate with Spearman 0.31.** What m
 of the randomised positions, not proximity to a wild-type reference, and a randomised macrocycle
 region of a few positions sits at the favourable extreme of that variable.
 
-**Five things that must travel with this.**
+**Six things that must travel with this.**
 
 - It is an argument about pool structure, not a measurement of macrocycles. No landscape here
   contains a macrocycle, a non-canonical residue or a cyclisation.
