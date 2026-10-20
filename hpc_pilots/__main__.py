@@ -2,10 +2,12 @@ import argparse
 import json
 import os
 
+from .arms import ARMS
 from .common import config
 
 
-def main():
+def main(argv=None):
+    """`argv` is accepted so the parser can be exercised without a subprocess."""
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("prepare")
@@ -32,36 +34,23 @@ def main():
     # and the emergency decision episodes that consume the dossier state.
     sub.add_parser("chemistry")
     sub.add_parser("targets")
-    p = sub.add_parser("prepare-target")
-    p.add_argument("--landscape", required=True)
-    p = sub.add_parser("target")
-    p.add_argument("--landscape", required=True)
-    p.add_argument("--pool", type=int, default=0)
-    p.add_argument("--policy", default="greedy")
-    p.add_argument("--delay", type=int, default=0)
-    p.add_argument("--smoke", action="store_true")
-    p.add_argument("--control", choices=["permuted"],
-                   help="Falsification arm: shuffle outcomes, then grade against the shuffle")
-    p = sub.add_parser("prepare-display")
-    p.add_argument("--landscape", required=True)
-    p = sub.add_parser("display")
-    p.add_argument("--landscape", required=True)
-    p.add_argument("--pool", type=int, default=0)
-    p.add_argument("--policy", default="greedy")
-    p.add_argument("--delay", type=int, default=0)
-    p.add_argument("--smoke", action="store_true")
-    p.add_argument("--control", choices=["permuted"], default=None,
-                   help="Falsification arm: shuffle outcomes, then grade against the shuffle")
-    p = sub.add_parser("prepare-method")
-    p.add_argument("--landscape", required=True)
-    p = sub.add_parser("method")
-    p.add_argument("--landscape", required=True)
-    p.add_argument("--pool", type=int, default=0)
-    p.add_argument("--policy", default="greedy")
-    p.add_argument("--delay", type=int, default=0)
-    p.add_argument("--smoke", action="store_true")
-    p.add_argument("--control", choices=["permuted"],
-                   help="Falsification arm: shuffle outcomes, then grade against the shuffle")
+    # One parser pair per staged arm, generated from the registry. These were written out
+    # by hand three times and the copies had already drifted -- `target` declared --control
+    # without the default its neighbours carried -- which is the whole argument for not
+    # writing them a fourth time.
+    for name, spec in ARMS.items():
+        if not spec.per_landscape:
+            continue
+        q = sub.add_parser(f"prepare-{name}", help=f"Stage one {name} landscape")
+        q.add_argument("--landscape", required=True)
+        q = sub.add_parser(name, help=f"Replay one acquisition policy against a {name} landscape")
+        q.add_argument("--landscape", required=True)
+        q.add_argument("--pool", type=int, default=0)
+        q.add_argument("--policy", default="greedy")
+        q.add_argument("--delay", type=int, default=0)
+        q.add_argument("--smoke", action="store_true")
+        q.add_argument("--control", choices=["permuted"], default=None,
+                       help="Falsification arm: shuffle outcomes, then grade against the shuffle")
     p = sub.add_parser("emergency")
     p.add_argument("--family", default="coronaviridae")
     p.add_argument("--policy", default="rubric")
@@ -78,7 +67,7 @@ def main():
     p.add_argument("--dry-run", action="store_true")
     p = sub.add_parser("manifest", help="Rewrite the source digest record, or report its drift")
     p.add_argument("--check", action="store_true", help="Report drift and exit non-zero; write nothing")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.command == "prepare":
         from .data import prepare_binding, prepare_atlas_manifest
         prepare_binding()
@@ -112,24 +101,14 @@ def main():
     elif args.command == "targets":
         from .targets import build_packets
         build_packets()
-    elif args.command == "prepare-target":
-        from .data import prepare_target
-        prepare_target(args.landscape)
-    elif args.command == "target":
-        from .binding import run_target
-        run_target(args.landscape, args.pool, args.policy, args.delay, args.smoke, args.control)
-    elif args.command == "prepare-display":
-        from .data import prepare_display
-        prepare_display(args.landscape)
-    elif args.command == "display":
-        from .binding import run_display
-        run_display(args.landscape, args.pool, args.policy, args.delay, args.smoke, args.control)
-    elif args.command == "prepare-method":
-        from .data import prepare_method
-        prepare_method(args.landscape)
-    elif args.command == "method":
-        from .binding import run_method
-        run_method(args.landscape, args.pool, args.policy, args.delay, args.smoke, args.control)
+    elif args.command.startswith("prepare-") and args.command[8:] in ARMS:
+        from .data import prepare_display, prepare_method, prepare_target
+        {"target": prepare_target, "method": prepare_method,
+         "display": prepare_display}[args.command[8:]](args.landscape)
+    elif args.command in ARMS:
+        from .binding import run_arm
+        run_arm(args.command, args.landscape, args.pool, args.policy, args.delay,
+                args.smoke, args.control)
     elif args.command == "emergency":
         from .emergency import run_emergency
         run_emergency(args.family, args.policy, args.smoke, args.control, args.repeat)

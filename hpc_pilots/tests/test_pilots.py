@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from hpc_pilots.__main__ import main as cli_main
 from hpc_pilots.arms import ARMS
 from hpc_pilots.binding import design_matrix, enrichment, pick_batch, replay
 from hpc_pilots.calibration import calibration_metrics, trajectory
@@ -652,3 +653,25 @@ def test_collect_never_pools_a_falsification_run_into_a_result():
             assert column in frame.columns, f'{name} dropped {column}'
         if ARMS[name].per_landscape:
             assert 'landscape' in frame.columns and frame.landscape.notna().all()
+
+
+def test_the_cli_exposes_every_registered_arm():
+    """Adding an arm to the registry must not require remembering to add it to the CLI."""
+    import contextlib
+    import io
+
+    for name, spec in ARMS.items():
+        if not spec.per_landscape:
+            continue
+        for command in (f'prepare-{name}', name):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out), pytest.raises(SystemExit) as exit:
+                cli_main([command, '--help'])
+            assert exit.value.code == 0, f'{command} is not a CLI subcommand'
+            assert '--landscape' in out.getvalue()
+        # The falsification arm must be reachable for every staged arm, not just the ones
+        # somebody remembered to copy the flag into.
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), pytest.raises(SystemExit):
+            cli_main([name, '--help'])
+        assert '--control' in out.getvalue(), f'{name} cannot run its control arm'
