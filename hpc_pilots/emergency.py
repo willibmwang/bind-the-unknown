@@ -314,22 +314,36 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=Non
                               "or antiviral claim is made or implied."}
 
 
-def run_emergency(name, policy, smoke=False, control=None):
+def run_emergency(name, policy, smoke=False, control=None, repeat=1):
+    """Run `repeat` independent episodes, each to its own artifact.
+
+    The output path previously carried only the packet, the policy and the control, so a
+    second episode of the same cell overwrote the first and the arm could not hold more
+    than one observation per cell. Every recorded emergency result was therefore n = 1,
+    which is not enough to report anything about a policy whose output varies between
+    calls. A replicate index in the path is the whole fix.
+    """
     if name not in PACKETS:
         raise ValueError(f"Unknown family {name!r}")
-    agent = Agent() if policy == "agent" else None
     deadline = 4 if smoke else 8
-    result = run_episode(name, policy, deadline=deadline, agent=agent, control=control)
-    label_policy = agent.label if agent else policy
-    result.update({"experiment": "emergency", "family_packet": name, "policy": label_policy,
-                   "control": control, "smoke": smoke, "status": "complete",
-                   "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
-                   "provenance": provenance()})
-    if agent:
-        result["agent"] = agent.report()
     prefix = "smoke_" if smoke else ""
-    # The control writes its own file, so it can never be pooled with the evidence-using arm.
-    output = (ROOT / "runs/emergency" /
-              f"{prefix}{name}_{label_policy}{f'_{control}' if control else ''}.json")
-    write_json(output, result)
-    print(json.dumps({"output": str(output), "metrics": result["metrics"]}, indent=2))
+    outputs = []
+    for replicate in range(1, repeat + 1):
+        agent = Agent() if policy == "agent" else None
+        result = run_episode(name, policy, deadline=deadline, agent=agent, control=control)
+        label_policy = agent.label if agent else policy
+        result.update({"experiment": "emergency", "family_packet": name, "policy": label_policy,
+                       "control": control, "smoke": smoke, "status": "complete",
+                       "replicate": replicate, "replicates_requested": repeat,
+                       "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
+                       "provenance": provenance()})
+        if agent:
+            result["agent"] = agent.report()
+        # The control writes its own file, so it can never be pooled with the evidence arm.
+        suffix = f"{f'_{control}' if control else ''}{f'_rep{replicate:02d}' if repeat > 1 else ''}"
+        output = ROOT / "runs/emergency" / f"{prefix}{name}_{label_policy}{suffix}.json"
+        write_json(output, result)
+        outputs.append(str(output))
+        print(json.dumps({"output": str(output), "replicate": replicate,
+                          "metrics": result["metrics"]}, indent=2))
+    return outputs

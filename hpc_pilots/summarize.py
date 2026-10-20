@@ -241,15 +241,50 @@ def summarize_delay(directory):
 
 
 def summarize_emergency(directory):
-    rows = []
+    """Aggregate the decision episodes, keeping the control arm strictly apart.
+
+    The zero-retrieval control is reported on its own, because what it measures is not
+    policy performance but how much of the answer is recoverable without buying any
+    evidence at all. That number is a floor: the evidence-using arm has to clear it
+    before any of its performance can be credited to the evidence it paid for.
+    """
+    rows, probe = [], []
     for path in (ROOT / "runs/emergency").glob("*.json"):
         data = json.loads(path.read_text())
         if data.get("smoke") or data.get("status") != "complete":
             continue
-        rows.append({"file": str(path.relative_to(ROOT)), "packet": data["family_packet"],
-                     **data["metrics"]})
+        record = {"file": str(path.relative_to(ROOT)), "packet": data["family_packet"],
+                  "replicate": data.get("replicate", 1), **data["metrics"]}
+        (probe if data.get("control") else rows).append(record)
     if rows:
         pd.DataFrame(rows).to_csv(directory / "emergency_metrics.csv", index=False)
+    if not probe:
+        return
+    frame = pd.DataFrame(probe)
+    frame.to_csv(directory / "memorisation_probe.csv", index=False)
+    summary = []
+    for (packet, policy), part in frame.groupby(["packet", "policy"]):
+        decided = part[part.chosen_target.notna()]
+        summary.append({
+            "packet": packet, "policy": policy, "episodes": len(part),
+            "evidence_retrieved": int(part.evidence_retrieved.sum()),
+            # A policy that declines to recommend from an empty dossier is behaving
+            # correctly, so refusals are counted rather than scored as failures.
+            "declined_to_recommend": int(part.chosen_target.isna().sum()),
+            "recommended": len(decided),
+            "matched_reference": int(decided.chosen_matches_reference.sum()) if len(decided) else 0,
+            "match_rate": round(float(decided.chosen_matches_reference.mean()), 4)
+            if len(decided) else None})
+    write_json(directory / "memorisation_probe.json", {
+        "control": "zero_retrieval",
+        "question": "With retrieval forbidden and no evidence pushed, does the policy still "
+                    "name the target the full evidence base supports?",
+        "by_cell": summary,
+        "total_evidence_retrieved": int(frame.evidence_retrieved.sum()),
+        "interpretation": "Any match here was not derived from evidence, because none was "
+                          "bought. For a policy with pretrained knowledge of named targets "
+                          "this measures hindsight, which the decision-clock boundary cannot "
+                          "control. Read it as a floor on the evidence-using arm, not as skill."})
 
 
 def summarize():
