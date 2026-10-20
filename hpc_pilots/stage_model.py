@@ -4,14 +4,21 @@ from pathlib import Path
 
 from huggingface_hub import HfApi, snapshot_download
 
-from .common import ROOT, digest, write_json
+from .common import COMMITTED_MODEL_MANIFEST, ROOT, STAGED_MODEL_MANIFEST, digest, write_json
 
 
 def main():
     repo = 'Qwen/Qwen3-4B-Instruct-2507'
-    manifest_path = ROOT / 'models/manifest.json'
-    revision = (json.loads(manifest_path.read_text())['revision'] if manifest_path.exists()
-                else HfApi().model_info(repo).sha)
+    manifest_path = STAGED_MODEL_MANIFEST
+    # Prefer an in-progress staging record, then the committed pin, and only resolve the
+    # repository head when neither exists. Reading the head first would have staged
+    # whatever was current in a clean checkout, which defeats the point of pinning.
+    for source in (manifest_path, COMMITTED_MODEL_MANIFEST):
+        if source.exists():
+            revision = json.loads(source.read_text())['revision']
+            break
+    else:
+        revision = HfApi().model_info(repo).sha
     target = ROOT / 'models/qwen3-4b'
     write_json(manifest_path, {'repo': repo, 'revision': revision, 'status': 'downloading',
                               'license': 'Apache-2.0'})

@@ -1,6 +1,8 @@
 import hashlib
 import json
 import os
+import platform
+import socket
 import subprocess
 import time
 from datetime import datetime, timezone
@@ -8,9 +10,85 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+# `stage_model` writes the first; the repository carries the second as the committed pin.
+STAGED_MODEL_MANIFEST = ROOT / "models/manifest.json"
+COMMITTED_MODEL_MANIFEST = ROOT / "hpc_pilots/model.manifest.json"
+
+# Everything whose content can change a result. Hashed into source_manifest.json.
+SOURCE_PATTERNS = ("hpc_pilots/*.py", "hpc_pilots/tests/*.py", "hpc_pilots/configs/*.json",
+                   "hpc_pilots/slurm/*.sbatch", "hpc_pilots/requirements*.txt")
+
 
 def config():
     return json.loads((ROOT / "hpc_pilots/configs/today.json").read_text())
+
+
+def model_manifest():
+    """The staged manifest if weights were downloaded here, else the committed pin.
+
+    Both `stage_model` and `submit` previously named `models/manifest.json` directly,
+    which does not exist in a clean checkout, so the GPU submission guard refused a
+    submission whose pin was in fact committed.
+    """
+    return STAGED_MODEL_MANIFEST if STAGED_MODEL_MANIFEST.exists() else COMMITTED_MODEL_MANIFEST
+
+
+def _git(*argv):
+    try:
+        done = subprocess.run(("git", "-C", str(ROOT)) + argv, capture_output=True,
+                              text=True, timeout=15)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return done.stdout.strip() if done.returncode == 0 else None
+
+
+def provenance():
+    """Where a run was produced and from which source state.
+
+    Run records carried no host or commit, so whether a recorded sweep came from the
+    cluster or a local re-run could not be recovered from the artifact. `git_dirty`
+    is the one to read first: a run from a modified tree is not reproducible from the
+    commit it names.
+    """
+    commit = _git("rev-parse", "HEAD")
+    dirty = _git("status", "--porcelain")
+    return {"host": socket.gethostname(), "platform": platform.platform(),
+            "python": platform.python_version(), "git_commit": commit,
+            "git_dirty": None if dirty is None else bool(dirty),
+            "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+            "slurm_array_task_id": os.environ.get("SLURM_ARRAY_TASK_ID"),
+            "recorded_at_utc": datetime.now(timezone.utc).isoformat()}
+
+
+def sources():
+    """Digest every source file that can change a result, in a stable order."""
+    files = {}
+    for pattern in SOURCE_PATTERNS:
+        for path in sorted(ROOT.glob(pattern)):
+            if path.is_file() and "__pycache__" not in path.parts:
+                files[str(path.relative_to(ROOT))] = digest(path)
+    return files
+
+
+def source_manifest(check=False):
+    """Rewrite `source_manifest.json`, or report how far it has drifted from the tree.
+
+    Nothing regenerated this file, so seven of its digests no longer matched their
+    files: a record that looks like provenance and is not is worse than none. `check`
+    returns the drift without writing, for use in CI or before a submission.
+    """
+    path = ROOT / "hpc_pilots/source_manifest.json"
+    files = sources()
+    recorded = json.loads(path.read_text()).get("files", {}) if path.exists() else {}
+    drift = {"changed": sorted(k for k, v in files.items() if k in recorded and recorded[k] != v),
+             "added": sorted(set(files) - set(recorded)),
+             "removed": sorted(set(recorded) - set(files))}
+    if not check:
+        write_json(path, {"generated_at_utc": datetime.now(timezone.utc).isoformat(),
+                          "git_commit": _git("rev-parse", "HEAD"),
+                          "git_dirty": bool(_git("status", "--porcelain")),
+                          "patterns": list(SOURCE_PATTERNS), "files": files})
+    return path, drift
 
 
 def write_json(path, obj):

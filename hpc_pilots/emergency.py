@@ -18,7 +18,7 @@ import json
 import time
 
 from .chemistry import library_spec
-from .common import ROOT, Agent, digest, write_json
+from .common import ROOT, Agent, digest, provenance, write_json
 from .dossier import ACTIONS, AXES, rank
 from .targets import PACKETS, packet
 
@@ -212,7 +212,8 @@ def run_emergency(name, policy, smoke=False):
     label_policy = agent.label if agent else policy
     result.update({"experiment": "emergency", "family_packet": name, "policy": label_policy,
                    "smoke": smoke, "status": "complete",
-                   "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json")})
+                   "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
+                   "provenance": provenance()})
     if agent:
         result["agent"] = agent.report()
     prefix = "smoke_" if smoke else ""

@@ -23,7 +23,7 @@ from scipy.stats import spearmanr
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import RidgeCV
 
-from .common import ROOT, config, digest, write_json
+from .common import ROOT, config, digest, provenance, write_json
 
 SURROGATE_BUDGETS = (8, 16, 32, 64, 128, 256, 512, 1024)
 # Log-spaced grid for the linear comparator. RidgeCV selects per budget by leave-one-out,
@@ -164,5 +164,6 @@ def run_calibration():
         "surrogate_budgets": list(SURROGATE_BUDGETS),
         "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
         "dataset_manifest_sha256": digest(ROOT / "data/processed/binding/manifest.json"),
+        "provenance": provenance(),
         "interpretation": "Audits of the pilot surrogate only; no biological or efficacy claim"})
     print(f"rf_calibration rows={len(rf)} surrogate_skill rows={len(skill)} -> {directory}")

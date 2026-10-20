@@ -5,7 +5,7 @@ import time
 import numpy as np
 import pandas as pd
 
-from .common import ROOT, Agent, config, digest, write_json
+from .common import ROOT, Agent, config, digest, provenance, write_json
 from .data import fetch_atlas
 
 
@@ -171,7 +171,8 @@ def run_structure(policy, smoke=False):
     policy = agent.label if agent else policy
     result.update({"experiment": "structure", "policy": policy, "smoke": smoke,
                    "status": "complete", "dataset_manifest_sha256": digest(directory / "manifest.json"),
-                   "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json")})
+                   "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
+                   "provenance": provenance()})
     if agent:
         result["agent"] = agent.report()
     output = ROOT / "runs/structure" / f"{'smoke_' if smoke else ''}{policy}.json"

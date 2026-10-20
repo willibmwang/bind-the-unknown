@@ -4,7 +4,7 @@ import json
 import shutil
 import subprocess
 
-from .common import ROOT, config, digest, write_json
+from .common import ROOT, config, digest, model_manifest, source_manifest, write_json
 
 
 def main():
@@ -21,9 +21,15 @@ def main():
     if status_path.exists() and not args.add_agent:
         raise SystemExit('Submission registry already exists; inspect it before launching another sweep')
     if args.with_agent or args.add_agent:
-        manifest = ROOT / 'models/manifest.json'
+        manifest = model_manifest()
         if not manifest.exists() or json.loads(manifest.read_text()).get('status') != 'staged':
             raise SystemExit('Pinned local LLM weights must be fully staged before GPU submission')
+    # A sweep launched from a tree that no longer matches the recorded digests cannot be
+    # reconstructed from them afterwards. Report the drift at submission, not at write-up.
+    _, drift = source_manifest(check=True)
+    if any(drift.values()):
+        print('source_manifest.json is stale; run `python -m hpc_pilots manifest`:',
+              json.dumps(drift), flush=True)
     if args.add_agent:
         if not status_path.exists():
             raise SystemExit('No baseline submission registry')

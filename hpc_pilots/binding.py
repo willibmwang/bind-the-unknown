@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
-from .common import ROOT, Agent, config, digest, write_json
+from .common import ROOT, Agent, config, digest, provenance, write_json
 
 
 def design_matrix(features, cardinalities=None):
@@ -34,7 +34,7 @@ def distances(features, observed_indices):
 
 
 def pick_batch(features, observed_indices, observed_values, available, policy, size, seed, agent=None,
-               decision_context=None, cardinalities=None):
+               decision_context=None, cardinalities=None, surrogate=None):
     """The policy interface accepts only revealed values, never the hidden outcome vector."""
     rng = np.random.default_rng(seed)
     if policy == "random":
@@ -47,9 +47,13 @@ def pick_batch(features, observed_indices, observed_values, available, policy, s
             best = allowed[d[allowed] == d[allowed].max()]
             chosen.append(int(rng.choice(best)))
         return np.array(chosen), {"action": "diverse"}
-    bc = config()["binding"]
+    # Surrogate hyperparameters come from the caller's own config, defaulting to the GB1
+    # block so recorded binding replays stay bit-identical. The pathogen and method configs
+    # each carried `forest_trees` and `ucb_beta` that nothing read; the values coincided, so
+    # no recorded result was wrong, but the keys described an intent the code did not honour.
+    sc = surrogate or config()["binding"]
     mean, uncertainty = predictions(features, observed_indices, observed_values, seed,
-                                    bc["forest_trees"], cardinalities)
+                                    sc["forest_trees"], cardinalities)
     d = distances(features, observed_indices)
     action = "explore" if policy == "ucb" else "greedy"
     if policy == "agent":
@@ -70,7 +74,7 @@ def pick_batch(features, observed_indices, observed_values, available, policy, s
                               ["greedy", "explore", "diverse"])
     if action == "diverse":
         return pick_batch(features, observed_indices, observed_values, available, "diverse", size, seed)
-    acquisition = mean + (bc["ucb_beta"] * uncertainty if action == "explore" else 0)
+    acquisition = mean + (sc["ucb_beta"] * uncertainty if action == "explore" else 0)
     # Randomize ties reproducibly without perturbing score ordering.
     shuffled = rng.permutation(available)
     return shuffled[np.argsort(-acquisition[shuffled], kind="stable")[:size]], {"action": action}
@@ -103,7 +107,7 @@ def enrichment(hidden_outcomes, selected, fraction):
 
 def replay(features, hidden_outcomes, policy, seed, maximum=128, initial=8, batch=8,
            delay=0, checkpoints=(8, 16, 32, 64, 128), agent=None, fraction=None,
-           cardinalities=None):
+           cardinalities=None, surrogate=None):
     rng = np.random.default_rng(seed)
     first = rng.choice(len(features), size=initial, replace=False).tolist()
     queried, observed = first.copy(), first.copy()
@@ -141,7 +145,7 @@ def replay(features, hidden_outcomes, policy, seed, maximum=128, initial=8, batc
                                    {"remaining_label_budget": maximum - len(queried),
                                     "pending_labels": len(queried) - len(observed),
                                     "feedback_delay_rounds": delay, "decision_round": round_number},
-                                   cardinalities)
+                                   cardinalities, surrogate)
         ids = ids.tolist()
         if len(set(ids)) != count or set(ids) & set(queried):
             raise ValueError("Repeated or invalid acquisition")
@@ -169,12 +173,14 @@ def run_binding(pool, policy, delay=0, smoke=False):
     maximum = 16 if smoke else c["binding"]["maximum_labels"]
     agent = Agent() if policy == "agent" else None
     result = replay(features, hidden, policy, c["seed"] + pool, maximum=maximum,
-                    delay=delay, agent=agent)
+                    initial=c["binding"]["initial_labels"], delay=delay, agent=agent,
+                    surrogate=c["binding"])
     policy = agent.label if agent else policy
     result.update({"experiment": "binding", "pool": pool, "policy": policy, "delay": delay,
                    "smoke": smoke, "status": "complete",
                    "dataset_manifest_sha256": digest(path / "manifest.json"),
-                   "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json")})
+                   "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
+                   "provenance": provenance()})
     if agent:
         result["agent"] = agent.report()
     label = "smoke_" if smoke else ""
@@ -208,7 +214,8 @@ def run_method(landscape, pool, policy, delay=0, smoke=False):
                     maximum=16 if smoke else mc["maximum_labels"],
                     initial=mc["initial_labels"], batch=mc["batch_size"], delay=delay,
                     checkpoints=tuple(mc["checkpoints"]), agent=agent,
-                    fraction=spec["top_fraction"], cardinalities=manifest["cardinalities"])
+                    fraction=spec["top_fraction"], cardinalities=manifest["cardinalities"],
+                    surrogate=mc)
     policy = agent.label if agent else policy
     result.update({"experiment": "method", "landscape": landscape, "pool": pool,
                    "policy": policy, "delay": delay, "smoke": smoke, "status": "complete",
@@ -221,7 +228,8 @@ def run_method(landscape, pool, policy, delay=0, smoke=False):
                                        "multiple over random is bounded by the labelled "
                                        "fraction of the pool.",
                    "dataset_manifest_sha256": digest(path / "manifest.json"),
-                   "method_config_sha256": digest(ROOT / "hpc_pilots/configs/method.json")})
+                   "method_config_sha256": digest(ROOT / "hpc_pilots/configs/method.json"),
+                   "provenance": provenance()})
     if agent:
         result["agent"] = agent.report()
     label = "smoke_" if smoke else ""
@@ -252,7 +260,7 @@ def run_target(landscape, pool, policy, delay=0, smoke=False):
                     initial=tc["initial_labels"], batch=tc["batch_size"], delay=delay,
                     checkpoints=tuple(tc["checkpoints"]), agent=agent,
                     fraction=tc["top_fraction"],
-                    cardinalities=manifest["cardinalities"])
+                    cardinalities=manifest["cardinalities"], surrogate=tc)
     policy = agent.label if agent else policy
     result.update({"experiment": "target", "landscape": landscape, "pool": pool, "policy": policy,
                    "delay": delay, "smoke": smoke, "status": "complete",
@@ -263,7 +271,8 @@ def run_target(landscape, pool, policy, delay=0, smoke=False):
                                        "figures with the GB1 1% figures.",
                    "dataset_manifest_sha256": digest(path / "manifest.json"),
                    "targets_config_sha256": digest(ROOT / "hpc_pilots/configs/targets.json"),
-                   "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json")})
+                   "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
+                   "provenance": provenance()})
     if agent:
         result["agent"] = agent.report()
     label = "smoke_" if smoke else ""

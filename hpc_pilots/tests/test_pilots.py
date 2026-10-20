@@ -8,7 +8,8 @@ from hpc_pilots.binding import design_matrix, enrichment, pick_batch, replay
 from hpc_pilots.calibration import calibration_metrics, trajectory
 from hpc_pilots.chemistry import alphabet, encode, library_spec, registry, sample_library
 from hpc_pilots.common import ROOT
-from hpc_pilots.common import Agent
+from hpc_pilots.common import (Agent, COMMITTED_MODEL_MANIFEST, STAGED_MODEL_MANIFEST,
+                               digest, model_manifest, provenance, source_manifest)
 from hpc_pilots.data import AA, encode_variants, pool_geometry
 from hpc_pilots.dossier import Dossier, evidence, rank
 from hpc_pilots.emergency import run_episode
@@ -285,3 +286,49 @@ def test_encoding_narrows_for_singles_and_widens_for_combined_substitutions():
 def test_encoding_rejects_a_reference_sequence_mismatch():
     with pytest.raises(ValueError, match="mismatch"):
         encode_variants(pd.DataFrame({"mutant": ["Q2A"]}), "MKTAYIAKQR")
+
+
+def test_surrogate_hyperparameters_are_taken_from_the_callers_config():
+    # The pathogen and method configs each carried forest_trees and ucb_beta that nothing
+    # read. Passing them must now change the exploration bonus, or the keys are still dead.
+    rng = np.random.default_rng(31)
+    x = rng.integers(0, 20, size=(256, 4))
+    observed = np.arange(16)
+    values = rng.normal(size=16)
+    available = np.arange(16, 256)
+    flat, wide = ({"forest_trees": 16, "ucb_beta": 0.0}, {"forest_trees": 16, "ucb_beta": 50.0})
+    greedy_like, _ = pick_batch(x, observed, values, available, 'ucb', 8, 5, surrogate=flat)
+    explorative, _ = pick_batch(x, observed, values, available, 'ucb', 8, 5, surrogate=wide)
+    assert set(greedy_like.tolist()) != set(explorative.tolist())
+    # With the bonus switched off, UCB must reduce to the greedy ordering at the same seed.
+    greedy, _ = pick_batch(x, observed, values, available, 'greedy', 8, 5, surrogate=flat)
+    np.testing.assert_array_equal(greedy_like, greedy)
+
+
+def test_model_manifest_resolves_to_the_committed_pin_in_a_clean_checkout():
+    resolved = model_manifest()
+    assert resolved == (STAGED_MODEL_MANIFEST if STAGED_MODEL_MANIFEST.exists()
+                        else COMMITTED_MODEL_MANIFEST)
+    # The committed pin is what a clean checkout has to be able to pass its staging guard on.
+    pin = json.loads(COMMITTED_MODEL_MANIFEST.read_text())
+    assert pin['status'] == 'staged' and len(pin['revision']) == 40
+
+
+def test_provenance_names_the_host_and_the_source_state():
+    record = provenance()
+    assert set(record) == {'host', 'platform', 'python', 'git_commit', 'git_dirty',
+                           'slurm_job_id', 'slurm_array_task_id', 'recorded_at_utc'}
+    assert record['host'] and record['recorded_at_utc'].endswith(('Z', '+00:00'))
+    # A run from a modified tree is not reproducible from the commit it names, so the
+    # flag has to be present and boolean wherever git is available at all.
+    assert record['git_dirty'] is None or isinstance(record['git_dirty'], bool)
+
+
+def test_source_manifest_check_reports_drift_without_rewriting_the_record():
+    path = ROOT / 'hpc_pilots/source_manifest.json'
+    before = digest(path)
+    returned, drift = source_manifest(check=True)
+    assert returned == path and digest(path) == before
+    assert set(drift) == {'changed', 'added', 'removed'}
+    # Every pattern the record claims to cover must actually resolve to files on disk.
+    assert json.loads(path.read_text())['files']
