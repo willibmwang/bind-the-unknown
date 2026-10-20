@@ -28,6 +28,7 @@ EYEBROWS = {
     "W4_DEBRIEF_AND_TARGET_SELECTION": "SynX Therapeutics · MATS 11.0 · Week 4 review",
     "PROJECT_OVERVIEW_AND_PLAN": "SynX Therapeutics · MATS 11.0 · Project overview and plan",
     "ARCHITECTURE": "SynX Therapeutics · MATS 11.0 · System architecture",
+    "OVERVIEW_AND_SIX_WEEK_PLAN": "SynX Therapeutics · MATS 11.0 · Overview and six-week plan",
     "PROTOTYPE_AND_PRIORITY_PATHOGENS": "SynX Therapeutics · MATS 11.0 · Background note",
 }
 DEFAULT_EYEBROW = "SynX Therapeutics · MATS 11.0"
