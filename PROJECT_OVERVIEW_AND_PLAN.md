@@ -36,15 +36,22 @@ such environments, already existing in quantity, and not currently used that way
 variant's outcome is known, so a proposed measurement, ranking or stopping decision can be
 graded deterministically with no human and no wet lab. §1.3 and §2.2 make the argument.
 
-**Two results survive scrutiny; one did not.** Grading a decision system on what it *selected*
-overstates it by 1.1–1.4× relative to grading it on what had actually *returned* when each
-decision was made — this replicated on every dataset tried, including SARS-CoV-2 Mpro and both
-influenza haemagglutinin landscapes, and it is the metric the project will use. A second
-measurement-design finding is that improvement-over-random is bounded by the labelled fraction
-of the pool and is therefore not comparable across pool geometries. Against that, an earlier
-headline — roughly eightfold recovery of strong candidates over random selection — is
-substantially an artefact of pool size and **will not appear in any paper or talk**. §4 gives
-the arithmetic.
+**Three of the project's headline claims failed this week, including one I made yesterday.**
+The eightfold recovery over random selection is an artefact of pool size. The
+selected-versus-returned ratio — until this morning the one result I thought had replicated
+everywhere — is an accounting identity rather than a measurement: a feedback-blind policy
+reproduces the whole band, and the matched comparison of delayed against undelayed feedback is
+null. And my own claim from yesterday, that the gain tracks combinatorial encoding rather than
+pathogen identity, was a mis-attribution with a circular control group. Each is now a permanent
+check in the code rather than a note in a document. §4 gives the arithmetic and §4.3 says what
+replaced them.
+
+**What survives is better than what it replaced.** Acquisition gain is governed by whether the
+surrogate can learn *inside the candidate pool*, which is a computable property of pool geometry
+rather than a property of the biology — established by intervention in both directions, not by
+correlation. The practical consequence for this project is favourable: the closest on-disk
+analogue to a randomised display library gives the largest gain measured anywhere in the work,
+from a deliberately weak surrogate.
 
 **The system now holds biology.** Until 19 October the software chose among three abstract
 strategies over numbered candidates and contained no representation of the problem domain. It
@@ -155,26 +162,29 @@ subsection states a decision, the alternatives, and what would make me reverse i
 **The choice.** The primary measured object is the quality of the *decision procedure*, not the
 accuracy of a molecular predictor.
 
-**The reasoning.** The October calibration study is the load-bearing evidence. Acquisition
-policy produced gains over random selection *while the underlying predictor was only weakly
-informative* — Spearman ≈ 0.31 against truth at a 128-label budget, with plain ridge regression
-matching a 64-tree random forest. If decision gains had required a good predictor, the emergency
-premise would collapse, because at emergency timescales there are no labels with which to fit
-one. That the gains came from the policy rather than the model is the substrate-independent
-part of the result and the reason the project points here.
+**The reasoning.** Acquisition policy produces gains over random selection *while the underlying
+predictor is only weakly informative* — Spearman ≈ 0.31 at a 128-label budget, with plain ridge
+regression matching a 64-tree forest. If decision gains had required a good predictor the
+emergency premise would collapse, because at emergency timescales there are no labels with which
+to fit one.
 
-**The caveat, stated because it matters.** §4.2 shows this argument is weaker than it looked a
-week ago. On the pathogen landscapes at a 25% labelled fraction the policy gain is small and
-inconsistent. The claim that survives is narrower: policy choice measurably affects outcomes
-under some geometries, and the *metric* used to assess it is systematically biased in a way
-that can be corrected. That is a real contribution to how such systems are evaluated, and it is
-smaller than what I would have claimed on 12 October.
+**How much of that survived this week.** The weak-predictor half is intact and better supported:
+the largest gain in the project comes from exactly that Spearman-0.31 surrogate. The half that
+does not survive is the stronger reading — that gains come from the policy *rather than* the
+model, and are therefore substrate-independent. They are a surrogate effect; where no weak model
+can be fitted inside the pool, no policy beats random. §4.3 gives the evidence and the corrected
+claim.
 
-**What would reverse it.** If the policy gain disappears entirely under matched budget fractions
-across all landscapes, the contribution becomes purely methodological — the evaluation-design
-findings — and the system work is reframed as applied engineering rather than a research claim.
-That is a defensible outcome and I would rather reach it honestly in week 6 than discover it at
-review.
+**What this costs and what it buys.** It costs the cleanest version of the argument. It buys a
+precondition that can be *computed in advance* — pool coverage — which is more useful to a
+decision-maker than a claim of substrate independence would have been, because it says when to
+expect the method to work before any budget is committed.
+
+**What would reverse the remaining claim.** If the gain fails to appear on two independent
+high-coverage landscapes staged from unrelated proteins — the next experiment, §10 — then the
+mechanism rests on one independent protein plus a restaging of the pilot, and the contribution
+narrows to the evaluation-design work and the environment generator. I would rather reach that
+in week 6 than at review.
 
 ### 2.2 Why public measurement landscapes as the substrate
 
@@ -362,52 +372,138 @@ Four weeks of evidence, separated into what survives, what does not, and what ha
 attempted. The detail and arithmetic are in
 [W4_DEBRIEF_AND_TARGET_SELECTION.md](W4_DEBRIEF_AND_TARGET_SELECTION.md) §2.
 
-### 4.1 Two findings that survive
+### 4.1 Three claims withdrawn
 
-**Selected-versus-returned.** Grading a decision system on everything it *selected* overstates
-its performance relative to grading it on what had actually *returned* at the time each decision
-was made. The discrepancy is 1.12–1.38× at a three-round feedback delay across three landscapes
-and four policies, and exactly 1.00× at zero delay, as it must be. On GB1 it was roughly 1.4×.
+I am leading with these rather than burying them. Each was a number I believed, two of them
+appear in the Week 4 debrief you may already have read, and one of them I generated yesterday.
+All three are now permanent checks in the code, so they cannot quietly return.
 
-This is not bookkeeping. It separates "were these good selections in hindsight?" from "were
-these good selections on the evidence then available?" Only the second is a fair test of an
-emergency decision-maker, and the first is what most evaluations measure inadvertently. It is
-substrate-independent, endpoint-independent, and it transfers directly into the episode rubric.
+**The eightfold gain over random (withdrawn 19 October).** Random top-fraction recall is simply
+the labelled fraction of the pool, so an improvement-over-random is bounded by pool geometry:
+32× of headroom at 128 labels from 4,096 candidates, but only 4× at 128 from 512. The figure
+measured the pool, not the policy. A related error was found yesterday in the correction itself:
+the attainable multiple is `min(1/top_fraction, 1/labelled_fraction)`, not `1/labelled_fraction`.
+The two agree at the final checkpoint of every configured landscape, so no reported figure
+changes, but the old formula overstated headroom precisely at the early checkpoints whose raw
+multiples look most impressive.
 
-**Improvement-over-random is bounded by the labelled fraction.** Random top-fraction recall is
-simply the labelled fraction of the pool, confirmed to two decimal places:
+**The selected-versus-returned ratio (withdrawn 20 October).** This was the project's best
+result and the one I was most confident in. It is an identity. `returned` is always a subset of
+`selected` and recall divides both by the same pool-wide hit count, so the ratio is monotone in
+set inclusion — across 1,018 recorded delayed checkpoints it never once falls below 1. What it
+reports is the share of the budget still in flight: with 128 labels in batches of 8 at a
+three-round delay, 24 are pending at the final checkpoint and 128/104 = 1.23 falls out of the
+bookkeeping before any policy acts.
 
-| Pool | Labelled fraction | Predicted random recall | Observed | Headroom |
-| --- | --- | --- | --- | --- |
-| GB1, 4,096 candidates | 128/4096 = 0.031 | 0.031 | 0.032 | 32× |
-| Pathogen, 512 candidates | 128/512 = 0.250 | 0.250 | 0.223 | 4.0× |
+The decisive check is the random policy. It reads no returned label, so its selections are
+identical at every delay — confirmed in 99 of 99 pools — and yet it reproduces the entire band:
 
-So a multiple-over-random is not comparable across pool geometries, and the honest comparison
-reports recall at a matched *budget fraction* rather than a matched absolute budget. This is a
-second evaluation-design finding of the same kind as the first.
-
-### 4.2 One finding that does not survive
-
-An earlier headline reported that the selection rule recovered roughly **eight times** more of
-the best candidates than random selection. That figure is substantially an artefact of the
-bound above. Once corrected, the advantage on pathogen landscapes is small and inconsistent:
-
-| Landscape | Greedy vs random | UCB vs random | Diverse vs random |
+| | Mean ratio | SD | n |
 | --- | --- | --- | --- |
-| Mpro | +0.065 ± 0.152 (7/10 pools) | +0.038 ± 0.120 (5/10) | −0.027 ± 0.065 (3/10) |
-| HA H3 | +0.104 ± 0.085 (8/10) | +0.050 ± 0.093 (6/10) | −0.031 ± 0.065 (1/10) |
-| HA H1 | −0.004 ± 0.118 (6/10) | +0.046 ± 0.107 (7/10) | +0.019 ± 0.084 (3/10) |
+| Random (feedback-blind) | 1.297 | 0.498 | 89 |
+| Greedy / UCB / diverse (informed) | 1.312 | 0.356 | 279 |
 
-Pool-to-pool spread exceeds the mean difference everywhere; diversity-seeking is actively
-harmful on two of three landscapes. The likely cause is representational: a single-substitution
-scan encoded as (position, residue) over 303–566 positions gives a forest far less to generalise
-from than GB1's four co-varying sites, where every candidate shares positions with every other.
+A quantity a feedback-blind policy can produce is not a measurement of how delay degrades a
+decision. And the matched comparison that *would* measure it — same budget, same metric, delay 0
+against delay 3 — is null: mean paired difference −0.006 across 392 pool comparisons, Wilcoxon
+p = 0.31 on the 243 non-zero pairs. **The 1.1–1.4× figure must not be presented as a finding.**
 
-**The eightfold figure will not appear in any paper or presentation.** I am raising it
-prominently rather than quietly dropping it, because the correction is itself the kind of result
-the project is trying to produce, and because I would rather you hear it from me than find it.
+**That the gain tracks combinatorial encoding (withdrawn 20 October).** Mine, from yesterday's
+runs. Two failures. The control group was circular: `spike_rbd_ace2` *is* SARS-CoV-2 spike RBD,
+so across the six staged landscapes "viral protein" and "single-substitution scan" are the same
+two-versus-four partition, and any statistic separating one separates the other identically.
+And the explanatory variable was wrong — combined substitutions are collinear with, but not the
+cause of, the quantity that actually moves the gain. Intervention breaks it in both directions
+(§4.2). It is the same failure mode as the eightfold figure: a property of pool geometry read as
+a property of the biology.
 
-### 4.3 What has not been measured at all
+### 4.2 What survives — a mechanism, with an intervention test
+
+Acquisition gain is governed by **how densely the candidate pool covers the variable positions
+the surrogate must learn from** — that is, by whether a weak model can be fitted *inside* the
+pool at all. This is a computable property of pool geometry, available before any assay is run.
+
+Correlation would not establish that, so it was tested by intervention in both directions,
+holding everything else fixed:
+
+| Intervention | Greedy gain | Surrogate Spearman |
+| --- | --- | --- |
+| Influenza H3 scan, pools restricted to 28 variable positions | +0.104 → **+0.250** (8/8 pools) | 0.10 → 0.63 |
+| …to 55 / 150 / 566 positions | +0.159 / +0.019 / 0.000 | 0.42 / 0.18 / 0.10 |
+| GB1 doubles re-encoded so pool members share no feature levels | +0.242 → **−0.019** | 0.66 → 0.03 |
+
+The first takes a pathogen protein on a replication-fitness endpoint — the very case that
+appeared to fail — and recovers the full gain by narrowing the pool. The second keeps the same
+variants, the same hidden scores and the same combinatorial structure, destroys only the feature
+sharing, and removes the gain entirely. Combined substitutions are neither necessary nor
+sufficient.
+
+It is a *surrogate* effect: the surrogate-free diverse policy shows no gain on any of the six
+landscapes (−0.031 to +0.026), and it requires at least 64 of 512 labels — absent at 8, 16 and 32.
+
+**The relevant analogue for this project is better than either.** The four-site GB1 library
+(Wu 2016) is a randomised region over an alphabet, every member carrying a value at all four
+randomised positions, members mutually distant (mean pairwise Hamming 0.95). At the same
+512/128/5% geometry it gives **the largest gain measured anywhere in this work — greedy +0.373
+and UCB +0.373, 10 of 10 pools — from a surrogate with Spearman 0.31.** What matters is coverage
+of the randomised positions, not proximity to a wild-type reference, and a randomised macrocycle
+region of a few positions sits at the favourable extreme of that variable.
+
+**Five things that must travel with this.**
+
+- It is an argument about pool structure, not a measurement of macrocycles. No landscape here
+  contains a macrocycle, a non-canonical residue or a cyclisation.
+- Coverage is necessary but not sufficient. Mpro reaches Spearman 0.68 with greedy gain −0.02;
+  GB1 singles reach 0.61 with no gain. The surrogate must also resolve the top tail. Two
+  conditions of unknown relative weight, not a rule.
+- The gain decays steeply with pool size at fixed budget: normalised gain 0.58 → 0.22 → 0.09 →
+  0.035 at 512 → 2,048 → 8,192 → 32,768 candidates. It therefore describes focused pools of
+  hundreds to a few thousand — deconvolution and focused maturation — and says **nothing** about
+  a selection round over a 10¹¹-member library. Over that same sweep the *multiple* over random
+  rises from 2.9× to 12.9× while the policy loses almost all its real advantage, which is
+  exactly how the eightfold figure misled. No multiple over random will be quoted again.
+- The landscape-level comparison cannot reach significance: two landscapes against four admits
+  fifteen partitions, the observed split is rank 1 of 15, exact permutation p = 0.067 — the floor
+  of the design. The ± figures are variation across pools of one protein.
+- One reported cell used a partial sweep. The H3 figure of +0.104 used 10 of 20 staged pools;
+  the other ten give +0.015, so the honest all-pool figure is +0.060. Pool counts now appear in
+  the table.
+
+### 4.3 What this does to the project's central argument
+
+The project has argued that decision gains do not require a good predictor — which matters,
+because at emergency timescales there are no labels with which to fit one. That argument
+**partly survives, in a more useful form.**
+
+What survives, now better supported: gains do not require a *good* predictor. The largest gain
+in the project comes from a surrogate at Spearman 0.31, and gain is not even monotone in
+surrogate skill — blocked H3 reaches 0.63 with a smaller gain. A modestly informative model is
+enough.
+
+What does not survive: the stronger reading that gains come from the policy *rather than* the
+model, and are therefore substrate-independent. They are a surrogate effect. Every landscape
+where the surrogate has essentially no in-pool skill shows essentially no gain, and the
+surrogate-free policy never gains anywhere. The original argument was measured on the four-site
+GB1 library — the highest-coverage substrate in the project — so "substrate-independent" was
+never tested where coverage is poor. It has now been tested four times and it fails there.
+
+The honest version, and the one I would defend on Thursday: *policy gains require only a weakly
+informative surrogate, but they do require one — and whether one can be fitted at all is a
+property of the candidate pool's geometry that can be computed in advance.* That is weaker than
+the original and considerably more useful, because it is checkable before any budget is spent.
+
+### 4.4 Why I am presenting it this way
+
+Three self-caught errors in two days is not a comfortable thing to put in front of you, and the
+temptation to lead with the surviving mechanism instead was real. But the project's proposed
+contribution is that auto-gradeable decision environments let you find your own artefacts fast,
+and this week is the first evidence that the claim is true of the method rather than just
+asserted about it. Each correction is now a control in the code — a delay-effect table carrying
+the identity and the null band beside the effect, a corrected headroom ceiling, a permuted-outcome
+falsification run, and a zero-retrieval control for the dossier arm — so the specific mistakes
+cannot recur silently. That is the part worth carrying into the paper.
+
+### 4.5 What has not been measured at all
 
 - **No macrocycle, and no non-canonical amino acid.** The building-block registry carries
   literature block *classes* only; every chemical identifier, codon assignment, Rosetta parameter
@@ -579,7 +675,8 @@ London or the review pulled to 25 November.
 | **No booked display round** | Overdue since 16 Oct. No named SynX owner, no slot. | The one mandatory experimental deliverable does not happen. Backward planning from a usable 18 Nov readout is already tight. | Needs a name and a date this week. No internal workaround exists. |
 | **Campaign export not received** | Overdue. | The platform-improvement deliverable cannot begin; the molecular audit path is entirely blocked. Most exposed dependency in the project. | Re-scope decision at Thursday's gate: either the export arrives, or the platform improvement is re-specified against something available. |
 | **Trainable model access unconfirmed** | No confirmed account, model list or spend ceiling. | Cannot commit to model identities or an experiment matrix. | Verify live availability; the local pilot model is not automatically a supported training model. |
-| **Policy gain may not survive correction** | §4.2. Small and inconsistent on pathogen landscapes. | The headline claim shrinks to the evaluation-design findings. | Report matched budget fractions; decide pool geometry at Thursday's gate; frame the methodological contribution as primary. |
+| **The mechanism rests on too few independent landscapes** | §4.2. Two landscapes against four, exact permutation p = 0.067 — the floor of the design — and the confirmatory arm is a restaging of the pilot protein. | The surviving claim is suggestive rather than established, and a reviewer will say so first. | Two independent high-coverage landscapes from unrelated proteins, pre-registered before the replay runs. ~80 replays, about an hour. This moves the permutation floor from 1/15 to 1/70 and is the single highest-value experiment available. |
+| **Further headline claims may be artefacts** | Three fell in two days. | Credibility, and wasted weeks building on a number that is not real. | The controls are now in the code rather than in a document: a delay-effect table carrying the identity and the null band, a corrected headroom ceiling, a permuted-outcome falsification run, and a zero-retrieval control. Every new claim gets an intervention test before it is written down. |
 | **Expert rubric reliability** | Not yet measured. | If inter-rater reliability is poor, the primary evaluation is unreliable. | This is precisely why the auto-gradeable environments matter: they give a domain where ground truth is exact rather than assessed. |
 | **Scope** | Eight workstreams, ten weeks, one person plus collaborators. | Thin delivery across everything rather than one solid result. | One paper narrative rather than two; mandatory outputs protected; a negative result retained and the claim narrowed, rather than the deliverable dropped. |
 
@@ -620,18 +717,20 @@ Ordered by how much they block.
    change the plan depending on the answer.
 2. **The display-round question.** Mpro confirmed, or an alternative? This gates library design
    and everything downstream of it.
-3. **Pool geometry.** Many small pools with compressed headroom, or few large pools with no
-   pool-to-pool spread? There is no free choice at 5,725 rows; it is a genuine trade-off and I
-   would like your view before fixing it.
-4. **Scope.** Eight streams in six remaining weeks is aggressive. If something should be cut
+3. **Scope.** Eight streams in six remaining weeks is aggressive. If something should be cut
    rather than delivered thinly, Thursday is the time to say so.
 
 **Things I would value your judgement on**
 
-5. **Is the sharpened contribution the right one?** "Verifiable decision environments
+4. **Is the sharpened contribution the right one?** "Verifiable decision environments
    manufactured from public measurement data" versus "an agent that helps scientists decide."
    The first is more defensible and less obviously useful to a clinician; I think it is right
    but I would like to be argued with.
+5. **Have I scoped §4.2 correctly?** My reading is that the surviving result describes focused
+   pools of hundreds to a few thousand candidates — deconvolution and focused maturation — and
+   says nothing about a selection round over a 10¹¹-member library. That is a deliberately
+   narrow reading of my own result and I would rather you tell me it is too narrow than find out
+   at review that it was too broad.
 6. **Is tractability a legitimate prototype-selection criterion?** The two families were chosen
    substantially because public data exists for them. §5.3 examines whether the literature
    supports that or whether it is convenience dressed as principle.
@@ -643,5 +742,7 @@ Ordered by how much they block.
 
 **What I will bring**
 
-The running system with a walkthrough of a single episode end to end; the 240 paired replays
-behind §4; and the corrected arithmetic on the eightfold figure.
+The running system with a walkthrough of a single episode end to end; the replays behind §4,
+including the two interventions; and the arithmetic on all three withdrawn claims. If you want
+one thing to look at before Thursday, make it §4 — it is the most informative two pages about
+how this project actually works.

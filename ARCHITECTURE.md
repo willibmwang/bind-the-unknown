@@ -297,31 +297,76 @@ about line coverage.
 
 ---
 
-## 10. Defects found while documenting this
+## 10. Defects found while documenting this, and what they turned up
 
-Recording them rather than quietly fixing them, since two change how a number should be read.
+Six were recorded on 20 October; five are closed, and the sixth turned out to matter far more
+than it looked.
 
-1. **Dead configuration.** `pick_batch` unconditionally reads `forest_trees` and `ucb_beta` from
-   `today.json`, so the copies of those keys in the pathogen and method configs are never in
-   force. The values coincide (64 trees, β = 1.0) so no recorded result is wrong and the stated
-   intent — one fixed surrogate shared by all policies — holds. But the keys are misleading and
-   should be removed or wired.
-2. **`source_manifest.json` is stale.** Seven source files no longer match their recorded
-   digests. Nothing regenerates this file, which makes it worse than absent: it looks like a
-   provenance record and is not one.
-3. **Model manifest path asymmetry.** `stage_model.py` and `submit.py` both read
-   `models/manifest.json`; the committed copy is at `hpc_pilots/model.manifest.json` and nothing
-   copies one to the other, so an agent submission from a clean checkout fails its staging guard.
-4. **`initial_labels` under the binding config is unused.** The replay relies on its own default,
-   which happens to equal the configured value. Harmless today, a trap later.
-5. **The effort-allocation check self-declares as superseded** — generated against the 14 October
-   baseline of 78 tasks, predating the 19 October additions.
-6. **Provenance gap in the run records.** Run files carry no host field, so whether the 160 GB1
-   results came from the cluster or a local re-run cannot be determined from the artifacts. The
-   launch checkpoint was never refreshed. This should be fixed before any result is published.
+1. **Dead configuration** — *closed.* `pick_batch` read `forest_trees` and `ucb_beta` from
+   `today.json` unconditionally, so the copies in the pathogen and method configs were never in
+   force. The values coincided, so no recorded result was wrong, but the keys described a control
+   the code did not offer. `replay` and `pick_batch` now take a surrogate argument and each
+   runner passes its own config; the GB1 block remains the default, so recorded replays stay
+   bit-identical. A test switches the exploration bonus off and asserts UCB collapses onto greedy.
+2. **Stale `source_manifest.json`** — *closed.* Nine digests had drifted and seven files,
+   including the whole dossier and emergency layer, had never been recorded. It is now
+   regenerable (`python -m hpc_pilots manifest`, with `--check` reporting drift without writing),
+   and `submit.py` prints drift at submission time.
+3. **Model manifest path asymmetry** — *closed.* Both paths now resolve through one function,
+   which prefers a staged record and falls back to the committed pin. A second bug surfaced
+   alongside it: staging resolved the revision from the repository head when no staged manifest
+   existed, which in a clean checkout staged whatever was current and defeated the pin.
+4. **Unused `initial_labels`** — *closed*, wired in rather than coinciding with the default.
+5. **The effort-allocation check self-declares as superseded** — *open.* Generated against the
+   14 October baseline of 78 tasks.
+6. **Provenance gap in the run records** — *closed, and it found something.* Every run, episode
+   and audit now carries host, platform, Python version, commit, SLURM identifiers and a
+   `git_dirty` flag. Closing it answered the question it was raised about, and the answer was not
+   the expected one — see below.
 
-Items 2, 3 and 6 are quick and worth doing before the feasibility gate; item 1 before anything
-is written up.
+### What the provenance gap was hiding
+
+Whether the 160 GB1 results came from the cluster or a local re-run could not be determined from
+the artifacts. Re-running them locally settled it: **154 of 160 reproduce exactly and six do
+not — all six in the two forest-backed policies**, with random and diverse reproducing perfectly.
+Pinned numpy, scipy and scikit-learn all match `requirements.lock.txt`, so the divergence is
+*below the version pin*: floating-point reduction order differing across machines, flipping a
+split or a tie.
+
+The authoritative cluster values survive in the SLURM stdout of job 19169 and are recovered into
+`runs/binding_cluster_finals.csv`, tracked by exception because `runs/` is not. They confirm
+every GB1 figure the Week 4 debrief quotes. The local run files are now a local re-run and
+should be re-synced from the cluster.
+
+This matters beyond bookkeeping. A project whose contribution is auditable decision records
+cannot claim bit-exact reproducibility for its forest-backed policies across machines, and now
+says so with a number attached.
+
+### Controls added since, each closing a specific way of being wrong
+
+- `summarize_delay` computes the delay effect and writes it with the accounting identity and the
+  feedback-blind null band *beside* it, so the selected-over-returned ratio cannot be read as a
+  measurement again (§4 of the overview).
+- The headroom ceiling is corrected to `min(1/top_fraction, 1/labelled_fraction)` and
+  `normalised_gain` divides by the attainable ceiling rather than by 1.0.
+- A **permuted-outcome control**: outcomes are shuffled before the episode and graded against the
+  shuffle, so a learning policy must fall to random. One that does not is scoring on index order
+  or tie-breaking.
+- A **zero-retrieval control** for the dossier arm: retrieval is forbidden and no evidence is
+  pushed, so the policy must decide from an empty dossier against the reference ranking the full
+  evidence base supports. It measures the hindsight risk the code had only ever *named*. The
+  deterministic baselines behave correctly; the LLM named the reference-best target in both
+  families that ran, having bought nothing. Two episodes is not a result, but it is a floor the
+  evidence-using arm must clear before any of its performance can be credited to evidence.
+- The action budget could never bind — with deadline 8 and budget 8 at one action per round, the
+  exhaustion branch first held at round 9, which the loop never reached. The budget the prompt
+  told the policy about was fiction.
+- `conflict_retained` is a property of the state object, true for every policy including one that
+  ignores the contradiction, and read 1.0 in all nine recorded episodes. It is demoted to a
+  labelled regression check; `addressed_conflict` now asks what the policy did next.
+
+Both controls write to their own files and are excluded from every aggregate, since a
+falsification check is not a result. Twenty-nine tests pass.
 
 ---
 

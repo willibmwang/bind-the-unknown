@@ -4,6 +4,36 @@
 (two prototype families, opens Oct 19), LAB-01 (single-round experimental question,
 Oct 22–23) and GATE-06 (feasibility and novelty review, Oct 23).
 
+> **Correction notice, 20 October 2026.** This document is left as the record of what was
+> believed on 19 October; it is not revised, so that the corrections remain legible. One claim
+> made throughout it has since been **withdrawn**.
+>
+> **The selected-versus-returned finding (§2.2(b), §2.5, and the summary) does not stand.** It
+> is an accounting identity, not a measurement. `returned` is always a subset of `selected` and
+> recall divides both by the same pool-wide hit count, so the ratio cannot fall below 1 — and
+> across 1,018 recorded delayed checkpoints it never does. It reports the share of the budget
+> still in flight: at 128 labels in batches of 8 with a three-round delay, 24 are pending at the
+> final checkpoint and 128/104 = 1.23 before any policy acts. The feedback-blind random policy,
+> whose selections are identical at every delay, reproduces the whole band (mean 1.297 over 89
+> runs against 1.312 over 279 for the informed policies). The matched comparison that would
+> actually measure a delay effect is null: mean paired difference −0.006 over 392 pool
+> comparisons, Wilcoxon p = 0.31. The 1.1–1.4× figure must not be quoted.
+>
+> Also corrected: the headroom formula used in §2.5 is wrong. The attainable multiple is
+> `min(1/top_fraction, 1/labelled_fraction)`, not `1/labelled_fraction`. The two agree at the
+> terminal checkpoint of every configured landscape, so **no figure printed in §2.5 changes**,
+> but the formula overstated headroom at earlier checkpoints.
+>
+> §2.5's conclusion that the policy gain is "small and inconsistent on pathogen landscapes" is
+> superseded rather than withdrawn: the gain is governed by how densely a pool covers the
+> variable positions the surrogate learns from, which is a property of pool geometry and not of
+> the pathogen. The pathogen scans deliver the full gain once their pools are narrowed. See
+> [ADJUDICATION_COMBINATORIAL_GAIN.md](ADJUDICATION_COMBINATORIAL_GAIN.md) for the intervention
+> tests and [PROJECT_OVERVIEW_AND_PLAN.md](PROJECT_OVERVIEW_AND_PLAN.md) §4 for the current
+> position.
+>
+> Unaffected: everything in §1 (dataset engineering), §3 (targets) and §4 (architecture).
+
 No claim of therapeutic efficacy, antiviral activity, binding affinity or full-system
 performance is made anywhere below. Targets in §3 are proposals for review with Askar
 and the SynX experimental lead, not selections.
