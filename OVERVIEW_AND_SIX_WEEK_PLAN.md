@@ -1,16 +1,4 @@
-# Emergency AI co-scientist — overview and six-week plan
-
-**Prepared 20 October 2026, for Askar and Robyn.** Covers project weeks 5 to 10, 26 October
-to 4 December. Week 1 began 28 September; six weeks remain after this one.
-
-This document supersedes the plan sections of
-[PROJECT_OVERVIEW_AND_PLAN.md](PROJECT_OVERVIEW_AND_PLAN.md) and carries forward its §4.1
-withdrawals. [ARCHITECTURE.md](ARCHITECTURE.md) holds the system detail;
-[output/TEN_WEEK_DELIVERY_PLAN.md](output/TEN_WEEK_DELIVERY_PLAN.md) holds the task register
-this plan adds to.
-
-**Nothing below asserts binding affinity, functional inhibition or therapeutic efficacy.**
-Where a number appears, the section states what it was measured on.
+# Emergency AI co-scientist — overview and plan for next six weeks
 
 ---
 
@@ -73,10 +61,28 @@ tested.
 
 ### 1.2 What it reasons over
 
-A **seven-axis dossier per candidate target**. Each claim carries a source, an availability
-date, one of four strength levels, a `verified` flag, and an optional pointer to the claim it
-contradicts. One axis is a hard gate: fail it and the campaign ends regardless of how strong
-the rest looks.
+A **seven-axis dossier per candidate target**. The axes are the Week 4 selection rubric, and
+each is in the state because it gates a decision rather than because it is interesting:
+
+| Axis | What it gates |
+| --- | --- |
+| `reagent_tractability` | **Hard gate.** An untractable reagent ends the campaign regardless of the biology. |
+| `essentiality` | A binder to a dispensable protein cannot become a therapeutic. |
+| `conservation` | Gates every family-wide and prototype-pathogen claim. |
+| `accessibility` | Sets whether a permeability story is required. |
+| `assay_availability` | Without one, a single round can only substantiate enrichment. |
+| `public_labels` | Determines whether transfer tests are runnable now or blocked on SynX. |
+| `precedent` | Supplies positive controls and de-risks interpretation of a failure. |
+
+Each claim on an axis carries a source, an availability date, one of four strength levels
+(`unknown`, `weak`, `moderate`, `strong`), a `verified` flag, and an optional pointer to the
+claim it contradicts. Only `reagent_tractability` is a hard gate: fail it and the campaign
+ends however strong the other six look.
+
+The rubric is also the reason the saturation problem in §4.2 has a tractable fix. Which axis
+is currently gating a given decision depends on the evidence state the co-scientist has been
+handed, not on the target's identity — so it is a question pretraining cannot answer, which
+is what §5.1 builds on.
 
 ### 1.3 Three rules enforced in code, not by convention
 
