@@ -18,7 +18,7 @@ import json
 import time
 
 from .chemistry import library_spec
-from .common import ROOT, Agent, digest, provenance, write_json
+from .common import ROOT, Agent, ContentFiltered, digest, provenance, write_json
 from .dossier import ACTIONS, AXES, rank
 from .targets import PACKETS, packet
 
@@ -305,6 +305,11 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=Non
                "structure_requests_unserviced": len(requested_structures),
                "libraries_proposed": len(libraries),
                "refused_future_evidence": sum(len(d.rejected) for d in dossiers),
+               # An episode that needed several attempts to obtain a parseable action is
+               # not the same observation as one that needed one, so the count travels
+               # with the result rather than only with the agent report.
+               "agent_filtered_attempts": agent.filtered if agent else None,
+               "agent_transport_retries": agent.transport_retries if agent else None,
                "policy_wall_seconds": time.perf_counter() - started}
     return {"metrics": metrics, "ranking": ranking, "recommendation": result, "trace": log,
             "probe_scores": probe_scores, "requested_structures": requested_structures,
@@ -330,7 +335,28 @@ def run_emergency(name, policy, smoke=False, control=None, repeat=1):
     outputs = []
     for replicate in range(1, repeat + 1):
         agent = Agent() if policy == "agent" else None
-        result = run_episode(name, policy, deadline=deadline, agent=agent, control=control)
+        try:
+            result = run_episode(name, policy, deadline=deadline, agent=agent, control=control)
+        except ContentFiltered as filtered:
+            # One packet's generations are filtered intermittently. Losing the rest of the
+            # batch to it would make the recorded replicate count a function of the
+            # provider's filter rather than of the design, and would quietly bias the
+            # surviving sample toward whatever the filter happens to permit. The episode
+            # is recorded as missing data with a stated cause and the batch continues;
+            # `status` is not "complete", so no aggregate will read it as a result.
+            label_policy = agent.label if agent else policy
+            suffix = f"{f'_{control}' if control else ''}_rep{replicate:02d}"
+            output = ROOT / "runs/emergency" / f"{prefix}{name}_{label_policy}{suffix}_filtered.json"
+            write_json(output, {
+                "experiment": "emergency", "family_packet": name, "policy": label_policy,
+                "control": control, "smoke": smoke, "status": "filtered",
+                "replicate": replicate, "replicates_requested": repeat,
+                "reason": str(filtered), "agent": agent.report() if agent else None,
+                "provenance": provenance()})
+            outputs.append(str(output))
+            print(json.dumps({"output": str(output), "replicate": replicate,
+                              "status": "filtered"}))
+            continue
         label_policy = agent.label if agent else policy
         result.update({"experiment": "emergency", "family_packet": name, "policy": label_policy,
                        "control": control, "smoke": smoke, "status": "complete",

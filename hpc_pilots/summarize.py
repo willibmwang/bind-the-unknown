@@ -248,10 +248,20 @@ def summarize_emergency(directory):
     evidence at all. That number is a floor: the evidence-using arm has to clear it
     before any of its performance can be credited to the evidence it paid for.
     """
-    rows, probe = [], []
+    rows, probe, filtered = [], [], []
     for path in (ROOT / "runs/emergency").glob("*.json"):
         data = json.loads(path.read_text())
-        if data.get("smoke") or data.get("status") != "complete":
+        if data.get("smoke"):
+            continue
+        if data.get("status") == "filtered":
+            # Attrition has to be reported, not inferred from a missing file. An episode
+            # that failed on a provider content filter is missing data with a known cause,
+            # and the rate matters: it determines how much of the intended design survived.
+            filtered.append({"file": str(path.relative_to(ROOT)), "packet": data["family_packet"],
+                             "policy": data["policy"], "control": data.get("control"),
+                             "replicate": data.get("replicate", 1)})
+            continue
+        if data.get("status") != "complete":
             continue
         record = {"file": str(path.relative_to(ROOT)), "packet": data["family_packet"],
                   "replicate": data.get("replicate", 1), **data["metrics"]}
@@ -281,6 +291,8 @@ def summarize_emergency(directory):
                     "name the target the full evidence base supports?",
         "by_cell": summary,
         "total_evidence_retrieved": int(frame.evidence_retrieved.sum()),
+        "episodes_lost_to_content_filter": len([f for f in filtered if f["control"]]),
+        "filtered_episodes": [f for f in filtered if f["control"]],
         "interpretation": "Any match here was not derived from evidence, because none was "
                           "bought. For a policy with pretrained knowledge of named targets "
                           "this measures hindsight, which the decision-clock boundary cannot "

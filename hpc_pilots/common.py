@@ -130,6 +130,29 @@ PROVIDERS = {
 NO_TEMPERATURE = {"anthropic"}
 MAX_TOKENS_KEY = {"openai": "max_completion_tokens"}
 
+# Provider-side stop reasons worth another attempt. A content filter is intermittent and
+# content-dependent: measured on one evidence packet, two of four attempts were stopped at
+# 666 and 795 characters while rationales elsewhere complete at 919, so the output ceiling
+# is not the cause and the same request can succeed unchanged.
+#
+# `length` is deliberately absent. A request that truncated once will truncate again, and
+# retrying it would spend money to produce the same failure; it needs a raised ceiling.
+#
+# An action outside the allowed set is also absent, and must stay absent. That is a policy
+# result, not a provider failure, and resampling until the policy returns something legal
+# would quietly filter its behaviour out of the record.
+RETRYABLE_FINISH = {"content_filter"}
+
+
+class ContentFiltered(ValueError):
+    """Every attempt was stopped by the provider's content filter.
+
+    Its own type so a caller running a batch can record the episode as filtered and carry
+    on to the next one, while an action outside the allowed set -- a plain ValueError --
+    still aborts. A filtered episode is missing data with a known cause, not a result and
+    not a licence to substitute anything for it.
+    """
+
 # The original domain-free prompt for the budgeted-acquisition pilots. Kept verbatim so the
 # recorded binding replays remain reproducible; the emergency policy supplies its own.
 BUDGET_SYSTEM = ("You allocate a limited scientific evidence budget. Use only the supplied state. "
@@ -178,10 +201,17 @@ class Agent:
         # Hosted runs get their own policy name so they never overwrite or pool with local-model runs.
         self.label = "agent" if self.provider == "local" else \
             f"agent-{self.provider}-{self.model.replace('/', '-').replace(':', '-')}"
+        self.retries = int(os.environ.get("PILOT_LLM_RETRIES", "4"))
         self.calls = 0
         self.seconds = 0.0
         self.tokens = {"prompt_tokens": 0, "completion_tokens": 0}
         self.history = []
+        # Recovery is recorded, not hidden. An episode that needed four attempts to get a
+        # parseable answer is not the same observation as one that needed one, and a
+        # filtered attempt still costs tokens, so both have to reach the artifact.
+        self.filtered = 0
+        self.transport_retries = 0
+        self.incidents = []
 
     def act(self, task, state, allowed, fields=None, system=None):
         """Return the validated action object. `fields` adds enum-constrained arguments.
@@ -210,36 +240,33 @@ class Agent:
             token = Path(self.token_file).read_text().strip()
         if token:
             headers["Authorization"] = "Bearer " + token
-        start = time.perf_counter()
-        response = requests.post(self.url + "/chat/completions", json=payload,
-                                 headers=headers, timeout=90)
-        response.raise_for_status()
-        body = response.json()
-        self.calls += 1
-        self.seconds += time.perf_counter() - start
-        for k in self.tokens:
-            self.tokens[k] += int(body.get("usage", {}).get(k, 0))
-        choice = body["choices"][0]
-        content = choice["message"]["content"]
-        # Accept fenced JSON or surrounding text, but not an invented/fallback action.
-        first, last = content.find("{"), content.rfind("}")
-        if first < 0 or last < first:
-            # The usual cause is truncation at the output-token ceiling, which leaves an
-            # opening brace and no closing one. Say so, rather than only that parsing failed.
+        for attempt in range(1, self.retries + 1):
+            body = self._post(payload, headers, requests)
+            choice = body["choices"][0]
+            content = choice["message"]["content"]
             reason = choice.get("finish_reason")
-            # The two causes need different responses, and treating them alike wasted a
+            # Accept fenced JSON or surrounding text, but not an invented/fallback action.
+            first, last = content.find("{"), content.rfind("}")
+            if first >= 0 and last > first:
+                break
+            self.incidents.append({"attempt": attempt, "finish_reason": reason,
+                                   "chars": len(content), "content_head": content[:160]})
+            if reason in RETRYABLE_FINISH and attempt < self.retries:
+                self.filtered += 1
+                continue
+            # The causes need different responses, and treating them alike wasted a
             # debugging session: a ceiling is raised, a filter is recorded and retried.
             hint = {"length": f" The response hit the {self.max_tokens}-token output ceiling; "
                               "raise PILOT_LLM_MAX_TOKENS.",
-                    "content_filter": " The provider stopped this response on a content filter, "
-                                      "so the output ceiling is not the cause and raising it will "
-                                      "not help. This fires on some evidence packets and not "
-                                      "others, which makes it a reproducibility hazard rather "
-                                      "than a bug: an episode can fail for reasons unrelated to "
-                                      "the policy, so record which packets filtered and report "
-                                      "them alongside the episodes that completed."}.get(reason, "")
-            raise ValueError(f"Agent did not return a JSON object (finish_reason={reason!r},"
-                             f" {len(content)} chars).{hint} Content began: {content[:200]!r}")
+                    "content_filter": f" The provider stopped this response on a content filter "
+                                      f"on all {attempt} attempts, so the output ceiling is not "
+                                      "the cause and raising it will not help. The episode is "
+                                      "not substitutable: record the packet as filtered and "
+                                      "report it alongside the episodes that completed."
+                    }.get(reason, "")
+            error = ContentFiltered if reason == "content_filter" else ValueError
+            raise error(f"Agent did not return a JSON object (finish_reason={reason!r},"
+                        f" {len(content)} chars).{hint} Content began: {content[:200]!r}")
         answer = json.loads(content[first:last + 1])
         if answer.get("action") not in allowed:
             raise ValueError("Agent returned an action outside the allowed set")
@@ -249,10 +276,44 @@ class Agent:
         self.history.append({"state": state, "response": answer})
         return answer
 
+    def _post(self, payload, headers, requests):
+        """One completion, retrying only transport failures that could plausibly clear.
+
+        A 429 or a 5xx is worth waiting out; a long sweep should not die on one. Any
+        other 4xx is a malformed request and will fail identically however often it is
+        sent, so it is raised immediately rather than retried for a minute first.
+        """
+        delay = 1.0
+        for attempt in range(1, self.retries + 1):
+            start = time.perf_counter()
+            try:
+                response = requests.post(self.url + "/chat/completions", json=payload,
+                                         headers=headers, timeout=90)
+                response.raise_for_status()
+            except requests.RequestException as error:
+                status = getattr(getattr(error, "response", None), "status_code", None)
+                retryable = status is None or status == 429 or status >= 500
+                if attempt == self.retries or not retryable:
+                    raise
+                self.transport_retries += 1
+                self.incidents.append({"attempt": attempt, "status": status,
+                                       "transport_error": str(error)[:160]})
+                time.sleep(delay)
+                delay *= 2
+                continue
+            self.calls += 1
+            self.seconds += time.perf_counter() - start
+            body = response.json()
+            for key in self.tokens:
+                self.tokens[key] += int(body.get("usage", {}).get(key, 0))
+            return body
+
     def choose(self, task, state, allowed):
         """Action-only interface retained so the existing binding replays reproduce exactly."""
         return self.act(task, state, allowed)["action"]
 
     def report(self):
-        return {"provider": self.provider, "model": self.model, "calls": self.calls, "seconds": self.seconds,
-                "tokens": self.tokens, "history": self.history}
+        return {"provider": self.provider, "model": self.model, "calls": self.calls,
+                "seconds": self.seconds, "tokens": self.tokens,
+                "filtered_attempts": self.filtered, "transport_retries": self.transport_retries,
+                "incidents": self.incidents, "history": self.history}

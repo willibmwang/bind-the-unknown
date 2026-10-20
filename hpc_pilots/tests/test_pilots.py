@@ -1,4 +1,5 @@
 import json
+import time
 
 import numpy as np
 import pandas as pd
@@ -107,6 +108,110 @@ def test_agent_contract_and_token_accounting(monkeypatch):
     schema = recorded['json']['response_format']['json_schema']['schema']
     assert schema['properties']['action']['enum'] == ['greedy', 'explore']
     assert agent.report()['tokens'] == {'prompt_tokens': 10, 'completion_tokens': 4}
+
+
+def _mock_agent(monkeypatch, responses):
+    """Wire a fake transport returning `responses` in order. Each is (content, finish_reason)."""
+    import requests
+    for key in ('PILOT_LLM_ENDPOINT_FILE', 'PILOT_LLM_TOKEN_FILE', 'PILOT_LLM_TOKEN'):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv('PILOT_LLM_URL', 'http://local-test/v1')
+    monkeypatch.setenv('PILOT_LLM_MODEL', 'test-model')
+    sent = []
+    class Response:
+        def __init__(self, content, reason):
+            self.content, self.reason = content, reason
+        def raise_for_status(self): pass
+        def json(self):
+            return {'choices': [{'message': {'content': self.content},
+                                 'finish_reason': self.reason}],
+                    'usage': {'prompt_tokens': 3, 'completion_tokens': 1}}
+    def fake_post(url, **kwargs):
+        sent.append(kwargs)
+        return Response(*responses[min(len(sent) - 1, len(responses) - 1)])
+    monkeypatch.setattr(requests, 'post', fake_post)
+    monkeypatch.setattr(time, 'sleep', lambda *a: None)
+    return sent
+
+
+def test_a_content_filter_is_retried_and_the_recovery_is_recorded(monkeypatch):
+    # Measured on a real packet: two of four attempts were stopped at 666 and 795 chars
+    # while rationales elsewhere complete at 919, so the same request can succeed
+    # unchanged. Retrying it is recovery from a provider failure, not resampling a policy.
+    truncated = ('{"action":"greedy","rationale":"All three targets have zero substantiated',
+                 'content_filter')
+    good = ('{"action":"greedy","rationale":"ok"}', 'stop')
+    _mock_agent(monkeypatch, [truncated, truncated, good])
+    agent = Agent()
+    assert agent.choose('select', {'observed_labels': 8}, ['greedy', 'explore']) == 'greedy'
+    assert agent.filtered == 2
+    assert agent.calls == 3, 'every attempt costs a call and must be counted'
+    assert [i['finish_reason'] for i in agent.incidents] == ['content_filter'] * 2
+    assert agent.report()['filtered_attempts'] == 2
+
+
+def test_a_persistent_content_filter_fails_rather_than_substituting(monkeypatch):
+    truncated = ('{"action":"greedy","rationale":"unterminated', 'content_filter')
+    _mock_agent(monkeypatch, [truncated])
+    monkeypatch.setenv('PILOT_LLM_RETRIES', '3')
+    with pytest.raises(ValueError, match='content filter'):
+        Agent().choose('select', {'observed_labels': 8}, ['greedy'])
+
+
+def test_a_truncated_response_is_not_retried_because_it_cannot_clear(monkeypatch):
+    # A request that hit the output ceiling will hit it again; retrying spends money to
+    # reproduce the same failure. The ceiling has to be raised instead, and the message says so.
+    _mock_agent(monkeypatch, [('{"action":"greedy","rationale":"cut', 'length')])
+    agent = Agent()
+    with pytest.raises(ValueError, match='output ceiling'):
+        agent.choose('select', {'observed_labels': 8}, ['greedy'])
+    assert agent.calls == 1 and agent.filtered == 0
+
+
+def test_an_invalid_action_is_never_retried_away(monkeypatch):
+    # Resampling until the policy returns something legal would filter its behaviour out
+    # of the record. One call, then raise.
+    _mock_agent(monkeypatch, [('{"action":"invented","rationale":"bad"}', 'stop')])
+    agent = Agent()
+    with pytest.raises(ValueError, match='outside'):
+        agent.choose('select', {'observed_labels': 8}, ['greedy'])
+    assert agent.calls == 1
+
+
+def test_a_client_error_is_not_retried_but_a_rate_limit_is(monkeypatch):
+    import requests
+    for key in ('PILOT_LLM_ENDPOINT_FILE', 'PILOT_LLM_TOKEN_FILE', 'PILOT_LLM_TOKEN'):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv('PILOT_LLM_URL', 'http://local-test/v1')
+    monkeypatch.setenv('PILOT_LLM_MODEL', 'test-model')
+    monkeypatch.setattr(time, 'sleep', lambda *a: None)
+    attempts = []
+    class Response:
+        def __init__(self, status): self.status_code = status
+        def raise_for_status(self):
+            if self.status_code >= 400:
+                error = requests.HTTPError(f'{self.status_code}')
+                error.response = self
+                raise error
+        def json(self):
+            return {'choices': [{'message': {'content': '{"action":"greedy","rationale":"ok"}'},
+                                 'finish_reason': 'stop'}], 'usage': {}}
+    def post_sequence(statuses):
+        def fake(url, **kwargs):
+            attempts.append(1)
+            return Response(statuses[min(len(attempts) - 1, len(statuses) - 1)])
+        return fake
+    # A 429 clears on a later attempt, so the sweep survives it.
+    monkeypatch.setattr(requests, 'post', post_sequence([429, 429, 200]))
+    agent = Agent()
+    assert agent.choose('select', {}, ['greedy']) == 'greedy'
+    assert agent.transport_retries == 2
+    # A 400 is a malformed request and will fail identically however often it is sent.
+    attempts.clear()
+    monkeypatch.setattr(requests, 'post', post_sequence([400]))
+    with pytest.raises(requests.HTTPError):
+        Agent().choose('select', {}, ['greedy'])
+    assert len(attempts) == 1
 
 
 def test_invalid_agent_action_fails_instead_of_substituting_policy(monkeypatch):
