@@ -103,10 +103,21 @@ Each rule is pinned by a test that would fail if the rule were removed.
 
 ## 2. How it is graded without a laboratory or a reviewer
 
-Public measurement tables are hidden behind an evaluator. The co-scientist pays to reveal
-outcomes under a budget, and every choice is scored exactly against what was withheld.
-Grading is deterministic, needs no human, and can be repeated as often as the question
-requires.
+Knowing whether a scientific decision was a good one normally costs either a bench
+experiment or an expert's time. Both are slow and expensive, and expert judgement has
+inter-rater problems that are themselves a project risk.
+
+The alternative used here: take a dataset in which someone has *already measured* the
+outcome for every candidate, hide all of it behind an evaluator, and let the co-scientist pay
+to reveal a few at a time under a budget. Every choice it makes is then scored exactly
+against the outcomes that were withheld. Grading is deterministic, needs no bench and no
+reviewer, and can be repeated as often as the question requires.
+
+A note on one word, because it is overloaded. **"Policy" below means the decision rule — the
+thing choosing the next action**, in the machine-learning sense. It has nothing to do with
+public-health policy or with WHO guidance; the project's one WHO reference is the
+prototype-pathogen rationale recorded in the evidence packets, which is a justification for
+family choice and is unrelated to this section.
 
 Four substrate families run through one replay engine: the original pilot landscape, the
 pathogen landscapes, the method-development landscapes carrying measured binding endpoints,
@@ -119,10 +130,12 @@ and the macrocyclic display libraries added this week.
   episode coordinates: 0.804 on the real signal, 0.265 permuted, 0.263 random — the control
   lands 0.002 from random, which is what it is for. A policy that did *not* collapse would be
   scoring on index order or tie-breaking rather than on the evidence it paid for.
-- **Zero retrieval.** Forbid retrieval, push no evidence, and require a decision from an
-  empty dossier. This measures how much of the answer is recoverable from the model's
-  pretraining rather than from evidence. It is the audit the architecture document had named
-  as necessary and left undone.
+- **Zero retrieval.** Switch off the co-scientist's ability to look anything up, hand it an
+  empty dossier, and require a decision anyway. In plain terms it is a cheating detector: if
+  the system still names the target the full evidence base supports, it did not reason its
+  way there, because it bought nothing to reason from — it already knew the answer from
+  pretraining. It fired, in 16 of 16 episodes. This is the audit the architecture document
+  named as necessary and left undone, and it is the reason §5.1 leads the plan.
 
 Controls write to their own files and are excluded from every aggregate, because a
 falsification check is not a result.

@@ -81,6 +81,38 @@ def _rubric_action(by_target, available, ranking):
     return "stop", ranking[0]["target"], None
 
 
+def decision_relevant(dossiers, pool, retrieved, now):
+    """The (target, axis) pairs whose purchase would actually move the decision at `now`.
+
+    Computed by the evaluator, which can see the whole evidence base: each retrievable
+    claim is applied to a forked state and the ranking recomputed. A pair counts as
+    relevant if observing it changes the leading target, the leader's hard-gate verdict,
+    or how much of the leader is substantiated.
+
+    This exists because the readout the decision arm had been scored on is saturated. A
+    policy that has memorised which target is best scores 1.0 on target agreement having
+    bought no evidence at all, so that metric cannot separate a policy using evidence from
+    one reciting a prior. Which axis is worth buying *now* is a different question: it
+    depends on what this episode has already observed and on what this packet happens to
+    contain, neither of which is recoverable from a target's name.
+
+    It also comes with its own floor. The share of retrievable pairs that are relevant is
+    the rate a policy choosing uniformly at random would achieve, and the evaluator can
+    compute it exactly, so the metric needs no baseline arm to be interpretable.
+    """
+    by_target = {d.target: d for d in dossiers}
+    before = rank(dossiers, now)[0]
+    unchanged = (before["target"], before["hard_gates_met"], before["substantiated_axes"])
+    relevant = []
+    for target, axis in _retrievable(pool, retrieved, now):
+        forks = {name: d.fork() for name, d in by_target.items()}
+        forks[target].observe(pool[(target, axis)], now)
+        after = rank(list(forks.values()), now)[0]
+        if (after["target"], after["hard_gates_met"], after["substantiated_axes"]) != unchanged:
+            relevant.append((target, axis))
+    return relevant
+
+
 def _addressed_conflict(later, target, axis):
     """Did the policy do anything about a contradiction once it had landed?
 
@@ -175,6 +207,9 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=Non
         # One point of control for every policy. Gating only the agent's action list left
         # the rubric reading the retrievable set directly and buying evidence anyway.
         available = set() if blind else set(_retrievable(pool, retrieved, round_))
+        # Scored against this round's state, before the policy acts, so the oracle cannot
+        # be contaminated by the choice it is about to grade.
+        relevant = set() if blind else set(decision_relevant(dossiers, pool, retrieved, round_))
         if policy == "rubric":
             action, target, axis = _rubric_action(by_target, available, ranking)
         elif policy == "scripted":
@@ -199,6 +234,12 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=Non
 
         record = {"round": round_, "action": action, "target": target, "axis": axis,
                   "pushed_evidence": [p["entry"]["id"] for p in due]}
+        if action == "retrieve_evidence" and not blind:
+            # Recorded whether or not the pair exists, so a policy cannot improve its score
+            # by asking for claims that were never on offer.
+            record["decision_relevant"] = (target, axis) in relevant
+            record["relevant_offered"] = len(relevant)
+            record["retrievable_offered"] = len(available)
         if action == "retrieve_evidence":
             if blind:
                 raise ValueError("retrieve_evidence reached the zero-retrieval control")
@@ -274,12 +315,40 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=Non
     else:
         terminal = "deadline_reached"
 
+    # Chance is the share of retrievable pairs that were decision-relevant, averaged over
+    # the rounds where the policy actually bought something, so the floor is matched to the
+    # decisions taken rather than to rounds the policy never spent on.
+    scored_picks = [r for r in log if r.get("decision_relevant") is not None]
+    relevant_picks = sum(1 for r in scored_picks if r["decision_relevant"])
+    # The statistic is observed over expected. Expected is the per-round probability of
+    # picking a relevant pair by chance, summed over the rounds the policy actually spent
+    # on. Reporting it as a count rather than a rate is what makes it readable: a round
+    # where nothing relevant remained contributes nothing to either side, so two policies
+    # that buy a different number of times can legitimately share a lift.
+    offers = [r["relevant_offered"] / r["retrievable_offered"] for r in scored_picks
+              if r["retrievable_offered"]]
+    expected_relevant = sum(offers) if offers else None
+    chance_rate = expected_relevant / len(offers) if offers else None
+
     reference = reference_ranking(name, deadline)
     chosen = result["target"] if result else None
     metrics = {"policy": policy, "control": control, "family": spec["family"],
                # The comparison the control exists for. Under zero retrieval this says
                # whether the policy reached the reference answer having bought nothing.
                "evidence_retrieved": len(retrieved),
+               # Were the purchases the ones that moved the decision? Reported beside the
+               # rate a uniform chooser would have achieved on the same offers, which is
+               # the comparator -- the zero-retrieval control makes no purchases and so
+               # cannot saturate this the way it saturates target agreement.
+               "retrievals_scored": len(scored_picks),
+               "decision_relevant_retrievals": relevant_picks,
+               "decision_relevant_rate": round(relevant_picks / len(scored_picks), 4)
+               if scored_picks else None,
+               "chance_relevant_rate": round(chance_rate, 4) if chance_rate is not None else None,
+               "expected_relevant_retrievals": round(expected_relevant, 3)
+               if expected_relevant is not None else None,
+               "decision_relevant_lift": round(relevant_picks / expected_relevant, 3)
+               if expected_relevant else None,
                "reference_top_target": reference[0]["target"],
                "chosen_target": chosen,
                "chosen_matches_reference": None if chosen is None

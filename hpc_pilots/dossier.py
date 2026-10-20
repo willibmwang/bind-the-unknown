@@ -90,6 +90,18 @@ class Dossier:
         self.observed.append(entry)
         return True
 
+    def fork(self):
+        """A copy sharing no mutable state, for counterfactual lookahead by the evaluator.
+
+        The evaluator needs to ask what the ranking *would* be if one further claim were
+        observed. It must not answer that by mutating the dossier the policy is reasoning
+        over, and a shallow copy would share the observed list and do exactly that.
+        """
+        other = Dossier(self.target, self.pathogen, self.family, self.compartment)
+        other.observed = list(self.observed)
+        other.rejected = list(self.rejected)
+        return other
+
     def axis_evidence(self, axis):
         return [e for e in self.observed if e["axis"] == axis]
 
