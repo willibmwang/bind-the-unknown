@@ -107,7 +107,23 @@ def enrichment(hidden_outcomes, selected, fraction):
 
 def replay(features, hidden_outcomes, policy, seed, maximum=128, initial=8, batch=8,
            delay=0, checkpoints=(8, 16, 32, 64, 128), agent=None, fraction=None,
-           cardinalities=None, surrogate=None):
+           cardinalities=None, surrogate=None, control=None):
+    """Replay one acquisition policy. `control="permuted"` is the falsification arm.
+
+    Under the permuted control the outcome vector is shuffled before the episode begins
+    and the episode is then graded against the shuffled vector, so the environment is
+    self-consistent but carries no relationship between features and outcome. There is
+    nothing left to learn, and every policy that works by learning one must fall to the
+    random baseline. A policy that does not fall is scoring on something other than the
+    evidence it paid for -- index order, a tie-breaking bias, pool construction -- and
+    its headline number on the real landscape means correspondingly less. Running this
+    arm costs one extra replay per configuration and is the cheapest check available
+    that the measured gain is a gain.
+    """
+    if control == "permuted":
+        hidden_outcomes = np.random.default_rng(seed + 10_000_000).permutation(hidden_outcomes)
+    elif control is not None:
+        raise ValueError(f"Unknown control arm {control!r}")
     rng = np.random.default_rng(seed)
     first = rng.choice(len(features), size=initial, replace=False).tolist()
     queried, observed = first.copy(), first.copy()
@@ -161,11 +177,14 @@ def replay(features, hidden_outcomes, policy, seed, maximum=128, initial=8, batc
     # Selection quality is retrospective; delayed results are not available at submission time.
     final_return_round = max([round_number] + [due for due, _ in pending])
     return {"metrics": records, "trace": trace, "initial_indices": first,
-            "final_return_round": final_return_round,
+            "final_return_round": final_return_round, "control": control,
+            "control_note": "Outcomes were permuted before the episode and graded against the "
+                            "permutation; every learning policy should fall to random here."
+                            if control == "permuted" else "Real outcomes.",
             "delay_units": "synthetic decision rounds, not measured laboratory time"}
 
 
-def run_binding(pool, policy, delay=0, smoke=False):
+def run_binding(pool, policy, delay=0, smoke=False, control=None):
     c, path = config(), ROOT / "data/processed/binding"
     split = np.load(path / "splits.npz")["evaluation"][pool]
     features = np.load(path / "features.npy")[split]

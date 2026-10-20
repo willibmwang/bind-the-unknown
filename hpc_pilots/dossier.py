@@ -94,12 +94,22 @@ class Dossier:
         return [e for e in self.observed if e["axis"] == axis]
 
     def assess(self, axis):
-        """Strongest observed claim on the axis, with its citations. Unknown when uncited."""
+        """Strongest observed claim on the axis, with its citations. Unknown when uncited.
+
+        Two readings are kept apart because they license different decisions.
+        `assessment` is the strongest claim of any kind; `verified_assessment` ignores
+        claims carrying no citation, so an assertion from memory cannot be the thing
+        that satisfies a gate. `conflict` says another observed claim contradicts one
+        of them, which `readiness` then refuses to treat as settled.
+        """
         entries = self.axis_evidence(axis)
         if not entries:
-            return {"assessment": "unknown", "citations": [], "unverified": [], "conflict": False}
+            return {"assessment": "unknown", "verified_assessment": "unknown",
+                    "citations": [], "unverified": [], "conflict": False}
         best = max(entries, key=lambda e: ASSESSMENTS.index(e["strength"]))
         return {"assessment": best["strength"],
+                "verified_assessment": max((e["strength"] for e in entries if e["verified"]),
+                                           key=ASSESSMENTS.index, default="unknown"),
                 "citations": sorted({e["source"] for e in entries}),
                 "unverified": [e["id"] for e in entries if not e["verified"]],
                 "conflict": any(e["conflicts_with"] for e in entries)}
@@ -137,25 +147,48 @@ class Dossier:
         return out
 
     def readiness(self):
-        """Evidence coverage, not efficacy. A failed hard gate blocks regardless of coverage."""
-        assessed = {axis: self.assess(axis)["assessment"] for axis in AXES}
-        substantiated = [a for a, v in assessed.items() if v in ("moderate", "strong")]
-        blocking = [a for a, spec in AXES.items()
-                    if spec["hard_gate"] and assessed[a] in ("unknown", "weak")]
+        """Evidence coverage, not efficacy. A failed hard gate blocks regardless of coverage.
+
+        An axis is substantiated only when a *cited* claim reaches moderate or better and
+        no observed claim contradicts it. Both exclusions are deliberate.
+
+        Counting a contested axis as substantiated made retaining the contradiction
+        decorative: the ranking read the axis as settled while the state recorded that it
+        was not, so the one thing the design exists to preserve had no consequence for any
+        decision taken downstream of it. Counting an uncited claim let an assertion from
+        memory satisfy a hard gate, which is exactly what the `verified` flag was added to
+        prevent. Both are reported, so a demotion can be read off the state.
+        """
+        assessed = {axis: self.assess(axis) for axis in AXES}
+        substantiated = [a for a, v in assessed.items()
+                         if v["verified_assessment"] in ("moderate", "strong") and not v["conflict"]]
+        blocking = [a for a, spec in AXES.items() if spec["hard_gate"] and a not in substantiated]
         return {"substantiated_axes": len(substantiated), "total_axes": len(AXES),
+                "substantiated": substantiated,
+                "contested_axes": [a for a, v in assessed.items() if v["conflict"]],
+                "uncited_axes": [a for a, v in assessed.items() if v["unverified"]],
                 "hard_gates_met": not blocking, "blocking_axes": blocking,
-                "unknown_axes": [a for a, v in assessed.items() if v == "unknown"],
-                "interpretation": "Evidence coverage of the rubric. Not binding, inhibition, "
-                                  "antiviral activity or therapeutic efficacy."}
+                "unknown_axes": [a for a, v in assessed.items() if v["assessment"] == "unknown"],
+                "interpretation": "Evidence coverage of the rubric, counting only cited and "
+                                  "uncontested claims. Not binding, inhibition, antiviral "
+                                  "activity or therapeutic efficacy."}
 
     def state(self, now):
-        """The agent-visible decision state. Named targets, cited claims, explicit unknowns."""
+        """The agent-visible decision state. Named targets, cited claims, explicit unknowns.
+
+        This deliberately does *not* report the refusal count. A policy told that three
+        claims exist which it is not allowed to see has been told that the axis is one
+        somebody later thought worth writing about, which is information from after the
+        decision clock arriving by a side channel the date boundary does not close. An
+        axis with no evidence and an axis with only future evidence must be
+        indistinguishable from here; the count stays available on the dossier for the
+        episode record, which the policy never reads.
+        """
         return {"target": self.target, "pathogen": self.pathogen, "family": self.family,
                 "compartment": self.compartment, "decision_clock": now,
                 "axes": {axis: {**AXES[axis], **self.assess(axis)} for axis in AXES},
                 "readiness": self.readiness(), "conflicts": self.conflicts(),
                 "open_uncertainties": self.open_uncertainties(),
-                "refused_future_evidence": len(self.rejected),
                 "hindsight_risk": "Targets are named, so pretrained knowledge may substitute for "
                                   "retrieval. The date boundary does not control this."}
 
@@ -171,6 +204,8 @@ def rank(dossiers, now):
              "hard_gates_met": d.readiness()["hard_gates_met"],
              "blocking_axes": d.readiness()["blocking_axes"],
              "unknown_axes": d.readiness()["unknown_axes"],
+             "contested_axes": d.readiness()["contested_axes"],
+             "uncited_axes": d.readiness()["uncited_axes"],
              "rationale": _rationale(d)} for i, d in enumerate(ordered)]
 
 
@@ -183,6 +218,8 @@ def _rationale(d):
     strong = [a for a in AXES if d.assess(a)["assessment"] == "strong"]
     weak = [a for a in AXES if d.axis_evidence(a) and d.assess(a)["assessment"] == "weak"]
     unseen = [a for a in AXES if not d.axis_evidence(a)]
+    contested = [a for a in AXES if d.assess(a)["conflict"]]
+    uncited = [a for a in AXES if d.assess(a)["unverified"]]
     parts = []
     if strong:
         parts.append("strong on " + ", ".join(strong))
@@ -190,4 +227,10 @@ def _rationale(d):
         parts.append("assessed weak on " + ", ".join(weak))
     if unseen:
         parts.append("no evidence retrieved for " + ", ".join(unseen))
+    # Both of these demote an axis in `readiness`, so the rationale has to say so rather
+    # than leaving the reader to wonder why a strong-looking axis did not count.
+    if contested:
+        parts.append("contested, not counted as substantiated: " + ", ".join(contested))
+    if uncited:
+        parts.append("claims awaiting a citation on " + ", ".join(uncited))
     return "; ".join(parts) or "no evidence observed"

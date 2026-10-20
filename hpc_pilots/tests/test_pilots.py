@@ -176,9 +176,52 @@ def test_dossier_refuses_evidence_dated_after_the_decision_clock():
     future = evidence("e1", "conservation", "later finding", "strong", "src", available_from=5)
     assert d.observe(future, now=2) is False
     assert d.assess("conservation")["assessment"] == "unknown"
-    assert d.state(2)["refused_future_evidence"] == 1
+    # The refusal is recorded for the episode artifact but must not reach the policy: a
+    # count of claims it is not allowed to see would tell it the axis is one somebody
+    # later wrote about, which the date boundary cannot take back.
+    assert len(d.rejected) == 1
+    assert 'refused_future_evidence' not in json.dumps(d.state(2))
+    unseen = Dossier("Mpro (nsp5)", "SARS-CoV-2", "Coronaviridae", "cytosolic")
+    assert d.state(2)['axes']['conservation'] == unseen.state(2)['axes']['conservation']
     assert d.observe(future, now=5) is True
     assert d.assess("conservation")["assessment"] == "strong"
+
+
+def test_a_contested_or_uncited_axis_is_not_substantiated():
+    # Retaining a contradiction is decorative if the ranking still reads the axis as
+    # settled, and the verified flag is decorative if an uncited claim can carry a gate.
+    settled = Dossier("settled", "P", "F")
+    contested = Dossier("contested", "P", "F")
+    uncited = Dossier("uncited", "P", "F")
+    for d in (settled, contested, uncited):
+        d.observe(evidence(f"{d.target}:gate", "reagent_tractability", "c", "strong", "src", 0), 0)
+    settled.observe(evidence("s:ess", "essentiality", "c", "strong", "src", 0), 0)
+    contested.observe(evidence("c:ess", "essentiality", "c", "strong", "src", 0), 0)
+    contested.observe(evidence("c:ess2", "essentiality", "disputed", "weak", "other", 1,
+                               conflicts_with="c:ess"), 1)
+    uncited.observe(evidence("u:ess", "essentiality", "c", "strong", "memory", 0, verified=False), 0)
+    assert settled.readiness()["substantiated_axes"] == 2
+    assert contested.readiness()["substantiated_axes"] == 1
+    assert contested.readiness()["contested_axes"] == ["essentiality"]
+    assert uncited.readiness()["substantiated_axes"] == 1
+    assert uncited.readiness()["uncited_axes"] == ["essentiality"]
+    # The strongest claim is still reported; it simply no longer counts toward readiness.
+    assert contested.assess("essentiality")["assessment"] == "strong"
+    assert uncited.assess("essentiality")["verified_assessment"] == "unknown"
+    assert rank([contested, settled, uncited], now=1)[0]["target"] == "settled"
+
+
+def test_a_contradiction_is_scored_on_what_the_policy_did_next():
+    result = run_episode("coronaviridae", "rubric", deadline=8, call_budget=8)
+    contradictory = [s for s in result["probe_scores"] if s["kind"] == "contradictory"]
+    assert contradictory, "the coronaviridae packet carries a contradictory probe"
+    # Retention is a property of the state object, so it holds for every policy and is
+    # kept only as a regression check. The policy-level reading is scored separately and
+    # is allowed to be unscored when the probe lands with no round left to respond in.
+    assert all(s["conflict_retained"] for s in contradictory)
+    assert all("addressed_conflict" in s for s in contradictory)
+    assert result["metrics"]["terminal_condition"] in (
+        "recommended", "stopped", "action_budget_exhausted", "deadline_reached")
 
 
 def test_contradictory_evidence_coexists_instead_of_overwriting():

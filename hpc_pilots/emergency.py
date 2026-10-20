@@ -34,9 +34,16 @@ SYSTEM = (
 
 
 def recommendation(d):
-    """What the single display round can substantiate, gated by the assay-availability axis."""
+    """What the single display round can substantiate, gated by the assay-availability axis.
+
+    The gate reads the *cited and uncontested* assessment. An assay believed available on
+    the strength of an uncited claim, or one another observed claim contradicts, does not
+    license a functional endpoint in the write-up.
+    """
     r = d.readiness()
-    assay = d.assess("assay_availability")["assessment"]
+    assessed = d.assess("assay_availability")
+    assay = "strong" if (assessed["verified_assessment"] == "strong"
+                         and not assessed["conflict"]) else assessed["assessment"]
     return {"target": d.target, "pathogen": d.pathogen, "family": d.family,
             "compartment": d.compartment,
             "permeability_story_required": d.compartment == "cytosolic",
@@ -49,22 +56,50 @@ def recommendation(d):
             "unverified_claims": [e["id"] for e in d.observed if not e["verified"]]}
 
 
-def _retrievable(pool, retrieved):
-    """Pull-retrievable (target, axis) pairs not yet observed."""
-    return [key for key in pool if key not in retrieved]
+def _retrievable(pool, retrieved, now):
+    """Pairs a policy may ask for at `now`: not yet retrieved, and already in existence.
+
+    Future-dated entries are withheld rather than offered and then refused. Offering one
+    tells the policy that this axis is a thing somebody later thought worth writing about,
+    which is information from after the decision clock arriving through a channel the date
+    boundary does not close -- and it charges a call for the privilege. An axis with no
+    evidence and an axis whose only evidence is still in the future must look the same.
+    """
+    return [key for key, entry in pool.items()
+            if key not in retrieved and entry["available_from"] <= now]
 
 
-def _rubric_action(by_target, pool, retrieved, ranking):
+def _rubric_action(by_target, available, ranking):
     """Fixed rubric: resolve the leading target's unknown axes in rubric order, then recommend."""
     for row in ranking:
         d = by_target[row["target"]]
         for axis in AXES:
-            if d.assess(axis)["assessment"] == "unknown" and (d.target, axis) in pool \
-                    and (d.target, axis) not in retrieved:
+            if d.assess(axis)["assessment"] == "unknown" and (d.target, axis) in available:
                 return "retrieve_evidence", d.target, axis
         if d.readiness()["hard_gates_met"]:
             return "recommend_experiment", d.target, None
     return "stop", ranking[0]["target"], None
+
+
+def _addressed_conflict(later, target, axis):
+    """Did the policy do anything about a contradiction once it had landed?
+
+    `conflict_retained` scores the dossier, not the policy: the state object keeps
+    contradictions side by side by construction, so that metric reads 1.0 for every
+    policy including one that ignores the contradiction entirely, and cannot discriminate.
+    This looks at what the policy did next instead. Retrieving further evidence on the
+    contested axis, revisiting the ranking, or declining to recommend all count as a
+    response; recommending the contested target anyway does not.
+    """
+    for record in later:
+        if record["action"] == "retrieve_evidence" and record["target"] == target \
+                and record["axis"] == axis:
+            return True
+        if record["action"] in ("rerank_targets", "stop"):
+            return True
+        if record["action"] == "recommend_experiment":
+            return record["target"] != target
+    return False
 
 
 def _scripted_action(step, order, ranking):
@@ -101,8 +136,9 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None):
             break
 
         ranking = rank(dossiers, round_)
+        available = set(_retrievable(pool, retrieved, round_))
         if policy == "rubric":
-            action, target, axis = _rubric_action(by_target, pool, retrieved, ranking)
+            action, target, axis = _rubric_action(by_target, available, ranking)
         elif policy == "scripted":
             action, target, axis = _scripted_action(len(retrieved), order, ranking)
         elif policy == "agent":
@@ -112,8 +148,7 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None):
                      "remaining_actions": call_budget - calls,
                      "ranking": ranking,
                      "dossiers": [d.state(round_) for d in dossiers],
-                     "retrievable_axes": [{"target": t, "axis": a}
-                                          for t, a in _retrievable(pool, retrieved)],
+                     "retrievable_axes": [{"target": t, "axis": a} for t, a in sorted(available)],
                      "available_actions": ACTIONS}
             answer = agent.act("Choose the next scientific action for this emergency target "
                                "decision.", state, list(ACTIONS), fields={
@@ -176,9 +211,28 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None):
             break
 
     ranking = rank(dossiers, rounds)
+    # Scored after the loop, because it depends on what the policy did in later rounds.
+    # A probe landing in the final round leaves no opportunity to respond, and is left
+    # unscored rather than counted as a failure to respond.
+    for score in probe_scores:
+        if score["kind"] == "contradictory":
+            later = [r for r in log if r["round"] > score["round"]]
+            score["addressed_conflict"] = (_addressed_conflict(later, score["target"],
+                                                               score["axis"])
+                                           if later else None)
+
     def rate(kind, key):
-        rows = [s[key] for s in probe_scores if s["kind"] == kind and key in s]
+        rows = [s[key] for s in probe_scores if s["kind"] == kind and s.get(key) is not None]
         return None if not rows else sum(rows) / len(rows)
+
+    if result is not None:
+        terminal = "recommended"
+    elif any(r["action"] == "stop" for r in log):
+        terminal = "stopped"
+    elif any(r["action"] is None for r in log):
+        terminal = "action_budget_exhausted"
+    else:
+        terminal = "deadline_reached"
 
     metrics = {"policy": policy, "family": spec["family"], "rounds_used": rounds,
                "deadline_rounds": deadline, "actions_used": calls, "action_budget": call_budget,
@@ -187,9 +241,16 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None):
                "appropriate_update_rate_on_relevant": rate("relevant", "appropriate_update"),
                "held_rate_on_irrelevant": rate("irrelevant", "held_recommendation"),
                "held_full_ranking_on_irrelevant": rate("irrelevant", "held_full_ranking"),
+               # A harness invariant, kept as a regression check on the state object: it
+               # reads 1.0 for every policy and must never be reported as policy skill.
                "conflict_retained_rate": rate("contradictory", "conflict_retained"),
+               "addressed_conflict_rate": rate("contradictory", "addressed_conflict"),
+               "terminal_condition": terminal,
+               "actions_unspent_at_exit": call_budget - calls,
                "axes_substantiated_top_target": ranking[0]["substantiated_axes"],
                "unknown_axes_top_target": len(ranking[0]["unknown_axes"]),
+               "contested_axes_top_target": len(ranking[0]["contested_axes"]),
+               "uncited_axes_top_target": len(ranking[0]["uncited_axes"]),
                "unsupported_assessments": sum(len(d.unsupported()) for d in dossiers),
                "structure_requests_unserviced": len(requested_structures),
                "libraries_proposed": len(libraries),
