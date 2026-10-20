@@ -50,6 +50,8 @@ def main():
     p.add_argument("--family", default="coronaviridae")
     p.add_argument("--policy", default="rubric")
     p.add_argument("--smoke", action="store_true")
+    p.add_argument("--control", choices=["zero_retrieval"],
+                   help="Memorisation probe: forbid retrieval and push no evidence")
     p = sub.add_parser("manifest", help="Rewrite the source digest record, or report its drift")
     p.add_argument("--check", action="store_true", help="Report drift and exit non-zero; write nothing")
     args = parser.parse_args()
@@ -100,7 +102,7 @@ def main():
         run_method(args.landscape, args.pool, args.policy, args.delay, args.smoke)
     elif args.command == "emergency":
         from .emergency import run_emergency
-        run_emergency(args.family, args.policy, args.smoke)
+        run_emergency(args.family, args.policy, args.smoke, args.control)
     elif args.command == "manifest":
         from .common import source_manifest
         path, drift = source_manifest(check=args.check)

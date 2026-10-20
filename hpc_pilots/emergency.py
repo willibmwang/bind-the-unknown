@@ -111,8 +111,42 @@ def _scripted_action(step, order, ranking):
     return tail[min(step - len(order), len(tail) - 1)], ranking[0]["target"], None
 
 
-def run_episode(name, policy, deadline=8, call_budget=8, agent=None):
+def reference_ranking(name, deadline):
+    """The ranking the whole evidence base supports by `deadline`.
+
+    Built from a fresh packet so an episode's own dossiers are untouched, and used only
+    in scoring -- it is never exposed to a policy. Its purpose is to give the
+    zero-retrieval control something to be compared against: a policy that names the
+    reference-best target while having paid for no evidence at all did not get there
+    from evidence, and the gap between that and its scored performance is the size of
+    the hindsight problem this project has so far only been able to name.
+    """
+    _, dossiers, entries, probes = packet(name)
+    by_target = {d.target: d for d in dossiers}
+    for target, entry in entries:
+        by_target[target].observe(entry, deadline)
+    for probe in probes:
+        by_target[probe["target"]].observe(probe["entry"], deadline)
+    return rank(dossiers, deadline)
+
+
+def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=None):
+    """Run one decision episode. `control="zero_retrieval"` is the memorisation probe.
+
+    Under that control the policy may not retrieve, and no evidence is pushed to it: it
+    must rank and recommend from an empty dossier. Targets in this system are named, so
+    pretrained knowledge can substitute for retrieval and the date boundary does nothing
+    about it -- the architecture notes say exactly this and leave it unaudited. This is
+    the audit. Whatever the control scores is a floor the evidence-using arm has to beat
+    before any of its performance can be attributed to the evidence.
+    """
+    if control not in (None, "zero_retrieval"):
+        raise ValueError(f"Unknown control arm {control!r}")
     spec, dossiers, entries, probes = packet(name)
+    blind = control == "zero_retrieval"
+    if blind:
+        probes = []
+    allowed = [a for a in ACTIONS if not (blind and a == "retrieve_evidence")]
     by_target = {d.target: d for d in dossiers}
     pool = {(t, e["axis"]): e for t, e in entries}
     order = list(pool)
@@ -124,6 +158,12 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None):
     rounds = 0
 
     for round_ in range(1, deadline + 1):
+        # Checked before the round opens. Pushing evidence into a round the policy cannot
+        # act in charged the episode for information it could not use, and the probes due
+        # in that round were then skipped by the break below and never scored at all.
+        if calls >= call_budget:
+            log.append({"round": round_, "action": None, "result": "action budget exhausted"})
+            break
         rounds = round_
         due = [p for p in probes if p["entry"]["available_from"] == round_]
         before_rank = rank(dossiers, round_)
@@ -131,16 +171,14 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None):
         for p in due:
             by_target[p["target"]].observe(p["entry"], round_)
 
-        if calls >= call_budget:
-            log.append({"round": round_, "action": None, "result": "action budget exhausted"})
-            break
-
         ranking = rank(dossiers, round_)
-        available = set(_retrievable(pool, retrieved, round_))
+        # One point of control for every policy. Gating only the agent's action list left
+        # the rubric reading the retrievable set directly and buying evidence anyway.
+        available = set() if blind else set(_retrievable(pool, retrieved, round_))
         if policy == "rubric":
             action, target, axis = _rubric_action(by_target, available, ranking)
         elif policy == "scripted":
-            action, target, axis = _scripted_action(len(retrieved), order, ranking)
+            action, target, axis = _scripted_action(len(retrieved), [] if blind else order, ranking)
         elif policy == "agent":
             if agent is None:
                 raise ValueError("Missing agent")
@@ -149,9 +187,9 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None):
                      "ranking": ranking,
                      "dossiers": [d.state(round_) for d in dossiers],
                      "retrievable_axes": [{"target": t, "axis": a} for t, a in sorted(available)],
-                     "available_actions": ACTIONS}
+                     "available_actions": {a: ACTIONS[a] for a in allowed}}
             answer = agent.act("Choose the next scientific action for this emergency target "
-                               "decision.", state, list(ACTIONS), fields={
+                               "decision.", state, allowed, fields={
                                    "target": [d.target for d in dossiers],
                                    "axis": list(AXES)}, system=SYSTEM)
             action, target, axis = answer["action"], answer["target"], answer["axis"]
@@ -162,6 +200,8 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None):
         record = {"round": round_, "action": action, "target": target, "axis": axis,
                   "pushed_evidence": [p["entry"]["id"] for p in due]}
         if action == "retrieve_evidence":
+            if blind:
+                raise ValueError("retrieve_evidence reached the zero-retrieval control")
             entry = pool.get((target, axis))
             if entry is None:
                 record["result"] = "no evidence exists for this target and axis; action charged"
@@ -234,7 +274,17 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None):
     else:
         terminal = "deadline_reached"
 
-    metrics = {"policy": policy, "family": spec["family"], "rounds_used": rounds,
+    reference = reference_ranking(name, deadline)
+    chosen = result["target"] if result else None
+    metrics = {"policy": policy, "control": control, "family": spec["family"],
+               # The comparison the control exists for. Under zero retrieval this says
+               # whether the policy reached the reference answer having bought nothing.
+               "evidence_retrieved": len(retrieved),
+               "reference_top_target": reference[0]["target"],
+               "chosen_target": chosen,
+               "chosen_matches_reference": None if chosen is None
+               else chosen == reference[0]["target"],
+               "rounds_used": rounds,
                "deadline_rounds": deadline, "actions_used": calls, "action_budget": call_budget,
                "recommendation_issued": result is not None,
                "deadline_met": result is not None and rounds <= deadline,
@@ -264,20 +314,22 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None):
                               "or antiviral claim is made or implied."}
 
 
-def run_emergency(name, policy, smoke=False):
+def run_emergency(name, policy, smoke=False, control=None):
     if name not in PACKETS:
         raise ValueError(f"Unknown family {name!r}")
     agent = Agent() if policy == "agent" else None
     deadline = 4 if smoke else 8
-    result = run_episode(name, policy, deadline=deadline, agent=agent)
+    result = run_episode(name, policy, deadline=deadline, agent=agent, control=control)
     label_policy = agent.label if agent else policy
     result.update({"experiment": "emergency", "family_packet": name, "policy": label_policy,
-                   "smoke": smoke, "status": "complete",
+                   "control": control, "smoke": smoke, "status": "complete",
                    "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
                    "provenance": provenance()})
     if agent:
         result["agent"] = agent.report()
     prefix = "smoke_" if smoke else ""
-    output = ROOT / "runs/emergency" / f"{prefix}{name}_{label_policy}.json"
+    # The control writes its own file, so it can never be pooled with the evidence-using arm.
+    output = (ROOT / "runs/emergency" /
+              f"{prefix}{name}_{label_policy}{f'_{control}' if control else ''}.json")
     write_json(output, result)
     print(json.dumps({"output": str(output), "metrics": result["metrics"]}, indent=2))

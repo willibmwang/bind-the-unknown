@@ -14,6 +14,7 @@ from hpc_pilots.data import AA, encode_variants, pool_geometry
 from hpc_pilots.dossier import Dossier, evidence, rank
 from hpc_pilots.emergency import run_episode
 from hpc_pilots.structure import structure_replay
+from hpc_pilots.summarize import headroom
 from hpc_pilots.targets import packet
 
 
@@ -329,6 +330,57 @@ def test_encoding_narrows_for_singles_and_widens_for_combined_substitutions():
 def test_encoding_rejects_a_reference_sequence_mismatch():
     with pytest.raises(ValueError, match="mismatch"):
         encode_variants(pd.DataFrame({"mutant": ["Q2A"]}), "MKTAYIAKQR")
+
+
+def test_permuted_control_destroys_a_learnable_signal():
+    # The falsification arm. On a landscape where the outcome is a clean function of the
+    # features, a learning policy must do well; once the outcomes are permuted there is
+    # nothing left to learn and it must not. A policy that scored the same either way
+    # would be scoring on index order or tie-breaking, not on the evidence it bought.
+    rng = np.random.default_rng(17)
+    x = rng.integers(0, 20, size=(512, 4))
+    y = x[:, 0].astype(float) + 0.01 * rng.normal(size=512)
+    shared = dict(maximum=128, initial=8, batch=8, checkpoints=(128,), fraction=0.05)
+    real = replay(x, y, 'greedy', 5, **shared)['metrics'][-1]['top_recall']
+    permuted = replay(x, y, 'greedy', 5, control='permuted', **shared)['metrics'][-1]['top_recall']
+    baseline = replay(x, y, 'random', 5, **shared)['metrics'][-1]['top_recall']
+    assert real == 1.0 and permuted < 0.5 * real
+    # Under permutation the learning policy must fall back to the random band, which is
+    # the whole point: what is left is the budget, not the policy.
+    assert abs(permuted - baseline) < 0.2
+    assert replay(x, y, 'greedy', 5, **shared)['control'] is None
+    with pytest.raises(ValueError, match='control'):
+        replay(x, y, 'greedy', 5, maximum=16, control='nonsense')
+
+
+def test_zero_retrieval_control_reaches_a_decision_having_bought_nothing():
+    # The memorisation probe. Targets are named, so pretrained knowledge can stand in for
+    # retrieval; whatever this arm scores is a floor the evidence-using arm must clear
+    # before its performance can be credited to the evidence.
+    blind = run_episode("coronaviridae", "rubric", deadline=8, call_budget=8,
+                        control="zero_retrieval")
+    assert blind["metrics"]["evidence_retrieved"] == 0
+    assert not any(r["action"] == "retrieve_evidence" for r in blind["trace"])
+    assert blind["probe_scores"] == [], "no evidence may be pushed under the control"
+    assert blind["metrics"]["reference_top_target"]
+    # The evidence-using arm buys evidence and is scored against the same reference.
+    seeing = run_episode("coronaviridae", "rubric", deadline=8, call_budget=8)
+    assert seeing["metrics"]["evidence_retrieved"] > 0
+    assert seeing["metrics"]["reference_top_target"] == blind["metrics"]["reference_top_target"]
+    with pytest.raises(ValueError, match="control"):
+        run_episode("coronaviridae", "rubric", control="nonsense")
+
+
+def test_headroom_is_capped_by_whichever_ceiling_binds():
+    # 128 labels in a 512 pool at the 5 percent threshold: the budget binds, not the
+    # threshold, and the attainable multiple is 4 rather than 20.
+    assert headroom(0.25, 0.05) == {"recall_ceiling": 1.0, "headroom_multiple": 4.0}
+    # 8 labels in the same pool: the threshold binds. Reporting 1/labelled here would
+    # claim 64x of headroom where 20x exists, at the checkpoint where raw multiples
+    # look most impressive.
+    early = headroom(8 / 512, 0.05)
+    assert early["headroom_multiple"] == 20.0
+    assert early["recall_ceiling"] == pytest.approx(0.3125)
 
 
 def test_surrogate_hyperparameters_are_taken_from_the_callers_config():

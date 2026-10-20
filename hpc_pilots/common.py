@@ -227,8 +227,17 @@ class Agent:
             # The usual cause is truncation at the output-token ceiling, which leaves an
             # opening brace and no closing one. Say so, rather than only that parsing failed.
             reason = choice.get("finish_reason")
-            hint = (f" The response hit the {self.max_tokens}-token output ceiling; raise "
-                    "PILOT_LLM_MAX_TOKENS." if reason == "length" else "")
+            # The two causes need different responses, and treating them alike wasted a
+            # debugging session: a ceiling is raised, a filter is recorded and retried.
+            hint = {"length": f" The response hit the {self.max_tokens}-token output ceiling; "
+                              "raise PILOT_LLM_MAX_TOKENS.",
+                    "content_filter": " The provider stopped this response on a content filter, "
+                                      "so the output ceiling is not the cause and raising it will "
+                                      "not help. This fires on some evidence packets and not "
+                                      "others, which makes it a reproducibility hazard rather "
+                                      "than a bug: an episode can fail for reasons unrelated to "
+                                      "the policy, so record which packets filtered and report "
+                                      "them alongside the episodes that completed."}.get(reason, "")
             raise ValueError(f"Agent did not return a JSON object (finish_reason={reason!r},"
                              f" {len(content)} chars).{hint} Content began: {content[:200]!r}")
         answer = json.loads(content[first:last + 1])

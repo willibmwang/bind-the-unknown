@@ -193,7 +193,7 @@ def run_binding(pool, policy, delay=0, smoke=False, control=None):
     agent = Agent() if policy == "agent" else None
     result = replay(features, hidden, policy, c["seed"] + pool, maximum=maximum,
                     initial=c["binding"]["initial_labels"], delay=delay, agent=agent,
-                    surrogate=c["binding"])
+                    surrogate=c["binding"], control=control)
     policy = agent.label if agent else policy
     result.update({"experiment": "binding", "pool": pool, "policy": policy, "delay": delay,
                    "smoke": smoke, "status": "complete",
@@ -203,7 +203,9 @@ def run_binding(pool, policy, delay=0, smoke=False, control=None):
     if agent:
         result["agent"] = agent.report()
     label = "smoke_" if smoke else ""
-    output = ROOT / "runs/binding" / f"{label}{policy}_pool{pool:02d}_delay{delay}.json"
+    # A control arm writes to its own file so it can never overwrite or pool with the real one.
+    output = (ROOT / "runs/binding" /
+              f"{label}{policy}_pool{pool:02d}_delay{delay}{f'_{control}' if control else ''}.json")
     write_json(output, result)
     print(json.dumps({"output": str(output), "final": result["metrics"][-1]}))
 
@@ -212,7 +214,7 @@ def target_config():
     return json.loads((ROOT / "hpc_pilots/configs/targets.json").read_text())
 
 
-def run_method(landscape, pool, policy, delay=0, smoke=False):
+def run_method(landscape, pool, policy, delay=0, smoke=False, control=None):
     """Replay the acquisition policies against a method-development landscape.
 
     Identical machinery and the same fixed surrogate as every other replay, so a change of
@@ -234,7 +236,7 @@ def run_method(landscape, pool, policy, delay=0, smoke=False):
                     initial=mc["initial_labels"], batch=mc["batch_size"], delay=delay,
                     checkpoints=tuple(mc["checkpoints"]), agent=agent,
                     fraction=spec["top_fraction"], cardinalities=manifest["cardinalities"],
-                    surrogate=mc)
+                    surrogate=mc, control=control)
     policy = agent.label if agent else policy
     result.update({"experiment": "method", "landscape": landscape, "pool": pool,
                    "policy": policy, "delay": delay, "smoke": smoke, "status": "complete",
@@ -252,12 +254,13 @@ def run_method(landscape, pool, policy, delay=0, smoke=False):
     if agent:
         result["agent"] = agent.report()
     label = "smoke_" if smoke else ""
-    output = ROOT / "runs/method" / f"{label}{landscape}_{policy}_pool{pool:02d}_delay{delay}.json"
+    output = (ROOT / "runs/method" / f"{label}{landscape}_{policy}_pool{pool:02d}"
+              f"_delay{delay}{f'_{control}' if control else ''}.json")
     write_json(output, result)
     print(json.dumps({"output": str(output), "final": result["metrics"][-1]}))
 
 
-def run_target(landscape, pool, policy, delay=0, smoke=False):
+def run_target(landscape, pool, policy, delay=0, smoke=False, control=None):
     """Replay the acquisition policies against a pathogen landscape.
 
     The surrogate hyperparameters are deliberately the same fixed forest the GB1 pilot
@@ -279,7 +282,7 @@ def run_target(landscape, pool, policy, delay=0, smoke=False):
                     initial=tc["initial_labels"], batch=tc["batch_size"], delay=delay,
                     checkpoints=tuple(tc["checkpoints"]), agent=agent,
                     fraction=tc["top_fraction"],
-                    cardinalities=manifest["cardinalities"], surrogate=tc)
+                    cardinalities=manifest["cardinalities"], surrogate=tc, control=control)
     policy = agent.label if agent else policy
     result.update({"experiment": "target", "landscape": landscape, "pool": pool, "policy": policy,
                    "delay": delay, "smoke": smoke, "status": "complete",
@@ -295,6 +298,7 @@ def run_target(landscape, pool, policy, delay=0, smoke=False):
     if agent:
         result["agent"] = agent.report()
     label = "smoke_" if smoke else ""
-    output = ROOT / "runs/targets" / f"{label}{landscape}_{policy}_pool{pool:02d}_delay{delay}.json"
+    output = (ROOT / "runs/targets" / f"{label}{landscape}_{policy}_pool{pool:02d}"
+              f"_delay{delay}{f'_{control}' if control else ''}.json")
     write_json(output, result)
     print(json.dumps({"output": str(output), "final": result["metrics"][-1]}))
