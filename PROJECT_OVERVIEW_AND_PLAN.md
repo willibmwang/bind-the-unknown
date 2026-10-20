@@ -19,22 +19,30 @@ on and what it does not transfer to.
 
 ## Summary
 
-The project builds an **emergency AI co-scientist**: a system that helps experts decide what
-to pursue, what to measure next, and how to revise as evidence arrives, under the conditions
-that actually characterise an outbreak — incomplete pathogen knowledge, conflicting evidence,
-hard deadlines, finite compute, and very limited experimental capacity. Macrocyclic peptide
-discovery on SynX's mRNA display platform is the application and the experimental testbed.
+The project is about **macrocyclic peptide drug discovery**: designing macrocycles that bind a
+chosen viral target on SynX's mRNA display platform, well enough that the design process is an
+improvement on what the platform does today. The primary research object is **molecular
+prediction** — can we predict which macrocycles bind, and use that to design better libraries?
+An emergency AI co-scientist sits above that as a sub-arm, deciding which target to pursue and
+what to measure next when experimental capacity is the binding constraint.
 
 Four weeks in, the position is this.
 
-**The research question has sharpened.** It began as "can an agent make better scientific
-decisions under emergency constraints?" The October work suggests a more specific and more
-defensible claim: *the binding constraint on scientific-decision agents is not policy
-architecture but the absence of verifiable decision environments at the volume needed to
-train and evaluate one* — and public deep mutational scanning (DMS) landscapes are exactly
-such environments, already existing in quantity, and not currently used that way. Every
-variant's outcome is known, so a proposed measurement, ranking or stopping decision can be
-graded deterministically with no human and no wet lab. §1.3 and §2.2 make the argument.
+**The most important thing in this document is a problem, not a result.** Every
+molecular-prediction deliverable is blocked on the SynX campaign export, which is overdue. Four
+weeks in, **there is no macrocycle and no non-canonical amino acid anywhere in the repository** —
+the building-block registry exists but every chemical field in it is null, and the physics track
+is untouched. The work that could proceed without the export was the decision arm, so that is
+what got built, and earlier drafts of this document then described the sub-arm as the
+contribution. That was an inversion and §2.1 corrects it. The practical consequence is that the
+export is the critical path rather than a risk-table row.
+
+**The fix that does not need SynX, now in progress.** The bibliography contains one labeled
+dataset of the right molecule class — Rogers, Passioura & Suga, *PNAS* 2018, a deep mutational
+scan of linear **and cyclic** peptides **including non-canonical residues**. It was recorded as
+an action in the Week 4 debrief and never done. Acquiring and characterising it is under way; it
+would let binding prediction start on macrocycles with ncAAs this week rather than on the wrong
+molecule class.
 
 **Three of the project's headline claims failed this week, including one I made yesterday.**
 The eightfold recovery over random selection is an artefact of pool size. The
@@ -46,15 +54,16 @@ pathogen identity, was a mis-attribution with a circular control group. Each is 
 check in the code rather than a note in a document. §4 gives the arithmetic and §4.3 says what
 replaced them.
 
-**What survives is better than what it replaced.** Acquisition gain is governed by whether the
-surrogate can learn *inside the candidate pool* — a computable property of pool geometry rather
-than of the biology, established by intervention in both directions rather than by correlation.
-It then replicated on two unrelated proteins against a prediction committed before the replays
-ran: predicted +0.25 and +0.24, observed +0.254 and +0.254, with every falsifier passed. Across
-eight landscapes on complete sweeps the groups do not overlap and the exact permutation test is
-at its floor, p = 1/70. The practical consequence is favourable: the closest on-disk analogue to
-a randomised display library gives the largest gain measured anywhere in the work, from a
-deliberately weak surrogate. §4.2 states the limits, which are real.
+**What survives, read as a result about prediction rather than about choosing.** Binding is
+learnable from a small number of labels **only when the candidates share sequence coordinates
+with the labelled ones** — established by intervention in both directions, not by correlation,
+then replicated on two unrelated proteins against a prediction committed before the replays ran
+(predicted +0.25 and +0.24, observed +0.254 and +0.254, every falsifier passed; exact permutation
+p = 1/70). The useful part for this project is that the favourable regime is *a randomised region
+of a few positions over an alphabet* — which is what a RaPID library is. A weak predictor
+suffices, Spearman ≈ 0.31, but there must be one, and whether one can be fitted is computable
+from the library's design before any selection is run. The limits in §4.2 are real, and the
+largest is that none of this is yet on macrocycles.
 
 **The system now holds biology.** Until 19 October the software chose among three abstract
 strategies over numbered candidates and contained no representation of the problem domain. It
@@ -71,11 +80,14 @@ your point on target identification. The prototype-versus-priority pathogen comp
 suggested is in
 [PROTOTYPE_AND_PRIORITY_PATHOGENS.md](PROTOTYPE_AND_PRIORITY_PATHOGENS.md).
 
-**Three external dependencies are overdue and none has an internal workaround.** A named SynX
-experimental owner with a booked slot; the campaign export, without which the mandatory
-platform-improvement deliverable cannot begin; and confirmed trainable-model access with an
-approved spending ceiling. §8 states the consequence of each, and §10 asks for a decision on
-each.
+**Three external dependencies are overdue and none has an internal workaround.** In order of
+damage: **the campaign export**, without which the primary molecular arm and the mandatory
+platform-improvement deliverable cannot begin; a named SynX experimental owner with a booked
+slot, without which the one display round does not happen; and confirmed trainable-model access
+with an approved spending ceiling. §8 states the consequence of each and §10 asks for a decision
+on each. If only one thing is resolved on Thursday it should be the export — and a minimal
+subset with the chemistry definitions would unblock more than a complete export arriving in
+three weeks.
 
 **On visibility.** You are right that the output has been sitting locally. §9 proposes a
 concrete fix: repository access, a fixed weekly written cadence, and a standing rule that
@@ -85,7 +97,66 @@ every claim in a document names the file and run that produced it.
 
 ## 1. The problem and the research question
 
-### 1.1 What "emergency" means operationally
+### 1.1 The goal
+
+The project is about **macrocyclic peptide drug discovery**: designing macrocycles that bind a
+chosen viral target, on SynX's mRNA display platform, well enough that the design process
+itself is an improvement over what the platform does today. The primary research object is
+therefore **molecular prediction** — can we predict which macrocycles bind, and use that to
+design better libraries?
+
+Everything else in this document is in service of that. The emergency co-scientist (§1.3) is a
+sub-arm: it decides *what to measure and which target to pursue* when experimental capacity is
+the binding constraint. It matters because the project gets approximately one display round,
+and choosing what goes into it determines what the round can establish. But it is the
+allocation layer above the molecular work, not a replacement for it.
+
+### 1.2 Why the molecular prediction problem is hard
+
+Macrocyclic peptides sit in a gap between the two classes of molecule that prediction methods
+are good at. They are not small molecules and not proteins, and almost every tool the field
+offers assumes one or the other.
+
+- **The chemistry has no settled representation.** A RaPID-style library is built by
+  flexizyme-charged initiator incorporation with spontaneous thioether macrocyclisation, over an
+  alphabet that includes non-canonical residues — N-methylated backbones, D-amino acids,
+  β-amino acids. A 20-letter alphabet cannot express that, and neither can a model trained only
+  on natural proteins. Every public landscape currently staged in this project is canonical
+  residues on a folded domain, which is the wrong molecule class.
+- **Cyclisation changes the problem.** Conformational entropy, the backbone constraint and the
+  absence of free termini all matter for binding, and are exactly what sequence-only models
+  ignore.
+- **The scores available are not the quantity of interest.** Rosetta energies are not measured
+  binding free energies, and a contact-distance filter is a geometric criterion rather than
+  evidence of binding. Display selection returns *enrichment*, which is not affinity, which is
+  not functional inhibition, which is not antiviral activity. Four distinct endpoints get
+  conflated routinely and the project's rule is to report each as itself.
+- **Labels are scarce and selected.** Measured candidates are typically the ones somebody chose
+  to measure, so the labeled set is a biased sample of the design population.
+- **And there is a membrane problem for the target we favour.** Macrocycles cross membranes
+  poorly, and Mpro is cytosolic, so affinity alone is not the objective — predicted
+  permeability has to be traded against it (§2.4).
+
+So the research question underneath the application is: **what does it take to predict binding
+for this molecule class, from few labels, well enough to design a library?** That question is
+answerable with public data on the generic part — sequence-to-binding learnability — and needs
+SynX chemistry for the part specific to the platform.
+
+### 1.3 The emergency constraint, and where the co-scientist sits
+
+The project's framing is pandemic preparedness, which adds a constraint rather than changing
+the goal: the molecular work has to be doable *fast*, on a pathogen nobody has worked on, with
+very little data. That rules out methods needing a large labeled set for the new target, and it
+is why few-label prediction is the question rather than large-scale supervised fitting.
+
+Within that, the co-scientist arm handles the allocation decisions — which target, which
+candidates to measure next, when the evidence warrants revising a ranking. Five conditions
+distinguish outbreak-time work and the system represents each explicitly rather than treating
+it as background: incomplete pathogen knowledge; evidence that evolves and conflicts; hard
+deadlines; finite compute and tool cost; and very limited experimental capacity. The last is
+the binding one, and it is what makes the allocation layer worth building at all.
+
+### 1.4 What "emergency" means operationally
 
 The word does a lot of work and is usually left vague, so it is worth pinning down. Five
 conditions distinguish outbreak-time research from ordinary research, and the project treats
@@ -108,50 +179,53 @@ The last two mean the central object is not a prediction but an **allocation**: 
 known now, what is the next action worth paying for? That framing is what makes the problem
 tractable as a measurable research question rather than an aspiration.
 
-### 1.2 The question
+### 1.5 The questions, in priority order
 
-> Can an AI co-scientist make better, faster, evidence-backed scientific decisions under
-> emergency constraints, and revise appropriately as evidence and experimental results arrive?
+**Primary — molecular.**
 
-Three levels of evaluation follow from it, and they are deliberately kept separate so that a
-failure at one does not contaminate the others:
+> Can we predict binding for macrocyclic peptides with non-canonical residues, from few labels,
+> well enough to design a better library than the platform designs today?
 
-1. **Scientific decisions (primary).** Target prioritisation, next-action choice, uncertainty
+**Secondary — allocation.**
+
+> Given that capacity, can a system decide well which target to pursue and what to measure
+> next, and revise appropriately as evidence arrives?
+
+Three levels of evaluation follow, kept separate so a failure at one does not contaminate the
+others:
+
+1. **Molecular prediction (primary).** Does a defined score rank measured outcomes within
+   matched assay conditions? Does it transfer to new backbones and chemical classes? Do a few
+   labels beat simple rescaling? Is there a measured failure mode that justifies a specific
+   platform improvement?
+2. **Scientific decisions (supporting).** Target prioritisation, next-action choice, uncertainty
    handling, adaptation to evidence, and decision quality against time and cost.
-2. **Molecular tools (supporting).** Reliability of structure, design and scoring tools;
-   molecular ranking; chemical and structural transfer.
 3. **End-to-end validation.** A historical COVID-19 reconstruction from January–March 2020
    evidence, two prototype-family case studies, and the required prospective display round —
    with conclusions limited strictly to what was actually measured.
 
-### 1.3 Where the contribution sits
+### 1.6 Where the contribution sits
 
-A tool-using agent coupled to a structure-prediction stack is not by itself a novel
-contribution; [Agent Rosetta](https://arxiv.org/abs/2603.15952) already couples an LLM to
-Rosetta and evaluates non-canonical design. The project needs a sharper claim, and the October
-work points at one.
+The honest answer is that it is not yet settled, and I would rather say so than pick one and
+defend it.
 
-Building and evaluating a decision policy requires **environments in which decisions can be
-graded**. Expert review is the obvious grader, but it is slow, expensive, and has
-inter-rater-reliability problems that are themselves a project risk. The alternative is an
-environment where the ground truth is already known and the grading is exact.
+The molecular claim is the one the project is *for*: that binding for this molecule class can be
+predicted from few labels well enough to design a better library. It is the right contribution
+and it is the one that is not yet started, because the chemistry is blocked (§8.1). The public
+ncAA macrocycle set is the route to starting it without SynX.
 
-Public DMS landscapes are that. A landscape such as `R1AB_SARS2_Flynn_2022` records a measured
-outcome for each of 5,725 Mpro variants. Hide the outcomes behind an oracle, expose only a tool
-API, let a system request measurements under a budget, and every decision it makes can be
-scored deterministically. Vary pool composition, budget, feedback delay, initial evidence,
-corrupted evidence and conflicting evidence, and one landscape yields an effectively unbounded
-supply of graded episodes. Ten such landscapes are already on disk (§5.2).
+The decision claim is the one the project can currently support. A tool-using agent coupled to a
+structure stack is not itself novel — [Agent Rosetta](https://arxiv.org/abs/2603.15952) already
+couples an LLM to Rosetta and evaluates non-canonical design — so the sharper version is about
+*environments*: public measurement landscapes can be turned into auto-gradeable decision
+environments at volume, which is what makes a decision policy trainable and evaluable at all.
+That is a real claim and this week produced evidence for it. It is also the sub-arm.
 
-The claim is therefore: **auto-gradeable scientific decision environments can be manufactured
-at volume from existing public measurement data, and doing so is what makes a trainable,
-evaluable decision policy possible.** The emergency co-scientist is the system that
-demonstrates it; the SynX display round is the prospective check that the decisions survive
-contact with a real laboratory.
-
-This also rescues the October pilot work. The GB1 study was built as a biology pilot, which is
-why it looks thin as biology. As infrastructure it is the first working instance of exactly the
-pattern above.
+My current view, for arguing with on Thursday: the paper is a **macrocycle design** paper in
+which the decision layer is a component, and the environment-generation work is the methods
+contribution that makes the evaluation credible. If the export does not arrive, that inverts by
+force rather than by choice — which is a reason to treat §8.1 as urgent rather than as
+housekeeping.
 
 ---
 
@@ -160,54 +234,76 @@ pattern above.
 This section is the "reasoning around why you made certain choices" you asked for. Each
 subsection states a decision, the alternatives, and what would make me reverse it.
 
-### 2.1 Why decision quality rather than molecular prediction
+### 2.1 How the molecular and decision arms relate — and a correction
 
-**The choice.** The primary measured object is the quality of the *decision procedure*, not the
-accuracy of a molecular predictor.
+**The choice.** The primary measured object is **molecular prediction for macrocyclic peptides**.
+The decision arm sits above it, allocating the scarce experimental capacity that the molecular
+work consumes.
 
-**The reasoning.** Acquisition policy produces gains over random selection *while the underlying
-predictor is only weakly informative* — Spearman ≈ 0.31 at a 128-label budget, with plain ridge
-regression matching a 64-tree forest. If decision gains had required a good predictor the
-emergency premise would collapse, because at emergency timescales there are no labels with which
-to fit one.
+**A correction to how I have been describing this.** Earlier drafts of this document inverted
+that, presenting decision quality as the primary contribution and molecular work as supporting.
+That was wrong, and the drift has a cause worth naming: **every molecular-prediction deliverable
+is blocked on the SynX campaign export**, so the only work that could proceed was decision-policy
+work on public data. Four weeks in there is still no macrocycle and no non-canonical residue
+anywhere in the repository (§4.5). The consequence of taking the goal seriously is that the
+export is not a row in a risk table — it is the critical path, and §8 now says so.
 
-**How much of that survived this week.** The weak-predictor half is intact and better supported:
-the largest gain in the project comes from exactly that Spearman-0.31 surrogate. The half that
-does not survive is the stronger reading — that gains come from the policy *rather than* the
-model, and are therefore substrate-independent. They are a surrogate effect; where no weak model
-can be fitted inside the pool, no policy beats random. §4.3 gives the evidence and the corrected
-claim.
+**What the decision arm is for.** The project gets approximately one display round. Which target
+it is run against, and which candidates go into the library, determine what the round can
+establish. That is a real allocation problem and it is worth doing well, but it is the layer
+above the molecular question rather than a substitute for it.
 
-**What this costs and what it buys.** It costs the cleanest version of the argument. It buys a
-precondition that can be *computed in advance* — pool coverage — which is more useful to a
-decision-maker than a claim of substrate independence would have been, because it says when to
-expect the method to work before any budget is committed.
+**What the decision work found, read as a molecular-prediction result.** This week's finding was
+written up as being about acquisition policy, and under the corrected framing it reads more
+usefully than that. What it actually establishes is a condition on **when binding is learnable
+from few labels**: a weak model fitted on 128 measurements predicts held-out binding well enough
+to be worth acting on *only when the candidates share sequence coordinates with the labelled
+ones*. Where they do not, in-pool Spearman sits at 0.08–0.12 and nothing downstream helps. That
+is a statement about the predictor, not about the chooser, and §4.2 gives the intervention tests.
 
-**What would reverse the remaining claim.** If the gain fails to appear on two independent
-high-coverage landscapes staged from unrelated proteins — the next experiment, §10 — then the
-mechanism rests on one independent protein plus a restaging of the pilot, and the contribution
-narrows to the evaluation-design work and the environment generator. I would rather reach that
-in week 6 than at review.
+**It points the right way for library design.** The favourable regime is a randomised region of
+a few positions over an alphabet — which is what a RaPID library *is*. The highest in-pool
+learnability and the largest measured gain in the project both come from the four-site randomised
+GB1 library, the closest on-disk analogue to a display library, from a surrogate at Spearman 0.31.
+A weak predictor is enough; but there must be one, and whether one can be fitted is a computable
+property of the library's design, available before any selection is run. For a project whose job
+is to design libraries, that is a more directly useful result than a claim about decision
+procedure would have been.
 
-### 2.2 Why public measurement landscapes as the substrate
+**What it does not do**, and this is the limitation that matters most: every landscape behind it
+is canonical residues on a folded protein domain. None contains a macrocycle, a non-canonical
+residue or a cyclisation, so none of it speaks to the molecule class the project exists to design.
+§2.2 is about closing exactly that gap.
 
-**The choice.** Method development runs on public DMS data rather than on SynX campaign data.
+### 2.2 Getting onto the right molecule class without waiting for SynX
 
-**The reasoning.** Three things follow from it. First, **it removes a blocking dependency**: the
-SynX campaign export has not arrived, and a plan whose method development cannot start without
-it is a plan with a single point of failure. Second, **the outcomes are already known for every
-candidate**, which is what makes automatic grading possible at all. Third, **it is releasable**:
-code, benchmark definitions and evaluation data can be published without negotiating permissions,
-which matters for the artifact deliverable and for the paper.
+**The choice.** Method development runs on public measurement data rather than on SynX campaign
+data — but it has to move onto **macrocycles with non-canonical residues**, which the landscapes
+staged so far are not.
 
-**The cost, honestly.** Public landscapes are single-substitution scans of canonical residues.
-They contain no macrocycle, no non-canonical chemistry and no enrichment readout — the two
-features that define the SynX platform. No result from them can speak to either. The
-landscapes are a decision-environment substrate, not a model of the platform, and §4.3 keeps
-that boundary explicit.
+**Why public data at all.** Three reasons, all still good. It removes a blocking dependency: a
+plan whose method development cannot start without the campaign export has a single point of
+failure, and four weeks of a ten-week project have now demonstrated that. The outcomes are known
+for every candidate, so a predictor can be scored exactly. And it is releasable, which matters
+for the artifact deliverable and the paper.
 
-**What would change it.** The arrival of the campaign export, which would let the same episode
-machinery run over real macrocycle measurements. The request is live and overdue.
+**The cost, stated plainly.** Everything staged to date is canonical amino acids on a folded
+protein domain. No macrocycle, no non-canonical residue, no cyclisation, no enrichment readout —
+which is to say, none of the features that define the molecule the project designs. These
+landscapes support claims about sequence-to-binding learnability in general. They support no
+claim about macrocyclic chemistry, and §4.5 keeps that boundary explicit.
+
+**What is being done about it, this week.** The bibliography contains one labeled dataset of the
+right class — Rogers, Passioura & Suga, *PNAS* 2018;115(43):10959–64, a deep mutational scan of
+**linear and cyclic peptides including non-canonical residues**. It needs no SynX data. It was
+recorded as an action in the Week 4 debrief and never done, which in hindsight is the single
+clearest symptom of the inversion described in §2.1. Acquiring and characterising it is now in
+progress, and §10 asks what to do if it turns out to be unusable.
+
+**What would still change things.** The campaign export, which is the only route to the
+platform's own chemistry — its building-block catalogue, codon mappings, stereochemistry and
+existing Rosetta parameters. Public ncAA data lets the prediction work start; it does not
+substitute for the platform-improvement deliverable.
 
 ### 2.3 Why a target dossier as the decision state
 
@@ -310,7 +406,7 @@ separation between four concerns:
 | Layer | Responsibility | Why it is separate |
 | --- | --- | --- |
 | **Domain** | Target dossiers, pathogen target packets, the non-canonical building-block registry | The biology must be representable independently of any policy that reasons over it. Writing the dossier schema *before* the policy that consumes it was deliberate; the reverse order produces a schema shaped by whatever the first policy happened to need. |
-| **Environment** | Decision episodes built from measurement landscapes: hidden outcomes, timed evidence release, budgets, deadlines, delayed feedback | This is the auto-gradeable oracle of §1.3. It owns the hidden truth and exposes only a request interface. |
+| **Environment** | Decision episodes built from measurement landscapes: hidden outcomes, timed evidence release, budgets, deadlines, delayed feedback | This is the auto-gradeable oracle of §1.6. It owns the hidden truth and exposes only a request interface. |
 | **Policy** | The rules being compared: random, greedy, UCB, diversity-seeking, and an LLM-mediated policy over the six-action space | Policies are interchangeable behind one interface so that comparisons are matched by construction rather than by care. |
 | **Evaluation** | Scoring, calibration studies, summarisation, provenance and resource accounting | Kept out of the policy path entirely, so a policy cannot read a metric it has not earned. |
 
@@ -512,11 +608,11 @@ region of a few positions sits at the favourable extreme of that variable.
   in-pool Spearman (0.68) and the smallest gain of the four (+0.194), and gain is not monotone
   in surrogate skill anywhere in the table.
 
-### 4.3 What this does to the project's central argument
+### 4.3 What this does to the few-label premise
 
-The project has argued that decision gains do not require a good predictor — which matters,
-because at emergency timescales there are no labels with which to fit one. That argument
-**partly survives, in a more useful form.**
+The project rests on a premise that matters for the molecular arm as much as the decision arm:
+that useful work is possible *without* a good predictor, because at emergency timescales there
+are no labels with which to fit one. That premise **partly survives, in a more useful form.**
 
 What survives, now better supported: gains do not require a *good* predictor. The largest gain
 in the project comes from a surrogate at Spearman 0.31, and gain is not even monotone in
@@ -538,10 +634,11 @@ the original and considerably more useful, because it is checkable before any bu
 ### 4.4 Why I am presenting it this way
 
 Three self-caught errors in two days is not a comfortable thing to put in front of you, and the
-temptation to lead with the surviving mechanism instead was real. But the project's proposed
-contribution is that auto-gradeable decision environments let you find your own artefacts fast,
-and this week is the first evidence that the claim is true of the method rather than just
-asserted about it. Each correction is now a control in the code — a delay-effect table carrying
+temptation to lead with the surviving mechanism instead was real. But the methods claim this
+project makes is that auto-gradeable environments built from public measurement data let you
+find your own artefacts fast, and this week is the first evidence that it is true of the method
+rather than just asserted about it. Each correction is now a control in the code — a delay-effect
+table carrying
 the identity and the null band beside the effect, a corrected headroom ceiling, a permuted-outcome
 falsification run, and a zero-retrieval control for the dossier arm — so the specific mistakes
 cannot recur silently. That is the part worth carrying into the paper.
@@ -679,8 +776,29 @@ literature makes, and §5.3 examines how well it is actually evidenced.
 
 ## 6. Evaluation design
 
-Four system-level studies, each with a decision attached, so that a negative result changes the
-plan rather than being absorbed:
+### 6.1 Molecular prediction — the primary arm
+
+Each study has a decision attached, so a negative result changes the plan rather than being
+absorbed. E0–E2 are gated on data: E0 and E1 can begin immediately on the public ncAA macrocycle
+set if it proves usable (§2.2), and otherwise wait on the campaign export along with the rest.
+
+| Study | Question | Decision it forces | Blocked on |
+| --- | --- | --- | --- |
+| **E0** | What do the labels actually mean — replicates, censoring, independent scaffolds, selection bias in which candidates were measured? | If there are too few independent chemical or backbone groups, the claim narrows to within-parent interpolation before any model is fitted. | ncAA set, or export |
+| **E1** | Does a defined Rosetta metric rank experimental outcomes *within* matched assay conditions, rather than only separating campaigns or parents? | If the association disappears under grouping, physics is not a useful prior here and the contribution moves elsewhere. A null is informative. | Export |
+| **E2** | Does any signal survive new backbones and new chemical classes? | A strong random-split result with weak grouped transfer supports interpolation, not generalisation. Prioritise the shift with the clearest reproducible failure. | ncAA set, or export |
+| **E3** | Do a handful of labels beat simple score rescaling? | If affine calibration explains the whole gain, use the simpler correction and say so. | ncAA set, or export |
+| **E4** | Is there a measured failure mode that justifies a specific platform improvement — rotamer coverage, or stage tracking and filtering? | Picks *which* platform change to implement. A better Rosetta score is not independent confirmation of a scoring improvement. | Export |
+| **E5** | Does better prediction actually improve experimental choices under a fixed budget? | This is where the decision arm reconnects to the molecular arm. | A credible predictor |
+| **E7** | Does the improvement survive new measurements? | The prospective check: candidates, ranks, model version and analysis frozen before the round. | Booked round |
+
+The coverage result in §4.2 is a partial, early answer to the generic half of E0–E2: it says when
+sequence-to-binding is learnable from few labels. It is on the wrong molecule class, which is
+what §2.2 is for.
+
+### 6.2 The decision arm
+
+Four system-level studies, each likewise with a decision attached:
 
 | Study | Question | Decision it forces |
 | --- | --- | --- |
@@ -689,6 +807,8 @@ plan rather than being absorbed:
 | **S2** | Does the system revise when evidence warrants and hold steady when it does not? | A changed ranking is not automatically a better ranking; this separates evidence-following from instability. |
 | **S3** | Does an adaptive policy use a constrained budget better than a fixed action order? | Pursue the policy contribution only if gains survive held-out episodes and a simple cost-aware baseline. |
 | **S4** | Do the recommendations survive a real laboratory? | The prospective check; predictions frozen before results arrive. |
+
+### 6.3 Commitments governing both arms
 
 Four commitments govern all of them. **Baselines are matched** — a fixed rubric, a scripted
 workflow, retrieval with a single LLM response, and the adaptive agent, on identical document
@@ -709,15 +829,19 @@ explicitly.
 No stretch goal has been dropped. If a collaborator-dependent obligation fails it is recorded as
 incomplete rather than replaced with a simulation.
 
+Ordered with the molecular deliverables first, which is both the corrected priority and an
+uncomfortable way round to read: the top three are the primary arm and all three are blocked.
+
 | Required output | Where it lands | Status |
 | --- | --- | --- |
-| Modular emergency co-scientist | Decision state and action space delivered 19 Oct; integrated replay W5; demo frozen W6 | Partially delivered |
+| **Non-canonical macrocyclic designs and focused library** | Block registry exists as a container; every chemical field null | **Blocked — export** |
+| **SynX platform improvement** | No substrate; re-scope decision at Thursday's gate | **Blocked — export** |
+| **One mRNA display selection round, analysed** | W7 execution; readout due 18 Nov; analysis by 20 Nov | **Blocked — slot** |
+| Binding prediction on the right molecule class | Public ncAA macrocycle set being characterised now (§2.2) | In progress |
 | Evidence-backed target dossiers | Seven-axis packets for three families exist; both chosen families finalised W5 | Partially delivered |
-| Non-canonical macrocyclic designs and focused library | Block registry exists as structure; chemistry blocked on campaign export | **Blocked** |
-| Historical COVID-19 evaluation | W5, with hindsight audit | Planned |
+| Modular emergency co-scientist | Decision state and action space delivered 19 Oct; integrated replay W5; demo frozen W6 | Partially delivered |
 | Two prototype-family case studies | W5–W6, scored outputs | Planned |
-| SynX platform improvement | Blocked on campaign export; re-scope decision at Thursday's gate | **Blocked** |
-| One mRNA display selection round, analysed | W7 execution; readout due 18 Nov; analysis by 20 Nov | **Blocked on slot** |
+| Historical COVID-19 evaluation | W5, with hindsight audit | Planned |
 | Paper, reproducible artifact, presentation | W10 | Planned |
 
 ### 7.2 Remaining shape of the ten weeks
@@ -755,10 +879,42 @@ London or the review pulled to 25 November.
 
 ## 8. Risks
 
+### 8.1 The one that dominates: the campaign export
+
+This is not one risk among several. It is the critical path of the project's primary arm, and
+it has been overdue for a week.
+
+Without it there is no chemistry: no chemical identifiers, no codon mappings, no
+stereochemistry, no molecular weights, no Rosetta parameters, no rotamer libraries. The
+building-block registry is a correctly-shaped container with every field null. In consequence
+**MOL-01 through MOL-04 cannot start**, the mandatory platform-improvement deliverable has no
+substrate, and the physics-based non-canonical track — Flex ddG, rotamer generation, the
+RosettaCommons ncAA interface protocol — remains entirely untouched. Six weeks remain.
+
+Three things would help, in descending order of value and ascending order of how much they ask
+of SynX:
+
+1. **A minimal subset, this week**, beats a complete export in three weeks: the supported
+   building-block catalogue with chemical identifiers, stereochemistry and codon assignments,
+   plus whatever Rosetta parameters and rotamer assets already exist. That alone unblocks
+   representation and the platform-improvement scoping.
+2. **One complete campaign** with parent/variant identities, score provenance, assay endpoints,
+   replicates and censoring — including the failed and low-scoring candidates, which are the
+   ones that make an honest evaluation possible.
+3. **A named owner and a date**, so that if neither arrives the platform-improvement deliverable
+   can be re-specified at Thursday's gate against something that does exist, rather than
+   slipping silently into week 8.
+
+The public ncAA macrocycle dataset (§2.2) reduces the damage but does not remove it: it lets
+binding prediction start on the right molecule class, and it says nothing about *this platform's*
+chemistry, which is what the platform-improvement deliverable requires.
+
+### 8.2 The rest
+
 | Risk | Current state | Consequence | Mitigation |
 | --- | --- | --- | --- |
 | **No booked display round** | Overdue since 16 Oct. No named SynX owner, no slot. | The one mandatory experimental deliverable does not happen. Backward planning from a usable 18 Nov readout is already tight. | Needs a name and a date this week. No internal workaround exists. |
-| **Campaign export not received** | Overdue. | The platform-improvement deliverable cannot begin; the molecular audit path is entirely blocked. Most exposed dependency in the project. | Re-scope decision at Thursday's gate: either the export arrives, or the platform improvement is re-specified against something available. |
+| **The public ncAA dataset may not be usable** | Being acquired and characterised now; the project's description of it is from memory and unverified. | If it has no quantitative per-variant endpoint, or too few independent scaffolds, the molecular arm has no substrate at all until the export lands. | §10 asks for the fallback. Candidates: other mRNA-display selection datasets, cyclic-peptide permeability sets, or accepting that prediction work waits on SynX. |
 | **Trainable model access unconfirmed** | No confirmed account, model list or spend ceiling. | Cannot commit to model identities or an experiment matrix. | Verify live availability; the local pilot model is not automatically a supported training model. |
 | **The mechanism rests on few independent landscapes** | §4.2. Now four against four with no overlap and a pre-registered replication on two unrelated proteins, but the permutation test sits at its floor (p = 1/70). | The claim is supported rather than established; a reviewer will ask for the within-protein control. | *Largely addressed on 20 October.* What remains is the 2×2 that separates coverage from combinatorial structure within one protein — PDZ doubles against the staged PDZ singles, coverage matched. ~60 replays, about two minutes. |
 | **Further headline claims may be artefacts** | Three fell in two days. | Credibility, and wasted weeks building on a number that is not real. | The controls are now in the code rather than in a document: a delay-effect table carrying the identity and the null band, a corrected headroom ceiling, a permuted-outcome falsification run, and a zero-retrieval control. Every new claim gets an intervention test before it is written down. |
@@ -796,26 +952,33 @@ Ordered by how much they block.
 
 **Decisions I need from you**
 
-1. **The three overdue dependencies.** A named SynX experimental owner and a booked slot; the
-   campaign export or an agreed substitute; confirmed trainable-model access with a spend
-   ceiling. Each is past its date, each is outside my control, and the second and third both
-   change the plan depending on the answer.
-2. **The display-round question.** Mpro confirmed, or an alternative? This gates library design
+1. **The campaign export — or an agreed substitute — is the one that matters** (§8.1). The
+   primary molecular arm has not started because of it. A minimal subset this week beats a
+   complete export in three; if neither is realistic, I need to re-specify the
+   platform-improvement deliverable on Thursday rather than let it slide to week 8.
+2. **A named SynX experimental owner and a booked slot.** Backward planning from a usable
+   18 November readout is already tight.
+3. **The display-round question.** Mpro confirmed, or an alternative? This gates library design
    and everything downstream of it.
-3. **Scope.** Eight streams in six remaining weeks is aggressive. If something should be cut
-   rather than delivered thinly, Thursday is the time to say so.
+4. **Scope.** Eight streams in six remaining weeks is aggressive. If something should be cut
+   rather than delivered thinly, Thursday is the time to say so — and my own view is that the
+   decision arm is the thing to trim if the molecular arm unblocks.
 
 **Things I would value your judgement on**
 
-4. **Is the sharpened contribution the right one?** "Verifiable decision environments
-   manufactured from public measurement data" versus "an agent that helps scientists decide."
-   The first is more defensible and less obviously useful to a clinician; I think it is right
-   but I would like to be argued with.
-5. **Have I scoped §4.2 correctly?** My reading is that the surviving result describes focused
-   pools of hundreds to a few thousand candidates — deconvolution and focused maturation — and
-   says nothing about a selection round over a 10¹¹-member library. That is a deliberately
-   narrow reading of my own result and I would rather you tell me it is too narrow than find out
-   at review that it was too broad.
+5. **Is the molecular/decision balance now right?** I had been describing the decision arm as
+   the contribution, which was an inversion, and §2.1 explains how it happened. The corrected
+   position is that molecular prediction for macrocycles is the research object and the
+   co-scientist is the allocation layer. Tell me if that is still not the balance you want.
+6. **The fallback if the public ncAA dataset is unusable.** It is being characterised now and
+   the project's description of it is from memory. If it has no quantitative per-variant endpoint
+   or too few independent scaffolds, the molecular arm has no substrate until the export lands,
+   and I would rather agree the fallback in advance than improvise it.
+7. **Have I scoped §4.2 correctly?** My reading is that the result describes focused pools of
+   hundreds to a few thousand candidates — deconvolution and focused maturation — and says
+   nothing about a selection round over a 10¹¹-member library. That is a deliberately narrow
+   reading of my own result and I would rather you tell me it is too narrow than find out at
+   review that it was too broad.
 6. **NIAID excluded both our families from its prototype list, by name** (§5.3), because they
    are already well resourced — which is close to the exact reason we chose them. I have an
    answer, which is that their exclusion concerns product resourcing and ours concerns benchmark
@@ -830,7 +993,10 @@ Ordered by how much they block.
 
 **What I will bring**
 
-The running system with a walkthrough of a single episode end to end; the replays behind §4,
-including the two interventions; and the arithmetic on all three withdrawn claims. If you want
-one thing to look at before Thursday, make it §4 — it is the most informative two pages about
-how this project actually works.
+Whatever the public ncAA macrocycle dataset turns out to contain, which is the thing most likely
+to change what we do next; the running system with a walkthrough of one episode end to end; the
+replays behind §4, including the two interventions; and the arithmetic on all three withdrawn
+claims.
+
+If you want one thing to read beforehand, make it §8.1 — the export — rather than the results.
+The results are in better shape than the critical path is.
