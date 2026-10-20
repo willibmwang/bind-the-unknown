@@ -87,3 +87,38 @@ delay, 128 labels, top-5% recall, paired per pool against random on the same poo
 eight seeded initial labels. Report mean paired gain, standard deviation across pools, and the
 count of pools improved. No multiple over random will be quoted. If the exact landscape-level
 permutation test is run, it will be reported with its floor (4 versus 4 gives 1/70 = 0.014).
+
+---
+
+## Outcome, appended 20 October after the replays were run
+
+Everything above this line was committed before the replays (`3f9b0a1`-series, see
+`git log --follow PREREGISTRATION_COVERAGE.md`). Nothing above has been edited.
+
+**All criteria passed.** At 10 pools, the geometry the prediction was written for:
+
+| Landscape | Predicted | Observed greedy | Pools improved | Diverse |
+| --- | --- | --- | --- | --- |
+| `grb2_sh3_peptide` | +0.25 ± 0.10, ≥ 7/10 | **+0.254** | 9/10 | −0.035 |
+| `rask_darpin_binding` | +0.24 ± 0.10, ≥ 7/10 | **+0.254** | 8/10 | +0.038 |
+
+Primary criterion (≥ +0.15 and ≥ 7/10): pass on both. Point predictions: within 0.005 on
+both, which is closer than the method deserves and should not be read as precision. Diverse
+within ±0.05 of zero: pass on both, consistent with a surrogate effect.
+
+**On the remaining ten pools, run afterwards.** Both landscapes were staged with 20 pools; the
+prediction was written for 10, so the second half is an out-of-sample extension rather than part
+of the registered test. GRB2 strengthened to +0.265 over 20 pools (19/20). KRAS weakened to
++0.194 (15/20) — outside the registered ±0.10 band had the test been written for 20 pools. Both
+figures are reported, and the 20-pool numbers are the ones used everywhere else, because using
+the half that was registered while twenty exist is the selective reporting this file is meant to
+prevent.
+
+**Effect on the landscape-level comparison.** Four high-coverage landscapes against four
+low-coverage, all staged pools run: high-coverage +0.194 to +0.265, low-coverage −0.004 to
++0.065, no overlap. Exact one-sided permutation p = 1/70 = 0.014, the floor of the design,
+against 1/15 = 0.067 before these two were added.
+
+**What it does not establish**, restated because it has not changed: this tests independence,
+not the coverage-versus-combinatoriality distinction, and bears on neither macrocycles nor
+display readouts nor pools larger than 512.

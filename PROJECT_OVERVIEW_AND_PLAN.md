@@ -47,11 +47,14 @@ check in the code rather than a note in a document. §4 gives the arithmetic and
 replaced them.
 
 **What survives is better than what it replaced.** Acquisition gain is governed by whether the
-surrogate can learn *inside the candidate pool*, which is a computable property of pool geometry
-rather than a property of the biology — established by intervention in both directions, not by
-correlation. The practical consequence for this project is favourable: the closest on-disk
-analogue to a randomised display library gives the largest gain measured anywhere in the work,
-from a deliberately weak surrogate.
+surrogate can learn *inside the candidate pool* — a computable property of pool geometry rather
+than of the biology, established by intervention in both directions rather than by correlation.
+It then replicated on two unrelated proteins against a prediction committed before the replays
+ran: predicted +0.25 and +0.24, observed +0.254 and +0.254, with every falsifier passed. Across
+eight landscapes on complete sweeps the groups do not overlap and the exact permutation test is
+at its floor, p = 1/70. The practical consequence is favourable: the closest on-disk analogue to
+a randomised display library gives the largest gain measured anywhere in the work, from a
+deliberately weak surrogate. §4.2 states the limits, which are real.
 
 **The system now holds biology.** Until 19 October the software chose among three abstract
 strategies over numbered candidates and contained no representation of the problem domain. It
@@ -438,8 +441,39 @@ variants, the same hidden scores and the same combinatorial structure, destroys 
 sharing, and removes the gain entirely. Combined substitutions are neither necessary nor
 sufficient.
 
-It is a *surrogate* effect: the surrogate-free diverse policy shows no gain on any of the six
-landscapes (−0.031 to +0.026), and it requires at least 64 of 512 labels — absent at 8, 16 and 32.
+It is a *surrogate* effect: the surrogate-free diverse policy shows no systematic gain on any
+landscape (−0.042 to +0.058 across all eight), and it requires at least 64 of 512 labels —
+absent at 8, 16 and 32.
+
+**It then held on two unrelated proteins, against a prediction written down first.** The
+mechanism's weakest point was independence: it rested on one independent protein plus a
+restaging of the pilot protein. Two further landscapes were staged — GRB2 SH3 domain and
+KRAS against the DARPin K55 binder, neither related to anything already in the set, the second
+carrying a binding rather than a fitness endpoint. The predictor (in-pool surrogate Spearman at
+128 labels), the thresholds and the falsifiers were recorded in
+[PREREGISTRATION_COVERAGE.md](PREREGISTRATION_COVERAGE.md) and committed **before** the replays
+ran. Predicted ≥ +0.15 improving in ≥ 7 of 10 pools, with point estimates of +0.25 and +0.24;
+observed +0.254 and +0.254. Every criterion passed, including diverse staying within ±0.05 of
+zero on both.
+
+Running every staged pool — no cell now rests on a selected half — the comparison is:
+
+| Landscape | In-pool Spearman | Pools | Greedy gain | Pools improved |
+| --- | ---: | ---: | ---: | ---: |
+| GRB2 SH3 | 0.46 | 20 | **+0.265** | 19/20 |
+| YAP1 WW | 0.35 | 18 | **+0.263** | 17/18 |
+| GB1-Olson (matched) | 0.70 | 20 | **+0.244** | 17/20 |
+| KRAS–DARPin | 0.68 | 20 | **+0.194** | 15/20 |
+| Mpro | 0.09 | 10 | +0.065 | 7/10 |
+| Influenza HA H3 | 0.08 | 20 | +0.060 | 13/20 |
+| Spike RBD | 0.11 | 6 | +0.030 | 3/6 |
+| Influenza HA H1 | 0.12 | 19 | −0.004 | 10/19 |
+
+The groups do not overlap — lowest high-coverage +0.194 against highest low-coverage +0.065 —
+and the exact one-sided permutation test over landscape labels now gives **p = 1/70 = 0.014**,
+against a floor of 0.067 before these two were added. Finishing the partial sweeps was not
+cosmetic: H3 fell from +0.104 on ten pools to +0.060 on twenty, and KRAS from +0.254 on ten to
++0.194 on twenty.
 
 **The relevant analogue for this project is better than either.** The four-site GB1 library
 (Wu 2016) is a randomised region over an alphabet, every member carrying a value at all four
@@ -462,12 +496,17 @@ region of a few positions sits at the favourable extreme of that variable.
   a selection round over a 10¹¹-member library. Over that same sweep the *multiple* over random
   rises from 2.9× to 12.9× while the policy loses almost all its real advantage, which is
   exactly how the eightfold figure misled. No multiple over random will be quoted again.
-- The landscape-level comparison cannot reach significance: two landscapes against four admits
-  fifteen partitions, the observed split is rank 1 of 15, exact permutation p = 0.067 — the floor
-  of the design. The ± figures are variation across pools of one protein.
-- One reported cell used a partial sweep. The H3 figure of +0.104 used 10 of 20 staged pools;
-  the other ten give +0.015, so the honest all-pool figure is +0.060. Pool counts now appear in
-  the table.
+- Eight landscapes is still eight. The permutation test is at its floor (rank 1 of 70), so 0.014
+  is the smallest p this design can produce, not a measurement of how much smaller it might be.
+  The ± spreads quoted per landscape are variation across pools of one protein, not evidence
+  about the landscape class.
+- **This does not separate coverage from combinatorial structure.** Both new landscapes are
+  multi-substitution and high-coverage, so the withdrawn hypothesis predicts the same outcome.
+  It tests independence only. Separating the two needs the within-protein comparison — PDZ
+  doubles against the already-staged PDZ singles with coverage matched — which is not yet run.
+- Coverage is also not the whole story in the other direction: KRAS has the second-highest
+  in-pool Spearman (0.68) and the smallest gain of the four (+0.194), and gain is not monotone
+  in surrogate skill anywhere in the table.
 
 ### 4.3 What this does to the project's central argument
 
@@ -675,7 +714,7 @@ London or the review pulled to 25 November.
 | **No booked display round** | Overdue since 16 Oct. No named SynX owner, no slot. | The one mandatory experimental deliverable does not happen. Backward planning from a usable 18 Nov readout is already tight. | Needs a name and a date this week. No internal workaround exists. |
 | **Campaign export not received** | Overdue. | The platform-improvement deliverable cannot begin; the molecular audit path is entirely blocked. Most exposed dependency in the project. | Re-scope decision at Thursday's gate: either the export arrives, or the platform improvement is re-specified against something available. |
 | **Trainable model access unconfirmed** | No confirmed account, model list or spend ceiling. | Cannot commit to model identities or an experiment matrix. | Verify live availability; the local pilot model is not automatically a supported training model. |
-| **The mechanism rests on too few independent landscapes** | §4.2. Two landscapes against four, exact permutation p = 0.067 — the floor of the design — and the confirmatory arm is a restaging of the pilot protein. | The surviving claim is suggestive rather than established, and a reviewer will say so first. | Two independent high-coverage landscapes from unrelated proteins, pre-registered before the replay runs. ~80 replays, about an hour. This moves the permutation floor from 1/15 to 1/70 and is the single highest-value experiment available. |
+| **The mechanism rests on few independent landscapes** | §4.2. Now four against four with no overlap and a pre-registered replication on two unrelated proteins, but the permutation test sits at its floor (p = 1/70). | The claim is supported rather than established; a reviewer will ask for the within-protein control. | *Largely addressed on 20 October.* What remains is the 2×2 that separates coverage from combinatorial structure within one protein — PDZ doubles against the staged PDZ singles, coverage matched. ~60 replays, about two minutes. |
 | **Further headline claims may be artefacts** | Three fell in two days. | Credibility, and wasted weeks building on a number that is not real. | The controls are now in the code rather than in a document: a delay-effect table carrying the identity and the null band, a corrected headroom ceiling, a permuted-outcome falsification run, and a zero-retrieval control. Every new claim gets an intervention test before it is written down. |
 | **Expert rubric reliability** | Not yet measured. | If inter-rater reliability is poor, the primary evaluation is unreliable. | This is precisely why the auto-gradeable environments matter: they give a domain where ground truth is exact rather than assessed. |
 | **Scope** | Eight workstreams, ten weeks, one person plus collaborators. | Thin delivery across everything rather than one solid result. | One paper narrative rather than two; mandatory outputs protected; a negative result retained and the claim narrowed, rather than the deliverable dropped. |
