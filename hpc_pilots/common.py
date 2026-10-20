@@ -212,8 +212,16 @@ class Agent:
         self.url = os.environ.get("PILOT_LLM_URL", "").rstrip("/")
         self.model = os.environ.get("PILOT_LLM_MODEL", "")
         self.token_file = os.environ.get("PILOT_LLM_TOKEN_FILE", "")
-        # Reasoning models spend part of this budget thinking, so allow headroom when needed.
-        self.max_tokens = int(os.environ.get("PILOT_LLM_MAX_TOKENS", "192"))
+        # Reasoning models spend part of this budget thinking before emitting anything, so
+        # the ceiling is not a bound on the answer's length. 192 was sized for the local 4B
+        # model and silently made a hosted reasoning model unusable: every call failed on
+        # finish_reason='length', and raising to 512 made the emitted content *shorter*,
+        # because the extra budget went to reasoning that still did not reach the JSON.
+        # 4096 is what actually completed. The default is per provider rather than global,
+        # since the local model does not need the headroom and paying for it would change
+        # the recorded binding replays.
+        self.max_tokens = int(os.environ.get(
+            "PILOT_LLM_MAX_TOKENS", "192" if self.provider == "local" else "4096"))
         if self.provider != "local":
             if self.provider not in PROVIDERS:
                 raise RuntimeError(f"Unknown PILOT_LLM_PROVIDER {self.provider!r}")
