@@ -285,8 +285,42 @@ def summarize_emergency(directory):
             "matched_reference": int(decided.chosen_matches_reference.sum()) if len(decided) else 0,
             "match_rate": round(float(decided.chosen_matches_reference.mean()), 4)
             if len(decided) else None})
+    # The contrast the probe exists for: same readout, same policy, evidence bought or not.
+    contrast = []
+    if rows:
+        using = pd.DataFrame(rows)
+        for policy in sorted(set(frame.policy) & set(using.policy)):
+            blind = frame[frame.policy == policy]
+            seeing = using[using.policy == policy]
+            blind_decided = blind[blind.chosen_target.notna()]
+            seeing_decided = seeing[seeing.chosen_target.notna()]
+            if not len(blind_decided) or not len(seeing_decided):
+                continue
+            blind_rate = float(blind_decided.chosen_matches_reference.mean())
+            seeing_rate = float(seeing_decided.chosen_matches_reference.mean())
+            contrast.append({
+                "policy": policy,
+                "zero_retrieval_episodes": len(blind_decided),
+                "zero_retrieval_match_rate": round(blind_rate, 4),
+                "zero_retrieval_evidence_bought": int(blind.evidence_retrieved.sum()),
+                "evidence_using_episodes": len(seeing_decided),
+                "evidence_using_match_rate": round(seeing_rate, 4),
+                "evidence_using_evidence_bought": int(seeing.evidence_retrieved.sum()),
+                "difference": round(seeing_rate - blind_rate, 4),
+                # The conclusion to draw when the control is already at 1.0 is about the
+                # READOUT, not about the policy. A measure that pretrained knowledge alone
+                # saturates has no room left to register evidence use, so it cannot be
+                # evidence that the retrieval mechanism works -- or that it does not.
+                "readout_saturated_by_control": blind_rate >= 1.0,
+                "verdict": "Control saturates the readout: target-selection agreement has no "
+                           "power to detect evidence-driven decision quality here, whatever "
+                           "the evidence-using arm scores."
+                if blind_rate >= 1.0 else
+                           "Control below ceiling: the margin over it is the part of "
+                           "performance attributable to purchased evidence."})
     write_json(directory / "memorisation_probe.json", {
         "control": "zero_retrieval",
+        "contrast_with_evidence_using_arm": contrast,
         "question": "With retrieval forbidden and no evidence pushed, does the policy still "
                     "name the target the full evidence base supports?",
         "by_cell": summary,
