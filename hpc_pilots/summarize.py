@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
 
-from .common import ROOT, config, write_json
+from .common import ROOT, config, provenance, write_json
 
 
 def headroom(labelled_fraction, top_fraction):
@@ -511,6 +511,7 @@ def summarize():
     status = {"binding_expected": expected_binding, "binding_completed": completed_binding,
               "structure_expected": len(sc["policies"]), "structure_completed": completed_structure,
               "complete": completed_binding == expected_binding and completed_structure == len(sc["policies"]),
+              "provenance": provenance(),
               "interpretation": "Pilot results; no claim of non-canonical, antiviral, or full-system efficacy"}
     write_json(directory / "status.json", status)
     print(json.dumps(status))
