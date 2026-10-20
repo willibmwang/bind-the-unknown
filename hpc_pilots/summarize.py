@@ -28,6 +28,32 @@ def headroom(labelled_fraction, top_fraction):
             "headroom_multiple": min(1 / top_fraction, 1 / labelled_fraction)}
 
 
+def with_bounds(frame):
+    """Attach the geometry-dependent ceiling to every checkpoint row, not just the last.
+
+    Recall at a budget is not comparable across environment instances on its own. Two
+    landscapes with different pool sizes and hit thresholds have different attainable
+    maxima, so the same raw recall can mean a policy recovered almost everything it
+    could have or almost nothing. Carrying the ceiling beside every number, at every
+    checkpoint, is what stops a raw figure being read without the bound that limits it --
+    the omission that produced the eightfold figure the project had to withdraw.
+
+    `ceiling_normalised_recall` is the share of the reachable hits that were reached. It
+    is on a common scale across pool geometries where raw recall and raw multiple over
+    random are not.
+    """
+    if not {"labels", "pool_size", "top_fraction", "top_recall"} <= set(frame.columns):
+        return frame
+    out = frame.copy()
+    out["labelled_fraction"] = out.labels / out.pool_size
+    bounds = [headroom(labelled, fraction)
+              for labelled, fraction in zip(out.labelled_fraction, out.top_fraction)]
+    out["recall_ceiling"] = [b["recall_ceiling"] for b in bounds]
+    out["headroom_multiple"] = [b["headroom_multiple"] for b in bounds]
+    out["ceiling_normalised_recall"] = out.top_recall / out.recall_ceiling
+    return out
+
+
 def summarize_targets(directory):
     """Pathogen landscapes are summarised per landscape and never pooled across endpoints."""
     rows = []
@@ -38,11 +64,12 @@ def summarize_targets(directory):
         for row in data["metrics"]:
             rows.append({"landscape": data["landscape"], "target": data["target"],
                          "endpoint": data["endpoint"], "policy": data["policy"],
+                         "pool_size": data.get("pool_size"),
                          "pool": data["pool"], "delay": data["delay"],
                          "file": str(path.relative_to(ROOT)), **row})
     if not rows:
         return
-    df = pd.DataFrame(rows)
+    df = with_bounds(pd.DataFrame(rows))
     df.to_csv(directory / "target_metrics.csv", index=False)
     for landscape, part in df.groupby("landscape"):
         fig, axes = plt.subplots(1, 3, figsize=(14, 4), layout="constrained")
@@ -81,9 +108,11 @@ def summarize_method(directory):
                          "file": str(path.relative_to(ROOT)), **row})
     if not rows:
         return
-    df = pd.DataFrame(rows)
+    df = with_bounds(pd.DataFrame(rows))
     df.to_csv(directory / "method_metrics.csv", index=False)
-    final = df[(df.labels == df.labels.max()) & (df.delay == 0)]
+    # Per landscape, since the checkpoint grids differ: taking a global max silently
+    # dropped any landscape whose grid ends elsewhere.
+    final = df[(df.delay == 0) & (df.labels == df.groupby("landscape").labels.transform("max"))]
     summary = []
     for landscape, part in final.groupby("landscape"):
         wide = part.pivot_table(index="pool", columns="policy", values="top_recall")
@@ -236,11 +265,12 @@ def summarize():
             for row in data["metrics"]:
                 base = {"policy": data["policy"], "file": str(path.relative_to(ROOT))}
                 if experiment == "binding":
-                    base.update({"pool": data["pool"], "delay": data["delay"]})
+                    base.update({"pool": data["pool"], "delay": data["delay"],
+                                 "pool_size": data.get("pool_size")})
                 base.update({k: v for k, v in row.items() if k != "per_protein"})
                 destination.append(base)
     if binding:
-        df = pd.DataFrame(binding)
+        df = with_bounds(pd.DataFrame(binding))
         df.to_csv(directory / "binding_metrics.csv", index=False)
         for delay, part in df.groupby("delay"):
             fig, axes = plt.subplots(1, 2, figsize=(10, 4), layout="constrained")

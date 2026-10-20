@@ -197,6 +197,10 @@ def run_binding(pool, policy, delay=0, smoke=False, control=None):
     policy = agent.label if agent else policy
     result.update({"experiment": "binding", "pool": pool, "policy": policy, "delay": delay,
                    "smoke": smoke, "status": "complete",
+                   # Recorded so the attainable-recall ceiling can be computed at every
+                   # checkpoint rather than reconstructed from the config afterwards.
+                   "pool_size": len(features),
+                   "top_fraction": c["binding"]["top_fraction"],
                    "dataset_manifest_sha256": digest(path / "manifest.json"),
                    "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
                    "provenance": provenance()})
@@ -287,7 +291,8 @@ def run_target(landscape, pool, policy, delay=0, smoke=False, control=None):
     result.update({"experiment": "target", "landscape": landscape, "pool": pool, "policy": policy,
                    "delay": delay, "smoke": smoke, "status": "complete",
                    "target": spec["target"], "pathogen": spec["pathogen"], "family": spec["family"],
-                   "endpoint": spec["endpoint"],
+                   "endpoint": spec["endpoint"], "top_fraction": tc["top_fraction"],
+                   "pool_size": manifest["pool_geometry"]["pool_size"],
                    "endpoint_warning": "Do not pool metrics across landscapes with different "
                                        "assay endpoints, and do not compare these top-fraction "
                                        "figures with the GB1 1% figures.",
