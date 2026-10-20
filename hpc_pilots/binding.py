@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
+from .arms import arm
 from .common import ROOT, Agent, config, digest, provenance, write_json
 from .streams import stream, stream_int
 
@@ -211,176 +212,97 @@ def replay(features, hidden_outcomes, policy, seed, maximum=128, initial=8, batc
             "delay_units": "synthetic decision rounds, not measured laboratory time"}
 
 
-def run_binding(pool, policy, delay=0, smoke=False, control=None):
-    c, path = config(), ROOT / "data/processed/binding"
+def run_arm(name, landscape=None, pool=0, policy="greedy", delay=0, smoke=False, control=None):
+    """Replay one acquisition policy against any arm.
+
+    The four arms previously had a `run_*` apiece, differing in the config they read, the
+    directory they load from, the column holding the outcome and the fields they stamp.
+    Those differences are now data, in `arms.ARMS`, and this is the single code path, so
+    the arms are identical by construction rather than by four separate edits staying in
+    step -- which they had already stopped doing.
+
+    Every replay parameter is passed explicitly even where `replay`'s default matches the
+    configured value. The defaults coincided with `today.json` by history rather than by
+    design, so an arm that quietly relied on them would silently diverge the moment either
+    changed.
+    """
+    a = arm(name)
+    cfg = json.loads((ROOT / a.config_path()).read_text())
+    block = cfg[a.section] if a.section else cfg
+    spec = cfg["landscapes"][landscape] if a.per_landscape else block
+    if a.per_landscape and landscape not in cfg["landscapes"]:
+        raise ValueError(f"Unknown {name} landscape {landscape!r}")
+
+    path = ROOT / a.staged(landscape)
+    manifest = json.loads((path / "manifest.json").read_text())
+    geometry = manifest.get("pool_geometry", {})
+    if a.per_landscape and not geometry.get("disjoint", True):
+        raise ValueError(f"{landscape} was staged without pools and cannot be replayed; "
+                         f"{geometry.get('reason', '')}")
     split = np.load(path / "splits.npz")["evaluation"][pool]
     features = np.load(path / "features.npy")[split]
-    hidden = pd.read_csv(path / "outcomes.csv", usecols=["DMS_score"]).DMS_score.to_numpy()[split]
-    maximum = 16 if smoke else c["binding"]["maximum_labels"]
+    hidden = pd.read_csv(path / "outcomes.csv",
+                         usecols=[a.outcome_column])[a.outcome_column].to_numpy()[split]
+
     agent = Agent() if policy == "agent" else None
-    result = replay(features, hidden, policy, c["seed"] + pool, maximum=maximum,
-                    initial=c["binding"]["initial_labels"], delay=delay, agent=agent,
-                    surrogate=c["binding"], control=control)
+    fraction = spec["top_fraction"] if a.fraction_from_spec else block["top_fraction"]
+    result = replay(features, hidden, policy, cfg["seed"] + pool,
+                    maximum=16 if smoke else block["maximum_labels"],
+                    initial=block["initial_labels"], batch=block["batch_size"], delay=delay,
+                    checkpoints=tuple(block["checkpoints"]), agent=agent, fraction=fraction,
+                    cardinalities=manifest.get("cardinalities"), surrogate=block,
+                    control=control)
     policy = agent.label if agent else policy
-    result.update({"experiment": "binding", "pool": pool, "policy": policy, "delay": delay,
-                   "smoke": smoke, "status": "complete",
-                   # Recorded so the attainable-recall ceiling can be computed at every
-                   # checkpoint rather than reconstructed from the config afterwards.
-                   "pool_size": len(features),
-                   "top_fraction": c["binding"]["top_fraction"],
+
+    result.update({"experiment": name, "pool": pool, "policy": policy, "delay": delay,
+                   "smoke": smoke, "status": "complete", "top_fraction": fraction,
+                   "pool_size": geometry.get("pool_size", len(features)),
                    "dataset_manifest_sha256": digest(path / "manifest.json"),
-                   "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
+                   # The manifest's own hash moves whenever the data is restaged, because it
+                   # carries observation timestamps, so it cannot verify that a rerun used the
+                   # same data. The content hash can, and both are kept: one identifies the
+                   # file, the other the data.
+                   "dataset_content_sha256": manifest.get("content_sha256"),
                    "provenance": provenance()})
+    if a.per_landscape:
+        result["landscape"] = landscape
+    if a.describe:
+        result.update(a.describe(spec, manifest))
+    if a.warning:
+        result["endpoint_warning"] = a.warning
+    for key, filename in a.extra_hashes:
+        result[key] = digest(ROOT / "hpc_pilots/configs" / filename)
     if agent:
         result["agent"] = agent.report()
-    label = "smoke_" if smoke else ""
-    # A control arm writes to its own file so it can never overwrite or pool with the real one.
-    output = (ROOT / "runs/binding" /
-              f"{label}{policy}_pool{pool:02d}_delay{delay}{f'_{control}' if control else ''}.json")
+
+    output = ROOT / a.runs / a.filename(landscape, policy, pool, delay, smoke, control)
     write_json(output, result)
     print(json.dumps({"output": str(output), "final": result["metrics"][-1]}))
+    return result
 
 
 def target_config():
     return json.loads((ROOT / "hpc_pilots/configs/targets.json").read_text())
 
-
-def run_method(landscape, pool, policy, delay=0, smoke=False, control=None):
-    """Replay the acquisition policies against a method-development landscape.
-
-    Identical machinery and the same fixed surrogate as every other replay, so a change of
-    substrate is not confounded by a change of model. These landscapes carry measured
-    binding endpoints, which the pathogen landscapes do not; that is the point of them.
-    """
-    mc = json.loads((ROOT / "hpc_pilots/configs/method.json").read_text())
-    if landscape not in mc["landscapes"]:
-        raise ValueError(f"Unknown method landscape {landscape!r}")
-    spec = mc["landscapes"][landscape]
-    path = ROOT / "data/processed/method" / landscape
-    manifest = json.loads((path / "manifest.json").read_text())
-    split = np.load(path / "splits.npz")["evaluation"][pool]
-    features = np.load(path / "features.npy")[split]
-    hidden = pd.read_csv(path / "outcomes.csv", usecols=["DMS_score"]).DMS_score.to_numpy()[split]
-    agent = Agent() if policy == "agent" else None
-    result = replay(features, hidden, policy, mc["seed"] + pool,
-                    maximum=16 if smoke else mc["maximum_labels"],
-                    initial=mc["initial_labels"], batch=mc["batch_size"], delay=delay,
-                    checkpoints=tuple(mc["checkpoints"]), agent=agent,
-                    fraction=spec["top_fraction"], cardinalities=manifest["cardinalities"],
-                    surrogate=mc, control=control)
-    policy = agent.label if agent else policy
-    result.update({"experiment": "method", "landscape": landscape, "pool": pool,
-                   "policy": policy, "delay": delay, "smoke": smoke, "status": "complete",
-                   "protein": spec["protein"], "interface": spec["interface"],
-                   "endpoint": spec["endpoint"], "top_fraction": spec["top_fraction"],
-                   "pool_size": manifest["pool_geometry"]["pool_size"],
-                   "role": "method development substrate; not a pathogen target proposal",
-                   "endpoint_warning": "Do not pool metrics across landscapes with different "
-                                       "assay endpoints or different pool geometries; the "
-                                       "multiple over random is bounded by the labelled "
-                                       "fraction of the pool.",
-                   "dataset_manifest_sha256": digest(path / "manifest.json"),
-                   "method_config_sha256": digest(ROOT / "hpc_pilots/configs/method.json"),
-                   "provenance": provenance()})
-    if agent:
-        result["agent"] = agent.report()
-    label = "smoke_" if smoke else ""
-    output = (ROOT / "runs/method" / f"{label}{landscape}_{policy}_pool{pool:02d}"
-              f"_delay{delay}{f'_{control}' if control else ''}.json")
-    write_json(output, result)
-    print(json.dumps({"output": str(output), "final": result["metrics"][-1]}))
-
-
-def run_display(landscape, pool, policy, delay=0, smoke=False, control=None):
-    """Replay the acquisition policies against a display-selection library.
-
-    Same machinery, same fixed surrogate and the same seeded initial labels as every other
-    replay, so the change of substrate is not confounded by a change of model. What differs
-    is the substrate itself: these are the first landscapes in this project that are
-    macrocyclic, and in the thrombin case the first whose features are named non-canonical
-    monomers rather than amino-acid letters.
-    """
-    dc = json.loads((ROOT / "hpc_pilots/configs/display.json").read_text())
-    if landscape not in dc["landscapes"]:
-        raise ValueError(f"Unknown display landscape {landscape!r}")
-    spec = dc["landscapes"][landscape]
-    path = ROOT / "data/processed/display" / landscape
-    manifest = json.loads((path / "manifest.json").read_text())
-    if not manifest["pool_geometry"].get("disjoint"):
-        raise ValueError(f"{landscape} was staged without pools and cannot be replayed; "
-                         f"{manifest['pool_geometry'].get('reason', '')}")
-    split = np.load(path / "splits.npz")["evaluation"][pool]
-    features = np.load(path / "features.npy")[split]
-    hidden = pd.read_csv(path / "outcomes.csv", usecols=["outcome"]).outcome.to_numpy()[split]
-    agent = Agent() if policy == "agent" else None
-    result = replay(features, hidden, policy, dc["seed"] + pool,
-                    maximum=16 if smoke else dc["maximum_labels"],
-                    initial=dc["initial_labels"], batch=dc["batch_size"], delay=delay,
-                    checkpoints=tuple(dc["checkpoints"]), agent=agent,
-                    fraction=spec["top_fraction"], cardinalities=manifest["cardinalities"],
-                    surrogate=dc, control=control)
-    policy = agent.label if agent else policy
-    result.update({"experiment": "display", "landscape": landscape, "pool": pool,
-                   "policy": policy, "delay": delay, "smoke": smoke, "status": "complete",
-                   "target": spec["target"], "modality": spec["modality"],
-                   "endpoint": spec["endpoint"], "top_fraction": spec["top_fraction"],
-                   "pool_size": manifest["pool_geometry"]["pool_size"],
-                   "noncanonical_features": bool(spec.get("monomer_separator")),
-                   "endpoint_warning": "Enrichment is not affinity, functional inhibition or "
-                                       "antiviral activity. Do not pool metrics across "
-                                       "landscapes with different endpoints or geometries.",
-                   "dataset_manifest_sha256": digest(path / "manifest.json"),
-                   "display_config_sha256": digest(ROOT / "hpc_pilots/configs/display.json"),
-                   "provenance": provenance()})
-    if agent:
-        result["agent"] = agent.report()
-    label = "smoke_" if smoke else ""
-    output = (ROOT / "runs/display" / f"{label}{landscape}_{policy}_pool{pool:02d}"
-              f"_delay{delay}{f'_{control}' if control else ''}.json")
-    write_json(output, result)
-    print(json.dumps({"output": str(output), "final": result["metrics"][-1]}))
+# The four arms kept a `run_*` apiece until the registry in `arms` made their differences
+# data. These remain as the named entry points the CLI, the sweep and the tests already
+# use; each is now one call, and they were verified to reproduce their predecessors
+# field-for-field before the bodies were deleted.
+def run_binding(pool, policy, delay=0, smoke=False, control=None):
+    """Replay against the staged GB1 pilot, the one arm with no landscape to name."""
+    return run_arm("binding", None, pool, policy, delay, smoke, control)
 
 
 def run_target(landscape, pool, policy, delay=0, smoke=False, control=None):
-    """Replay the acquisition policies against a pathogen landscape.
+    """Replay against a pathogen landscape."""
+    return run_arm("target", landscape, pool, policy, delay, smoke, control)
 
-    The surrogate hyperparameters are deliberately the same fixed forest the GB1 pilot
-    used, so a substrate change is not confounded by a model change. Each landscape
-    carries its own assay endpoint and results from different endpoints are never pooled.
-    """
-    tc = target_config()
-    if landscape not in tc["landscapes"]:
-        raise ValueError(f"Unknown landscape {landscape!r}")
-    spec = tc["landscapes"][landscape]
-    path = ROOT / "data/processed/targets" / landscape
-    manifest = json.loads((path / "manifest.json").read_text())
-    split = np.load(path / "splits.npz")["evaluation"][pool]
-    features = np.load(path / "features.npy")[split]
-    hidden = pd.read_csv(path / "outcomes.csv", usecols=["DMS_score"]).DMS_score.to_numpy()[split]
-    agent = Agent() if policy == "agent" else None
-    result = replay(features, hidden, policy, tc["seed"] + pool,
-                    maximum=16 if smoke else tc["maximum_labels"],
-                    initial=tc["initial_labels"], batch=tc["batch_size"], delay=delay,
-                    checkpoints=tuple(tc["checkpoints"]), agent=agent,
-                    fraction=tc["top_fraction"],
-                    cardinalities=manifest["cardinalities"], surrogate=tc, control=control)
-    policy = agent.label if agent else policy
-    result.update({"experiment": "target", "landscape": landscape, "pool": pool, "policy": policy,
-                   "delay": delay, "smoke": smoke, "status": "complete",
-                   "target": spec["target"], "pathogen": spec["pathogen"], "family": spec["family"],
-                   "endpoint": spec["endpoint"], "top_fraction": tc["top_fraction"],
-                   "pool_size": manifest["pool_geometry"]["pool_size"],
-                   "endpoint_warning": "Do not pool metrics across landscapes with different "
-                                       "assay endpoints, and do not compare these top-fraction "
-                                       "figures with the GB1 1% figures.",
-                   "dataset_manifest_sha256": digest(path / "manifest.json"),
-                   "targets_config_sha256": digest(ROOT / "hpc_pilots/configs/targets.json"),
-                   "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
-                   "provenance": provenance()})
-    if agent:
-        result["agent"] = agent.report()
-    label = "smoke_" if smoke else ""
-    output = (ROOT / "runs/targets" / f"{label}{landscape}_{policy}_pool{pool:02d}"
-              f"_delay{delay}{f'_{control}' if control else ''}.json")
-    write_json(output, result)
-    print(json.dumps({"output": str(output), "final": result["metrics"][-1]}))
+
+def run_method(landscape, pool, policy, delay=0, smoke=False, control=None):
+    """Replay against a method-development landscape carrying a measured binding endpoint."""
+    return run_arm("method", landscape, pool, policy, delay, smoke, control)
+
+
+def run_display(landscape, pool, policy, delay=0, smoke=False, control=None):
+    """Replay against a display-selection library."""
+    return run_arm("display", landscape, pool, policy, delay, smoke, control)

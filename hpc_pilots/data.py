@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .common import ROOT, config, digest, download, write_json
+from .common import ROOT, config, content_digest, digest, download, write_json
 
 PG_BASE = "https://marks.hms.harvard.edu/proteingym/ProteinGym_v1.3/"
 PG_META = "https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/reference_files/DMS_substitutions.csv"
@@ -59,8 +59,14 @@ def prepare_binding():
                 "splits_sha256": digest(out / "splits.npz"),
                 "limitations": ["Single canonical-protein assay", "No non-canonical or antiviral claim",
                                 "Candidate-pool repetitions are not independent biological assays"]}
+    # Stamped here rather than through `write_landscape`, because the pilot writes its
+    # artifacts earlier in this function and its manifest key order is already recorded in
+    # results; the identity is what matters, not the route to it.
+    manifest["content_sha256"] = content_digest(manifest)
     write_json(out / "manifest.json", manifest)
-    print(json.dumps({"binding_rows": len(df), "evaluation_pools": len(pools), "manifest": str(out / "manifest.json")}))
+    print(json.dumps({"binding_rows": len(df), "evaluation_pools": len(pools),
+                      "content_sha256": manifest["content_sha256"],
+                      "manifest": str(out / "manifest.json")}))
 
 
 def pool_geometry(rows, pool_size, max_pools):
@@ -113,16 +119,8 @@ def prepare_target(landscape):
             raise ValueError(f"Invalid mutation or reference-sequence mismatch: {s}")
         features[i] = (pos_index[int(match[2])], AA.index(match[3]))
     geometry = pool_geometry(len(df), tc["pool_size"], tc["max_evaluation_pools"])
-    order = np.random.default_rng(tc["seed"]).permutation(len(df))
-    dev = order[:geometry["development_pool_size"]]
-    pools = order[geometry["development_pool_size"]:geometry["candidates_used"]].reshape(
-        geometry["evaluation_pools"], geometry["pool_size"])
-    if len(np.unique(np.r_[dev, pools.ravel()])) != geometry["candidates_used"]:
-        raise ValueError("Pools are not disjoint")
-    df.to_csv(out / "outcomes.csv", index=False)
-    np.save(out / "features.npy", features)
-    np.savez(out / "splits.npz", development=dev, evaluation=pools)
-    write_json(out / "manifest.json", {
+    dev, pools = _split_pools(len(df), geometry, tc["seed"])
+    write_landscape(out, df, features, geometry, dev, pools, {
         "landscape": landscape, "dataset": row.DMS_id, "rows": len(df),
         "target": spec["target"], "pathogen": spec["pathogen"], "family": spec["family"],
         "variable_positions": len(positions), "sequence_length": int(row.seq_len),
@@ -134,9 +132,9 @@ def prepare_target(landscape):
         "top_fraction_note": tc["top_fraction_note"],
         "sources": provenance,
         "targets_config_sha256": digest(ROOT / "hpc_pilots/configs/targets.json"),
-        "outcomes_sha256": digest(out / "outcomes.csv"),
-        "features_sha256": digest(out / "features.npy"),
-        "splits_sha256": digest(out / "splits.npz"),
+        "outcomes_sha256": None,
+        "features_sha256": None,
+        "splits_sha256": None,
         "limitations": [
             f"The measured endpoint is {spec['endpoint']}. It is not a macrocycle binding "
             "measurement and not an antiviral activity measurement.",
@@ -144,10 +142,8 @@ def prepare_target(landscape):
             "no macrocycle appears in this landscape.",
             "Pools are sub-landscapes of one protein. Pool spread is descriptive variability, "
             "not biological replication across independent targets.",
-            "Metrics must not be pooled across landscapes with different assay endpoints."]})
-    print(json.dumps({"landscape": landscape, "rows": len(df),
-                      "positions": len(positions), "geometry": geometry,
-                      "manifest": str(out / "manifest.json")}))
+            "Metrics must not be pooled across landscapes with different assay endpoints."]},
+        summary={"landscape": landscape, "positions": len(positions)})
 
 
 def _read_landscape(dms_id):
@@ -194,6 +190,41 @@ def encode_variants(df, target_seq):
             features[i, index[int(m[1:-1])]] = AA.index(m[-1])
     return (features, [len(AA)] * len(positions), len(positions),
             "residue identity at each variable position, supporting combined substitutions")
+
+
+def write_landscape(out, df, features, geometry, dev, pools, manifest, summary=None):
+    """Write one staged landscape and its manifest.
+
+    Every arm ends the same way -- three artifacts, three digests of those artifacts, a
+    manifest and a summary line -- and each `prepare_*` used to spell that out again. The
+    repetition had already produced a divergence: `prepare_target` inlined its own copy of
+    the pool split instead of calling `_split_pools`, so the disjointness assertion lived in
+    two places and could have drifted in one.
+
+    The digests are taken after the files are on disk rather than from the arrays in
+    memory, so a manifest can only ever describe bytes that were actually written.
+
+    The caller supplies the manifest with the three digest keys already present and set to
+    None. They are filled in place rather than appended, because a manifest's own hash is
+    recorded in every result file that used it, and reordering its keys would change those
+    bytes and silently break the tie between a recorded run and the data it ran on.
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out / "outcomes.csv", index=False)
+    np.save(out / "features.npy", features)
+    np.savez(out / "splits.npz", development=dev, evaluation=pools)
+    for key, name in (("outcomes_sha256", "outcomes.csv"), ("features_sha256", "features.npy"),
+                      ("splits_sha256", "splits.npz")):
+        if key not in manifest:
+            raise KeyError(f"{key} must be present in the manifest so its position is the "
+                           f"caller's choice, not this function's")
+        manifest[key] = digest(out / name)
+    # Stable identity for the staged data: the same inputs restage to the same value, which
+    # the file's own hash cannot do while it carries observation timestamps.
+    manifest["content_sha256"] = content_digest(manifest)
+    write_json(out / "manifest.json", manifest)
+    print(json.dumps({**(summary or {}), "rows": len(df), "geometry": geometry,
+                      "manifest": str(out / "manifest.json")}))
 
 
 def _split_pools(rows, geometry, seed):
@@ -310,10 +341,7 @@ def prepare_display(landscape):
         if chemistry is not None:
             np.save(out / "descriptors.npy", chemistry)
 
-    df.to_csv(out / "outcomes.csv", index=False)
-    np.save(out / "features.npy", features)
-    np.savez(out / "splits.npz", development=dev, evaluation=pools)
-    write_json(out / "manifest.json", {
+    write_landscape(out, df, features, geometry, dev, pools, {
         "landscape": landscape, "rows": len(df), "duplicates_collapsed": duplicates,
         "descriptors": list(DESCRIPTORS) if chemistry is not None else None,
         "descriptors_sha256": digest(out / "descriptors.npy") if chemistry is not None else None,
@@ -329,14 +357,12 @@ def prepare_display(landscape):
         "rationale": spec["why"], "source": spec["source"],
         "display_config_sha256": digest(ROOT / "hpc_pilots/configs/display.json"),
         "input_sha256": digest(source),
-        "outcomes_sha256": digest(out / "outcomes.csv"),
-        "features_sha256": digest(out / "features.npy"),
-        "splits_sha256": digest(out / "splits.npz"),
-        "limitations": dc["limitations"] + spec.get("limitations", [])})
-    print(json.dumps({"landscape": landscape, "rows": len(df),
-                      "randomised_positions": len(cardinalities),
-                      "cardinalities": cardinalities, "duplicates_collapsed": duplicates,
-                      "geometry": geometry}))
+        "outcomes_sha256": None,
+        "features_sha256": None,
+        "splits_sha256": None,
+        "limitations": dc["limitations"] + spec.get("limitations", [])},
+        summary={"landscape": landscape, "randomised_positions": len(cardinalities),
+                 "cardinalities": cardinalities, "duplicates_collapsed": duplicates})
 
 
 def prepare_method(landscape):
@@ -350,10 +376,7 @@ def prepare_method(landscape):
     combined = int((df.mutant.str.count(":") > 0).sum())
     geometry = pool_geometry(len(df), spec["pool_size"], mc["max_evaluation_pools"])
     dev, pools = _split_pools(len(df), geometry, mc["seed"])
-    df.to_csv(out / "outcomes.csv", index=False)
-    np.save(out / "features.npy", features)
-    np.savez(out / "splits.npz", development=dev, evaluation=pools)
-    write_json(out / "manifest.json", {
+    write_landscape(out, df, features, geometry, dev, pools, {
         "landscape": landscape, "dataset": row.DMS_id, "rows": len(df),
         "protein": spec["protein"], "interface": spec["interface"],
         "role": "method development substrate; not a pathogen target proposal",
@@ -366,15 +389,14 @@ def prepare_method(landscape):
         "pool_geometry": geometry, "top_fraction": spec["top_fraction"],
         "rationale": spec["why"], "sources": provenance,
         "method_config_sha256": digest(ROOT / "hpc_pilots/configs/method.json"),
-        "outcomes_sha256": digest(out / "outcomes.csv"),
-        "features_sha256": digest(out / "features.npy"),
-        "splits_sha256": digest(out / "splits.npz"),
+        "outcomes_sha256": None,
+        "features_sha256": None,
+        "splits_sha256": None,
         "limitations": mc["limitations"] + [
             f"The measured endpoint is {spec['endpoint']}. It is not a macrocycle "
-            "measurement and establishes nothing about non-canonical chemistry."]})
-    print(json.dumps({"landscape": landscape, "rows": len(df), "positions": n_positions,
-                      "combined_substitution_variants": combined, "encoding": encoding,
-                      "geometry": geometry}))
+            "measurement and establishes nothing about non-canonical chemistry."]},
+        summary={"landscape": landscape, "positions": n_positions,
+                 "combined_substitution_variants": combined, "encoding": encoding})
 
 
 def prepare_atlas_manifest():
@@ -395,14 +417,16 @@ def prepare_atlas_manifest():
     selected = selected[cols].copy()
     selected["split"] = ["development"] * sc["development_proteins"] + ["evaluation"] * sc["evaluation_proteins"]
     selected.to_csv(out / "selection.csv", index=False)
-    write_json(out / "manifest.json", {"metadata_rows": len(df), "selected_entries": len(selected),
-               "selection_rule": "human, length 50-250, nonredundant, first PDB per ECOD family, sorted by PDB",
-               "source": provenance, "selection_sha256": digest(out / "selection.csv"),
-               "data_license": "CC BY-NC 4.0; noncommercial research pilot",
-               "replicates": {"acquisition": [1, 2], "held_out_reference": 3},
-               "limitations": ["MD reference is not experimental binding truth",
-                               "Initial structures are equilibrated ATLAS starting structures",
-                               "Commercial use requires separate terms from the dataset owner"]})
+    manifest = {"metadata_rows": len(df), "selected_entries": len(selected),
+                "selection_rule": "human, length 50-250, nonredundant, first PDB per ECOD family, sorted by PDB",
+                "source": provenance, "selection_sha256": digest(out / "selection.csv"),
+                "data_license": "CC BY-NC 4.0; noncommercial research pilot",
+                "replicates": {"acquisition": [1, 2], "held_out_reference": 3},
+                "limitations": ["MD reference is not experimental binding truth",
+                                "Initial structures are equilibrated ATLAS starting structures",
+                                "Commercial use requires separate terms from the dataset owner"]}
+    manifest["content_sha256"] = content_digest(manifest)
+    write_json(out / "manifest.json", manifest)
     print(selected[["PDB", "length", "split"]].to_string(index=False))
 
 

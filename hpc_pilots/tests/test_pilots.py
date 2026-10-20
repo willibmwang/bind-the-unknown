@@ -5,12 +5,14 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from hpc_pilots.arms import ARMS
 from hpc_pilots.binding import design_matrix, enrichment, pick_batch, replay
 from hpc_pilots.calibration import calibration_metrics, trajectory
 from hpc_pilots.chemistry import alphabet, encode, library_spec, registry, sample_library
 from hpc_pilots.common import ROOT
 from hpc_pilots.common import (Agent, COMMITTED_MODEL_MANIFEST, STAGED_MODEL_MANIFEST,
-                               digest, model_manifest, provenance, source_manifest)
+                               content_digest, digest, model_manifest, provenance,
+                               source_manifest)
 from hpc_pilots.data import AA, encode_variants, pool_geometry
 from hpc_pilots.dossier import Dossier, evidence, rank
 from hpc_pilots.emergency import run_episode
@@ -581,3 +583,51 @@ def test_source_manifest_check_reports_drift_without_rewriting_the_record():
     assert set(drift) == {'changed', 'added', 'removed'}
     # Every pattern the record claims to cover must actually resolve to files on disk.
     assert json.loads(path.read_text())['files']
+
+
+def test_content_digest_ignores_when_but_not_what():
+    """A manifest's identity must survive restaging and must not survive editing."""
+    base = {'rows': 10, 'sources': [{'url': 'u', 'sha256': 'abc',
+                                     'verified_at_utc': '2026-10-20T20:05:35+00:00'}]}
+    later = json.loads(json.dumps(base))
+    later['sources'][0]['verified_at_utc'] = '2026-10-21T09:00:00+00:00'
+    assert content_digest(base) == content_digest(later)
+    # Key order is not content either, so a reordered manifest keeps its identity.
+    assert content_digest({'b': 1, 'a': 2}) == content_digest({'a': 2, 'b': 1})
+    # But anything that describes the data itself must change it.
+    changed = json.loads(json.dumps(base))
+    changed['sources'][0]['sha256'] = 'def'
+    assert content_digest(base) != content_digest(changed)
+    assert content_digest(base) != content_digest({**base, 'rows': 11})
+    # The field is excluded from its own input, so stamping it in is idempotent.
+    stamped = {**base, 'content_sha256': content_digest(base)}
+    assert content_digest(stamped) == content_digest(base)
+
+
+def test_every_arm_round_trips_its_result_filename():
+    """The registry is the only place an arm's layout is written down, so it must be total."""
+    for name, a in ARMS.items():
+        assert a.name == name
+        assert a.config_path().startswith('hpc_pilots/configs/')
+        assert a.runs.startswith('runs/') and a.processed.startswith('data/processed/')
+        # A control arm writes to its own file and can never collide with the real run.
+        real = a.filename('ls', 'greedy', 3, 0)
+        control = a.filename('ls', 'greedy', 3, 0, control='permuted')
+        smoke = a.filename('ls', 'greedy', 3, 0, smoke=True)
+        assert len({real, control, smoke}) == 3
+        assert real.endswith('_pool03_delay0.json') and smoke.startswith('smoke_')
+        # Only the pilot has no landscape to name; every other arm must carry one.
+        assert ('ls_' in real) == a.per_landscape
+
+
+def test_staged_landscapes_carry_a_stable_content_hash():
+    """Every staged landscape must be identifiable by content, not only by file bytes."""
+    staged = sorted((ROOT / 'data/processed').glob('*/manifest.json')) + \
+             sorted((ROOT / 'data/processed').glob('*/*/manifest.json'))
+    if not staged:
+        pytest.skip('no landscapes staged')
+    for path in staged:
+        manifest = json.loads(path.read_text())
+        assert manifest.get('content_sha256'), f'{path.parent.name} has no content hash'
+        # Recomputing from the file on disk must reproduce the value the file records.
+        assert content_digest(manifest) == manifest['content_sha256']

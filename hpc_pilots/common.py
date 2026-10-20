@@ -107,6 +107,38 @@ def digest(path):
     return h.hexdigest()
 
 
+# Fields recording *when* something was observed rather than *what* it is. They belong in a
+# manifest -- knowing when a download was last verified is useful -- but they must not
+# participate in the manifest's identity.
+VOLATILE_KEYS = ("verified_at_utc", "recorded_at_utc", "staged_at_utc")
+
+
+def content_digest(obj):
+    """A hash of what a manifest says, ignoring when it said it.
+
+    `digest` over manifest.json cannot serve as a data identity, because `download` stamps
+    `verified_at_utc` on every call including a cache hit. Re-staging byte-identical inputs
+    therefore produced a different manifest hash every time, which means the
+    `dataset_manifest_sha256` recorded in a result could never be checked by re-staging --
+    only by finding the one manifest still on disk. A provenance record that cannot be
+    recomputed is a label, not a record.
+
+    This strips the timestamps and hashes the rest with sorted keys, so the result depends
+    on the content and not on key order or the moment of observation.
+    """
+    def strip(x):
+        if isinstance(x, dict):
+            return {k: strip(v) for k, v in x.items()
+                    if k not in VOLATILE_KEYS and k != "content_sha256"}
+        if isinstance(x, list):
+            return [strip(v) for v in x]
+        return x
+
+    return hashlib.sha256(
+        json.dumps(strip(obj), sort_keys=True, separators=(",", ":"),
+                   allow_nan=False).encode()).hexdigest()
+
+
 def download(url, path):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)

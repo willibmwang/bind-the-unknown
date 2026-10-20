@@ -23,12 +23,10 @@ import time
 
 import numpy as np
 
-from .common import ROOT, config, provenance, write_json
+from .arms import arm as arm_spec
+from .common import ROOT, provenance, write_json
 
 POLICIES = ("random", "diverse", "greedy", "ucb")
-# arm -> (staged directory, config file). `binding` is the single GB1 pilot and has neither.
-ARMS = {"target": ("targets", "targets.json"), "method": ("method", "method.json"),
-        "display": ("display", "display.json")}
 
 
 def available_pools(arm, landscape=None):
@@ -40,10 +38,7 @@ def available_pools(arm, landscape=None):
     with an empty split and reports zero, which is how it drops out of the grid rather
     than failing in it.
     """
-    if arm == "binding":
-        path = ROOT / "data/processed/binding/splits.npz"
-    else:
-        path = ROOT / "data/processed" / ARMS[arm][0] / landscape / "splits.npz"
+    path = ROOT / arm_spec(arm).staged(landscape) / "splits.npz"
     if not path.exists():
         return 0
     with np.load(path) as splits:
@@ -56,11 +51,11 @@ def grid(arms=("binding", "target", "method", "display"), controls=True, policie
     """Every cell the staged data supports, as (arm, landscape, pool, policy, delay, control)."""
     tasks = []
     for arm in arms:
-        if arm == "binding":
-            landscapes, delays = [None], config()["binding"]["feedback_delays"]
-        else:
-            spec = json.loads((ROOT / "hpc_pilots/configs" / ARMS[arm][1]).read_text())
-            landscapes, delays = list(spec["landscapes"]), spec["feedback_delays"]
+        a = arm_spec(arm)
+        cfg = json.loads((ROOT / a.config_path()).read_text())
+        block = cfg[a.section] if a.section else cfg
+        landscapes = list(cfg["landscapes"]) if a.per_landscape else [None]
+        delays = block["feedback_delays"]
         for landscape in landscapes:
             pools = available_pools(arm, landscape)
             if max_pools:
@@ -81,18 +76,12 @@ def execute(task):
     arm, landscape, pool, policy, delay, control = task
     started = time.perf_counter()
     try:
-        from . import binding
-        # Each runner prints its own result line, which is unreadable across hundreds of
-        # cells, so stdout is captured and discarded; the artifact is the record.
+        from .binding import run_arm
+        # One code path for every arm. The result line each cell prints is unreadable
+        # across thousands of cells, so stdout is captured and discarded; the artifact
+        # is the record.
         with contextlib.redirect_stdout(io.StringIO()):
-            if arm == "binding":
-                binding.run_binding(pool, policy, delay, False, control)
-            elif arm == "target":
-                binding.run_target(landscape, pool, policy, delay, False, control)
-            elif arm == "display":
-                binding.run_display(landscape, pool, policy, delay, False, control)
-            else:
-                binding.run_method(landscape, pool, policy, delay, False, control)
+            run_arm(arm, landscape, pool, policy, delay, False, control)
     except Exception as error:
         return {"task": task, "ok": False, "seconds": time.perf_counter() - started,
                 "error": f"{type(error).__name__}: {error}"[:300]}
