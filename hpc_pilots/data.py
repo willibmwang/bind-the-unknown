@@ -233,6 +233,33 @@ def encode_library(sequences, separator=None):
     return features, cardinalities, vocabularies, note
 
 
+DESCRIPTORS = ("mw", "logp", "tpsa", "hbd", "hba", "rotb", "rings", "aromatic", "heavy", "fcsp3")
+
+
+def monomer_descriptors(vocabularies, table):
+    """Per-position chemical descriptors for a library built from named monomers.
+
+    A token index says only *which* building block occupies a position; it carries no
+    chemistry, so a model over token indices learns which monomers work and never why.
+    This attaches the actual structures, so the same library can be modelled either way
+    and the two compared. Returns `None` when any symbol has no structure, because a
+    silently half-populated descriptor matrix is worse than none.
+
+    The array is (positions, symbols, descriptors), aligned with the token vocabularies,
+    so row `features[i, p]` indexes `descriptors[p, features[i, p]]`.
+    """
+    known = {r["monomer"]: r for r in table}
+    missing = sorted({s for v in vocabularies for s in v if s not in known})
+    if missing:
+        return None, missing
+    width = max(len(v) for v in vocabularies)
+    out = np.full((len(vocabularies), width, len(DESCRIPTORS)), np.nan, dtype=np.float32)
+    for p, vocabulary in enumerate(vocabularies):
+        for s, symbol in enumerate(vocabulary):
+            out[p, s] = [known[symbol][d] for d in DESCRIPTORS]
+    return out, []
+
+
 def prepare_display(landscape):
     """Stage one display-selection library: whole sequences with a measured endpoint.
 
@@ -273,11 +300,24 @@ def prepare_display(landscape):
                     "reason": "too few members for two disjoint pools; no replay is possible"}
         dev, pools = np.empty(0, dtype=int), np.empty((0, 0), dtype=int)
 
+    # Chemistry, where the monomers have structures. Written beside the token features
+    # rather than replacing them, so the replay path is unchanged and a token model and a
+    # descriptor model can be compared on identical pools.
+    chemistry, unmapped = None, []
+    if spec.get("monomer_table"):
+        table = pd.read_csv(ROOT / spec["monomer_table"]).to_dict("records")
+        chemistry, unmapped = monomer_descriptors(vocabularies, table)
+        if chemistry is not None:
+            np.save(out / "descriptors.npy", chemistry)
+
     df.to_csv(out / "outcomes.csv", index=False)
     np.save(out / "features.npy", features)
     np.savez(out / "splits.npz", development=dev, evaluation=pools)
     write_json(out / "manifest.json", {
         "landscape": landscape, "rows": len(df), "duplicates_collapsed": duplicates,
+        "descriptors": list(DESCRIPTORS) if chemistry is not None else None,
+        "descriptors_sha256": digest(out / "descriptors.npy") if chemistry is not None else None,
+        "monomers_without_structures": unmapped,
         "target": spec["target"], "modality": spec["modality"],
         "cyclisation": spec["cyclisation"], "noncanonical": spec["noncanonical"],
         "randomised_positions": len(cardinalities),
