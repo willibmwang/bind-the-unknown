@@ -15,12 +15,16 @@ from hpc_pilots.common import (Agent, COMMITTED_MODEL_MANIFEST, STAGED_MODEL_MAN
                                content_digest, digest, model_manifest, provenance,
                                source_manifest)
 from hpc_pilots.data import AA, encode_variants, pool_geometry
-from hpc_pilots.dossier import Dossier, evidence, rank
-from hpc_pilots.emergency import run_episode
+from hpc_pilots.dossier import Dossier, evidence, leaders, rank
+from hpc_pilots.emergency import decision_relevant, run_episode
+from hpc_pilots.invariance import (KINDS, Relabelling, certify, earned, group, leaks, lexicon,
+                                   run_orbit,
+                                   relabel_packet)
+from hpc_pilots.twins import generate, grade_move, probe, run_twins
 from hpc_pilots.streams import stream, stream_int
 from hpc_pilots.structure import structure_replay
 from hpc_pilots.summarize import collect, headroom
-from hpc_pilots.targets import packet
+from hpc_pilots.targets import PACKETS, packet
 
 
 def test_shared_initialization_unique_queries_and_delayed_observations():
@@ -675,3 +679,165 @@ def test_the_cli_exposes_every_registered_arm():
         with contextlib.redirect_stdout(out), pytest.raises(SystemExit):
             cli_main([name, '--help'])
         assert '--control' in out.getvalue(), f'{name} cannot run its control arm'
+
+
+def test_decision_relevance_does_not_depend_on_the_order_the_dossiers_arrived_in():
+    # The oracle compared rank(...)[0], and `rank` sorts stably, so under a tie at the top
+    # the leader was whichever target the caller's list happened to put first. Permuting the
+    # list then changed the size of the relevant set -- 26 pairs against 28 on Coronaviridae
+    # -- with no policy doing anything. A quantity that moves when the state is rearranged
+    # cannot be the oracle a policy is scored against.
+    _, dossiers, entries, _ = packet("coronaviridae")
+    pool = {(t, e["axis"]): e for t, e in entries}
+    base = set(decision_relevant(dossiers, pool, set(), 1))
+    for shift in range(1, len(dossiers)):
+        rotated = dossiers[shift:] + dossiers[:shift]
+        assert set(decision_relevant(rotated, pool, set(), 1)) == base
+    # And the tie it was silently resolving is real: at the opening round every target sits
+    # on an empty dossier, so all of them are tied for the lead.
+    assert len(leaders(dossiers, 1)["tied_for_lead"]) == len(dossiers)
+    assert not leaders(dossiers, 1)["decided"]
+
+
+def test_a_nuisance_relabelling_is_certified_against_the_oracle_before_it_is_used():
+    # A transformation is a nuisance only if the oracle's answer is its image. That is
+    # checkable here rather than assumed, because the evaluator computes the oracle exactly.
+    for name in PACKETS:
+        for kind in KINDS:
+            for element in group(name, kind, 20261021, 2):
+                certificate = certify(name, element)
+                assert certificate["certified"], (name, kind, certificate["checks"])
+
+
+def test_an_identity_relabelling_leaves_no_declared_identifier_anywhere_in_the_record():
+    # Scrubbing the fields a policy reads is not enough. The packet specification is a
+    # nested dict whose keys are target names and whose claims cross-reference other
+    # targets -- "conserved but less so than Mpro across genera" is filed under PLpro --
+    # so a field-by-field scrub left every name in the artifact while removing it from the
+    # state. That leaks to every later reader of the record and to anything trained on it.
+    element = group("coronaviridae", "identity", 20261021, 1)[0]
+    spec, dossiers, entries, probes = relabel_packet("coronaviridae", element)
+    record = [spec, [d.state(8) for d in dossiers], [e for _, e in entries], probes]
+    assert leaks(record, lexicon("coronaviridae")) == {}
+    # The conflict pointer has to survive the rename, or a retained contradiction stops
+    # resolving to the claim it contradicts and the state quietly loses the thing it exists
+    # to preserve.
+    identifiers = {e["id"] for _, e in entries} | {p["entry"]["id"] for p in probes}
+    pointers = {p["entry"]["conflicts_with"] for p in probes
+                if p["entry"]["conflicts_with"] is not None}
+    assert pointers and pointers <= identifiers
+
+
+def test_an_uncertified_relabelling_is_refused_rather_than_measured():
+    # An element that fails certification is evidence about the harness, not about any
+    # policy, and averaging it into an orbit would report the harness as a result.
+    broken = Relabelling("identity", 0, names=(("Mpro (nsp5)", "TGT-01"),))
+    assert not certify("coronaviridae", broken)["certified"]
+    with pytest.raises(ValueError, match="not certified"):
+        run_twins("coronaviridae", "rubric", attempts=8, relabelling=broken)
+
+
+def test_a_move_is_graded_by_how_much_of_the_decision_it_settles():
+    # Binary relevance could not separate resolving the leader's next axis from handing the
+    # lead to a challenger: both scored 1, so a policy walking the leader's axes in
+    # declaration order was indistinguishable from one choosing the purchase that decides
+    # the campaign. The grade is ordered by what the purchase settles.
+    tied = {"tied_for_lead": frozenset({"a", "b"}), "substantiated_axes": 1}
+    assert grade_move(tied, tied) == 0
+    assert grade_move(tied, {**tied, "substantiated_axes": 2}) == 1
+    assert grade_move(tied, {**tied, "tied_for_lead": frozenset({"a", "b", "c"})}) == 2
+    assert grade_move(tied, {**tied, "tied_for_lead": frozenset({"a"})}) == 3
+    # Resolving a contest that was already resolved is a change of leader, not a decision.
+    decided = {"tied_for_lead": frozenset({"a"}), "substantiated_axes": 1}
+    assert grade_move(decided, {**decided, "tied_for_lead": frozenset({"b"})}) == 2
+
+
+def test_the_fixed_rubric_attains_the_ceiling_only_when_the_best_purchase_is_on_the_leader():
+    # The instrument's two controls, and the reason it replaced the relevance readout.
+    # `_rubric_action` resolves the leading target's unknown axes in declaration order, and
+    # the previous oracle marked a purchase relevant when it moved the lead verdict -- which
+    # once any target leads is the same set. The rubric scored 6 of 6 against it, a lift of
+    # 4.48, higher than the hosted model's 3.81, by definitional collision rather than skill.
+    result = run_twins("orthomyxoviridae", "rubric", attempts=200)
+    summary = result["summary"]
+    # Positive control: where the best purchase is on the leader the probe is answerable and
+    # the rubric answers it perfectly. A probe no policy can score here is broken, not hard.
+    assert summary["leader_best"]["attainment"] == 1.0
+    assert summary["leader_best"]["optimal_rate"] == 1.0
+    # Discrimination: where the best purchase is on a challenger the rubric falls to chance
+    # or below, because it never examines a target that is not leading.
+    assert summary["challenger_best"]["attainment"] < 0.5
+    assert summary["challenger_best"]["optimal_rate"] < 0.2
+    assert summary["leader_best"]["bought_on_leader_rate"] == 1.0
+    assert summary["challenger_best"]["bought_on_leader_rate"] == 1.0
+    assert summary["contrast"]["leader_minus_challenger"] > 0.5
+
+
+def test_a_state_blind_policy_scores_at_chance_in_both_strata():
+    # The normalisation's own check. Attainment is scaled so that 0.0 is the average purchase
+    # on offer, so a policy that ignores the state must land near zero in both strata. If it
+    # did not, the floor would be mis-stated and every attainment figure would inherit the
+    # error. It also separates the two failures: the rubric's large drop is leader fixation,
+    # not general incompetence, because an incompetent policy drops very little.
+    result = run_twins("coronaviridae", "scripted", attempts=200)
+    summary = result["summary"]
+    for family in ("leader_best", "challenger_best"):
+        assert abs(summary[family]["attainment"]) < 0.3, family
+    assert abs(summary["contrast"]["leader_minus_challenger"]) < 0.3
+
+
+def test_earned_performance_is_read_against_the_presentation_orbit_not_the_nominal_run():
+    # A policy that is merely unstable must not be reported as one reciting a name. The
+    # identity orbit is compared with the presentation orbit -- the same content rearranged
+    # at no cost -- rather than with the nominal run, so the policy's own variance and its
+    # sensitivity to the arrangement of the state are not charged to memorisation.
+    split = earned(1.0, {"null": [0.9, 0.9, 0.9], "presentation": [0.9, 0.9],
+                         "identity": [0.4, 0.4]})
+    assert split["attributable_to_identity"] == pytest.approx(0.5)
+    assert split["earned_mean"] == pytest.approx(0.4)
+    assert split["policy_variance_floor"] == 0.0
+    assert split["exceeds_variance_floor"] is True
+    # A policy whose identity orbit matches its presentation orbit earned its score, however
+    # unstable it is across repeats of the identical instance.
+    unstable = earned(1.0, {"null": [0.2, 1.0], "presentation": [0.6, 0.6],
+                            "identity": [0.6, 0.6]})
+    assert unstable["attributable_to_identity"] == 0.0
+    assert unstable["exceeds_variance_floor"] is False
+    # A missing arm reports a gap rather than substituting the nominal run for it.
+    assert earned(1.0, {"null": [0.5]})["attributable_to_identity"] is None
+
+
+def test_a_name_blind_policy_has_exactly_no_identity_contribution():
+    # The calibration that licenses every number this instrument reports. The rubric reads
+    # the evidence state and never a target's name, so renaming the targets cannot move its
+    # score, and the orbit must return exactly zero rather than approximately zero.
+    #
+    # It did not, before the states were matched. `generate` draws its subset over
+    # sorted(pool), whose order is the target names, so each orbit element saw a different
+    # sample of states and the orbit confounded renaming with resampling -- reporting a 0.11
+    # identity effect for a policy that cannot have one. States are now sampled once in base
+    # coordinates and translated, so the two halves are the same problem under two names.
+    orbit = run_orbit("orthomyxoviridae", "rubric", count=2, attempts=120)
+    for score, split in orbit["earned"].items():
+        assert split["attributable_to_identity"] == 0.0, score
+        for kind in KINDS:
+            assert split[f"{kind}_orbit"]["sd"] == 0.0, (score, kind)
+            assert split[f"{kind}_orbit"]["mean"] == split["nominal"], (score, kind)
+
+
+def test_a_relabelling_that_merges_two_targets_is_caught_rather_than_measured():
+    # The substitution table has to be a bijection on targets. One that is not merges two
+    # dossiers onto a single name, so the packet silently loses a target and every purchase
+    # on offer is re-graded against a decision with one fewer contender. That is a different
+    # problem, not a renamed one, and it would otherwise be averaged into an orbit as though
+    # it were the same instance.
+    states, _ = generate("coronaviridae", 20261021, attempts=60)
+    assert states, "the generator produced no discriminating state to probe"
+    element = group("coronaviridae", "identity", 20261021, 1)[0]
+    table = dict(element.names)
+    targets = sorted(PACKETS["coronaviridae"]["targets"])
+    table[targets[1]] = table[targets[0]]
+    merged = Relabelling("identity", 0, names=tuple(sorted(table.items())))
+    assert not certify("coronaviridae", merged)["certified"]
+    with pytest.raises(ValueError, match="does not reproduce|not the image"):
+        probe(states[0], "rubric", relabelling=merged)

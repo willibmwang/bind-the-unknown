@@ -19,7 +19,7 @@ import time
 
 from .chemistry import library_spec
 from .common import ROOT, Agent, ContentFiltered, digest, provenance, write_json
-from .dossier import ACTIONS, AXES, rank
+from .dossier import ACTIONS, AXES, leaders, rank
 from .targets import PACKETS, packet
 
 POLICIES = ("rubric", "scripted", "agent")
@@ -99,16 +99,21 @@ def decision_relevant(dossiers, pool, retrieved, now):
     It also comes with its own floor. The share of retrievable pairs that are relevant is
     the rate a policy choosing uniformly at random would achieve, and the evaluator can
     compute it exactly, so the metric needs no baseline arm to be interpretable.
+
+    The comparison is against `leaders` rather than `rank(...)[0]`. The first version read
+    the top row of the ranking, which under a tie is whichever of the tied targets the
+    caller's list happened to put first, so permuting the dossier list changed the size of
+    the relevant set -- between 26 and 27 pairs on the Coronaviridae packet -- without any
+    policy doing anything. A quantity that moves when the state is rearranged cannot be the
+    oracle a policy is scored against, so the tie is now carried as a tie.
     """
     by_target = {d.target: d for d in dossiers}
-    before = rank(dossiers, now)[0]
-    unchanged = (before["target"], before["hard_gates_met"], before["substantiated_axes"])
+    unchanged = leaders(dossiers, now)
     relevant = []
     for target, axis in _retrievable(pool, retrieved, now):
         forks = {name: d.fork() for name, d in by_target.items()}
         forks[target].observe(pool[(target, axis)], now)
-        after = rank(list(forks.values()), now)[0]
-        if (after["target"], after["hard_gates_met"], after["substantiated_axes"]) != unchanged:
+        if leaders(list(forks.values()), now) != unchanged:
             relevant.append((target, axis))
     return relevant
 
@@ -143,7 +148,7 @@ def _scripted_action(step, order, ranking):
     return tail[min(step - len(order), len(tail) - 1)], ranking[0]["target"], None
 
 
-def reference_ranking(name, deadline):
+def reference_ranking(name, deadline, build=None):
     """The ranking the whole evidence base supports by `deadline`.
 
     Built from a fresh packet so an episode's own dossiers are untouched, and used only
@@ -152,8 +157,12 @@ def reference_ranking(name, deadline):
     reference-best target while having paid for no evidence at all did not get there
     from evidence, and the gap between that and its scored performance is the size of
     the hindsight problem this project has so far only been able to name.
+
+    `build` substitutes a different constructor for the same packet, which is how a
+    relabelled instance is scored against its own reference rather than against the
+    original's. It defaults to `packet`, so every recorded episode is unaffected.
     """
-    _, dossiers, entries, probes = packet(name)
+    _, dossiers, entries, probes = (build or packet)(name)
     by_target = {d.target: d for d in dossiers}
     for target, entry in entries:
         by_target[target].observe(entry, deadline)
@@ -162,7 +171,7 @@ def reference_ranking(name, deadline):
     return rank(dossiers, deadline)
 
 
-def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=None):
+def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=None, build=None):
     """Run one decision episode. `control="zero_retrieval"` is the memorisation probe.
 
     Under that control the policy may not retrieve, and no evidence is pushed to it: it
@@ -171,10 +180,16 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=Non
     about it -- the architecture notes say exactly this and leave it unaudited. This is
     the audit. Whatever the control scores is a floor the evidence-using arm has to beat
     before any of its performance can be attributed to the evidence.
+
+    `build` replaces the packet constructor with one returning the same four-tuple, which
+    is how a nuisance-relabelled or twinned instance reaches this loop. It is a parameter
+    rather than a second loop because an orbit is only comparable with its nominal run if
+    both were scored by identical code, and two loops drift. It defaults to `packet`, so
+    every episode recorded before it existed is unaffected.
     """
     if control not in (None, "zero_retrieval"):
         raise ValueError(f"Unknown control arm {control!r}")
-    spec, dossiers, entries, probes = packet(name)
+    spec, dossiers, entries, probes = (build or packet)(name)
     blind = control == "zero_retrieval"
     if blind:
         probes = []
@@ -330,7 +345,7 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=Non
     expected_relevant = sum(offers) if offers else None
     chance_rate = expected_relevant / len(offers) if offers else None
 
-    reference = reference_ranking(name, deadline)
+    reference = reference_ranking(name, deadline, build)
     chosen = result["target"] if result else None
     metrics = {"policy": policy, "control": control, "family": spec["family"],
                # The comparison the control exists for. Under zero retrieval this says

@@ -205,12 +205,48 @@ class Dossier:
                                   "retrieval. The date boundary does not control this."}
 
 
+def _rank_key(d):
+    r = d.readiness()
+    return (r["hard_gates_met"], r["substantiated_axes"], -len(r["unknown_axes"]))
+
+
+def leaders(dossiers, now):
+    """The lead verdict, stated so it does not depend on the order the dossiers arrived in.
+
+    `rank` sorts with `sorted`, which is stable, so targets tied on the ranking key come out
+    in whatever order the caller's list happened to be in and `rank(...)[0]` is then an
+    arbitrary choice among equals. Nothing noticed, because the dossier list has always been
+    built by iterating one dict whose insertion order is fixed in source.
+
+    It matters as soon as anything compares a leader before and after an event, which is what
+    the decision-relevance oracle does: under a tie at the top, permuting the input list
+    changes which target is called the leader, so it changes which observations are judged to
+    have moved the decision. Measured over four permutations of the Coronaviridae packet the
+    relevant set moved between 26 and 27 pairs, which is a property of the list order and of
+    nothing a policy did.
+
+    This returns the whole tied set instead of picking from it. Going from two targets tied
+    for the lead to one of them clear is a real change in the decision and is reported as
+    one; which of two equals is written first is not.
+    """
+    if not dossiers:
+        raise ValueError("No dossiers to rank")
+    best = max(_rank_key(d) for d in dossiers)
+    tied = frozenset(d.target for d in dossiers if _rank_key(d) == best)
+    gates, substantiated, negated_unknown = best
+    return {"tied_for_lead": tied, "hard_gates_met": gates,
+            "substantiated_axes": substantiated, "unknown_axes": -negated_unknown,
+            "decided": len(tied) == 1}
+
+
 def rank(dossiers, now):
-    """Order targets by substantiated axes, with hard-gate failures demoted and the reason stated."""
-    def key(d):
-        r = d.readiness()
-        return (r["hard_gates_met"], r["substantiated_axes"], -len(r["unknown_axes"]))
-    ordered = sorted(dossiers, key=key, reverse=True)
+    """Order targets by substantiated axes, with hard-gate failures demoted and the reason stated.
+
+    The order among targets tied on the key is the caller's list order and carries no
+    meaning. Anything comparing a leader across two states must use `leaders`, which reports
+    the tie rather than resolving it arbitrarily.
+    """
+    ordered = sorted(dossiers, key=_rank_key, reverse=True)
     return [{"rank": i + 1, "target": d.target, "pathogen": d.pathogen,
              "substantiated_axes": d.readiness()["substantiated_axes"],
              "hard_gates_met": d.readiness()["hard_gates_met"],

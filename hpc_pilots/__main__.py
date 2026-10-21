@@ -59,6 +59,24 @@ def main(argv=None):
                    help="Memorisation probe: forbid retrieval and push no evidence")
     p.add_argument("--repeat", type=int, default=1,
                    help="Independent episodes, each to its own artifact")
+    # The decision-arm instruments. `twins` grades one decision per state against the floor
+    # and ceiling the evaluator computes for it; `orbit` runs the same probe over a certified
+    # nuisance group and splits the score into the part the structure supports and the part
+    # the target's name supplied.
+    p = sub.add_parser("twins", help="Grade one-step decisions over matched states")
+    p.add_argument("--family", default="coronaviridae")
+    p.add_argument("--policy", default="rubric")
+    p.add_argument("--attempts", type=int, default=400,
+                   help="Candidate states to sample before pairing")
+    p.add_argument("--round", type=int, default=3, dest="now",
+                   help="Decision round the probe is posed at")
+    p.add_argument("--smoke", action="store_true")
+    p = sub.add_parser("orbit", help="Split a score into earned skill and supplied identity")
+    p.add_argument("--family", default="coronaviridae")
+    p.add_argument("--policy", default="rubric")
+    p.add_argument("--count", type=int, default=4, help="Group elements per kind")
+    p.add_argument("--attempts", type=int, default=400)
+    p.add_argument("--smoke", action="store_true")
     p = sub.add_parser("sweep", help="Run the acquisition grid in parallel on this machine")
     p.add_argument("--arms", default="binding,target,method,display")
     p.add_argument("--workers", type=int, default=8)
@@ -112,6 +130,14 @@ def main(argv=None):
     elif args.command == "emergency":
         from .emergency import run_emergency
         run_emergency(args.family, args.policy, args.smoke, args.control, args.repeat)
+    elif args.command == "twins":
+        from .twins import run_twins
+        run_twins(args.family, args.policy, attempts=args.attempts, smoke=args.smoke,
+                  now=args.now)
+    elif args.command == "orbit":
+        from .invariance import run_orbit
+        run_orbit(args.family, args.policy, count=args.count, attempts=args.attempts,
+                  smoke=args.smoke)
     elif args.command == "sweep":
         from .sweep import run_sweep
         run_sweep([a for a in args.arms.split(",") if a], args.workers,
