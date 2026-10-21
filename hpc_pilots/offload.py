@@ -280,6 +280,32 @@ def _pinned_model():
     return manifest["repo"], manifest["revision"]
 
 
+@app.function(image=VLLM_IMAGE, volumes={"/weights": WEIGHTS}, timeout=3600, cpu=4.0)
+def fetch_weights():
+    """Pull the pinned revision into the Volume from a CPU container.
+
+    Separate from the serving function because the download is eight gigabytes of network
+    transfer and nothing else. Doing it inside the GPU container, as the first version did,
+    meant paying for an L40S to wait on a socket -- a few minutes per cold start, and all of
+    it avoidable since the Volume is read by every later run. The revision comes from the
+    committed manifest, so this fetches the pinned weights rather than whatever is current.
+    """
+    from pathlib import Path
+
+    from huggingface_hub import snapshot_download
+
+    repo, revision = _pinned_model()
+    local = Path("/weights") / revision
+    if (local / "config.json").exists():
+        return {"status": "cached", "repo": repo, "revision": revision, "path": str(local)}
+    snapshot_download(repo_id=repo, revision=revision, local_dir=str(local))
+    WEIGHTS.commit()
+    shards = sorted(p.name for p in local.glob("*.safetensors"))
+    return {"status": "fetched", "repo": repo, "revision": revision,
+            "path": str(local), "shards": shards,
+            "bytes": sum(p.stat().st_size for p in local.rglob("*") if p.is_file())}
+
+
 @app.function(image=VLLM_IMAGE, gpu="L40S", volumes={"/weights": WEIGHTS}, timeout=7200,
               max_containers=4)
 def probe_on_local_model(spec):
@@ -301,10 +327,10 @@ def probe_on_local_model(spec):
     repo, revision = _pinned_model()
     local = Path("/weights") / revision
     if not (local / "config.json").exists():
-        from huggingface_hub import snapshot_download
-
-        snapshot_download(repo_id=repo, revision=revision, local_dir=str(local))
-        WEIGHTS.commit()
+        raise RuntimeError(
+            f"{repo} at {revision} is not in the weights Volume. Run `fetch_weights` first: "
+            f"the download is network transfer and belongs on a CPU container, not on a GPU "
+            f"billed by the second while it waits on a socket.")
 
     token_file = Path("/root/runs/backend/token")
     token_file.parent.mkdir(parents=True, exist_ok=True)
@@ -365,6 +391,12 @@ def probe_on_local_model(spec):
             server.wait(timeout=30)
         except subprocess.TimeoutExpired:
             server.kill()
+
+
+@app.local_entrypoint()
+def stage_weights():
+    """Fetch the pinned model into the Volume once, before any GPU work."""
+    print(json.dumps(fetch_weights.remote(), indent=2))
 
 
 @app.local_entrypoint()
