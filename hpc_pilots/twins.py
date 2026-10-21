@@ -257,7 +257,28 @@ def translate(state, relabelling):
             "tied_for_lead": sorted(name(t) for t in state["tied_for_lead"])}
 
 
-def probe(state, policy, agent=None, relabelling=None, deadline=8):
+def answer_key(name, seed, attempts, now=3):
+    """The optimal purchase for each state, keyed by the *names* in that state.
+
+    This is a planted contamination, and it exists because the nuisance orbit was until now
+    only half validated. Run against the fixed rubric the orbit returns exactly zero with
+    zero spread, which shows it does not invent an identity effect where none exists. Nothing
+    showed it could detect one. A detector verified only on negatives is not verified.
+
+    So this is the positive control: a policy that has memorised the answer key, which is
+    what a model that has seen the benchmark has. The table is built on the unrelabelled
+    packet and keyed by the observed claims under their real names, so a renamed instance
+    misses every lookup -- exactly as a recalled answer stops being retrievable once the
+    entity it was filed under is gone. A policy consulting it should score at the ceiling
+    nominally, hold that score when the state is merely rearranged, and fall to the rubric's
+    level when the targets are renamed.
+    """
+    states, _ = generate(name, seed, attempts=attempts, now=now)
+    return {(name, frozenset(tuple(k) for k in s["observed"])): tuple(s["optimal"][0])
+            for s in states}
+
+
+def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
     """Put one state to one policy and score the single action it returns.
 
     Scores three things, and the third is the diagnostic that explains the other two.
@@ -277,8 +298,8 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8):
     pool = {(t, e["axis"]): e for t, e in entries}
     by_target = {d.target: d for d in dossiers}
     observed = [tuple(k) for k in state["observed"]]
-    for key in observed:
-        by_target[key[0]].observe(pool[key], now)
+    for claim in observed:
+        by_target[claim[0]].observe(pool[claim], now)
 
     available = set(_retrievable(pool, set(observed), now))
     grades = {tuple(k.split("|")): g for k, g in state["grades"].items()}
@@ -302,6 +323,18 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8):
         action, target, axis = _rubric_action(by_target, available, ranking)
     elif policy == "scripted":
         action, target, axis = _scripted_action(len(observed), sorted(pool), ranking)
+    elif policy == "memorised":
+        if key is None:
+            raise ValueError("The memorised arm is a planted contamination and needs the "
+                             "answer key it is meant to have memorised")
+        # Looked up by the names in the state, so the lookup survives a rearrangement and
+        # misses a rename. On a miss it does what any policy does when recall fails: falls
+        # back to the fixed traversal.
+        remembered = key.get((name, frozenset(observed)))
+        if remembered is not None and remembered in available:
+            action, target, axis = "retrieve_evidence", remembered[0], remembered[1]
+        else:
+            action, target, axis = _rubric_action(by_target, available, ranking)
     elif policy == "agent":
         if agent is None:
             raise ValueError("Missing agent")
@@ -421,10 +454,12 @@ def run_twins(name, policy, seed=None, attempts=400, limit=None, smoke=False,
         paired = paired[:limit]
 
     agent = Agent() if policy == "agent" else None
+    key = answer_key(name, seed, 16 if smoke else attempts, now) \
+        if policy == "memorised" else None
     probes, filtered = [], 0
     for state in paired:
         try:
-            probes.append(probe(state, policy, agent, relabelling))
+            probes.append(probe(state, policy, agent, relabelling, key=key))
         except ContentFiltered:
             # Recorded as missing data rather than dropped. Losing a probe to a provider
             # filter and not saying so makes the scored sample a function of the filter, and

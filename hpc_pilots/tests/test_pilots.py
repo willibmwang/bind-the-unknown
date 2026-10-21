@@ -997,3 +997,43 @@ def test_the_audit_condemns_every_readout_already_known_to_be_dead():
     assert twins_row["verdict"] == "discriminating"
     assert twins_row["positive_control_attained"] is True
     assert twins_row["challenger_headroom"] > 0.3
+
+
+def test_the_orbit_detects_a_planted_memoriser_and_not_a_name_blind_policy():
+    # Both halves of the detector, because one without the other proves nothing. Run against
+    # the fixed rubric the orbit returns exactly zero with zero spread: it does not invent an
+    # identity effect where none can exist, since the rubric reads the evidence state and
+    # never a target's name.
+    #
+    # The planted memoriser is the positive control -- a policy holding the answer key, which
+    # is what a model that has seen the benchmark has. It is invisible to every other readout
+    # in this project: it attains the ceiling on the graded probe, which is the best score
+    # available, and looks like the strongest policy here. The orbit separates it, and
+    # separates it exactly, to the name-blind baseline.
+    #
+    # The presentation orbit is what makes that reading sound. The memoriser *holds* its
+    # ceiling when the state is merely rearranged, so the collapse under renaming is not
+    # prompt sensitivity or sampling noise, which is the first objection to any such result.
+    for name in ("coronaviridae", "orthomyxoviridae", "henipavirus"):
+        blind = run_orbit(name, "rubric", count=2, attempts=200)["earned"]["challenger_best"]
+        assert blind["attributable_to_identity"] == 0.0, name
+        assert blind["identity_orbit"]["sd"] == 0.0, name
+
+        planted = run_orbit(name, "memorised", count=2,
+                            attempts=200)["earned"]["challenger_best"]
+        assert planted["nominal"] == 1.0, name
+        assert planted["presentation_orbit"]["mean"] == 1.0, name
+        # Falls back to the fixed traversal once recall misses, so it lands on exactly the
+        # name-blind policy's score rather than somewhere merely lower.
+        assert planted["identity_orbit"]["mean"] == pytest.approx(blind["nominal"], abs=0.02), name
+        assert planted["attributable_to_identity"] > 0.5, name
+        assert planted["exceeds_variance_floor"] is True, name
+
+
+def test_the_planted_memoriser_refuses_to_run_without_the_key_it_memorised():
+    # It is a planted contamination, not a policy. Running it without the answer key would
+    # silently make it the rubric, and the positive control would then report zero and be
+    # read as the detector failing.
+    states, _ = generate("henipavirus", 20261021, attempts=60)
+    with pytest.raises(ValueError, match="answer key"):
+        probe(states[0], "memorised")
