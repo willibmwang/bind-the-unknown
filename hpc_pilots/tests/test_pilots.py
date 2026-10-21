@@ -7,7 +7,8 @@ import pytest
 
 from hpc_pilots.__main__ import main as cli_main
 from hpc_pilots.arms import ARMS
-from hpc_pilots.binding import design_matrix, enrichment, pick_batch, replay
+from hpc_pilots import surrogates
+from hpc_pilots.binding import (design_matrix, enrichment, pick_batch, replay, run_binding)
 from hpc_pilots.calibration import calibration_metrics, trajectory
 from hpc_pilots.chemistry import alphabet, encode, library_spec, registry, sample_library
 from hpc_pilots.common import ROOT
@@ -1288,3 +1289,56 @@ def test_each_guard_catches_the_hack_it_exists_for():
     baseline = improve_module.evaluate(by_name["baseline"], "coronaviridae", attempts=150,
                                        run_tests=False)
     assert baseline["admitted"], baseline["failed_guards"]
+
+
+def test_naming_the_surrogate_leaves_the_recorded_replay_bit_identical():
+    # The forest was constructed inside the function every policy calls, so trying a different
+    # surrogate meant editing that function. Making it a registry lookup is only safe if the
+    # default path is unchanged, because otherwise a new surrogate's effect cannot be told from
+    # the refactor's. Checked against a recorded artifact rather than against itself.
+    recorded = json.loads((ROOT / "runs/binding/greedy_pool00_delay0.json").read_text())
+    rerun = run_binding(0, "greedy", 0)
+    assert [m["top_recall"] for m in recorded["metrics"]] \
+        == [m["top_recall"] for m in rerun["metrics"]]
+    assert [m["best_score"] for m in recorded["metrics"]] \
+        == [m["best_score"] for m in rerun["metrics"]]
+    assert [t["selected"] for t in recorded["trace"]] == [t["selected"] for t in rerun["trace"]]
+    # Every config on disk omits the key, so every one of them resolves to the forest.
+    for path in sorted((ROOT / "hpc_pilots/configs").glob("*.json")):
+        spec = json.loads(path.read_text())
+        blocks = [spec] + [v for v in spec.values() if isinstance(v, dict)]
+        for block in blocks:
+            assert surrogates.surrogate(block.get("surrogate")).name == "forest", path.name
+
+
+def test_a_surrogate_declares_whether_its_spread_is_a_posterior():
+    # The acquisition rule is mean + ucb_beta * sigma, which reads as a confidence multiplier
+    # and is not one here: the forest's sigma is the dispersion of its per-tree predictions.
+    # That is a reasonable thing to acquire on and a different thing from what the formula
+    # appears to say, so which it is travels with the model rather than with whoever reads the
+    # number.
+    forest = surrogates.surrogate("forest")
+    assert forest.spread_is_posterior is False
+    assert "per-tree" in forest.spread_note
+    assert forest.takes_design_matrix is True
+    # An unregistered name raises rather than falling back to the default, because a typo in a
+    # config silently selecting the forest would report a surrogate comparison that never ran.
+    with pytest.raises(ValueError, match="Unknown surrogate"):
+        surrogates.surrogate("tabpfn-v2")
+    # And a surrogate whose dependency is absent names the dependency. The scientific
+    # environment is deliberately free of torch, so this is the expected path there, and an
+    # ImportError surfacing from inside round fifteen of a replay is not a diagnosis.
+    needs_torch = surrogates.Surrogate(
+        name="needs-torch", fit_predict=lambda *a: None, takes_design_matrix=False,
+        spread_is_posterior=True, spread_note="posterior", requires=("torch",))
+    surrogates.register(needs_torch)
+    try:
+        if needs_torch.available():
+            with pytest.raises(RuntimeError, match="torch"):
+                surrogates.surrogate("needs-torch")
+        with pytest.raises(ValueError, match="already registered"):
+            surrogates.register(surrogates.Surrogate(
+                name="needs-torch", fit_predict=lambda *a: None, takes_design_matrix=False,
+                spread_is_posterior=True, spread_note="other"))
+    finally:
+        del surrogates.SURROGATES["needs-torch"]

@@ -3,11 +3,10 @@ import time
 
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
-
 from .arms import arm
 from .common import ROOT, Agent, config, digest, provenance, write_json
 from .streams import stream, stream_int
+from . import surrogates
 
 
 def design_matrix(features, cardinalities=None):
@@ -22,13 +21,28 @@ def design_matrix(features, cardinalities=None):
     return np.concatenate([np.eye(c, dtype=np.float32)[x[:, j]] for j, c in enumerate(cards)], axis=1)
 
 
-def predictions(features, observed_indices, observed_values, seed, trees=64, cardinalities=None):
-    model = RandomForestRegressor(n_estimators=trees, min_samples_leaf=2,
-                                  max_features=1.0, n_jobs=1, random_state=seed)
-    x = design_matrix(features, cardinalities)
-    model.fit(x[observed_indices], observed_values)
-    estimates = np.array([tree.predict(x) for tree in model.estimators_])
-    return estimates.mean(axis=0), estimates.std(axis=0)
+def predictions(features, observed_indices, observed_values, seed, cardinalities=None,
+                block=None, name=None):
+    """Fit the configured surrogate on the revealed labels and predict over the whole pool.
+
+    A dispatcher rather than a model. Which surrogate runs is a registry lookup keyed by the
+    caller's config, so trying a different one is a config change rather than an edit to the
+    function every policy calls. `name=None` selects the forest, which is what every config
+    currently on disk resolves to, so recorded replays reproduce bit-for-bit.
+
+    The design matrix is built only for a surrogate that wants one. A model conditioning on
+    rows of raw feature values is handed the integer encoding instead, which is the whole
+    reason the distinction is recorded: the one-hot is where an unseen category loses its
+    column, and a model that never had a per-column coefficient cannot lose one.
+    """
+    # The module rather than the function, because `pick_batch` already has a parameter named
+    # `surrogate` holding the config block. Importing the lookup under that name would shadow
+    # it there, and a shadowed name is how the answer key reached the wrong variable earlier
+    # in this same file's history.
+    model = surrogates.surrogate(name)
+    design = design_matrix(features, cardinalities) if model.takes_design_matrix else None
+    return model.fit_predict(design, np.asarray(features), observed_indices, observed_values,
+                             seed, block)
 
 
 def distances(features, observed_indices):
@@ -63,7 +77,7 @@ def pick_batch(features, observed_indices, observed_values, available, policy, s
     # that exists to stop its tied plateaus resolving in index order.
     mean, uncertainty = predictions(features, observed_indices, observed_values,
                                     stream_int(seed, "surrogate", round_number),
-                                    sc["forest_trees"], cardinalities)
+                                    cardinalities, sc, sc.get("surrogate"))
     d = distances(features, observed_indices)
     action = "explore" if policy == "ucb" else "greedy"
     if policy == "agent":
@@ -204,8 +218,18 @@ def replay(features, hidden_outcomes, policy, seed, maximum=128, initial=8, batc
             snapshot()
     # Selection quality is retrospective; delayed results are not available at submission time.
     final_return_round = max([round_number] + [due for due, _ in pending])
+    # Which surrogate produced the predictions, and what its spread meant. Both travel with
+    # the result because `ucb_beta` multiplies a posterior for one model and a dispersion
+    # heuristic for another, and a recall figure cannot be read against another arm's without
+    # knowing which. Recorded even for policies that never consult a surrogate, so a `random`
+    # row says so rather than leaving the field absent and ambiguous.
+    model = surrogates.surrogate((surrogate or {}).get("surrogate"))
     return {"metrics": records, "trace": trace, "initial_indices": first,
             "final_return_round": final_return_round, "control": control,
+            "surrogate": model.name,
+            "surrogate_spread_is_posterior": model.spread_is_posterior,
+            "surrogate_spread_note": model.spread_note,
+            "surrogate_consulted": policy in ("greedy", "ucb", "agent"),
             "control_note": "Outcomes were permuted before the episode and graded against the "
                             "permutation; every learning policy should fall to random here."
                             if control == "permuted" else "Real outcomes.",
