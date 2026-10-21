@@ -81,6 +81,10 @@ def main(argv=None):
     p.add_argument("--attempts", type=int, default=400)
     p.add_argument("--limit", type=int,
                    help="Cap the probes scored per group element; bounds inference spend")
+    p.add_argument("--kinds",
+                   help="Comma-separated nuisance kinds to run, e.g. null,axis_order. "
+                        "Defaults to all of them; naming a subset is how an expensive policy "
+                        "buys one transformation instead of four")
     p.add_argument("--smoke", action="store_true")
     p = sub.add_parser("improve", help="Search instrument variants behind the guard")
     p.add_argument("--family", default="coronaviridae")
@@ -157,8 +161,14 @@ def main(argv=None):
                   now=args.now, limit=args.limit)
     elif args.command == "orbit":
         from .invariance import run_orbit
+        from .invariance import KINDS
+        kinds = tuple(k for k in (args.kinds or "").split(",") if k) or KINDS
+        unknown = set(kinds) - set(KINDS)
+        if unknown:
+            raise SystemExit(f"Unknown nuisance kinds {sorted(unknown)}; known kinds are "
+                             f"{list(KINDS)}")
         run_orbit(args.family, args.policy, count=args.count, attempts=args.attempts,
-                  smoke=args.smoke, limit=args.limit)
+                  smoke=args.smoke, limit=args.limit, kinds=kinds)
     elif args.command == "improve":
         from .improve import run_improve
         run_improve(args.family, attempts=args.attempts, run_tests=not args.no_tests,

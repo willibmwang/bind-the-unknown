@@ -46,6 +46,7 @@ records what such a model would need so the dependency is named rather than disc
 """
 import json
 import pathlib
+import socket
 
 import modal
 
@@ -123,24 +124,33 @@ def _write(payload):
     sys.path.insert(0, str(ROOT))
     from hpc_pilots.common import write_json
 
+    # The host goes in the filename, not only in the provenance. Without it a remote result
+    # and a local one of the same cell write to the same path and the later overwrites the
+    # earlier: nine of ten artifacts from the first remote sweep were destroyed by local runs
+    # made afterwards, and the provenance field that would have identified them went with
+    # them. This is the rule `arms.filename` already applies to control arms, which get their
+    # own file so a control "can never overwrite a real run" -- a different host is the same
+    # kind of distinction, and six of 160 recorded forest replays did diverge across machines.
     kind, result = payload["kind"], payload["result"]
+    host = (result.get("provenance") or {}).get("host", "unknown")
+    suffix = "" if host == socket.gethostname() else f"_{host}"
     if kind == "twins":
-        name = f"{result['family_packet']}_{result['policy']}"
-        relative = f"runs/twins/{name}.json"
+        relative = f"runs/twins/{result['family_packet']}_{result['policy']}{suffix}.json"
     elif kind == "orbit":
-        relative = f"runs/orbit/{result['family_packet']}_{result['policy']}.json"
+        relative = f"runs/orbit/{result['family_packet']}_{result['policy']}{suffix}.json"
     elif kind == "monitor":
-        relative = "runs/monitor/ledger.json"
+        relative = f"runs/monitor/ledger{suffix}.json"
     else:
         relative = (f"runs/monomers/{result['landscape']}_"
-                    f"held{result['held_out_count']:02d}.json")
+                    f"held{result['held_out_count']:02d}{suffix}.json")
     write_json(ROOT / relative, result)
     return relative
 
 
 @app.local_entrypoint()
 def decision_grid(packets: str = "all", policies: str = "rubric,scripted",
-                  attempts: int = 400, orbit: bool = False, elements: int = 2):
+                  attempts: int = 400, orbit: bool = False, elements: int = 2,
+                  kinds: str = ""):
     """Fan the decision grid out over containers and write every result back locally.
 
     `orbit=True` runs the nuisance orbits instead of single probes, which is the same work
@@ -149,10 +159,16 @@ def decision_grid(packets: str = "all", policies: str = "rubric,scripted",
     names = (["coronaviridae", "orthomyxoviridae", "henipavirus"]
              if packets == "all" else [p for p in packets.split(",") if p])
     chosen = [p for p in policies.split(",") if p]
-    cells = [("orbit", {"name": n, "policy": p, "count": elements, "attempts": attempts})
-             if orbit else
-             ("twins", {"name": n, "policy": p, "attempts": attempts})
-             for n in names for p in chosen]
+    def arguments(name, policy):
+        if not orbit:
+            return {"name": name, "policy": policy, "attempts": attempts}
+        spec = {"name": name, "policy": policy, "count": elements, "attempts": attempts}
+        if kinds:
+            spec["kinds"] = tuple(k for k in kinds.split(",") if k)
+        return spec
+
+    cells = [("orbit", arguments(n, p)) for n in names for p in chosen] if orbit else \
+            [("twins", arguments(n, p)) for n in names for p in chosen]
     print(json.dumps({"cells": len(cells), "orbit": orbit, "app": APP}))
     written = []
     for payload in decision_cell.map(cells):
@@ -433,7 +449,8 @@ def stage_weights():
 
 @app.local_entrypoint()
 def local_policy_probes(packets: str = "henipavirus", attempts: int = 300,
-                        orbit: bool = False, elements: int = 4, limit: int = 0):
+                        orbit: bool = False, elements: int = 4, limit: int = 0,
+                        kinds: str = ""):
     """Run the probes against the pinned local model instead of a hosted one.
 
     Start with one packet and no orbit: that is the TRAIN-10 acceptance check -- one non-smoke
@@ -450,6 +467,8 @@ def local_policy_probes(packets: str = "henipavirus", attempts: int = 300,
                          "attempts": attempts}
         if limit:
             arguments["limit"] = limit
+        if orbit and kinds:
+            arguments["kinds"] = kinds
         cells.append(("orbit" if orbit else "twins", arguments))
     print(json.dumps({"cells": len(cells), "orbit": orbit, "model": _pinned_model()[0]}))
     for payload in probe_on_local_model.map(cells):
