@@ -208,9 +208,19 @@ def encode(features, descriptors, flags, vocabularies, train_rows, encoder, seed
     if encoder not in ENCODERS:
         raise ValueError(f"Unknown encoder {encoder!r}; known encoders are {list(ENCODERS)}")
     cardinalities = [len(v) for v in vocabularies]
+    # Built at float64, which is not a performance note. `design_matrix` returns float32 for
+    # the binding replays, and at that precision a ridge's predictions for two members
+    # differing only in an unseen monomer round to the same number: the held-out column has no
+    # training variance, so regularisation alone fixes its coefficient at something tiny but
+    # non-zero, and the resulting difference falls below float32's resolution. The recorded
+    # float32 runs therefore read a tied rate of 1.0 for the linear arm, which looked like the
+    # same structural blindness the tree ensemble has and is not. At float64 the linear arm's
+    # tied rate is 0.0, 0.0006, 0.33 and 0.40 across the four holdout sizes. The tree
+    # ensemble's is 1.0 at both precisions, because no split can use a column with zero
+    # training variance and its predictions are bit-identical either way.
     if encoder == "vocabulary":
-        return design_matrix(features, cardinalities), {"kind": "one-hot token index",
-                                                        "constant_columns": 0}
+        return (design_matrix(features, cardinalities).astype(np.float64),
+                {"kind": "one-hot token index", "constant_columns": 0})
 
     chemistry = descriptors.copy()
     if encoder == "descriptor_shuffled":
@@ -226,12 +236,13 @@ def encode(features, descriptors, flags, vocabularies, train_rows, encoder, seed
             raise ValueError(f"Position {position} has a missing descriptor for an observed "
                              f"monomer; a half-populated chemistry matrix is worse than none")
         columns.append(np.column_stack([rows, flags[position][taken]]))
-    block = np.concatenate(columns, axis=1).astype(np.float32)
+    block = np.concatenate(columns, axis=1).astype(np.float64)
     scaled, constant = _standardise(block, train_rows)
     detail = {"kind": f"{len(DESCRIPTORS)} RDKit descriptors plus an absence indicator per "
                       f"position", "constant_columns": constant}
     if encoder == "both":
-        scaled = np.concatenate([design_matrix(features, cardinalities), scaled], axis=1)
+        scaled = np.concatenate([design_matrix(features, cardinalities).astype(np.float64),
+                                 scaled], axis=1)
         detail["kind"] = "one-hot token index concatenated with " + detail["kind"]
     return scaled, detail
 
@@ -258,15 +269,24 @@ def paired_discrimination(features, outcomes, predictions, vocabularies, held, p
     held-out monomer are the ones that matter, because that is where a vocabulary model has
     no coefficient for either and must predict them identically.
 
-    `tied_rate` is the measurement and it is not a statistic about this landscape: for a
-    one-hot encoding it is 1.0 by construction, and no quantity of training data of the same
-    kind moves it. `concordance` is reported beside it over the untied pairs, so a model that
-    discriminates but discriminates wrongly is distinguishable from one that cannot
-    discriminate at all.
+    `tied_rate` is the measurement, and which models it is structural for is narrower than it
+    first appeared. For a **tree ensemble** over one-hot features it is 1.0 by construction and
+    at any precision: no split can use a column with zero training variance, so the two
+    predictions are bit-identical. For a **linear** model on the same features it is not
+    structural at all -- regularisation alone fixes the unseen column's coefficient at
+    something small and non-zero, so the predictions differ, and the first version of this
+    measurement reported 1.0 only because the design matrix was float32 and the difference fell
+    below its resolution.
+
+    `concordance` is reported beside it over the untied pairs, so a model that discriminates
+    but discriminates wrongly is distinguishable from one that cannot discriminate at all.
+    `smallest_separation` is reported so a tie can be read as a tie rather than as a margin
+    the dtype could not hold.
     """
     held_indices = {p: {i for i, s in enumerate(vocabularies[p]) if s in held}
                     for p in positions}
     tied = compared = concordant = 0
+    gaps = []
     for position in positions:
         others = [p for p in range(features.shape[1]) if p != position]
         groups = {}
@@ -282,12 +302,20 @@ def paired_discrimination(features, outcomes, predictions, vocabularies, held, p
                     tied += 1
                     continue
                 compared += 1
+                gaps.append(abs(gap))
                 concordant += int((gap > 0) == (outcomes[first] > outcomes[second]))
     total = tied + compared
     return {"pairs": total, "tied_predictions": tied,
             "tied_rate": None if not total else round(tied / total, 4),
             "compared": compared,
-            "concordance": None if not compared else round(concordant / compared, 4)}
+            "concordance": None if not compared else round(concordant / compared, 4),
+            "smallest_separation": None if not gaps else float(min(gaps)),
+            "separation_note": "The smallest non-zero prediction gap between two members "
+                               "differing only in an unseen monomer. A tie is only a tie if "
+                               "this is comfortably above the dtype's resolution; the first "
+                               "version of this measurement ran at float32, where a linear "
+                               "model's real separation rounded to zero and read as the tree "
+                               "ensemble's structural blindness."}
 
 
 def transfer(landscape="thrombin_cyclic", held_count=6, seed=20261021, budget=128,

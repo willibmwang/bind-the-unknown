@@ -72,12 +72,37 @@ IDENTIFYING = {
         "influenza", "Influenza", "Orthomyxoviridae", "haemagglutinin", "hemagglutinin",
         "neuraminidase", "H1", "H3", "H1N1", "H3N2", "HA", "NA", "M2", "PB1", "PB2", "PA",
         "nucleoprotein", "sialic", "oseltamivir", "zanamivir", "stem", "stalk",
+        # Public dataset identifiers quoted in claim text. `9INFA` names the organism
+        # outright, so these leaked the family through the citation while every target name
+        # was correctly replaced. Found by `residual_candidates` once its own false positive
+        # was removed -- it had been reporting the bare `TGT` inside every opaque code, 9415
+        # times, and a real leak would have arrived inside that noise.
+        "A0A2Z5U3Z0_9INFA_Doud_2016", "A4D664_9INFA_Soh_2019", "C6KNH7_9INFA_Lee_2018",
+        "H1-to-H3", "9INFA",
     ),
-    "filoviridae": (
-        "Ebola", "ebolavirus", "Filoviridae", "Marburg", "marburgvirus", "GP1", "GP2",
-        "glycoprotein", "NPC1", "VP35", "VP40", "VP24", "nucleoprotein", "L polymerase",
+    "henipavirus": (
+        "Nipah virus", "Nipah", "Henipavirus", "henipavirus", "NiV-B", "NiV-M",
+        "Hendra", "Cedar", "Langya", "Ephrin-B2", "ephrin-B3", "Ephrin", "ephrin",
+        "B2", "B3", "beta-propeller", "cathepsin L", "cathepsin",
     ),
 }
+
+# Declared identifiers must belong to a packet that exists. The table was first written with
+# an entry for `filoviridae`, which is not one of the three packets, while `henipavirus` had
+# none -- so that packet's identity orbit scrubbed five tokens and left `Nipah`, `Hendra`,
+# `Langya`, `Cedar` and the ephrin receptors in the state it called anonymised. A table keyed
+# by name does nothing at all when the name is wrong, and reports nothing while doing it.
+_undeclared = set(IDENTIFYING) - set(PACKETS)
+if _undeclared:
+    raise RuntimeError(f"IDENTIFYING names packets that do not exist: {sorted(_undeclared)}; "
+                       f"known packets are {sorted(PACKETS)}")
+
+# A committed floor on each packet's lexicon, so shrinking the substitution table cannot
+# shrink the audit that checks it. `leaks` is called with `lexicon(name)`, which is built from
+# the same table `_codes` substitutes from, so emptying the table makes the scrub and its own
+# auditor vanish together and `certify` passes with `surviving_tokens: {}` while eleven names
+# survive into the state. Checked against this snapshot instead.
+LEXICON_FLOOR = {"coronaviridae": 35, "orthomyxoviridae": 35, "henipavirus": 21}
 
 # A token that looks like it names something: an internal capital, a digit welded to a
 # letter, or a dotted abbreviation. Reported, never substituted -- a detector cannot tell a
@@ -333,10 +358,16 @@ def residual_candidates(obj):
     artifact so a reader can see what the scrub did not consider rather than inferring from
     a clean leak report that nothing was missed.
     """
-    text = json.dumps(obj)
+    # The codes are removed from the text before scanning rather than filtered afterwards.
+    # `SUSPICIOUS` matches runs of capitals on word boundaries and `-` is not a word
+    # character, so it found the bare `TGT` inside every `TGT-01` and the filter -- which
+    # tested the whole `TGT-01` form -- never fired. A clean identity run therefore reported
+    # `{"TGT": 9415}`, and a real leak would have arrived in a report already full of noise,
+    # which is the failure mode this function exists to prevent.
+    text = re.sub(r"(?:TGT|ORG|SRC|TOK)-\d+", " ", json.dumps(obj))
     counts = {}
     for token in SUSPICIOUS.findall(text):
-        if token in BENIGN or re.fullmatch(r"(?:TGT|ORG|SRC|TOK)-\d+", token):
+        if token in BENIGN:
             continue
         counts[token] = counts.get(token, 0) + 1
     return dict(sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])))
@@ -402,11 +433,16 @@ def certify(name, relabelling, deadline=8):
     scrub = leaks([spec, [d.state(deadline) for d in dossiers], probes], lexicon(name)) \
         if relabelling.kind == "identity" else {}
 
+    declared = lexicon(name)
     checks = {"reference_ranking_is_the_image": ranking_ok,
               "relevant_set_is_the_image": base_relevant == moved_relevant,
-              "no_declared_token_survives": not scrub}
+              "no_declared_token_survives": not scrub,
+              "lexicon_is_not_smaller_than_its_committed_floor":
+                  len(declared) >= LEXICON_FLOOR.get(name, 0)}
     return {"element": relabelling.record(), "family_packet": name, "checks": checks,
             "certified": all(checks.values()),
+            "declared_tokens": len(declared),
+            "declared_tokens_floor": LEXICON_FLOOR.get(name, 0),
             "surviving_tokens": scrub,
             "relevant_set_size": len(moved_relevant),
             "relevant_set_expected": len(base_relevant),

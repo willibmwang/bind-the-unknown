@@ -58,7 +58,7 @@ from .emergency import SYSTEM, _retrievable, _rubric_action, _scripted_action, d
 from .streams import stream
 from .targets import PACKETS, packet
 
-FAMILIES = ("leader_best", "challenger_best")
+FAMILIES = ("leader_best", "mixed_best", "challenger_best")
 
 # Sampling bounds for the pre-observed subset. Below the floor every target is still tied on
 # an empty dossier and every purchase breaks the tie, so there is nothing to discriminate;
@@ -145,7 +145,7 @@ def generate(name, seed, attempts=400, now=3):
     pool = {(t, e["axis"]): e for t, e in entries}
     keys = sorted(pool)
     low, high = OBSERVED_FRACTION
-    counts = {"attempts": attempts, "leader_best": 0, "challenger_best": 0,
+    counts = {"attempts": attempts, "leader_best": 0, "mixed_best": 0, "challenger_best": 0,
               "no_purchase_moves_the_decision": 0, "every_purchase_grades_alike": 0}
     states = []
     for index in range(attempts):
@@ -171,9 +171,34 @@ def generate(name, seed, attempts=400, now=3):
             continue
 
         optimal = sorted(k for k, g in grades.items() if g == best)
-        family = ("leader_best" if all(t in lead["tied_for_lead"] for t, _ in optimal)
-                  else "challenger_best")
+        # The best any policy can do while only ever buying on a target tied for the lead.
+        # This is recorded because the hard stratum's headline number turned out to *be* this
+        # ceiling: an independent check found the fixed rubric attaining it in every probe,
+        # 84 of 84 and 81 of 81, so reporting the rubric's score as a measurement of its
+        # reasoning described a structural bound as a behaviour. Recorded per state, the
+        # bound becomes the thing to read a real policy against: a policy above it has
+        # demonstrably looked past the leader, and one at it has not, whatever its rationale.
+        on_lead = [g for (t, _), g in grades.items() if t in lead["tied_for_lead"]]
+        leader_ceiling = max(on_lead) if on_lead else 0
+        on_leader = sum(1 for t, _ in optimal if t in lead["tied_for_lead"])
+        # Three strata, not two. The boundary was `all optimal purchases on the leader` versus
+        # anything else, which put the *mixed* states -- some optimal purchases on the leader,
+        # some off it -- into the hard stratum. A policy that only examines the leader can
+        # still land an optimal purchase there, so the hard stratum was not purely hard and
+        # its rate was correspondingly flattered. Mixed states are 31, 29 and 0 of about 394
+        # across the three packets, so separating them costs almost nothing and the hard
+        # stratum becomes what the docstring always claimed it was.
+        family = ("leader_best" if on_leader == len(optimal)
+                  else "challenger_best" if on_leader == 0 else "mixed_best")
         counts[family] += 1
+        # The label and the count it is derived from are both recorded, and they must agree.
+        # Moving this boundary is how an adversary raises headroom by redefinition while every
+        # yield, optimal rate and the positive control look ordinary, so the two are checked
+        # against each other rather than one being derived and trusted.
+        if (family == "leader_best") != (on_leader == len(optimal)) \
+                or (family == "challenger_best") != (on_leader == 0):
+            raise ValueError(f"stratum {family!r} disagrees with {on_leader} of "
+                             f"{len(optimal)} optimal purchases on the leader")
         states.append({"index": index, "family_packet": name, "state_family": family,
                        "decision_round": now, "observed": [list(k) for k in sorted(observed)],
                        "observed_count": len(observed),
@@ -181,10 +206,43 @@ def generate(name, seed, attempts=400, now=3):
                        "grades": {f"{t}|{a}": g for (t, a), g in sorted(grades.items())},
                        "optimal": [list(k) for k in optimal],
                        "best_grade": best, "chance_grade": round(chance, 4),
+                       "leader_ceiling_grade": leader_ceiling,
                        "tied_for_lead": sorted(lead["tied_for_lead"]),
-                       "optimal_on_leader": sum(1 for t, _ in optimal
-                                                if t in lead["tied_for_lead"])})
+                       "optimal_on_leader": on_leader})
     return states, counts
+
+
+def sample_audit(states, scored):
+    """Is the scored sample distributionally like the pool it was drawn from?
+
+    Only about a fifth of challenger states find a leader partner at the same observed count,
+    so `pair` discards most of them, and whoever chooses the draw chooses the sample. An
+    independent adversary exploited exactly that: replacing the random draw with an ordering
+    on each state's own margin -- the gap between the best purchase on offer and the average
+    one -- keeps the states where the reference policy is least able to clear the floor and
+    raised headroom from 0.66 to 0.79, and from 0.82 to 1.08 on another packet, while the
+    yield, the pair count, the probe count, the optimal rate and the positive control all
+    matched the baseline exactly. Nothing in the artifact distinguished it from a random draw.
+
+    This puts the comparison in the artifact. Under a random draw the scored states' mean
+    margin agrees with the pool's; under a targeted one it does not, and the selection rule
+    has to be correlated with the margin to move the score at all.
+    """
+    def margin(rows):
+        gaps = [r["best_grade"] - r["chance_grade"] for r in rows]
+        return None if not gaps else round(sum(gaps) / len(gaps), 4)
+
+    out = {}
+    for family in FAMILIES:
+        pool = [s for s in states if s["state_family"] == family]
+        drawn = [s for s in scored if s["state_family"] == family]
+        pooled, sampled = margin(pool), margin(drawn)
+        out[family] = {
+            "pool_states": len(pool), "scored_states": len(drawn),
+            "pool_mean_margin": pooled, "scored_mean_margin": sampled,
+            "difference": None if pooled is None or sampled is None
+            else round(sampled - pooled, 4)}
+    return out
 
 
 def pair(states, seed):
@@ -199,6 +257,11 @@ def pair(states, seed):
     """
     by_count = {}
     for state in states:
+        # The paired design is over the two extremes. Mixed states belong to neither and are
+        # excluded here rather than folded into one of them; `generate` counts them, so the
+        # exclusion is a number in the artifact and not a silent filter.
+        if state["state_family"] == "mixed_best":
+            continue
         by_count.setdefault((state["observed_count"], state["state_family"]), []).append(state)
     pairs, unmatched = [], []
     for (count, family), rows in sorted(by_count.items()):
@@ -310,6 +373,15 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
     # the fully observed packet; this checks it on the partially observed state the policy is
     # actually being asked about, which is a different state and the one the score comes from.
     recomputed, _ = graded_moves(dossiers, pool, set(observed), now)
+    # The scale is checked before the image, because a grading function returning levels
+    # outside the declared scale is a broken grading function and should be reported as one
+    # rather than as a relabelling that failed to be a rename.
+    if not set(recomputed.values()) <= set(GRADES):
+        raise ValueError(f"Grades {sorted(set(recomputed.values()) - set(GRADES))} are outside "
+                         f"the declared scale {sorted(GRADES)}. The grade is ordinal and "
+                         f"attainment divides by its range, so rescaling the levels moves "
+                         f"every attainment figure while leaving every yield, stratum, "
+                         f"optimal rate and the positive control untouched")
     if recomputed != grades:
         raise ValueError("The graded moves are not the image of the relabelled state; the "
                          "relabelling changed the decision rather than renaming it")
@@ -350,15 +422,37 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
 
     bought = action == "retrieve_evidence"
     chosen = (target, axis) if bought else None
-    best, chance = state["best_grade"], state["chance_grade"]
+    # Recomputed from the grades, not read from the record. The grades were already verified
+    # and the floor and ceiling were not, and an independent adversary used exactly that
+    # asymmetry: setting the recorded floor equal to the ceiling on the states where the
+    # reference policy would beat the average sends those probes down the `best <= chance`
+    # branch, `summarise` drops them as unscored, and the surviving mean is taken over the
+    # states where the policy does worse than chance. Headroom went from 0.66 to 1.47 on one
+    # packet and 0.82 to 2.03 on another, with the yield, the strata and the positive control
+    # all unchanged. A floor that is a function of the policy being scored is circular.
+    best = max(recomputed.values())
+    chance = sum(recomputed.values()) / len(recomputed)
+    if (best, round(chance, 4)) != (state["best_grade"], state["chance_grade"]):
+        raise ValueError(f"The state's floor and ceiling do not reproduce: recorded "
+                         f"{state['best_grade']}/{state['chance_grade']}, recomputed "
+                         f"{best}/{round(chance, 4)}")
     chosen_grade = None if not bought else grades.get(chosen, 0)
     # Attainment against the floor and the ceiling the evaluator computed for this state, the
     # same normalisation the acquisition arm reports: 1.0 is the best purchase available, 0.0
     # is the average purchase available, and a negative value is worse than choosing blindly.
     # A raw grade cannot be compared across states, because the ceiling moves with how much
     # of the decision is still open.
-    attainment = (None if chosen_grade is None or best <= chance
-                  else round((chosen_grade - chance) / (best - chance), 4))
+    def scaled(grade):
+        return None if grade is None or best <= chance \
+            else round((grade - chance) / (best - chance), 4)
+
+    attainment = scaled(chosen_grade)
+    ceiling = state["leader_ceiling_grade"]
+    recomputed_ceiling = max([g for (t, _), g in recomputed.items()
+                              if t in lead["tied_for_lead"]] or [0])
+    if ceiling != recomputed_ceiling:
+        raise ValueError(f"The state's leader-first ceiling does not reproduce: recorded "
+                         f"{ceiling}, recomputed {recomputed_ceiling}")
     return {"family_packet": name, "state_family": state["state_family"],
             "state_index": state["index"], "observed_count": state["observed_count"],
             "decision_round": now, "policy": policy, "action": action,
@@ -369,6 +463,12 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
             # that never buys outscore one that buys imperfectly.
             "chosen_grade": chosen_grade, "best_grade": best, "chance_grade": chance,
             "attainment": attainment,
+            # The bound and whether the policy cleared it. A policy pinned at the ceiling has
+            # not looked past the leading target, however it explains itself; one above it has.
+            "leader_ceiling_grade": ceiling,
+            "leader_ceiling_attainment": scaled(ceiling),
+            "exceeded_leader_ceiling": None if chosen_grade is None
+            else chosen_grade > ceiling,
             "chose_optimally": None if not bought else chosen in optimal,
             "chosen_offered": None if not bought else chosen in available,
             "chose_leader": None if not bought else target in lead["tied_for_lead"],
@@ -404,10 +504,29 @@ def summarise(probes):
     for family in FAMILIES:
         rows = [p for p in probes if p["state_family"] == family]
         scored = [p for p in rows if p["attainment"] is not None]
+        # The reported figures must be recomputable from the probe rows the artifact carries,
+        # and the counts must add up. Three of an independent adversary's hacks lived in this
+        # gap: a one-sided trimmed mean that dropped the reference policy's successes only, a
+        # refusal scored as zero rather than excluded, and a thinned sample. Each moved the
+        # headline while leaving `purchases` and `declined_to_buy` printing their old values,
+        # so the file disagreed with the number computed from it.
+        declined = [p for p in rows if p["attainment"] is None]
+        if len(scored) + len(declined) != len(rows):
+            raise ValueError("Probe rows are neither scored nor declined")
+        mistaken = [p for p in declined if p["retrieved"] and p["best_grade"] > p["chance_grade"]]
+        if mistaken:
+            raise ValueError(f"{len(mistaken)} probes bought something and were still left "
+                             f"unscored on a state with headroom; a purchase is not a refusal")
         out[family] = {
             "probes": len(rows), "purchases": len(scored),
             "declined_to_buy": len(rows) - len(scored),
             "attainment": _mean(scored, "attainment"),
+            # Read the attainment against this, not against zero. It is the most a policy
+            # buying only on the leading target can score, and the fixed rubric sits exactly
+            # on it in every probe, so the gap between a policy and this number is the part
+            # that is about the policy.
+            "leader_first_ceiling": _mean(scored, "leader_ceiling_attainment"),
+            "exceeded_leader_ceiling_rate": _rate(rows, "exceeded_leader_ceiling"),
             "optimal_rate": _rate(rows, "chose_optimally"),
             "mean_best_grade": _mean(rows, "best_grade"),
             "mean_chance_grade": _mean(rows, "chance_grade"),
@@ -479,6 +598,7 @@ def run_twins(name, policy, seed=None, attempts=400, limit=None, smoke=False,
               "status": "complete" if probes else "no probes generated",
               "state_yield": counts, "pairs": len(pairs),
               "unmatched_challenger_states": len(unmatched),
+              "sample_audit": sample_audit(states, paired),
               "probes_scored": len(probes), "probes_filtered": filtered,
               "summary": summarise(probes), "probes": probes,
               "relabelling": None if relabelling is None else relabelling.record(),

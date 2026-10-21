@@ -20,10 +20,12 @@ from hpc_pilots.emergency import decision_relevant, run_episode
 from hpc_pilots.monitor import audit_rule_robustness, packet_verdict, run_monitor
 from hpc_pilots.monomers import (MODELS, _standardise, absence_flags, encode as encode_monomers, holdout,
                                  load, transfer)
-from hpc_pilots.invariance import (KINDS, Relabelling, certify, earned, group, leaks, lexicon,
+from hpc_pilots.invariance import (IDENTIFYING, KINDS, LEXICON_FLOOR, Relabelling, certify,
+                                   earned, group, leaks, lexicon, relabel_packet,
+                                   residual_candidates,
                                    run_orbit,
                                    relabel_packet)
-from hpc_pilots.twins import generate, grade_move, probe, run_twins
+from hpc_pilots.twins import generate, grade_move, pair, probe, run_twins
 from hpc_pilots.streams import stream, stream_int
 from hpc_pilots.structure import structure_replay
 from hpc_pilots.summarize import collect, headroom
@@ -868,12 +870,22 @@ def test_a_vocabulary_encoding_cannot_tell_two_unseen_monomers_apart():
     # is why a surrogate over token indices cannot rank a library built from a new block.
     result = transfer("thrombin_cyclic", held_count=6)
     by_cell = {(r["encoder"], r["model"]): r for r in result["results"]}
-    for model in MODELS:
-        paired = by_cell[("vocabulary", model)]["paired"]
-        assert paired["pairs"] > 500, "too few discriminating pairs to pin the claim"
-        assert paired["tied_rate"] == 1.0, model
-        assert paired["tied_predictions"] == paired["pairs"]
-        assert paired["concordance"] is None, "an all-tied arm has nothing to be concordant on"
+    # The tree ensemble is blind structurally, at any precision.
+    paired = by_cell[("vocabulary", "forest")]["paired"]
+    assert paired["pairs"] > 500, "too few discriminating pairs to pin the claim"
+    assert paired["tied_rate"] == 1.0
+    assert paired["tied_predictions"] == paired["pairs"]
+    assert paired["concordance"] is None, "an all-tied arm has nothing to be concordant on"
+    # The linear model on the same features is NOT structurally blind, and the first version
+    # of this test asserted it was. Regularisation alone fixes the unseen column's coefficient
+    # at something small and non-zero, so the predictions differ -- and at the float32 the
+    # design matrix used to be built in, that difference rounded to zero and read as the tree
+    # ensemble's blindness. At float64 the linear arm separates nearly every pair, by about
+    # 1e-15: real arithmetic, no usable signal, and its concordance sits at chance.
+    linear = by_cell[("vocabulary", "ridge")]["paired"]
+    assert linear["tied_rate"] < 0.01, linear["tied_rate"]
+    assert linear["smallest_separation"] < 1e-9, linear["smallest_separation"]
+    assert abs(linear["concordance"] - 0.5) < 0.12, linear["concordance"]
     # Grounding the position in measured structure removes the blindness: every descriptor
     # arm separates the pairs it could not separate before.
     for encoder in ("descriptor", "both", "descriptor_shuffled"):
@@ -1120,9 +1132,9 @@ def test_the_unseen_monomer_result_is_pinned_on_resampled_holdout_sets():
 
     for run in draws:
         by_cell = {(r["encoder"], r["model"]): r for r in run["results"]}
-        # Structural, and so exact in every draw rather than on average.
-        for model in MODELS:
-            assert by_cell[("vocabulary", model)]["paired"]["tied_rate"] == 1.0
+        # Structural for the tree ensemble, and so exact in every draw rather than on
+        # average: no split can use a column with zero training variance.
+        assert by_cell[("vocabulary", "forest")]["paired"]["tied_rate"] == 1.0
         # Empirical, and so a null: the real descriptors must not beat their own shuffle,
         # and both sit at chance. A reversal here is the positive result and must be read as
         # one rather than patched away.
@@ -1131,3 +1143,116 @@ def test_the_unseen_monomer_result_is_pinned_on_resampled_holdout_sets():
             shuffled = by_cell[("descriptor_shuffled", model)]["paired"]["concordance"]
             assert abs(real - 0.5) < 0.12, (model, real)
             assert real - shuffled < 0.12, (model, real, shuffled)
+
+
+def test_the_floor_and_ceiling_are_recomputed_rather_than_read_from_the_state():
+    # The largest hole an independent adversary found. `probe` verified the grades and trusted
+    # the floor and the ceiling, so setting the recorded floor equal to the ceiling on the
+    # states where the reference policy would beat the average sent those probes down the
+    # `best <= chance` branch, `summarise` dropped them as unscored, and the surviving mean was
+    # taken over the states where the policy does worse than chance. Headroom went from 0.66 to
+    # 1.47 on one packet and 0.82 to 2.03 on another, with the yield, the strata and the
+    # positive control all unchanged. A floor that is a function of the policy being scored is
+    # circular.
+    states, _ = generate("coronaviridae", 20261021, attempts=80)
+    assert states
+    tampered = {**states[0], "chance_grade": states[0]["best_grade"]}
+    with pytest.raises(ValueError, match="floor and ceiling do not reproduce"):
+        probe(tampered, "rubric")
+    raised_ceiling = {**states[0], "best_grade": states[0]["best_grade"] + 1}
+    with pytest.raises(ValueError, match="floor and ceiling do not reproduce"):
+        probe(raised_ceiling, "rubric")
+
+
+def test_the_grade_scale_is_pinned_because_attainment_divides_by_its_range():
+    # The grade is ordinal; attainment divides by its range. An adversary rescaled the levels
+    # -- shrinking the one the reference policy usually buys, stretching the one it never buys
+    # -- and moved headroom from 0.66 to 1.14 with every yield, stratum, optimal rate and the
+    # positive control bit-identical. No readout moved, so no readout could have caught it.
+    from hpc_pilots import twins as twins_module
+
+    states, _ = generate("coronaviridae", 20261021, attempts=80)
+    saved = twins_module.grade_move
+    try:
+        twins_module.grade_move = lambda before, after: (
+            0.0 if after == before
+            else (8.0 if len(after["tied_for_lead"]) == 1 < len(before["tied_for_lead"]) else 2.0)
+            if after["tied_for_lead"] != before["tied_for_lead"] else 0.05)
+        with pytest.raises(ValueError, match="outside the declared scale"):
+            probe(states[0], "rubric")
+    finally:
+        twins_module.grade_move = saved
+
+
+def test_the_hard_stratum_holds_no_optimal_purchase_on_the_leader():
+    # The boundary was `all optimal purchases on the leader` against anything else, which put
+    # the mixed states -- some optimal purchases on the leader, some off it -- into the hard
+    # stratum, where a policy examining only the leader can still land an optimal purchase. The
+    # stratum was not purely hard and its rate was flattered: separating the mixed states moved
+    # the rubric from 0.362 to 0.278 on one packet and 0.112 to 0.054 on another.
+    states, counts = generate("coronaviridae", 20261021, attempts=300)
+    assert counts["mixed_best"] > 0, "this packet must produce mixed states or the test is vacuous"
+    for state in states:
+        on_leader = state["optimal_on_leader"]
+        total = len(state["optimal"])
+        if state["state_family"] == "leader_best":
+            assert on_leader == total, state["index"]
+        elif state["state_family"] == "challenger_best":
+            assert on_leader == 0, state["index"]
+        else:
+            assert 0 < on_leader < total, state["index"]
+    # Mixed states are excluded from the paired design by count, not silently filtered.
+    pairs, _ = pair(states, 20261021)
+    assert all(p[f]["state_family"] == f for p in pairs for f in ("leader_best",
+                                                                  "challenger_best"))
+
+
+def test_the_identity_lexicon_cannot_shrink_and_cannot_name_a_packet_that_does_not_exist():
+    # Two failures, one found by an adversary and one by the check it motivated.
+    #
+    # `leaks` audits with `lexicon(name)`, built from the same table `_codes` substitutes
+    # from, so emptying the table makes the scrub and its own auditor vanish together and
+    # certification passes with no surviving tokens while eleven names reach the state.
+    # Checked against a committed floor instead.
+    for name in PACKETS:
+        assert len(lexicon(name)) >= LEXICON_FLOOR[name], name
+        assert certify(name, group(name, "identity", 20261021, 1)[0])["certified"], name
+    # And the table was first written with an entry for `filoviridae`, which is not a packet,
+    # while `henipavirus` had none -- so that packet scrubbed five tokens and left `Nipah`,
+    # `Hendra`, `Langya`, `Cedar` and the ephrin receptors in the state it called anonymised.
+    # A table keyed by name does nothing when the name is wrong, and reports nothing.
+    assert set(IDENTIFYING) <= set(PACKETS)
+    assert "henipavirus" in IDENTIFYING
+
+
+def test_the_residual_detector_does_not_report_its_own_opaque_codes():
+    # `SUSPICIOUS` matches runs of capitals on word boundaries, and `-` is not a word
+    # character, so it found the bare `TGT` inside every `TGT-01` while the filter tested the
+    # whole `TGT-01` form and never fired. A clean run reported {"TGT": 9415}, so a real leak
+    # would have arrived inside that noise -- which is the failure this function prevents.
+    # With the codes stripped first, it found four genuine leaks: ProteinGym dataset
+    # identifiers quoted in claim text, whose `9INFA` names the organism outright.
+    for name in PACKETS:
+        element = group(name, "identity", 20261021, 1)[0]
+        spec, dossiers, entries, probes = relabel_packet(name, element)
+        record = [spec, [d.state(8) for d in dossiers], [e for _, e in entries], probes]
+        residual = residual_candidates(record)
+        assert residual == {}, (name, list(residual)[:6])
+        assert not any(token.startswith(("TGT", "ORG", "SRC", "TOK")) for token in residual)
+
+
+def test_the_hard_stratum_reports_the_bound_a_leader_first_policy_cannot_beat():
+    # An independent check found the fixed rubric attaining, in every probe, the maximum
+    # available to any policy that only buys on a target tied for the lead -- 84 of 84 and 81
+    # of 81. So the hard stratum's headline number was a structural ceiling reported as a
+    # measurement of the rubric's reasoning. The ceiling is now recorded per state, which
+    # turns the objection into the readout: the quantity to read is whether a policy clears
+    # the bound, and a policy pinned on it has not looked past the leading target whatever its
+    # rationale says.
+    for name in ("coronaviridae", "orthomyxoviridae", "henipavirus"):
+        blind = run_twins(name, "rubric", attempts=250)["summary"]["challenger_best"]
+        assert blind["attainment"] == blind["leader_first_ceiling"], name
+        assert blind["exceeded_leader_ceiling_rate"] == 0.0, name
+        planted = run_twins(name, "memorised", attempts=250)["summary"]["challenger_best"]
+        assert planted["exceeded_leader_ceiling_rate"] == 1.0, name
+        assert planted["attainment"] > planted["leader_first_ceiling"], name
