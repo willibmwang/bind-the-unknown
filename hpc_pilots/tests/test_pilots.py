@@ -1342,3 +1342,19 @@ def test_a_surrogate_declares_whether_its_spread_is_a_posterior():
                 spread_is_posterior=True, spread_note="other"))
     finally:
         del surrogates.SURROGATES["needs-torch"]
+
+
+def test_clearing_the_leader_first_ceiling_is_a_diagnostic_and_not_a_skill_measure():
+    # The rate at which a policy buys off the leading target has a chance level near a fifth,
+    # because a policy working down a fixed list lands off the leader by accident. Measured on
+    # the same states in the same run the state-blind scripted policy clears the ceiling about
+    # as often as the hosted model did, so a non-zero rate licenses nothing on its own. This is
+    # pinned because the rate was briefly read as evidence that the model reasons past the
+    # leader, and it is not.
+    blind = run_twins("orthomyxoviridae", "scripted", attempts=300)["summary"]["challenger_best"]
+    assert blind["exceeded_leader_ceiling_rate"] > 0.1, blind["exceeded_leader_ceiling_rate"]
+    # What does separate them is the attainment, which stays at or below chance for a policy
+    # that ignores the state however often it happens to buy off the leader.
+    assert blind["attainment"] < 0.1, blind["attainment"]
+    fixed = run_twins("orthomyxoviridae", "rubric", attempts=300)["summary"]["challenger_best"]
+    assert fixed["exceeded_leader_ceiling_rate"] == 0.0

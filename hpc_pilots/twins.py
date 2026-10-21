@@ -526,6 +526,14 @@ def summarise(probes):
             # on it in every probe, so the gap between a policy and this number is the part
             # that is about the policy.
             "leader_first_ceiling": _mean(scored, "leader_ceiling_attainment"),
+            # A diagnostic, not a skill measure, and the distinction cost a withdrawn claim.
+            # It answers only "did the policy ever buy off the leading target", which a policy
+            # working down a fixed list does by accident: measured on the same states in the
+            # same run, the state-blind scripted policy clears the ceiling on 0.18 to 0.22 of
+            # probes and the hosted model on 0.21. The rate therefore has a chance level near
+            # a fifth and does not separate them. What separates them is the attainment above
+            # -- 0.369 for the model against -0.099 for the state-blind policy on the same
+            # packet -- so a non-zero rate here licenses nothing on its own.
             "exceeded_leader_ceiling_rate": _rate(rows, "exceeded_leader_ceiling"),
             "optimal_rate": _rate(rows, "chose_optimally"),
             "mean_best_grade": _mean(rows, "best_grade"),
