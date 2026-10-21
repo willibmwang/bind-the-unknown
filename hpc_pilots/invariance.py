@@ -475,6 +475,15 @@ def earned(nominal, orbits):
     reading the arrangement of the state rather than its content, which is a defect in that
     policy and not evidence about the name.
 
+    **The floor degenerates for a deterministic policy, and the hosted model is one.** Asked
+    the identical question three times it returned the identical action each time, so its null
+    orbit has a spread of exactly zero and `exceeds_variance_floor` is true for any non-zero
+    effect, however small. The flag is therefore uninformative in precisely the case it was
+    added for. Where the null spread is zero the quantity to read instead is the spread
+    *across group elements* -- an identity orbit whose own deviation is larger than its
+    distance from nominal has not shown an effect, it has shown that relabellings differ from
+    each other.
+
     Returns `None` for any quantity whose orbit is absent rather than substituting nominal
     for a missing arm, so a partial run reports a gap instead of a number.
     """
@@ -507,6 +516,14 @@ def earned(nominal, orbits):
             "policy_variance_floor": floor,
             "exceeds_variance_floor": None if gap is None or floor is None
             else bool(abs(gap) > floor),
+            # Reported because the floor degenerates for a deterministic policy, and the
+            # hosted model is one: its null orbit has a spread of exactly zero, so the flag
+            # above is true for any non-zero effect. Where that happens, read the effect
+            # against the identity orbit's own deviation instead -- an orbit that varies more
+            # between its own elements than it differs from nominal has shown nothing.
+            "exceeds_orbit_spread": None if gap is None or identity is None
+            or identity["sd"] is None else bool(abs(gap) > identity["sd"]),
+            "variance_floor_is_degenerate": None if floor is None else floor == 0.0,
             "interpretation": "attributable_to_identity is the nominal score less the identity "
                               "orbit's mean: what renaming the targets costs, with the order "
                               "held fixed. It is read against the null orbit's spread, which "
@@ -563,6 +580,12 @@ def run_orbit(name, policy, count=4, attempts=400, kinds=KINDS, smoke=False, lim
                                  f"{certificate['checks']}")
 
     runs, orbits = [], {score: {kind: [] for kind in kinds} for score in ORBIT_SCORES}
+    # The artifact is named by the label the policy actually ran under, not by the string
+    # asked for. A hosted model reports `agent-<provider>-<model>` and a local one reports
+    # `agent`, and writing both to `<packet>_agent.json` would let a hosted orbit silently
+    # overwrite a local-model orbit -- the exact pooling the replay arm already guards
+    # against and which this runner had not inherited.
+    label = policy
     for kind, pool in elements.items():
         for element in pool:
             # The null element is the identity transformation, so it is run with no
@@ -570,6 +593,7 @@ def run_orbit(name, policy, count=4, attempts=400, kinds=KINDS, smoke=False, lim
             # take a different code path to reach the same instance.
             result = run_twins(name, policy, attempts=attempts, smoke=smoke, limit=limit,
                                relabelling=None if kind == "null" else element)
+            label = result["policy"]
             for score in ORBIT_SCORES:
                 orbits[score][kind].append(result["summary"][score]["attainment"])
             runs.append({"kind": kind, "element": element.record(),
@@ -578,7 +602,8 @@ def run_orbit(name, policy, count=4, attempts=400, kinds=KINDS, smoke=False, lim
     nominal = next((r["summary"] for r in runs if r["kind"] == "null"), None)
     split = {score: earned(None if nominal is None else nominal[score]["attainment"],
                            orbits[score]) for score in ORBIT_SCORES}
-    out = {"experiment": "orbit", "family_packet": name, "policy": policy,
+    out = {"experiment": "orbit", "family_packet": name, "policy": label,
+           "policy_requested": policy,
            "elements_per_kind": 2 if smoke else count, "kinds": list(kinds),
            "probes_per_element": limit,
            "smoke": smoke, "status": "complete",
@@ -590,7 +615,7 @@ def run_orbit(name, policy, count=4, attempts=400, kinds=KINDS, smoke=False, lim
                              "declared name can still name one. What a prior cannot supply is "
                              "which target the decision currently turns on, which is what the "
                              "challenger stratum asks."}
-    output = ROOT / "runs/orbit" / f"{'smoke_' if smoke else ''}{name}_{policy}.json"
+    output = ROOT / "runs/orbit" / f"{'smoke_' if smoke else ''}{name}_{label}.json"
     write_json(output, out)
     print(json.dumps({"output": str(output), "earned": split}, indent=2))
     return out
