@@ -413,6 +413,13 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
     if policy == "rubric":
         action, target, axis = _rubric_action(by_target, available, ranking, axis_order)
     elif policy == "scripted":
+        # `sorted(pool)` orders by target NAME, so this policy is state-blind and *not*
+        # name-blind: renaming the targets reshuffles its traversal and changes what it buys.
+        # Measured identity effects of +0.046, -0.328 and +0.270 across the three packets, with
+        # the sign varying, which is reshuffling noise rather than memorisation. It remains a
+        # sound control for the readout's normalisation -- a policy ignoring the state must
+        # land near zero attainment, and it does -- and it is NOT a sound control for the
+        # orbit. The fixed rubric is that control: exactly 0.0 on all three packets.
         action, target, axis = _scripted_action(len(observed), sorted(pool), ranking)
     elif policy == "lattice":
         # The cost-aware comparator the brief pre-registered, over a state with no slot for a

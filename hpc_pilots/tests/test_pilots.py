@@ -1687,3 +1687,29 @@ def test_the_axis_order_nuisance_catches_a_policy_reading_a_list_order():
     blind = run_orbit("coronaviridae", "scripted", count=2, attempts=300,
                       kinds=("null", "axis_order"))["earned"]["challenger_best"]
     assert blind["attributable_to_axis_order"] == 0.0, blind
+
+def test_the_state_blind_policy_is_not_the_orbits_name_blind_control():
+    # Two different controls that were briefly conflated, and the full orbit separated them.
+    #
+    # `scripted` ignores the decision state, so it is a sound control for the readout's
+    # normalisation: a policy reading nothing must land near zero attainment, and it does.
+    # But its traversal is `sorted(pool)`, which orders by target NAME -- so renaming the
+    # targets reshuffles what it buys. Measured identity effects +0.046, -0.328 and +0.270
+    # across the three packets, sign varying, which is reshuffling noise and not memorisation.
+    # It is therefore NOT a control for the orbit.
+    _, _, entries, _ = packet("coronaviridae")
+    named = sorted({(t, e["axis"]) for t, e in entries})
+    element = group("coronaviridae", "identity", 20261021, 1)[0]
+    _, _, renamed_entries, _ = relabel_packet("coronaviridae", element)
+    renamed = sorted({(t, e["axis"]) for t, e in renamed_entries})
+    table = element.table()
+    # The traversal is not the image of itself under the rename: position i holds a different
+    # claim, which is exactly how a name reaches a policy that never reads one.
+    translated = [(table.get(t, t), a) for t, a in named]
+    assert translated != renamed, "the rename did not reorder the traversal"
+
+    # The rubric is the orbit's name-blind control, and it is exact rather than approximate.
+    for name in PACKETS:
+        blind = run_orbit(name, "rubric", count=2, attempts=200,
+                          kinds=("null", "identity"))["earned"]["challenger_best"]
+        assert blind["attributable_to_identity"] == 0.0, name
