@@ -55,6 +55,7 @@ import time
 from .common import ROOT, Agent, ContentFiltered, digest, provenance, write_json
 from .dossier import ACTIONS, AXES, leaders, rank
 from .emergency import SYSTEM, _retrievable, _rubric_action, _scripted_action, decision_relevant
+from .lattice import lattice_action
 from .streams import stream
 from .targets import PACKETS, packet
 
@@ -401,6 +402,11 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
         action, target, axis = _rubric_action(by_target, available, ranking)
     elif policy == "scripted":
         action, target, axis = _scripted_action(len(observed), sorted(pool), ranking)
+    elif policy == "lattice":
+        # The cost-aware comparator the brief pre-registered, over a state with no slot for a
+        # target's name. It reads the lattice and nothing else -- no ranking is passed, so it
+        # cannot inherit the caller's tie order the way a policy walking `ranking` does.
+        action, target, axis = lattice_action(dossiers, pool, set(observed), now)
     elif policy == "memorised":
         if key is None:
             raise ValueError("The memorised arm is a planted contamination and needs the "

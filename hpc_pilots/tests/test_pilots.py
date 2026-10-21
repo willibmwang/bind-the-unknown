@@ -19,6 +19,7 @@ from hpc_pilots.common import (Agent, COMMITTED_MODEL_MANIFEST, STAGED_MODEL_MAN
 from hpc_pilots.data import AA, encode_variants, pool_geometry
 from hpc_pilots.dossier import Dossier, evidence, leaders, rank
 from hpc_pilots.emergency import decision_relevant, run_episode
+from hpc_pilots.lattice import lattice, lattice_action
 from hpc_pilots.monitor import audit_rule_robustness, packet_verdict, run_monitor
 from hpc_pilots.monomers import (MODELS, _standardise, absence_flags, encode as encode_monomers, holdout,
                                  load, transfer)
@@ -1534,3 +1535,127 @@ def test_a_landscape_staged_without_pools_says_so_instead_of_indexing_an_empty_s
     # A pool beyond what was staged is named rather than traced back from an array error.
     with pytest.raises(ValueError, match="does not exist"):
         run_arm("display", "thrombin_cyclic", 999, "greedy")
+
+
+def test_the_lattice_has_nowhere_to_put_a_target_name():
+    # The architectural claim, and the only one here that needs no experiment. A target is
+    # exactly its row of cell features; there is no target embedding, no index, no slot a name
+    # could occupy. So renaming every target cannot change the state, and therefore cannot
+    # change any function of it.
+    element = group("coronaviridae", "identity", 20261021, 1)[0]
+    table = element.table()
+    # The observed set is chosen in base coordinates and translated, never re-sorted under the
+    # new names. Sorting pool keys would sort by target name, so renaming would change which
+    # claims are observed -- the same confound that made an earlier orbit report a 0.11
+    # identity effect for a policy that reads no names.
+    _, _, base_entries, _ = packet("coronaviridae")
+    base_observed = sorted({(t, e["axis"]) for t, e in base_entries})[:11]
+    built = {}
+    for name, build in (("named", packet), ("renamed", lambda n: relabel_packet(n, element))):
+        _, dossiers, entries, _ = build("coronaviridae")
+        pool = {(t, e["axis"]): e for t, e in entries}
+        observed = [(table.get(t, t), a) if name == "renamed" else (t, a)
+                    for t, a in base_observed]
+        by_target = {d.target: d for d in dossiers}
+        for key in observed:
+            by_target[key[0]].observe(pool[key], 3)
+        built[name] = lattice(dossiers, pool, set(observed), 3)
+
+    np.testing.assert_array_equal(built["named"][0], built["renamed"][0])
+    np.testing.assert_array_equal(built["named"][1], built["renamed"][1])
+    np.testing.assert_array_equal(built["named"][2], built["renamed"][2])
+    # The order list is the one place a name appears, and it is used only to name the chosen
+    # action -- never read by the score.
+    assert built["named"][3] != built["renamed"][3]
+    # And nothing in the state is a string at all.
+    assert built["named"][0].dtype.kind == "f"
+
+
+def test_the_lattice_policy_is_equivariant_to_the_order_the_targets_arrived_in():
+    # `rank` resolves ties by the caller's list order, which is how the oracle acquired an
+    # order-dependence that took 26-versus-28 relevant pairs to find. A representation with no
+    # row order must not be able to reacquire it.
+    #
+    # The claim is equivariance **up to indistinguishability**, and that qualifier is the
+    # honest version rather than a weakening. Measured on Coronaviridae, `nsp13 helicase`,
+    # `Spike RBD` and `Spike S2 stem-helix` have byte-identical rows: the lattice cannot tell
+    # them apart, so naming a different member of that class under rotation is correct
+    # behaviour, and asserting a particular name would be asserting something the
+    # representation deliberately cannot see. What must be invariant is the chosen cell's
+    # content and axis.
+    #
+    # Tested on a state the generator kept, so the score actually discriminates. The first
+    # version of this test used an arbitrary prefix of the pool, where every offered cell
+    # scored 0.0 and all 22 were tied -- an uninformative state proves nothing about a
+    # tie-break.
+    states, _ = generate("coronaviridae", 20261021, attempts=200)
+    discriminating = [s for s in states if s["state_family"] == "challenger_best"]
+    assert discriminating, "no discriminating state to test equivariance on"
+    state = discriminating[0]
+
+    _, dossiers, entries, _ = packet("coronaviridae")
+    pool = {(t, e["axis"]): e for t, e in entries}
+    observed = [tuple(k) for k in state["observed"]]
+    by_target = {d.target: d for d in dossiers}
+    for key in observed:
+        by_target[key[0]].observe(pool[key], state["decision_round"])
+
+    def chosen(rows):
+        action, target, axis = lattice_action(rows, pool, set(observed),
+                                              state["decision_round"])
+        cells, _, _, order = lattice(rows, pool, set(observed), state["decision_round"])
+        content = tuple(cells[order.index(target), :, :].ravel())
+        return action, axis, content
+
+    baseline = chosen(dossiers)
+    for shift in range(1, len(dossiers)):
+        rotated = dossiers[shift:] + dossiers[:shift]
+        assert chosen(rotated) == baseline, shift
+
+    # And where the winning row's content is unique, the name is invariant too -- so the
+    # qualifier above is not hiding an order-dependence.
+    cells, _, _, order = lattice(dossiers, pool, set(observed), state["decision_round"])
+    contents = [tuple(cells[r, :, :].ravel()) for r in range(len(order))]
+    _, winner, _ = lattice_action(dossiers, pool, set(observed), state["decision_round"])
+    if contents.count(contents[order.index(winner)]) == 1:
+        for shift in range(1, len(dossiers)):
+            rotated = dossiers[shift:] + dossiers[:shift]
+            assert lattice_action(rotated, pool, set(observed),
+                                  state["decision_round"])[1] == winner, shift
+
+
+def test_the_lattice_score_does_not_depend_on_the_value_of_its_prior():
+    # The prior is a constant multiplying every cell, so it scales the score and cannot move
+    # the argmax. It is carried because the magnitude is reported, not because the choice turns
+    # on it -- which is what stops it becoming a tuned knob, and is why it can be a measured
+    # base rate (40 of 59 entries) rather than a fitted parameter.
+    _, dossiers, entries, _ = packet("orthomyxoviridae")
+    pool = {(t, e["axis"]): e for t, e in entries}
+    observed = sorted(pool)[:6]
+    by_target = {d.target: d for d in dossiers}
+    for key in observed:
+        by_target[key[0]].observe(pool[key], 3)
+    chosen = {p: lattice_action(dossiers, pool, set(observed), 3, prior=p)
+              for p in (0.1, 0.5, 0.678, 0.9, 1.0)}
+    assert len(set(chosen.values())) == 1, chosen
+
+
+def test_the_lattice_policy_clears_the_bound_a_leader_first_policy_cannot():
+    # The measurement the architecture exists for. The fixed rubric is pinned at the
+    # leader-first ceiling in every probe; a policy over a state with no target identity, and
+    # no ranking handed to it, clears that bound on most of them.
+    #
+    # Reported honestly: it does NOT dominate. It is well below the rubric on the easy
+    # stratum, because its prior is constant and so it prefers the higher *potential* grade
+    # over the more reliable one -- it is risk-seeking by construction. That residual failure
+    # mode is named because it is exactly what a policy learned over the same lattice could
+    # fix, and the fix would be measurable on this same instrument.
+    for name in ("coronaviridae", "orthomyxoviridae"):
+        fixed = run_twins(name, "rubric", attempts=400)["summary"]["challenger_best"]
+        built = run_twins(name, "lattice", attempts=400)["summary"]["challenger_best"]
+        assert fixed["exceeded_leader_ceiling_rate"] == 0.0, name
+        assert built["exceeded_leader_ceiling_rate"] > 0.6, (name, built)
+        assert built["attainment"] > fixed["attainment"] + 0.3, (name, built, fixed)
+        # It gets there by looking off the leader, which the rubric never does.
+        assert fixed["bought_on_leader_rate"] == 1.0, name
+        assert built["bought_on_leader_rate"] < 0.2, (name, built)
