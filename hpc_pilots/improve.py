@@ -474,7 +474,10 @@ def guard_summary_reproduces_from_its_probes(packet="coronaviridae", attempts=25
         if row["purchases"] != len(scored):
             reasons.append(f"{family} reports {row['purchases']} purchases, "
                            f"{len(scored)} are scored")
-        if row["purchases"] + row["declined_to_buy"] != row["probes"]:
+        # Three categories now, not two: a purchase scored for attainment, a refusal to buy,
+        # and an illegal action -- an unofferable pair, which is an invalid action rather than
+        # a bad purchase and is counted apart from both.
+        if row["purchases"] + row["declined_to_buy"] + row["illegal_actions"] != row["probes"]:
             reasons.append(f"{family} counts do not add up")
         expected = None if not scored else round(sum(scored) / len(scored), 4)
         if row["attainment"] is not None and expected is not None \

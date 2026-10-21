@@ -475,10 +475,35 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
     # A raw grade cannot be compared across states, because the ceiling moves with how much
     # of the decision is still open.
     def scaled(grade):
-        return None if grade is None or best <= chance \
-            else round((grade - chance) / (best - chance), 4)
+        """Attainment, bounded below at -1.
 
-    attainment = scaled(chosen_grade)
+        It was unbounded, and that was not a rounding concern. Attainment is
+        `(chosen - chance) / (best - chance)`, and `generate` keeps any state where the best
+        purchase merely exceeds the average one -- so a state whose margin is a third of a
+        grade level scales every shortfall by three. Measured on one forty-probe run the range
+        was -5.0 to 1.0 with eight probes below -1, and a single probe at -5.0 moved a mean
+        over twenty. A margin floor does not fix it: even requiring half a grade level leaves
+        a worst case of -5.0, because the pathology is `chance` being large relative to the
+        margin rather than the margin being small.
+
+        So the bound goes on the quantity. Zero is the average purchase on offer and one is
+        the best; worse than average by more than the entire available range is a property of
+        the scale, not a degree of badness. The unclipped value is kept beside it so nothing
+        is hidden, and `summarise` reports how many were clipped.
+        """
+        if grade is None or best <= chance:
+            return None
+        return round(max(-1.0, (grade - chance) / (best - chance)), 4)
+
+    # An unofferable pair is an invalid action, not a badly chosen purchase. Scoring the two
+    # on one scale conflated expressivity with judgement: of a 4B model's -0.938 on one
+    # packet, excluding its nine illegal requests leaves +0.037 -- at chance rather than far
+    # below it. The action schema enum-constrains target and axis separately, so an illegal
+    # pair is expressible, and until that is closed the two have to be counted apart.
+    legal = bool(bought) and chosen in available
+    attainment = scaled(chosen_grade) if legal else None
+    raw = (None if chosen_grade is None or best <= chance
+           else round((chosen_grade - chance) / (best - chance), 4))
     ceiling = state["leader_ceiling_grade"]
     recomputed_ceiling = max([g for (t, _), g in recomputed.items()
                               if t in lead["tied_for_lead"]] or [0])
@@ -498,7 +523,8 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
             # decision, and folding a refusal into the attainment rate would let a policy
             # that never buys outscore one that buys imperfectly.
             "chosen_grade": chosen_grade, "best_grade": best, "chance_grade": chance,
-            "attainment": attainment,
+            "attainment": attainment, "attainment_unclipped": raw,
+            "illegal_action": bool(bought) and not legal,
             # The bound and whether the policy cleared it. A policy pinned at the ceiling has
             # not looked past the leading target, however it explains itself; one above it has.
             "leader_ceiling_grade": ceiling,
@@ -607,13 +633,27 @@ def summarise(probes):
         declined = [p for p in rows if p["attainment"] is None]
         if len(scored) + len(declined) != len(rows):
             raise ValueError("Probe rows are neither scored nor declined")
-        mistaken = [p for p in declined if p["retrieved"] and p["best_grade"] > p["chance_grade"]]
+        # A *legal* purchase left unscored is the hack this catches: scoring a purchase as a
+        # refusal removes it from the mean. An illegal purchase is a third thing -- an invalid
+        # action, counted in `illegal_actions` and deliberately not scored for attainment --
+        # so it is excluded here rather than tripping a check written for the other case.
+        mistaken = [p for p in declined if p["retrieved"] and not p.get("illegal_action")
+                    and p["best_grade"] > p["chance_grade"]]
         if mistaken:
-            raise ValueError(f"{len(mistaken)} probes bought something and were still left "
-                             f"unscored on a state with headroom; a purchase is not a refusal")
+            raise ValueError(f"{len(mistaken)} legal purchases were left unscored on a state "
+                             f"with headroom; a purchase is not a refusal")
+        illegal = [p for p in rows if p.get("illegal_action")]
+        clipped = [p for p in scored if p.get("attainment_unclipped") is not None
+                   and p["attainment_unclipped"] < -1.0]
         out[family] = {
             "probes": len(rows), "purchases": len(scored),
-            "declined_to_buy": len(rows) - len(scored),
+            "declined_to_buy": len(rows) - len(scored) - len(illegal),
+            # Counted apart from attainment: an unofferable pair is an invalid action rather
+            # than a bad purchase, and the scale is bounded below, so both facts are reported
+            # instead of being absorbed into the mean.
+            "illegal_actions": len(illegal),
+            "illegal_action_rate": None if not rows else round(len(illegal) / len(rows), 4),
+            "attainment_clipped_below": len(clipped),
             "attainment": _mean(scored, "attainment"),
             # Read the attainment against this, not against zero. It is the most a policy
             # buying only on the leading target can score, and the fixed rubric sits exactly

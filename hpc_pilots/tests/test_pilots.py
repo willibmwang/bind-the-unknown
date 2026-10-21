@@ -1358,9 +1358,14 @@ def test_clearing_the_leader_first_ceiling_is_a_diagnostic_and_not_a_skill_measu
     # leader, and it is not.
     blind = run_twins("orthomyxoviridae", "scripted", attempts=300)["summary"]["challenger_best"]
     assert blind["exceeded_leader_ceiling_rate"] > 0.1, blind["exceeded_leader_ceiling_rate"]
-    # What does separate them is the attainment, which stays at or below chance for a policy
-    # that ignores the state however often it happens to buy off the leader.
-    assert blind["attainment"] < 0.1, blind["attainment"]
+    # What separates them is the attainment, and the assertion is now a SEPARATION rather than
+    # a position against zero. Bounding attainment below at -1 removes large negatives and
+    # nothing else, so it raises a policy that chooses badly often: this arm moved from -0.063
+    # to +0.104 when the bound was added. Zero stops meaning "the average purchase" once
+    # clipping is common, so the honest claim is the gap between the policies.
+    built = run_twins("orthomyxoviridae", "lattice", attempts=300)["summary"]["challenger_best"]
+    assert built["attainment"] - blind["attainment"] > 0.4, (built, blind)
+    assert blind["attainment"] < built["leader_first_ceiling"] + 0.2, blind["attainment"]
     fixed = run_twins("orthomyxoviridae", "rubric", attempts=300)["summary"]["challenger_best"]
     assert fixed["exceeded_leader_ceiling_rate"] == 0.0
 
