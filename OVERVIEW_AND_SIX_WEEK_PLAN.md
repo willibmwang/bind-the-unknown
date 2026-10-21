@@ -236,9 +236,34 @@ showing it reorders *published* results.
 
 ### 4.3 What has not been measured at all
 
-- The co-scientist's policy has **never run on a local model on GPU**. Every agent episode to
-  date is a hosted model. Validating the local path is the only route to the volumes a
-  trained policy needs.
+- ~~The co-scientist's policy has **never run on a local model on GPU**.~~ **Now measured, and
+  the answer is negative.** The pinned Qwen3-4B serves on an L40S and the policy path
+  completes end to end — 40 probes, 40 calls, no transport retries, nothing content-filtered,
+  artifact recorded — for twenty-three cents. The policy is far worse than the baselines it
+  was meant to exceed: challenger-stratum attainment **−0.938** on Henipavirus against a
+  leader-first ceiling of −0.363, where the fixed rubric reaches −0.229 and the lattice policy
+  +0.365. Below the bound a leader-only policy is held to, and below the zero that marks the
+  average purchase on offer.
+
+  The failure is state-tracking, not reasoning depth. It chose `reagent_tractability` in **39
+  of 40** probes — the first axis in declaration order, which is also the hard gate — so it
+  holds one heuristic and applies it unconditionally. Of 19 purchases that moved nothing, **9
+  were requests for a claim already observed**, while the state handed to it carries
+  `retrievable_axes` listing precisely what remains. The other 10 were offered and moved
+  nothing.
+
+  Two consequences. The route to the volumes a trained policy needs does not run through this
+  model. And a policy keying on the first-listed axis is keying on *presentation*, while the
+  nuisance group permutes the dossier order and not the axis order — a real gap in the group,
+  and exactly where this model is vulnerable.
+
+  Getting there required correcting the pinned environment, which had never been executed:
+  `requirements.llm.lock.txt` resolves to transformers 5.19.0 against a vLLM 0.10.2 that calls
+  an attribute transformers 5 removed, and stepping back cascades through tokenizers and
+  huggingface-hub for four layers. The working resolution is transformers 4.57.6, tokenizers
+  0.22.2, huggingface_hub 0.36.2 — the last being two major versions from what the lock
+  carries. The same failure is waiting for TRAIN-10 on the cluster, which builds `.venv-llm`
+  from that file.
 - **No macrocycle from the SynX platform** has been represented or measured. Every
   platform-supplied chemistry field remains null pending the campaign export.
 - The **physics-based non-canonical track** is untouched.
