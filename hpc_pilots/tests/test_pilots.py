@@ -17,6 +17,8 @@ from hpc_pilots.common import (Agent, COMMITTED_MODEL_MANIFEST, STAGED_MODEL_MAN
 from hpc_pilots.data import AA, encode_variants, pool_geometry
 from hpc_pilots.dossier import Dossier, evidence, leaders, rank
 from hpc_pilots.emergency import decision_relevant, run_episode
+from hpc_pilots.monomers import (MODELS, _standardise, absence_flags, encode as encode_monomers, holdout,
+                                 load, transfer)
 from hpc_pilots.invariance import (KINDS, Relabelling, certify, earned, group, leaks, lexicon,
                                    run_orbit,
                                    relabel_packet)
@@ -841,3 +843,101 @@ def test_a_relabelling_that_merges_two_targets_is_caught_rather_than_measured():
     assert not certify("coronaviridae", merged)["certified"]
     with pytest.raises(ValueError, match="does not reproduce|not the image"):
         probe(states[0], "rubric", relabelling=merged)
+
+
+def test_a_vocabulary_encoding_cannot_tell_two_unseen_monomers_apart():
+    # Structural, not statistical. Holding a monomer out of training leaves its one-hot column
+    # with zero variance over the training rows, so no tree splits on it and no coefficient is
+    # fitted to it. Two members differing only in which held-out monomer they carry therefore
+    # traverse identically and receive the identical prediction -- 1599 of 1599 pairs on the
+    # thrombin library. No quantity of further data of the same kind moves that number, which
+    # is why a surrogate over token indices cannot rank a library built from a new block.
+    result = transfer("thrombin_cyclic", held_count=6)
+    by_cell = {(r["encoder"], r["model"]): r for r in result["results"]}
+    for model in MODELS:
+        paired = by_cell[("vocabulary", model)]["paired"]
+        assert paired["pairs"] > 500, "too few discriminating pairs to pin the claim"
+        assert paired["tied_rate"] == 1.0, model
+        assert paired["tied_predictions"] == paired["pairs"]
+        assert paired["concordance"] is None, "an all-tied arm has nothing to be concordant on"
+    # Grounding the position in measured structure removes the blindness: every descriptor
+    # arm separates the pairs it could not separate before.
+    for encoder in ("descriptor", "both", "descriptor_shuffled"):
+        for model in MODELS:
+            assert by_cell[(encoder, model)]["paired"]["tied_rate"] == 0.0, (encoder, model)
+
+
+def test_descriptor_grounding_removes_the_blindness_without_adding_ranking_skill():
+    # The negative half, and the control that licenses calling it one. The descriptor arm can
+    # order two unseen monomers, but it orders them at chance: concordance 0.49 against a
+    # shuffled control's 0.49, where shuffling permutes the ten descriptors across monomers
+    # and so destroys the correspondence between a block's identity and its structure while
+    # leaving dimensionality, column scales, the absence indicator and the model class alone.
+    #
+    # Being able to represent a new building block is necessary and not sufficient. On this
+    # landscape the per-monomer descriptors carry no transferable signal about which new
+    # monomer is better, which is consistent with the staged manifest's own caveat that they
+    # describe the building blocks and nothing about the assembled macrocycle.
+    result = transfer("thrombin_cyclic", held_count=6)
+    by_cell = {(r["encoder"], r["model"]): r for r in result["results"]}
+    for model in MODELS:
+        real = by_cell[("descriptor", model)]["paired"]["concordance"]
+        shuffled = by_cell[("descriptor_shuffled", model)]["paired"]["concordance"]
+        assert abs(real - 0.5) < 0.1, (model, real)
+        # The claim is that chemistry adds nothing here, so the real descriptors must not
+        # beat their own shuffle by a margin worth reporting. A reversal of this assertion
+        # would be the positive result and must be read as one, not patched away.
+        assert real - shuffled < 0.1, (model, real, shuffled)
+
+
+def test_a_monomer_split_holds_the_block_out_everywhere_it_occurs():
+    # A member-wise split leaks: every monomer appears in hundreds of members, so a random
+    # split leaves each one well represented in training and measures interpolation inside a
+    # known alphabet. The monomers here are shared across two positions, so a block held out
+    # at one position and left at another is not held out at all.
+    features, outcomes, descriptors, vocabularies, _ = load("thrombin_cyclic")
+    train_rows, test_rows, held, positions = holdout(features, vocabularies, 6, 20261021)
+    assert set(train_rows) & set(test_rows) == set()
+    assert len(train_rows) + len(test_rows) == len(features)
+    assert len(positions) > 1, "the claim needs a monomer shared across positions"
+    for position in positions:
+        held_indices = {i for i, s in enumerate(vocabularies[position]) if s in held}
+        if held_indices:
+            assert not set(features[train_rows, position]) & held_indices, position
+    # Standardisation uses training rows only. Scaling on the whole matrix would let the test
+    # members' chemistry set the mean, a leak that flatters the descriptor arm specifically --
+    # the arm whose advantage is the claim under test.
+    flags = absence_flags(vocabularies, "thrombin_cyclic")
+    matrix, _ = encode_monomers(features, descriptors, flags, vocabularies, train_rows, "descriptor",
+                       20261021)
+    informative = matrix[train_rows].std(axis=0) > 0
+    # Tolerance is float32's, not the standardisation's: the matrix is float32 and the mean is
+    # accumulated over five thousand rows, so a residual around 1e-4 is the dtype rather than
+    # a centring error.
+    assert np.allclose(matrix[train_rows][:, informative].mean(axis=0), 0, atol=1e-3)
+    assert np.allclose(matrix[train_rows][:, informative].std(axis=0), 1, atol=1e-3)
+
+
+def test_a_column_with_one_distinct_value_is_dropped_however_wide_the_matrix_is():
+    # Constancy is tested on the extent, not on the standard deviation, and the difference is
+    # a real defect rather than a style preference. A column holding one distinct value has a
+    # deviation of zero mathematically, but numpy accumulates the mean in float32 and orders
+    # that sum by the matrix's stride, so the returned deviation is around 1e-7 and *changes
+    # with how many other columns sit beside it*. Dividing by it turned three constant
+    # thrombin columns into features with mean +/-1 whose sign depends on the split.
+    column = np.full((400, 1), 0.667, dtype=np.float32)
+    for width in (1, 7, 66, 150):
+        padded = np.concatenate(
+            [column] + [np.arange(400, dtype=np.float32).reshape(-1, 1) + j
+                        for j in range(width - 1)], axis=1)
+        scaled, constant = _standardise(padded, np.arange(400))
+        assert constant == 1, width
+        assert np.all(scaled[:, 0] == 0), width
+    # And the quantity the discarded test compared is not zero and not reliably small: the
+    # same constant column reduces to 1.2e-07 as a contiguous slice and 3.2e-06 column-wise,
+    # so a threshold on the deviation catches it or misses it depending on the reduction.
+    deviation = float(np.concatenate(
+        [column] + [np.arange(400, dtype=np.float32).reshape(-1, 1) + j
+                    for j in range(65)], axis=1).std(axis=0)[0])
+    assert deviation > 1e-6 * max(abs(0.667), 1.0), "the deviation test would have passed"
+    assert float(column.max() - column.min()) == 0.0, "the extent is exact"

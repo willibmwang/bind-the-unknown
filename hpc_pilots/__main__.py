@@ -77,6 +77,11 @@ def main(argv=None):
     p.add_argument("--count", type=int, default=4, help="Group elements per kind")
     p.add_argument("--attempts", type=int, default=400)
     p.add_argument("--smoke", action="store_true")
+    p = sub.add_parser("monomers", help="Hold monomers out of training and score the transfer")
+    p.add_argument("--landscape", default="thrombin_cyclic")
+    p.add_argument("--held", type=int, help="One holdout size; omit to sweep the configured set")
+    p.add_argument("--no-controls", action="store_true")
+    p.add_argument("--smoke", action="store_true")
     p = sub.add_parser("sweep", help="Run the acquisition grid in parallel on this machine")
     p.add_argument("--arms", default="binding,target,method,display")
     p.add_argument("--workers", type=int, default=8)
@@ -138,6 +143,12 @@ def main(argv=None):
         from .invariance import run_orbit
         run_orbit(args.family, args.policy, count=args.count, attempts=args.attempts,
                   smoke=args.smoke)
+    elif args.command == "monomers":
+        from .monomers import run_monomers, transfer
+        if args.held:
+            transfer(args.landscape, args.held)
+        else:
+            run_monomers(args.landscape, controls=not args.no_controls, smoke=args.smoke)
     elif args.command == "sweep":
         from .sweep import run_sweep
         run_sweep([a for a in args.arms.split(",") if a], args.workers,
