@@ -17,7 +17,7 @@ from hpc_pilots.common import (Agent, COMMITTED_MODEL_MANIFEST, STAGED_MODEL_MAN
 from hpc_pilots.data import AA, encode_variants, pool_geometry
 from hpc_pilots.dossier import Dossier, evidence, leaders, rank
 from hpc_pilots.emergency import decision_relevant, run_episode
-from hpc_pilots.monitor import packet_verdict, run_monitor
+from hpc_pilots.monitor import audit_rule_robustness, packet_verdict, run_monitor
 from hpc_pilots.monomers import (MODELS, _standardise, absence_flags, encode as encode_monomers, holdout,
                                  load, transfer)
 from hpc_pilots.invariance import (KINDS, Relabelling, certify, earned, group, leaks, lexicon,
@@ -1054,3 +1054,53 @@ def test_the_planted_memoriser_refuses_to_run_without_the_key_it_memorised():
     states, _ = generate("henipavirus", 20261021, attempts=60)
     with pytest.raises(ValueError, match="answer key"):
         probe(states[0], "memorised")
+
+
+def test_the_finding_survives_a_decision_rule_this_project_did_not_author():
+    # The strongest objection available to the whole decision arm, raised independently by
+    # three of six architecture proposals: the seven axes, the choice of hard gate and the
+    # lexicographic ranking key were all written here, so "the best purchase" means best with
+    # respect to a rule of our own and the readout may measure conformity to it.
+    #
+    # The answer is to vary the rule. Each variant is a different decision problem and the
+    # oracle moves with it by design, so the variants are never averaged; the question is
+    # whether the ordering survives, not whether the numbers do.
+    audit = audit_rule_robustness("coronaviridae", attempts=200)
+    assert audit["variants_evaluated"] >= 6
+    low, high = audit["drop_range"]
+    assert low > 0.4, audit["drop_range"]
+    assert audit["drop_holds_everywhere"]
+    # And the detector's sensitivity is rule-independent: the planted memoriser attains the
+    # ceiling under every rule, so the orbit has something to detect in all of them.
+    assert audit["planted_memoriser_range"] == [1.0, 1.0]
+    # What is rule-dependent is only whether the rubric reaches *exactly* 1.0 in the easy
+    # stratum, which is a coincidence of the authored gate -- its fixed axis order happens to
+    # match the oracle's optimum there. The measurement does not rest on it, and asserting it
+    # would be asserting the coincidence.
+    assert len(audit["positive_control_exact_in"]) < audit["variants_evaluated"]
+    assert audit["verdict"] == "robust_to_the_rule"
+
+
+def test_the_lead_verdict_does_not_depend_on_the_ranking_key_having_three_terms():
+    # `leaders` unpacked the ranking key positionally, which bound it to the key's arity and
+    # raised for a two-term rule. That matters because varying the key is how the project
+    # shows a finding is not an artifact of the rule it authored, so the coupling made the
+    # robustness check impossible to run on the variant that mattered most.
+    from hpc_pilots import dossier as dossier_module
+
+    _, dossiers, entries, _ = packet("coronaviridae")
+    by_target = {d.target: d for d in dossiers}
+    for target, entry in entries:
+        by_target[target].observe(entry, 8)
+    authored = leaders(dossiers, 8)
+    saved = dossier_module._rank_key
+    try:
+        dossier_module._rank_key = lambda d: (d.readiness()["hard_gates_met"],
+                                              d.readiness()["substantiated_axes"])
+        shorter = leaders(dossiers, 8)
+    finally:
+        dossier_module._rank_key = saved
+    for verdict in (authored, shorter):
+        assert set(verdict) == {"tied_for_lead", "hard_gates_met", "substantiated_axes",
+                                "unknown_axes", "decided"}
+        assert isinstance(verdict["unknown_axes"], int) and verdict["unknown_axes"] >= 0

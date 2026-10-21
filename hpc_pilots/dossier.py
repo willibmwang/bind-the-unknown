@@ -232,11 +232,17 @@ def leaders(dossiers, now):
     if not dossiers:
         raise ValueError("No dossiers to rank")
     best = max(_rank_key(d) for d in dossiers)
-    tied = frozenset(d.target for d in dossiers if _rank_key(d) == best)
-    gates, substantiated, negated_unknown = best
-    return {"tied_for_lead": tied, "hard_gates_met": gates,
-            "substantiated_axes": substantiated, "unknown_axes": -negated_unknown,
-            "decided": len(tied) == 1}
+    leading = [d for d in dossiers if _rank_key(d) == best]
+    # The reported fields are read from a leading dossier rather than unpacked out of the key.
+    # Unpacking bound this function to the key's arity, so a ranking rule with two terms
+    # instead of three raised here -- which matters because varying the key is how the
+    # project shows a finding is not an artifact of the rule it authored.
+    readiness = leading[0].readiness()
+    return {"tied_for_lead": frozenset(d.target for d in leading),
+            "hard_gates_met": readiness["hard_gates_met"],
+            "substantiated_axes": readiness["substantiated_axes"],
+            "unknown_axes": len(readiness["unknown_axes"]),
+            "decided": len(leading) == 1}
 
 
 def rank(dossiers, now):
