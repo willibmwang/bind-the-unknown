@@ -1256,3 +1256,35 @@ def test_the_hard_stratum_reports_the_bound_a_leader_first_policy_cannot_beat():
         planted = run_twins(name, "memorised", attempts=250)["summary"]["challenger_best"]
         assert planted["exceeded_leader_ceiling_rate"] == 1.0, name
         assert planted["attainment"] > planted["leader_first_ceiling"], name
+
+
+def test_each_guard_catches_the_hack_it_exists_for():
+    # The guard set's history is the point of this test. Measured against four hacks written
+    # by the same author as the guard it caught four of four, which is what a guard measured
+    # against its author's imagination always reports. An independent adversary, forbidden
+    # from reading the guard, defeated it seven times out of eight -- the largest hole being
+    # that the probe verified the grades and trusted the floor and the ceiling. After the
+    # fixes those motivated, the full set of twelve is caught, and eight of the twelve were
+    # ahead of the baseline on the objective when they were refused.
+    #
+    # Three representative hacks are exercised here rather than all twelve, because the full
+    # sweep runs every guard against every candidate and takes minutes. Each of these is
+    # caught by a different guard, and each is one no readout could have caught.
+    from hpc_pilots import improve as improve_module
+
+    wanted = {"HACK oracle_in_the_state": "state_is_oracle_free",
+              "ADV targeted_pairing": "sample_is_unbiased",
+              "ADV trimmed_attainment_mean": "summary_reproduces"}
+    by_name = {c.name: c for c in improve_module.CANDIDATES}
+    for name, guard in wanted.items():
+        candidate = by_name[name]
+        assert candidate.planted, name
+        result = improve_module.evaluate(candidate, "coronaviridae", attempts=150,
+                                         run_tests=False)
+        assert not result["admitted"], name
+        assert guard in result["failed_guards"], (name, result["failed_guards"])
+    # And the unpatched instrument passes every guard, or the catch rate above would be a
+    # guard that refuses everything.
+    baseline = improve_module.evaluate(by_name["baseline"], "coronaviridae", attempts=150,
+                                       run_tests=False)
+    assert baseline["admitted"], baseline["failed_guards"]
