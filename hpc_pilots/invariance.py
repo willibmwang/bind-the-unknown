@@ -419,12 +419,25 @@ def earned(nominal, orbits):
     """Split a score into the part the structure supports and the part identity supplied.
 
     `orbits` maps a kind to the scores observed over that kind's elements. The quantity to
-    read is `attributable_to_identity`: the identity orbit's shortfall against the
-    presentation orbit, not against the nominal run. Reading it against nominal would charge
-    the policy's own variance and its sensitivity to the arrangement of the state to
-    memorisation, and a policy that is merely unstable would be indistinguishable from one
-    reciting a name. The presentation orbit is the matched comparator because it is the same
-    content, rearranged, and the identity orbit is the same arrangement, renamed.
+    read is `attributable_to_identity`: the identity orbit's shortfall against the nominal
+    run, with the null orbit's spread as the noise floor it has to clear.
+
+    It was first defined as the shortfall against the *presentation* orbit, on the reasoning
+    that a policy which is merely unstable would otherwise be indistinguishable from one
+    reciting a name. That reasoning was wrong, and the guard in `improve` caught it: the
+    fixed rubric, which reads no names at all, reported a 0.18 identity effect under a wider
+    sampling band. The cause is that the two transformations are orthogonal rather than
+    nested -- an identity relabelling renames with the order fixed, a presentation
+    permutation reorders with the names fixed -- so their difference mixes two distinct
+    sensitivities. The rubric walks the ranking and takes the first target, and `rank`
+    resolves ties in the caller's list order, so permuting the list genuinely changes what it
+    buys. Differencing the orbits charged that order-dependence to memorisation.
+
+    The control for instability is the null orbit, which re-runs the identical instance and
+    is what the noise floor is computed from. The presentation orbit measures something else
+    worth reporting on its own: a policy with a large `attributable_to_presentation` is
+    reading the arrangement of the state rather than its content, which is a defect in that
+    policy and not evidence about the name.
 
     Returns `None` for any quantity whose orbit is absent rather than substituting nominal
     for a missing arm, so a partial run reports a gap instead of a number.
@@ -441,23 +454,35 @@ def earned(nominal, orbits):
                 "sd": None if spread is None else round(spread, 4)}
 
     null, presentation, identity = (summary(k) for k in KINDS)
-    gap = None
-    if presentation and identity:
-        gap = round(presentation["mean"] - identity["mean"], 4)
+
+    def shortfall(orbit):
+        if nominal is None or orbit is None:
+            return None
+        return round(nominal - orbit["mean"], 4)
+
+    gap = shortfall(identity)
+    floor = None if null is None else null["sd"]
     return {"nominal": None if nominal is None else round(nominal, 4),
             "null_orbit": null, "presentation_orbit": presentation, "identity_orbit": identity,
             "earned_mean": None if identity is None else identity["mean"],
             "earned_floor": None if identity is None else identity["min"],
             "attributable_to_identity": gap,
-            "policy_variance_floor": None if null is None else null["sd"],
-            "exceeds_variance_floor": None if gap is None or not null or null["sd"] is None
-            else bool(abs(gap) > null["sd"]),
-            "interpretation": "attributable_to_identity is the presentation orbit's mean less "
-                              "the identity orbit's mean: the score lost by renaming content "
-                              "that was rearranged at no cost. It bounds the lexical channel "
-                              "only. Evidence identifies its subject, so a claim scrubbed of "
-                              "every name can still name one, and that residue is measured by "
-                              "an intervention that moves the answer, not by this orbit."}
+            "attributable_to_presentation": shortfall(presentation),
+            "policy_variance_floor": floor,
+            "exceeds_variance_floor": None if gap is None or floor is None
+            else bool(abs(gap) > floor),
+            "interpretation": "attributable_to_identity is the nominal score less the identity "
+                              "orbit's mean: what renaming the targets costs, with the order "
+                              "held fixed. It is read against the null orbit's spread, which "
+                              "is the same instance re-run and so is the policy's own "
+                              "variance. attributable_to_presentation is a separate and "
+                              "orthogonal sensitivity -- reordering with the names held fixed "
+                              "-- and is a defect in a policy rather than evidence about the "
+                              "name, so the two are reported side by side and never "
+                              "differenced. Both bound the lexical channel only: evidence "
+                              "identifies its subject, so a claim scrubbed of every name can "
+                              "still name one, and that residue needs an intervention that "
+                              "moves the answer."}
 
 
 def axis_gate(dossiers, pool, retrieved, now):

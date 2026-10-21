@@ -77,6 +77,12 @@ def main(argv=None):
     p.add_argument("--count", type=int, default=4, help="Group elements per kind")
     p.add_argument("--attempts", type=int, default=400)
     p.add_argument("--smoke", action="store_true")
+    p = sub.add_parser("improve", help="Search instrument variants behind the guard")
+    p.add_argument("--family", default="coronaviridae")
+    p.add_argument("--attempts", type=int, default=250)
+    p.add_argument("--no-tests", action="store_true",
+                   help="Skip the in-process invariant suite, which the guard otherwise runs")
+    p.add_argument("--smoke", action="store_true")
     p = sub.add_parser("monitor", help="Audit which readouts can still tell two policies apart")
     p.add_argument("--family", action="append", dest="packets",
                    help="Restrict the audit to one packet; repeatable")
@@ -148,6 +154,10 @@ def main(argv=None):
         from .invariance import run_orbit
         run_orbit(args.family, args.policy, count=args.count, attempts=args.attempts,
                   smoke=args.smoke)
+    elif args.command == "improve":
+        from .improve import run_improve
+        run_improve(args.family, attempts=args.attempts, run_tests=not args.no_tests,
+                    smoke=args.smoke)
     elif args.command == "monitor":
         from .monitor import run_monitor
         run_monitor(args.packets, attempts=args.attempts, smoke=args.smoke)

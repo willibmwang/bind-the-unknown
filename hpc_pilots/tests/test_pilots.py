@@ -789,23 +789,36 @@ def test_a_state_blind_policy_scores_at_chance_in_both_strata():
     assert abs(summary["contrast"]["leader_minus_challenger"]) < 0.3
 
 
-def test_earned_performance_is_read_against_the_presentation_orbit_not_the_nominal_run():
-    # A policy that is merely unstable must not be reported as one reciting a name. The
-    # identity orbit is compared with the presentation orbit -- the same content rearranged
-    # at no cost -- rather than with the nominal run, so the policy's own variance and its
-    # sensitivity to the arrangement of the state are not charged to memorisation.
-    split = earned(1.0, {"null": [0.9, 0.9, 0.9], "presentation": [0.9, 0.9],
-                         "identity": [0.4, 0.4]})
-    assert split["attributable_to_identity"] == pytest.approx(0.5)
-    assert split["earned_mean"] == pytest.approx(0.4)
-    assert split["policy_variance_floor"] == 0.0
-    assert split["exceeds_variance_floor"] is True
-    # A policy whose identity orbit matches its presentation orbit earned its score, however
-    # unstable it is across repeats of the identical instance.
-    unstable = earned(1.0, {"null": [0.2, 1.0], "presentation": [0.6, 0.6],
-                            "identity": [0.6, 0.6]})
-    assert unstable["attributable_to_identity"] == 0.0
-    assert unstable["exceeds_variance_floor"] is False
+def test_an_identity_effect_is_read_against_the_null_orbit_and_never_against_presentation():
+    # The estimator was first defined as the identity orbit's shortfall against the
+    # *presentation* orbit, reasoning that a policy which is merely unstable would otherwise
+    # look like one reciting a name. That was wrong, and the guard in `improve` caught it: the
+    # fixed rubric, which reads no names, reported a 0.18 identity effect under a wider
+    # sampling band. The two transformations are orthogonal, not nested -- renaming holds the
+    # order fixed, reordering holds the names fixed -- so their difference mixes two
+    # sensitivities. The rubric walks the ranking and takes the first target, and `rank`
+    # resolves ties in the caller's list order, so permuting the list genuinely changes what it
+    # buys; differencing the orbits charged that to memorisation.
+    #
+    # Instability is controlled by the null orbit, which re-runs the identical instance.
+    order_sensitive = earned(1.0, {"null": [1.0, 1.0], "presentation": [0.5, 0.5],
+                                   "identity": [1.0, 1.0]})
+    assert order_sensitive["attributable_to_identity"] == 0.0
+    assert order_sensitive["attributable_to_presentation"] == pytest.approx(0.5)
+
+    memorising = earned(1.0, {"null": [1.0, 1.0], "presentation": [1.0, 1.0],
+                              "identity": [0.4, 0.4]})
+    assert memorising["attributable_to_identity"] == pytest.approx(0.6)
+    assert memorising["attributable_to_presentation"] == 0.0
+    assert memorising["earned_mean"] == pytest.approx(0.4)
+    assert memorising["exceeds_variance_floor"] is True
+
+    # An effect inside the policy's own variance does not clear the floor.
+    noisy = earned(1.0, {"null": [0.2, 1.0], "presentation": [0.6, 0.6],
+                         "identity": [0.9, 0.9]})
+    assert noisy["policy_variance_floor"] > 0.1
+    assert noisy["exceeds_variance_floor"] is False
+
     # A missing arm reports a gap rather than substituting the nominal run for it.
     assert earned(1.0, {"null": [0.5]})["attributable_to_identity"] is None
 
@@ -986,7 +999,11 @@ def test_the_audit_condemns_every_readout_already_known_to_be_dead():
     verdicts = {k: v["verdict"] for k, v in ledger["episode_readouts"].items()}
     # Scores the state object, which retains contradictions by construction.
     assert verdicts["conflict_retained_rate"] != "discriminating"
-    # Saturated: the zero-retrieval control reached it having bought nothing.
+    # Saturated because the fixed rubric reaches 1.0 with evidence, so nothing can be observed
+    # above it. That is a separate finding from the zero-retrieval result, which is the *agent*
+    # policy's: under that control the rubric and scripted policies decline to recommend and
+    # report None, so they contribute nothing to the match rate and cannot saturate it. Both
+    # say the readout is unusable; only one of them is what this audit measured.
     assert verdicts["chosen_matches_reference"] == "saturated_by_a_trivial_policy"
     # The definitional collision with the rubric's own traversal.
     assert ledger["episode_readouts"]["decision_relevant_rate"]["per_packet"][

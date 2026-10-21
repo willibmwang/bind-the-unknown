@@ -7,9 +7,12 @@ before anybody noticed it could not move.
 * `conflict_retained_rate` reads 1.0 for every policy. The state object retains
   contradictions by construction, so the metric scores the harness and not the decision. It
   is now labelled as such in the code, which is the only reason it is harmless.
-* `chosen_matches_reference` saturated. The zero-retrieval control named the reference-best
-  target in sixteen episodes of sixteen having bought nothing, so the metric was measuring
-  what the model already knew.
+* `chosen_matches_reference` is saturated twice over. The fixed rubric reaches 1.0 with
+  evidence, so nothing can be observed above it; and separately the hosted agent named the
+  reference-best target in sixteen zero-retrieval episodes of sixteen having bought nothing.
+  The two findings are distinct and are often run together: under the zero-retrieval control
+  the deterministic policies *decline to recommend* and report `None`, so they contribute
+  nothing to that match rate and cannot be what saturated it.
 * `decision_relevant_rate` saturated against the fixed rubric. The oracle marks a purchase
   relevant when it moves the lead verdict; the rubric resolves the leading target's unknown
   axes; those are the same set, so the trivial policy scored 6 of 6 and a lift of 4.48 --
