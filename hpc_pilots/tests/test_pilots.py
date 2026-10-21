@@ -1358,3 +1358,18 @@ def test_clearing_the_leader_first_ceiling_is_a_diagnostic_and_not_a_skill_measu
     assert blind["attainment"] < 0.1, blind["attainment"]
     fixed = run_twins("orthomyxoviridae", "rubric", attempts=300)["summary"]["challenger_best"]
     assert fixed["exceeded_leader_ceiling_rate"] == 0.0
+
+
+def test_capping_the_probe_count_keeps_whole_pairs():
+    # The cap exists to bound inference spend on an agent policy, which is what held the first
+    # live orbit to two group elements with no interval on anything. Drawing states
+    # independently to save that money would leave the two strata unbalanced by chance, which
+    # is the matched design discarded for cost. Pairs are drawn instead, so the strata stay
+    # balanced at every budget.
+    for cap in (6, 12, 20):
+        result = run_twins("henipavirus", "rubric", attempts=300, limit=cap)
+        leader = result["summary"]["leader_best"]["probes"]
+        challenger = result["summary"]["challenger_best"]["probes"]
+        assert leader == challenger, (cap, leader, challenger)
+        assert leader + challenger <= cap + 1, (cap, leader, challenger)
+        assert leader > 0, cap

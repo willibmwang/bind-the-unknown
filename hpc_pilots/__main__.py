@@ -70,12 +70,17 @@ def main(argv=None):
                    help="Candidate states to sample before pairing")
     p.add_argument("--round", type=int, default=3, dest="now",
                    help="Decision round the probe is posed at")
+    p.add_argument("--limit", type=int,
+                   help="Cap the probes scored, sampled rather than truncated. The cap is "
+                        "what bounds inference spend on an agent policy")
     p.add_argument("--smoke", action="store_true")
     p = sub.add_parser("orbit", help="Split a score into earned skill and supplied identity")
     p.add_argument("--family", default="coronaviridae")
     p.add_argument("--policy", default="rubric")
     p.add_argument("--count", type=int, default=4, help="Group elements per kind")
     p.add_argument("--attempts", type=int, default=400)
+    p.add_argument("--limit", type=int,
+                   help="Cap the probes scored per group element; bounds inference spend")
     p.add_argument("--smoke", action="store_true")
     p = sub.add_parser("improve", help="Search instrument variants behind the guard")
     p.add_argument("--family", default="coronaviridae")
@@ -149,11 +154,11 @@ def main(argv=None):
     elif args.command == "twins":
         from .twins import run_twins
         run_twins(args.family, args.policy, attempts=args.attempts, smoke=args.smoke,
-                  now=args.now)
+                  now=args.now, limit=args.limit)
     elif args.command == "orbit":
         from .invariance import run_orbit
         run_orbit(args.family, args.policy, count=args.count, attempts=args.attempts,
-                  smoke=args.smoke)
+                  smoke=args.smoke, limit=args.limit)
     elif args.command == "improve":
         from .improve import run_improve
         run_improve(args.family, attempts=args.attempts, run_tests=not args.no_tests,

@@ -228,3 +228,166 @@ def verify():
                 "forest-backed replays failed to reproduce across machines below the version "
                 "pin, so every artifact carries its host and none are pooled without it."},
         indent=2))
+
+
+# --- The local-model policy lane -------------------------------------------------------
+#
+# The probes' cost is inference, not CPU. A hosted reply costs about 1.6 cents and an orbit
+# wants hundreds of them per group element, which is why the first live orbit ran at two
+# elements with no interval attached to anything. Serving the pinned model instead moves that
+# cost onto GPU hours: a four-billion-parameter model on one mid-range card answers this
+# prompt in about a second, so a few thousand probes is a few dollars rather than a few tens.
+#
+# It is also the plan's own TRAIN-10 -- stand the pinned local model up on GPU and validate
+# the policy path end to end -- which has been blocked on confirmed trainable-model access.
+#
+# Two environments in one container, which is not tidiness. The scientific requirements and
+# the vLLM requirements are pinned separately and deliberately so the first can resolve
+# without CUDA pins, and co-resolving them here would change the numerical stack every
+# recorded result was produced under. `agent.sbatch` solves this on the cluster by running
+# `.venv-llm/bin/vllm serve` alongside `.venv-hpc/bin/python -m hpc_pilots`, and this mirrors
+# it: vLLM from the image, the probe from a venv built off the scientific lock.
+
+WEIGHTS = modal.Volume.from_name("bind-the-unknown-weights", create_if_missing=True)
+
+# Bound to localhost inside the container, as on the cluster. Nothing is exposed: the policy's
+# HTTP client and the server are in the same container, so there is no endpoint to
+# authenticate across a network and no token to hold anywhere but in the container's own
+# filesystem.
+PORT = 18573
+SERVED_AS = "emergency-pilot"
+
+VLLM_IMAGE = (
+    modal.Image.debian_slim(python_version="3.12")
+    .pip_install_from_requirements(str(HERE / "requirements.llm.lock.txt"))
+    .add_local_dir(str(HERE), "/root/hpc_pilots", copy=True, ignore=["__pycache__", "*.pyc"])
+    .run_commands(
+        "python -m venv /opt/sci",
+        "/opt/sci/bin/pip install --no-cache-dir -r /root/hpc_pilots/requirements.lock.txt",
+    )
+)
+
+
+def _pinned_model():
+    """The repository's committed pin, read rather than restated.
+
+    `stage_model` exists so the model is fixed by commit SHA with per-file hashes, and a
+    second copy of the revision here would be a second thing to keep in step. Resolving the
+    revision from whatever is current on the Hub is the specific failure that pin was written
+    to prevent.
+    """
+    manifest = json.loads((HERE / "model.manifest.json").read_text())
+    return manifest["repo"], manifest["revision"]
+
+
+@app.function(image=VLLM_IMAGE, gpu="L40S", volumes={"/weights": WEIGHTS}, timeout=7200,
+              max_containers=4)
+def probe_on_local_model(spec):
+    """Serve the pinned model on localhost, run one probe cell against it, return the result.
+
+    Health is polled while also checking the server process is still alive, because a server
+    that died on startup is indistinguishable from one still loading if only the socket is
+    watched, and the difference is a ten-minute wait against an immediate diagnosis.
+    """
+    import os
+    import secrets
+    import subprocess
+    import time
+    from pathlib import Path
+
+    import requests
+
+    kind, arguments = spec
+    repo, revision = _pinned_model()
+    local = Path("/weights") / revision
+    if not (local / "config.json").exists():
+        from huggingface_hub import snapshot_download
+
+        snapshot_download(repo_id=repo, revision=revision, local_dir=str(local))
+        WEIGHTS.commit()
+
+    token_file = Path("/root/runs/backend/token")
+    token_file.parent.mkdir(parents=True, exist_ok=True)
+    handle = os.open(token_file, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o600)
+    with os.fdopen(handle, "w") as out:
+        out.write(secrets.token_hex(32))
+    token = token_file.read_text()
+
+    server = subprocess.Popen(
+        ["vllm", "serve", str(local), "--served-model-name", SERVED_AS,
+         "--host", "127.0.0.1", "--port", str(PORT), "--max-model-len", "8192",
+         "--max-num-seqs", "8", "--gpu-memory-utilization", "0.85",
+         "--generation-config", "vllm", "--seed", "20261012"],
+        env={**os.environ, "VLLM_API_KEY": token, "HF_HUB_OFFLINE": "1"},
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    try:
+        deadline = time.monotonic() + 900
+        while time.monotonic() < deadline:
+            if server.poll() is not None:
+                raise RuntimeError(f"vLLM exited with {server.returncode} before becoming "
+                                   f"healthy:\n{server.stdout.read()[-4000:]}")
+            try:
+                if requests.get(f"http://127.0.0.1:{PORT}/health", timeout=3).status_code == 200:
+                    break
+            except requests.RequestException:
+                pass
+            time.sleep(3)
+        else:
+            raise RuntimeError("vLLM did not become healthy within fifteen minutes")
+
+        command = ["/opt/sci/bin/python", "-m", "hpc_pilots",
+                   "twins" if kind == "twins" else "orbit"]
+        for key, value in arguments.items():
+            command += [f"--{key.replace('_', '-')}", str(value)]
+        probe = subprocess.run(
+            command, cwd="/root", capture_output=True, text=True,
+            env={**os.environ,
+                 "PYTHONPATH": "/root",
+                 "PILOT_LLM_PROVIDER": "local",
+                 "PILOT_LLM_URL": f"http://127.0.0.1:{PORT}/v1",
+                 "PILOT_LLM_MODEL": SERVED_AS,
+                 "PILOT_LLM_TOKEN_FILE": str(token_file),
+                 # The default of 192 was sized for this model on the emergency task. The
+                 # probe shows the same state and asks for the same object, so the ceiling is
+                 # raised only enough to absorb a longer rationale; the cost of the headroom
+                 # is negligible and a truncated reply raises rather than degrading.
+                 "PILOT_LLM_MAX_TOKENS": "512",
+                 "OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"})
+        if probe.returncode != 0:
+            raise RuntimeError(f"probe failed:\n{probe.stdout[-3000:]}\n{probe.stderr[-3000:]}")
+        written = sorted(Path("/root/runs").rglob("*.json"), key=lambda p: p.stat().st_mtime)
+        return {"kind": kind, "arguments": arguments,
+                "result": json.loads(written[-1].read_text()),
+                "stdout_tail": probe.stdout[-1500:]}
+    finally:
+        server.terminate()
+        try:
+            server.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            server.kill()
+
+
+@app.local_entrypoint()
+def local_policy_probes(packets: str = "henipavirus", attempts: int = 300,
+                        orbit: bool = False, elements: int = 4, limit: int = 0):
+    """Run the probes against the pinned local model instead of a hosted one.
+
+    Start with one packet and no orbit: that is the TRAIN-10 acceptance check -- one non-smoke
+    agent episode from the local model, artifact-recorded -- and it confirms the path before
+    any volume is bought. `orbit=True` is the measurement the hosted run could not afford.
+    """
+    names = (["coronaviridae", "orthomyxoviridae", "henipavirus"]
+             if packets == "all" else [p for p in packets.split(",") if p])
+    cells = []
+    for name in names:
+        arguments = {"family": name, "policy": "agent", "attempts": attempts}
+        if orbit:
+            arguments = {"family": name, "policy": "agent", "count": elements,
+                         "attempts": attempts}
+        if limit:
+            arguments["limit"] = limit
+        cells.append(("orbit" if orbit else "twins", arguments))
+    print(json.dumps({"cells": len(cells), "orbit": orbit, "model": _pinned_model()[0]}))
+    for payload in probe_on_local_model.map(cells):
+        print(json.dumps({"wrote": _write(payload),
+                          "host": payload["result"]["provenance"]["host"]}))

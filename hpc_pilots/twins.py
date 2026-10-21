@@ -576,16 +576,19 @@ def run_twins(name, policy, seed=None, attempts=400, limit=None, smoke=False,
 
     states, counts = generate(name, seed, attempts=16 if smoke else attempts, now=now)
     pairs, unmatched = pair(states, seed)
+    # Whole pairs, never individual states. The limit exists to bound inference spend on an
+    # agent policy, and drawing states independently would leave the two strata unbalanced by
+    # chance -- which is the matched design, discarded to save money. Sampled rather than
+    # truncated, because `pair` emits in ascending observed-count order, so a prefix would
+    # keep only the states with the fewest claims observed, where the decision is most open
+    # and the floor highest, and would do so identically for every element of an orbit,
+    # biasing every arm the same way and hiding it. The draw is keyed on the packet and the
+    # limit alone, so each orbit element keeps the same pairs.
+    if limit and limit // 2 < len(pairs):
+        keep = stream(seed, "twin-limit", limit).choice(len(pairs), size=max(1, limit // 2),
+                                                        replace=False)
+        pairs = [pairs[int(i)] for i in sorted(keep)]
     paired = [s for p in pairs for s in (p["challenger_best"], p["leader_best"])]
-    if limit and limit < len(paired):
-        # Sampled, not truncated. `pair` emits in ascending observed-count order, so a prefix
-        # would keep only the states with the fewest claims observed -- where the decision is
-        # most open and the chance floor highest -- and would do so identically for every
-        # element of an orbit, biasing every arm the same way and hiding it. The draw is keyed
-        # on the packet and the limit alone, so each orbit element keeps the same states.
-        chosen = stream(seed, "twin-limit", limit).choice(len(paired), size=limit,
-                                                          replace=False)
-        paired = [paired[int(i)] for i in sorted(chosen)]
 
     agent = Agent() if policy == "agent" else None
     key = answer_key(name, seed, 16 if smoke else attempts, now) \
