@@ -69,9 +69,16 @@ _base = (modal.Image.debian_slim(python_version="3.12")
 DECISION_IMAGE = _base
 
 # The monomer transfer needs one small landscape and its descriptor matrix: 1.6MB against the
-# 166MB the method landscapes would add.
-MONOMER_IMAGE = _base.add_local_dir(
-    str(ROOT / "data/processed/display"), "/root/data/processed/display", copy=True)
+# 166MB the method landscapes would add. It also needs the *raw* monomer table, which is a
+# separate path and was missed the first time -- `absence_flags` reads `is_absence` from it
+# rather than inferring absence from an all-zero descriptor row, because the staged manifest
+# warns that a zero row is indistinguishable from a monomer whose descriptors are genuinely
+# zero. So the staged matrix alone is not enough and every cell failed on the missing file.
+MONOMER_IMAGE = (_base
+                 .add_local_dir(str(ROOT / "data/processed/display"),
+                                "/root/data/processed/display", copy=True)
+                 .add_local_dir(str(ROOT / "data/raw/pepexplainer"),
+                                "/root/data/raw/pepexplainer", copy=True))
 
 # Defined and unused. See the module docstring: there is no GPU workload here yet.
 GPU_IMAGE = _base.pip_install("torch==2.8.0", index_url="https://download.pytorch.org/whl/cpu")
