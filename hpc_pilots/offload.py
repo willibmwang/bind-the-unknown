@@ -257,9 +257,15 @@ WEIGHTS = modal.Volume.from_name("bind-the-unknown-weights", create_if_missing=T
 PORT = 18573
 SERVED_AS = "emergency-pilot"
 
+# Built from constraints, not from `requirements.llm.lock.txt`, because that lock does not
+# install. vLLM 0.10.2 declares `transformers>=4.55.2` with no upper bound, so the lock
+# recorded transformers 5.19.0 -- which removed the attribute vLLM calls -- and stepping back
+# cascades through tokenizers and huggingface-hub for four layers. The header of that file
+# records the chain. Resolving by constraint is what a lock should have been generated from,
+# and `report_versions` below prints the resolution so one can be.
 VLLM_IMAGE = (
     modal.Image.debian_slim(python_version="3.12")
-    .pip_install_from_requirements(str(HERE / "requirements.llm.lock.txt"))
+    .pip_install("vllm==0.10.2", "transformers<5", "huggingface_hub<2", "requests")
     .add_local_dir(str(HERE), "/root/hpc_pilots", copy=True, ignore=["__pycache__", "*.pyc"])
     .run_commands(
         "python -m venv /opt/sci",
@@ -403,6 +409,20 @@ def probe_on_local_model(spec):
             server.wait(timeout=30)
         except subprocess.TimeoutExpired:
             server.kill()
+
+
+@app.function(image=VLLM_IMAGE)
+def resolved_versions():
+    """What pip actually chose, so a lock can be written from something that runs."""
+    from importlib.metadata import version
+
+    return {name: version(name) for name in
+            ("vllm", "torch", "transformers", "tokenizers", "huggingface_hub")}
+
+
+@app.local_entrypoint()
+def report_versions():
+    print(json.dumps(resolved_versions.remote(), indent=2))
 
 
 @app.local_entrypoint()
