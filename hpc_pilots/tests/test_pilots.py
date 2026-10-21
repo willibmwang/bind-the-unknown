@@ -17,7 +17,7 @@ from hpc_pilots.common import (Agent, COMMITTED_MODEL_MANIFEST, STAGED_MODEL_MAN
                                content_digest, digest, model_manifest, provenance,
                                source_manifest)
 from hpc_pilots.data import AA, encode_variants, pool_geometry
-from hpc_pilots.dossier import Dossier, evidence, leaders, rank
+from hpc_pilots.dossier import AXES, Dossier, evidence, leaders, rank
 from hpc_pilots.emergency import decision_relevant, run_episode
 from hpc_pilots.lattice import lattice, lattice_action
 from hpc_pilots.monitor import audit_rule_robustness, packet_verdict, run_monitor
@@ -1640,22 +1640,50 @@ def test_the_lattice_score_does_not_depend_on_the_value_of_its_prior():
     assert len(set(chosen.values())) == 1, chosen
 
 
-def test_the_lattice_policy_clears_the_bound_a_leader_first_policy_cannot():
-    # The measurement the architecture exists for. The fixed rubric is pinned at the
-    # leader-first ceiling in every probe; a policy over a state with no target identity, and
-    # no ranking handed to it, clears that bound on most of them.
+def test_the_lattice_policy_clears_the_bound_on_the_larger_packets_and_not_the_smallest():
+    # The measurement the architecture exists for, with the number it actually earns.
     #
-    # Reported honestly: it does NOT dominate. It is well below the rubric on the easy
-    # stratum, because its prior is constant and so it prefers the higher *potential* grade
-    # over the more reliable one -- it is risk-seeking by construction. That residual failure
-    # mode is named because it is exactly what a policy learned over the same lattice could
-    # fix, and the fix would be measurable on this same instrument.
-    for name in ("coronaviridae", "orthomyxoviridae"):
+    # Reported first as 0.899 / 0.933 / 0.365 against ceilings of 0.258 / 0.054 / -0.229. That
+    # was wrong, and the axis-order nuisance is what found it: ties were broken on the column
+    # index, so nearly a third of the attainment was the authored axis declaration order
+    # rather than anything in the lattice -- a 0.291 axis-order effect against the fixed
+    # rubric's 0.116. With ties drawn instead, the earned figures are 0.492 / 0.725 / -0.245.
+    #
+    # The advantage holds on the two larger packets and vanishes on the smallest, where two
+    # targets leave barely a challenger to find. Reported per packet and never pooled.
+    for name, floor in (("coronaviridae", 0.4), ("orthomyxoviridae", 0.6)):
         fixed = run_twins(name, "rubric", attempts=400)["summary"]["challenger_best"]
         built = run_twins(name, "lattice", attempts=400)["summary"]["challenger_best"]
         assert fixed["exceeded_leader_ceiling_rate"] == 0.0, name
-        assert built["exceeded_leader_ceiling_rate"] > 0.6, (name, built)
-        assert built["attainment"] > fixed["attainment"] + 0.3, (name, built, fixed)
-        # It gets there by looking off the leader, which the rubric never does.
         assert fixed["bought_on_leader_rate"] == 1.0, name
-        assert built["bought_on_leader_rate"] < 0.2, (name, built)
+        assert built["attainment"] > floor, (name, built["attainment"])
+        assert built["attainment"] > built["leader_first_ceiling"], name
+        assert built["exceeded_leader_ceiling_rate"] > 0.5, (name, built)
+
+    # Henipavirus, two targets: the advantage is gone and the test says so rather than
+    # quietly excluding the packet that disagrees.
+    small = run_twins("henipavirus", "lattice", attempts=400)["summary"]["challenger_best"]
+    assert small["attainment"] < small["leader_first_ceiling"] + 0.1, small["attainment"]
+
+
+def test_the_axis_order_nuisance_catches_a_policy_reading_a_list_order():
+    # Added because the local model chose the first-declared axis in 39 probes of 40, and the
+    # group as first written permuted the dossier order and not the axis order -- so it had no
+    # way to see the failure that mattered most. The oracle counts substantiated axes and does
+    # not read their order, so it is invariant, and `certify` checks that rather than assuming.
+    for name in PACKETS:
+        for element in group(name, "axis_order", 20261021, 2):
+            certificate = certify(name, element)
+            assert certificate["certified"], (name, certificate["checks"])
+            assert len(certificate["element"]["axis_order"]) == len(AXES)
+
+    # The fixed rubric walks the list and takes the first unresolved entry, so permuting the
+    # list must cost it. Measured at +0.116 on Coronaviridae.
+    walker = run_orbit("coronaviridae", "rubric", count=4, attempts=300,
+                       kinds=("null", "axis_order"))["earned"]["challenger_best"]
+    assert walker["attributable_to_axis_order"] > 0.05, walker
+
+    # A policy that ignores the state entirely cannot be sensitive to how it is ordered.
+    blind = run_orbit("coronaviridae", "scripted", count=2, attempts=300,
+                      kinds=("null", "axis_order"))["earned"]["challenger_best"]
+    assert blind["attributable_to_axis_order"] == 0.0, blind

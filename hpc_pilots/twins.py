@@ -286,18 +286,29 @@ def pair(states, seed):
     return pairs, unmatched
 
 
-def _state_for_policy(dossiers, available, now, deadline, remaining, allowed):
+def _state_for_policy(dossiers, available, now, deadline, remaining, allowed, axes=None):
     """The decision state, in the shape an episode presents it.
 
     Assembled from the same fields `run_episode` assembles, so a probe measures the episode's
     task rather than a simplified relative of it. Divergence here would be invisible and would
     make every probe number incomparable with every episode number.
     """
+    # `axes` reorders the *presentation* of the axes and nothing else: every axis keeps its
+    # role and every claim keeps its content. It exists because the local model chose the
+    # first-declared axis in 39 probes of 40, and a policy keying on the order of a list
+    # rather than on its contents is only visible if something permutes the list.
+    order = list(axes) if axes else list(AXES)
+    states = []
+    for dossier in dossiers:
+        shown = dossier.state(now)
+        states.append({**shown, "axes": {a: shown["axes"][a] for a in order}})
     return {"decision_round": now, "rounds_remaining": deadline - now,
             "remaining_actions": remaining,
             "ranking": rank(dossiers, now),
-            "dossiers": [d.state(now) for d in dossiers],
-            "retrievable_axes": [{"target": t, "axis": a} for t, a in sorted(available)],
+            "dossiers": states,
+            "retrievable_axes": [{"target": t, "axis": a}
+                                 for t, a in sorted(available,
+                                                    key=lambda p: (p[0], order.index(p[1])))],
             "available_actions": {a: ACTIONS[a] for a in allowed}}
 
 
@@ -396,17 +407,19 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
     lead = leaders(dossiers, now)
     allowed = list(ACTIONS)
     ranking = rank(dossiers, now)
+    axis_order = list(relabelling.axes) if relabelling and relabelling.axes else list(AXES)
 
     started = time.perf_counter()
     if policy == "rubric":
-        action, target, axis = _rubric_action(by_target, available, ranking)
+        action, target, axis = _rubric_action(by_target, available, ranking, axis_order)
     elif policy == "scripted":
         action, target, axis = _scripted_action(len(observed), sorted(pool), ranking)
     elif policy == "lattice":
         # The cost-aware comparator the brief pre-registered, over a state with no slot for a
         # target's name. It reads the lattice and nothing else -- no ranking is passed, so it
         # cannot inherit the caller's tie order the way a policy walking `ranking` does.
-        action, target, axis = lattice_action(dossiers, pool, set(observed), now)
+        action, target, axis = lattice_action(dossiers, pool, set(observed), now,
+                                              axes=axis_order)
     elif policy == "memorised":
         if key is None:
             raise ValueError("The memorised arm is a planted contamination and needs the "
@@ -418,14 +431,14 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
         if remembered is not None and remembered in available:
             action, target, axis = "retrieve_evidence", remembered[0], remembered[1]
         else:
-            action, target, axis = _rubric_action(by_target, available, ranking)
+            action, target, axis = _rubric_action(by_target, available, ranking, axis_order)
     elif policy == "agent":
         if agent is None:
             raise ValueError("Missing agent")
         answer = agent.act("Choose the next scientific action for this emergency target "
                            "decision.",
                            _state_for_policy(dossiers, available, now, deadline,
-                                             deadline - now, allowed),
+                                             deadline - now, allowed, axis_order),
                            allowed, fields={"target": [d.target for d in dossiers],
                                             "axis": list(AXES)}, system=SYSTEM)
         action, target, axis = answer["action"], answer["target"], answer["axis"]

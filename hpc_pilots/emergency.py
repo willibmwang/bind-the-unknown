@@ -69,11 +69,17 @@ def _retrievable(pool, retrieved, now):
             if key not in retrieved and entry["available_from"] <= now]
 
 
-def _rubric_action(by_target, available, ranking):
-    """Fixed rubric: resolve the leading target's unknown axes in rubric order, then recommend."""
+def _rubric_action(by_target, available, ranking, axes=None):
+    """Fixed rubric: resolve the leading target's unknown axes in rubric order, then recommend.
+
+    `axes` supplies the order the axes were presented in. It defaults to the declaration order,
+    which is what every recorded episode used, and exists so an axis-order nuisance reaches the
+    policy that is most obviously sensitive to it: this walks the list and takes the first
+    unresolved entry, so permuting the list changes what it buys.
+    """
     for row in ranking:
         d = by_target[row["target"]]
-        for axis in AXES:
+        for axis in (axes or AXES):
             if d.assess(axis)["assessment"] == "unknown" and (d.target, axis) in available:
                 return "retrieve_evidence", d.target, axis
         if d.readiness()["hard_gates_met"]:

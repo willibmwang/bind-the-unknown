@@ -24,6 +24,12 @@ other two.
 * `identity` replaces every declared identifying token -- target names, their aliases,
   pathogen, family, source strings and evidence identifiers -- with opaque codes. The
   decision problem is unchanged and the answer is the same target under its new code.
+* `axis_order` permutes the order the axes are *listed* in, leaving every axis's role and
+  every claim untouched. It was added because the local model chose the first-declared axis in
+  39 probes of 40, which is a policy keying on the order of a list rather than on its
+  contents -- and the group as first written permuted the dossier order and not the axis
+  order, so it had no way to see that. The oracle counts substantiated axes and does not read
+  their order, so it is invariant by inspection and certified by check.
 
 **What this measures and what it cannot.** Scrubbing is lexical. A claim reading
 "polyprotein processing at eleven sites is obligatory for replication" names no target and
@@ -53,7 +59,7 @@ from .common import ROOT, provenance, write_json
 from .dossier import AXES, Dossier, leaders, rank
 from .targets import PACKETS, packet
 
-KINDS = ("null", "presentation", "identity")
+KINDS = ("null", "presentation", "identity", "axis_order")
 
 # Tokens that name an entity in claim text, source strings or identifiers, beyond the target
 # and pathogen names the packet already declares. Data rather than a regular expression,
@@ -135,19 +141,22 @@ class Relabelling:
     index: int
     names: tuple = ()
     order: tuple = ()
+    axes: tuple = ()
+    """The order axes are listed in. Empty for every kind but `axis_order`."""
 
     def table(self):
         return dict(self.names)
 
     def code(self):
         """A short stable identifier for the element, for filenames and result keys."""
-        payload = json.dumps([self.kind, self.index, sorted(self.names), list(self.order)],
-                             sort_keys=True)
+        payload = json.dumps([self.kind, self.index, sorted(self.names), list(self.order),
+                              list(self.axes)], sort_keys=True)
         return hashlib.blake2b(payload.encode(), digest_size=6).hexdigest()
 
     def record(self):
         return {"kind": self.kind, "index": self.index, "code": self.code(),
-                "substitutions": len(self.names), "order": list(self.order)}
+                "substitutions": len(self.names), "order": list(self.order),
+                "axis_order": list(self.axes)}
 
 
 def _aliases(target):
@@ -353,6 +362,10 @@ def group(name, kind, seed, count):
             out.append(Relabelling(kind, index))
         elif kind == "presentation":
             out.append(Relabelling(kind, index, order=tuple(int(i) for i in rng.permutation(size))))
+        elif kind == "axis_order":
+            names = list(AXES)
+            out.append(Relabelling(kind, index,
+                                   axes=tuple(names[int(i)] for i in rng.permutation(len(names)))))
         else:
             out.append(Relabelling(kind, index, names=tuple(sorted(_codes(name, rng).items()))))
     return out
@@ -527,7 +540,10 @@ def earned(nominal, orbits):
                 "max": round(max(rows), 4),
                 "sd": None if spread is None else round(spread, 4)}
 
-    null, presentation, identity = (summary(k) for k in KINDS)
+    # Named rather than unpacked from KINDS. Unpacking by position broke the moment a fourth
+    # transformation was added, which is the wrong way for a new nuisance to announce itself.
+    null, presentation = summary("null"), summary("presentation")
+    identity, axis_order = summary("identity"), summary("axis_order")
 
     def shortfall(orbit):
         if nominal is None or orbit is None:
@@ -538,10 +554,15 @@ def earned(nominal, orbits):
     floor = None if null is None else null["sd"]
     return {"nominal": None if nominal is None else round(nominal, 4),
             "null_orbit": null, "presentation_orbit": presentation, "identity_orbit": identity,
+            "axis_order_orbit": axis_order,
             "earned_mean": None if identity is None else identity["mean"],
             "earned_floor": None if identity is None else identity["min"],
             "attributable_to_identity": gap,
             "attributable_to_presentation": shortfall(presentation),
+            # The order the axes were listed in, holding their roles and every claim fixed. A
+            # policy that walks the list and takes the first unresolved entry is sensitive to
+            # this by construction; one that reads the cells is not.
+            "attributable_to_axis_order": shortfall(axis_order),
             "policy_variance_floor": floor,
             "exceeds_variance_floor": None if gap is None or floor is None
             else bool(abs(gap) > floor),

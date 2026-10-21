@@ -55,6 +55,7 @@ check that this stayed true.
 import numpy as np
 
 from .dossier import ASSESSMENTS, AXES
+from .streams import stream
 
 # One row per cell feature, in order. Declared as data because a learned policy has to agree
 # with the heuristic about the layout, and a silent disagreement would be a rewiring nobody
@@ -221,7 +222,8 @@ def _magnitude(before, before_key, after, after_key):
     return 1.0
 
 
-def lattice_action(dossiers, pool, retrieved, now, ranking=None, prior=SUBSTANTIATION_PRIOR):
+def lattice_action(dossiers, pool, retrieved, now, ranking=None, prior=SUBSTANTIATION_PRIOR,
+                   axes=None, seed=20261021):
     """Choose the purchase with the highest expected value of information.
 
     Ties are broken by the lowest row and column index, which is a property of the lattice and
@@ -232,7 +234,8 @@ def lattice_action(dossiers, pool, retrieved, now, ranking=None, prior=SUBSTANTI
     Returns the episode action triple, so this drops into the same policy slot as the fixed
     rubric and is measured by the same instrument.
     """
-    cells, offered, axis_features, order = lattice(dossiers, pool, retrieved, now)
+    columns = list(axes or AXES)
+    cells, offered, axis_features, order = lattice(dossiers, pool, retrieved, now, columns)
     if not offered.any():
         # Nothing purchasable. Recommend if the lead is held and the gate is met, else stop --
         # the same two terminal moves the rubric has, chosen from the lattice rather than from
@@ -241,7 +244,8 @@ def lattice_action(dossiers, pool, retrieved, now, ranking=None, prior=SUBSTANTI
         leaders = _leaders(gate_met, counts)
         # Content-keyed for the same reason the purchase branch is: `min(leaders)` is a row
         # position, and a position is exactly what this representation refuses to carry.
-        row = min(leaders, key=lambda r: (tuple(cells[r, :, :].ravel()), r))
+        tied = sorted((tuple(cells[r, :, :].ravel()), int(r)) for r in leaders)
+        row = tied[int(stream(seed, "lattice-lead", len(tied)).integers(len(tied)))][1]
         action = "recommend_experiment" if gate_met[row] and len(leaders) == 1 else "stop"
         return action, order[row], None
 
@@ -253,10 +257,22 @@ def lattice_action(dossiers, pool, retrieved, now, ranking=None, prior=SUBSTANTI
     # as `rank` resolving ties by the caller's list order. The test caught it, which is the
     # only reason the architectural claim is worth stating.
     #
-    # Two rows with byte-identical content are genuinely interchangeable: the lattice cannot
-    # distinguish them, so naming either is correct and the key below picks deterministically
-    # without consulting where they sat.
-    candidates = [(int(column), tuple(cells[row, :, :].ravel()), int(row))
-                  for row, column in zip(*np.nonzero(values == best))]
-    column, _, row = min(candidates)
-    return "retrieve_evidence", order[row], list(AXES)[column]
+    # Then taking the lowest *column* index was wrong the same way, and worse than it sounds.
+    # Measured, it gave the policy a 0.291 axis-order effect against the fixed rubric's 0.116:
+    # nearly a third of its headline attainment was the authored axis declaration order rather
+    # than anything in the lattice. An axis carries only whether it gates, so six of the seven
+    # are feature-identical and content cannot separate them either.
+    #
+    # Cells the lattice genuinely cannot distinguish are therefore chosen between at random,
+    # reproducibly -- the same resolution `pick_batch` uses for the surrogate's tied plateaus
+    # and for the same reason. An arbitrary order is not information, and a policy that reads
+    # one is reporting the author's keystrokes as skill.
+    candidates = sorted((tuple(cells[row, :, :].ravel()), tuple(axis_features[column]),
+                         int(row), int(column))
+                        for row, column in zip(*np.nonzero(values == best)))
+    _, _, row, column = candidates[
+        int(stream(seed, "lattice-tie", len(candidates)).integers(len(candidates)))]
+    # Named from the presented order, not from the declaration order. A column index means
+    # whatever the caller listed at that position, and reading the name from `AXES` instead
+    # would silently return a different axis whenever the two differ.
+    return "retrieve_evidence", order[row], columns[column]
