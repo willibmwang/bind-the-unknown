@@ -134,9 +134,18 @@ gap between them is the project's main surviving finding.
 
 **Aggregate.** `summarize` collects non-smoke complete runs, grouped by landscape so metrics
 are never pooled across endpoints, and titles each figure with the endpoint string so the assay
-cannot be lost from the plot. It also emits `headroom_multiple` (= 1 / labelled fraction) and
-`normalised_gain` alongside every raw multiple, so a "multiple over random" can never be read
-without its budget ratio. That column exists *because* of the eightfold error.
+cannot be lost from the plot. It also emits `recall_ceiling`, `headroom_multiple` and
+`attainment` alongside every raw multiple, so a "multiple over random" can never be read
+without its budget ratio. Those columns exist *because* of the eightfold error.
+
+Two corrections to an earlier version of this paragraph, both of which described the code
+wrongly. `headroom_multiple` is **not** `1 / labelled fraction` -- that is the formula the
+overview withdrew in §4.2, and restating it here as current undid the withdrawal. It is
+`recall_ceiling / labelled_fraction`, where the ceiling prefers the exact counted-hits form
+`min(1, labels / hits_in_pool)` and falls back to `min(1, labelled / top_fraction)`. And there
+is **no `normalised_gain` column**; the emitted name is `attainment`, with `policy_attainment`
+and `random_attainment` beside it. A document naming a column the summariser does not write
+cannot be checked against the artifact it describes.
 
 ---
 
@@ -347,8 +356,10 @@ says so with a number attached.
 - `summarize_delay` computes the delay effect and writes it with the accounting identity and the
   feedback-blind null band *beside* it, so the selected-over-returned ratio cannot be read as a
   measurement again (§4 of the overview).
-- The headroom ceiling is corrected to `min(1/top_fraction, 1/labelled_fraction)` and
-  `normalised_gain` divides by the attainable ceiling rather than by 1.0.
+- The headroom ceiling is corrected to `min(1/top_fraction, 1/labelled_fraction)`, preferring
+  the exact counted-hits form where `hits_in_pool` is recorded, and `attainment` divides by
+  that attainable ceiling rather than by 1.0. (The column is `attainment`; an earlier draft of
+  this list called it `normalised_gain`, which the summariser has never written.)
 - A **permuted-outcome control**: outcomes are shuffled before the episode and graded against the
   shuffle, so a learning policy must fall to random. One that does not is scoring on index order
   or tie-breaking.

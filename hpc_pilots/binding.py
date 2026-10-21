@@ -260,10 +260,24 @@ def run_arm(name, landscape=None, pool=0, policy="greedy", delay=0, smoke=False,
     path = ROOT / a.staged(landscape)
     manifest = json.loads((path / "manifest.json").read_text())
     geometry = manifest.get("pool_geometry", {})
-    if a.per_landscape and not geometry.get("disjoint", True):
+    # A landscape staged without pools says so in one of two keys. `pool_geometry` writes
+    # `disjoint` when it built pools and `pooled: False` when it could not, and this tested
+    # only the first -- so the one landscape that is genuinely unreplayable fell straight
+    # through to indexing an empty split and died with a bare IndexError, while the geometry
+    # was carrying a `reason` string written to explain exactly that.
+    unpooled = geometry.get("pooled") is False or not geometry.get("disjoint", True)
+    if a.per_landscape and unpooled:
         raise ValueError(f"{landscape} was staged without pools and cannot be replayed; "
                          f"{geometry.get('reason', '')}")
-    split = np.load(path / "splits.npz")["evaluation"][pool]
+    splits = np.load(path / "splits.npz")["evaluation"]
+    # Checked rather than indexed. A geometry key nobody anticipated would otherwise reach
+    # the same IndexError by a different route, and a missing pool is a staging fact worth
+    # naming rather than an array error to be traced back.
+    if pool >= len(splits):
+        raise ValueError(f"{landscape} was staged with {len(splits)} evaluation pools; "
+                         f"pool {pool} does not exist. "
+                         f"{geometry.get('reason', '')}".strip())
+    split = splits[pool]
     features = np.load(path / "features.npy")[split]
     hidden = pd.read_csv(path / "outcomes.csv",
                          usecols=[a.outcome_column])[a.outcome_column].to_numpy()[split]

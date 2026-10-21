@@ -202,6 +202,12 @@ def generate(name, seed, attempts=400, now=3):
         states.append({"index": index, "family_packet": name, "state_family": family,
                        "decision_round": now, "observed": [list(k) for k in sorted(observed)],
                        "observed_count": len(observed),
+                       # The denominator scarcity has to be read against. Packets hold 33, 17
+                       # and 9 claims, so twelve observed claims is a third of one packet and
+                       # all but nothing of another; a curve plotted on the raw count would
+                       # compare three different quantities on one axis.
+                       "pool_claims": len(keys),
+                       "observed_share": round(len(observed) / len(keys), 4),
                        "retrievable": [list(k) for k in sorted(grades)],
                        "grades": {f"{t}|{a}": g for (t, a), g in sorted(grades.items())},
                        "optimal": [list(k) for k in optimal],
@@ -455,6 +461,10 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
                          f"{ceiling}, recomputed {recomputed_ceiling}")
     return {"family_packet": name, "state_family": state["state_family"],
             "state_index": state["index"], "observed_count": state["observed_count"],
+            # The scarcity axis travels with every probe. The raw count is not comparable
+            # across packets -- they hold 33, 17 and 9 claims -- so the share is what a curve
+            # is plotted against and the count is kept beside it for readability.
+            "observed_share": state["observed_share"], "pool_claims": state["pool_claims"],
             "decision_round": now, "policy": policy, "action": action,
             "target": target, "axis": axis,
             "retrieved": bought,
@@ -485,6 +495,64 @@ def _rate(rows, key):
 def _mean(rows, key):
     kept = [r[key] for r in rows if r.get(key) is not None]
     return None if not kept else round(sum(kept) / len(kept), 4)
+
+
+def curve(rows, bins=4):
+    """Attainment as a function of how much evidence exists, rather than averaged over it.
+
+    The brief committed to this before any result existed -- S3 asks for "budget-quality
+    curves" and for evidence completeness to be varied "separately" -- and it was never
+    built. Averaging over the sampling band answers a question nobody asked: the operating
+    condition is that there is almost no evidence for the target that matters, and what
+    matters is whether decisions degrade gracefully as that bites.
+
+    Two trends are reported and the second is not optional. Attainment is already scaled per
+    state between the average purchase on offer and the best one, but the **leader-first
+    ceiling itself moves with scarcity**: a nearly-empty dossier leaves every target tied, so
+    buying on the leader is buying on everything. If attainment and the ceiling move together
+    the policy is not getting better or worse -- the problem is -- and reporting only the
+    first would read a change in the instrument as a change in the agent.
+
+    The trend is a rank correlation over individual probes, not over bins, so no binning
+    choice can tune it. The bins exist to be read, and their count is reported with each.
+    """
+    from scipy.stats import spearmanr
+
+    scored = [r for r in rows if r.get("attainment") is not None
+              and r.get("observed_share") is not None]
+    if len(scored) < 8:
+        return {"probes": len(scored), "trend": None, "bins": [],
+                "note": "too few scored probes to fit a trend"}
+
+    def trend(key):
+        xs = [r["observed_share"] for r in scored]
+        ys = [r[key] for r in scored if r.get(key) is not None]
+        if len(ys) != len(xs) or len(set(ys)) < 2:
+            return None
+        result = spearmanr(xs, ys)
+        return {"rho": round(float(result.statistic), 4),
+                "p": round(float(result.pvalue), 5), "n": len(xs)}
+
+    ordered = sorted(scored, key=lambda r: r["observed_share"])
+    width = max(1, len(ordered) // bins)
+    grouped = [ordered[i:i + width] for i in range(0, len(ordered), width)][:bins]
+    return {"probes": len(scored),
+            "trend": trend("attainment"),
+            # The control. A ceiling that moves with scarcity means the problem changed, not
+            # the policy, and the two trends have to be read against each other.
+            "ceiling_trend": trend("leader_ceiling_attainment"),
+            "bins": [{"observed_share": [round(g[0]["observed_share"], 4),
+                                         round(g[-1]["observed_share"], 4)],
+                      "observed_count": [g[0]["observed_count"], g[-1]["observed_count"]],
+                      "probes": len(g),
+                      "attainment": _mean(g, "attainment"),
+                      "leader_first_ceiling": _mean(g, "leader_ceiling_attainment"),
+                      "exceeded_ceiling_rate": _rate(g, "exceeded_leader_ceiling")}
+                     for g in grouped],
+            "interpretation": "Attainment against the share of the packet's claims already "
+                              "observed. Read the trend against `ceiling_trend`: if both move "
+                              "together the decision problem got easier or harder, and only a "
+                              "divergence between them is about the policy."}
 
 
 def summarise(probes):
@@ -540,6 +608,11 @@ def summarise(probes):
             "mean_chance_grade": _mean(rows, "chance_grade"),
             "bought_on_leader_rate": _rate(rows, "chose_leader"),
             "offered_rate": _rate(rows, "chosen_offered")}
+    # Per stratum, because the hard stratum is where scarcity is supposed to bite and the
+    # easy one is the control that the probe stayed answerable as evidence thinned.
+    out["by_scarcity"] = {family: curve([p for p in probes
+                                         if p["state_family"] == family])
+                          for family in FAMILIES}
     lead = out["leader_best"]["attainment"]
     challenge = out["challenger_best"]["attainment"]
     out["contrast"] = {

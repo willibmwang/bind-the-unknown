@@ -190,9 +190,24 @@ the enrichment library — it is harmful: 0.027 against random's 0.267, worse in
 pools, p = 0.0001 in the wrong direction. It spends the whole budget away from the hits. On
 the activity library it is indistinguishable from random instead.
 
-**The surrogate has no discriminative power at the smallest budget.** At eight labels every
-policy returns identical recall, on both libraries and on every other arm — 21 of 105 rows in
-the gain table. Those rows carry no policy information and now say so on their face.
+**The eight-label row is recorded before any policy acts, and is not about the surrogate.**
+This section previously read "the surrogate has no discriminative power at the smallest
+budget", on the grounds that every policy returns identical recall at eight labels in 21 of
+105 rows of the gain table. The identity is real; the attribution was wrong. `replay` calls
+`snapshot()` before the acquisition loop opens, so the eight-label record is the shared random
+initialisation — `round: 0`, while the first acquisition is `round: 1` — taken before any
+`pick_batch` call has executed. Every policy agrees there by construction at every seed, which
+is the property `test_all_policies_still_open_from_identical_observations` exists to pin, and
+it says nothing whatever about the surrogate's power.
+
+The genuine smallest decision budget is **sixteen** labels: one batch of eight chosen by a
+policy, with the surrogate fitted on eight. Measured there, the largest paired gain over
+random on any landscape is **+0.0225**; signal emerges at thirty-two and is substantial by
+sixty-four. The clause that survives is the last one — those rows carry no policy information
+— and it is now pinned by a test rather than asserted.
+
+This is the fourth claim of the same shape to be withdrawn here: a quantity a feedback-blind
+policy reproduces by arithmetic, reported as a measurement. The others are in §4.2.
 
 ### 4.2 Three claims withdrawn
 

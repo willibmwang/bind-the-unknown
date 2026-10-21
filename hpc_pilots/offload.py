@@ -275,9 +275,21 @@ def _pinned_model():
     second copy of the revision here would be a second thing to keep in step. Resolving the
     revision from whatever is current on the Hub is the specific failure that pin was written
     to prevent.
+
+    The path is resolved against two candidates because this function runs in two places.
+    Modal copies the entry-point module to the container root, so `__file__`'s parent is the
+    package directory on the driver and `/root` inside the container, while the package
+    itself is added at `/root/hpc_pilots` -- a path derived from `__file__` alone is therefore
+    correct in one of the two and wrong in the other, which is how the first staging attempt
+    failed looking for `/root/model.manifest.json`.
     """
-    manifest = json.loads((HERE / "model.manifest.json").read_text())
-    return manifest["repo"], manifest["revision"]
+    for candidate in (HERE / "model.manifest.json",
+                      pathlib.Path("/root/hpc_pilots/model.manifest.json")):
+        if candidate.exists():
+            return (lambda m: (m["repo"], m["revision"]))(
+                json.loads(candidate.read_text()))
+    raise FileNotFoundError("model.manifest.json is not beside this module nor at "
+                            "/root/hpc_pilots; the committed model pin cannot be read")
 
 
 @app.function(image=VLLM_IMAGE, volumes={"/weights": WEIGHTS}, timeout=3600, cpu=4.0)

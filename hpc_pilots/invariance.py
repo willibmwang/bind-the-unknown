@@ -172,12 +172,17 @@ def _aliases(target):
     return {o for o in out if len(o) > 1}
 
 
-def lexicon(name):
-    """Every declared identifying token for a packet, longest first.
+def lexicon(name, declared=True):
+    """Every identifying token for a packet, longest first.
 
     Order matters: substitution is sequential, so `nsp10/nsp16 interface` has to be replaced
     before `nsp16`, or the longer name is left as a half-scrubbed hybrid of a code and a
     fragment. Sorting by descending length is what makes the sequence confluent.
+
+    `declared=False` returns only the tokens recoverable from the packet itself -- the target
+    names and their aliases, the pathogen, the family and the source strings -- and omits the
+    hand-curated extras in `IDENTIFYING`. That subset is what a floor can be derived from for
+    a packet nobody has curated a count for.
     """
     spec = PACKETS[name]
     tokens = {spec["family"], spec["pathogen"]}
@@ -185,8 +190,28 @@ def lexicon(name):
         tokens |= _aliases(target)
         tokens.add(pathogen)
         tokens.update(entry[3] for entry in axes)
-    tokens.update(IDENTIFYING.get(name, ()))
+    if declared:
+        tokens.update(IDENTIFYING.get(name, ()))
     return sorted((t for t in tokens if t), key=lambda t: (-len(t), t))
+
+
+def lexicon_floor(name):
+    """The committed floor for a packet, or one derived from the packet's own structure.
+
+    This was `LEXICON_FLOOR.get(name, 0)`, which makes the check `len(declared) >= 0` -- true
+    for every input. So the guard was vacuous for every packet the table does not name, which
+    is the regression the floor exists to prevent, re-opened by default: the auditor would
+    report a clean scrub it had not performed. The three curated packets have zero slack
+    against their committed floors, so the omission was invisible as long as only they ran.
+
+    A packet with no committed floor gets a floor derived from the tokens its own structure
+    implies. That cannot catch a shrunken `IDENTIFYING` the way a committed count can, because
+    the derived floor shrinks with it, so the two are not interchangeable and `certify`
+    records which was in force rather than leaving a reader to assume the stronger one.
+    """
+    if name in LEXICON_FLOOR:
+        return LEXICON_FLOOR[name], "committed"
+    return len(lexicon(name, declared=False)), "derived from the packet's own tokens"
 
 
 def _codes(name, rng):
@@ -434,15 +459,19 @@ def certify(name, relabelling, deadline=8):
         if relabelling.kind == "identity" else {}
 
     declared = lexicon(name)
+    floor, floor_source = lexicon_floor(name)
     checks = {"reference_ranking_is_the_image": ranking_ok,
               "relevant_set_is_the_image": base_relevant == moved_relevant,
               "no_declared_token_survives": not scrub,
-              "lexicon_is_not_smaller_than_its_committed_floor":
-                  len(declared) >= LEXICON_FLOOR.get(name, 0)}
+              "lexicon_is_not_smaller_than_its_floor": len(declared) >= floor}
     return {"element": relabelling.record(), "family_packet": name, "checks": checks,
             "certified": all(checks.values()),
             "declared_tokens": len(declared),
-            "declared_tokens_floor": LEXICON_FLOOR.get(name, 0),
+            "declared_tokens_floor": floor,
+            # Which guard was in force. A derived floor shrinks with the table it audits, so
+            # it cannot catch an emptied `IDENTIFYING` the way a committed count can, and a
+            # reader must be able to tell the two apart.
+            "declared_tokens_floor_source": floor_source,
             "surviving_tokens": scrub,
             "relevant_set_size": len(moved_relevant),
             "relevant_set_expected": len(base_relevant),

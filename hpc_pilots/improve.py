@@ -457,11 +457,16 @@ def guard_summary_reproduces_from_its_probes(packet="coronaviridae", attempts=25
     a thinned sample -- and each moved the headline while `purchases` and `declined_to_buy`
     kept printing their old values. The file carried everything needed to catch all three.
     """
+    from .twins import FAMILIES
+
     result = run_twins(packet, "rubric", attempts=attempts)
     reasons = []
-    for family, row in result["summary"].items():
-        if family == "contrast":
-            continue
+    # Iterated over the declared strata rather than over every key in the summary. Skipping
+    # one known extra key by name meant the guard broke the moment the summary grew another:
+    # adding the scarcity curves put a `by_scarcity` block beside the strata and the guard
+    # read it as one, which is a guard failing on a change that was not a hack.
+    for family in FAMILIES:
+        row = result["summary"][family]
         rows = [p for p in result["probes"] if p["state_family"] == family]
         scored = [p["attainment"] for p in rows if p["attainment"] is not None]
         if row["probes"] != len(rows):

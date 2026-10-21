@@ -20,7 +20,14 @@ from .dossier import AXES, Dossier, evidence
 INTERNAL = "W4 target-selection write-up; proposal pending Askar/SynX review"
 PG = "ProteinGym v1.3 archive verified present in data/raw/proteingym_v1.3.zip"
 
-# target -> (pathogen, family, compartment, [(axis, strength, claim, source, verified, round)])
+# target -> (pathogen, compartment, [(axis, strength, claim, source, verified, round)])
+#
+# Three positions, not four: `family` is a packet-level key and has no per-target slot. The
+# comment said otherwise for as long as this table existed, which matters now that something
+# other than a human may write one -- every consumer destructures a 3-tuple positionally
+# (`invariance` additionally reads `entry[3]` for the source), so the arity and the order are
+# load-bearing. Note also that the axis tuple is strength-then-claim while `evidence()` takes
+# claim-then-strength; `packet` reorders them.
 PACKETS = {
     "coronaviridae": {
         "family": "Coronaviridae",
@@ -141,12 +148,29 @@ PROBES = {
 
 
 def packet(name):
-    """Build the dossiers and the release timeline for one family."""
+    """Build the dossiers and the release timeline for one family.
+
+    At most one base entry per `(target, axis)`, enforced rather than assumed. Every consumer
+    builds the retrievable pool as `{(target, axis): entry}`, so a second entry on the same
+    pair silently replaces the first: the dossier still observes both and `assess` still sees
+    both, but only one of them is ever purchasable, and the count of offered claims quietly
+    disagrees with the count of authored ones. All eleven hand-written targets happen to
+    satisfy this, which is why it never surfaced; a generated packet has no such luck.
+
+    Intra-axis contradiction belongs in `PROBES`, which is dated and so enters the pool on a
+    release schedule rather than competing for the same opening key.
+    """
     spec = PACKETS[name]
     dossiers, entries = [], []
     for target, (pathogen, compartment, axes) in spec["targets"].items():
         dossiers.append(Dossier(target, pathogen, spec["family"], compartment))
+        seen = set()
         for axis, strength, claim, source, verified, round_ in axes:
+            if axis in seen:
+                raise ValueError(f"{name}/{target} carries two base entries on {axis!r}; the "
+                                 f"retrievable pool is keyed on (target, axis) and the second "
+                                 f"would replace the first unseen")
+            seen.add(axis)
             entries.append((target, evidence(f"{target}:{axis}", axis, claim, strength,
                                              source, round_, verified)))
     probes = []

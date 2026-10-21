@@ -8,7 +8,8 @@ import pytest
 from hpc_pilots.__main__ import main as cli_main
 from hpc_pilots.arms import ARMS
 from hpc_pilots import surrogates
-from hpc_pilots.binding import (design_matrix, enrichment, pick_batch, replay, run_binding)
+from hpc_pilots.binding import (design_matrix, enrichment, pick_batch, replay, run_arm,
+                                run_binding)
 from hpc_pilots.calibration import calibration_metrics, trajectory
 from hpc_pilots.chemistry import alphabet, encode, library_spec, registry, sample_library
 from hpc_pilots.common import ROOT
@@ -22,6 +23,7 @@ from hpc_pilots.monitor import audit_rule_robustness, packet_verdict, run_monito
 from hpc_pilots.monomers import (MODELS, _standardise, absence_flags, encode as encode_monomers, holdout,
                                  load, transfer)
 from hpc_pilots.invariance import (IDENTIFYING, KINDS, LEXICON_FLOOR, Relabelling, certify,
+                                   lexicon_floor,
                                    earned, group, leaks, lexicon, relabel_packet,
                                    residual_candidates,
                                    run_orbit,
@@ -1216,7 +1218,9 @@ def test_the_identity_lexicon_cannot_shrink_and_cannot_name_a_packet_that_does_n
     # certification passes with no surviving tokens while eleven names reach the state.
     # Checked against a committed floor instead.
     for name in PACKETS:
-        assert len(lexicon(name)) >= LEXICON_FLOOR[name], name
+        floor, source = lexicon_floor(name)
+        assert len(lexicon(name)) >= floor, (name, floor)
+        assert source == "committed", (name, source)
         assert certify(name, group(name, "identity", 20261021, 1)[0])["certified"], name
     # And the table was first written with an entry for `filoviridae`, which is not a packet,
     # while `henipavirus` had none -- so that packet scrubbed five tokens and left `Nipah`,
@@ -1373,3 +1377,160 @@ def test_capping_the_probe_count_keeps_whole_pairs():
         assert leader == challenger, (cap, leader, challenger)
         assert leader + challenger <= cap + 1, (cap, leader, challenger)
         assert leader > 0, cap
+
+
+def test_a_packet_cannot_carry_two_base_entries_on_one_axis():
+    # Every consumer builds the retrievable pool as {(target, axis): entry}, so a second entry
+    # on the same pair silently replaces the first: the dossier observes both and `assess` sees
+    # both, but only one is ever purchasable and the count of offered claims quietly disagrees
+    # with the count authored. All eleven hand-written targets happen to satisfy this, which is
+    # why it never surfaced -- measured, a duplicated axis turns five entries into four pool
+    # keys. A generated packet has no such luck, so the invariant is enforced rather than
+    # assumed.
+    from hpc_pilots import targets as targets_module
+
+    spec = targets_module.PACKETS["henipavirus"]
+    target, (pathogen, compartment, axes) = next(iter(spec["targets"].items()))
+    doubled = {**spec, "targets": {target: (pathogen, compartment,
+                                            list(axes) + [axes[0]])}}
+    targets_module.PACKETS["doubled-axis"] = doubled
+    try:
+        with pytest.raises(ValueError, match="two base entries"):
+            packet("doubled-axis")
+    finally:
+        del targets_module.PACKETS["doubled-axis"]
+    # The real packets satisfy it, so enforcing it changes nothing recorded.
+    for name in PACKETS:
+        _, _, entries, _ = packet(name)
+        keys = [(t, e["axis"]) for t, e in entries]
+        assert len(keys) == len(set(keys)), name
+
+
+def test_the_identity_audit_has_a_floor_for_a_packet_nobody_curated():
+    # `LEXICON_FLOOR.get(name, 0)` made the check `len(declared) >= 0` -- true for every
+    # input -- so the guard was vacuous for every packet the table does not name, which is the
+    # regression the floor exists to prevent. The three curated packets have zero slack against
+    # their committed floors, so the omission was invisible while only they ran.
+    from hpc_pilots import targets as targets_module
+
+    for name in PACKETS:
+        floor, source = lexicon_floor(name)
+        assert source == "committed", name
+        assert floor > 0
+
+    targets_module.PACKETS["uncurated"] = {
+        "family": "Fam", "pathogen": "Org", "prototype_rationale": "x",
+        "targets": {"A": ("Org", "extracellular",
+                          [("essentiality", "strong", "a claim", "src-one", True, 0)])}}
+    try:
+        floor, source = lexicon_floor("uncurated")
+        assert floor > 0, "an uncurated packet must not fall back to a floor of zero"
+        assert source.startswith("derived")
+        # And the certificate says which guard ran, because a derived floor shrinks with the
+        # table it audits and so cannot catch an emptied IDENTIFYING the way a committed one can.
+        certificate = certify("uncurated", group("uncurated", "identity", 20261021, 1)[0])
+        assert certificate["declared_tokens_floor_source"].startswith("derived")
+        assert certificate["checks"]["lexicon_is_not_smaller_than_its_floor"]
+    finally:
+        del targets_module.PACKETS["uncurated"]
+
+
+def test_the_scarcity_curve_is_read_against_a_ceiling_that_moves_with_it():
+    # The brief committed to "budget-quality curves" and to varying evidence completeness
+    # "separately", and it was never built: every figure averaged over the sampling band.
+    #
+    # The control is the point. Attainment is already scaled per state between the average
+    # purchase on offer and the best one, but the leader-first ceiling moves with scarcity
+    # too, so reporting only the policy's trend would read a change in the problem as a change
+    # in the agent. For the fixed rubric the two trends are *identical*, because the rubric is
+    # the ceiling -- which is the internal check that the control is wired to the right thing.
+    curves = run_twins("orthomyxoviridae", "rubric", attempts=400)["summary"]["by_scarcity"]
+    hard = curves["challenger_best"]
+    assert hard["probes"] > 50
+    assert hard["trend"]["rho"] == hard["ceiling_trend"]["rho"], "the rubric is the ceiling"
+    # Not flat: scarcity is an operative variable rather than a framing device.
+    assert abs(hard["trend"]["rho"]) > 0.1 and hard["trend"]["p"] < 0.05
+
+    # A state-blind policy diverges from the ceiling, so there is something for the contrast
+    # to measure rather than two restatements of the same quantity.
+    blind = run_twins("orthomyxoviridae", "scripted",
+                      attempts=400)["summary"]["by_scarcity"]["challenger_best"]
+    assert blind["trend"]["rho"] != blind["ceiling_trend"]["rho"]
+
+    # The bins span a real range of evidence availability and carry their own n.
+    shares = [b["observed_share"] for b in hard["bins"]]
+    assert len(hard["bins"]) >= 3
+    assert shares[0][0] < shares[-1][1]
+    assert all(b["probes"] > 5 for b in hard["bins"])
+
+
+def test_the_leader_first_ceiling_decays_as_evidence_accumulates():
+    # The direction is the opposite of the intuition the plan was written with, so it is
+    # pinned rather than left to be re-derived. More observed evidence lowers the leader-first
+    # ceiling: as the leading target's axes fill in, a policy that only buys on the leader
+    # runs out of purchases that move anything. Measured, the headroom between the best and
+    # the average purchase stays roughly flat across the band (1.27 -> 1.14 on this packet),
+    # so the decay is in what the leader has left to offer, not in the problem's difficulty.
+    #
+    # The consequence for the framing: the data-poor regime is where leader-fixation is
+    # cheapest, and the cost of a bad decision policy shows up as evidence arrives.
+    states, _ = generate("orthomyxoviridae", 20261021, attempts=400)
+    hard = [s for s in states if s["state_family"] == "challenger_best"]
+    sparse = [s for s in hard if s["observed_share"] < 0.3]
+    rich = [s for s in hard if s["observed_share"] > 0.5]
+    assert len(sparse) > 20 and len(rich) > 20
+
+    def mean(rows, key):
+        return sum(key(r) for r in rows) / len(rows)
+
+    headroom = (mean(sparse, lambda s: s["best_grade"] - s["chance_grade"]),
+                mean(rich, lambda s: s["best_grade"] - s["chance_grade"]))
+    assert abs(headroom[0] - headroom[1]) < 0.5, headroom
+    # And the lead is already decided in this stratum at both ends, so the decay is not a
+    # tie-breaking artifact.
+    assert mean(sparse, lambda s: len(s["tied_for_lead"])) == 1.0
+    assert mean(rich, lambda s: len(s["tied_for_lead"])) == 1.0
+
+
+def test_the_smallest_checkpoint_is_recorded_before_any_policy_acts():
+    # A fourth claim of the same genus as the three already withdrawn, and the reason this
+    # test exists rather than a comment. The overview reports "the surrogate has no
+    # discriminative power at the smallest budget -- at eight labels every policy returns
+    # identical recall, 21 of 105 rows in the gain table". The identity is real and the
+    # attribution is wrong: `snapshot()` is called before the acquisition loop opens, so the
+    # eight-label row is the shared random initialisation recorded before any `pick_batch`
+    # call has executed. Every policy agrees there by construction at every seed, which says
+    # nothing whatever about the surrogate.
+    #
+    # The genuine smallest decision budget is 16 -- one batch of eight chosen by a policy,
+    # with the surrogate fitted on eight labels.
+    rng = np.random.default_rng(7)
+    x = rng.integers(0, 20, size=(512, 4))
+    y = rng.normal(size=512)
+    shared = dict(maximum=32, checkpoints=(8, 16, 32), fraction=0.05)
+    runs = {p: replay(x, y, p, 11, **shared) for p in ("random", "diverse", "greedy", "ucb")}
+
+    # The first record predates the loop: round 0, while the first acquisition is round 1.
+    for policy, out in runs.items():
+        assert out["metrics"][0]["round"] == 0, policy
+        assert out["metrics"][0]["labels"] == 8, policy
+        assert out["trace"][0]["round"] == 1, policy
+    # So it is identical across policies, and that is arithmetic rather than a measurement.
+    first = {round(out["metrics"][0]["top_recall"], 10) for out in runs.values()}
+    assert len(first) == 1, "the pre-loop snapshot must agree across policies"
+    # And the acquisitions themselves do differ once a policy has acted, so the agreement
+    # above is not evidence that the policies are the same.
+    selections = {p: tuple(out["trace"][0]["selected"]) for p, out in runs.items()}
+    assert len(set(selections.values())) > 1, selections
+
+
+def test_a_landscape_staged_without_pools_says_so_instead_of_indexing_an_empty_split():
+    # `pool_geometry` writes `disjoint` when it built pools and `pooled: False` when it could
+    # not. The guard tested only the first, so the one landscape that genuinely cannot be
+    # replayed fell through to indexing a (0, 0) split and died with a bare IndexError --
+    # while its geometry carried a `reason` string written to explain precisely that.
+    with pytest.raises(ValueError, match="without pools|does not exist"):
+        run_arm("display", "il17c_bioactivity", 0, "greedy")
+    # A pool beyond what was staged is named rather than traced back from an array error.
+    with pytest.raises(ValueError, match="does not exist"):
+        run_arm("display", "thrombin_cyclic", 999, "greedy")
