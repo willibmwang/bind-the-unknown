@@ -195,6 +195,7 @@ def monomer_grid(landscape: str = "thrombin_cyclic", counts: str = "2,4,6,9,12",
     import sys
 
     sys.path.insert(0, str(ROOT))
+    from hpc_pilots.common import write_json
     from hpc_pilots.streams import stream_int
 
     sizes = [int(c) for c in counts.split(",") if c]
@@ -214,7 +215,20 @@ def monomer_grid(landscape: str = "thrombin_cyclic", counts: str = "2,4,6,9,12",
                                   "tied_rate": r["paired"]["tied_rate"],
                                   "concordance": r["paired"]["concordance"]}
                                  for r in result["results"]}})
-    print(json.dumps({"draws": len(rows)}, indent=2))
+    # Written, not only printed. The first run of this did twenty-five draws and persisted
+    # nothing -- every cell was dispatched with `record=False` so it would not write
+    # twenty-five near-identical per-draw files, and the summary was then left in a log. A
+    # sweep whose result exists only in a terminal buffer has to be re-run to be read, which
+    # is the opposite of why it was run remotely.
+    output = ROOT / f"runs/monomers/{landscape}_grid.json"
+    write_json(output, {"experiment": "monomer-transfer-grid", "landscape": landscape,
+                        "sizes": sizes, "replicates": replicates, "draws": len(rows),
+                        "unit_of_analysis": "the held-out monomer set; a split is one "
+                                            "observation however many members it contains",
+                        "hosts": sorted({r["host"] for r in rows}),
+                        "status": "complete", "rows": rows})
+    print(json.dumps({"output": str(output), "draws": len(rows),
+                      "hosts": sorted({r["host"] for r in rows})}, indent=2))
     return rows
 
 
