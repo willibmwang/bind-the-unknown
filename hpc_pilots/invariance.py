@@ -504,7 +504,7 @@ def axis_gate(dossiers, pool, retrieved, now):
 ORBIT_SCORES = ("challenger_best", "leader_best")
 
 
-def run_orbit(name, policy, count=4, attempts=400, kinds=KINDS, smoke=False):
+def run_orbit(name, policy, count=4, attempts=400, kinds=KINDS, smoke=False, limit=None):
     """Probe one policy over a whole nuisance orbit and split its score into earned and supplied.
 
     Each element is certified before it is run, and an element that fails certification stops
@@ -532,7 +532,7 @@ def run_orbit(name, policy, count=4, attempts=400, kinds=KINDS, smoke=False):
             # The null element is the identity transformation, so it is run with no
             # relabelling at all rather than with an empty substitution table, which would
             # take a different code path to reach the same instance.
-            result = run_twins(name, policy, attempts=attempts, smoke=smoke,
+            result = run_twins(name, policy, attempts=attempts, smoke=smoke, limit=limit,
                                relabelling=None if kind == "null" else element)
             for score in ORBIT_SCORES:
                 orbits[score][kind].append(result["summary"][score]["attainment"])
@@ -544,6 +544,7 @@ def run_orbit(name, policy, count=4, attempts=400, kinds=KINDS, smoke=False):
                            orbits[score]) for score in ORBIT_SCORES}
     out = {"experiment": "orbit", "family_packet": name, "policy": policy,
            "elements_per_kind": 2 if smoke else count, "kinds": list(kinds),
+           "probes_per_element": limit,
            "smoke": smoke, "status": "complete",
            "earned": split, "runs": runs,
            "provenance": provenance(),

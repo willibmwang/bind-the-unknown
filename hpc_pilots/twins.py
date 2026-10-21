@@ -450,8 +450,15 @@ def run_twins(name, policy, seed=None, attempts=400, limit=None, smoke=False,
     states, counts = generate(name, seed, attempts=16 if smoke else attempts, now=now)
     pairs, unmatched = pair(states, seed)
     paired = [s for p in pairs for s in (p["challenger_best"], p["leader_best"])]
-    if limit:
-        paired = paired[:limit]
+    if limit and limit < len(paired):
+        # Sampled, not truncated. `pair` emits in ascending observed-count order, so a prefix
+        # would keep only the states with the fewest claims observed -- where the decision is
+        # most open and the chance floor highest -- and would do so identically for every
+        # element of an orbit, biasing every arm the same way and hiding it. The draw is keyed
+        # on the packet and the limit alone, so each orbit element keeps the same states.
+        chosen = stream(seed, "twin-limit", limit).choice(len(paired), size=limit,
+                                                          replace=False)
+        paired = [paired[int(i)] for i in sorted(chosen)]
 
     agent = Agent() if policy == "agent" else None
     key = answer_key(name, seed, 16 if smoke else attempts, now) \

@@ -23,11 +23,23 @@ discriminate among unseen monomers is zero and cannot be improved by more data o
 kind. `paired_discrimination` measures it and the expected answer is a tied-prediction rate
 of 1.0.
 
-**The empirical half.** A model whose per-position features are the monomer's measured
-structure -- molecular weight, logP, polar surface area, donors, acceptors, rotatable bonds,
-rings, aromaticity, heavy atoms, sp3 fraction -- places an unseen monomer in the same space as
-the seen ones and can interpolate. Whether that interpolation actually ranks held-out members
-better is a question about this landscape, and it can come back null.
+**The empirical half, which is a null.** A model whose per-position features are the
+monomer's measured structure -- molecular weight, logP, polar surface area, donors,
+acceptors, rotatable bonds, rings, aromaticity, heavy atoms, sp3 fraction -- places an unseen
+monomer in the same space as the seen ones and can interpolate. It does: every descriptor arm
+separates the pairs the vocabulary cannot. It separates them at chance. Concordance among
+those pairs is 0.46 to 0.52 across holdout sizes with a draw-to-draw deviation near 0.03,
+and the shuffled control sits at 0.50 to 0.52 -- indistinguishable at every size.
+
+Resampling is what settled it, and it had to, because the unit of analysis is the held-out
+*set*: removing a monomer removes every member containing it, so a split is one observation
+however many thousand rows it has. A single draw per size reported a monotone decline in
+held-out Spearman from 0.435 to 0.164 and an ordering at twelve monomers held out in which
+the shuffled arm (0.354) beat the real descriptors (0.229) which beat the vocabulary (0.164).
+Five draws per size overturn all of that: the means are 0.42, 0.24, 0.34, 0.29, 0.29 -- not
+monotone -- and at twelve the vocabulary is nominally *highest* at 0.293 +/- 0.066 against
+0.255 +/- 0.048 and 0.217 +/- 0.150, with every gap inside one deviation across draws. Both
+of those first readings were draw noise.
 
 **The control that decides whether chemistry is doing the work.** A descriptor model could
 beat a vocabulary model for reasons unrelated to chemistry: sixty-six continuous columns
@@ -279,7 +291,7 @@ def paired_discrimination(features, outcomes, predictions, vocabularies, held, p
 
 
 def transfer(landscape="thrombin_cyclic", held_count=6, seed=20261021, budget=128,
-             control=None):
+             control=None, record=True):
     """Fit every encoder and model on a monomer-wise split and score the held-out members.
 
     `control="permuted"` shuffles the outcomes before fitting and grades against the shuffle,
@@ -344,10 +356,15 @@ def transfer(landscape="thrombin_cyclic", held_count=6, seed=20261021, budget=12
                "comparison is within this landscape and is not a benchmark-breadth claim.",
                "Members are not independent replicates; they are draws from one combinatorial "
                "library measured in one campaign."]}
+    # `record=False` for the later draws of a resampled size, so a sweep does not write five
+    # files per size that differ only in which monomers were held back. The draw is still in
+    # the sweep's own summary, with the set it used named there.
     suffix = f"_{control}" if control else ""
     output = ROOT / "runs/monomers" / f"{landscape}_held{len(held):02d}{suffix}.json"
-    write_json(output, out)
-    print(json.dumps({"output": str(output), "held_out_monomers": held,
+    if record:
+        write_json(output, out)
+    print(json.dumps({"output": str(output) if record else None,
+                      "held_out_monomers": held,
                       "train_members": out["train_members"],
                       "test_members": out["test_members"],
                       "results": [{k: r[k] for k in ("encoder", "model", "held_out_spearman",
@@ -358,30 +375,82 @@ def transfer(landscape="thrombin_cyclic", held_count=6, seed=20261021, budget=12
     return out
 
 
-def run_monomers(landscape="thrombin_cyclic", counts=(2, 4, 6, 9, 12), seed=20261021,
-                 controls=True, smoke=False):
-    """Sweep the held-out monomer count, which is the axis the claim is about.
+def _moments(values):
+    kept = [v for v in values if v is not None]
+    if not kept:
+        return None
+    mean = sum(kept) / len(kept)
+    spread = (sum((v - mean) ** 2 for v in kept) / (len(kept) - 1)) ** 0.5 \
+        if len(kept) > 1 else None
+    return {"n": len(kept), "mean": round(mean, 4), "min": round(min(kept), 4),
+            "max": round(max(kept), 4), "sd": None if spread is None else round(spread, 4)}
 
-    One holdout size cannot distinguish a representation that transfers from one that
-    happened to suit a split. The quantity to read is how each encoder degrades as more of the
-    alphabet becomes unseen: a vocabulary model's structural ceiling does not move with it,
-    because its tied-prediction rate is 1.0 at every size.
+
+def run_monomers(landscape="thrombin_cyclic", counts=(2, 4, 6, 9, 12), seed=20261021,
+                 replicates=5, controls=True, smoke=False):
+    """Sweep the held-out monomer count, resampling the held-out set at each size.
+
+    The axis the claim is about is how each encoder degrades as more of the alphabet becomes
+    unseen. One draw per size cannot support that, and the unit of analysis is the reason: a
+    held-out *set* is the thing being resampled, not a member and not a monomer, because
+    removing a monomer removes every member containing it and the resulting split is one
+    observation however many thousand rows it has. Thirty variable monomers admit many
+    distinct sets of six, and two of them can differ in how much of the library they take and
+    in whether the removed blocks were chemically alike.
+
+    So each size is drawn `replicates` times from independent streams and the spread across
+    draws is reported. Without it a difference between two encoders at one size cannot be
+    told from the difference between two draws at that size -- which is the form the
+    objection takes, and it is a fair one.
+
+    The structural claim is the one to read in the `min` and `max` rather than the mean: a
+    vocabulary encoding's tied-prediction rate should be exactly 1.0 in *every* draw, because
+    it follows from the encoding and not from the sample.
     """
     sizes = (2, 4) if smoke else counts
-    runs = [transfer(landscape, count, seed) for count in sizes]
+    draws = 2 if smoke else replicates
+    runs = []
+    for count in sizes:
+        for replicate in range(draws):
+            runs.append(transfer(landscape, count,
+                                 stream_int(seed, "holdout-replicate", replicate),
+                                 record=replicate == 0))
     if controls:
         runs += [transfer(landscape, max(sizes), seed, control="permuted")]
-    summary = [{"held_out_count": r["held_out_count"], "control": r["control"],
-                "test_members": r["test_members"],
-                "by_encoder": {f"{x['encoder']}/{x['model']}":
-                               {"held_out_spearman": x["held_out_spearman"],
-                                "tied_rate": x["paired"]["tied_rate"],
-                                "top_recall": x["selection"]["top_recall"]}
-                               for x in r["results"]}}
-               for r in runs]
+
+    by_cell = {}
+    for run in runs:
+        bucket = (run["held_out_count"], run["control"])
+        for row in run["results"]:
+            key = f"{row['encoder']}/{row['model']}"
+            cell = by_cell.setdefault(bucket, {}).setdefault(key, {
+                "held_out_spearman": [], "tied_rate": [], "top_recall": [], "concordance": []})
+            cell["held_out_spearman"].append(row["held_out_spearman"])
+            cell["tied_rate"].append(row["paired"]["tied_rate"])
+            cell["top_recall"].append(row["selection"]["top_recall"])
+            cell["concordance"].append(row["paired"]["concordance"])
+
+    summary = [{"held_out_count": count, "control": control,
+                "draws": len({id(r) for r in runs if (r["held_out_count"], r["control"])
+                              == (count, control)}),
+                "held_out_sets": sorted({tuple(r["held_out_monomers"]) for r in runs
+                                         if (r["held_out_count"], r["control"])
+                                         == (count, control)}),
+                "by_encoder": {key: {metric: _moments(values)
+                                     for metric, values in cell.items()}
+                               for key, cell in sorted(cells.items())}}
+               for (count, control), cells in sorted(
+                   by_cell.items(), key=lambda kv: (kv[0][0], kv[0][1] or ""))]
+
     output = ROOT / "runs/monomers" / f"{landscape}_sweep.json"
     write_json(output, {"experiment": "monomer-transfer-sweep", "landscape": landscape,
-                        "seed": seed, "sizes": list(sizes), "summary": summary,
-                        "status": "complete", "provenance": provenance()})
-    print(json.dumps({"output": str(output), "summary": summary}, indent=2))
+                        "seed": seed, "sizes": list(sizes), "replicates": draws,
+                        "unit_of_analysis": "the held-out monomer set; a split is one "
+                                            "observation however many members it contains",
+                        "summary": summary, "status": "complete", "provenance": provenance()})
+    print(json.dumps({"output": str(output),
+                      "summary": [{k: s[k] for k in ("held_out_count", "control", "draws")}
+                                  | {"vocabulary_tied_rate":
+                                     s["by_encoder"]["vocabulary/forest"]["tied_rate"]}
+                                  for s in summary]}, indent=2))
     return summary

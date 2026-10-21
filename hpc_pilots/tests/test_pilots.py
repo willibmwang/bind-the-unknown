@@ -1104,3 +1104,30 @@ def test_the_lead_verdict_does_not_depend_on_the_ranking_key_having_three_terms(
         assert set(verdict) == {"tied_for_lead", "hard_gates_met", "substantiated_axes",
                                 "unknown_axes", "decided"}
         assert isinstance(verdict["unknown_axes"], int) and verdict["unknown_axes"] >= 0
+
+
+def test_the_unseen_monomer_result_is_pinned_on_resampled_holdout_sets():
+    # The unit of analysis is the held-out *set*: removing a monomer removes every member
+    # containing it, so a split is one observation however many thousand rows it has. A single
+    # draw per size reported a monotone decline in held-out Spearman and an ordering in which
+    # the shuffled control beat the real descriptors which beat the vocabulary. Five draws
+    # overturned all of it as draw noise. So both halves of the claim are pinned across draws,
+    # not within one.
+    draws = [transfer("thrombin_cyclic", 6, stream_int(20261021, "holdout-replicate", r),
+                      record=False) for r in range(3)]
+    sets = {tuple(d["held_out_monomers"]) for d in draws}
+    assert len(sets) == 3, "the draws must differ or they are one observation repeated"
+
+    for run in draws:
+        by_cell = {(r["encoder"], r["model"]): r for r in run["results"]}
+        # Structural, and so exact in every draw rather than on average.
+        for model in MODELS:
+            assert by_cell[("vocabulary", model)]["paired"]["tied_rate"] == 1.0
+        # Empirical, and so a null: the real descriptors must not beat their own shuffle,
+        # and both sit at chance. A reversal here is the positive result and must be read as
+        # one rather than patched away.
+        for model in MODELS:
+            real = by_cell[("descriptor", model)]["paired"]["concordance"]
+            shuffled = by_cell[("descriptor_shuffled", model)]["paired"]["concordance"]
+            assert abs(real - 0.5) < 0.12, (model, real)
+            assert real - shuffled < 0.12, (model, real, shuffled)
