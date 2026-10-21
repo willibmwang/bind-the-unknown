@@ -17,6 +17,7 @@ from hpc_pilots.common import (Agent, COMMITTED_MODEL_MANIFEST, STAGED_MODEL_MAN
 from hpc_pilots.data import AA, encode_variants, pool_geometry
 from hpc_pilots.dossier import Dossier, evidence, leaders, rank
 from hpc_pilots.emergency import decision_relevant, run_episode
+from hpc_pilots.monitor import packet_verdict, run_monitor
 from hpc_pilots.monomers import (MODELS, _standardise, absence_flags, encode as encode_monomers, holdout,
                                  load, transfer)
 from hpc_pilots.invariance import (KINDS, Relabelling, certify, earned, group, leaks, lexicon,
@@ -941,3 +942,58 @@ def test_a_column_with_one_distinct_value_is_dropped_however_wide_the_matrix_is(
                     for j in range(65)], axis=1).std(axis=0)[0])
     assert deviation > 1e-6 * max(abs(0.667), 1.0), "the deviation test would have passed"
     assert float(column.max() - column.min()) == 0.0, "the extent is exact"
+
+
+def test_the_readout_audit_never_pools_across_packets():
+    # The audit's own regression test. Pooling the spread over packets made
+    # `held_full_ranking_on_irrelevant` look discriminating with a range of 1.0, when both
+    # policies scored identically inside every packet and the entire range was between-packet
+    # variation: 0.0 on Coronaviridae against 1.0 on Henipavirus. That is the error this
+    # codebase forbids everywhere else, committed by the audit that exists to catch it.
+    identical_within_packet = packet_verdict({"rubric": 0.0, "scripted": 0.0}, "floor")
+    assert identical_within_packet["verdict"] == "degenerate"
+    assert identical_within_packet["spread_across_policies"] == 0.0
+    other_packet = packet_verdict({"rubric": 1.0, "scripted": 1.0}, "floor")
+    assert other_packet["verdict"] == "saturated_by_a_trivial_policy"
+    # Neither packet discriminates, so no combination of them may be reported as doing so.
+    assert "discriminating" not in {identical_within_packet["verdict"], other_packet["verdict"]}
+
+
+def test_a_trivial_policy_at_the_ceiling_outranks_a_non_zero_spread():
+    # A readout can separate two trivial policies and still be unusable, because the
+    # separation is all below a ceiling a fixed traversal already reaches and there is no
+    # headroom above it for a better policy to be observed in. This is
+    # `decision_relevant_rate` on Coronaviridae: rubric 1.0, scripted 0.75, spread 0.25.
+    saturated = packet_verdict({"rubric": 1.0, "scripted": 0.75}, "chance_relevant_rate")
+    assert saturated["verdict"] == "saturated_by_a_trivial_policy"
+    assert saturated["spread_across_policies"] == 0.25
+    # Below the ceiling with a computable floor, the same spread is usable. This is the same
+    # readout on Henipavirus, which is why the headline verdict is the best packet and not
+    # the worst: a packet-dependent readout is not a dead one.
+    usable = packet_verdict({"rubric": 0.8, "scripted": 0.5}, "chance_relevant_rate")
+    assert usable["verdict"] == "discriminating"
+    # The same spread with no stated chance level cannot be read on its own.
+    assert packet_verdict({"rubric": 0.8, "scripted": 0.5}, None)["verdict"] \
+        == "floor_not_computable"
+    # One policy declining to produce the readout is missing data, not agreement.
+    assert packet_verdict({"rubric": 0.4, "scripted": None}, "floor")["verdict"] \
+        == "not_exercised"
+
+
+def test_the_audit_condemns_every_readout_already_known_to_be_dead():
+    # The three failures this module was written from, caught without being told about them.
+    ledger = run_monitor(packets=["coronaviridae"], attempts=120)
+    verdicts = {k: v["verdict"] for k, v in ledger["episode_readouts"].items()}
+    # Scores the state object, which retains contradictions by construction.
+    assert verdicts["conflict_retained_rate"] != "discriminating"
+    # Saturated: the zero-retrieval control reached it having bought nothing.
+    assert verdicts["chosen_matches_reference"] == "saturated_by_a_trivial_policy"
+    # The definitional collision with the rubric's own traversal.
+    assert ledger["episode_readouts"]["decision_relevant_rate"]["per_packet"][
+        "coronaviridae"]["verdict"] == "saturated_by_a_trivial_policy"
+    # And the replacement passes the audit that condemned its predecessor, with its positive
+    # control attained -- a probe no policy can score in the easy stratum is broken, not hard.
+    twins_row = ledger["twin_readout"]["coronaviridae"]
+    assert twins_row["verdict"] == "discriminating"
+    assert twins_row["positive_control_attained"] is True
+    assert twins_row["challenger_headroom"] > 0.3

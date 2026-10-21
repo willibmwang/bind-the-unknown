@@ -77,6 +77,11 @@ def main(argv=None):
     p.add_argument("--count", type=int, default=4, help="Group elements per kind")
     p.add_argument("--attempts", type=int, default=400)
     p.add_argument("--smoke", action="store_true")
+    p = sub.add_parser("monitor", help="Audit which readouts can still tell two policies apart")
+    p.add_argument("--family", action="append", dest="packets",
+                   help="Restrict the audit to one packet; repeatable")
+    p.add_argument("--attempts", type=int, default=300)
+    p.add_argument("--smoke", action="store_true")
     p = sub.add_parser("monomers", help="Hold monomers out of training and score the transfer")
     p.add_argument("--landscape", default="thrombin_cyclic")
     p.add_argument("--held", type=int, help="One holdout size; omit to sweep the configured set")
@@ -143,6 +148,9 @@ def main(argv=None):
         from .invariance import run_orbit
         run_orbit(args.family, args.policy, count=args.count, attempts=args.attempts,
                   smoke=args.smoke)
+    elif args.command == "monitor":
+        from .monitor import run_monitor
+        run_monitor(args.packets, attempts=args.attempts, smoke=args.smoke)
     elif args.command == "monomers":
         from .monomers import run_monomers, transfer
         if args.held:
