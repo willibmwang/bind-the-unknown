@@ -522,6 +522,25 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
     # packet, excluding its nine illegal requests leaves +0.037 -- at chance rather than far
     # below it. The action schema enum-constrains target and axis separately, so an illegal
     # pair is expressible, and until that is closed the two have to be counted apart.
+    # What a policy reading nothing but claim counts would have bought on this same state.
+    #
+    # Recorded for every policy, not just the trivial ones, because the question it answers is
+    # about the policy under test: how much of what it did is explained by a quantity that
+    # requires no reasoning. `coverage_static` scores 0.7652 on the hard stratum against the
+    # lattice's 0.5487 while reading no claim, no strength and no gate verdict, so a high
+    # agreement rate is the first thing to check before a score is attributed to reasoning.
+    #
+    # This is a decomposition and deliberately not a nuisance kind. The orbit requires that
+    # the oracle's answer be the image of the original under the transformation, and there is
+    # no relabelling that redistributes claim counts while leaving the decision intact --
+    # removing a claim changes what is substantiated and therefore changes the answer. So the
+    # count channel cannot be certified away, and the honest alternative is to measure
+    # agreement with it directly and report it beside the score.
+    count_action, count_target, count_axis = _coverage_action(
+        offers_by_target(available), [d.target for d in dossiers], axis_order,
+        weights={t: sum(1 for (pt, _) in pool if pt == t) for t in by_target})
+    agrees_with_count_only = (action, target, axis) == (count_action, count_target, count_axis)
+
     legal = bool(bought) and chosen in available
     attainment = scaled(chosen_grade) if legal else None
     raw = (None if chosen_grade is None or best <= chance
@@ -541,6 +560,8 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
             "decision_round": now, "policy": policy, "action": action,
             "target": target, "axis": axis,
             "retrieved": bought,
+            "agrees_with_count_only": agrees_with_count_only,
+            "count_only_choice": [count_target, count_axis],
             # A policy declining to buy is not scored as a bad purchase. It made a different
             # decision, and folding a refusal into the attainment rate would let a policy
             # that never buys outscore one that buys imperfectly.
@@ -692,6 +713,10 @@ def summarise(probes):
             # packet -- so a non-zero rate here licenses nothing on its own.
             "exceeded_leader_ceiling_rate": _rate(rows, "exceeded_leader_ceiling"),
             "optimal_rate": _rate(rows, "chose_optimally"),
+            # Share of probes on which this policy made the same purchase a count-only policy
+            # would. Read before the attainment above it: a policy agreeing with counting on
+            # most states has not been shown to reason, whatever it scored.
+            "count_only_agreement": _rate(rows, "agrees_with_count_only"),
             "mean_best_grade": _mean(rows, "best_grade"),
             "mean_chance_grade": _mean(rows, "chance_grade"),
             "bought_on_leader_rate": _rate(rows, "chose_leader"),

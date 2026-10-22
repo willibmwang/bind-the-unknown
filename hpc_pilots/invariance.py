@@ -31,6 +31,18 @@ other two.
   order, so it had no way to see that. The oracle counts substantiated axes and does not read
   their order, so it is invariant by inspection and certified by check.
 
+**A channel this group does not cover, and cannot.** `coverage_static` ranks targets by how
+many claims each carries in the packet and reads nothing else -- no claim text, no strength,
+no gate verdict, no ranking, nothing that moves as evidence arrives. It earns 0.75 on the
+hard stratum, above every policy here that reads the state, and this group reads exactly 0.0
+for it on all four kinds. The orbit certifies it clean because none of the four transforms
+claim counts, and none can: a nuisance has to leave the oracle's answer as the image of the
+original, and removing a claim changes what is substantiated and therefore changes the
+answer. So a 0.0 here is evidence about the channels the group covers and is not evidence
+that a score was earned. The count channel is measured instead, by `twins.probe` recording
+whether each choice matches the count-only one, and reported as `count_only_agreement` beside
+the attainment it qualifies.
+
 **What this measures and what it cannot.** Scrubbing is lexical. A claim reading
 "polyprotein processing at eleven sites is obligatory for replication" names no target and
 identifies one anyway to any reader who knows the biology, and no substitution table fixes

@@ -1051,6 +1051,45 @@ def test_the_audit_condemns_every_readout_already_known_to_be_dead():
     assert ledger["discriminating_readouts"] == []
 
 
+def test_the_count_channel_is_measured_rather_than_certified_away():
+    """The decomposition that covers the channel the orbit cannot.
+
+    `coverage_static` earns 0.75 on the hard stratum while reading nothing but how many claims
+    each target carries, and the orbit reads exactly 0.0 for it on every nuisance kind --
+    identity, presentation, axis order -- so the instrument built to find supplied advantage
+    certifies it clean. Nothing in the group permutes claim counts, and nothing can: a
+    nuisance has to leave the oracle's answer as the image of the original, and removing a
+    claim changes what is substantiated and so changes the answer. The count channel is not
+    certifiable away, so it is measured instead.
+
+    Both ends are pinned, because one without the other proves nothing. The count-only policy
+    must agree with itself on every probe, or the diagnostic is not measuring what it says.
+    And a policy that reads the state must agree with it far less often, or the diagnostic
+    cannot separate reasoning from counting and is just another saturated number.
+    """
+    import io
+    from contextlib import redirect_stdout
+
+    summaries = {}
+    for policy in ("coverage_static", "lattice", "scripted"):
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            summaries[policy] = run_twins("coronaviridae", policy,
+                                          attempts=200)["summary"]["challenger_best"]
+
+    # Exactly one: the diagnostic reconstructs the count-only choice independently of the
+    # policy branch that produced it, so anything below 1.0 means the two have drifted apart.
+    assert summaries["coverage_static"]["count_only_agreement"] == 1.0, summaries
+
+    # And it separates. The lattice reads the evidence state and lands far from the count-only
+    # choice while scoring comparably, which is the whole point of reporting the two together.
+    assert summaries["lattice"]["count_only_agreement"] < 0.4, summaries["lattice"]
+    assert summaries["lattice"]["attainment"] > 0.3, summaries["lattice"]
+
+    # A fixed traversal keyed on the target name has no reason to track counts at all.
+    assert summaries["scripted"]["count_only_agreement"] < 0.2, summaries["scripted"]
+
+
 def test_four_of_five_public_label_claims_are_not_binding_measurements():
     """The only independently verified axis, checked for the endpoint it actually cites.
 
