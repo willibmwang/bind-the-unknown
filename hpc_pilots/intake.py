@@ -851,7 +851,31 @@ def decompose(ranked, limit=12):
     for row in ranked:
         if not row.get("identified"):
             continue
-        accession = row["nearest_homolog"]
+        # The best-scoring homolog is not necessarily the best-annotated one, and for
+        # decomposition the annotation is what matters. Hepatitis C's polyprotein matches a
+        # UniProt entry marked "(Fragment)" at 0.899 -- correctly, it is the closest sequence
+        # -- and a fragment carries two mature chains where a complete entry carries nine. The
+        # pipeline therefore identified HCV perfectly and then returned three candidates with
+        # none of NS3, NS5A or NS5B among them, because the chains it needed were annotated on
+        # an entry it had not chosen.
+        #
+        # So the hit used for decomposition is the best-annotated of the top hits rather than
+        # the highest-scoring one. Identity picks the homolog; annotation picks which of the
+        # near-equivalent homologs can actually be taken apart.
+        candidates_by_chain = []
+        for hit in row.get("hits", [])[:3]:
+            try:
+                candidates_by_chain.append((len(mature_chains(hit["accession"])), hit))
+            except Exception:                             # noqa: BLE001
+                continue
+        if not candidates_by_chain:
+            expanded.append({**row, "decompose_error": "no hit could be read for chains"})
+            continue
+        count, best_hit = max(candidates_by_chain, key=lambda pair: pair[0])
+        accession = best_hit["accession"]
+        if accession != row["nearest_homolog"]:
+            row = {**row, "decomposed_via": accession,
+                   "decomposed_via_reason": "better annotated than the top hit"}
         try:
             chains = mature_chains(accession)
         except Exception as error:                        # noqa: BLE001
