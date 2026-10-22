@@ -31,6 +31,23 @@ searched locally. A genome resolves in about ten seconds. BLAST remains availabl
 `identify_remote` for the case where k-mer identity is too blunt, which is remote homology
 below roughly 25% identity.
 
+**How far the control actually reaches, measured rather than assumed.** The organism-name
+holdout below is an *isolate* holdout: ICTV places SARS-CoV, SARS-CoV-2 and three bat
+coronaviruses in one species, so removing the name "severe acute respiratory syndrome
+coronavirus 2" leaves four conspecific relatives in the reference. Taking the holdout up the
+ranks, in `runs/holdout_ladder.json`, finds the limit. SARS-CoV-2 survives the isolate
+holdout with all five targets and collapses at the species rung to one identified ORF and
+none of them. Nipah survives a species holdout -- Hendra is a separate species in the same
+genus -- and collapses at the genus rung to zero.
+
+Two things follow. The limit is sequence identity and taxonomic rank is only a proxy for it,
+which is why the breaking rung differs between families. And the failure is a cliff rather
+than a slope: one rung below success nothing is identified at all. That it fails *empty*
+rather than *wrong* is the one comfortable part -- with no identifiable homolog the pipeline
+returns no targets instead of a confident wrong list -- and it is worth keeping. The remedy
+for the cross-family case is remote homology, which means profile methods or structure
+prediction and structural search, not a lower k-mer threshold.
+
 **The control that makes this a novel-pathogen pipeline rather than a lookup.** Every protein
 of SARS-CoV-2 is in the reference, so identifying its ORFs against the full set is a database
 query with a known answer. `exclude_organism` removes the pathogen from the reference before
@@ -290,12 +307,12 @@ def fetch_reference(query=REFERENCE_QUERY, path=None):
 
 def read_fasta(path):
     """(accession, name, organism, sequence) per entry, from a UniProt FASTA."""
-    entries, accession, name, organism, chunks = [], None, None, None, []
+    entries, accession, name, organism, taxon, chunks = [], None, None, None, None, []
 
     def flush():
         if accession:
-            entries.append({"accession": accession, "name": name,
-                            "organism": organism, "sequence": "".join(chunks)})
+            entries.append({"accession": accession, "name": name, "organism": organism,
+                            "taxid": taxon, "sequence": "".join(chunks)})
 
     for line in open(path):
         if line.startswith(">"):
@@ -307,6 +324,8 @@ def read_fasta(path):
             name = rest.split(" OS=")[0]
             match = re.search(r"OS=(.*?)(?: OX=| GN=| PE=| SV=|$)", rest)
             organism = match.group(1) if match else None
+            taxid = re.search(r"OX=(\d+)", rest)
+            taxon = taxid.group(1) if taxid else None
             chunks = []
         else:
             chunks.append(line.strip())
@@ -498,11 +517,16 @@ def rank_score(features):
 
 
 def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
-               minimum_score=MINIMUM_SCORE, record=True):
+               minimum_score=MINIMUM_SCORE, record=True,
+               exclude_taxid=None, exclude_rank=None):
     """Genome accession to a ranked list of candidate binding targets.
 
-    `exclude_organism` holds the pathogen out of the reference, which is the only honest way
-    to test the pipeline on a genome whose every protein is already curated.
+    Two holdouts, and they ask different questions. `exclude_organism` removes one organism
+    by name, which tests identification from a close relative -- SARS-CoV-2 still resolves
+    through bat coronavirus HKU3, same subgenus, 46% identity. `exclude_taxid` with
+    `exclude_rank` removes an entire clade, so a family-level holdout leaves no coronavirus in
+    the reference at all. The second is the case the theory of change describes and the one a
+    species holdout cannot speak to.
     """
     segments = genome_records(accession)
     found = []
@@ -531,7 +555,15 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
     seq = "".join(part for _, part in segments)
 
     entries = read_fasta(fetch_reference())
-    index, kept = build_index(entries, exclude_organism)
+    removed, clade = None, None
+    if exclude_taxid:
+        if not exclude_rank:
+            raise ValueError("A clade holdout needs the rank to take it at")
+        known = lineages([exclude_taxid] + [e.get("taxid") for e in entries])
+        index, kept, removed, clade = build_index_excluding_clade(
+            entries, exclude_taxid, exclude_rank, known)
+    else:
+        index, kept = build_index(entries, exclude_organism)
 
     candidates = []
     for orf in searched:
@@ -561,6 +593,10 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
         "genome_accession": accession, "genome_header": header,
         "genome_length_nt": len(seq), "segments": len(segments),
         "reference_excluded_organism": exclude_organism,
+        "reference_excluded_taxid": exclude_taxid,
+        "reference_excluded_rank": exclude_rank,
+        "reference_excluded_clade": clade,
+        "reference_entries_removed": removed,
         "reference_entries": len(kept),
         "minimum_orf_aa": minimum_aa, "minimum_hit_score": minimum_score,
         "orfs_found": len(found), "orfs_ranked": len(searched),
@@ -774,3 +810,99 @@ def decompose(ranked, limit=12):
             best[key] = row
     expanded = sorted(best.values(), key=lambda r: r["score"] or 0, reverse=True)
     return expanded
+
+
+# ---------------------------------------------------------------------------
+# Graded taxonomic holdout.
+
+TAXONOMY = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+
+# Ranks a holdout can be taken at, outermost last. Holding out a species asks whether the
+# pipeline can identify a protein it has never seen from a close relative; holding out a
+# family asks whether it can do so from a distant one, which is the case the theory of change
+# actually describes and the one the first validation did not test.
+RANKS = ("species", "genus", "family", "order")
+
+
+def lineages(taxids, chunk=200, cache=None):
+    """taxid -> {rank: taxid} for every rank in RANKS, from NCBI taxonomy.
+
+    Cached on disk because the reference carries a few thousand distinct taxa and the lineage
+    of a species does not change between runs. The cache is keyed on taxid, so adding a
+    pathogen later costs only its own lookups.
+    """
+    import xml.etree.ElementTree as ET
+
+    cache = cache or ROOT / "data/raw/reference/lineages.json"
+    known = json.loads(cache.read_text()) if cache.exists() else {}
+    missing = sorted({str(t) for t in taxids if t and str(t) not in known})
+
+    for start in range(0, len(missing), chunk):
+        batch = missing[start:start + chunk]
+        # POSTed, not in the URL. A few hundred ids exceeds what a GET query string carries
+        # comfortably, and NCBI answers an over-long one with a 414 or silently truncates.
+        body = urllib.parse.urlencode({"db": "taxonomy", "id": ",".join(batch),
+                                       "retmode": "xml"}).encode()
+        # NCBI permits three requests a second without a key and answers a burst with 429.
+        # Retried with backoff rather than failed, because a lineage fetch is thousands of
+        # taxa and losing the run to one throttle is avoidable; the sleep between batches
+        # keeps it under the limit in the first place.
+        for attempt in range(6):
+            try:
+                request = urllib.request.Request(TAXONOMY, data=body)
+                with urllib.request.urlopen(request, timeout=180) as handle:
+                    tree = ET.fromstring(handle.read())
+                break
+            except urllib.error.HTTPError as error:
+                if error.code not in (429, 500, 502, 503) or attempt == 5:
+                    raise
+                time.sleep(2 ** attempt)
+        time.sleep(0.4)
+        for taxon in tree.findall("Taxon"):
+            identifier = taxon.findtext("TaxId")
+            ranks = {}
+            own = taxon.findtext("Rank")
+            if own in RANKS:
+                ranks[own] = identifier
+            for parent in taxon.findall("./LineageEx/Taxon"):
+                rank = parent.findtext("Rank")
+                if rank in RANKS:
+                    ranks[rank] = parent.findtext("TaxId")
+            known[identifier] = ranks
+        # Written after each batch: a taxonomy fetch of several thousand ids takes minutes and
+        # losing all of it to one timeout at the end is avoidable.
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        cache.write_text(json.dumps(known))
+    return known
+
+
+def clade_of(taxid, rank, known):
+    """The ancestor of `taxid` at `rank`, or None if the lineage does not reach it."""
+    return (known.get(str(taxid)) or {}).get(rank)
+
+
+def build_index_excluding_clade(entries, taxid, rank, known, k=KMER):
+    """Index the reference with everything in one clade removed.
+
+    The graded version of `exclude_organism`, and the difference is the whole point. Excluding
+    an organism by name leaves its genus and family in place, so SARS-CoV-2 is still
+    identified through bat coronavirus HKU3 at 46% identity -- a close relative in the same
+    subgenus. Excluding the family removes every coronavirus, which is what a genuinely new
+    pathogen looks like, and whether identification survives that is not something the first
+    validation could answer.
+
+    Returns the index, the kept entries, and how many were removed, because a holdout that
+    removed nothing is indistinguishable in its output from one that worked.
+    """
+    target = clade_of(taxid, rank, known)
+    if target is None:
+        raise ValueError(f"taxid {taxid} has no {rank} in its lineage, so a {rank}-level "
+                         f"holdout would silently remove nothing")
+    kept = [e for e in entries if clade_of(e.get("taxid"), rank, known) != target]
+    removed = len(entries) - len(kept)
+    index = {}
+    for position, entry in enumerate(kept):
+        sequence = entry["sequence"]
+        for offset in range(len(sequence) - k + 1):
+            index.setdefault(sequence[offset:offset + k], set()).add(position)
+    return index, kept, removed, target

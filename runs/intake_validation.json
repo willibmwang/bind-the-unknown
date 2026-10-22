@@ -190,7 +190,8 @@
   "limitations": [
     "Three families, all viral and all with well-curated relatives. Nothing here shows the pipeline works on a pathogen with no sequenced relative, which is the hardest case.",
     "The expected-target lists are the project's own Week 4 selections plus the clinically validated targets, so they are a reasonable reference and not an independent one.",
-    "The ranking is a stated rubric. Two vocabulary gaps found during this validation -- 'proteinase' and 'hemagglutinin' -- each demoted a clinically validated target by several places until fixed, so the rubric's sensitivity to naming is real."
+    "The ranking is a stated rubric. Two vocabulary gaps found during this validation -- 'proteinase' and 'hemagglutinin' -- each demoted a clinically validated target by several places until fixed, so the rubric's sensitivity to naming is real.",
+    "The holdout is by organism name. For SARS-CoV-2 that leaves four conspecific relatives in the reference, so the test is weaker than 'the pathogen was held out' suggests."
   ],
   "provenance": {
     "host": "MWPF4GD0LT.yu.yale.edu",
@@ -201,5 +202,6 @@
     "slurm_job_id": null,
     "slurm_array_task_id": null,
     "recorded_at_utc": "2026-10-22T21:52:16.832346+00:00"
-  }
+  },
+  "correction_2026_10_22": "This run's holdouts are by organism NAME, which for SARS-CoV-2 is an isolate holdout and not a species one: bat coronaviruses HKU3, Rp3/2004 and 279/2005 and SARS-CoV are all in species Betacoronavirus pandemicum with it, and all four remain in the reference here. runs/holdout_ladder.json takes the holdout up the taxonomic ranks and finds identification collapses one rung above this one. What this file shows is that the ranking recovers the right targets given a conspecific or congeneric relative; it does not show that it works without one."
 }

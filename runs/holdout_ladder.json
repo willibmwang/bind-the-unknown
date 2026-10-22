@@ -1,0 +1,118 @@
+{
+  "experiment": "holdout-ladder",
+  "status": "complete",
+  "question": "How distant may the nearest curated relative be before genome-to-targets stops identifying anything?",
+  "answer": "The pipeline needs a relative sharing enough 5-mers, which in practice means one close enough to be conspecific or congeneric. Beyond that it does not degrade, it stops: identification goes to zero or one ORF and no expected target is found. The taxonomic rank at which this happens differs between families, because viral species boundaries are not calibrated to sequence identity.",
+  "correction": "The first validation described SARS-CoV-2 as identified through bat coronavirus HKU3 and SARS-CoV with 'the pathogen held out'. Those two and bat coronaviruses 279/2005 and Rp3/2004 are all in species Betacoronavirus pandemicum with SARS-CoV-2, so that run was an isolate holdout and not a species holdout. Removing the species removes all five and identification collapses to one ORF. The earlier result stands for what it tested and the description of it was too strong.",
+  "ladders": {
+    "SARS-CoV-2": {
+      "accession": "NC_045512.2",
+      "taxid": "2697049",
+      "rungs": [
+        {
+          "rank": "isolate (name match)",
+          "removed": "SARS-CoV-2 entries only",
+          "orfs_identified": 8,
+          "expected_targets_found": 5,
+          "of": 5,
+          "identified_through": [
+            "Bat coronavirus HKU3",
+            "SARS-CoV"
+          ]
+        },
+        {
+          "rank": "species",
+          "clade": "3418604",
+          "removed": 69,
+          "orfs_identified": 1,
+          "expected_targets_found": 0,
+          "of": 5,
+          "identified_through": [
+            "Rat coronavirus (strain 681)"
+          ],
+          "note": "species Betacoronavirus pandemicum contains SARS-CoV, SARS-CoV-2 and three bat coronaviruses; removing it removes every close relative at once"
+        },
+        {
+          "rank": "genus",
+          "clade": "694002",
+          "removed": 320,
+          "orfs_identified": 1,
+          "expected_targets_found": 0,
+          "of": 5
+        },
+        {
+          "rank": "family",
+          "clade": "11118",
+          "removed": 486,
+          "orfs_identified": 0,
+          "expected_targets_found": 0,
+          "of": 5
+        },
+        {
+          "rank": "order",
+          "clade": "76804",
+          "removed": 548,
+          "orfs_identified": 0,
+          "expected_targets_found": 0,
+          "of": 5
+        }
+      ]
+    },
+    "Nipah virus": {
+      "accession": "NC_002728.1",
+      "taxid": "3052225",
+      "rungs": [
+        {
+          "rank": "species",
+          "clade": "3052225",
+          "removed": 9,
+          "orfs_identified": 8,
+          "expected_targets_found": 3,
+          "of": 3,
+          "identified_through": [
+            "Hendra virus (isolate Horse/Autral"
+          ]
+        },
+        {
+          "rank": "genus",
+          "clade": "260964",
+          "removed": 18,
+          "orfs_identified": 0,
+          "expected_targets_found": 0,
+          "of": 3,
+          "identified_through": null
+        },
+        {
+          "rank": "family",
+          "clade": "11158",
+          "removed": 342,
+          "orfs_identified": 0,
+          "expected_targets_found": 0,
+          "of": 3,
+          "identified_through": null
+        }
+      ]
+    }
+  },
+  "findings": [
+    "Nipah survives a species holdout and SARS-CoV-2 does not. Hendra and Nipah are separate species in one genus; SARS-CoV and SARS-CoV-2 are one species. The pipeline's limit is sequence identity and taxonomic rank is only a proxy for it.",
+    "Failure is a cliff and not a slope. One rung below success, identification falls to zero or one ORF rather than returning a degraded ranking.",
+    "Failure is empty rather than wrong. With no identifiable homolog the pipeline returns no targets instead of a confidently incorrect list, which is the safer failure for an emergency tool and is a property worth keeping.",
+    "k-mer identity is what breaks. Shared 5-mers collapse well above the identity where profile methods and structure comparison still find a fold, so the remedy for the cross-family case is remote homology -- BLAST, profile HMMs, or structure prediction followed by structural search -- and not a better threshold."
+  ],
+  "limitations": [
+    "Two pathogens, both viral, both with curated relatives at some rank.",
+    "The reference is reviewed viral proteins only, so a bacterial or fungal genome would identify nothing for a different reason entirely and is not tested here.",
+    "Rank-level holdout removes a clade from the reference; it does not simulate a pathogen whose family has never been sequenced, which would also lack the curated annotations the ranking reads."
+  ],
+  "provenance": {
+    "host": "MWPF4GD0LT.yu.yale.edu",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "6c2d98184eafbad217bace0e5d2fa46d8a43650f",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-10-22T22:09:38.235310+00:00"
+  }
+}

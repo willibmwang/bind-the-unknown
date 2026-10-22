@@ -41,4 +41,10 @@ runs/improve/
 # ranking recovers the targets with drugs against them across coronavirus, paramyxovirus and
 # orthomyxovirus rather than on the one family it was built against.
 !runs/intake_validation.json
+
+# The holdout ladder: how distant the nearest curated relative may be before identification
+# stops. runs/ is otherwise untracked, but this is the record that the validation above is an
+# isolate holdout rather than a species one, and that one rung further out the pipeline
+# returns nothing. A limit nobody measured would be assumed to be further away than it is.
+!runs/holdout_ladder.json
 .venv-pfn/
