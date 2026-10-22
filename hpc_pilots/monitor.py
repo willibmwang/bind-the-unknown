@@ -44,14 +44,30 @@ which is the same failure one level up.
 import json
 
 from .common import ROOT, provenance, write_json
-from .dossier import leaders
+from .dossier import AXES, leaders
 from .emergency import decision_relevant, run_episode
 from .targets import PACKETS, packet
 from .twins import FAMILIES, generate, run_twins
 
 # Policies with no access to the decision state, or with a fixed traversal of it. A readout a
 # member of this set can max out is defined on something that requires no reasoning.
-TRIVIAL = ("rubric", "scripted")
+#
+# `coverage` was added last and for a different reason from the other two. They are controls
+# on *reasoning*: a policy that ignores the state must not score, and if it does the readout
+# is measuring the harness. It is a control on *the packets*: axis coverage is uneven across
+# targets -- seven axes on Mpro, four on Nipah's F glycoprotein -- and that spread records
+# how much had been published when the evidence was assembled rather than how good the target
+# is. Because `retrievable_axes` is in the state, a policy can count offers and rank targets
+# by research attention without reading a single claim. Any readout `coverage` can reach is
+# reporting that proxy.
+TRIVIAL = ("rubric", "scripted", "coverage", "coverage_static")
+
+# Policies that do read the decision state, carried here so the twin audit can ask the
+# question the trivial set alone cannot: not "does a trivial policy reach the ceiling" but
+# "does a trivial policy outscore a policy that reasons". The first question is about the
+# readout's range and the second is about whether the range means anything, and only the
+# second catches a trivial policy sitting comfortably above the field without touching 1.0.
+REFERENCE = ("lattice",)
 
 # Readouts carried in an episode's metrics, with the floor each must be read against. `None`
 # means the readout has no computable floor, which is itself an audit finding rather than an
@@ -68,7 +84,8 @@ EPISODE_READOUTS = {
 }
 
 VERDICTS = ("discriminating", "degenerate", "saturated_by_a_trivial_policy",
-            "floor_not_computable", "order_dependent", "not_exercised")
+            "led_by_a_trivial_policy", "floor_not_computable", "order_dependent",
+            "not_exercised")
 
 
 # Ordered from most to least usable, so a readout's headline verdict is the best its
@@ -206,6 +223,71 @@ def audit_order_invariance(packets=None, rounds=(1, 2, 3)):
     return rows
 
 
+# Fields carried on a dossier beside the axes. An axis recoverable from one of these is not
+# an axis: it is that field, restated, occupying a slot the policy can be asked to resolve.
+PREDICTORS = ("compartment", "family", "pathogen")
+
+
+def audit_axis_redundancy(packets=None, deadline=8):
+    """Axes whose assessment is a deterministic function of a field already in the state.
+
+    The other four audits ask whether a *readout* can discriminate. This one asks the same
+    question of the *state*, because the same defect lives there and costs more: a readout
+    that cannot move wastes a column in a summary, while an axis that cannot move wastes one
+    of seven slots in the object every policy reasons over, and it does so while looking
+    like evidence a policy should pay to retrieve.
+
+    `accessibility` is the case that prompted it. Across all eleven targets the mapping is
+    exact -- every cytosolic target is assessed `weak` and every extracellular one `strong`,
+    with no exception -- and `compartment` is handed to the policy in the same state. So the
+    axis is `compartment` wearing a hat. A policy can resolve it without buying it, a policy
+    that does buy it learns nothing it did not already hold, and the next-axis readout the
+    plan calls for would be scoring a question that answers itself.
+
+    Reported as a mapping rather than as a boolean, because which direction the redundancy
+    runs is the diagnostic. An axis recoverable from `compartment` is a modelling shortcut
+    and can be repaired by sourcing the axis properly. An axis recoverable from `family`
+    would be something else entirely -- evidence that the packets were written per family
+    and varied per target only decoratively -- and would call for rewriting the packets.
+
+    Constancy is reported beside redundancy and is the degenerate case of it: an axis taking
+    one value everywhere is recoverable from nothing at all, which is worse.
+    """
+    names = sorted(PACKETS) if packets is None else list(packets)
+    observed = []
+    for name in names:
+        _, dossiers, entries, probes = packet(name)
+        by_target = {d.target: d for d in dossiers}
+        for target, entry in entries:
+            by_target[target].observe(entry, deadline)
+        observed.extend(dossiers)
+
+    rows = {}
+    for axis in AXES:
+        assessments = {d.target: d.assess(axis)["assessment"] for d in observed}
+        distinct = sorted(set(assessments.values()))
+        row = {"distinct_assessments": distinct, "targets": len(assessments),
+               "constant": len(distinct) == 1, "recoverable_from": None, "mapping": None}
+        # Constancy short-circuits the search rather than competing with it. A constant axis
+        # is single-valued inside every cell of every partition, so it would be reported as
+        # recoverable from whichever predictor happened to be tried first -- which is a true
+        # statement and a misleading one, because nothing about `compartment` is doing the
+        # work. `essentiality` is the case: `strong` on all eleven targets, which the first
+        # version of this audit duly blamed on the compartment field.
+        for field in () if row["constant"] else PREDICTORS:
+            seen = {}
+            for d in observed:
+                seen.setdefault(getattr(d, field), set()).add(assessments[d.target])
+            # Single-valued in every cell, and more than one cell -- a one-cell partition is
+            # trivially single-valued and says nothing, which is the constant case above.
+            if len(seen) > 1 and all(len(v) == 1 for v in seen.values()):
+                row["recoverable_from"] = field
+                row["mapping"] = {k: sorted(v)[0] for k, v in sorted(seen.items())}
+                break
+        rows[axis] = row
+    return rows
+
+
 def audit_twin_readout(packets=None, attempts=300):
     """The replacement readout, audited by the same questions that condemned its predecessor.
 
@@ -219,7 +301,7 @@ def audit_twin_readout(packets=None, attempts=300):
     for name in names:
         states, counts = generate(name, 20261021, attempts=attempts)
         by_policy = {policy: run_twins(name, policy, attempts=attempts)["summary"]
-                     for policy in TRIVIAL}
+                     for policy in TRIVIAL + REFERENCE}
         strata = {}
         for family in FAMILIES:
             values = [by_policy[p][family]["attainment"] for p in TRIVIAL]
@@ -228,12 +310,28 @@ def audit_twin_readout(packets=None, attempts=300):
                               "spread_across_policies": _spread(values)}
         answerable = by_policy["rubric"]["leader_best"]["attainment"] == 1.0
         challenger = by_policy["rubric"]["challenger_best"]["attainment"]
+
+        # The comparison the audit was missing. It tested the rubric alone against the
+        # ceiling, so a trivial policy that does not reach 1.0 but outscores every policy
+        # that reads the state was invisible -- which is the shape of every readout this
+        # module exists to catch, one level up.
+        def best(policies):
+            scored = [(by_policy[p]["challenger_best"]["attainment"], p) for p in policies
+                      if by_policy[p]["challenger_best"]["attainment"] is not None]
+            return max(scored) if scored else (None, None)
+
+        trivial_best, trivial_who = best(TRIVIAL)
+        reference_best, reference_who = best(REFERENCE)
+        outscored = (trivial_best is not None and reference_best is not None
+                     and trivial_best >= reference_best)
         if not counts["challenger_best"]:
             verdict = "not_exercised"
         elif not answerable:
             verdict = "probe_unanswerable"
-        elif challenger is not None and challenger >= 1.0:
+        elif trivial_best is not None and trivial_best >= 1.0:
             verdict = "saturated_by_a_trivial_policy"
+        elif outscored:
+            verdict = "led_by_a_trivial_policy"
         else:
             verdict = "discriminating"
         rows[name] = {
@@ -241,6 +339,11 @@ def audit_twin_readout(packets=None, attempts=300):
             "positive_control_attained": answerable,
             "trivial_drop": {p: by_policy[p]["contrast"]["leader_minus_challenger"]
                              for p in TRIVIAL},
+            # Reported whatever the verdict, so a reader sees how much of the hard stratum a
+            # policy reading no claim already reaches, rather than inferring it from a word.
+            "best_trivial": {"policy": trivial_who, "attainment": trivial_best},
+            "best_reference": {"policy": reference_who, "attainment": reference_best},
+            "trivial_outscores_reference": outscored,
             # The headroom a model has to be observed in. A readout whose trivial policy
             # already sits at the ceiling of the hard stratum leaves none.
             "challenger_headroom": None if challenger is None else round(1.0 - challenger, 4)}
@@ -261,6 +364,10 @@ def run_monitor(packets=None, attempts=300, smoke=False):
     order = audit_order_invariance(names)
     twins = audit_twin_readout(names, attempts)
     rules = audit_rule_robustness(names[0], attempts)
+    # Pooled over every packet regardless of `names`, because the question is about the axis
+    # schema and not about one family: an axis can vary within a packet and still be a
+    # restatement of a field across the panel the policy is ranking.
+    axes = audit_axis_redundancy()
 
     counts = {}
     for row in list(episodes.values()) + list(order.values()) + list(twins.values()):
@@ -273,6 +380,9 @@ def run_monitor(packets=None, attempts=300, smoke=False):
               "discriminating_readouts": sorted(usable),
               "episode_readouts": episodes, "order_invariance": order,
               "twin_readout": twins, "rule_robustness": rules,
+              "axis_redundancy": axes,
+              "uninformative_axes": sorted(a for a, row in axes.items()
+                                           if row["constant"] or row["recoverable_from"]),
               "provenance": provenance(),
               "interpretation": "A verdict describes the code as it stands, not a recorded "
                                 "run. `degenerate` means the readout scores the harness; "
@@ -280,7 +390,13 @@ def run_monitor(packets=None, attempts=300, smoke=False):
                                 "something a fixed traversal already does; "
                                 "`floor_not_computable` means the rate has no stated chance "
                                 "level and cannot be read on its own; `order_dependent` "
-                                "means it reports the order the state was listed in."}
+                                "means it reports the order the state was listed in. "
+                                "`axis_redundancy` audits the state rather than a readout: "
+                                "an axis listed in `uninformative_axes` cannot gate a "
+                                "decision, either because it takes one value across every "
+                                "target or because it restates a field the policy already "
+                                "holds, and a next-axis readout scored over it is scoring a "
+                                "question that answers itself."}
     output = ROOT / "runs/monitor" / f"{'smoke_' if smoke else ''}ledger.json"
     write_json(output, ledger)
     print(json.dumps({"output": str(output), "verdict_counts": counts,

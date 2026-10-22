@@ -54,7 +54,8 @@ import time
 
 from .common import ROOT, Agent, ContentFiltered, digest, provenance, write_json
 from .dossier import ACTIONS, AXES, leaders, rank
-from .emergency import SYSTEM, _retrievable, _rubric_action, _scripted_action, decision_relevant
+from .emergency import (SYSTEM, _coverage_action, _retrievable, _rubric_action,
+                        _scripted_action, decision_relevant, offers_by_target)
 from .lattice import lattice_action
 from .streams import stream
 from .targets import PACKETS, packet
@@ -421,6 +422,27 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
         # land near zero attainment, and it does -- and it is NOT a sound control for the
         # orbit. The fixed rubric is that control: exactly 0.0 on all three packets.
         action, target, axis = _scripted_action(len(observed), sorted(pool), ranking)
+    elif policy == "coverage":
+        # Counts the offers per target and reads nothing else. It is here because axis
+        # coverage in the packets tracks how much was known about a target rather than how
+        # good the target is, and `retrievable_axes` puts that shape in the state. A twin
+        # probe this policy can score on is scoring on the shape of the dossier. Name-blind
+        # as well as state-blind, unlike `scripted`.
+        action, target, axis = _coverage_action(offers_by_target(available),
+                                                [d.target for d in dossiers], axis_order)
+    elif policy == "coverage_static":
+        # The same policy ranking on a quantity that cannot move: how many axes the packet
+        # declares for each target, counted over the whole pool rather than over what is
+        # still outstanding. `coverage` could be uncertainty sampling; this cannot be. It
+        # knows only that the Week 4 write-up had more to say about one target than another,
+        # which is a record of published volume. Whatever this scores is the share of the
+        # readout that research attention supplies.
+        totals = {}
+        for offered_target, _ in pool:
+            totals[offered_target] = totals.get(offered_target, 0) + 1
+        action, target, axis = _coverage_action(offers_by_target(available),
+                                                [d.target for d in dossiers], axis_order,
+                                                weights=totals)
     elif policy == "lattice":
         # The cost-aware comparator the brief pre-registered, over a state with no slot for a
         # target's name. It reads the lattice and nothing else -- no ranking is passed, so it

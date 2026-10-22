@@ -1024,12 +1024,96 @@ def test_the_audit_condemns_every_readout_already_known_to_be_dead():
     # The definitional collision with the rubric's own traversal.
     assert ledger["episode_readouts"]["decision_relevant_rate"]["per_packet"][
         "coronaviridae"]["verdict"] == "saturated_by_a_trivial_policy"
-    # And the replacement passes the audit that condemned its predecessor, with its positive
-    # control attained -- a probe no policy can score in the easy stratum is broken, not hard.
+    # The replacement attains its positive control, and does *not* pass the audit that
+    # condemned its predecessor. This assertion read `== "discriminating"` until the trivial
+    # set was completed, and the claim it encoded is withdrawn.
+    #
+    # The audit asked only whether the fixed rubric reached 1.0, so a trivial policy that
+    # outscores every policy reading the state without touching the ceiling was invisible to
+    # it -- which is the exact shape of the three failures this module was written from, one
+    # level up. Completing the set and comparing against a declared reference rather than
+    # against 1.0 moves the verdict to `led_by_a_trivial_policy` and empties
+    # `discriminating_readouts`.
+    #
+    # What does the outscoring is `coverage_static`, which ranks targets by how many axes the
+    # packet declares for each and reads no claim, no strength, no gate verdict, no ranking
+    # and nothing that moves as evidence arrives. Two readings are available and the artifact
+    # carries both: resolving a target with more open axes genuinely settles more of the
+    # decision, so it is partly a sound heuristic; and the quantity it keys on is a record of
+    # how much the Week 4 write-up had to say, which tracks published volume and is precisely
+    # what a pretrained policy recalls for free. Only the second makes it a defect, and the
+    # readout cannot tell them apart, which is why the verdict is not `discriminating`.
     twins_row = ledger["twin_readout"]["coronaviridae"]
-    assert twins_row["verdict"] == "discriminating"
+    assert twins_row["verdict"] == "led_by_a_trivial_policy"
     assert twins_row["positive_control_attained"] is True
     assert twins_row["challenger_headroom"] > 0.3
+    assert twins_row["trivial_outscores_reference"] is True
+    assert ledger["discriminating_readouts"] == []
+
+
+def test_two_of_the_seven_axes_cannot_gate_a_decision():
+    """The state audit, pinned on the two axes that fail it today.
+
+    `essentiality` is `strong` on all eleven targets, so it separates nothing. `accessibility`
+    is recoverable from `compartment` exactly -- every cytosolic target weak, every
+    extracellular one strong -- and `compartment` is already in the state the policy reads,
+    so the axis can be resolved without being bought.
+
+    Both matter for the readout the six-week plan puts first. Scoring which axis a policy
+    chooses to resolve next, against which axis actually gates the decision, is scored over
+    an action space of seven; two of those seven cannot gate anything, and a policy that
+    picks them is not making the mistake the readout would record.
+
+    The assertion is deliberately exact rather than a bound. If a third axis joins them the
+    test should fail and the finding be rewritten, and if one is repaired it should fail and
+    the repair be recorded -- which is the point of pinning it.
+    """
+    from hpc_pilots.monitor import audit_axis_redundancy
+
+    rows = audit_axis_redundancy()
+    uninformative = sorted(a for a, r in rows.items() if r["constant"] or r["recoverable_from"])
+    assert uninformative == ["accessibility", "essentiality"], rows
+
+    assert rows["essentiality"]["constant"] is True
+    assert rows["essentiality"]["distinct_assessments"] == ["strong"]
+    # Constancy short-circuits the predictor search; a constant axis must not be blamed on a
+    # field that is not doing the work.
+    assert rows["essentiality"]["recoverable_from"] is None
+
+    assert rows["accessibility"]["constant"] is False
+    assert rows["accessibility"]["recoverable_from"] == "compartment"
+    assert rows["accessibility"]["mapping"] == {"cytosolic": "weak", "extracellular": "strong"}
+
+    # The axes that do carry information are not swept up by the same rule.
+    assert rows["reagent_tractability"]["recoverable_from"] is None
+    assert rows["conservation"]["recoverable_from"] is None
+
+
+def test_counting_declared_axes_outscores_the_policies_that_read_the_state():
+    """The dossier's shape is a research-attention proxy, and the twin probe pays for it.
+
+    Axis coverage is not uniform across the packets: Mpro carries claims on all seven axes
+    and Nipah's F glycoprotein on four, with the rest between. That spread records how much
+    was known when the evidence was assembled rather than how good the target is, and
+    `retrievable_axes` hands the shape to the policy directly, so counting it needs no claim.
+
+    Two things are pinned here and the second is what makes the first a defect rather than a
+    heuristic. The policy outscores the lattice on the hard stratum; and it does so with
+    nothing attributable to identity or to presentation, so the score is not a name leak and
+    not an order leak -- it is earned, by counting, which is the problem.
+    """
+    from hpc_pilots.invariance import run_orbit
+
+    by_policy = {policy: run_twins("coronaviridae", policy, attempts=200)["summary"]
+                 for policy in ("coverage_static", "lattice", "rubric")}
+    hard = {p: v["challenger_best"]["attainment"] for p, v in by_policy.items()}
+    assert hard["coverage_static"] > hard["lattice"], hard
+    assert hard["coverage_static"] > hard["rubric"], hard
+
+    earned = run_orbit("coronaviridae", "coverage_static", count=2, attempts=200,
+                       kinds=("null", "identity", "presentation"))["earned"]["challenger_best"]
+    assert earned["attributable_to_identity"] == 0.0, earned
+    assert earned["attributable_to_presentation"] == 0.0, earned
 
 
 def test_the_orbit_detects_a_planted_memoriser_and_not_a_name_blind_policy():

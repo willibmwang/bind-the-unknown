@@ -22,7 +22,7 @@ from .common import ROOT, Agent, ContentFiltered, digest, provenance, write_json
 from .dossier import ACTIONS, AXES, leaders, rank
 from .targets import PACKETS, packet
 
-POLICIES = ("rubric", "scripted", "agent")
+POLICIES = ("rubric", "scripted", "coverage", "coverage_static", "agent")
 
 SYSTEM = (
     "You are an emergency countermeasure co-scientist. A poorly characterised pathogen is "
@@ -154,6 +154,59 @@ def _scripted_action(step, order, ranking):
     return tail[min(step - len(order), len(tail) - 1)], ranking[0]["target"], None
 
 
+def _coverage_action(offers, order, axes=None, weights=None):
+    """Buy from whichever target carries the most offers, reading nothing else.
+
+    A third fixed policy, and the one that exists because of a defect in the packets rather
+    than because of a defect in a model. Axis coverage is not uniform across targets: Mpro
+    carries claims on all seven axes, Nipah's F glycoprotein on four, and the rest sit
+    between. That spread is a record of how much was known when the Week 4 write-up was
+    assembled, which tracks how much has been published about a target -- and published
+    volume is exactly what a pretrained policy can recall without reading anything. The
+    state hands the shape over directly: `retrievable_axes` lists every pair on offer, so
+    counting them needs no claim, no strength level, no gate verdict and no ranking.
+
+    So this policy is the triviality control for that channel, in the sense `monitor` uses
+    the word. A readout it can reach is a readout defined on the shape of the dossier rather
+    than on the decision, and the shape is a research-attention proxy. It is the same move
+    as the zero-retrieval control one level down: establish what a policy that does not
+    reason can score, before attributing a score to reasoning.
+
+    `weights` is what separates two readings of this policy that would otherwise be
+    conflated, and conflating them is how `scripted` was read as a name-blind control for
+    three packets before the orbit caught it. Left `None`, the policy ranks by the offers
+    *still outstanding* at this state, which is not obviously a defect at all -- it is
+    uncertainty sampling, the same family as the lattice's uncertainty-reduction-per-cost,
+    and a policy that buys where most is unresolved may be reasoning perfectly well. Given
+    a table of per-target counts over the *whole* packet, it ranks by a quantity that never
+    moves as evidence arrives, which is the fame proxy and nothing else. Only the second is
+    evidence that the readout is measuring research attention. Both are reported, because
+    the gap between them is the measurement.
+
+    Ties are broken on the order the dossiers are listed in, never on the target's name.
+    That distinction is deliberate and was learned the expensive way -- `scripted` traverses
+    `sorted(pool)`, which orders by name, so it is state-blind and *not* name-blind, and it
+    was read as a name-blind control for three packets before the orbit separated them. This
+    policy is both, so the `identity` orbit should read exactly 0.0 for it while the
+    `presentation` orbit measures whatever its order-dependence is worth.
+    """
+    listed = [target for target in order if offers.get(target)]
+    if not listed:
+        return "stop", order[0], None
+    size = (lambda t: weights[t]) if weights is not None else (lambda t: len(offers[t]))
+    target = max(listed, key=size)
+    axis = next(a for a in (axes or AXES) if a in offers[target])
+    return "retrieve_evidence", target, axis
+
+
+def offers_by_target(available):
+    """Group an offered set into target -> axes, the only thing `_coverage_action` reads."""
+    offers = {}
+    for target, axis in available:
+        offers.setdefault(target, []).append(axis)
+    return offers
+
+
 def reference_ranking(name, deadline, build=None):
     """The ranking the whole evidence base supports by `deadline`.
 
@@ -235,6 +288,16 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=Non
             action, target, axis = _rubric_action(by_target, available, ranking)
         elif policy == "scripted":
             action, target, axis = _scripted_action(len(retrieved), [] if blind else order, ranking)
+        elif policy == "coverage":
+            action, target, axis = _coverage_action(offers_by_target(available),
+                                                    [d.target for d in dossiers])
+        elif policy == "coverage_static":
+            totals = {}
+            for offered_target, _ in pool:
+                totals[offered_target] = totals.get(offered_target, 0) + 1
+            action, target, axis = _coverage_action(offers_by_target(available),
+                                                    [d.target for d in dossiers],
+                                                    weights=totals)
         elif policy == "agent":
             if agent is None:
                 raise ValueError("Missing agent")

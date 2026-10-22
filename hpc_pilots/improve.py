@@ -353,6 +353,26 @@ def guard_state_is_oracle_free(packet="coronaviridae"):
     return (not leaked), f"state carries evaluator fields {leaked}" if leaked else "clean"
 
 
+# Verdicts under which the probe still separates policies, so a candidate carrying one has
+# not destroyed the readout and the search may proceed.
+#
+# `led_by_a_trivial_policy` is here because the committed instrument now carries it, and the
+# distinction it forces is the reason this list is explicit rather than a single equality.
+# The guard exists to refuse a *change* that destroys discrimination; it is not a certificate
+# that the readout is sound. Completing the trivial set found that `coverage_static` -- which
+# ranks targets by how many axes the packet declares and reads nothing that moves -- outscores
+# every policy that reads the state. That is a defect in the packets, it predates every
+# candidate here, and holding the whole search red for it would mean no candidate could ever
+# be evaluated against a baseline that is itself refused.
+#
+# It is recorded rather than forgiven. `audit_axis_redundancy` names the two axes that cannot
+# gate, the ledger carries `trivial_outscores_reference`, and both are pinned by their own
+# tests. What must not be admitted is a candidate that takes the readout from separating
+# policies to not separating them at all, and the three planted adversaries that trip this
+# guard all do exactly that -- verified, not assumed, by the test that runs them.
+SEPARATING_VERDICTS = ("discriminating", "led_by_a_trivial_policy")
+
+
 def guard_readout_still_discriminates(packet="coronaviridae", attempts=250):
     """The monitor's verdict, the positive control, and the yield floor together.
 
@@ -362,7 +382,7 @@ def guard_readout_still_discriminates(packet="coronaviridae", attempts=250):
     """
     rows = audit_twin_readout([packet], attempts=attempts)[packet]
     reasons = []
-    if rows["verdict"] != "discriminating":
+    if rows["verdict"] not in SEPARATING_VERDICTS:
         reasons.append(f"verdict {rows['verdict']}")
     if not rows["positive_control_attained"]:
         reasons.append("the leader stratum is no longer attainable, so the probe is broken "
