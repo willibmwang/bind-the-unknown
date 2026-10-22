@@ -1051,6 +1051,59 @@ def test_the_audit_condemns_every_readout_already_known_to_be_dead():
     assert ledger["discriminating_readouts"] == []
 
 
+def test_padding_absent_axes_moves_the_leak_rather_than_closing_it():
+    """The obvious repair, and the reason it is not adopted.
+
+    Equalising axis coverage is the repair that suggests itself once `coverage_static` is
+    seen to outscore every policy that reads the state, and it is structurally sound: `assess`
+    already answers `unknown` for an axis with no entries and `unknown` never substantiates,
+    so padding leaves `readiness` and the ranking untouched and changes only what is offered.
+
+    It does not work, and the measurement is in `runs/monitor/coverage_channel.json`. Padded,
+    every target carries seven entries, the per-target total is constant, and the policy falls
+    through to the first-listed dossier -- which is the reference-best target in all three
+    packets as authored. Challenger attainment on Coronaviridae moves 0.7652 to 0.7344, and on
+    Henipavirus it *rises*, 0.6095 to 0.6761. The orbit shows where it went: unpadded,
+    `attributable_to_presentation` is 0.0; padded, it is 0.4279.
+
+    What is pinned here is the cheap structural half -- that padding equalises the counts and
+    leaves the ranking alone -- because that is what makes the expensive half interpretable.
+    If padding ever changed a ranking, the comparison in that artifact would be between two
+    different decision problems and the numbers would not mean what they are reported to mean.
+    """
+    from hpc_pilots import targets as targets_module
+
+    before = targets_module.PAD_ABSENT_AXES
+    try:
+        shapes, rankings = {}, {}
+        for pad in (False, True):
+            targets_module.PAD_ABSENT_AXES = pad
+            _spec, dossiers, entries, _probes = targets_module.packet("coronaviridae")
+            counts = {}
+            for target, _entry in entries:
+                counts[target] = counts.get(target, 0) + 1
+            for dossier in dossiers:
+                for target, entry in entries:
+                    if target == dossier.target:
+                        dossier.observe(entry, 8)
+            shapes[pad] = sorted(counts.values())
+            rankings[pad] = [row["target"] for row in rank(dossiers, 8)]
+    finally:
+        targets_module.PAD_ABSENT_AXES = before
+
+    # Uneven as authored, constant when padded: the count channel is closed by construction.
+    assert shapes[False] == [5, 5, 5, 5, 6, 7], shapes[False]
+    assert shapes[True] == [7] * 6, shapes[True]
+    # And nothing else moved, which is what makes the attainment comparison a fair one.
+    assert rankings[False] == rankings[True], (rankings[False], rankings[True])
+    # The first-declared target is the one padding hands a fixed-order policy, and it is the
+    # reference-best. That is the channel the advantage relocates into.
+    assert rankings[False][0] == "Mpro (nsp5)", rankings[False]
+
+    # The default is unpadded, so every recorded artifact means what it says.
+    assert targets_module.PAD_ABSENT_AXES is False
+
+
 def test_axis_coverage_is_not_a_structure_count_proxy():
     """The withdrawal, pinned so it cannot be quietly reasserted.
 

@@ -1,0 +1,131 @@
+{
+  "experiment": "coverage-channel",
+  "status": "complete",
+  "question": "Does equalising axis coverage across targets remove the advantage a policy gets from counting offers?",
+  "answer": "No. It relocates the advantage from the count channel to the dossier-order channel at almost unchanged magnitude. Padded, every target carries seven entries, so the per-target total is constant and the policy degenerates to buying from the first-listed dossier -- which is the reference-best target in the packets as authored.",
+  "attempts": 300,
+  "orbit_count": 3,
+  "orbit_kinds": [
+    "null",
+    "identity",
+    "presentation"
+  ],
+  "challenger_attainment": [
+    {
+      "family": "coronaviridae",
+      "policy": "rubric",
+      "challenger_unpadded": 0.3046,
+      "challenger_padded": 0.3136
+    },
+    {
+      "family": "coronaviridae",
+      "policy": "scripted",
+      "challenger_unpadded": 0.1021,
+      "challenger_padded": 0.0561
+    },
+    {
+      "family": "coronaviridae",
+      "policy": "coverage",
+      "challenger_unpadded": 0.4254,
+      "challenger_padded": 0.1908
+    },
+    {
+      "family": "coronaviridae",
+      "policy": "coverage_static",
+      "challenger_unpadded": 0.7652,
+      "challenger_padded": 0.7344
+    },
+    {
+      "family": "coronaviridae",
+      "policy": "lattice",
+      "challenger_unpadded": 0.5487,
+      "challenger_padded": 0.3395
+    },
+    {
+      "family": "orthomyxoviridae",
+      "policy": "rubric",
+      "challenger_unpadded": 0.084,
+      "challenger_padded": 0.2117
+    },
+    {
+      "family": "orthomyxoviridae",
+      "policy": "scripted",
+      "challenger_unpadded": 0.1851,
+      "challenger_padded": 0.1954
+    },
+    {
+      "family": "orthomyxoviridae",
+      "policy": "coverage",
+      "challenger_unpadded": 0.4923,
+      "challenger_padded": 0.5355
+    },
+    {
+      "family": "orthomyxoviridae",
+      "policy": "coverage_static",
+      "challenger_unpadded": 0.6244,
+      "challenger_padded": 0.6488
+    },
+    {
+      "family": "orthomyxoviridae",
+      "policy": "lattice",
+      "challenger_unpadded": 0.6961,
+      "challenger_padded": 0.7369
+    },
+    {
+      "family": "henipavirus",
+      "policy": "rubric",
+      "challenger_unpadded": -0.2199,
+      "challenger_padded": 0.102
+    },
+    {
+      "family": "henipavirus",
+      "policy": "scripted",
+      "challenger_unpadded": -0.1341,
+      "challenger_padded": -0.1173
+    },
+    {
+      "family": "henipavirus",
+      "policy": "coverage",
+      "challenger_unpadded": 0.5316,
+      "challenger_padded": 0.5317
+    },
+    {
+      "family": "henipavirus",
+      "policy": "coverage_static",
+      "challenger_unpadded": 0.6095,
+      "challenger_padded": 0.6761
+    },
+    {
+      "family": "henipavirus",
+      "policy": "lattice",
+      "challenger_unpadded": -0.0731,
+      "challenger_padded": -0.3002
+    }
+  ],
+  "orbit_coverage_static_coronaviridae": {
+    "unpadded": {
+      "nominal": 0.7539,
+      "earned_mean": 0.7539,
+      "attributable_to_identity": 0.0,
+      "attributable_to_presentation": 0.0
+    },
+    "padded": {
+      "nominal": 0.7452,
+      "earned_mean": 0.7452,
+      "attributable_to_identity": 0.0,
+      "attributable_to_presentation": 0.4279
+    }
+  },
+  "findings": [
+    "coverage_static outscores the lattice on coronaviridae and henipavirus both padded and unpadded.",
+    "Padding raises coverage_static on henipavirus, from 0.6095 to 0.6761.",
+    "Unpadded, the orbit reads attributable_to_identity 0.0 and attributable_to_presentation 0.0 for coverage_static while it scores 0.7539. The nuisance group has no element that permutes how many claims a target carries, so the count channel is invisible to it and a policy exploiting that channel is certified clean.",
+    "Padded, attributable_to_presentation is 0.4279: the orbit does see the order channel, so the relocation is detectable even though the repair is not."
+  ],
+  "limitations": [
+    "One orbit, three elements per kind, on one packet. A first measurement, not a result.",
+    "Padding was measured, not adopted: PAD_ABSENT_AXES defaults to False and every recorded artifact predating this file was produced unpadded."
+  ],
+  "git_commit": "e50374d775ceeafad80ebb1bd9a1c9c4f8b34573",
+  "path_note": "Kept at runs/ top level rather than runs/monitor/, because runs/ is ignored wholesale and git cannot re-include a file whose parent directory is also excluded. The two other artifacts tracked by exception live here for the same reason."
+}

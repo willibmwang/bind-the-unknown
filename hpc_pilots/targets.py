@@ -18,6 +18,29 @@ from .common import ROOT, write_json
 from .dossier import AXES, Dossier, evidence
 
 INTERNAL = "W4 target-selection write-up; proposal pending Askar/SynX review"
+ABSENT = ("No claim on this axis in the W4 target-selection write-up. Recorded as an explicit "
+          "absence so that the axis is offered and returns nothing, rather than not being "
+          "offered at all.")
+
+# Whether a target with no claim on an axis still offers that axis, answering `unknown`.
+#
+# Off, the packets are as authored and coverage is uneven: seven axes on Mpro, four on Nipah's
+# F glycoprotein. `retrievable_axes` carries that shape into the state, so a policy can rank
+# targets by counting offers without reading a claim -- and `coverage_static`, which does
+# exactly that and nothing else, outscores every policy that reads the state. The audit marks
+# the twin readout `led_by_a_trivial_policy` and `discriminating_readouts` is empty.
+#
+# On, every target offers all seven axes and the count is constant across targets, so counting
+# carries no information by construction. Nothing else moves: `assess` already answers
+# `unknown` for an axis with no entries, and `unknown` never substantiates, so `readiness`,
+# the ranking and the reference answer are untouched. What changes is the offered set, and
+# therefore the chance floor the probe is normalised against -- more offers that settle
+# nothing makes the probe harder, which is a real change and not a free repair.
+#
+# A module constant rather than a parameter because that is how this project varies an
+# instrument: `improve` patches `twins.OBSERVED_FRACTION` the same way, and the guarded search
+# can then evaluate the variant against the planted hacks rather than trusting it.
+PAD_ABSENT_AXES = False
 PG = "ProteinGym v1.3 archive verified present in data/raw/proteingym_v1.3.zip"
 
 # target -> (pathogen, compartment, [(axis, strength, claim, source, verified, round)])
@@ -173,6 +196,15 @@ def packet(name):
             seen.add(axis)
             entries.append((target, evidence(f"{target}:{axis}", axis, claim, strength,
                                              source, round_, verified)))
+        if PAD_ABSENT_AXES:
+            # Available from round 0 like the authored claims, and `verified=True`: the
+            # absence is a real and checkable statement about the write-up, not an assertion
+            # from memory about the biology. Strength `unknown` keeps it out of every
+            # substantiation count, so the ranking is identical to the unpadded packet.
+            for axis in AXES:
+                if axis not in seen:
+                    entries.append((target, evidence(f"{target}:{axis}", axis, ABSENT,
+                                                     "unknown", INTERNAL, 0, True)))
     probes = []
     for kind, target, axis, strength, claim, round_ in PROBES.get(name, []):
         prior = f"{target}:{axis}"

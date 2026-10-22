@@ -22,4 +22,17 @@ runs/orbit/
 runs/monomers/
 runs/monitor/
 runs/improve/
+
+# The coverage-channel experiment: whether equalising axis coverage removes the advantage a
+# policy gets from counting offers. runs/ is otherwise untracked, but this is the only record
+# that the obvious repair was tried and does not work -- it relocates the advantage into
+# dossier order rather than closing it -- and a repair that looks right and is not is exactly
+# the thing a later reader would otherwise redo.
+#
+# Note on the three negations in this file: git cannot re-include a file whose parent
+# directory is excluded, and `runs/` on line 6 excludes all three. They were added with
+# `git add -f` and stay tracked because gitignore does not apply to tracked files. The
+# negations are a record of intent, not the mechanism, and a fresh clone that deletes one of
+# these will not get it back by rerunning anything.
+!runs/coverage_channel.json
 .venv-pfn/
