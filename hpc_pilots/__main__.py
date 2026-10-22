@@ -194,8 +194,13 @@ def main(argv=None):
         payload = run_intake(args.accession, exclude_organism=args.exclude_organism,
                              top=args.top)
         rows = payload["targets"] if args.no_decompose else decompose(payload["targets"])
+        # Two axes, not one. `score` is worth-binding and `conservation` is how-sure-we-are
+        # what this is; `tier` says which identifier produced it. A row may hold a high score
+        # on a remote or hydropathy-only assignment, and that is the row a reader has to be
+        # able to see without opening `features`.
         print(_json.dumps([
             {"rank": i, "target": r.get("name"), "score": r.get("score"),
+             "conservation": r.get("conservation"), "tier": r.get("tier"),
              "nearest_homolog": r.get("nearest_homolog"),
              "features": r.get("features")}
             for i, r in enumerate(rows[:args.top], 1) if r.get("identified")], indent=2))

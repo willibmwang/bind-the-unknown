@@ -1051,6 +1051,112 @@ def test_the_audit_condemns_every_readout_already_known_to_be_dead():
     assert ledger["discriminating_readouts"] == []
 
 
+def test_the_cascade_recovers_enzymes_by_homology_and_antigens_by_topology():
+    """What survives past the cliff, and the split that matters more than the recovery.
+
+    The holdout ladder found identification falling to zero one rank out. Two mechanisms get
+    past it and they reach different proteins, which is the point. Conserved enzymes have
+    genuine distant relatives: with all of Coronaviridae removed, both replicase halves are
+    found through Tobaniviridae. Family-specific surface proteins have none, so no homology
+    method reaches them at any sensitivity -- and those are the antibody targets. They are
+    recovered from their own sequence instead, as a class rather than a name.
+
+    The statistics are pinned alongside, because the threshold is what makes the two tiers
+    separable. A raw alignment score cannot be compared between a 4,400-residue replicase and
+    a 1,282-residue spike; the Karlin-Altschul expectation can, and at 1e-3 it admits the
+    replicase at 1e-68 while rejecting the spike at 20 and the nucleoprotein at 0.35.
+    """
+    import json
+
+    from hpc_pilots.common import ROOT
+    from hpc_pilots.intake import bit_score, expectation, membrane_topology
+
+    # Pure arithmetic, so this half runs with no artifact and no network.
+    assert round(bit_score(655)) == 257
+    assert expectation(655, 2595, 6_000_000) < 1e-50
+    assert expectation(62, 1282, 6_000_000) > 1.0        # spike against a non-relative
+    assert 0.1 < expectation(73, 419, 6_000_000) < 1.0   # nucleoprotein, also rejected
+
+    # A polyprotein must not read as a surface antigen however hydrophobic it is. The
+    # SARS-CoV-2 replicase 1a carries twenty-four membrane segments and reads as surface on
+    # hydropathy alone; the length guard is what stops it.
+    assert membrane_topology("M" + "LVILVILVIL" * 250)["plausible_antigen_length"] is False
+
+    path = ROOT / "runs/identification_cascade.json"
+    if not path.exists():
+        pytest.skip("cascade artifact absent")
+    payload = json.loads(path.read_text())
+    rows = payload["coronaviridae_removed"]["rows"]
+    by_tier = {}
+    for row in rows:
+        by_tier.setdefault(row["tier"], []).append(row)
+
+    # Both replicase halves, through remote homology, at genuine significance.
+    remote = by_tier.get("remote") or []
+    assert len(remote) == 2, remote
+    assert all(row["ev"] < 1e-9 for row in remote), remote
+    assert all("eplicase" in row["name"] for row in remote), remote
+
+    # The spike, by topology, with no homolog at all.
+    topology = by_tier.get("topology") or []
+    assert len(topology) == 1, topology
+    assert topology[0]["len"] == 1282, topology
+    assert "surface antigen" in topology[0]["name"]
+    # Scored below every homology hit, so a class never outranks a name.
+    assert topology[0]["score"] < min(row["score"] for row in remote)
+
+
+def test_identification_falls_off_a_cliff_one_rank_out():
+    """The operating envelope, pinned from its artifact.
+
+    The validation beside this one holds the pathogen out by name and recovers every target.
+    That reads as a strong control and is a weaker one than it looks: ICTV places SARS-CoV,
+    SARS-CoV-2 and three bat coronaviruses in a single species, so a name holdout leaves four
+    conspecific relatives in the reference.
+
+    Taking the holdout up the ranks finds the limit, and the limit is not where taxonomy would
+    put it. Nipah survives a species holdout because Hendra is a separate species in the same
+    genus; SARS-CoV-2 does not, because its species already contains its closest relatives.
+    The pipeline's constraint is sequence identity and rank is only a proxy for it.
+
+    Two properties are asserted because a later change could quietly lose either. The fall is
+    a cliff -- one rung out, at most one ORF is identified and no expected target is found,
+    rather than a ranking that degrades. And the failure is empty rather than wrong: nothing
+    identified means no targets returned, not a confident list of incorrect ones, which for an
+    emergency tool is the failure worth having.
+    """
+    import json
+
+    from hpc_pilots.common import ROOT
+
+    path = ROOT / "runs/holdout_ladder.json"
+    if not path.exists():
+        pytest.skip("holdout ladder artifact absent")
+    ladders = json.loads(path.read_text())["ladders"]
+
+    cov = {rung["rank"]: rung for rung in ladders["SARS-CoV-2"]["rungs"]}
+    nipah = {rung["rank"]: rung for rung in ladders["Nipah virus"]["rungs"]}
+
+    # Succeeds with conspecific relatives present, fails as soon as they are removed.
+    assert cov["isolate (name match)"]["expected_targets_found"] == 5
+    assert cov["species"]["expected_targets_found"] == 0, cov["species"]
+    assert cov["species"]["orfs_identified"] <= 1, cov["species"]
+
+    # Nipah's congeneric relative is a different species, so it survives one rung further.
+    assert nipah["species"]["expected_targets_found"] == 3, nipah["species"]
+    assert nipah["genus"]["expected_targets_found"] == 0, nipah["genus"]
+
+    # The break is at a different rank in each family, which is the finding: taxonomy is a
+    # proxy for identity and not the thing itself. If this ever stops holding, the envelope
+    # has changed and the claim above needs rewriting.
+    assert cov["species"]["orfs_identified"] < nipah["species"]["orfs_identified"]
+
+    # A cliff, not a slope, and empty rather than wrong.
+    for rung in list(cov.values()) + list(nipah.values()):
+        if rung["expected_targets_found"] == 0:
+            assert rung["orfs_identified"] <= 1, rung
+
+
 def test_intake_recovers_the_real_targets_of_three_virus_families():
     """The validation, read from its artifact rather than re-run.
 

@@ -1,0 +1,189 @@
+{
+  "experiment": "identification-cascade",
+  "status": "complete",
+  "question": "The holdout ladder found identification falls to zero one rank out. Can anything be recovered past that, and if so what kind of thing?",
+  "answer": "Yes, by two different mechanisms, and the split between them is the finding. Conserved enzymes are recoverable across families by remote homology, because they genuinely have distant relatives. Family-specific surface proteins are not recoverable by any homology method, because they have none -- and those are the antibody targets. They are recovered instead from their own sequence, as a class.",
+  "tiers": [
+    {
+      "tier": "exact",
+      "method": "5-mers over the 20-letter alphabet",
+      "reaches": "conspecific and congeneric relatives",
+      "cost": "milliseconds"
+    },
+    {
+      "tier": "remote",
+      "method": "Murphy 10-letter reduced-alphabet seeding, then Smith-Waterman with BLOSUM62, scored as a Karlin-Altschul expectation",
+      "reaches": "cross-family homologs of conserved enzymes",
+      "cost": "seconds per ORF"
+    },
+    {
+      "tier": "topology",
+      "method": "Kyte-Doolittle hydropathy: signal peptide, transmembrane segments, N-linked sequons",
+      "reaches": "surface antigens with no relative anywhere; names a class, not a protein",
+      "cost": "microseconds"
+    }
+  ],
+  "coronaviridae_removed": {
+    "rank": "family",
+    "removed": 486,
+    "secs": 29,
+    "rows": [
+      {
+        "len": 2595,
+        "tier": "remote",
+        "name": "R1AB_WBV24 Replicase polyprotein 1ab",
+        "org": "White bream virus (isolate Bli",
+        "score": 6.92,
+        "ev": 8.932450751568206e-68
+      },
+      {
+        "len": 4405,
+        "tier": "remote",
+        "name": "R1AB_BEV Replicase polyprotein 1ab",
+        "org": "Berne virus",
+        "score": 4.8819,
+        "ev": 6.474744495272296e-10
+      },
+      {
+        "len": 1282,
+        "tier": "topology",
+        "name": "unidentified probable surface antigen",
+        "org": "",
+        "score": 3.6,
+        "ev": null
+      },
+      {
+        "len": 419,
+        "tier": null,
+        "name": "",
+        "org": "",
+        "score": null,
+        "ev": null
+      },
+      {
+        "len": 275,
+        "tier": null,
+        "name": "",
+        "org": "",
+        "score": null,
+        "ev": null
+      },
+      {
+        "len": 222,
+        "tier": null,
+        "name": "",
+        "org": "",
+        "score": null,
+        "ev": null
+      },
+      {
+        "len": 121,
+        "tier": null,
+        "name": "",
+        "org": "",
+        "score": null,
+        "ev": null
+      },
+      {
+        "len": 121,
+        "tier": null,
+        "name": "",
+        "org": "",
+        "score": null,
+        "ev": null
+      }
+    ]
+  },
+  "nidovirales_removed": {
+    "rank": "order",
+    "removed": 548,
+    "secs": 27,
+    "rows": [
+      {
+        "len": 2595,
+        "tier": "remote",
+        "name": "POLG_ZYMVC Genome polyprotein",
+        "org": "Zucchini yellow mosaic virus (",
+        "score": 4.5873,
+        "ev": 0.0003089623403621763
+      },
+      {
+        "len": 1282,
+        "tier": "topology",
+        "name": "unidentified probable surface antigen",
+        "org": "",
+        "score": 3.6,
+        "ev": null
+      },
+      {
+        "len": 4405,
+        "tier": null,
+        "name": "",
+        "org": "",
+        "score": null,
+        "ev": null
+      },
+      {
+        "len": 419,
+        "tier": null,
+        "name": "",
+        "org": "",
+        "score": null,
+        "ev": null
+      },
+      {
+        "len": 275,
+        "tier": null,
+        "name": "",
+        "org": "",
+        "score": null,
+        "ev": null
+      },
+      {
+        "len": 222,
+        "tier": null,
+        "name": "",
+        "org": "",
+        "score": null,
+        "ev": null
+      },
+      {
+        "len": 121,
+        "tier": null,
+        "name": "",
+        "org": "",
+        "score": null,
+        "ev": null
+      },
+      {
+        "len": 121,
+        "tier": null,
+        "name": "",
+        "org": "",
+        "score": null,
+        "ev": null
+      }
+    ]
+  },
+  "findings": [
+    "With all of Coronaviridae removed, both replicase halves are found through Tobaniviridae -- White bream virus at E=8.9e-68 and Berne virus at E=6.5e-10. Nidovirus replicases are genuinely homologous across families and exact 5-mers simply could not see them.",
+    "The spike is found by neither tier of homology at any holdout level, and that is correct rather than a failure: it has no homolog outside Coronaviridae. The topology tier recovers it as a probable surface antigen from a signal peptide, three transmembrane segments and twenty-two glycosylation sequons.",
+    "The expectation is what makes the threshold meaningful across query lengths. The same alignment stage scores the spike at E=20 and the nucleoprotein at E=0.35 against distant candidates, and both are correctly rejected at 1e-3.",
+    "At order level the ORF1a hit is lost and the surviving ORF1b hit is to a potyvirus polyprotein at E=3.1e-4, within an order of magnitude of the threshold. It is reported with its expectation rather than filtered, because a borderline hit a reader can discount is better than a confident one they cannot."
+  ],
+  "limitations": [
+    "The topology tier names a class. It cannot say which surface protein, and a false positive on a large polyprotein is possible -- the SARS-CoV-2 replicase 1a reads as surface on hydropathy alone, which is why the tier runs only where homology found nothing and why a length guard excludes anything over 2,000 residues.",
+    "Remote homology costs seconds per ORF against milliseconds for exact seeds, so it runs only on ORFs the first tier could not place.",
+    "Nothing here addresses a non-viral genome. The reference is reviewed viral proteins, so a bacterial genome identifies nothing for an entirely different reason."
+  ],
+  "provenance": {
+    "host": "MWPF4GD0LT.yu.yale.edu",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "6c2d98184eafbad217bace0e5d2fa46d8a43650f",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-10-22T22:18:33.335884+00:00"
+  }
+}

@@ -280,7 +280,27 @@ UNIPROT_STREAM = "https://rest.uniprot.org/uniprotkb/stream"
 # Reviewed entries only. TrEMBL would multiply the reference by three orders of magnitude for
 # sequences nobody has curated, and the point of the reference is that a hit against it carries
 # a name somebody stands behind.
-REFERENCE_QUERY = "(taxonomy_id:10239) AND (reviewed:true)"
+#
+# Scope is a parameter because the default is a real limitation rather than a neutral choice.
+# Indexing viruses alone means a bacterial genome identifies nothing at all -- not distantly,
+# not weakly, nothing -- and the failure looks exactly like the cross-family failure the
+# cascade exists to handle while having an entirely different cause. Measured sizes, from
+# UniProt on 22 October 2026:
+#
+#   viral      17,529 entries     6M residues    index builds in ~5s
+#   fungi      38,309 entries    13M residues
+#   bacteria  337,292 entries   118M residues    twenty times the default
+#   all       575,748 entries   202M residues
+#
+# The exact-seed index is a dict of sets and its memory grows with residues, so the larger
+# scopes are offered and their cost is stated rather than assumed to be free.
+SCOPES = {
+    "viral": "(taxonomy_id:10239) AND (reviewed:true)",
+    "bacteria": "(taxonomy_id:2) AND (reviewed:true)",
+    "fungi": "(taxonomy_id:4751) AND (reviewed:true)",
+    "all": "reviewed:true",
+}
+REFERENCE_QUERY = SCOPES["viral"]
 
 KMER = 5
 
@@ -290,11 +310,15 @@ KMER = 5
 MINIMUM_SCORE = 0.12
 
 
-def fetch_reference(query=REFERENCE_QUERY, path=None):
-    """The reference protein set, downloaded once and cached as FASTA."""
+def fetch_reference(query=None, path=None, scope="viral"):
+    """The reference protein set for one scope, downloaded once and cached as FASTA."""
     import gzip
 
-    path = path or ROOT / "data/raw/reference/viral_reviewed.fasta"
+    if query is None:
+        if scope not in SCOPES:
+            raise ValueError(f"Unknown scope {scope!r}; known scopes are {sorted(SCOPES)}")
+        query = SCOPES[scope]
+    path = path or ROOT / "data/raw/reference" / f"{scope}_reviewed.fasta"
     if path.exists():
         return path
     url = f"{UNIPROT_STREAM}?query={urllib.parse.quote(query)}&format=fasta&compressed=true"
@@ -518,7 +542,7 @@ def rank_score(features):
 
 def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
                minimum_score=MINIMUM_SCORE, record=True,
-               exclude_taxid=None, exclude_rank=None):
+               exclude_taxid=None, exclude_rank=None, remote=True, scope="viral"):
     """Genome accession to a ranked list of candidate binding targets.
 
     Two holdouts, and they ask different questions. `exclude_organism` removes one organism
@@ -554,7 +578,7 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
         f"{len(segments)} segments: " + "; ".join(h.split()[0] for h, _ in segments)
     seq = "".join(part for _, part in segments)
 
-    entries = read_fasta(fetch_reference())
+    entries = read_fasta(fetch_reference(scope=scope))
     removed, clade = None, None
     if exclude_taxid:
         if not exclude_rank:
@@ -565,27 +589,68 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
     else:
         index, kept = build_index(entries, exclude_organism)
 
+    # Three tiers, tried in order of cost. Exact 5-mers answer the easy case in milliseconds.
+    # Reduced-alphabet seeding plus Smith-Waterman answers the remote case in seconds, and is
+    # only paid for when the first tier finds nothing. Hydropathy answers the case neither can
+    # -- a protein with no relative anywhere -- and answers it with a class rather than a name.
+    reduced = build_reduced_index(kept) if remote else None
+    aligner = _aligner() if remote else None
+
     candidates = []
     for orf in searched:
         hits = [h for h in identify_local(orf["protein"], index, kept)
                 if h["score"] >= minimum_score]
+        tier = "exact" if hits else None
+        if not hits and remote:
+            hits = identify_remote(orf["protein"], reduced, kept, aligner)
+            tier = "remote" if hits else None
+        topology = None if hits else membrane_topology(orf["protein"])
+        if topology and topology["likely_surface"]:
+            tier = "topology"
         candidates.append({"orf": {k: orf[k] for k in
                                    ("strand", "frame", "nt_start", "length_aa")}
                                   | {"segment": orf.get("segment", 0)},
-                           "hits": hits})
+                           "hits": hits, "tier": tier, "topology": topology})
 
     records = homolog_records([h["accession"] for c in candidates for h in c["hits"]])
     ranked = []
     for candidate in candidates:
         if not candidate["hits"]:
-            ranked.append({**candidate, "identified": False, "features": None, "score": None})
+            topology = candidate.get("topology") or {}
+            if topology.get("likely_surface"):
+                # Named by class, because that is all the evidence supports. A surface antigen
+                # with no identifiable relative is still the protein antibodies would be
+                # raised against, and returning nothing for it loses the target the system
+                # exists to find. Scored below any homology hit so it never outranks one.
+                features = {"conservation": 0.0, "surface_exposed": True,
+                            "structures_in_family": 0, "druggable_class": 2,
+                            "essential_class": False, "keywords_matched": [],
+                            "locations": ["predicted surface, from hydropathy"],
+                            "from_topology": True}
+                ranked.append({**candidate, "identified": True,
+                               "name": "unidentified probable surface antigen",
+                               "nearest_homolog": None, "nearest_organism": None,
+                               "features": features, "score": rank_score(features),
+                               "conservation": features["conservation"]})
+                continue
+            ranked.append({**candidate, "identified": False, "features": None,
+                           "score": None, "conservation": None})
             continue
         features = score_candidate(candidate["hits"], records)
+        # Conservation is reported beside the score and not only inside it. It is the one
+        # feature read from this genome's relationship to the reference; the other four are
+        # read off whatever homolog was matched and do not move as that homolog gets more
+        # distant. Summed, a close assignment and a remote one differ by at most three of the
+        # rubric's nine-odd points, so the number the list sorts by is the number that hides
+        # how far the evidence reached. The holdout ladder is why it matters: within a genus
+        # conservation carries the assignment, one rank further out there is no assignment at
+        # all, and the two cases must not present as the same kind of answer.
         ranked.append({**candidate, "identified": True,
                        "name": candidate["hits"][0]["name"],
                        "nearest_homolog": candidate["hits"][0]["accession"],
                        "nearest_organism": candidate["hits"][0]["organism"],
-                       "features": features, "score": rank_score(features)})
+                       "features": features, "score": rank_score(features),
+                       "conservation": features["conservation"]})
     ranked.sort(key=lambda r: (r["score"] is not None, r["score"] or 0), reverse=True)
 
     payload = {
@@ -599,6 +664,7 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
         "reference_entries_removed": removed,
         "reference_entries": len(kept),
         "minimum_orf_aa": minimum_aa, "minimum_hit_score": minimum_score,
+        "reference_scope": scope,
         "orfs_found": len(found), "orfs_ranked": len(searched),
         "orfs_dropped_by_top": len(found) - len(searched),
         "unidentified": sum(1 for r in ranked if not r["identified"]),
@@ -796,7 +862,14 @@ def decompose(ranked, limit=12):
                 "parent": row["name"], "chain_range": [chain["start"], chain["end"]],
                 "length_aa": chain["length"],
                 "hits": row["hits"], "features": features,
-                "score": rank_score(features)})
+                "score": rank_score(features),
+                # Carried from the parent ORF, which is the only thing that was matched. A
+                # mature chain is cut out of a hit, never aligned on its own, so its
+                # conservation is the parent's and the tier that found the parent is the
+                # tier that found it. Dropping them here is what made the decomposed list
+                # look like it had been identified more directly than it was.
+                "tier": row.get("tier"),
+                "conservation": features["conservation"]})
     # A polyprotein reached by two ORFs -- ORF1a and ORF1b of a coronavirus both hit a
     # replicase entry -- decomposes twice into the same chains. Keep the better-scoring copy.
     best = {}
@@ -906,3 +979,157 @@ def build_index_excluding_clade(entries, taxid, rank, known, k=KMER):
         for offset in range(len(sequence) - k + 1):
             index.setdefault(sequence[offset:offset + k], set()).add(position)
     return index, kept, removed, target
+
+
+# ---------------------------------------------------------------------------
+# Remote homology, and the proteins no homology search can reach.
+
+# Murphy's ten-letter reduced alphabet. Exact 5-mers over the twenty-letter alphabet need
+# roughly 40% identity before two homologs share any, which is why identification falls off a
+# cliff one taxonomic rank out. Grouping residues by physicochemical class keeps seeds alive
+# at much lower identity, at the cost of many more chance matches -- which is what the
+# alignment stage after it exists to throw away.
+REDUCED_GROUPS = ("LVIM", "C", "A", "G", "ST", "P", "FYW", "EDNQ", "KR", "H")
+REDUCED = {residue: chr(ord("a") + group)
+           for group, residues in enumerate(REDUCED_GROUPS) for residue in residues}
+
+# Karlin-Altschul parameters for BLOSUM62 with an 11/1 affine gap, the values BLAST uses.
+# They turn a raw Smith-Waterman score into a bit score and an expectation, which is the only
+# way to compare a 4,400-residue replicase against a 222-residue membrane protein and say
+# which hit means something.
+LAMBDA, KAPPA = 0.267, 0.041
+
+# An expectation below this counts as a hit. Calibrated against the Coronaviridae-removed run,
+# where the replicase finds a genuine nidovirus homolog at E near zero while the spike and the
+# nucleoprotein -- which have no relatives outside the family -- score E of 20 and 0.35.
+MAX_EVALUE = 1e-3
+
+
+def reduce_sequence(seq):
+    return "".join(REDUCED.get(residue, "x") for residue in seq)
+
+
+def bit_score(raw):
+    import math
+
+    return (LAMBDA * raw - math.log(KAPPA)) / math.log(2)
+
+
+def expectation(raw, query_len, database_residues):
+    return query_len * database_residues * (2.0 ** -bit_score(raw))
+
+
+def _aligner():
+    from Bio import Align
+    from Bio.Align import substitution_matrices
+
+    aligner = Align.PairwiseAligner()
+    aligner.substitution_matrix = substitution_matrices.load("BLOSUM62")
+    aligner.open_gap_score, aligner.extend_gap_score = -11, -1
+    aligner.mode = "local"
+    return aligner
+
+
+def build_reduced_index(entries, k=KMER):
+    index = {}
+    for position, entry in enumerate(entries):
+        reduced = reduce_sequence(entry["sequence"])
+        for offset in range(len(reduced) - k + 1):
+            index.setdefault(reduced[offset:offset + k], set()).add(position)
+    return index
+
+
+def identify_remote(protein, index, kept, aligner=None, k=KMER, prefilter=120, top=3):
+    """Identify one ORF by remote homology: reduced-alphabet seeds, then alignment.
+
+    The two stages do different jobs and neither works alone. Reduced-alphabet seeding is
+    sensitive and indiscriminate -- it proposes candidates a twenty-letter seed would never
+    reach, and most of them are chance. Smith-Waterman with BLOSUM62 scores each properly, and
+    the Karlin-Altschul expectation makes scores comparable across query lengths so a
+    threshold means the same thing for a replicase and for a membrane protein.
+
+    What it cannot do is the point of the next function. With all of Coronaviridae removed
+    this finds the replicase through a torovirus at E near zero, because nidovirus replicases
+    are genuinely homologous across families. It finds nothing for the spike, because the
+    spike has no homolog outside the family. That is biology and not a tuning failure, and no
+    sensitivity setting changes it.
+    """
+    import collections
+
+    aligner = aligner or _aligner()
+    database_residues = sum(len(entry["sequence"]) for entry in kept)
+    reduced = reduce_sequence(protein)
+    seeds = {reduced[i:i + k] for i in range(len(reduced) - k + 1)}
+
+    counts = collections.Counter()
+    for seed in seeds:
+        for position in index.get(seed, ()):
+            counts[position] += 1
+
+    scored = []
+    for position, _shared in counts.most_common(prefilter):
+        entry = kept[position]
+        raw = aligner.score(protein, entry["sequence"])
+        evalue = expectation(raw, len(protein), database_residues)
+        if evalue > MAX_EVALUE:
+            continue
+        scored.append({"accession": entry["accession"], "name": entry["name"],
+                       "organism": entry["organism"],
+                       "bits": round(bit_score(raw), 1), "evalue": evalue,
+                       "score": round(min(1.0, bit_score(raw) / 200.0), 4)})
+    scored.sort(key=lambda hit: hit["evalue"])
+    return scored[:top]
+
+
+# Kyte-Doolittle hydropathy, for the proteins homology cannot reach.
+HYDROPATHY = {"A": 1.8, "R": -4.5, "N": -3.5, "D": -3.5, "C": 2.5, "Q": -3.5, "E": -3.5,
+              "G": -0.4, "H": -3.2, "I": 4.5, "L": 3.8, "K": -3.9, "M": 1.9, "F": 2.8,
+              "P": -1.6, "S": -0.8, "T": -0.7, "W": -0.9, "Y": -1.3, "V": 4.2}
+
+
+def membrane_topology(protein, window=19, threshold=1.6):
+    """Signal peptide and transmembrane segments, from hydropathy alone.
+
+    This is the path for a protein with no identifiable relative, and it exists because the
+    holdout ladder showed what the alternative is: for a pathogen outside every sequenced
+    family, the spike-equivalent returns no hit and therefore no target, and the
+    spike-equivalent is the antibody target. Losing it is losing the thing the system is for.
+
+    Homology is not the only evidence. A viral surface glycoprotein is recognisable from its
+    own sequence: an N-terminal signal peptide, one or more hydrophobic segments long enough
+    to cross a membrane, and N-linked glycosylation sequons on the ectodomain. None of that
+    requires a relative. It identifies a *class* rather than a protein, which is weaker than
+    a homology hit and is the right kind of weaker -- it says "this is probably a surface
+    antigen worth raising antibodies against" without claiming to know which one.
+    """
+    scores = [HYDROPATHY.get(residue, 0.0) for residue in protein]
+    if len(scores) < window:
+        return {"signal_peptide": False, "transmembrane_segments": 0, "sequons": 0,
+                "likely_surface": False}
+
+    means = [sum(scores[i:i + window]) / window for i in range(len(scores) - window + 1)]
+    segments, inside = 0, False
+    for value in means:
+        if value >= threshold and not inside:
+            segments, inside = segments + 1, True
+        elif value < threshold:
+            inside = False
+
+    # A signal peptide is a hydrophobic core in the first ~40 residues. Counted separately
+    # from the transmembrane segments it would otherwise be mistaken for.
+    head = means[:max(1, 40 - window)]
+    signal = bool(head) and max(head) >= threshold
+
+    sequons = len(re.findall(r"N[^P][ST]", protein))
+    # A polyprotein is not a surface antigen, however many membrane segments it carries. The
+    # SARS-CoV-2 replicase 1a has twenty-four and twenty-eight sequons -- nsp3, nsp4 and nsp6
+    # are genuinely membrane-bound -- and reads as a surface protein on hydropathy alone. In
+    # the cascade this rarely matters, because a replicase is identified by homology long
+    # before the de-novo path is reached, but the function is also called directly and should
+    # not return an answer it cannot support.
+    plausible_length = 100 <= len(protein) <= 2000
+    return {"signal_peptide": signal, "transmembrane_segments": segments,
+            "sequons": sequons, "plausible_antigen_length": plausible_length,
+            # A membrane anchor and glycosylation together: either alone is common in proteins
+            # that are not surface antigens.
+            "likely_surface": plausible_length and (signal or segments >= 1) and sequons >= 2}
