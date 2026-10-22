@@ -1290,10 +1290,43 @@ def rank_enrichment(ranks, candidates):
                       if sum(combo) <= observed)
         p, method = atleast / placements, "exact"
 
+    # What the test could achieve at this size if the ranking were perfect. Without it a
+    # non-significant result is unreadable, because two very different things produce one:
+    # a ranking that did badly, and a test with no room to show that it did well. Nipah
+    # scores three targets among eight candidates, where the best attainable p is 0.018 --
+    # so even a flawless ranking would be weak evidence, and the observed 0.071 says almost
+    # nothing about the ranking.
+    floor = sum(range(1, k + 1))
+    if math.comb(total, k) > 5_000_000:
+        mu = k * (total + 1) / 2
+        variance = k * (total - k) * (total + 1) / 12
+        z = (floor - mu) / math.sqrt(variance)
+        best = 0.5 * (1 + math.erf(z / math.sqrt(2)))
+    else:
+        best = sum(1 for combo in itertools.combinations(range(1, total + 1), k)
+                   if sum(combo) <= floor) / math.comb(total, k)
+    powered = best < 0.01
+
+    # Three outcomes, not two. A test that cannot produce strong evidence in its best case
+    # must not be reported as a failure when it produces weak evidence in the actual one.
+    if p < 0.05:
+        verdict = "beats chance"
+    elif powered:
+        verdict = "does not beat chance"
+    else:
+        verdict = "not established (underpowered)"
+
     return {"p": p, "mean_percentile": mean_percentile, "method": method,
             "targets": k, "candidates": total, "rank_sum": observed,
             "chance_rank_sum": k * (total + 1) / 2,
-            # Stated rather than left to the reader, because the whole point of replacing the
-            # previous claim is that a reader should not have to work out whether it could
-            # have failed.
-            "beats_chance_at_05": bool(p is not None and p < 0.05)}
+            "best_attainable_p": best, "adequately_powered": powered,
+            "verdict": verdict,
+            "beats_chance_at_05": bool(p is not None and p < 0.05),
+            # The denominator moves the answer and must therefore be fixed by a rule applied
+            # to every pathogen, never chosen per pathogen. Nipah's observed ranks of 1, 3 and
+            # 4 give p = 0.071 against eight candidates and p = 0.006 against seventeen, with
+            # nothing about the ranking changed -- so counting unidentified reading frames as
+            # candidates would rescue it and would be selecting the denominator that gives the
+            # wanted answer. The rule here is candidates the pipeline identified and ranked,
+            # and it is the same rule for the bacterium with its 1,662.
+            "denominator_rule": "candidates identified and ranked by the pipeline"}

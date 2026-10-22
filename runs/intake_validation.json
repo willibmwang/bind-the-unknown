@@ -75,7 +75,11 @@
         "candidates": 23,
         "rank_sum": 21,
         "chance_rank_sum": 60.0,
-        "beats_chance_at_05": true
+        "best_attainable_p": 2.9718565187672738e-05,
+        "adequately_powered": true,
+        "verdict": "beats chance",
+        "beats_chance_at_05": true,
+        "denominator_rule": "candidates identified and ranked by the pipeline"
       },
       "all_expected_in_top_8_is_vacuous_when": "the pathogen produced 8 or fewer candidates, which is the case for Nipah virus; the claim then says only that the targets were somewhere in the list"
     },
@@ -146,7 +150,11 @@
         "candidates": 8,
         "rank_sum": 8,
         "chance_rank_sum": 13.5,
-        "beats_chance_at_05": false
+        "best_attainable_p": 0.017857142857142856,
+        "adequately_powered": false,
+        "verdict": "not established (underpowered)",
+        "beats_chance_at_05": false,
+        "denominator_rule": "candidates identified and ranked by the pipeline"
       },
       "all_expected_in_top_8_is_vacuous_when": "the pathogen produced 8 or fewer candidates, which is the case for Nipah virus; the claim then says only that the targets were somewhere in the list"
     },
@@ -218,7 +226,11 @@
         "candidates": 11,
         "rank_sum": 7,
         "chance_rank_sum": 18.0,
-        "beats_chance_at_05": true
+        "best_attainable_p": 0.006060606060606061,
+        "adequately_powered": true,
+        "verdict": "beats chance",
+        "beats_chance_at_05": true,
+        "denominator_rule": "candidates identified and ranked by the pipeline"
       },
       "all_expected_in_top_8_is_vacuous_when": "the pathogen produced 8 or fewer candidates, which is the case for Nipah virus; the claim then says only that the targets were somewhere in the list"
     }
@@ -241,5 +253,6 @@
     "recorded_at_utc": "2026-10-22T21:52:16.832346+00:00"
   },
   "correction_2026_10_22": "This run's holdouts are by organism NAME, which for SARS-CoV-2 is an isolate holdout and not a species one: bat coronaviruses HKU3, Rp3/2004 and 279/2005 and SARS-CoV are all in species Betacoronavirus pandemicum with it, and all four remain in the reference here. runs/holdout_ladder.json takes the holdout up the taxonomic ranks and finds identification collapses one rung above this one. What this file shows is that the ranking recovers the right targets given a conspecific or congeneric relative; it does not show that it works without one.",
-  "correction_2026_10_22_second": "The headline 'every expected target ranks in the top eight' is withdrawn as a measure. It could not fail for Nipah, which produced exactly 8 candidates, and it omitted the denominator everywhere: SARS-CoV-2 produced 23 candidates and not the 8 this file stored. Replaced by a rank-sum probability against a random ranking. Under it SARS-CoV-2 (p=8.6e-04), influenza (p=1.2e-02) and M. tuberculosis (p=4.0e-04) beat chance and NIPAH DOES NOT (p=7.1e-02). The Nipah result reported earlier as a success is not distinguishable from random at the 5 per cent level."
+  "correction_2026_10_22_second": "The headline 'every expected target ranks in the top eight' is withdrawn as a measure. It could not fail for Nipah, which produced exactly 8 candidates, and it omitted the denominator everywhere: SARS-CoV-2 produced 23 candidates and not the 8 this file stored. Replaced by a rank-sum probability against a random ranking. Under it SARS-CoV-2 (p=8.6e-04), influenza (p=1.2e-02) and M. tuberculosis (p=4.0e-04) beat chance and NIPAH DOES NOT (p=7.1e-02). The Nipah result reported earlier as a success is not distinguishable from random at the 5 per cent level.",
+  "correction_2026_10_22_third": "The Nipah verdict is revised from 'does not beat chance' to 'not established (underpowered)'. With three targets among eight candidates the best attainable p is 0.018, so even a perfect ranking would be weak evidence and the observed 0.071 says almost nothing about the ranking. Reporting it as a failure overstates the evidence in the same direction the original 'top 8' claim overstated it, only inverted. Note also that the denominator decides this: the same ranks give p=0.071 against eight candidates and p=0.006 against seventeen. The rule is therefore fixed -- candidates identified and ranked -- and applied to every pathogen including the bacterium's 1,662, rather than chosen per pathogen."
 }

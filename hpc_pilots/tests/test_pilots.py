@@ -1238,12 +1238,27 @@ def test_intake_recovers_the_real_targets_of_three_virus_families():
     assert enrichment["SARS-CoV-2"]["beats_chance_at_05"] is True, enrichment["SARS-CoV-2"]
     assert enrichment["Influenza A PR8"]["beats_chance_at_05"] is True, enrichment["Influenza A PR8"]
 
-    # Pinned as a negative. Three targets among eight candidates at ranks 1, 3 and 4 is
-    # p = 0.071, which does not clear 5 per cent, and an earlier version of this file reported
-    # it as a success. If a later change makes Nipah significant this test should fail and the
-    # improvement be recorded rather than absorbed silently.
-    assert enrichment["Nipah virus"]["beats_chance_at_05"] is False, enrichment["Nipah virus"]
-    assert 0.05 < enrichment["Nipah virus"]["p"] < 0.1, enrichment["Nipah virus"]
+    # Nipah is neither a pass nor a failure and is pinned as the third thing. Three targets
+    # among eight candidates at ranks 1, 3 and 4 gives p = 0.071, but the best attainable p at
+    # that size is 0.018, so even a perfect ranking would be weak evidence and the observed
+    # value says almost nothing about the ranking. It was reported as a success twice and then
+    # as a failure once; both overstate what eight candidates can show.
+    nipah = enrichment["Nipah virus"]
+    assert nipah["verdict"] == "not established (underpowered)", nipah
+    assert nipah["adequately_powered"] is False, nipah
+    assert nipah["best_attainable_p"] > 0.01, nipah
+
+    # The two that are adequately powered must say so, or the verdict above is just a label
+    # the underpowered case wears to avoid being a failure.
+    for name in ("SARS-CoV-2", "Influenza A PR8"):
+        assert enrichment[name]["adequately_powered"] is True, enrichment[name]
+        assert enrichment[name]["verdict"] == "beats chance", enrichment[name]
+
+    # The denominator decides the answer, so the rule must be recorded with it. Nipah's ranks
+    # give p = 0.071 against eight candidates and p = 0.006 against seventeen with nothing
+    # about the ranking changed, and counting unidentified reading frames as candidates would
+    # rescue it by choosing the denominator that gives the wanted result.
+    assert nipah["denominator_rule"] == "candidates identified and ranked by the pipeline"
 
     # The denominator must travel with the rank. SARS-CoV-2 produced 23 candidates and the
     # artifact stored only the top 8 rows, which is how the denominator went missing.
