@@ -42,6 +42,7 @@ describe whichever runs happened to be lying around, and the staleness would be 
 which is the same failure one level up.
 """
 import json
+import re
 
 from .common import ROOT, provenance, write_json
 from .dossier import AXES, leaders
@@ -290,6 +291,95 @@ def audit_axis_redundancy(packets=None, deadline=8):
     return rows
 
 
+# A ProteinGym dataset identifier as it appears in claim prose. The trailing suffix is
+# optional and load-bearing: Starr's RBD scan ships as `..._Starr_2020_binding` and
+# `..._Starr_2020_expression`, and a pattern that stops at the year silently matches neither.
+DMS_ID = re.compile(r"\b[A-Z0-9][A-Za-z0-9]*_[A-Za-z0-9]+_[A-Za-z]+_\d{4}(?:_[a-z]+)?\b")
+
+# `selection_type` values in the ProteinGym metadata that are a measurement of binding. The
+# scope narrowed on 22 October to binding affinity as the only admissible endpoint, so this
+# is the list that decides whether a `public_labels` claim is about the endpoint in scope.
+BINDING_SELECTION = ("binding", "activity, binding", "binding assays")
+
+
+def audit_public_label_endpoints(metadata=None):
+    """What endpoint each `public_labels` claim actually cites, read from ProteinGym.
+
+    `public_labels` is the only axis in the packets whose claims are independently verified --
+    every other claim is sourced to the Week 4 write-up -- so it is the axis most likely to be
+    quoted as settled, and the one where a wrong endpoint does the most damage.
+
+    Four of the five populated claims cite a scan that is not a binding measurement. Mpro's
+    cites a FRET-and-growth readout; the HA stem's two and the PA-PB1 interface's two are
+    viral replication; the neuraminidase's is growth. Only Starr's RBD scan is
+    `selection_type: Binding`, and across all 217 assays in the archive only nine are. The
+    rest measure whether the virus replicates or the enzyme turns over, which is a different
+    question from whether anything binds.
+
+    That mattered less when the project spanned enrichment, activity and affinity and said so
+    in each manifest. It matters now, because the endpoint rule admits binding alone, and a
+    claim reading "among the cleanest binding landscapes available" against a replication scan
+    is the kind of thing a reviewer finds rather than the kind a project reports.
+
+    Read from the archive's own metadata rather than from a list kept here, so the audit tracks
+    the data and a re-released ProteinGym reclassifying an assay shows up as a changed verdict
+    instead of as agreement with a stale table. Returns one row per claim, never raising on a
+    missing file -- a clean checkout without the archive should report that it could not check,
+    which is a different statement from reporting that everything is fine.
+    """
+    import csv
+
+    path = ROOT / "data/raw/proteingym_metadata.csv"
+    if metadata is None:
+        if not path.exists():
+            return {"checked": False,
+                    "reason": f"{path} is absent; stage it with `python -m hpc_pilots prepare`",
+                    "claims": []}
+        with path.open() as handle:
+            metadata = {row["DMS_id"]: row for row in csv.DictReader(handle)}
+
+    rows = []
+    for name, spec in PACKETS.items():
+        for target, (_pathogen, _compartment, claims) in spec["targets"].items():
+            for axis, strength, claim, source, verified, _round in claims:
+                if axis != "public_labels" or strength == "unknown":
+                    continue
+                cited = DMS_ID.findall(claim)
+                endpoints = []
+                for identifier in cited:
+                    record = metadata.get(identifier)
+                    if record is None:
+                        endpoints.append({"dms_id": identifier, "found": False,
+                                          "selection_type": None, "selection_assay": None,
+                                          "is_binding": None})
+                        continue
+                    selection = (record.get("selection_type") or "").strip()
+                    endpoints.append({
+                        "dms_id": identifier, "found": True,
+                        "selection_type": selection or None,
+                        "selection_assay": (record.get("selection_assay") or "").strip() or None,
+                        "is_binding": selection.lower() in BINDING_SELECTION})
+                known = [e for e in endpoints if e["found"]]
+                rows.append({
+                    "family": name, "target": target, "strength": strength,
+                    "source": source, "cited": cited, "endpoints": endpoints,
+                    "cites_nothing_resolvable": not known,
+                    # All, not any. A claim citing one binding scan and three replication
+                    # scans is not a binding claim, and reporting it as one because a single
+                    # citation qualifies is how a mixed claim gets quoted as a clean one.
+                    "all_cited_are_binding": bool(known) and all(e["is_binding"] for e in known)})
+
+    offending = [r for r in rows if not r["all_cited_are_binding"]]
+    return {"checked": True, "claims": rows,
+            "populated_claims": len(rows),
+            "claims_on_a_binding_endpoint": len(rows) - len(offending),
+            "claims_on_another_endpoint": sorted(r["target"] for r in offending),
+            "note": "A claim is counted as binding only when every ProteinGym dataset it cites "
+                    "is selection_type Binding. The endpoint rule in force admits measured "
+                    "binding affinity alone; replication fitness and enzymatic activity are "
+                    "different measurements and are reported here as such, not demoted."}
+
+
 def audit_twin_readout(packets=None, attempts=300):
     """The replacement readout, audited by the same questions that condemned its predecessor.
 
@@ -370,6 +460,8 @@ def run_monitor(packets=None, attempts=300, smoke=False):
     # schema and not about one family: an axis can vary within a packet and still be a
     # restatement of a field across the panel the policy is ranking.
     axes = audit_axis_redundancy()
+    # Also pooled over every packet: the endpoint rule applies to the project, not to a family.
+    endpoints = audit_public_label_endpoints()
 
     counts = {}
     for row in list(episodes.values()) + list(order.values()) + list(twins.values()):
@@ -383,6 +475,7 @@ def run_monitor(packets=None, attempts=300, smoke=False):
               "episode_readouts": episodes, "order_invariance": order,
               "twin_readout": twins, "rule_robustness": rules,
               "axis_redundancy": axes,
+              "public_label_endpoints": endpoints,
               "uninformative_axes": sorted(a for a, row in axes.items()
                                            if row["constant"] or row["recoverable_from"]),
               "provenance": provenance(),
@@ -398,7 +491,12 @@ def run_monitor(packets=None, attempts=300, smoke=False):
                                 "decision, either because it takes one value across every "
                                 "target or because it restates a field the policy already "
                                 "holds, and a next-axis readout scored over it is scoring a "
-                                "question that answers itself."}
+                                "question that answers itself. "
+                                "`public_label_endpoints` audits the evidence rather than the "
+                                "state: a claim listed in `claims_on_another_endpoint` cites a "
+                                "scan measuring replication fitness or enzymatic turnover, "
+                                "which the endpoint rule in force does not admit as a binding "
+                                "label."}
     output = ROOT / "runs/monitor" / f"{'smoke_' if smoke else ''}ledger.json"
     write_json(output, ledger)
     print(json.dumps({"output": str(output), "verdict_counts": counts,

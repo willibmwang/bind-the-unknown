@@ -4,7 +4,22 @@ Provenance discipline. Most axis assessments below are the project's own Week 4
 target-selection write-up, awaiting review with Askar and the SynX experimental lead.
 They are recorded as `internal assessment` and are **not** independent literature
 citations. Only the public-label axis is independently verified, against the
-ProteinGym archive actually on disk. Claims the write-up flagged as asserted from
+ProteinGym archive actually on disk.
+
+That verification was of existence, not of endpoint, and the distinction became
+load-bearing when the scope narrowed on 22 October to measured binding affinity as the
+only admissible endpoint. Four of the five populated `public_labels` claims cite a scan
+that measures something else: Mpro's is FRET and growth, the HA stem's two and the
+PA-PB1 interface's two are viral replication, the neuraminidase's is growth. Only
+Starr's RBD scan is `selection_type: Binding`, and nine of the archive's 217 assays are.
+Every claim now states its endpoint in its own text, read from the archive's metadata
+rather than asserted, and `monitor.audit_public_label_endpoints` recomputes it so a
+re-released ProteinGym changes the verdict instead of agreeing with a stale sentence.
+
+The strengths are deliberately unchanged. Demoting four claims would move the ranking,
+and therefore every recorded attainment figure, on the strength of a scope decision
+rather than a measurement. What a binding-only rule implies for those strengths is a
+question for the gate, not for a quiet edit. Claims the write-up flagged as asserted from
 memory carry `verified=False` and must not be used as positive controls until a
 citation is attached.
 
@@ -63,7 +78,7 @@ PACKETS = {
                 ("conservation", "strong", "Active site highly conserved across sarbecoviruses; workable across betacoronaviruses.", INTERNAL, True, 0),
                 ("accessibility", "weak", "Cytosolic homodimeric cysteine protease; requires a membrane-permeability story.", INTERNAL, True, 0),
                 ("assay_availability", "strong", "Standard FRET peptide-cleavage assay available for orthogonal functional follow-up.", INTERNAL, True, 0),
-                ("public_labels", "strong", "R1AB_SARS2_Flynn_2022: 5,725 single substitutions, FRET and growth readout.", PG, True, 0),
+                ("public_labels", "strong", "R1AB_SARS2_Flynn_2022: 5,725 single substitutions. The readout is FRET and growth -- enzymatic turnover and replication fitness, not a binding measurement, and ProteinGym records no selection_type for it at all.", PG, True, 0),
                 ("precedent", "moderate", "Published macrocyclic peptide campaigns including RaPID-derived work are asserted from memory and uncited.", INTERNAL, False, 0)]),
             "PLpro (nsp3)": ("SARS-CoV-2", "cytosolic", [
                 ("reagent_tractability", "moderate", "Soluble and tractable; the zinc-binding domain requires attention in construct design.", INTERNAL, True, 0),
@@ -89,7 +104,7 @@ PACKETS = {
                 ("essentiality", "strong", "ACE2 engagement required for entry.", INTERNAL, True, 0),
                 ("conservation", "weak", "Immune-evasion surface under intense positive selection; wrong basis for a family-transfer claim.", INTERNAL, True, 0),
                 ("accessibility", "strong", "Extracellular; no permeability story required.", INTERNAL, True, 0),
-                ("public_labels", "strong", "SPIKE_SARS2_Starr_2020_binding (3,802) and _expression (3,798); among the cleanest binding landscapes available.", PG, True, 0)]),
+                ("public_labels", "strong", "SPIKE_SARS2_Starr_2020_binding (3,802) and _expression (3,798). selection_type Binding, assay ACE2 binding: the only cited scan in these packets that measures binding, and one of nine such assays in the 217-entry archive.", PG, True, 0)]),
             "Spike S2 stem-helix": ("SARS-CoV-2", "extracellular", [
                 ("reagent_tractability", "weak", "Needs a stabilised construct or peptide presentation rather than whole prefusion spike.", INTERNAL, True, 0),
                 ("essentiality", "strong", "Fusion machinery required for entry.", INTERNAL, True, 0),
@@ -107,7 +122,7 @@ PACKETS = {
                 ("essentiality", "strong", "Fusion machinery required for entry.", INTERNAL, True, 0),
                 ("conservation", "strong", "Conserved epitope recognised by group-specific broadly neutralising antibodies.", INTERNAL, True, 0),
                 ("accessibility", "strong", "Extracellular; no permeability story required.", INTERNAL, True, 0),
-                ("public_labels", "strong", "A0A2Z5U3Z0_9INFA_Doud_2016 (H1N1, 10,715) and C6KNH7_9INFA_Lee_2018 (H3N2, 10,754) support a grouped H1-to-H3 shift test.", PG, True, 0),
+                ("public_labels", "strong", "A0A2Z5U3Z0_9INFA_Doud_2016 (H1N1, 10,715) and C6KNH7_9INFA_Lee_2018 (H3N2, 10,754) support a grouped H1-to-H3 shift test. Both are selection_type Growth, assay viral replication: fitness, not binding.", PG, True, 0),
                 ("precedent", "moderate", "Peptide-binder precedent against the stem is asserted and uncited.", INTERNAL, False, 0)]),
             "NA catalytic site": ("Influenza A", "extracellular", [
                 ("reagent_tractability", "strong", "Sialidase expressed as a soluble tetrameric head; validated drug target.", INTERNAL, True, 0),
@@ -115,12 +130,12 @@ PACKETS = {
                 ("conservation", "strong", "Catalytic residues and framework highly conserved.", INTERNAL, True, 0),
                 ("accessibility", "strong", "Extracellular; no permeability story required.", INTERNAL, True, 0),
                 ("assay_availability", "strong", "Established sialidase activity assay available as an orthogonal endpoint.", INTERNAL, True, 0),
-                ("public_labels", "moderate", "NRAM_I33A0_Jiang_2016 is present but small (298 mutants).", PG, True, 0)]),
+                ("public_labels", "moderate", "NRAM_I33A0_Jiang_2016 is present but small (298 mutants), and is selection_type Growth with no assay recorded: fitness, not binding.", PG, True, 0)]),
             "PA-PB1 interface": ("Influenza A", "cytosolic", [
                 ("reagent_tractability", "moderate", "PA C-terminal domain binds an N-terminal PB1 peptide; a well-characterised interface.", INTERNAL, True, 0),
                 ("essentiality", "strong", "Polymerase assembly required for replication.", INTERNAL, True, 0),
                 ("accessibility", "weak", "Intracellular; permeability story required.", INTERNAL, True, 0),
-                ("public_labels", "moderate", "RDRP_I33A0_Li_2023 (PB1, 12,003) and A4D664_9INFA_Soh_2019 (PB2, 14,421) are on disk.", PG, True, 0),
+                ("public_labels", "moderate", "RDRP_I33A0_Li_2023 (PB1, 12,003) and A4D664_9INFA_Soh_2019 (PB2, 14,421) are on disk. Both are selection_type Growth, assay viral replication: fitness, not binding. Neither is on PA, so neither measures the interface this axis is about.", PG, True, 0),
                 ("precedent", "moderate", "Published peptide inhibitors of this interface are asserted and uncited.", INTERNAL, False, 0)]),
         }},
     "henipavirus": {

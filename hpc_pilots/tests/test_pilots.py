@@ -1051,6 +1051,57 @@ def test_the_audit_condemns_every_readout_already_known_to_be_dead():
     assert ledger["discriminating_readouts"] == []
 
 
+def test_four_of_five_public_label_claims_are_not_binding_measurements():
+    """The only independently verified axis, checked for the endpoint it actually cites.
+
+    `public_labels` is the one axis whose claims were checked against something outside the
+    project -- the ProteinGym archive on disk -- so it is the axis most likely to be quoted as
+    settled. The check was of existence. Under the endpoint rule in force since 22 October,
+    which admits measured binding affinity alone, four of the five populated claims cite a
+    scan that measures something else: FRET and growth for Mpro, viral replication for the HA
+    stem and the PA-PB1 interface, growth for the neuraminidase. Nine of the archive's 217
+    assays are `selection_type: Binding` and only Starr's RBD scan is cited here.
+
+    Pinned exactly rather than as a bound. If a claim is repaired the test should fail and the
+    repair be recorded; if a sixth claim is populated it should fail and the endpoint be
+    stated. Skipped without the archive, because "could not check" and "nothing is wrong" are
+    different findings and only one of them is true here.
+    """
+    from hpc_pilots.common import ROOT
+    from hpc_pilots.monitor import audit_public_label_endpoints
+
+    if not (ROOT / "data/raw/proteingym_metadata.csv").exists():
+        pytest.skip("ProteinGym metadata not staged; run `python -m hpc_pilots prepare`")
+
+    report = audit_public_label_endpoints()
+    assert report["checked"] is True
+    assert report["populated_claims"] == 5, report["populated_claims"]
+    assert report["claims_on_a_binding_endpoint"] == 1, report
+    assert report["claims_on_another_endpoint"] == [
+        "HA stem (HA2 helix A)", "Mpro (nsp5)", "NA catalytic site", "PA-PB1 interface"], report
+
+    by_target = {row["target"]: row for row in report["claims"]}
+    # The one that does measure binding, and the regex that finds it. Starr's scan ships with
+    # a `_binding`/`_expression` suffix after the year, so a pattern stopping at the year
+    # matches neither half and the audit would report the claim as citing nothing resolvable.
+    spike = by_target["Spike RBD"]
+    assert spike["all_cited_are_binding"] is True, spike
+    assert "SPIKE_SARS2_Starr_2020_binding" in spike["cited"], spike["cited"]
+
+    # ProteinGym records no selection_type at all for the Mpro scan, which is a third state
+    # distinct from binding and from fitness, and it must not read as binding by default.
+    mpro = by_target["Mpro (nsp5)"]
+    assert mpro["endpoints"][0]["selection_type"] is None, mpro
+    assert mpro["all_cited_are_binding"] is False, mpro
+
+    # Every claim states its own endpoint now, so a reader who never runs the audit still sees
+    # it. The strengths are untouched on purpose: demoting them would move the ranking on a
+    # scope decision rather than on a measurement.
+    for target in report["claims_on_another_endpoint"]:
+        claim = by_target[target]
+        assert claim["strength"] in ("strong", "moderate"), claim
+
+
 def test_padding_absent_axes_moves_the_leak_rather_than_closing_it():
     """The obvious repair, and the reason it is not adopted.
 
