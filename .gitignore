@@ -53,4 +53,16 @@ runs/improve/
 # enzymes survive cross-family homology while surface antigens do not and must be recovered
 # from their own sequence instead.
 !runs/identification_cascade.json
+
+# Cross-kingdom transfer: the same pipeline on a bacterial genome, with M. tuberculosis held
+# out. runs/ is otherwise untracked, but this records that identification and ranking transfer
+# from viruses while six-frame calling and length ranking do not, and that all four first-line
+# TB drug target complexes land in the top 2.3 percent of 4,085 predicted genes.
+!runs/cross_kingdom_intake.json
+
+# Drug-target ranks against pathogen genome input, one row per target, with the denominator
+# and the rank-sum probability on every row. runs/ is otherwise untracked, but this is the
+# deliverable the collaborator reads and the record that the ranking beats chance on three of
+# four pathogens and not on Nipah.
+!runs/target_ranks.csv
 .venv-pfn/

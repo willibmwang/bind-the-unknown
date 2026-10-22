@@ -357,7 +357,7 @@ def read_fasta(path):
     return entries
 
 
-def build_index(entries, exclude_organism=None, k=KMER):
+def build_index(entries, exclude_organism=None, k=KMER, require_removal=True):
     """A k-mer index over the reference, optionally with one organism removed.
 
     `exclude_organism` is the control that makes this a pipeline rather than a lookup. Every
@@ -375,6 +375,23 @@ def build_index(entries, exclude_organism=None, k=KMER):
         sequence = entry["sequence"]
         for offset in range(len(sequence) - k + 1):
             index.setdefault(sequence[offset:offset + k], set()).add(position)
+    # A name holdout that removed nothing is the most dangerous outcome available here,
+    # because its output is indistinguishable from one that worked: the pathogen is still in
+    # the reference, every protein identifies perfectly, and the run reads as a passing test
+    # of something never tested. Two real cases, found while assembling benchmark families.
+    # NCBI titles the dengue reference "Dengue virus 2" while UniProt writes "Dengue virus
+    # type 2", so the obvious string removes nought of thirteen entries. And holding out
+    # "West Nile virus" leaves Kunjin virus, which is West Nile lineage 1b at 97.6% identity
+    # under a name sharing no substring with it.
+    #
+    # So a holdout removing nothing raises. The second failure it cannot catch, which is why
+    # `build_index_excluding_clade` is the better instrument: taxonomy knows Kunjin is West
+    # Nile and a substring never will.
+    if exclude_organism and require_removal and len(kept) == len(entries):
+        raise ValueError(
+            f"Holding out {exclude_organism!r} removed no entries, so the pathogen is still "
+            f"in the reference and this run is a lookup wearing a control's name. Check the "
+            f"string against UniProt's OS= field, or hold out by clade instead.")
     return index, kept
 
 
@@ -436,14 +453,38 @@ DRUGGABLE = {"protease": 3, "proteinase": 3, "peptidase": 3,
              # target of every broadly neutralising antibody programme against the virus and
              # ranked sixth, below the matrix protein, until these three lines existed -- the
              # same failure as "proteinase", one family later.
-             "hemagglutinin": 2, "haemagglutinin": 2, "neuraminidase": 3}
+             "hemagglutinin": 2, "haemagglutinin": 2, "neuraminidase": 3,
+             # Bacterial and general enzyme classes. This is the THIRD time this table has
+             # been wrong in the same way -- "proteinase" demoted the main protease of
+             # SARS-CoV-2 to eleventh, "hemagglutinin" demoted influenza's antibody target to
+             # sixth, and the whole of it scored every bacterial drug target at zero: DNA
+             # gyrase, InhA and ATP synthase, which are what fluoroquinolones, isoniazid and
+             # bedaquiline bind.
+             #
+             # The pattern is the finding and a fourth patch will not end it. A hand-written
+             # keyword list encodes whichever domain its author had in mind, and the failure
+             # is silent -- a missing term reads as "not a druggable class" rather than as
+             # "not in my vocabulary". The principled replacement is an external, curated
+             # source of target classes: an EC number means the protein is an enzyme, and
+             # ChEMBL and DrugBank both publish what has actually been drugged. Until that
+             # exists here, this list is a known weak point and is documented as one rather
+             # than presented as complete.
+             "gyrase": 3, "topoisomerase": 3, "reductase": 3, "synthase": 2, "synthetase": 2,
+             "dehydrogenase": 2, "kinase": 2, "ligase": 2, "isomerase": 1, "lyase": 1,
+             "transpeptidase": 3, "penicillin-binding": 3, "ribosomal protein": 2,
+             "elongation factor": 2, "atp synthase": 3, "carboxylase": 1, "oxidase": 1}
 
 # Keywords implying the protein is required for the virus to replicate at all. Binding a
 # dispensable protein cannot become a therapeutic, which is the same argument the dossier's
 # essentiality axis makes.
 ESSENTIAL = ("polymerase", "helicase", "protease", "proteinase", "peptidase", "capsid",
              "nucleoprotein", "spike", "fusion", "attachment", "entry into host",
-             "hemagglutinin", "haemagglutinin", "neuraminidase")
+             "hemagglutinin", "haemagglutinin", "neuraminidase",
+             # Bacterial essentials: replication, transcription, translation and cell-wall
+             # synthesis are the four processes every approved antibacterial class attacks.
+             "gyrase", "topoisomerase", "ribosomal protein", "elongation factor",
+             "transpeptidase", "penicillin-binding", "atp synthase", "replication initiator",
+             "dna polymerase", "rna polymerase", "cell wall", "peptidoglycan")
 
 
 def homolog_records(accessions, chunk=25):
@@ -1133,3 +1174,126 @@ def membrane_topology(protein, window=19, threshold=1.6):
             # A membrane anchor and glycosylation together: either alone is common in proteins
             # that are not surface antigens.
             "likely_surface": plausible_length and (signal or segments >= 1) and sequons >= 2}
+
+
+# ---------------------------------------------------------------------------
+# Prokaryotic genomes, where six-frame calling and length ranking both fail.
+
+# Above this, a genome is not viral and the viral heuristics stop being safe. The largest
+# genome in the families this project models is around 200 kb; a small bacterial chromosome is
+# ten times that.
+VIRAL_GENOME_LIMIT_NT = 500_000
+
+
+def predict_genes(seq, minimum_aa=60):
+    """Protein-coding genes by prokaryotic gene prediction, not by reading frames.
+
+    Six-frame calling plus a length ranking is a viral heuristic and it does not transfer.
+    SARS-CoV-2 yields twenty-eight open reading frames and its real products are the longest
+    of them. Mycobacterium tuberculosis yields 15,787, of which 2,534 are at least as long as
+    InhA -- the target of isoniazid, at 269 residues -- so ranking by length puts the drug
+    target somewhere past two thousandth and returns a confident list containing none of the
+    proteins anyone treats the disease with.
+
+    Prodigal's model finds 4,085 genes in the same genome in two seconds, against an
+    annotation of roughly 4,000. The difference is not sensitivity, it is that a gene is
+    defined by coding statistics and ribosome-binding signals rather than by the absence of a
+    stop codon.
+    """
+    import pyrodigal
+
+    finder = pyrodigal.GeneFinder()
+    finder.train(seq)
+    found = []
+    for gene in finder.find_genes(seq):
+        protein = gene.translate().rstrip("*")
+        if len(protein) < minimum_aa:
+            continue
+        found.append({"strand": "+" if gene.strand > 0 else "-", "frame": 0,
+                      "nt_start": gene.begin, "length_aa": len(protein),
+                      "protein": protein, "called_by": "pyrodigal"})
+    return found
+
+
+def candidate_genes(segments, minimum_aa=MINIMUM_AA):
+    """Candidate proteins from a genome, by whichever caller the genome's size warrants.
+
+    Returned with the caller named on every record, because the two are not interchangeable
+    and a result that does not say which produced it cannot be compared with one that does.
+    """
+    total = sum(len(part) for _, part in segments)
+    prokaryotic = total > VIRAL_GENOME_LIMIT_NT
+    found = []
+    for index, (header, part) in enumerate(segments):
+        called = predict_genes(part, minimum_aa) if prokaryotic else orfs(part, minimum_aa)
+        for record in called:
+            found.append({**record, "segment": index, "segment_header": header,
+                          "called_by": record.get("called_by", "six-frame")})
+    found.sort(key=lambda record: -record["length_aa"])
+    return found, prokaryotic
+
+
+def prescreen(name):
+    """Target-class score from a hit's name alone, for ranking before any network call.
+
+    A bacterial genome yields thousands of identified genes and the full feature set costs a
+    UniProt lookup each. The hit's own name is already in hand from the reference, and it
+    carries the two things that matter most for whether a protein is worth pursuing, so it is
+    used to choose which few hundred get the expensive treatment. This is a prefilter and not
+    the ranking; anything it admits is scored properly afterwards.
+    """
+    lowered = (name or "").lower()
+    druggable = max([weight for term, weight in DRUGGABLE.items() if term in lowered] or [0])
+    essential = any(term in lowered for term in ESSENTIAL)
+    return druggable + (1 if essential else 0)
+
+
+# ---------------------------------------------------------------------------
+# Whether a ranking beat chance, which "top 8" does not answer.
+
+def rank_enrichment(ranks, candidates):
+    """Probability a random ranking would place these targets at least this high.
+
+    The statistic exists because the claim it replaces could not fail. "Every expected target
+    ranks in the top eight" was reported for three pathogens, two of which produced eight and
+    eleven candidates in total -- so for Nipah it says only that the targets were somewhere in
+    the list, and it would have read as a pass had the ranking been random.
+
+    Computed exactly over all placements of k targets among n candidates, which is tractable
+    at viral scale, and by normal approximation when the binomial coefficient is too large --
+    a bacterial genome yields thousands of candidates and C(1662, 4) is about three hundred
+    billion.
+
+    Returns the one-sided p, the mean percentile, and which method was used, because a p of
+    0.07 on eight candidates and a p of 0.0004 on sixteen hundred are different kinds of
+    evidence and the reader needs to see which they have.
+    """
+    import itertools
+    import math
+
+    k, total = len(ranks), int(candidates)
+    if not k or total < k:
+        return {"p": None, "mean_percentile": None, "method": "not computable",
+                "targets": k, "candidates": total}
+    observed = sum(ranks)
+    mean_percentile = round(sum(r / total for r in ranks) / k * 100, 1)
+
+    if math.comb(total, k) > 5_000_000:
+        mu = k * (total + 1) / 2
+        variance = k * (total - k) * (total + 1) / 12
+        z = (observed - mu) / math.sqrt(variance)
+        p = 0.5 * (1 + math.erf(z / math.sqrt(2)))
+        method = "normal approximation"
+    else:
+        placements = math.comb(total, k)
+        atleast = sum(1 for combo in itertools.combinations(range(1, total + 1), k)
+                      if sum(combo) <= observed)
+        p, method = atleast / placements, "exact"
+
+    return {"p": p, "mean_percentile": mean_percentile, "method": method,
+            "targets": k, "candidates": total, "rank_sum": observed,
+            "chance_rank_sum": k * (total + 1) / 2,
+            # Stated rather than left to the reader, because the whole point of replacing the
+            # previous claim is that a reader should not have to work out whether it could
+            # have failed.
+            "beats_chance_at_05": bool(p is not None and p < 0.05)}

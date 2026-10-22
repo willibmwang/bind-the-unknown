@@ -1051,6 +1051,43 @@ def test_the_audit_condemns_every_readout_already_known_to_be_dead():
     assert ledger["discriminating_readouts"] == []
 
 
+def test_a_holdout_that_removes_nothing_raises():
+    """The control that silently is not one.
+
+    A name holdout removing nothing produces output identical to one that worked: the
+    pathogen is still in the reference, every protein identifies at full confidence, and the
+    run reads as a passing test of something never tested. Both failure modes here are real
+    and were found while assembling benchmark families rather than imagined.
+
+    NCBI titles the dengue reference "Dengue virus 2" and UniProt writes "Dengue virus type
+    2", so the obvious string matches nothing. That one is caught. The other is not catchable
+    by any string: holding out "West Nile virus" leaves Kunjin virus, West Nile lineage 1b at
+    97.6% identity, whose name shares no substring with it. That is why clade holdout exists
+    and why this test asserts the guard is a floor and not a guarantee.
+    """
+    from hpc_pilots.common import ROOT
+    from hpc_pilots.intake import build_index, fetch_reference, read_fasta
+
+    path = ROOT / "data/raw/reference/viral_reviewed.fasta"
+    if not path.exists():
+        pytest.skip("viral reference not staged")
+    entries = read_fasta(fetch_reference(scope="viral"))
+
+    # A string UniProt actually uses removes entries and is allowed through.
+    _index, kept = build_index(entries, "Nipah virus")
+    assert 0 < len(entries) - len(kept) < len(entries)
+
+    # A plausible string UniProt does not use must raise rather than pass quietly.
+    for absent in ("Dengue virus 2", "Severe acute respiratory syndrome coronavirus 3"):
+        with pytest.raises(ValueError, match="removed no entries"):
+            build_index(entries, absent)
+
+    # The escape hatch stays available for callers that mean it, so the guard cannot become a
+    # reason to stop holding anything out.
+    _index, kept = build_index(entries, "Dengue virus 2", require_removal=False)
+    assert len(kept) == len(entries)
+
+
 def test_the_cascade_recovers_enzymes_by_homology_and_antigens_by_topology():
     """What survives past the cliff, and the split that matters more than the recovery.
 
@@ -1186,12 +1223,32 @@ def test_intake_recovers_the_real_targets_of_three_virus_families():
     for pathogen, case in cases.items():
         # The control. Without it the run is a database lookup with a known answer.
         assert case["held_out"], pathogen
-        assert case["all_expected_in_top_8"] is True, (pathogen, case["expected_target_ranks"])
         for target, rank in case["expected_target_ranks"].items():
-            assert rank is not None and rank <= 8, (pathogen, target, rank)
+            assert rank is not None, (pathogen, target)
         # Identified through relatives, never through the pathogen itself.
         for organism in case["nearest_organisms"]:
             assert case["held_out"].lower() not in organism.lower(), (pathogen, organism)
+
+    # `all_expected_in_top_8` is kept in the artifact for continuity and is NOT asserted,
+    # because it cannot fail where it matters most: Nipah produced exactly eight candidates,
+    # so the claim says only that its targets appear in the list at all. The rank-sum
+    # probability replaces it and can fail -- and for Nipah it does.
+    enrichment = {name: case["rank_enrichment"] for name, case in cases.items()}
+
+    assert enrichment["SARS-CoV-2"]["beats_chance_at_05"] is True, enrichment["SARS-CoV-2"]
+    assert enrichment["Influenza A PR8"]["beats_chance_at_05"] is True, enrichment["Influenza A PR8"]
+
+    # Pinned as a negative. Three targets among eight candidates at ranks 1, 3 and 4 is
+    # p = 0.071, which does not clear 5 per cent, and an earlier version of this file reported
+    # it as a success. If a later change makes Nipah significant this test should fail and the
+    # improvement be recorded rather than absorbed silently.
+    assert enrichment["Nipah virus"]["beats_chance_at_05"] is False, enrichment["Nipah virus"]
+    assert 0.05 < enrichment["Nipah virus"]["p"] < 0.1, enrichment["Nipah virus"]
+
+    # The denominator must travel with the rank. SARS-CoV-2 produced 23 candidates and the
+    # artifact stored only the top 8 rows, which is how the denominator went missing.
+    assert cases["SARS-CoV-2"]["candidates_ranked"] == 23, cases["SARS-CoV-2"]
+    assert cases["Nipah virus"]["candidates_ranked"] == 8
 
     # Influenza is segmented and must be read as eight records, not concatenated into one.
     # Joining them would manufacture reading frames across junctions that exist in no molecule.

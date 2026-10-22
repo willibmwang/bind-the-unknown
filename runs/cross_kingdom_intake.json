@@ -1,0 +1,160 @@
+{
+  "experiment": "cross-kingdom-intake",
+  "status": "complete",
+  "question": "Does genome-to-targets transfer from viruses to a bacterium?",
+  "answer": "Yes, after replacing the candidate-selection step. The identification and ranking transfer unchanged; six-frame calling and length ranking do not.",
+  "pathogen": "Mycobacterium tuberculosis H37Rv",
+  "accession": "NC_000962.3",
+  "genome_nt": 4411532,
+  "held_out": "Mycobacterium tuberculosis (4,737 reviewed entries)",
+  "reference_scope": "bacteria",
+  "reference_entries": 332557,
+  "six_frame_orfs": 15787,
+  "predicted_genes": 4085,
+  "identified_through": "Mycobacterium bovis and M. bovis BCG, congeneric",
+  "top_ranked": [
+    {
+      "rank": 1,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 1316,
+      "name": "RPOC_MYCBO DNA-directed RNA polymerase subunit beta'"
+    },
+    {
+      "rank": 2,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 1184,
+      "name": "DPO3A_MYCBO DNA polymerase III subunit alpha"
+    },
+    {
+      "rank": 3,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 1079,
+      "name": "DNAE2_MYCBO Error-prone DNA polymerase"
+    },
+    {
+      "rank": 4,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 887,
+      "name": "DPO1_MYCBO DNA polymerase I"
+    },
+    {
+      "rank": 5,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 848,
+      "name": "CLPC_MYCBO Probable ATP-dependent Clp protease ATP-bindi"
+    },
+    {
+      "rank": 6,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 760,
+      "name": "FTSH_MYCBO ATP-dependent zinc metalloprotease FtsH"
+    },
+    {
+      "rank": 7,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 578,
+      "name": "DPO3X_MYCBO DNA polymerase III subunit gamma/tau"
+    },
+    {
+      "rank": 8,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 549,
+      "name": "ATPA_MYCBT ATP synthase subunit alpha"
+    },
+    {
+      "rank": 9,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 528,
+      "name": "SIGA_MYCBO RNA polymerase sigma factor SigA"
+    },
+    {
+      "rank": 10,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 518,
+      "name": "HIP1_MYCBO Serine protease Hip1"
+    },
+    {
+      "rank": 11,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 486,
+      "name": "ATPB_MYCBT ATP synthase subunit beta"
+    },
+    {
+      "rank": 12,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 451,
+      "name": "LDT5_MYCBO L,D-transpeptidase Mb0493"
+    },
+    {
+      "rank": 13,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 446,
+      "name": "ATPFD_MYCBP ATP synthase subunit b-delta"
+    },
+    {
+      "rank": 14,
+      "prescreen": 4,
+      "confidence": 1.0,
+      "length_aa": 438,
+      "name": "Y2805_MYCBO Uncharacterized zinc protease Mb2805c"
+    }
+  ],
+  "first_line_drug_targets": [
+    {
+      "drug": "fluoroquinolones",
+      "rank": 39,
+      "found_as": "GYRB_MYCBP DNA gyrase subunit B"
+    },
+    {
+      "drug": "isoniazid (InhA)",
+      "rank": 92,
+      "found_as": "INHA_MYCBO Enoyl-[acyl-carrier-protein] reduct"
+    },
+    {
+      "drug": "rifampicin (RpoB)",
+      "rank": 1,
+      "found_as": "RPOC_MYCBO DNA-directed RNA polymerase subunit"
+    },
+    {
+      "drug": "bedaquiline (AtpE)",
+      "rank": 8,
+      "found_as": "ATPA_MYCBT ATP synthase subunit alpha"
+    }
+  ],
+  "findings": [
+    "Six-frame calling returns 15,787 ORFs for a 4.4 Mb genome against 28 for SARS-CoV-2, and 2,534 of them are at least as long as InhA. Ranking by length would put isoniazid's target past two thousandth. The viral candidate-selection step does not transfer.",
+    "Prodigal's model predicts 4,085 genes in two seconds against an annotation of about 4,000, which is the step that makes a bacterial genome tractable at all.",
+    "All four first-line TB drug target complexes rank inside the top 92 of 4,085 genes, the top 2.3 percent, with the pathogen held out of the reference.",
+    "The keyword vocabulary failed for the third time and in the same way. Built for viruses, it scored DNA gyrase, InhA and ATP synthase at zero -- the targets of fluoroquinolones, isoniazid and bedaquiline. Three instances in three domains is a property of the method, not three accidents.",
+    "Indexing 332,557 bacterial proteins costs 78 seconds and 7.8 GB, well under the 17 GB extrapolated from the viral and fungal measurements: the 5-mer space saturates at about 2.8 million distinct keys, so memory grows sublinearly once the dictionary stops gaining them. The earlier estimate was wrong in the favourable direction."
+  ],
+  "limitations": [
+    "The pipeline finds the right complexes, not always the drug-bound subunit. Rifampicin binds RpoB and the top hit is RpoC; bedaquiline binds AtpE and the hit is AtpA.",
+    "Identification is through M. bovis, which is congeneric, so this is a species-level holdout and not a hard one.",
+    "The prescreen saturates: dozens of genes tie at the maximum class score with confidence 1.000, so ordering within that band is close to arbitrary.",
+    "Only the identification half was run. Full ranking with surface exposure and structural evidence would need a UniProt lookup per gene."
+  ],
+  "provenance": {
+    "host": "MWPF4GD0LT.yu.yale.edu",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "8405326b22f99f0fbf3d05f9348f9479c03e1c00",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-10-22T22:37:57.151424+00:00"
+  }
+}
