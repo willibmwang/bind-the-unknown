@@ -1051,6 +1051,47 @@ def test_the_audit_condemns_every_readout_already_known_to_be_dead():
     assert ledger["discriminating_readouts"] == []
 
 
+def test_axis_coverage_is_not_a_structure_count_proxy():
+    """The withdrawal, pinned so it cannot be quietly reasserted.
+
+    `coverage_static` outscores every policy that reads the state, and that measurement is
+    pinned elsewhere. It was introduced as a *research-attention* control, on the reasoning
+    that a target with more declared axes is one more had been published about. Checked
+    against the per-target deposited-structure counts, which is a standard attention proxy
+    and the one this project now fetches with dates attached, the two are uncorrelated.
+
+    Spike RBD carries 2,099 structures and five axes; the neuraminidase accession the packet
+    cites carries none and six. Whatever the coverage policy exploits, this proxy is not it,
+    and a docstring claiming otherwise should fail here rather than be believed.
+
+    The test is skipped rather than failed when the structural table has not been built, so a
+    clean checkout without a network does not report a withdrawal it could not check.
+    """
+    from scipy.stats import spearmanr
+
+    from hpc_pilots.common import ROOT
+
+    path = ROOT / "data/processed/structures/manifest.json"
+    if not path.exists():
+        pytest.skip("structural table not built; run `python -m hpc_pilots structures`")
+    structures = json.loads(path.read_text())["targets"]
+
+    axes, counts = [], []
+    for spec in PACKETS.values():
+        for name, (_pathogen, _compartment, claims) in spec["targets"].items():
+            if name not in structures:
+                continue
+            axes.append(len({c[0] for c in claims}))
+            counts.append(structures[name]["structures"])
+
+    assert len(axes) == 11, len(axes)
+    rho = spearmanr(axes, counts)
+    # Deliberately a bound on the magnitude rather than on the p-value. With eleven targets
+    # the test is underpowered and a null p-value would pass for a correlation of 0.5; what
+    # the withdrawal rests on is that the estimate itself is near zero.
+    assert abs(rho.statistic) < 0.35, (rho.statistic, rho.pvalue, list(zip(axes, counts)))
+
+
 def test_two_of_the_seven_axes_cannot_gate_a_decision():
     """The state audit, pinned on the two axes that fail it today.
 

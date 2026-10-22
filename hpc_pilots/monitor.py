@@ -55,11 +55,13 @@ from .twins import FAMILIES, generate, run_twins
 # `coverage` was added last and for a different reason from the other two. They are controls
 # on *reasoning*: a policy that ignores the state must not score, and if it does the readout
 # is measuring the harness. It is a control on *the packets*: axis coverage is uneven across
-# targets -- seven axes on Mpro, four on Nipah's F glycoprotein -- and that spread records
-# how much had been published when the evidence was assembled rather than how good the target
-# is. Because `retrievable_axes` is in the state, a policy can count offers and rank targets
-# by research attention without reading a single claim. Any readout `coverage` can reach is
-# reporting that proxy.
+# targets -- seven axes on Mpro, four on Nipah's F glycoprotein -- and `retrievable_axes` puts
+# that shape in the state, so a policy can rank targets by counting offers without reading a
+# single claim. Any readout it can reach cannot separate counting from reasoning.
+#
+# It was introduced as a research-attention control and that reading is withdrawn: declared
+# axis count and deposited-structure count are uncorrelated across the eleven targets,
+# Spearman 0.060, p = 0.86. The measurement survives the withdrawal; the mechanism is open.
 TRIVIAL = ("rubric", "scripted", "coverage", "coverage_static")
 
 # Policies that do read the decision state, carried here so the twin audit can ask the

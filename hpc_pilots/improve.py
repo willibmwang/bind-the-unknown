@@ -363,7 +363,9 @@ def guard_state_is_oracle_free(packet="coronaviridae"):
 # ranks targets by how many axes the packet declares and reads nothing that moves -- outscores
 # every policy that reads the state. That is a defect in the packets, it predates every
 # candidate here, and holding the whole search red for it would mean no candidate could ever
-# be evaluated against a baseline that is itself refused.
+# be evaluated against a baseline that is itself refused. What the counting exploits is open:
+# it is not deposited-structure count, which is uncorrelated with declared axis count across
+# the eleven targets at Spearman 0.060, p = 0.86.
 #
 # It is recorded rather than forgiven. `audit_axis_redundancy` names the two axes that cannot
 # gate, the ledger carries `trivial_outscores_reference`, and both are pinned by their own

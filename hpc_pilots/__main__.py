@@ -92,6 +92,10 @@ def main(argv=None):
     p.add_argument("--no-tests", action="store_true",
                    help="Skip the in-process invariant suite, which the guard otherwise runs")
     p.add_argument("--smoke", action="store_true")
+    p = sub.add_parser("structures",
+                       help="Fetch per-target structural evidence with deposition dates")
+    p.add_argument("--coverage", type=float, default=0.5,
+                   help="Fraction of a declared range a deposited chain must cover to count")
     p = sub.add_parser("monitor", help="Audit which readouts can still tell two policies apart")
     p.add_argument("--family", action="append", dest="packets",
                    help="Restrict the audit to one packet; repeatable")
@@ -173,6 +177,13 @@ def main(argv=None):
         from .improve import run_improve
         run_improve(args.family, attempts=args.attempts, run_tests=not args.no_tests,
                     smoke=args.smoke)
+    elif args.command == "structures":
+        from .structures_evidence import build
+        import json as _json
+        payload = build(minimum=args.coverage)
+        print(_json.dumps({t: {k: r[k] for k in ("accession", "structures",
+                                                 "earliest_deposition", "best_resolution")}
+                           for t, r in payload["targets"].items()}, indent=2))
     elif args.command == "monitor":
         from .monitor import run_monitor
         run_monitor(args.packets, attempts=args.attempts, smoke=args.smoke)

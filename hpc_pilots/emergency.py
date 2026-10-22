@@ -160,28 +160,42 @@ def _coverage_action(offers, order, axes=None, weights=None):
     A third fixed policy, and the one that exists because of a defect in the packets rather
     than because of a defect in a model. Axis coverage is not uniform across targets: Mpro
     carries claims on all seven axes, Nipah's F glycoprotein on four, and the rest sit
-    between. That spread is a record of how much was known when the Week 4 write-up was
-    assembled, which tracks how much has been published about a target -- and published
-    volume is exactly what a pretrained policy can recall without reading anything. The
-    state hands the shape over directly: `retrievable_axes` lists every pair on offer, so
-    counting them needs no claim, no strength level, no gate verdict and no ranking.
+    between. The state hands that shape over directly -- `retrievable_axes` lists every pair
+    on offer -- so counting it needs no claim, no strength level, no gate verdict and no
+    ranking. A readout a policy counting offers can reach is a readout defined on the shape
+    of the dossier rather than on the decision.
 
-    So this policy is the triviality control for that channel, in the sense `monitor` uses
-    the word. A readout it can reach is a readout defined on the shape of the dossier rather
-    than on the decision, and the shape is a research-attention proxy. It is the same move
-    as the zero-retrieval control one level down: establish what a policy that does not
-    reason can score, before attributing a score to reasoning.
+    **What this policy keying on coverage does *not* establish, with the arithmetic.** It was
+    introduced here as a research-attention control, on the reasoning that a target with more
+    declared axes is one more had been published about, and published volume is what a
+    pretrained policy recalls for free. That attribution is withdrawn. Tested against the
+    per-target deposited-structure counts in `data/processed/structures/manifest.json` --
+    1,839 for Mpro against 0 for the neuraminidase accession the packet cites -- declared axis
+    count and structure count are uncorrelated: Spearman 0.060 over eleven targets, p = 0.86.
+    Spike RBD carries 2,099 structures and five axes; NA carries none and six. Whatever the
+    coverage policy is exploiting, one standard proxy for research attention is not it.
 
-    `weights` is what separates two readings of this policy that would otherwise be
-    conflated, and conflating them is how `scripted` was read as a name-blind control for
-    three packets before the orbit caught it. Left `None`, the policy ranks by the offers
-    *still outstanding* at this state, which is not obviously a defect at all -- it is
-    uncertainty sampling, the same family as the lattice's uncertainty-reduction-per-cost,
-    and a policy that buys where most is unresolved may be reasoning perfectly well. Given
-    a table of per-target counts over the *whole* packet, it ranks by a quantity that never
-    moves as evidence arrives, which is the fame proxy and nothing else. Only the second is
-    evidence that the readout is measuring research attention. Both are reported, because
-    the gap between them is the measurement.
+    What survives is the measurement and not the mechanism. A policy reading only the number
+    of offers outscores every policy that reads the state, which makes the readout unable to
+    separate counting from reasoning, and that is true whatever the counting correlates with.
+    The likelier mechanism, untested, is mechanical rather than lexical: a target with more
+    unresolved axes has more purchases that can settle it, so buying there pays off without
+    any knowledge of which axis gates. That is still not reasoning, and it is still a defect
+    in the readout, but it is a different defect from the one claimed here first.
+
+    It is the triviality control for that channel, in the sense `monitor` uses the word: the
+    same move as the zero-retrieval control one level down, establishing what a policy that
+    does not reason can score before attributing a score to reasoning.
+
+    `weights` separates two readings of this policy that would otherwise be conflated, and
+    conflating them is how `scripted` was read as a name-blind control for three packets
+    before the orbit caught it. Left `None`, the policy ranks by the offers *still
+    outstanding* at this state, which is not obviously a defect at all -- it is uncertainty
+    sampling, the same family as the lattice's uncertainty-reduction-per-cost, and a policy
+    buying where most is unresolved may be reasoning perfectly well. Given a table of
+    per-target counts over the *whole* packet, it ranks by a quantity that never moves as
+    evidence arrives, so whatever it scores cannot be uncertainty sampling. Both are
+    reported, because the gap between them is the measurement.
 
     Ties are broken on the order the dossiers are listed in, never on the target's name.
     That distinction is deliberate and was learned the expensive way -- `scripted` traverses

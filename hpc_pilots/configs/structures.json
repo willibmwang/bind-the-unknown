@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-22",
+  "note": "Where each target's structural evidence comes from, as data. Written after the scope narrowed to pathogen intake through target generation, where structural evidence is the only target-quality signal in this project computable without literature: a pocket score can be computed on a protein nobody has screened, and an antibody count cannot. Kept separate from targets.py because that file is hand-authored assessments and this one is a pointer to public records that can be refetched and rechecked.",
+  "range_sources": {
+    "uniprot_feature": "A residue range read from the UniProt entry's own features, matched by feature type and an exact description. Derived rather than asserted: refetching the entry reproduces it, and the entry carries its own release date.",
+    "declared": "A residue range with no corresponding UniProt feature, carried with an explicit citation. The S2 stem-helix epitope is the case -- it is a real and well-mapped antibody target with no feature in P0DTC2 -- and a declared range without a source is refused rather than defaulted."
+  },
+  "targets": {
+    "Mpro (nsp5)": {"accession": "P0DTD1", "ranges": [
+      {"source": "uniprot_feature", "type": "Chain", "description": "3C-like proteinase nsp5"}]},
+    "PLpro (nsp3)": {"accession": "P0DTD1", "ranges": [
+      {"source": "uniprot_feature", "type": "Domain", "description": "Peptidase C16"}],
+      "caveat": "Counted on the Peptidase C16 catalytic domain rather than on the whole nsp3 chain. The first version of this entry used the chain, which is 1,945 residues against the domain's 265, so the coverage threshold excluded every construct that was actually of PLpro and returned three structures where there are hundreds. The count was described in this field as an upper bound and was in fact a severe undercount, which is the failure mode a caveat written before the number is checked tends to have."},
+    "nsp10/nsp16 interface": {"accession": "P0DTD1", "ranges": [
+      {"source": "uniprot_feature", "type": "Chain", "description": "Non-structural protein 10"},
+      {"source": "uniprot_feature", "type": "Chain", "description": "2'-O-methyltransferase nsp16"}],
+      "requires_all_ranges": true,
+      "caveat": "An obligate two-protein complex, so a structure counts only if it covers both chains. That is stricter than the other entries and is the point: a structure of nsp16 alone is not evidence that the interface is a tractable reagent."},
+    "nsp13 helicase": {"accession": "P0DTD1", "ranges": [
+      {"source": "uniprot_feature", "type": "Chain", "description": "Helicase nsp13"}]},
+    "Spike RBD": {"accession": "P0DTC2", "ranges": [
+      {"source": "uniprot_feature", "type": "Region", "description": "Receptor-binding domain (RBD)"}]},
+    "Spike S2 stem-helix": {"accession": "P0DTC2", "ranges": [
+      {"source": "declared", "start": 1140, "end": 1161,
+       "citation": "Stem-helix epitope of betacoronavirus S2, as mapped by the broadly neutralising antibodies S2P6 and CC40.8. No corresponding feature exists in P0DTC2, so the range is declared and cited rather than derived."}]},
+    "HA stem (HA2 helix A)": {"accession": "P03452", "ranges": [
+      {"source": "declared", "start": 418, "end": 475,
+       "citation": "HA2 helix A, numbered on the HA0 precursor. Declared because UniProt carries HA1/HA2 chains but no helix-A feature."}],
+      "caveat": "P03452 is A/Puerto Rico/8/1934 H1, which is not the strain of either deep mutational scan the packet cites. Structure counts are for this accession only and do not transfer across subtypes."},
+    "NA catalytic site": {"accession": "P03470", "ranges": [
+      {"source": "uniprot_feature", "type": "Chain", "description": "Neuraminidase"}],
+      "caveat": "The whole sialidase chain, not the catalytic site. Almost every NA structure covers the catalytic site, so the two counts are close, but they are not the same quantity."},
+    "PA-PB1 interface": {"accession": "P15659", "ranges": [
+      {"source": "declared", "start": 239, "end": 716,
+       "citation": "PA C-terminal domain, which carries the PB1 N-terminal peptide binding site."}],
+      "caveat": "Counted on PA alone. A structure of the PA C-terminal domain without the PB1 peptide is not evidence that the interface is tractable, and this count does not separate them."},
+    "G attachment glycoprotein": {"accession": "Q9IH62", "ranges": [
+      {"source": "uniprot_feature", "type": "Chain", "description": "Glycoprotein G"}]},
+    "F fusion glycoprotein": {"accession": "Q9IH63", "ranges": [
+      {"source": "uniprot_feature", "type": "Chain", "description": "Fusion glycoprotein F0"}]}
+  }
+}
