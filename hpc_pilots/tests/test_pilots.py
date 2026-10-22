@@ -1051,6 +1051,55 @@ def test_the_audit_condemns_every_readout_already_known_to_be_dead():
     assert ledger["discriminating_readouts"] == []
 
 
+def test_six_frame_calling_recovers_the_coronavirus_proteome():
+    """ORF calling, checked against products whose lengths are known exactly.
+
+    Offline and deterministic: the genome is read from the staged reference if present and the
+    test skips otherwise, so the suite never depends on NCBI being reachable.
+
+    What is pinned is the part that must not drift. Nucleocapsid is 419 residues, membrane is
+    222, ORF3a is 275, and a caller returning anything else has a frame or a stop-codon bug.
+    ORF1ab is the interesting case and is pinned as a *failure*: the biological product is one
+    7,096-residue polyprotein made by a -1 ribosomal frameshift, and six-frame translation
+    returns it as 4,405 and 2,595 because no reader of stop codons can see a frameshift. That
+    is a limitation of the method rather than of the implementation, and it is recorded here
+    so a later reader does not mistake the two fragments for a bug or, worse, patch them
+    together with coronavirus-specific special-casing in a step meant to be family-agnostic.
+    """
+    from hpc_pilots.common import ROOT
+    from hpc_pilots.intake import orfs, translate
+
+    # The genetic code, spot-checked at the three stops and one ordinary codon, because an
+    # off-by-one in the table builder would shift every translated protein silently.
+    assert translate("TAATAGTGA") == "***"
+    assert translate("ATGGCC") == "MA"
+
+    staged = ROOT / "data/processed/intake/NC_045512.2_heldout.json"
+    cached = ROOT / "data/raw/reference/NC_045512.2.fasta"
+    if not cached.exists():
+        pytest.skip("SARS-CoV-2 genome not staged; run `python -m hpc_pilots intake`")
+    seq = "".join(line.strip() for line in cached.read_text().splitlines()
+                  if not line.startswith(">"))
+
+    found = orfs(seq, minimum_aa=60)
+    lengths = [o["length_aa"] for o in found]
+
+    # Exact, because these are the products' real lengths.
+    for expected in (419, 275, 222):
+        assert expected in lengths, (expected, lengths[:12])
+
+    # The frameshift, pinned as the known failure it is.
+    assert 4405 in lengths and 2595 in lengths, lengths[:6]
+    assert 7096 not in lengths, "a six-frame caller cannot see a -1 frameshift"
+
+    # Every ORF starts at a methionine and contains no stop.
+    for orf in found:
+        assert orf["protein"].startswith("M")
+        assert "*" not in orf["protein"]
+
+    del staged
+
+
 def test_the_count_channel_is_measured_rather_than_certified_away():
     """The decomposition that covers the channel the orbit cannot.
 

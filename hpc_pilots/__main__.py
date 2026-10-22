@@ -92,6 +92,17 @@ def main(argv=None):
     p.add_argument("--no-tests", action="store_true",
                    help="Skip the in-process invariant suite, which the guard otherwise runs")
     p.add_argument("--smoke", action="store_true")
+    p = sub.add_parser("intake",
+                       help="Pathogen genome accession -> ranked candidate binding targets")
+    p.add_argument("--accession", default="NC_045512.2",
+                   help="NCBI nucleotide accession for the genome")
+    p.add_argument("--exclude-organism", dest="exclude_organism",
+                   help="Remove this organism from the reference before identifying, which "
+                        "is how a genome whose proteins are already curated is scored as if "
+                        "it were novel")
+    p.add_argument("--top", type=int, default=12, help="Longest ORFs to identify")
+    p.add_argument("--no-decompose", action="store_true",
+                   help="Rank whole ORFs without expanding polyproteins into mature chains")
     p = sub.add_parser("structures",
                        help="Fetch per-target structural evidence with deposition dates")
     p.add_argument("--coverage", type=float, default=0.5,
@@ -177,6 +188,17 @@ def main(argv=None):
         from .improve import run_improve
         run_improve(args.family, attempts=args.attempts, run_tests=not args.no_tests,
                     smoke=args.smoke)
+    elif args.command == "intake":
+        from .intake import decompose, run_intake
+        import json as _json
+        payload = run_intake(args.accession, exclude_organism=args.exclude_organism,
+                             top=args.top)
+        rows = payload["targets"] if args.no_decompose else decompose(payload["targets"])
+        print(_json.dumps([
+            {"rank": i, "target": r.get("name"), "score": r.get("score"),
+             "nearest_homolog": r.get("nearest_homolog"),
+             "features": r.get("features")}
+            for i, r in enumerate(rows[:args.top], 1) if r.get("identified")], indent=2))
     elif args.command == "structures":
         from .structures_evidence import build
         import json as _json
