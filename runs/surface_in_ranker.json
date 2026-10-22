@@ -1,0 +1,63 @@
+{
+  "experiment": "surface-markers-in-the-ranker",
+  "status": "complete",
+  "question": "Do structure-derived surface markers improve the target ranking?",
+  "answer": "No, in both forms tried, and the change is withdrawn. The markers are computed and reported; they are not scored.",
+  "measured": [
+    {
+      "pathogen": "SARS-CoV-2",
+      "p_no_surface": 0.0014251314560912085,
+      "p_surface_added": 0.0009337068160597573,
+      "p_surface_centred": 0.020050125313283207,
+      "ranks_no_surface": {
+        "Spike": 1,
+        "3C-like proteinase": 2,
+        "polymerase": 5,
+        "Papain-like protease": 6,
+        "Helicase": 7
+      },
+      "ranks_surface_centred": {
+        "Spike": 1,
+        "3C-like proteinase": 10,
+        "polymerase": 7,
+        "Papain-like protease": 4,
+        "Helicase": 8
+      }
+    },
+    {
+      "pathogen": "Nipah virus",
+      "p_no_surface": 0.07142857142857142,
+      "p_surface_added": 0.39285714285714285,
+      "p_surface_centred": 0.125,
+      "ranks_no_surface": {
+        "Fusion glycoprotein": 1,
+        "Glycoprotein G": 3,
+        "polymerase": 4
+      },
+      "ranks_surface_centred": {
+        "Fusion glycoprotein": 1,
+        "Glycoprotein G": 5,
+        "polymerase": 3
+      }
+    }
+  ],
+  "why_added_fails": "The term cannot be earned by a candidate with no deposited structure, so every such candidate falls below every candidate that has one. That is a penalty for being understudied, aimed at exactly the novel targets the system exists to find. SARS-CoV-2's spike went from first to fifth on surface_score None; Nipah's p went 0.071 to 0.393.",
+  "why_centred_fails": "The mirror failure. Centred on the mean of six reference structures, most real candidates score below it, so having a structure became the penalty and the top five were again everything with no structure. There is no baseline available that is not invented from the targets under test.",
+  "what_survives": "The markers themselves. Scoring the largest contiguous exposed hydrophobic patch ranks the spike receptor-binding domain above the main protease -- the reverse of a small-molecule druggability score and the right way round for a macrocycle -- and the direction holds at 8, 10 and 12 angstrom contact cutoffs. The signal is real and too weak to improve a ranking that already works.",
+  "bugs_found_on_the_way": [
+    "Every mature chain of a polyprotein resolved to the parent accession and therefore to one structure: the main protease, polymerase, helicase and papain-like protease of SARS-CoV-2 all received a single surface score of 2.85 and a patch of 381 square angstroms, which belongs to the replicase and to none of them. Structure selection is now restricted to entries covering the chain's own residue range.",
+    "Glycosylation sequons were counted inside the patch, but a patch is hydrophobic by construction and asparagine is not, so the shielding term returned zero for every structure including the spike trimer. Counted within glycan reach instead.",
+    "freesasa could not open any path under this checkout, because the directory contains a typographic apostrophe. Structures are copied to an ASCII path first."
+  ],
+  "open": "A large hydrophobic patch is necessary and not sufficient. Nipah's matrix protein carries the largest patch measured anywhere, 1,236 square angstroms, and is not a drug target -- that surface is an oligomerisation interface buried inside the virion. The marker cannot distinguish exposed in a crystal from exposed on a particle, and gating it on subcellular localisation is the obvious next attempt.",
+  "provenance": {
+    "host": "MWPF4GD0LT.yu.yale.edu",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "9aee563936a685771acde8fb9ce4f822431d1ab3",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-10-22T23:47:00.453168+00:00"
+  }
+}

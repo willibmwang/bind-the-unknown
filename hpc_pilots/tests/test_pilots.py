@@ -1051,6 +1051,46 @@ def test_the_audit_condemns_every_readout_already_known_to_be_dead():
     assert ledger["discriminating_readouts"] == []
 
 
+def test_surface_scoring_prefers_an_interface_to_a_pocket():
+    """The inversion the module exists for, pinned from its artifact.
+
+    The keyword rubric scores zero on six of the project's own eleven targets, and the first
+    reading of that was that non-enzymatic targets fall outside scope. Seven of the eleven are
+    interfaces or non-enzymatic surfaces, and the theory of change says macrocycles exist
+    precisely to reach what small molecules cannot -- so a rubric biased against them is
+    biased against the molecule class.
+
+    The obvious repair, a druggability score, reproduces the bias through geometry: fpocket
+    and its relatives are calibrated on deep enclosed small-molecule sites, and on pocket
+    depth the main protease beats the spike receptor-binding domain. What is pinned here is
+    that scoring the largest contiguous exposed hydrophobic patch inverts that, and that the
+    inversion survives the one free parameter.
+    """
+    import json
+
+    from hpc_pilots.common import ROOT
+
+    path = ROOT / "runs/surface_markers.json"
+    if not path.exists():
+        pytest.skip("surface marker artifact absent")
+    payload = json.loads(path.read_text())
+
+    sensitivity = {row["contact_angstrom"]: row for row in payload["contact_cutoff_sensitivity"]}
+    assert set(sensitivity) == {8.0, 10.0, 12.0}, sorted(sensitivity)
+
+    # The direction must hold at every cutoff, or the result is an artefact of the cutoff and
+    # the module is measuring its own parameter.
+    for cutoff, row in sensitivity.items():
+        assert row["gap"] > 0, (cutoff, row)
+        assert row["mean_non_enzyme"] > row["mean_enzyme"], (cutoff, row)
+
+    # And the specific comparison the argument rests on, at the chosen cutoff.
+    chosen = sensitivity[10.0]
+    by_target = {row["target"]: row for row in chosen["rows"]}
+    assert by_target["Spike RBD"]["score"] > by_target["Mpro (nsp5)"]["score"], chosen
+    assert by_target["Spike RBD"]["patch_area"] > by_target["Mpro (nsp5)"]["patch_area"]
+
+
 def test_a_holdout_that_removes_nothing_raises():
     """The control that silently is not one.
 

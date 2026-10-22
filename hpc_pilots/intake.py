@@ -565,6 +565,39 @@ def score_candidate(hits, records):
         "locations": sorted(locations)[:4]}
 
 
+# Mean macrocycle surface score over the six structures in `runs/surface_markers.json`, which
+# span two enzyme pockets and four interfaces. Used to centre the surface term so that a
+# candidate with no structure is neutral rather than penalised.
+SURFACE_BASELINE = 3.24
+
+
+def enrich_with_surface(ranked, top=12):
+    """Attach structure-derived surface markers to the highest-ranked candidates.
+
+    Only the top few, because the accessibility calculation costs seconds per structure and a
+    bacterial genome produces more than a thousand identified genes. The name-derived score
+    orders the field cheaply; this re-scores the head of it with something that does not
+    depend on what the protein is called.
+    """
+    from .geometry import surface_for_accession
+
+    for row in ranked[:top]:
+        accession = row.get("nearest_homolog")
+        if not row.get("identified") or not accession or not row.get("features"):
+            continue
+        span = row.get("chain_range")
+        interval = {"start": span[0], "end": span[1]} if span else None
+        markers = surface_for_accession(accession, interval=interval)
+        if not markers or markers.get("surface_score") is None:
+            row["features"]["surface_score"] = None
+            continue
+        row["features"]["surface_score"] = markers["surface_score"]
+        row["features"]["hydrophobic_patch_area"] = markers.get("hydrophobic_patch_area")
+        row["features"]["structure_used"] = f"{markers['pdb_id']}:{markers.get('chain')}"
+    # Not re-sorted. The markers are reported beside the ranking and do not change it.
+    return ranked
+
+
 def rank_score(features):
     """One number from the features, with every term visible.
 
@@ -573,12 +606,44 @@ def rank_score(features):
     grades decisions rather than predictions -- so a learned weighting here would be fitted to
     whatever its author already believed. A stated rubric is honest about being one.
     """
-    return round(
-        3.0 * features["conservation"]
-        + 2.0 * float(features["surface_exposed"])
-        + 1.5 * float(features["essential_class"])
-        + 0.8 * features["druggable_class"]
-        + 0.5 * min(1.0, features["structures_in_family"] / 50.0), 4)
+    base = (3.0 * features["conservation"]
+            + 2.0 * float(features["surface_exposed"])
+            + 1.5 * float(features["essential_class"])
+            + 0.5 * min(1.0, features["structures_in_family"] / 50.0))
+
+    # Where a structure exists, the surface markers carry the druggability term and the
+    # keyword class does not. The keyword class scores zero on six of this project's own
+    # eleven targets -- including the main protease and the neuraminidase, whose packet names
+    # contain no enzyme word -- and it is biased against interfaces, which is the half of the
+    # target set macrocycles exist for. The surface score is computed from a deposited
+    # structure and does not know what the protein is called.
+    #
+    # The keyword class remains the fallback rather than being deleted, because most
+    # candidates in a bacterial genome will never have a structure fetched for them and a
+    # ranker that scores them all identically is worse than one using a flawed proxy.
+    # The surface markers are computed and reported and are deliberately NOT scored. Two
+    # forms were measured against the ranking they were meant to improve and both made it
+    # worse.
+    #
+    #                        SARS-CoV-2 p      Nipah p
+    #   no surface term          0.0014         0.0714
+    #   added as a bonus         0.0009         0.3929
+    #   centred on a baseline    0.0201         0.1250
+    #
+    # Added, the term cannot be earned by a candidate with no deposited structure, so every
+    # such candidate sinks below every candidate that has one -- a penalty for being
+    # understudied, aimed at the novel targets this exists to find. The spike went first to
+    # fifth on `None`. Centred on the mean of six reference structures, the mirror failure:
+    # most real candidates score below that mean, so having a structure became the penalty and
+    # the top five were again everything with no structure at all. There is no baseline to
+    # centre on that is not invented from the targets under test.
+    #
+    # What survives is the measurement in `runs/surface_markers.json`: scoring a contiguous
+    # hydrophobic patch ranks the spike receptor-binding domain above the main protease, the
+    # reverse of a small-molecule druggability score, and the direction holds at every contact
+    # cutoff tried. That signal is real and is too weak to improve a ranking that already
+    # works. Reported as a feature so a reader can see it; not mixed into the score.
+    return round(base + 0.8 * features["druggable_class"], 4)
 
 
 def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
