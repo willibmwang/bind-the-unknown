@@ -1051,6 +1051,48 @@ def test_the_audit_condemns_every_readout_already_known_to_be_dead():
     assert ledger["discriminating_readouts"] == []
 
 
+def test_intake_recovers_the_real_targets_of_three_virus_families():
+    """The validation, read from its artifact rather than re-run.
+
+    Re-running would need NCBI and UniProt and about a minute, which does not belong in a
+    suite that has to pass offline. What is pinned is the recorded result and the conditions
+    that make it mean anything: the pathogen was held out of the reference in every case, so
+    identification proceeded through a relative rather than through the organism itself.
+
+    The targets recovered are the ones with drugs or antibodies against them -- the main
+    protease and spike of SARS-CoV-2, the fusion and attachment glycoproteins of Nipah,
+    haemagglutinin and neuraminidase of influenza. A rubric that found them on coronaviruses
+    and not on the other two would be tuned to coronaviruses, which is the failure this exists
+    to detect.
+    """
+    import json
+
+    from hpc_pilots.common import ROOT
+
+    path = ROOT / "runs/intake_validation.json"
+    if not path.exists():
+        pytest.skip("validation artifact absent; run the intake validation to produce it")
+    payload = json.loads(path.read_text())
+
+    cases = {case["pathogen"]: case for case in payload["cases"]}
+    assert set(cases) == {"SARS-CoV-2", "Nipah virus", "Influenza A PR8"}, sorted(cases)
+
+    for pathogen, case in cases.items():
+        # The control. Without it the run is a database lookup with a known answer.
+        assert case["held_out"], pathogen
+        assert case["all_expected_in_top_8"] is True, (pathogen, case["expected_target_ranks"])
+        for target, rank in case["expected_target_ranks"].items():
+            assert rank is not None and rank <= 8, (pathogen, target, rank)
+        # Identified through relatives, never through the pathogen itself.
+        for organism in case["nearest_organisms"]:
+            assert case["held_out"].lower() not in organism.lower(), (pathogen, organism)
+
+    # Influenza is segmented and must be read as eight records, not concatenated into one.
+    # Joining them would manufacture reading frames across junctions that exist in no molecule.
+    assert cases["Influenza A PR8"]["segments"] == 8
+    assert cases["SARS-CoV-2"]["segments"] == 1
+
+
 def test_six_frame_calling_recovers_the_coronavirus_proteome():
     """ORF calling, checked against products whose lengths are known exactly.
 

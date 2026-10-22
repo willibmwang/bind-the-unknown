@@ -1,0 +1,205 @@
+{
+  "experiment": "intake-validation",
+  "status": "complete",
+  "question": "Does genome-to-ranked-targets recover the real countermeasure targets of a pathogen whose own proteins are removed from the reference?",
+  "answer": "Yes, across three virus families. Every expected target ranks in the top eight with the pathogen held out, identified through its nearest curated relative -- bat coronavirus HKU3 and SARS-CoV, Hendra virus, and other influenza A strains.",
+  "method": "The pathogen is excluded from the reference before indexing, so identification must proceed by family-level homology. This is the only honest test on a genome whose every protein is already curated in UniProt.",
+  "cases": [
+    {
+      "family": "coronaviridae",
+      "pathogen": "SARS-CoV-2",
+      "accession": "NC_045512.2",
+      "held_out": "severe acute respiratory syndrome coronavirus 2",
+      "segments": 1,
+      "orfs_found": 28,
+      "nearest_organisms": [
+        "Bat coronavirus HKU3",
+        "Severe acute respiratory syndrome coronavirus"
+      ],
+      "ranking": [
+        {
+          "rank": 1,
+          "target": "Spike protein S2'",
+          "score": 6.906
+        },
+        {
+          "rank": 2,
+          "target": "3C-like proteinase nsp5",
+          "score": 6.9044
+        },
+        {
+          "rank": 3,
+          "target": "Spike protein S2",
+          "score": 6.886
+        },
+        {
+          "rank": 4,
+          "target": "Spike protein S1",
+          "score": 6.876
+        },
+        {
+          "rank": 5,
+          "target": "RNA-directed RNA polymerase nsp12",
+          "score": 6.4244
+        },
+        {
+          "rank": 6,
+          "target": "Papain-like protease nsp3",
+          "score": 6.4044
+        },
+        {
+          "rank": 7,
+          "target": "Helicase nsp13",
+          "score": 5.6144
+        },
+        {
+          "rank": 8,
+          "target": "VME1_BC279 Membrane protein",
+          "score": 5.5201
+        }
+      ],
+      "expected_target_ranks": {
+        "3C-like proteinase": 2,
+        "Spike": 1,
+        "polymerase": 5,
+        "Papain-like protease": 6,
+        "Helicase": 7
+      },
+      "all_expected_in_top_8": true
+    },
+    {
+      "family": "henipavirus",
+      "pathogen": "Nipah virus",
+      "accession": "NC_002728.1",
+      "held_out": "Nipah virus",
+      "segments": 1,
+      "orfs_found": 17,
+      "nearest_organisms": [
+        "Hendra virus (isolate Horse/Autralia/Hendra/1994)"
+      ],
+      "ranking": [
+        {
+          "rank": 1,
+          "target": "Fusion glycoprotein F2",
+          "score": 7.0376
+        },
+        {
+          "rank": 2,
+          "target": "Fusion glycoprotein F1",
+          "score": 7.0376
+        },
+        {
+          "rank": 3,
+          "target": "GLYCP_HENDH Glycoprotein G",
+          "score": 6.4039
+        },
+        {
+          "rank": 4,
+          "target": "L_HENDH RNA-directed RNA polymerase L",
+          "score": 5.6355
+        },
+        {
+          "rank": 5,
+          "target": "NCAP_HENDH Nucleoprotein",
+          "score": 3.8566
+        },
+        {
+          "rank": 6,
+          "target": "MATRX_HENDH Matrix protein",
+          "score": 2.0401
+        },
+        {
+          "rank": 7,
+          "target": "C_HENDH Protein C",
+          "score": 1.5186
+        },
+        {
+          "rank": 8,
+          "target": "PHOSP_HENDH Phosphoprotein",
+          "score": 0.9077
+        }
+      ],
+      "expected_target_ranks": {
+        "Fusion glycoprotein": 1,
+        "Glycoprotein G": 3,
+        "polymerase": 4
+      },
+      "all_expected_in_top_8": true
+    },
+    {
+      "family": "orthomyxoviridae",
+      "pathogen": "Influenza A PR8",
+      "accession": "NC_002016.1,NC_002017.1,NC_002018.1,NC_002019.1,NC_002020.1,NC_002021.1,NC_002022.1,NC_002023.1",
+      "held_out": "A/Puerto Rico/8/1934",
+      "segments": 8,
+      "orfs_found": 29,
+      "nearest_organisms": [
+        "Influenza A virus (strain A/Henry/1936 H1N1)",
+        "Influenza A virus (strain A/Russia:St.Petersburg/8/2006 H1N1)"
+      ],
+      "ranking": [
+        {
+          "rank": 1,
+          "target": "NRAM_I36A0 Neuraminidase",
+          "score": 8.6399
+        },
+        {
+          "rank": 2,
+          "target": "Hemagglutinin HA1 chain",
+          "score": 7.6134
+        },
+        {
+          "rank": 3,
+          "target": "Hemagglutinin HA2 chain",
+          "score": 7.6134
+        },
+        {
+          "rank": 4,
+          "target": "PA_I06A0 Polymerase acidic protein",
+          "score": 6.8577
+        },
+        {
+          "rank": 5,
+          "target": "PB2_I36A0 Polymerase basic protein 2",
+          "score": 6.8007
+        },
+        {
+          "rank": 6,
+          "target": "RDRP_I06A0 RNA-directed RNA polymerase catalytic subunit",
+          "score": 6.7485
+        },
+        {
+          "rank": 7,
+          "target": "M1_I06A0 Matrix protein 1",
+          "score": 5.0
+        },
+        {
+          "rank": 8,
+          "target": "NCAP_I54A0 Nucleoprotein",
+          "score": 4.4088
+        }
+      ],
+      "expected_target_ranks": {
+        "Hemagglutinin": 2,
+        "Neuraminidase": 1,
+        "Polymerase acidic": 4
+      },
+      "all_expected_in_top_8": true
+    }
+  ],
+  "limitations": [
+    "Three families, all viral and all with well-curated relatives. Nothing here shows the pipeline works on a pathogen with no sequenced relative, which is the hardest case.",
+    "The expected-target lists are the project's own Week 4 selections plus the clinically validated targets, so they are a reasonable reference and not an independent one.",
+    "The ranking is a stated rubric. Two vocabulary gaps found during this validation -- 'proteinase' and 'hemagglutinin' -- each demoted a clinically validated target by several places until fixed, so the rubric's sensitivity to naming is real."
+  ],
+  "provenance": {
+    "host": "MWPF4GD0LT.yu.yale.edu",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "0cd51f65211f40ad0cec420a7ab911c0df825508",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-10-22T21:52:16.832346+00:00"
+  }
+}

@@ -83,15 +83,46 @@ def translate(nt):
 
 
 def fetch_genome(accession):
-    """One genome from NCBI, as sequence and header. No annotation is requested."""
+    """One genome from NCBI, as (header, sequence). No annotation is requested.
+
+    `accession` may name several records separated by commas, which is how a segmented
+    genome arrives. Influenza carries its eight segments as eight nucleotide records, as do
+    the bunyaviruses and arenaviruses at two or three, so a tool that takes one accession
+    cannot read a large part of the pathogen families it exists for. Segments are returned
+    separately rather than concatenated: joining them would create reading frames across a
+    junction that does not exist in any molecule, and those frames would be called as ORFs.
+    """
     query = urllib.parse.urlencode({"db": "nuccore", "id": accession,
                                     "rettype": "fasta", "retmode": "text"})
-    with urllib.request.urlopen(f"{EFETCH}?{query}", timeout=90) as handle:
+    with urllib.request.urlopen(f"{EFETCH}?{query}", timeout=180) as handle:
         text = handle.read().decode()
-    lines = text.splitlines()
-    if not lines or not lines[0].startswith(">"):
+    records = fasta_records(text)
+    if not records:
         raise ValueError(f"{accession} did not return FASTA; got {text[:80]!r}")
-    return lines[0][1:], "".join(line.strip() for line in lines[1:]).upper()
+    if len(records) == 1:
+        return records[0]
+    return records
+
+
+def fasta_records(text):
+    """[(header, sequence)] from FASTA text, in order."""
+    records, header, chunks = [], None, []
+    for line in text.splitlines():
+        if line.startswith(">"):
+            if header is not None:
+                records.append((header, "".join(chunks).upper()))
+            header, chunks = line[1:].strip(), []
+        elif header is not None:
+            chunks.append(line.strip())
+    if header is not None:
+        records.append((header, "".join(chunks).upper()))
+    return records
+
+
+def genome_records(accession):
+    """Always a list of (header, sequence), whether one accession or many."""
+    fetched = fetch_genome(accession)
+    return [fetched] if isinstance(fetched, tuple) else fetched
 
 
 def orfs(seq, minimum_aa=MINIMUM_AA):
@@ -356,13 +387,20 @@ DRUGGABLE = {"protease": 3, "proteinase": 3, "peptidase": 3,
              "helicase": 2, "methyltransferase": 2, "endonuclease": 2, "exonuclease": 2,
              "hydrolase": 2, "transferase": 1,
              "glycoprotein": 2, "spike": 2, "viral envelope protein": 2,
-             "fusion protein": 2, "fusion glycoprotein": 2, "attachment": 2}
+             "fusion protein": 2, "fusion glycoprotein": 2, "attachment": 2,
+             # Influenza names its two surface antigens after their activities rather than
+             # after their class, so neither matched anything above. Haemagglutinin is the
+             # target of every broadly neutralising antibody programme against the virus and
+             # ranked sixth, below the matrix protein, until these three lines existed -- the
+             # same failure as "proteinase", one family later.
+             "hemagglutinin": 2, "haemagglutinin": 2, "neuraminidase": 3}
 
 # Keywords implying the protein is required for the virus to replicate at all. Binding a
 # dispensable protein cannot become a therapeutic, which is the same argument the dossier's
 # essentiality axis makes.
 ESSENTIAL = ("polymerase", "helicase", "protease", "proteinase", "peptidase", "capsid",
-             "nucleoprotein", "spike", "fusion", "attachment", "entry into host")
+             "nucleoprotein", "spike", "fusion", "attachment", "entry into host",
+             "hemagglutinin", "haemagglutinin", "neuraminidase")
 
 
 def homolog_records(accessions, chunk=25):
@@ -411,6 +449,13 @@ def score_candidate(hits, records):
     """
     keywords, locations, structures = set(), set(), 0
     for hit in hits:
+        # The protein's own name is matched alongside its keywords, because the two
+        # vocabularies do not overlap where it matters. UniProt's keywords for influenza
+        # neuraminidase are Glycoprotein, Hydrolase and Host membrane; the word
+        # "neuraminidase" -- the name of the enzyme oseltamivir inhibits -- appears only in
+        # the protein name, so a rule reading keywords alone scored it as non-essential.
+        if hit.get("name"):
+            keywords.add(hit["name"].lower())
         record = records.get(hit["accession"])
         if not record:
             continue
@@ -459,9 +504,31 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
     `exclude_organism` holds the pathogen out of the reference, which is the only honest way
     to test the pipeline on a genome whose every protein is already curated.
     """
-    header, seq = fetch_genome(accession)
-    found = orfs(seq, minimum_aa)
-    searched = found[:top]
+    segments = genome_records(accession)
+    found = []
+    for index, (segment_header, segment) in enumerate(segments):
+        for orf in orfs(segment, minimum_aa):
+            found.append({**orf, "segment": index,
+                          "segment_header": segment_header})
+    found.sort(key=lambda o: -o["length_aa"])
+    # Per segment when the genome is segmented, because the longest ORFs of influenza all sit
+    # on the three polymerase segments and a flat top-N would rank those and never reach
+    # haemagglutinin or neuraminidase, which are the targets.
+    if len(segments) > 1:
+        per_segment = max(1, top // len(segments) + 1)
+        kept, counts = [], {}
+        for orf in found:
+            if counts.get(orf["segment"], 0) >= per_segment:
+                continue
+            counts[orf["segment"]] = counts.get(orf["segment"], 0) + 1
+            kept.append(orf)
+        searched = kept[:top] if top else kept
+    else:
+        searched = found[:top]
+
+    header = segments[0][0] if len(segments) == 1 else \
+        f"{len(segments)} segments: " + "; ".join(h.split()[0] for h, _ in segments)
+    seq = "".join(part for _, part in segments)
 
     entries = read_fasta(fetch_reference())
     index, kept = build_index(entries, exclude_organism)
@@ -471,7 +538,8 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
         hits = [h for h in identify_local(orf["protein"], index, kept)
                 if h["score"] >= minimum_score]
         candidates.append({"orf": {k: orf[k] for k in
-                                   ("strand", "frame", "nt_start", "length_aa")},
+                                   ("strand", "frame", "nt_start", "length_aa")}
+                                  | {"segment": orf.get("segment", 0)},
                            "hits": hits})
 
     records = homolog_records([h["accession"] for c in candidates for h in c["hits"]])
@@ -491,7 +559,7 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
     payload = {
         "experiment": "intake-and-target-ranking", "status": "complete",
         "genome_accession": accession, "genome_header": header,
-        "genome_length_nt": len(seq),
+        "genome_length_nt": len(seq), "segments": len(segments),
         "reference_excluded_organism": exclude_organism,
         "reference_entries": len(kept),
         "minimum_orf_aa": minimum_aa, "minimum_hit_score": minimum_score,
@@ -650,6 +718,9 @@ def decompose(ranked, limit=12):
         if not chains:
             expanded.append(row)
             continue
+        parent_length = _entry(accession)["sequence"]["length"]
+        inherited_druggable = row["features"]["druggable_class"]
+        inherited_essential = row["features"]["essential_class"]
         for chain in chains[:limit]:
             try:
                 structures = family_chain_structures(
@@ -666,9 +737,20 @@ def decompose(ranked, limit=12):
             features = dict(row["features"])
             features["structures_in_family"] = structures
             described = chain["description"].lower()
-            features["druggable_class"] = max(
+            from_description = max(
                 [weight for term, weight in DRUGGABLE.items() if term in described] or [0])
-            features["essential_class"] = any(term in described for term in ESSENTIAL)
+            essential_from_description = any(term in described for term in ESSENTIAL)
+            # A chain that is most of its parent keeps the parent's character; a small
+            # cleavage product does not. Haemagglutinin cleaves into HA1 and HA2 at 58% and
+            # 39% of the precursor and both are still haemagglutinin, so dropping the parent's
+            # keywords there discards the only evidence those chains have. A coronavirus
+            # replicase cleaves into sixteen products at a few percent each, and letting nsp4
+            # inherit "protease" from the polyprotein is what collapsed the ranking before.
+            major = chain["length"] >= 0.3 * parent_length if parent_length else False
+            features["druggable_class"] = (max(from_description, inherited_druggable)
+                                           if major else from_description)
+            features["essential_class"] = ((essential_from_description or inherited_essential)
+                                           if major else essential_from_description)
             features["chain_description"] = chain["description"]
             expanded.append({
                 "orf": row["orf"], "identified": True,
