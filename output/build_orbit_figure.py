@@ -102,7 +102,7 @@ def render(cells, host, mode, stem):
         "font.sans-serif": ["Helvetica Neue", "Helvetica", "Arial", "DejaVu Sans"],
         "savefig.facecolor": c["surface"], "figure.facecolor": c["surface"],
     })
-    fig, ax = plt.subplots(figsize=(11, 6.4), dpi=200)
+    fig, ax = plt.subplots(figsize=(11, 6.9), dpi=200)
     ax.set_facecolor(c["surface"])
 
     # Lay the rows out top to bottom with a gap between policy blocks, so the three blocks
@@ -120,7 +120,12 @@ def render(cells, host, mode, stem):
     ordered = {(d["policy"], d["packet"]): d for d in cells}
     rows = [ordered[(p, k)] for p, _ in POLICIES for k, _ in PACKETS]
 
-    ax.axvline(0.0, color=c["rule"], lw=1.2, zorder=1)
+    # The two anchors the score is defined between. Without them "0.059" means nothing to
+    # anyone who has not read the grader, and the whole figure turns on the reader seeing
+    # that the memoriser's scrubbed score lands below the random one.
+    ax.axvspan(-0.42, 0.0, color=c["earned"], alpha=0.05, lw=0, zorder=0)
+    ax.axvline(0.0, color=c["rule"], lw=1.4, zorder=1)
+    ax.axvline(1.0, color=c["rule"], lw=1.4, ls=(0, (4, 3)), zorder=1)
 
     for row, yy in zip(rows, ys):
         lo, hi = sorted((row["nominal"], row["earned"]))
@@ -165,12 +170,24 @@ def render(cells, host, mode, stem):
                 ha="right", va="center", fontsize=12, fontweight="bold",
                 color=c["primary"], clip_on=False)
 
-    ax.text(COLUMN_X, ys[0] - 0.85, "name's share", transform=ax.get_yaxis_transform(),
-            va="center", ha="right", fontsize=9, color=c["muted"], clip_on=False)
+    ax.text(COLUMN_X, ys[0] - 0.85, "supplied by\nthe name", transform=ax.get_yaxis_transform(),
+            va="center", ha="right", fontsize=9, color=c["muted"],
+            linespacing=1.4, clip_on=False)
 
     ax.set_xlim(-0.42, 1.16)
-    ax.set_xlabel("Attainment on the challenger stratum", fontsize=10.5,
-                  color=c["secondary"], labelpad=10)
+    anchors = [
+        (0.0, "no better than\nbuying at random"),
+        (1.0, "the best evidence\non offer"),
+    ]
+    for x, text in anchors:
+        ax.annotate(text, xy=(x, 0), xycoords=("data", "axes fraction"),
+                    xytext=(0, -34), textcoords="offset points",
+                    ha="center", va="top", fontsize=9, color=c["muted"], linespacing=1.4)
+    # Inside the band and low, where the rows leave the plot area empty — the legend owns
+    # the top edge and the footnote owns everything below the axis.
+    ax.annotate("worse than random", xy=(-0.21, 0.0), xycoords=("data", "axes fraction"),
+                xytext=(0, 10), textcoords="offset points",
+                ha="center", va="bottom", fontsize=9, color=c["earned"], style="italic")
     ax.grid(axis="x", color=c["rule"], lw=0.8, alpha=0.6, zorder=0)
     ax.set_axisbelow(True)
     for side in ("top", "right", "left", "bottom"):
@@ -191,25 +208,28 @@ def render(cells, host, mode, stem):
 
     fig.text(0.012, 0.972, "A perfect score the orbit removes entirely",
              ha="left", va="top", fontsize=17, fontweight="bold", color=c["primary"])
-    fig.text(0.012, 0.902,
-             "The planted memoriser scores 1.000 on every packet and earns almost none of it. "
-             "The fixed rubric earns all of its score.\nThe agent's two numbers agree — on this "
-             "instrument, it is not reading the names.",
-             ha="left", va="top", fontsize=11, color=c["secondary"], linespacing=1.45)
+    fig.text(0.012, 0.912,
+             "Each turn the co-scientist spends one action buying a piece of evidence, and the "
+             "score is how good that purchase was.\nOnly the hard cases count: states where the "
+             "most useful evidence concerns a target that is not currently in the lead, so "
+             "digging into the favourite cannot score.\nThe planted memoriser buys perfectly on "
+             "every packet — until the targets are renamed, when it drops to no better than "
+             "random, or worse.",
+             ha="left", va="top", fontsize=11, color=c["secondary"], linespacing=1.5)
 
     def span(key):
         lo, hi = min(d[key] for d in cells), max(d[key] for d in cells)
         return str(lo) if lo == hi else f"{lo}–{hi}"
 
     fig.text(0.012, 0.022,
-             f"Identity orbit, {span('identity_n')} elements per cell, read against a "
-             f"null orbit of {span('null_n')} re-runs. Basis is null + identity "
-             f"throughout, because the recorded runs do not share a transform set.\n"
-             f"Single host ({host}); Modal re-runs reach different magnitudes and are not mixed "
-             f"in. Bound is lexical: a claim scrubbed of every name can still identify its subject.",
+             f"Identity orbit, {span('identity_n')} elements per cell, read against a null orbit "
+             f"of {span('null_n')} re-runs; basis is null + identity throughout, because the "
+             f"recorded runs do not share a transform set. Single host ({host}).\n"
+             f"The bound is lexical: a claim scrubbed of every name can still identify its subject, "
+             f"so this measures what the name spells out and not what the biology gives away.",
              ha="left", fontsize=8.5, color=c["muted"], linespacing=1.5)
 
-    fig.subplots_adjust(left=0.285, right=0.885, top=0.755, bottom=0.175)
+    fig.subplots_adjust(left=0.285, right=0.885, top=0.715, bottom=0.215)
     for ext in ("png", "pdf"):
         path = OUT / f"{stem}.{ext}"
         fig.savefig(path, facecolor=c["surface"])
