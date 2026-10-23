@@ -22,6 +22,7 @@ import argparse
 import json
 import os
 import sys
+import textwrap
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -51,9 +52,16 @@ THEME = {
 # Row order is the argument: the planted memoriser first because it is the demonstration,
 # the agent second because it is the subject, the fixed rubric last because it is the
 # control that makes the other two readable.
+# `agent` is a dispatcher, not a model: PILOT_LLM_PROVIDER picks a local vLLM serving
+# Qwen3-4B or a hosted provider defaulting to claude-sonnet-5-5, and the orbit artifacts do
+# not record which one ran. These cells are Sonnet, identified by matching their attainment
+# against the model-suffixed twins records -- henipavirus reads 0.496 in both. The Qwen arm
+# is a different and far worse result (-0.938 on henipavirus against a leader-first ceiling
+# of -0.363) and is not plotted here, because it was run over null + axis_order and has no
+# identity orbit to sit on this basis.
 POLICIES = [
     ("memorised", "Planted memoriser"),
-    ("agent", "LLM agent"),
+    ("agent", "Claude Sonnet 5.5"),
     ("rubric", "Fixed rubric"),
 ]
 PACKETS = [
@@ -221,13 +229,18 @@ def render(cells, host, mode, stem):
         lo, hi = min(d[key] for d in cells), max(d[key] for d in cells)
         return str(lo) if lo == hi else f"{lo}–{hi}"
 
-    fig.text(0.012, 0.022,
-             f"Identity orbit, {span('identity_n')} elements per cell, read against a null orbit "
-             f"of {span('null_n')} re-runs; basis is null + identity throughout, because the "
-             f"recorded runs do not share a transform set. Single host ({host}).\n"
-             f"The bound is lexical: a claim scrubbed of every name can still identify its subject, "
-             f"so this measures what the name spells out and not what the biology gives away.",
-             ha="left", fontsize=8.5, color=c["muted"], linespacing=1.5)
+    notes = [
+        f"Identity orbit, {span('identity_n')} elements per cell, against a null orbit of "
+        f"{span('null_n')} re-runs. Basis: null + identity; single host ({host}).",
+        "Local Qwen3-4B is not plotted: no identity orbit, and it fails outright at -0.938 on "
+        "Henipavirus against -0.363 for a leader-only policy.",
+        "Lexical bound only; count-only agreement unrecorded. The claim is 'not reading the "
+        "names', not 'reasoning'.",
+    ]
+    wrapped = "\n".join(line for note in notes
+                        for line in textwrap.wrap(note, width=148))
+    fig.text(0.012, 0.018, wrapped, ha="left", fontsize=8.5,
+             color=c["muted"], linespacing=1.5)
 
     fig.subplots_adjust(left=0.285, right=0.885, top=0.715, bottom=0.215)
     for ext in ("png", "pdf"):
