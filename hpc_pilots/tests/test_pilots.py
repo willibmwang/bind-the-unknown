@@ -2823,3 +2823,80 @@ def test_an_unknown_tool_schema_mode_raises_the_way_an_unknown_provider_does(mon
     assert Agent().label.endswith("-two_call")
     monkeypatch.setenv("PILOT_TOOL_SCHEMA_MODE", "flat")
     assert Agent().label == "agent"
+
+
+class _DesignToolAgent:
+    """Chooses invoke_design_tool once, then recommends, so the tool branch actually runs.
+
+    Needed because none of the five deterministic policies ever calls the design tool: only
+    two recorded agent episodes did, so comparing the deterministic cells would have reported
+    the branch unchanged without executing it once.
+    """
+
+    label = "agent-stub"
+    filtered = 0
+    transport_retries = 0
+    incidents = []
+
+    def __init__(self):
+        self.n = 0
+
+    def act(self, task, state, allowed, fields=None, system=None, tools=None, choices=None):
+        self.n += 1
+        return {"action": "invoke_design_tool" if self.n == 1 else "recommend_experiment",
+                "rationale": "stub", "target": state["ranking"][0]["target"],
+                "axis": "conservation"}
+
+    def report(self):
+        return {"calls": self.n}
+
+
+def test_routing_the_design_tool_through_the_caller_leaves_its_record_identical():
+    # The one action that already called a tool now calls it through the caller, so it is
+    # validated, policy-checked and carries provenance. Everything a recorded run counted has
+    # to be untouched by that: `library` holds exactly what library_spec() returns,
+    # `libraries_proposed` still counts entries, and the result string is byte-identical to
+    # the one two recorded agent episodes carry.
+    out = run_episode("coronaviridae", "agent", agent=_DesignToolAgent())
+    entry = out["libraries"][0]
+    assert entry["library"] == library_spec()
+    assert out["metrics"]["libraries_proposed"] == 1
+    design = [r for r in out["trace"] if r["action"] == "invoke_design_tool"][0]
+    assert design["result"] == \
+        "focused thioether macrocycle library proposed; no property predicted"
+    # The recorded trace carried exactly these keys; anything new must be additive, because a
+    # reader indexing the old shape must keep working.
+    assert {"action", "axis", "pushed_evidence", "result", "round", "target"} <= set(design)
+    # And the envelope says what the return is worth: computed honestly, and still not
+    # evidence, because a library definition is a design choice and not a finding.
+    provenance_ = entry["provenance"]
+    assert provenance_["tool"] == "chemistry.library_spec"
+    assert provenance_["status"] == "ok"
+    assert provenance_["source_kind"] == "computed"
+    assert provenance_["citable"] is False and provenance_["verified"] is False
+
+
+def test_the_recorded_deterministic_cells_still_reproduce_every_number_they_recorded():
+    # The guard against a refactor that is indistinguishable from a result. Every recorded
+    # deterministic cell is replayed and compared field by field; `runs/` is gitignored, so
+    # run_episode is called directly rather than through the CLI and no artifact is rewritten.
+    checked = ("actions_used", "action_budget", "rounds_used", "deadline_rounds",
+               "chosen_target", "chosen_matches_reference", "recommendation_issued",
+               "deadline_met", "evidence_retrieved", "terminal_condition",
+               "libraries_proposed", "structure_requests_unserviced",
+               "uncited_axes_top_target", "axes_substantiated_top_target",
+               "appropriate_update_rate_on_relevant")
+    seen = 0
+    for packet in PACKETS:
+        for policy in ("rubric", "scripted", "coverage", "coverage_static"):
+            path = ROOT / "runs/emergency" / f"{packet}_{policy}.json"
+            if not path.exists():
+                continue
+            recorded = json.loads(path.read_text())["metrics"]
+            fresh = run_episode(packet, policy)["metrics"]
+            for key in checked:
+                assert recorded.get(key) == fresh.get(key), \
+                    f"{packet}/{policy}.{key}: recorded {recorded.get(key)!r}, " \
+                    f"now {fresh.get(key)!r}"
+            seen += 1
+    assert seen, "no recorded deterministic cell was available to compare against"

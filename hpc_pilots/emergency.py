@@ -18,9 +18,16 @@ import json
 import time
 
 from .chemistry import library_spec
+from . import chief
 from .common import ROOT, Agent, ContentFiltered, digest, provenance, write_json
 from .dossier import ACTIONS, AXES, leaders, rank
-from .tools import spec_set_digest
+from .tools import spec_set_digest, tool
+
+# The wall clock one tool call may claim, which the dispatcher refuses against before
+# dispatch rather than discovering at round three. Declared and not measured: no v1 tool
+# declares a worst case, so the gate is inert today and is here so that the first tool
+# which does declare one is refused by a number somebody chose rather than by a timeout.
+TOOL_WALL_BUDGET_SECONDS = 600
 from .targets import PACKETS, packet
 
 POLICIES = ("rubric", "scripted", "coverage", "coverage_static", "agent")
@@ -356,8 +363,21 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=Non
         elif action == "rerank_targets":
             record["result"] = "reranked"
         elif action == "invoke_design_tool":
-            spec_out = library_spec()
-            libraries.append({"target": target, "round": round_, "library": spec_out})
+            # The one action that already called a tool, now calling it through the caller, so
+            # that it is validated, policy-checked and carries provenance like any other. The
+            # recorded shape is deliberately unchanged: `library` holds exactly what
+            # `library_spec()` returned before, `len(libraries)` still drives
+            # `libraries_proposed`, and the result string is byte-identical. What is new is the
+            # envelope beside it, which says the return is computed, uncitable and unverified --
+            # a library definition is a design choice, not a finding about the world.
+            called = chief.call(tool("chemistry.library_spec"), {},
+                                chief.context(dossiers, now=round_,
+                                              wall_budget_seconds=TOOL_WALL_BUDGET_SECONDS))
+            libraries.append({"target": target, "round": round_, "library": called["value"],
+                              "provenance": {k: called[k] for k in
+                                             ("tool", "tool_version", "status", "citable",
+                                              "verified", "source", "source_kind")}})
+            record["tool"] = called["tool"]
             record["result"] = "focused thioether macrocycle library proposed; no property predicted"
         elif action == "recommend_experiment":
             result = recommendation(by_target[target])
