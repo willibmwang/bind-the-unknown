@@ -49,6 +49,43 @@ TOOL_WALL_BUDGET_SECONDS = 600
 # the table tracks the code rather than the memory of whoever last edited it.
 ACTION_TOOLS = {"invoke_design_tool": ("chemistry.library_spec",)}
 
+# Checked here because it is knowable here, which is the whole argument. `chief.call` already
+# returns an `unavailable` envelope for a spec that is registered but unwired, and records the
+# distinction in `detail` -- correct for a tool reached only by `structure` or `intake`, where
+# being registered ahead of a dispatcher is a legitimate intermediate state.
+#
+# It is the wrong answer for an action. An action naming an unwired tool would charge the
+# budget every round and record a stated absence byte-identical to the genuine missing-backend
+# string, so a hole in the harness would present as policy behaviour and be counted by
+# `structure_requests_unserviced` as though a backend were merely absent. That is the shape an
+# adversary already found once here, in a trust annotation nothing could satisfy, and it is
+# worth refusing twice. An import-time raise is the house idiom for a static inconsistency:
+# `register` and `surrogates.register` both do it.
+def validate_action_tools(table, actions=None, dispatch=None):
+    """Raise unless every declared action exists and every tool it names has a dispatcher.
+
+    A function rather than a loop at module scope so the refusal can be exercised with a
+    table that is wrong, which a check that only ever runs against the correct one cannot be.
+    """
+    actions = ACTIONS if actions is None else actions
+    dispatch = chief.DISPATCH if dispatch is None else dispatch
+    for action, names in table.items():
+        if action not in actions:
+            raise RuntimeError(f"ACTION_TOOLS names {action!r}, which is not an action; the "
+                               f"actions are {sorted(actions)}")
+        for name in names:
+            if name not in dispatch:
+                raise RuntimeError(
+                    f"Action {action!r} is declared to dispatch {name!r}, which has no entry "
+                    f"in chief.DISPATCH. Left alone the episode would charge an action every "
+                    f"round and record an absence indistinguishable from a missing backend, "
+                    f"so a gap in the harness would read as a property of the policy. Wire a "
+                    f"dispatcher or drop the declaration.")
+    return table
+
+
+validate_action_tools(ACTION_TOOLS)
+
 from .targets import PACKETS, packet
 
 POLICIES = ("rubric", "scripted", "coverage", "coverage_static", "agent")

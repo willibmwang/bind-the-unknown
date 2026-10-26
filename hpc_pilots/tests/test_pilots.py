@@ -3607,3 +3607,32 @@ def test_the_emergency_summary_groups_by_the_label_and_not_the_requested_policy(
     # local-model run of the same requested policy land in different rows.
     probe = pd.read_csv(directory / "memorisation_probe.csv")
     assert "agent" not in set(probe["policy"])
+
+
+def test_an_action_declaring_an_unwired_tool_is_refused_at_import():
+    # `chief.call` returns an `unavailable` envelope for a spec registered without a
+    # dispatcher, and records the distinction in `detail`. That is right for a tool reached
+    # only by `structure` or `intake`, where being registered ahead of a dispatcher is a
+    # legitimate intermediate state -- `structures.evidence` and `intake.rank_targets` sit in
+    # `chief.DISPATCH` today with no action naming them.
+    #
+    # It is the wrong answer for an action. The note is byte-identical to the genuine
+    # missing-backend string that `structure_requests_unserviced` counts, so an action naming
+    # an unwired tool would charge the budget every round while a hole in the harness read as
+    # policy behaviour. That is the shape an adversary already found here once, in a trust
+    # annotation nothing could satisfy, so it is refused where it is knowable instead.
+    assert {n for names in emergency.ACTION_TOOLS.values() for n in names} <= set(chief.DISPATCH)
+    assert emergency.validate_action_tools(emergency.ACTION_TOOLS) is emergency.ACTION_TOOLS
+    with pytest.raises(RuntimeError, match="no entry in chief.DISPATCH"):
+        emergency.validate_action_tools({"invoke_design_tool": ("planted.unwired",)})
+    with pytest.raises(RuntimeError, match="which is not an action"):
+        emergency.validate_action_tools({"planted_action": ("chemistry.library_spec",)})
+    # And the runtime branch it replaces still behaves as `chief` documents, so this did not
+    # trade a recorded absence for a crash in the path that legitimately produces one.
+    spec = tools.Tool(name="planted.unwired", version=1, summary="s", description="d",
+                      entry="hpc_pilots.chemistry:library_spec")
+    _, dossiers, _, _ = packet("coronaviridae")
+    envelope = chief.call(spec, {}, chief.context(dossiers, now=1, wall_budget_seconds=600))
+    assert envelope["status"] == "unavailable"
+    assert envelope["detail"] == {"reason": "registered but not wired to a dispatcher"}
+    assert envelope["citable"] is False and envelope["verified"] is False
