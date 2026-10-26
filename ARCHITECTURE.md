@@ -240,9 +240,19 @@ regenerate is a result I cannot defend at review.
   the emergency summary groups by; `policy_requested` keeps the string the caller asked for
   beside it. The reason is that the schema is unmoved and the prompt is
   not: the input text changes, so no episode recorded before it is comparable with one after it
-  even at identical payload bytes. The flag is read off `common.Agent` rather than passed in by
-  the episode, so the state and the filename cannot disagree about which arm a file holds, and
-  a typo raises instead of reading as off — off being the arm that pools with the record. The
+  even at identical payload bytes. The environment states the request and the caller states
+  whether it can honour it, and the effective value is the conjunction: only `emergency` and
+  `twins` build a state that can carry the block, while `binding` and `structure` construct
+  the same `Agent` and never consult it, so reading the variable alone put `-toolstate` on
+  arms that had shown the policy nothing. That is not hypothetical — `slurm/agent.sbatch`
+  exports its environment once and then runs `binding`, `structure`, forty `binding-array`
+  tasks and `summarize`, and never runs either family that honours the flag, so one exported
+  variable would have mislabelled every artifact it produced and then aggregated them. A
+  module builds a tool block if and only if it declares it can, asserted over every module in
+  the package rather than a named few, so a fifth caller fails in either direction. A typo in
+  the variable raises instead of reading as off — off being the arm that pools with the
+  record — while a request an arm cannot honour is recorded rather than raised, because the
+  variable describes an episode's state and `binding` has none. The
   block shows only tools an action actually dispatches, which is one of the three registered:
   documentation for work no action can commission is a fabrication channel pointed at the
   policy. `invariance.certify` scrubs the block alongside the state, and a target name written

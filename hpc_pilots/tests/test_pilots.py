@@ -3729,17 +3729,32 @@ def test_an_arm_with_no_tool_block_keeps_its_plain_label():
     report = inapplicable.report()
     assert report["tool_state"] == "1"
     assert report["tool_state_applies"] is False and report["shows_tools"] is False
-    # And the two callers that do build the block are the two that declare it, checked from
-    # source so that a fifth caller cannot quietly inherit the wrong default.
-    declared = set()
-    for module in (emergency, twins, binding_module, structure_module):
-        tree = ast.parse(Path(module.__file__).read_text())
+    # And a module builds a tool block if and only if it declares it can. Stated as a
+    # biconditional over EVERY module in the package, not a list of four: the first version
+    # named emergency, twins, binding and structure, so a fifth caller would have gone
+    # unchecked -- and in the inverse and worse direction, showing a policy the block under a
+    # plain `agent` label. An adversary's verifier found that while narrowing the claim it was
+    # sent to check.
+    constructs, declares, builds = set(), set(), set()
+    for path in sorted(Path(emergency.__file__).parent.glob("*.py")):
+        tree = ast.parse(path.read_text())
         for node in ast.walk(tree):
-            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
-                    and node.func.id == "Agent"
-                    and any(k.arg == "tool_state_applies" for k in node.keywords)):
-                declared.add(module.__name__.rsplit(".", 1)[-1])
-    assert declared == {"emergency", "twins"}
+            if not isinstance(node, ast.Call):
+                continue
+            name = getattr(node.func, "id", None) or getattr(node.func, "attr", None)
+            if name == "Agent":
+                constructs.add(path.stem)
+                if any(k.arg == "tool_state_applies" for k in node.keywords):
+                    declares.add(path.stem)
+            elif name == "policy_view":
+                builds.add(path.stem)
+    assert constructs == {"emergency", "twins", "binding", "structure"}
+    # Among the callers that put a state to a model, declaring and building must coincide.
+    assert declares == builds & constructs == {"emergency", "twins"}
+    # `invariance` builds the block without constructing an Agent, because it scans what a
+    # policy would read rather than showing it to one. That is why the invariant is scoped to
+    # the modules that construct an Agent instead of to every module that builds a block.
+    assert "invariance" in builds - constructs
 
 
 def test_the_oracle_free_guard_scans_the_arm_that_carries_the_tool_block():
