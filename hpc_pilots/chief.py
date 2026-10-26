@@ -45,7 +45,6 @@ import socket
 import time
 from dataclasses import dataclass
 
-from .tools import TOOLS, tool
 
 # What happened to a call. `empty` is a successful call that found nothing, which is a
 # different thing from a failure and must not be counted as one: the structures table
@@ -107,14 +106,19 @@ def _is_kind(value, kind):
     raise ValueError(f"Unknown kind {kind!r}")
 
 
-def schema_conformance(name, arguments, choices=None):
+def schema_conformance(spec, arguments, choices=None):
     """Re-check everything the emitted schema constrained. Raises; never repairs.
 
     Called after the model replies and before anything executes. Every check here corresponds
     to something the schema declared, so a failure means the grammar was not honoured and the
     run is not measuring what it claims to measure.
+
+    Takes the spec record rather than its name, deliberately. The caller already holds the
+    record it showed the model, and re-resolving a name here would make the global registry a
+    hidden dependency of validation -- so a tool shown to the model but not registered, which
+    is every tool in a test and every tool in a candidate spec set, could not be validated at
+    all. Validate what you were handed.
     """
-    spec = TOOLS[name] if name in TOOLS else tool(name)
     declared = {p.name: p for p in spec.parameters}
     for parameter in spec.parameters:
         if parameter.name not in arguments or arguments[parameter.name] is None:

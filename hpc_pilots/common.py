@@ -173,6 +173,16 @@ MAX_TOKENS_KEY = {"openai": "max_completion_tokens"}
 # An action outside the allowed set is also absent, and must stay absent. That is a policy
 # result, not a provider failure, and resampling until the policy returns something legal
 # would quietly filter its behaviour out of the record.
+# How a tool's parameters reach the model. `flat` emits one object whose properties are the
+# union over the shown tools, with a parameter the chosen tool does not declare arriving null;
+# `nested` emits an `arguments` branch per tool; `two_call` chooses the tool and then fills its
+# arguments in a second request. `flat` is the default because, when every shown tool declares
+# every parameter as required, it emits the payload this method has always emitted -- byte for
+# byte -- so the recorded episodes replay with no mode flag at all. Its limit is not a tool
+# count but the first parameter-name collision, at which point `_union` raises rather than
+# letting one tool's bounds constrain another tool's decoding.
+TOOL_SCHEMA_MODES = ("flat", "nested", "two_call")
+
 RETRYABLE_FINISH = {"content_filter"}
 
 
@@ -201,6 +211,66 @@ def load_env(path=ROOT / ".env"):
             key, sep, value = line.strip().partition("=")
             if sep and not key.startswith("#"):
                 os.environ.setdefault(key.strip(), value.strip().strip("'\""))
+
+
+def _union(tools):
+    """The ordered parameter union over the shown tools, raising on a real collision.
+
+    Declaration order is preserved, first tool first, because the order of the emitted
+    properties is part of what the model sees and reordering it would be a silent change to
+    the prompt.
+
+    Two tools may share a parameter name only if they declare it identically. Otherwise the
+    flat encoding cannot represent both -- whichever is emitted last constrains the other's
+    decoding, and nothing but post-hoc validation would catch the mismatch, which is the thing
+    constrained decoding exists to avoid. So the limit on this mode is stated as a condition
+    rather than guessed as a tool count, and it raises with the remedy.
+    """
+    union, seen = [], {}
+    for spec in tools:
+        for parameter in spec.parameters:
+            identity = (parameter.kind, tuple(parameter.enum), parameter.enum_from,
+                        parameter.minimum, parameter.maximum, parameter.max_length)
+            if parameter.name in seen:
+                if seen[parameter.name] != identity:
+                    raise ValueError(
+                        f"Tools declare {parameter.name!r} differently, which a flat schema "
+                        f"cannot carry: one tool's bounds would constrain another tool's "
+                        f"decoding. Set PILOT_TOOL_SCHEMA_MODE=nested or two_call.")
+                continue
+            seen[parameter.name] = identity
+            union.append(parameter)
+    return union
+
+
+def _nullable(parameter, choices, required_everywhere):
+    """One flat property. Null is the encoding of `not a parameter of the chosen tool`.
+
+    When every shown tool declares the parameter as required, no null branch is emitted and
+    the property is exactly what the `fields` form emits -- which is what makes an all-required
+    tool set replay the recorded payload byte for byte.
+
+    Otherwise the enum carries None explicitly. With `type: ["string", "null"]` and an enum
+    that omits null, null is not a permitted value, so a conforming decoder cannot emit the
+    one thing this encoding needs it to emit. That failure presents as a provider that "does
+    not support schemas" rather than as a schema bug, which is why it is spelled out here.
+    """
+    values = parameter.values(choices)
+    if required_everywhere:
+        return {"type": parameter.json_type(), "enum": list(values)} if values \
+            else {"type": parameter.json_type()}
+    if values:
+        return {"type": [parameter.json_type(), "null"], "enum": list(values) + [None]}
+    return {"type": [parameter.json_type(), "null"]}
+
+
+def _object(spec, choices):
+    """One tool's arguments as a strict object, for the `nested` mode."""
+    properties = {p.name: ({"type": p.json_type(), "enum": list(p.values(choices))}
+                           if p.values(choices) else {"type": p.json_type()})
+                  for p in spec.parameters}
+    return {"type": "object", "title": spec.name, "properties": properties,
+            "required": list(properties), "additionalProperties": False}
 
 
 class Agent:
@@ -242,7 +312,20 @@ class Agent:
         self.label = "agent" if self.provider == "local" else \
             f"agent-{self.provider}-{self.model.replace('/', '-').replace(':', '-')}"
         self.retries = int(os.environ.get("PILOT_LLM_RETRIES", "4"))
+        self.tool_schema_mode = os.environ.get("PILOT_TOOL_SCHEMA_MODE", "flat")
+        if self.tool_schema_mode not in TOOL_SCHEMA_MODES:
+            raise RuntimeError(f"Unknown PILOT_TOOL_SCHEMA_MODE {self.tool_schema_mode!r}; "
+                               f"known modes are {list(TOOL_SCHEMA_MODES)}")
+        # A non-default mode writes its own artifact, for the reason the hosted label exists:
+        # `two_call` spends two requests per action, so its token and call counts are not
+        # comparable with a single-call run and the two must never pool.
+        if self.tool_schema_mode != "flat":
+            self.label = f"{self.label}-{self.tool_schema_mode}"
         self.calls = 0
+        # Requests per action: two under `two_call`, one otherwise. Recorded so that
+        # `calls / tool_turns` still recovers the retry count, which `calls` alone stops
+        # meaning the moment an action costs more than one request.
+        self.tool_turns = 0
         self.seconds = 0.0
         self.tokens = {"prompt_tokens": 0, "completion_tokens": 0}
         self.history = []
@@ -253,17 +336,47 @@ class Agent:
         self.transport_retries = 0
         self.incidents = []
 
-    def act(self, task, state, allowed, fields=None, system=None):
-        """Return the validated action object. `fields` adds enum-constrained arguments.
+    def _properties(self, allowed, fields, tools, choices):
+        """The schema's properties, by mode, so that the three modes are a table.
 
-        An action or argument outside the allowed set raises; it never degrades into a
-        default or baseline choice.
+        The discriminant key stays `action` and is deliberately not renamed to `tool`.
+        Renaming it would change the shape of every entry in every recorded `agent.history`
+        and break `answer["action"]` at its call sites, and buy nothing: the enum holds a tool
+        name either way.
+
+        `tools=None` returns exactly what this method has always returned.
         """
-        import requests
         properties = {"action": {"type": "string", "enum": list(allowed)},
                       "rationale": {"type": "string"}}
         for name, values in (fields or {}).items():
             properties[name] = {"type": "string", "enum": list(values)}
+        if tools is None:
+            return properties
+        if self.tool_schema_mode == "nested":
+            properties["arguments"] = {"anyOf": [_object(spec, choices) for spec in tools]}
+            return properties
+        for parameter in _union(tools):
+            required_everywhere = all(
+                any(p.name == parameter.name and p.required for p in spec.parameters)
+                for spec in tools)
+            properties[parameter.name] = _nullable(parameter, choices, required_everywhere)
+        return properties
+
+    def act(self, task, state, allowed, fields=None, system=None, tools=None, choices=None):
+        """Return the validated action object. `fields` adds enum-constrained arguments.
+
+        An action or argument outside the allowed set raises; it never degrades into a
+        default or baseline choice.
+
+        `tools` is an ordered sequence of tool spec records and `choices` supplies the
+        vocabulary a parameter declares late. Late binding is not a convenience: a spec whose
+        enum hard-coded target names would survive `relabel_packet`, which rewrites packet
+        content and not source constants, so the identity orbit would read a renamed packet
+        while the model still saw the real names.
+        """
+        import requests
+        properties = self._properties(allowed, fields, tools, choices)
+        self.tool_turns += 1
         payload = {"model": self.model, MAX_TOKENS_KEY.get(self.provider, "max_tokens"): self.max_tokens,
                    "messages": [{"role": "system", "content": system or BUDGET_SYSTEM},
                                 {"role": "user", "content": json.dumps({"task": task,
@@ -313,6 +426,16 @@ class Agent:
         for name, values in (fields or {}).items():
             if answer.get(name) not in values:
                 raise ValueError(f"Agent returned {name} outside the allowed set")
+        if tools is not None:
+            # Only what the emitted schema constrained. A violation here means the decoder did
+            # not honour the grammar, which is an instrument failure; everything the spec
+            # declares but the schema could not carry is the caller's to charge and record.
+            # Imported inside the call so that this module keeps importing nothing but the
+            # standard library, which is what lets `dossier` and `tools` stay dependency-free.
+            from .chief import schema_conformance
+            chosen = next(spec for spec in tools if spec.name == answer["action"])
+            supplied = {p.name: answer[p.name] for p in chosen.parameters if p.name in answer}
+            schema_conformance(chosen, supplied, choices)
         self.history.append({"state": state, "response": answer})
         return answer
 
@@ -356,4 +479,5 @@ class Agent:
         return {"provider": self.provider, "model": self.model, "calls": self.calls,
                 "seconds": self.seconds, "tokens": self.tokens,
                 "filtered_attempts": self.filtered, "transport_retries": self.transport_retries,
-                "incidents": self.incidents, "history": self.history}
+                "incidents": self.incidents, "history": self.history,
+                "tool_schema_mode": self.tool_schema_mode, "tool_turns": self.tool_turns}

@@ -2521,15 +2521,15 @@ def test_an_argument_of_the_wrong_type_is_rejected_and_never_coerced():
     # means the decoder did not honour the schema, and repairing it here would hide the one
     # failure this check exists to surface.
     with pytest.raises(chief.ToolCallRejected, match="must be int"):
-        chief.schema_conformance("intake.rank_targets",
+        chief.schema_conformance(tools.tool("intake.rank_targets"),
                                  {"accession": "NC_045512.2", "top": "8"})
     with pytest.raises(chief.ToolCallRejected, match="requires 'accession'"):
-        chief.schema_conformance("intake.rank_targets", {"top": 8})
+        chief.schema_conformance(tools.tool("intake.rank_targets"), {"top": 8})
     # A flat schema carries a property for every shown tool, so a property the chosen tool
     # does not declare must arrive null rather than carrying another tool's value.
     with pytest.raises(chief.ToolCallRejected, match="declares no parameter"):
-        chief.schema_conformance("chemistry.library_spec", {"accession": "NC_045512.2"})
-    assert chief.schema_conformance("intake.rank_targets",
+        chief.schema_conformance(tools.tool("chemistry.library_spec"), {"accession": "NC_045512.2"})
+    assert chief.schema_conformance(tools.tool("intake.rank_targets"),
                                     {"accession": "NC_045512.2", "top": 8}).name == \
         "intake.rank_targets"
 
@@ -2539,7 +2539,7 @@ def test_true_is_not_accepted_for_an_integer_parameter_however_much_python_think
     # model emitting `true` for a count is not off by a type, it is answering a different
     # question, and accepting it would run the pipeline with top=1.
     with pytest.raises(chief.ToolCallRejected, match="must be int, got bool"):
-        chief.schema_conformance("intake.rank_targets",
+        chief.schema_conformance(tools.tool("intake.rank_targets"),
                                  {"accession": "NC_045512.2", "top": True})
     assert chief._is_kind(True, "bool") is True
     assert chief._is_kind(True, "int") is False
@@ -2728,3 +2728,98 @@ def test_no_dispatched_tool_writes_its_own_artifact_or_issues_a_model_request(mo
                             lambda **kw: seen.update(kw) or {"targets": {}})
         chief.call(spec, {}, chief.context())
         assert seen.get("record") is False, f"{name} was dispatched with record={seen.get('record')}"
+
+
+def _two_action_tools():
+    """Two tools declaring the same two parameters identically, both required.
+
+    This is the configuration the recorded episodes ran under -- every action carried a target
+    and an axis -- expressed as tool records rather than as two global fields.
+    """
+    shared = (tools.Parameter("target", "str", "Which target.", enum_from="target"),
+              tools.Parameter("axis", "str", "Which axis.", enum_from="axis"))
+    return [tools.Tool(name="retrieve_evidence", version=1, summary="s", description="d",
+                       entry="hpc_pilots.chemistry:library_spec", parameters=shared),
+            tools.Tool(name="stop", version=1, summary="s", description="d",
+                       entry="hpc_pilots.chemistry:library_spec", parameters=shared)]
+
+
+def test_a_tool_universe_with_every_parameter_required_emits_the_payload_it_emitted_before(
+        monkeypatch):
+    # The migration story, as a check and not a claim. When every shown tool declares every
+    # parameter as required, no null branch is emitted and the payload is byte-identical to
+    # the one the `fields` form produces -- which is what the recorded episodes ran under. If
+    # this ever fails, the single-call flat encoding has bought nothing over a discriminated
+    # union and the choice should be revisited.
+    reply = ('{"action": "stop", "rationale": "ok", "target": "Mpro (nsp5)", '
+             '"axis": "conservation"}')
+    choices = {"target": ["Mpro (nsp5)", "nsp12"], "axis": ["conservation", "essentiality"]}
+
+    sent = _mock_agent(monkeypatch, [(reply, "stop")])
+    Agent().act("t", {"s": 1}, ["retrieve_evidence", "stop"], fields=choices)
+    legacy = sent[-1]["json"]
+
+    sent2 = _mock_agent(monkeypatch, [(reply, "stop")])
+    Agent().act("t", {"s": 1}, ["retrieve_evidence", "stop"],
+                tools=_two_action_tools(), choices=choices)
+    assert sent2[-1]["json"] == legacy, \
+        "an all-required tool set no longer replays the payload the recorded episodes used"
+
+
+def test_a_nullable_parameter_enum_carries_null_because_a_decoder_cannot_emit_what_it_omits(
+        monkeypatch):
+    # With type ["string", "null"] and an enum that omits null, null is not a permitted value,
+    # so a conforming decoder cannot emit the one thing this encoding needs it to emit. That
+    # failure presents as a provider which "does not support schemas" rather than as a schema
+    # bug, so it is pinned here.
+    optional = tools.Tool(
+        name="stop", version=1, summary="s", description="d",
+        entry="hpc_pilots.chemistry:library_spec",
+        parameters=(tools.Parameter("target", "str", "Which target.", required=False,
+                                    default=None, enum_from="target"),))
+    required = _two_action_tools()[0]
+    sent = _mock_agent(monkeypatch, [('{"action": "stop", "rationale": "r", '
+                                      '"target": null, "axis": "conservation"}', "stop")])
+    Agent().act("t", {}, ["stop", "retrieve_evidence"], tools=[optional, required],
+                choices={"target": ["Mpro (nsp5)"], "axis": ["conservation"]})
+    properties = sent[-1]["json"]["response_format"]["json_schema"]["schema"]["properties"]
+    assert properties["target"]["type"] == ["string", "null"]
+    assert None in properties["target"]["enum"]
+    # `axis` is required by one shown tool and absent from the other, so it is nullable too.
+    assert properties["axis"]["type"] == ["string", "null"]
+
+
+def test_two_tools_declaring_one_parameter_differently_raise_instead_of_merging():
+    # The flat encoding's limit is not a tool count but the first real collision: whichever
+    # property is emitted last would constrain the other tool's decoding, and only post-hoc
+    # validation would catch it -- which is what constrained decoding exists to avoid. So it
+    # raises, and names the remedy.
+    from hpc_pilots.common import _union
+
+    a = tools.Tool(name="a", version=1, summary="s", description="d",
+                   entry="hpc_pilots.chemistry:library_spec",
+                   parameters=(tools.Parameter("limit", "int", "m", maximum=10),))
+    b = tools.Tool(name="b", version=1, summary="s", description="d",
+                   entry="hpc_pilots.chemistry:library_spec",
+                   parameters=(tools.Parameter("limit", "int", "m", maximum=1000),))
+    with pytest.raises(ValueError, match="PILOT_TOOL_SCHEMA_MODE"):
+        _union([a, b])
+    # Identical declarations are not a collision, and the union keeps declaration order.
+    same = tools.Tool(name="c", version=1, summary="s", description="d",
+                      entry="hpc_pilots.chemistry:library_spec",
+                      parameters=(tools.Parameter("limit", "int", "m", maximum=10),))
+    assert [p.name for p in _union([a, same])] == ["limit"]
+
+
+def test_an_unknown_tool_schema_mode_raises_the_way_an_unknown_provider_does(monkeypatch):
+    # The PROVIDERS precedent: an unrecognised mode is a typo in an environment variable, and
+    # silently running the default would report one encoding's numbers under another's name.
+    _mock_agent(monkeypatch, [('{"action": "stop", "rationale": "r"}', "stop")])
+    monkeypatch.setenv("PILOT_TOOL_SCHEMA_MODE", "discriminated")
+    with pytest.raises(RuntimeError, match="PILOT_TOOL_SCHEMA_MODE"):
+        Agent()
+    # And a non-default mode writes its own artifact, for the reason the hosted label exists.
+    monkeypatch.setenv("PILOT_TOOL_SCHEMA_MODE", "two_call")
+    assert Agent().label.endswith("-two_call")
+    monkeypatch.setenv("PILOT_TOOL_SCHEMA_MODE", "flat")
+    assert Agent().label == "agent"
