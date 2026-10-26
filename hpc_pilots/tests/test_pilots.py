@@ -8,6 +8,7 @@ import pytest
 
 from hpc_pilots.__main__ import main as cli_main
 from hpc_pilots.arms import ARMS
+from hpc_pilots import chief
 from hpc_pilots import surrogates
 from hpc_pilots import tools
 from hpc_pilots.binding import (design_matrix, enrichment, pick_batch, replay, run_arm,
@@ -2370,7 +2371,17 @@ def test_a_tool_that_produces_evidence_declares_where_its_date_comes_from():
     assert structures.produces_evidence is True
     assert structures.date_field == "earliest_deposition"
     assert structures.citation
-    assert structures.date_field in [key for key, _, _ in structures.returns]
+    # The return is a table of eleven dated rows, not one dated object, so the date key lives
+    # inside a row. The first version of this spec declared the per-row keys as top-level,
+    # which a dispatcher would have read as None and dated every claim as undated.
+    assert structures.rows == "targets"
+    assert structures.rows in [key for key, _, _ in structures.returns]
+    assert structures.date_field == "earliest_deposition"
+    with pytest.raises(ValueError, match="produces no evidence"):
+        tools.register(tools.Tool(
+            name="undated-table", version=1, summary="s", description="d",
+            entry="hpc_pilots.chemistry:library_spec", rows="targets",
+            returns=(("targets", "dict", "m"),)))
     with pytest.raises(ValueError, match="produces evidence"):
         tools.register(tools.Tool(
             name="undated", version=1, summary="s", description="d",
@@ -2414,8 +2425,17 @@ def test_the_committed_tool_snapshot_matches_the_registry():
     # Every earlier snapshot keeps its digest, so the tool_set_sha256 recorded in an already
     # finished run still verifies. A new spec goes in a new file; this is the device
     # configs/today.json already uses, applied to the registry.
-    assert committed["tool_set_sha256"] == \
-        "b67cdcfb525a0ff9f8beef3178a9dd8b549d7ea333bfeec9acdd372ad7aba509"
+    # Every earlier snapshot keeps its digest for ever, which is what lets a
+    # tool_set_sha256 recorded in a finished run still be resolved to the specs it named.
+    # v1 described the structures table's per-row keys as top-level; correcting that cut v2
+    # rather than editing v1, which is the device configs/today.json already uses.
+    historical = {1: "b67cdcfb525a0ff9f8beef3178a9dd8b549d7ea333bfeec9acdd372ad7aba509"}
+    for version, expected in historical.items():
+        earlier = ROOT / "hpc_pilots" / "configs" / f"tools.v{version}.json"
+        assert json.loads(earlier.read_text())["tool_set_sha256"] == expected, \
+            f"tools.v{version}.json moved; a run recording its digest can no longer resolve it"
+    assert tools.TOOL_SET_VERSION not in historical or \
+        committed["tool_set_sha256"] == historical[tools.TOOL_SET_VERSION]
     # The digest is over what the specs say and not over the file, because the file carries a
     # generation timestamp and re-cutting a byte-identical registry would otherwise hash
     # differently -- which is the defect content_digest was written for.
@@ -2494,3 +2514,217 @@ def test_the_absent_structure_backend_string_is_byte_identical_to_the_one_on_the
                 for node in ast.walk(ast.parse((ROOT / "hpc_pilots/emergency.py").read_text()))
                 if isinstance(node, ast.Constant) and isinstance(node.value, str)}
     assert expected in literals, "the no-backend string moved away from what the runs carry"
+
+
+def test_an_argument_of_the_wrong_type_is_rejected_and_never_coerced():
+    # Coercion is a silent fallback under another name. A "8" where an integer was declared
+    # means the decoder did not honour the schema, and repairing it here would hide the one
+    # failure this check exists to surface.
+    with pytest.raises(chief.ToolCallRejected, match="must be int"):
+        chief.schema_conformance("intake.rank_targets",
+                                 {"accession": "NC_045512.2", "top": "8"})
+    with pytest.raises(chief.ToolCallRejected, match="requires 'accession'"):
+        chief.schema_conformance("intake.rank_targets", {"top": 8})
+    # A flat schema carries a property for every shown tool, so a property the chosen tool
+    # does not declare must arrive null rather than carrying another tool's value.
+    with pytest.raises(chief.ToolCallRejected, match="declares no parameter"):
+        chief.schema_conformance("chemistry.library_spec", {"accession": "NC_045512.2"})
+    assert chief.schema_conformance("intake.rank_targets",
+                                    {"accession": "NC_045512.2", "top": 8}).name == \
+        "intake.rank_targets"
+
+
+def test_true_is_not_accepted_for_an_integer_parameter_however_much_python_thinks_it_is():
+    # isinstance(True, int) is True in Python and that is the wrong answer to this question. A
+    # model emitting `true` for a count is not off by a type, it is answering a different
+    # question, and accepting it would run the pipeline with top=1.
+    with pytest.raises(chief.ToolCallRejected, match="must be int, got bool"):
+        chief.schema_conformance("intake.rank_targets",
+                                 {"accession": "NC_045512.2", "top": True})
+    assert chief._is_kind(True, "bool") is True
+    assert chief._is_kind(True, "int") is False
+    assert chief._is_kind(1, "bool") is False
+
+
+def test_a_bound_the_schema_could_not_carry_is_charged_rather_than_raised():
+    # The line between raising and charging sits where the emitted schema's expressive power
+    # ends. A strict JSON schema cannot carry a numeric bound portably -- OpenAI's strict mode
+    # drops `minimum` and both vLLM grammar backends ignore it -- so the model was never
+    # constrained against one and a violation is a wrong guess, which is a policy result.
+    spec = tools.tool("structures.evidence")
+    assert chief.semantics(spec, {"minimum": 5.0}).startswith("minimum=5.0 is above")
+    assert chief.semantics(spec, {"minimum": 0.5}) is None
+    out = chief.call(spec, {"minimum": 5.0}, chief.context())
+    assert out["status"] == "rejected" and out["citable"] is False
+    assert "above the declared maximum" in out["note"]
+
+
+def test_a_tool_whose_backend_is_absent_returns_the_no_backend_string_and_not_a_value():
+    # The discipline `emergency.py` has followed for one action since the structure arm was
+    # specified, promoted to a property of the dispatcher so it stays true for tools nobody
+    # has written yet. An absent backend is recorded and charged; it does not produce a
+    # plausible value for something it did not compute.
+    needs_torch = tools.Tool(name="needs-torch", version=1, summary="s", description="d",
+                             entry="hpc_pilots.chemistry:library_spec", requires=("torch",))
+    out = chief.call(needs_torch, {}, chief.context())
+    assert out["status"] == "unavailable"
+    assert out["value"] is None and out["citable"] is False
+    assert out["note"] == chief.NO_BACKEND.format(backend="needs-torch", claim="artifact")
+    # A tool in the registry that nothing has wired to a dispatcher is the same situation and
+    # must read the same way, rather than raising a KeyError from inside an episode.
+    unwired = tools.Tool(name="unwired", version=1, summary="s", description="d",
+                         entry="hpc_pilots.chemistry:library_spec")
+    assert chief.call(unwired, {}, chief.context())["status"] == "unavailable"
+
+
+def test_a_model_asserted_return_is_never_verified_and_never_citable():
+    # Anything a model said cannot substantiate an axis. `assess` and `readiness` already
+    # enforce that downstream; this makes it structural, so a tool cannot launder an assertion
+    # into evidence by supplying a source and a date for it.
+    spec = tools.tool("structures.evidence")
+    asserted = chief.envelope(spec, {}, "ok", value=7, source_kind="model_assertion",
+                              source="the model said so", available_from="2020-01-01")
+    assert asserted["citable"] is False and asserted["verified"] is False
+    # An in-house judgement may be cited and is still not verified, which is the distinction
+    # `targets.INTERNAL` already encodes.
+    internal = chief.envelope(spec, {}, "ok", value=7, source_kind="internal_assessment",
+                              source="bench judgement", available_from="2020-01-01")
+    assert internal["citable"] is True and internal["verified"] is False
+    # And a computed return from a tool that declares no evidence is neither, because a
+    # library definition is a design choice and not a finding about the world.
+    design = chief.call(tools.tool("chemistry.library_spec"), {}, chief.context())
+    assert design["status"] == "ok"
+    assert design["citable"] is False and design["verified"] is False
+
+
+def test_an_uncitable_success_must_declare_itself_rather_than_arrive_as_one():
+    # A successful return with no declared source kind raises instead of degrading to
+    # uncitable. Degrading would mean every tool with a provenance bug contributes quietly to
+    # unverified_claims, and the rubric would read the bug as policy behaviour.
+    spec = tools.tool("chemistry.library_spec")
+    with pytest.raises(ValueError, match="must declare itself"):
+        chief.envelope(spec, {}, "ok", value=1)
+    with pytest.raises(ValueError, match="Unknown status"):
+        chief.envelope(spec, {}, "finished", source_kind="computed")
+    with pytest.raises(ValueError, match="Unknown source_kind"):
+        chief.envelope(spec, {}, "ok", source_kind="vibes")
+    # A claim that is citable but undated cannot enter a dated dossier, because observe()
+    # compares available_from against the decision clock and an undated claim would pass at
+    # any clock -- which is the one boundary the packet design exists to hold.
+    with pytest.raises(ValueError, match="no source or no date"):
+        chief.envelope(tools.tool("structures.evidence"), {}, "ok", value=1,
+                       source_kind="external_record", source="PDBe")
+
+
+def test_a_table_row_with_no_date_is_kept_and_marked_uncitable(monkeypatch):
+    # One call on the structures table produces eleven claims, of which some are genuinely
+    # undated: a target with no deposited structure has no earliest deposition. That is a real
+    # zero and not a missing value, so the row is kept and marked uncitable. Dropping it would
+    # make the table read as though every target had been structurally characterised.
+    spec = tools.tool("structures.evidence")
+    monkeypatch.setattr(
+        "hpc_pilots.structures_evidence.build",
+        lambda **kw: {"coverage_threshold": kw.get("minimum"),
+                      "targets": {"dated": {"earliest_deposition": "2020-03-01",
+                                            "structures": 4},
+                                  "undeposited": {"earliest_deposition": None,
+                                                  "structures": 0}}})
+    out = chief.call(spec, {"minimum": 0.5}, chief.context())
+    assert out["status"] == "ok"
+    rows = {r["name"]: r for r in out["rows"]}
+    assert set(rows) == {"dated", "undeposited"}
+    assert rows["dated"]["citable"] is True
+    assert rows["undeposited"]["citable"] is False
+    assert rows["undeposited"]["value"]["structures"] == 0
+    # The envelope is citable because some row is, and says which.
+    assert out["citable"] is True
+
+
+def test_a_tool_that_raises_is_recorded_as_failed_and_is_not_retried(monkeypatch):
+    # Retrying a tool failure is resampling, which is the objection this project already
+    # raises against retrying an invalid action. The failure is caught at exactly one place so
+    # that no tool can smooth over its own, and the count is what reaches the record.
+    calls = []
+
+    def exploding(**kw):
+        calls.append(kw)
+        raise RuntimeError("the endpoint went away")
+
+    monkeypatch.setattr("hpc_pilots.intake.run_intake", exploding)
+    out = chief.call(tools.tool("intake.rank_targets"),
+                     {"accession": "NC_045512.2"}, chief.context())
+    assert out["status"] == "failed"
+    assert "RuntimeError: the endpoint went away" in out["note"]
+    assert out["value"] is None and out["citable"] is False
+    assert len(calls) == 1, "a tool failure was retried, which is resampling"
+
+
+def test_a_tool_with_no_policy_is_denied_rather_than_assumed_safe():
+    # Default-deny, and both polarities, because a published capability system shipped a
+    # policy whose is_trusted test was inverted -- it denied trusted ids and allowed untrusted
+    # ones, failing open. A guard nobody has tried to break is an assertion, not a guard, and
+    # asserting only the deny direction is how an inverted test passes its own suite.
+    unpolicied = tools.Tool(name="writes.something", version=1, summary="s", description="d",
+                            entry="hpc_pilots.chemistry:library_spec")
+    assert isinstance(chief.check_policy(unpolicied, {}, chief.context()), chief.Denied)
+    for name in chief.NO_SIDE_EFFECT:
+        assert isinstance(chief.check_policy(tools.tool(name), {}, chief.context()),
+                          chief.Allowed), f"{name} is on the no-side-effect list and is denied"
+    # A user_only parameter must trace to the task statement, and must be allowed when it
+    # does. The reason is redacted on the way back to the model, because a reason that quotes
+    # a tool's bytes into the deciding model's context is itself a channel.
+    gated = tools.Tool(
+        name="gated", version=1, summary="s", description="d",
+        entry="hpc_pilots.chemistry:library_spec",
+        parameters=(tools.Parameter("initiator", "str", "m", required=False,
+                                    default="ClAc-D-Tyr", trust="user_only"),))
+    denied = chief.check_policy(gated, {"initiator": "injected"}, chief.context())
+    assert isinstance(denied, chief.Denied) and denied.redact is True
+    assert isinstance(
+        chief._trusted_fields_policy(gated, {"initiator": "asked-for"},
+                                     chief.context(trusted=("asked-for",))),
+        chief.Allowed)
+    # The gates compose, and the trust gate alone is not sufficient: a tool that traces its
+    # arguments to the task and that nothing has decided about is still denied. Passing one
+    # gate is not passing the set, which is what default-deny is for.
+    assert isinstance(
+        chief.check_policy(gated, {"initiator": "asked-for"},
+                           chief.context(trusted=("asked-for",))),
+        chief.Denied)
+
+
+def test_a_tool_context_is_constructible_with_the_oracle_patched_to_raise(monkeypatch):
+    # Structural rather than scored, and it catches a leak no readout could: handing a policy
+    # the graded moves does not change what a deterministic policy does, so no number moves
+    # and an objective would happily admit it. This is the check improve.py already applies to
+    # the state, applied to what a tool is allowed to know.
+    def refuse(*a, **k):
+        raise AssertionError("the oracle must not be reachable from a tool context")
+
+    monkeypatch.setattr("hpc_pilots.twins.graded_moves", refuse)
+    monkeypatch.setattr("hpc_pilots.emergency.decision_relevant", refuse)
+    built = chief.context(now=3, wall_budget_seconds=60, trusted=("Mpro (nsp5)",))
+    assert set(built) == {"now", "wall_budget_seconds", "targets", "trusted"}
+    assert built["now"] == 3 and built["trusted"] == frozenset({"Mpro (nsp5)"})
+
+
+def test_no_dispatched_tool_writes_its_own_artifact_or_issues_a_model_request(monkeypatch):
+    # A tool returns; the episode loop writes. The rule is offload's -- nothing writes inside
+    # the container -- and it holds here for the same reason: a tool that wrote its own
+    # artifact would put a second file on disk that no run names. A tool issuing a model
+    # request would be a second LLM client spending budget nobody charged, which
+    # ARCHITECTURE.md forbids outright.
+    import inspect
+
+    source = (ROOT / "hpc_pilots/chief.py").read_text()
+    assert "write_json" not in source
+    assert "import Agent" not in source and "from .common import Agent" not in source
+    for name in chief.DISPATCH:
+        spec = tools.tool(name)
+        if "record" not in inspect.signature(spec.resolve()).parameters:
+            continue
+        seen = {}
+        monkeypatch.setattr(spec.entry.replace(":", "."),
+                            lambda **kw: seen.update(kw) or {"targets": {}})
+        chief.call(spec, {}, chief.context())
+        assert seen.get("record") is False, f"{name} was dispatched with record={seen.get('record')}"

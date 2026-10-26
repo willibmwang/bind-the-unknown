@@ -61,7 +61,7 @@ from .common import content_digest
 
 # Bumped by hand when a snapshot is cut. Deliberately not derived from the specs: a digest
 # answers whether two spec sets differ, a version answers which file a reader should open.
-TOOL_SET_VERSION = 1
+TOOL_SET_VERSION = 2
 
 # The declared types a parameter may take. Short on purpose, and not a coercion table: a
 # string where an integer is declared is a contract violation and not an input to parse.
@@ -202,6 +202,13 @@ class Tool:
     would be parsing documentation."""
     return_kind: str = "artifact"
     """One of `RETURN_KINDS`. This is what the caller branches on."""
+    rows: Optional[str] = None
+    """The returned key holding a mapping of row name to row, when the tool returns a table
+    rather than a single object; None when it returns one object. `structures_evidence.build`
+    returns `targets`, a mapping of eleven target names to eleven dated rows, so one call
+    carries eleven separately dated claims and `date_field` names a key inside a row rather
+    than at the top level. Declaring this wrongly is not a cosmetic error: a caller that read
+    `earliest_deposition` from the top level would find None and date every claim as undated."""
     cost_seconds: float = 0.0
     """Median wall seconds per call, measured. 0.0 means unmeasured, which is an honest
     starting value: a guessed one would make the first optimiser proposal unfalsifiable. Not a
@@ -363,13 +370,15 @@ TOOLS = {
                       "episode passes False, because the episode writes the record.",
                       required=False, default=True),
         ),
-        returns=(("accession", "str", "The UniProt accession resolved for the target."),
-                 ("structures", "int",
-                  "Entries covering a declared range. An attention proxy, not a score."),
-                 ("earliest_deposition", "str",
-                  "ISO date of the earliest covering entry, which is what dates the claim."),
-                 ("best_resolution", "float", "Best resolution among covering entries.")),
-        return_kind="evidence",
+        returns=(("targets", "dict",
+                  "Target name to a dated row carrying accession, structures, "
+                  "earliest_deposition, earliest_pdb, best_resolution, methods and pdb_ids."),
+                 ("coverage_threshold", "float", "The minimum echoed back."),
+                 ("sources", "tuple", "The three endpoints and their licence terms."),
+                 ("content_sha256", "str",
+                  "Identity of the payload with volatile timestamps stripped."),
+                 ("provenance", "dict", "Host, commit and time, from common.provenance.")),
+        return_kind="evidence", rows="targets",
         cost_seconds=0.0, worst_case_seconds=None, cost_network_calls=0, cost_actions=1,
         requires=(),
         failures=(
@@ -477,6 +486,12 @@ def register(spec):
     if spec.return_kind not in RETURN_KINDS:
         raise ValueError(f"Tool {spec.name!r} declares return_kind {spec.return_kind!r}; "
                          f"known kinds are {list(RETURN_KINDS)}")
+    if spec.rows and not spec.produces_evidence:
+        raise ValueError(f"Tool {spec.name!r} declares rows {spec.rows!r} but produces no "
+                         f"evidence; a table of undated rows is an artifact, not a row set")
+    if spec.rows and spec.rows not in [key for key, _, _ in spec.returns]:
+        raise ValueError(f"Tool {spec.name!r} declares rows {spec.rows!r}, which is not among "
+                         f"its declared returns {[k for k, _, _ in spec.returns]}")
     if spec.produces_evidence and not (spec.date_field and spec.citation):
         raise ValueError(
             f"Tool {spec.name!r} produces evidence but declares date_field "
