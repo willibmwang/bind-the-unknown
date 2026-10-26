@@ -136,6 +136,14 @@ BENIGN = frozenset({
     "FRET", "DMS", "WHO", "NIAID", "PDB", "SMILES", "RDKit", "MD", "NMR", "ATP", "NTP",
     "RNA", "DNA", "E", "coli", "ELISA", "SPR", "IC50", "KD", "EC50", "W4", "SynX",
     "ProteinGym", "UK", "US", "EU", "PCR", "LC", "MS", "HPLC", "CRISPR", "siRNA",
+    # From the tool specs, once the policy-facing block entered the residual report. Each is
+    # in a class this set already covers -- `EBI` and `NCBI` are database hosts like `PDB`
+    # and `NIAID`, `JSON` is a format like `SMILES`, `ORF` is a technique abbreviation like
+    # `FRET`, and `RUNNING` is a service status quoted inside a failure's cause. Listed
+    # rather than left to be reported, because five standing false positives in a report
+    # whose stated purpose is that a real leak not be lost among them is the defect that
+    # report already recovered from once.
+    "EBI", "NCBI", "JSON", "ORF", "RUNNING",
 })
 
 
@@ -512,6 +520,15 @@ def certify(name, relabelling, deadline=8):
                                          "axis": list(AXES)})]
     scrub = leaks(policy_facing, lexicon(name)) \
         if relabelling.kind == "identity" else {}
+    # The counterpart report, over the same object. `leaks` proves the declared lexicon was
+    # applied; this is the admission that the lexicon may be incomplete. `twins` has always
+    # computed it, but over the probe records -- the observed, retrievable, optimal and
+    # graded sets -- which are not what a policy reads, so neither the action block nor the
+    # tool block was ever scanned for an identifier nobody declared. A report and never a
+    # check, which is what `residual_candidates` documents itself as: a detector cannot tell
+    # a protein from a technique, so the judgement stays in `IDENTIFYING`.
+    residual = residual_candidates(policy_facing) \
+        if relabelling.kind == "identity" else {}
 
     declared = lexicon(name)
     floor, floor_source = lexicon_floor(name)
@@ -528,6 +545,9 @@ def certify(name, relabelling, deadline=8):
             # reader must be able to tell the two apart.
             "declared_tokens_floor_source": floor_source,
             "surviving_tokens": scrub,
+            # Additive: absence in an already-recorded certificate means the report did not
+            # cover the policy-facing object yet, not that it covered it and found nothing.
+            "residual_in_policy_facing": residual,
             "relevant_set_size": len(moved_relevant),
             "relevant_set_expected": len(base_relevant),
             "ranking_order_dependent": relabelling.kind == "presentation" and not ranking_ok,

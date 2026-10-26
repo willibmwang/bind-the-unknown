@@ -17,6 +17,9 @@ from hpc_pilots import chief
 from hpc_pilots import common
 from hpc_pilots import emergency
 from hpc_pilots import invariance
+from hpc_pilots import binding as binding_module
+from hpc_pilots import improve
+from hpc_pilots import structure as structure_module
 from hpc_pilots import twins
 from hpc_pilots import finder
 from hpc_pilots import optimizer
@@ -2434,13 +2437,16 @@ def test_the_committed_tool_snapshot_matches_the_registry():
     assert committed["tool_set_sha256"] == tools.spec_set_digest()
     assert sorted(committed["tools"]) == sorted(tools.TOOLS)
     # Every earlier snapshot keeps its digest, so the tool_set_sha256 recorded in an already
-    # finished run still verifies. A new spec goes in a new file; this is the device
+    # finished run still verifies, so a changed spec goes in a new file. This is the device
     # configs/today.json already uses, applied to the registry.
-    # Every earlier snapshot keeps its digest for ever, which is what lets a
-    # tool_set_sha256 recorded in a finished run still be resolved to the specs it named.
-    # v1 described the structures table's per-row keys as top-level; correcting that cut v2
-    # rather than editing v1, which is the device configs/today.json already uses.
-    historical = {1: "b67cdcfb525a0ff9f8beef3178a9dd8b549d7ea333bfeec9acdd372ad7aba509"}
+    #
+    # v1 described the structures table's per-row keys as top-level, and correcting that cut
+    # v2. v3 replaced a network-call count of 0 with an unmeasured None plus an explicit
+    # `reaches_network`, because two specs declared zero calls while reaching PDBe, UniProt,
+    # NCBI and EBI, and `optimizer` was reading that count as a capability. v2 is the digest
+    # fifty-nine recorded artifacts name, so it is pinned here rather than trusted.
+    historical = {1: "b67cdcfb525a0ff9f8beef3178a9dd8b549d7ea333bfeec9acdd372ad7aba509",
+                  2: "ff961039576d258eaff1c8bee4e506222ec4d0660e6ae5e088167c74e40e37d7"}
     for version, expected in historical.items():
         earlier = ROOT / "hpc_pilots" / "configs" / f"tools.v{version}.json"
         assert json.loads(earlier.read_text())["tool_set_sha256"] == expected, \
@@ -3318,9 +3324,19 @@ def test_the_tool_block_shows_only_tools_an_action_can_actually_dispatch():
              and node.func.id == "tool"
              for a in node.args if isinstance(a, ast.Constant)}
     assert named == reachable
+    # Non-empty, and this is not decoration. `named == reachable` is satisfied by two empty
+    # sets, so hoisting the `tool(...)` literal out of this module AND emptying the table
+    # passed all three assertions above while the block a policy reads became `{}` -- two
+    # characters against 2,486. A `-toolstate` run would then be labelled as though it showed
+    # the specs and have shown none: the same mislabel as the one `Agent` was carrying,
+    # arriving through the table instead. An adversary's verifier found this hole while
+    # narrowing the adversary's own claim about it.
+    assert reachable and named, "an emptied table satisfies set equality and shows nothing"
     agent_ = _StateCapturingAgent(shows_tools=True)
     run_episode("coronaviridae", "agent", agent=agent_)
-    assert set(agent_.states[0]["available_tools"]) == reachable
+    shown = agent_.states[0]["available_tools"]
+    assert set(shown) == reachable
+    assert shown, "the arm that declares it shows specs must show at least one"
 
 
 def test_the_policy_view_withholds_the_fields_that_are_not_addressed_to_a_decider():
@@ -3442,9 +3458,9 @@ def test_showing_the_specs_is_a_distinct_policy_label_and_a_typo_is_not_off():
     environment = {"PILOT_LLM_URL": "http://localhost:8000/v1/chat/completions",
                    "PILOT_LLM_MODEL": "stub-model"}
     with mock.patch.dict(os.environ, {**environment, "PILOT_TOOL_STATE": "0"}, clear=False):
-        plain = common.Agent()
+        plain = common.Agent(tool_state_applies=True)
     with mock.patch.dict(os.environ, {**environment, "PILOT_TOOL_STATE": "1"}, clear=False):
-        shown = common.Agent()
+        shown = common.Agent(tool_state_applies=True)
     assert plain.label == "agent" and plain.shows_tools is False
     assert shown.label == "agent-toolstate" and shown.shows_tools is True
     assert plain.report()["tool_state"] == "0" and shown.report()["tool_state"] == "1"
@@ -3480,29 +3496,84 @@ def test_every_spec_field_is_classified_as_shown_or_withheld():
     # later would then be withheld by omission -- the safe direction, but unrecorded, so a
     # reader could not tell a deliberate exclusion from a forgotten one. This makes adding a
     # field to the record fail here until somebody says which kind it is.
-    classified = set(tools.POLICY_VISIBLE) | set(tools.WITHHELD_FROM_POLICY)
+    classified = (set(tools.POLICY_VISIBLE) | set(tools.WITHHELD_FROM_POLICY)
+                  | set(tools.RENAMED_FOR_POLICY))
     for record, prefix in ((tools.Tool, ""), (tools.Parameter, "parameters."),
                            (tools.Failure, "failures.")):
         for field in dataclasses.fields(record):
             name = prefix + field.name
             assert name in classified, \
                 f"{name} is neither shown to a policy nor recorded as withheld"
-    # And nothing is claimed both ways.
-    assert not set(tools.POLICY_VISIBLE) & set(tools.WITHHELD_FROM_POLICY)
-    # The withheld half is a reason per field, not a bare list: a field excluded without a
-    # stated reason is indistinguishable from one excluded by accident.
+    # Three disjoint kinds, not two. The first version of this had `cost_seconds` and the
+    # parameter enums under "withheld" while the policy read their values on every round
+    # under another name, so the table said the policy never learns a cost and it does.
+    # Withheld and renamed are different claims, and only one is a containment property.
+    tables = (set(tools.POLICY_VISIBLE), set(tools.WITHHELD_FROM_POLICY),
+              set(tools.RENAMED_FOR_POLICY))
+    for first in range(len(tables)):
+        for second in range(first + 1, len(tables)):
+            assert not tables[first] & tables[second], "a field is classified two ways"
+    # Each non-visible kind carries a reason or a new name per field, never a bare list: an
+    # exclusion without a stated reason is indistinguishable from one made by accident.
     assert all(reason for reason in tools.WITHHELD_FROM_POLICY.values())
-    # And the shown half is not aspirational: every field it names must actually appear in a
-    # view built from a spec that declares one, or the table claims more than the code does.
+    assert all(name for name in tools.RENAMED_FOR_POLICY.values())
+    # And a renamed field really is readable by the policy under the name claimed, which is
+    # what distinguishes this table from the withheld one.
     view = tools.policy_view([tools.tool("structures.evidence")])["structures.evidence"]
-    flat = set(view) | {"name", "cost_actions", "cost_network_calls"}
-    flat |= {f"parameters.{k}" for p_ in view["parameters"] for k in p_}
-    flat |= {f"failures.{k}" for f_ in view["failures"] for k in f_}
-    missing = {f for f in tools.POLICY_VISIBLE if f not in flat}
-    # Exactly one, and it is absence rather than withholding: no v1 parameter declares a
-    # length ceiling, and a bound shown as null would read to a decider as a bound of null.
-    # The numeric bounds do appear, so dropping one from the view fails here.
-    assert missing == {"parameters.max_length"}
+    assert view["cost"]["median_seconds"] == tools.UNMEASURED
+    assert set(view["cost"]) == {"actions", "median_seconds", "network_calls",
+                                 "reaches_network"}
+    # The pair that makes an unmeasured count readable. A bare 0 told a decider the call
+    # touches no network; this tool reaches PDBe and UniProt and its own declared failure
+    # mode is an HTTP error from them, so 0 was false and `unmeasured` beside a declared
+    # capability is not.
+    assert view["cost"]["network_calls"] == tools.UNMEASURED
+    assert view["cost"]["reaches_network"] is True
+    local = tools.policy_view([tools.tool("chemistry.library_spec")])["chemistry.library_spec"]
+    assert local["cost"]["network_calls"] == 0 and local["cost"]["reaches_network"] is False
+    for original, renamed in tools.RENAMED_FOR_POLICY.items():
+        head = renamed.split(",")[0].split("[]")[0].split(".")
+        assert head[0] in view or head[0] == "parameters", f"{original} names {renamed}"
+    # And the shown half is not aspirational. Checked across EVERY registered spec, not just
+    # the one that happens to declare every field: the first version of this assertion used
+    # `structures.evidence` alone, which is the only spec carrying a citation and a row key,
+    # so it verified the best case and would have passed while two of three specs omitted
+    # two declared fields. An adversary found that; this is the repair.
+    for name in sorted(tools.TOOLS):
+        spec = tools.tool(name)
+        view = tools.policy_view([spec])[name]
+        flat = set(view) | {"name"}
+        flat |= {f"parameters.{k}" for p_ in view["parameters"] for k in p_}
+        flat |= {f"failures.{k}" for f_ in view["failures"] for k in f_}
+        for field in tools.POLICY_VISIBLE:
+            if field in flat:
+                continue
+            # A declared field may be absent only for a declared reason: either its condition
+            # is false for this spec, or no parameter of this spec declares that bound. A
+            # bound shown as null would read to a decider as a bound of null, and an empty
+            # citation as no citation needed, so absence is the honest encoding of both.
+            condition = tools.CONDITIONAL_ON.get(field)
+            optional_bound = field in ("parameters.max_length", "parameters.minimum",
+                                       "parameters.maximum", "parameters.default",
+                                       "parameters.admissible")
+            assert condition or optional_bound, \
+                f"{name}: {field} is declared visible, is absent, and declares no condition"
+            if condition:
+                assert not getattr(spec, condition), \
+                    f"{name}: {field} is absent although {condition} is set"
+    # The condition table is exact, not a catch-all: every field in it is genuinely absent
+    # from at least one registered spec and present in at least one, or it is documenting a
+    # branch that does not exist.
+    for field, condition in tools.CONDITIONAL_ON.items():
+        views = [tools.policy_view([tools.tool(n)])[n] for n in sorted(tools.TOOLS)]
+        assert any(field in v for v in views), f"{field} is never emitted by any spec"
+    # Concretely, and this is the fact worth pinning rather than deriving: the only tool an
+    # action dispatches shows the policy no citation obligation, because it produces no
+    # evidence. `chief` already returns its envelope uncitable, so the two agree.
+    dispatchable = {n for names in emergency.ACTION_TOOLS.values() for n in names}
+    for name in dispatchable:
+        assert "citation" not in tools.policy_view([tools.tool(name)])[name]
+        assert tools.tool(name).produces_evidence is False
 
 
 def test_the_orbit_scans_exactly_the_strings_the_policy_view_shows():
@@ -3636,3 +3707,184 @@ def test_an_action_declaring_an_unwired_tool_is_refused_at_import():
     assert envelope["status"] == "unavailable"
     assert envelope["detail"] == {"reason": "registered but not wired to a dispatcher"}
     assert envelope["citable"] is False and envelope["verified"] is False
+
+
+def test_an_arm_with_no_tool_block_keeps_its_plain_label():
+    # The defect this closes. The suffix was applied from the environment variable alone, but
+    # only `emergency` and `twins` build a state that can carry the block -- `binding` and
+    # `structure` construct the same class and never consult it. So one stray variable
+    # relabelled arms that had shown the policy nothing, splitting the forty recorded binding
+    # artifacts off from runs identical to them. The label lied in the direction nobody was
+    # watching: claiming specs were shown where there was no block to show.
+    environment = {"PILOT_LLM_URL": "http://localhost:8000/v1/chat/completions",
+                   "PILOT_LLM_MODEL": "stub-model", "PILOT_TOOL_STATE": "1"}
+    with mock.patch.dict(os.environ, environment, clear=False):
+        inapplicable = common.Agent()
+        applicable = common.Agent(tool_state_applies=True)
+    assert inapplicable.label == "agent" and inapplicable.shows_tools is False
+    assert applicable.label == "agent-toolstate" and applicable.shows_tools is True
+    # Recorded rather than raised, because the variable describes an episode's state and
+    # `binding` has no such state; refusing would let a flag for one experiment break three
+    # others. Not silent either: the request and the outcome sit side by side.
+    report = inapplicable.report()
+    assert report["tool_state"] == "1"
+    assert report["tool_state_applies"] is False and report["shows_tools"] is False
+    # And the two callers that do build the block are the two that declare it, checked from
+    # source so that a fifth caller cannot quietly inherit the wrong default.
+    declared = set()
+    for module in (emergency, twins, binding_module, structure_module):
+        tree = ast.parse(Path(module.__file__).read_text())
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                    and node.func.id == "Agent"
+                    and any(k.arg == "tool_state_applies" for k in node.keywords)):
+                declared.add(module.__name__.rsplit(".", 1)[-1])
+    assert declared == {"emergency", "twins"}
+
+
+def test_the_oracle_free_guard_scans_the_arm_that_carries_the_tool_block():
+    # This guard was made recursive one commit earlier precisely so it would reach the tool
+    # block, and was then handed a state built without one, because `shows_tools` defaults to
+    # False. The extension was inert and the verdict stayed `clean`. Three independent
+    # adversaries found it; none of them could read this test, which did not exist.
+    planted = tools.Tool(name="attainment", version=1, summary="s", description="d",
+                         entry="hpc_pilots.chemistry:library_spec")
+    assert planted.name in improve.EVALUATOR_VOCABULARY
+    saved = (dict(tools.TOOLS), dict(emergency.ACTION_TOOLS), dict(chief.DISPATCH))
+    try:
+        tools.TOOLS[planted.name] = planted
+        chief.DISPATCH[planted.name] = chief.DISPATCH["chemistry.library_spec"]
+        emergency.ACTION_TOOLS["invoke_design_tool"] = ("chemistry.library_spec", planted.name)
+        held, detail = improve.guard_state_is_oracle_free()
+        assert held is False and detail == "state carries evaluator fields ['attainment']"
+    finally:
+        for live, restored in zip((tools.TOOLS, emergency.ACTION_TOOLS, chief.DISPATCH), saved):
+            live.clear(); live.update(restored)
+    # The recorded verdict is unchanged, and the detail string is the one the artifact
+    # carries, so extending the guard moved no number it had already written down.
+    assert improve.guard_state_is_oracle_free() == (True, "clean")
+
+
+def test_the_undeclared_identifier_report_covers_what_the_policy_reads():
+    # `leaks` and `residual_candidates` are counterparts: the first proves the declared
+    # lexicon was applied, the second admits the lexicon may be incomplete. `leaks` was
+    # extended to the tool block; the residual report was computed in `twins` over the probe
+    # records -- the observed, retrievable, optimal and graded sets -- which are not what a
+    # policy reads. So neither the action block nor the tool block had ever been scanned for
+    # an identifier nobody declared. Found by an adversary.
+    element = invariance.group("coronaviridae", "identity", 20261021, 4)[0]
+    clean = invariance.certify("coronaviridae", element)
+    assert clean["residual_in_policy_facing"] == {}
+    saved = (dict(tools.TOOLS), dict(emergency.ACTION_TOOLS))
+    try:
+        # Identifier-shaped and undeclared: absent from the packet lexicon, so `leaks` is
+        # correctly silent, and absent from `BENIGN`, so the residual report must surface it.
+        tools.TOOLS["planted.residual"] = tools.Tool(
+            name="planted.residual", version=1, summary="s",
+            description="Validated against ZXQ7 and the KLMN assay.",
+            entry="hpc_pilots.chemistry:library_spec")
+        emergency.ACTION_TOOLS.clear()
+        emergency.ACTION_TOOLS["invoke_design_tool"] = ("planted.residual",)
+        planted = invariance.certify("coronaviridae", element)
+        assert planted["surviving_tokens"] == {}, "leaks should be silent for an undeclared token"
+        assert planted["residual_in_policy_facing"] == {"KLMN": 1, "ZXQ7": 1}
+        # A report and never a check. A detector cannot tell a protein from a technique, so
+        # the judgement stays in `IDENTIFYING` and certification is unaffected.
+        assert planted["certified"] is True
+    finally:
+        for live, restored in zip((tools.TOOLS, emergency.ACTION_TOOLS), saved):
+            live.clear(); live.update(restored)
+    # The five tokens the tool specs contributed are classed benign rather than left to
+    # stand, because the report's whole purpose is that a real leak not be lost among false
+    # positives -- a defect it has already recovered from once.
+    assert {"EBI", "NCBI", "JSON", "ORF", "RUNNING"} <= invariance.BENIGN
+    everything = tools.policy_view([tools.tool(n) for n in sorted(tools.TOOLS)])
+    assert invariance.residual_candidates(everything) == {}
+
+
+def test_a_measured_count_cannot_stand_in_for_a_capability():
+    # The defect: `optimizer` decided whether a tool reaches a network by reading
+    # `cost_network_calls`, which was 0 on every v1 spec because none had been measured. So
+    # it concluded `structures.evidence` touches no network, and would have refused a
+    # legitimate transport-failure proposal for the tool whose own declared failure mode is
+    # an HTTP error from the PDBe host -- a refusal contradicting the spec beside it.
+    #
+    # A measured count conflates not-yet-measured with makes-none, so the capability gets its
+    # own field. The same split as `cost_seconds` against `worst_case_seconds`: one for
+    # accounting, one for the predicate.
+    structures = tools.tool("structures.evidence")
+    assert structures.reaches_network is True
+    assert structures.cost_network_calls is None, "unmeasured, not zero"
+    assert structures.is_remote() is False, "it runs locally and still reaches a network"
+    assert "PDBe" in structures.failures[0].symptom
+    # The predicate the guard reads, and the one it used to read. The contrast is the finding:
+    # the count alone answers False for a tool that reaches PDBe and UniProt, so the guard
+    # refused a transport failure for the tool whose own first declared failure is an HTTP
+    # error from that host.
+    assert (structures.is_remote() or structures.reaches_network) is True
+    assert bool(structures.is_remote() or (structures.cost_network_calls or 0)) is False
+    design = tools.tool("chemistry.library_spec")
+    assert design.reaches_network is False and design.cost_network_calls == 0
+    # Frozen against the optimiser, because a run records requests made and never the
+    # capability to make them, so no recorded field could ever support a change to it.
+    assert "reaches_network" not in tools.PROPOSABLE
+    # Registration refuses the incoherent pair: a tool reaching no network knows its count is
+    # zero, so declaring it unmeasured is not a conservative default but a contradiction.
+    with pytest.raises(ValueError, match="known zero rather than"):
+        tools.register(tools.Tool(name="planted.incoherent", version=1, summary="s",
+                                  description="d", reaches_network=False,
+                                  cost_network_calls=None,
+                                  entry="hpc_pilots.chemistry:library_spec"))
+    # And the default pair is usable, which the first attempt at this was not: defaulting the
+    # count to None made a bare Tool refuse itself.
+    bare = tools.Tool(name="planted.default", version=1, summary="s", description="d",
+                      entry="hpc_pilots.chemistry:library_spec")
+    assert (bare.reaches_network, bare.cost_network_calls) == (False, 0)
+    try:
+        tools.register(bare)
+    finally:
+        tools.TOOLS.pop("planted.default", None)
+
+
+def test_every_declared_vocabulary_is_one_some_caller_actually_supplies():
+    # `register` used to accept an `enum_from` naming a vocabulary nothing supplies, and
+    # `values()` raised only when the block was built -- which, with the tool-state flag on,
+    # is round one of an episode. Same defect as an action naming an unwired tool, so the
+    # same answer: refuse where it is knowable.
+    with pytest.raises(ValueError, match="which no caller supplies"):
+        tools.register(tools.Tool(
+            name="planted.badenum", version=1, summary="s", description="d",
+            entry="hpc_pilots.chemistry:library_spec",
+            parameters=(tools.Parameter("t", "str", "m", enum_from="no_such_vocabulary"),)))
+    # The constant has to match what the callers build, and the check is behavioural rather
+    # than a source scan: every declared vocabulary is resolved through both arms that build
+    # a block, so a source named here but never supplied fails, and so does a caller that
+    # stops supplying one. A tuple agreeing with a grep would not prove either.
+    saved = (dict(tools.TOOLS), dict(emergency.ACTION_TOOLS), dict(chief.DISPATCH))
+    _, dossiers, _, _ = packet("coronaviridae")
+    try:
+        for source in tools.ENUM_SOURCES:
+            probe = tools.Tool(name="planted.vocab", version=1, summary="s", description="d",
+                               entry="hpc_pilots.chemistry:library_spec",
+                               parameters=(tools.Parameter("t", "str", "m",
+                                                           enum_from=source),))
+            tools.TOOLS["planted.vocab"] = probe
+            chief.DISPATCH["planted.vocab"] = chief.DISPATCH["chemistry.library_spec"]
+            emergency.ACTION_TOOLS.clear()
+            emergency.ACTION_TOOLS["invoke_design_tool"] = ("planted.vocab",)
+            # The episode arm.
+            agent_ = _StateCapturingAgent(shows_tools=True)
+            run_episode("coronaviridae", "agent", agent=agent_)
+            shown = agent_.states[0]["available_tools"]["planted.vocab"]["parameters"][0]
+            assert shown["admissible"], f"{source} resolved to nothing in the episode"
+            # The probe arm, which grades.
+            state = twins._state_for_policy(dossiers, set(), 1, 8, 11,
+                                            list(ACTIONS), shows_tools=True)
+            resolved = state["available_tools"]["planted.vocab"]["parameters"][0]
+            assert resolved["admissible"], f"{source} resolved to nothing in a probe"
+            # And the certificate builder, which scans what the policy reads.
+            element = invariance.group("coronaviridae", "identity", 20261021, 2)[0]
+            assert invariance.certify("coronaviridae", element)["certified"]
+    finally:
+        for live, restored in zip((tools.TOOLS, emergency.ACTION_TOOLS, chief.DISPATCH), saved):
+            live.clear(); live.update(restored)

@@ -56,10 +56,10 @@ the PDFs. It is self-validating (§8) and is not part of the research pipeline.
 | `targets.py` | 192 | Hand-authored evidence packets: 3 families, 11 targets, 59 evidence entries, 8 synthetic update probes. |
 | `emergency.py` | 221 | Timed decision episodes over a packet: evidence released on a schedule, a deadline, an action budget, and scoring of whether the system updated when it should and held when it should not. |
 | `chemistry.py` | 135 | Macrocycle building-block registry: initiators, closure chemistry, nine non-canonical block classes, library specification and encoding. |
-| `tools.py` | 655 | The tool registry: what a tool is called, how it is reached, what it costs, how it fails, and whether its return may be cited. Deliberately **not** the action space — of the six entries in `dossier.ACTIONS`, three are episode control flow and one is a dossier operation, and none is a callable. `policy_view` projects a spec down to the fields addressed to a decider, withholding module paths, the `trust` annotation and the `observed_in` run paths that spell a family as a source literal. |
+| `tools.py` | 745 | The tool registry: what a tool is called, how it is reached, what it costs, how it fails, and whether its return may be cited. Deliberately **not** the action space — of the six entries in `dossier.ACTIONS`, three are episode control flow and one is a dossier operation, and none is a callable. `policy_view` projects a spec down to the fields addressed to a decider. Every field is classified into one of three disjoint tables — shown, withheld with a reason, or shown under another name — because conflating the last two made the table claim the policy never learns a tool's cost when it reads one every round. Withheld: module paths, the `trust` annotation that would tell a policy which argument to launder, and the `observed_in` run paths that spell a family as a source literal. `reaches_network` is a capability field separate from the measured `cost_network_calls`, because a count of zero on an unmeasured tool was being read as “touches no network” by a guard — the same split as `cost_seconds` against `worst_case_seconds`. |
 | `chief.py` | 418 | Validates a tool call, executes it, and returns an envelope that says what the return is worth. Draws the line between raising and charging exactly where the emitted schema's expressive power ends. |
 | `finder.py` | 202 | Which tools a policy may reach this round, and the record of why. Defaults to showing everything, because withholding a tool is a reachability change rather than a cost saving. Its stated threshold was corrected from ~65 tools to ~9 once the block was built and measured: one tool's view is 4.9× the whole action block, and 70% of it is the caveats. |
-| `optimizer.py` | 638 | Proposes spec corrections from recorded runs, behind a guard on the edits. Propose-only and structurally so: it writes only under `runs/tools/`, which nothing in the package reads. |
+| `optimizer.py` | 644 | Proposes spec corrections from recorded runs, behind a guard on the edits. Propose-only and structurally so: it writes only under `runs/tools/`, which nothing in the package reads. |
 | `summarize.py` | 165 | Aggregation into CSVs and figures. Excludes smoke and incomplete runs structurally. |
 | `submit.py` | 85 | SLURM submission with a dependency DAG and a submission registry that doubles as an idempotency lock. |
 | `stage_model.py` | 29 | Pins a local model by commit SHA with per-file hashes; excludes `*.py` so no model code is downloaded. |
@@ -247,7 +247,10 @@ regenerate is a result I cannot defend at review.
   documentation for work no action can commission is a fabrication channel pointed at the
   policy. `invariance.certify` scrubs the block alongside the state, and a target name written
   into a spec's `enum` rather than bound late through `enum_from` fails certification on all
-  four identity elements, which stops the orbit rather than being averaged away.
+  four identity elements, which stops the orbit rather than being averaged away. The
+  counterpart report for identifiers nobody declared now covers the same object: it had been
+  computed over the probe records, which are not what a policy reads, so neither the action
+  block nor the tool block was ever scanned for one.
 - **Config immutability as a device.** `configs/today.json` is treated as byte-immutable;
   new work goes into new config files, purely so the `config_sha256` embedded in already
   recorded runs still verifies. Both newer configs carry a note saying so.

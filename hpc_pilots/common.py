@@ -279,7 +279,7 @@ def _object(spec, choices):
 class Agent:
     """OpenAI-compatible inference (local vLLM or a hosted provider); failed inference never substitutes a baseline."""
 
-    def __init__(self):
+    def __init__(self, tool_state_applies=False):
         load_env()
         self.provider = os.environ.get("PILOT_LLM_PROVIDER", "local")
         self.url = os.environ.get("PILOT_LLM_URL", "").rstrip("/")
@@ -325,19 +325,33 @@ class Agent:
         if self.tool_schema_mode != "flat":
             self.label = f"{self.label}-{self.tool_schema_mode}"
         # Whether the tool specs themselves reach the policy, as opposed to being the shape
-        # the caller validates against. Read here rather than passed in by the episode so
-        # that the flag and the label cannot disagree, which is the defect `arms.py` was
-        # written to end: a run whose state carried tool specs under the plain `agent` label
-        # would pool with the recorded episodes it is not comparable to.
+        # the caller validates against. The environment states the request and the caller
+        # states whether it can honour it, and the effective value is the conjunction.
+        #
+        # Both halves are needed, and getting this wrong was a real defect. Reading the
+        # variable alone put `-toolstate` on every Agent, but only `emergency` and `twins`
+        # build a state that can carry the block: `binding` and `structure` construct the
+        # same class and never consult it. So one stray variable relabelled arms that had
+        # shown the policy nothing, splitting forty recorded binding artifacts off from runs
+        # identical to them. The label lied in the direction nobody was watching -- claiming
+        # specs were shown where there was no block to show.
+        #
+        # An inapplicable request is recorded rather than raised, because `PILOT_TOOL_STATE`
+        # describes an episode's state and `binding` has no such state to describe; refusing
+        # would let a flag for one experiment break three others. It is not silent either:
+        # `report()` carries the request and the effective value side by side, and an arm
+        # that showed nothing keeps its plain label and so still pools with the runs it is
+        # genuinely comparable to.
         self.tool_state = os.environ.get("PILOT_TOOL_STATE", "0")
         if self.tool_state not in TOOL_STATE_MODES:
             raise RuntimeError(f"Unknown PILOT_TOOL_STATE {self.tool_state!r}; known values "
                                f"are {list(TOOL_STATE_MODES)}. A typo must not read as off, "
                                f"because the off state is the one that pools with the record.")
-        self.shows_tools = self.tool_state == "1"
+        self.tool_state_applies = tool_state_applies
+        self.shows_tools = tool_state_applies and self.tool_state == "1"
         # The input text changes, so no episode recorded before this is comparable with one
         # after it even at identical payload bytes -- the schema is unmoved and the prompt is
-        # not. Hazard five of the plan, and the reason this is a label and not a parameter.
+        # not. The suffix follows the effective value, never the request.
         if self.shows_tools:
             self.label = f"{self.label}-toolstate"
         self.calls = 0
@@ -500,4 +514,9 @@ class Agent:
                 "filtered_attempts": self.filtered, "transport_retries": self.transport_retries,
                 "incidents": self.incidents, "history": self.history,
                 "tool_schema_mode": self.tool_schema_mode, "tool_turns": self.tool_turns,
-                "tool_state": self.tool_state}
+                # The request and what came of it. An arm where the request does not apply
+                # records "1" beside False, which is the honest pair: asked for, nothing to
+                # show, label unchanged, still comparable with its own recorded runs.
+                "tool_state": self.tool_state,
+                "tool_state_applies": self.tool_state_applies,
+                "shows_tools": self.shows_tools}

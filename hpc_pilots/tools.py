@@ -61,7 +61,7 @@ from .common import content_digest
 
 # Bumped by hand when a snapshot is cut. Deliberately not derived from the specs: a digest
 # answers whether two spec sets differ, a version answers which file a reader should open.
-TOOL_SET_VERSION = 2
+TOOL_SET_VERSION = 3
 
 # The declared types a parameter may take. Short on purpose, and not a coercion table: a
 # string where an integer is declared is a contract violation and not an input to parse.
@@ -79,6 +79,17 @@ RETURN_KINDS = ("evidence", "artifact", "none")
 # Where a parameter's value is allowed to have come from, checked by the caller's policies.
 # `any` is the default and means unconstrained -- it never means trusted.
 TRUST = ("any", "user_only")
+# The late-bound vocabularies every caller in this package supplies, so a parameter naming
+# something outside them cannot be resolved by anything that exists. Declared here and
+# checked at registration because the alternative is where it used to surface: `values()`
+# raises when the block is built, which with the tool-state flag on is round one of an
+# episode. That is the same defect as an action naming an unwired tool -- a static
+# inconsistency discovered at runtime -- and it gets the same answer.
+#
+# A new caller supplying a new vocabulary adds to this tuple, which is a visible edit. The
+# tuple is pinned against the `choices` mappings the callers actually build, recovered from
+# source, so it cannot drift from them silently.
+ENUM_SOURCES = ("axis", "target")
 
 # The only fields an optimiser proposal may touch. Everything absent is either a claim about
 # the world (`citation`, `produces_evidence`, `date_field`) or a statement about which code
@@ -219,9 +230,35 @@ class Tool:
     bound it can enforce. A different question from `cost_seconds`: the median is for cost
     accounting, the worst case is the wall-budget gate, and one field would make the gate
     either toothless or permanently closed."""
-    cost_network_calls: int = 0
-    """Outbound requests one call makes, including retries. Not a rate limit -- a limit belongs
-    in `failures`, where a caller can branch on hitting it."""
+    cost_network_calls: Optional[int] = 0
+    """Outbound requests one call makes, including retries, or None for unmeasured.
+
+    The default pairs with `reaches_network`'s default: a tool that declares no network is a
+    tool whose count is a known zero, so the default pair is coherent and the common case
+    needs no declaration. A tool that does reach a network must say so, and then may leave
+    the count unmeasured. Defaulting this to None instead made the bare `Tool(...)` refuse
+    itself, which is a default that cannot be used. Not a rate
+    limit -- a limit belongs in `failures`, where a caller can branch on hitting it.
+
+    None rather than 0, for the reason `cost_seconds` reads `unmeasured`: a zero here is a
+    claim that the call touches no network, and two of the three v1 specs declared 0 while
+    reaching PDBe, UniProt, NCBI and EBI. Whether a tool reaches a network at all is
+    `reaches_network`, which is a capability and not a count."""
+    reaches_network: bool = False
+    """Whether the work makes outbound requests, independent of how many have been measured.
+
+    Separate from `cost_network_calls` because a measured count cannot carry a capability: an
+    unmeasured tool declares 0 calls, and anything reading that as "touches no network"
+    conflates not-yet-measured with makes-none. `optimizer` did exactly that, deciding a
+    transport failure could not belong to `structures.evidence` -- whose own declared failure
+    mode is an HTTP error from the PDBe host. The same split as `cost_seconds` against
+    `worst_case_seconds`: one field for accounting, one for the predicate.
+
+    Also separate from `is_remote()`, which says where the *tool* runs. A tool can run locally
+    and still reach the network, which is what both evidence-producing v1 specs do.
+
+    Absent from `PROPOSABLE`, so the optimiser can never propose a change to it. A run records
+    requests made, never the capability to make them, so no recorded field could support it."""
     cost_actions: int = 1
     """How much of an episode's action budget one call spends. One everywhere in v1, which is
     exactly what `emergency.py`'s per-round increment already charges, so no recorded budget
@@ -300,7 +337,7 @@ class Tool:
 # richest epistemic case. `intake.rank_targets` is the only one that reaches the network.
 TOOLS = {
     "chemistry.library_spec": Tool(
-        name="chemistry.library_spec", version=1,
+        name="chemistry.library_spec", version=2,
         summary="Define a focused thioether-macrocycle library over a randomised region.",
         description="Returns a library definition: a fixed chloroacetyl initiator, a "
                     "randomised region of the given length bounds, a downstream cysteine "
@@ -329,7 +366,8 @@ TOOLS = {
                   "Sequences the definition admits. Not a library that exists, and not a "
                   "count of anything measured.")),
         return_kind="artifact",
-        cost_seconds=0.0, worst_case_seconds=None, cost_network_calls=0, cost_actions=1,
+        cost_seconds=0.0, worst_case_seconds=None, cost_network_calls=0,
+        reaches_network=False, cost_actions=1,
         requires=(),
         failures=(
             Failure("'<name>' is not a registered chloroacetyl initiator",
@@ -352,7 +390,7 @@ TOOLS = {
                 "not a synthesised library, not a screened one, and no macrocycle has been "
                 "measured anywhere in this repository."),
     "structures.evidence": Tool(
-        name="structures.evidence", version=1,
+        name="structures.evidence", version=2,
         summary="Dated structural coverage per declared target, from PDBe and UniProt.",
         description="For each target in the structures config, resolves the UniProt entry, "
                     "the declared or derived residue ranges, and the PDBe entries covering "
@@ -379,7 +417,8 @@ TOOLS = {
                   "Identity of the payload with volatile timestamps stripped."),
                  ("provenance", "dict", "Host, commit and time, from common.provenance.")),
         return_kind="evidence", rows="targets",
-        cost_seconds=0.0, worst_case_seconds=None, cost_network_calls=0, cost_actions=1,
+        cost_seconds=0.0, worst_case_seconds=None, cost_network_calls=None,
+        reaches_network=True, cost_actions=1,
         requires=(),
         failures=(
             Failure("urllib.error.HTTPError from the PDBe or UniProt host",
@@ -396,7 +435,7 @@ TOOLS = {
                 "entities and a per-chain test returns zero for every such structure ever "
                 "deposited."),
     "intake.rank_targets": Tool(
-        name="intake.rank_targets", version=1,
+        name="intake.rank_targets", version=2,
         summary="Pathogen genome accession to a ranked list of candidate binding targets.",
         description="Six-frame ORF calling, homology identification against a reviewed "
                     "UniProt reference, then a stated and unfitted ranking over "
@@ -428,7 +467,8 @@ TOOLS = {
                  ("rubric", "dict", "The stated ranking weights, which are not fitted."),
                  ("provenance", "dict", "Host, commit and time, from common.provenance.")),
         return_kind="artifact",
-        cost_seconds=0.0, worst_case_seconds=None, cost_network_calls=0, cost_actions=1,
+        cost_seconds=0.0, worst_case_seconds=None, cost_network_calls=None,
+        reaches_network=True, cost_actions=1,
         requires=(),
         failures=(
             Failure("A holdout that removes nothing raises rather than proceeding",
@@ -483,6 +523,20 @@ def register(spec):
         raise ValueError(f"Tool {spec.name!r} is already registered")
     if not spec.entry and not spec.endpoint:
         raise ValueError(f"Tool {spec.name!r} declares neither an entry point nor an endpoint")
+    # The count and the capability have to agree, because a reader of either one alone draws
+    # a conclusion about the other. A tool that reaches no network knows its count is zero, so
+    # declaring it unmeasured is incoherent; a tool with a nonzero count has demonstrably
+    # reached one. `reaches_network=True` with a None count is the honest unmeasured case and
+    # is what both evidence-producing v1 specs declare.
+    #
+    # One rule and not two: `!= 0` already covers both the unmeasured None and a nonzero
+    # count, so a second clause for "declares calls while reaching no network" could never
+    # fire. An unreachable raise reads as a guard and is not one, which this repository has
+    # already paid for once in the finder's pinning check.
+    if not spec.reaches_network and spec.cost_network_calls != 0:
+        raise ValueError(f"Tool {spec.name!r} declares reaches_network=False, so its network "
+                         f"call count is a known zero rather than "
+                         f"{spec.cost_network_calls!r}")
     if spec.return_kind not in RETURN_KINDS:
         raise ValueError(f"Tool {spec.name!r} declares return_kind {spec.return_kind!r}; "
                          f"known kinds are {list(RETURN_KINDS)}")
@@ -508,6 +562,10 @@ def register(spec):
         if parameter.enum and parameter.enum_from:
             raise ValueError(f"Tool {spec.name!r} parameter {parameter.name!r} declares both "
                              f"a fixed enum and an enum_from; one vocabulary, not two")
+        if parameter.enum_from is not None and parameter.enum_from not in ENUM_SOURCES:
+            raise ValueError(f"Tool {spec.name!r} parameter {parameter.name!r} draws its "
+                             f"values from {parameter.enum_from!r}, which no caller supplies; "
+                             f"the late-bound vocabularies are {list(ENUM_SOURCES)}")
         try:
             json.dumps(parameter.default)
         except TypeError as error:
@@ -577,8 +635,7 @@ def snapshot():
 # output by hand: a field added later would be withheld by omission, which is the safe
 # direction but leaves a reader unable to tell a deliberate exclusion from a forgotten one.
 POLICY_VISIBLE = ("name", "summary", "description", "parameters", "returns", "return_kind",
-                  "rows", "cost_actions", "cost_network_calls", "failures", "warning",
-                  "produces_evidence", "citation",
+                  "rows", "failures", "warning", "produces_evidence", "citation",
                   "parameters.name", "parameters.kind", "parameters.meaning",
                   "parameters.required", "parameters.default", "parameters.minimum",
                   "parameters.maximum", "parameters.max_length",
@@ -589,16 +646,44 @@ WITHHELD_FROM_POLICY = {
     "endpoint": "a config key; no action can reach it",
     "requires": "import names; the caller checks them before dispatch",
     "version": "bookkeeping for the digest, not a fact about the work",
-    "cost_seconds": "reported as cost.median_seconds, 'unmeasured' while it is 0.0",
     "worst_case_seconds": "the caller's wall gate, enforced before the policy is asked",
-    "date_field": "a key name the caller reads to date an envelope; the policy learns the "
-                  "dating rule from returns and citation, which say the date is the one the "
-                  "claim entered the record and not the one it was fetched on",
+    "date_field": "a key name the caller reads to date an envelope",
     "parameters.trust": "tells a policy which argument to launder",
-    "parameters.enum": "superseded by the resolved admissible set",
-    "parameters.enum_from": "superseded by the resolved admissible set",
     "failures.raises": "an exception class the caller branches on",
     "failures.observed_in": "run paths carry family names as source literals",
+}
+
+# Shown, but not under this name. Split out of the table above because conflating the two
+# made that table lie: a reader scanning it for `cost_seconds` would conclude the policy
+# never learns what a call costs, and the policy reads a cost on every round. Withheld and
+# renamed are different claims about what a decider can see, and only one of them is a
+# containment property. An adversary found the conflation; the entries were always annotated
+# with the new name, which is why the mistake was in the heading rather than in the values.
+RENAMED_FOR_POLICY = {
+    "cost_seconds": "cost.median_seconds, reading 'unmeasured' rather than 0.0",
+    "cost_actions": "cost.actions",
+    "cost_network_calls": "cost.network_calls, reading 'unmeasured' rather than 0",
+    "reaches_network": "cost.reaches_network",
+    "parameters.enum": "parameters[].admissible, after resolution",
+    "parameters.enum_from": "parameters[].admissible, after resolution",
+}
+
+# Three visible fields are emitted only when they mean something, and the condition is
+# declared here rather than left to be read off `policy_view`'s branches. Emitting them
+# unconditionally would be the `cost_seconds: 0.0` mistake in another place: an empty
+# `citation` shown to a decider reads as "no citation needed" rather than "not applicable",
+# and a `rows: null` claims the return is a table with no rows rather than not a table.
+#
+# Worth stating because of what it implies today. The only tool an action dispatches is
+# `chemistry.library_spec`, which produces no evidence, so the block an episode actually
+# shows carries no citation obligation at all. That is correct -- a library definition is a
+# design choice and `chief` already returns it uncitable -- but it is not obvious from
+# `POLICY_VISIBLE`, and a reader who assumed every declared field appears would be wrong for
+# two of the three registered specs.
+CONDITIONAL_ON = {
+    "citation": "produces_evidence",
+    "rows": "rows",
+    "warning": "warning",
 }
 
 UNMEASURED = "unmeasured"
@@ -635,9 +720,14 @@ def policy_view(specs, choices=None):
     """
     block = {}
     for spec in specs:
+        # `reaches_network` sits in the cost block because it is what makes an unmeasured
+        # count readable: "network_calls: unmeasured, reaches_network: true" says the calls
+        # happen and nobody has counted them, where a bare 0 claimed there were none.
         cost = {"actions": spec.cost_actions,
                 "median_seconds": UNMEASURED if not spec.cost_seconds else spec.cost_seconds,
-                "network_calls": spec.cost_network_calls}
+                "network_calls": (UNMEASURED if spec.cost_network_calls is None
+                                  else spec.cost_network_calls),
+                "reaches_network": spec.reaches_network}
         view = {"summary": spec.summary, "description": spec.description,
                 "parameters": [_policy_parameter(p, choices) for p in spec.parameters],
                 "returns": [{"key": k, "kind": kind, "meaning": meaning}

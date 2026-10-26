@@ -588,7 +588,7 @@ def run_emergency(name, policy, smoke=False, control=None, repeat=1):
     prefix = "smoke_" if smoke else ""
     outputs = []
     for replicate in range(1, repeat + 1):
-        agent = Agent() if policy == "agent" else None
+        agent = Agent(tool_state_applies=True) if policy == "agent" else None
         try:
             result = run_episode(name, policy, deadline=deadline, agent=agent, control=control)
         except ContentFiltered as filtered:

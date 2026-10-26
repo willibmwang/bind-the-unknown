@@ -791,7 +791,7 @@ def run_twins(name, policy, seed=None, attempts=400, limit=None, smoke=False,
         pairs = [pairs[int(i)] for i in sorted(keep)]
     paired = [s for p in pairs for s in (p["challenger_best"], p["leader_best"])]
 
-    agent = Agent() if policy == "agent" else None
+    agent = Agent(tool_state_applies=True) if policy == "agent" else None
     key = answer_key(name, seed, 16 if smoke else attempts, now) \
         if policy == "memorised" else None
     probes, filtered = [], 0

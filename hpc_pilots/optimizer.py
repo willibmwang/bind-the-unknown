@@ -267,7 +267,13 @@ def guard_evidence_is_recorded_not_inferred(proposal):
         # clause eight recorded content filters would have licensed a failure mode on a local,
         # network-free library-definition tool.
         if pointer == "agent.incidents[]":
-            if not (spec.is_remote() or spec.cost_network_calls):
+            # `reaches_network` and not `cost_network_calls`. The count was 0 on every v1
+            # spec because none had been measured, so this read "touches no network" for
+            # `structures.evidence`, whose own declared failure mode is an HTTP error from
+            # the PDBe host. A measured count cannot carry a capability predicate: it
+            # conflates not-yet-measured with makes-none, and the refusal it produced
+            # contradicted the spec sitting beside it.
+            if not (spec.is_remote() or spec.reaches_network):
                 return False, (f"{proposal.tool} reaches no network, so an agent incident "
                                f"cannot be one of its failure modes")
             if not (isinstance(value, dict) and TRANSPORT_INCIDENT_KEYS & set(value)):

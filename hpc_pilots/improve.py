@@ -365,8 +365,17 @@ def guard_state_is_oracle_free(packet="coronaviridae"):
     saved = twins.graded_moves
     try:
         twins.graded_moves = refuse
-        built = twins._state_for_policy(dossiers, available, state["decision_round"], 8, 8,
-                                        list(emergency.ACTIONS))
+        # Both arms, because this guard was extended to scan keys recursively in order to
+        # reach the tool block and was then handed a state built without one. `shows_tools`
+        # defaults to False, so the recursive scan saw exactly what the flat scan had seen
+        # and the extension was inert -- an adversary found this, independently, three times.
+        #
+        # The opt-in arm is scanned as well as the default one rather than instead of it: a
+        # guard that only inspected the arm nobody runs would have the same defect pointing
+        # the other way, and the default arm's verdict is what the recorded artifact carries.
+        built = [twins._state_for_policy(dossiers, available, state["decision_round"], 8, 8,
+                                         list(emergency.ACTIONS), shows_tools=shown)
+                 for shown in (False, True)]
     except AssertionError as caught:
         return False, str(caught)
     finally:

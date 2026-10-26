@@ -1,0 +1,327 @@
+{
+  "version": 3,
+  "generated_at_utc": "2026-10-26T22:05:16.570076+00:00",
+  "tool_set_sha256": "5d29f0de726f3e8c0604b46ae05c48f2b038f4e0c41c6efec96781e467be535e",
+  "note": "Byte-immutable once committed, so the tool_set_sha256 embedded in already-recorded runs still verifies. A changed spec goes in a new tools.v{n+1}.json rather than editing this file, which is the device configs/today.json already uses.",
+  "tools": {
+    "chemistry.library_spec": {
+      "name": "chemistry.library_spec",
+      "version": 2,
+      "summary": "Define a focused thioether-macrocycle library over a randomised region.",
+      "description": "Returns a library definition: a fixed chloroacetyl initiator, a randomised region of the given length bounds, a downstream cysteine closure, and the elongator alphabet implied by the requested monomer classes. It defines a library and does not synthesise, screen or score one, and the theoretical diversity it reports is a count of sequences the definition admits rather than a prediction that any of them bind.",
+      "entry": "hpc_pilots.chemistry:library_spec",
+      "endpoint": null,
+      "parameters": [
+        {
+          "name": "initiator",
+          "kind": "str",
+          "meaning": "Chloroacetyl initiator, which must be one the chemistry module registers.",
+          "required": false,
+          "default": "ClAc-D-Tyr",
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "random_region",
+          "kind": "tuple",
+          "meaning": "Inclusive (low, high) length bounds for the randomised region.",
+          "required": false,
+          "default": [
+            4,
+            8
+          ],
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "elongator_classes",
+          "kind": "tuple",
+          "meaning": "Monomer classes admitted into the elongator alphabet.",
+          "required": false,
+          "default": [
+            "canonical",
+            "N-methyl",
+            "D-alpha-amino"
+          ],
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        }
+      ],
+      "returns": [
+        [
+          "initiator",
+          "str",
+          "The initiator the library fixes."
+        ],
+        [
+          "closure_residue",
+          "str",
+          "The residue that closes the macrocycle."
+        ],
+        [
+          "random_region",
+          "tuple",
+          "The length bounds, as [low, high]."
+        ],
+        [
+          "elongator_alphabet",
+          "tuple",
+          "Monomer codes the region draws from."
+        ],
+        [
+          "theoretical_diversity",
+          "int",
+          "Sequences the definition admits. Not a library that exists, and not a count of anything measured."
+        ]
+      ],
+      "return_kind": "artifact",
+      "rows": null,
+      "cost_seconds": 0.0,
+      "worst_case_seconds": null,
+      "cost_network_calls": 0,
+      "reaches_network": false,
+      "cost_actions": 1,
+      "requires": [],
+      "failures": [
+        {
+          "symptom": "'<name>' is not a registered chloroacetyl initiator",
+          "cause": "The initiator is validated against the chemistry module's own table, which is narrower than the set of strings the schema admits.",
+          "raises": "ValueError",
+          "observed_in": []
+        },
+        {
+          "symptom": "Invalid randomised-region bounds",
+          "cause": "The bounds must satisfy 1 <= low <= high, which a JSON schema cannot express portably, so the function enforces it.",
+          "raises": "ValueError",
+          "observed_in": []
+        },
+        {
+          "symptom": "Empty elongator alphabet",
+          "cause": "Every requested monomer class was unknown, leaving nothing to draw from.",
+          "raises": "ValueError",
+          "observed_in": []
+        }
+      ],
+      "check": null,
+      "produces_evidence": false,
+      "date_field": null,
+      "citation": "A library definition is a design choice, not a cited claim, and cannot substantiate a dossier axis on its own.",
+      "warning": "Theoretical diversity is a combinatorial count over the definition. It is not a synthesised library, not a screened one, and no macrocycle has been measured anywhere in this repository."
+    },
+    "intake.rank_targets": {
+      "name": "intake.rank_targets",
+      "version": 2,
+      "summary": "Pathogen genome accession to a ranked list of candidate binding targets.",
+      "description": "Six-frame ORF calling, homology identification against a reviewed UniProt reference, then a stated and unfitted ranking over conservation, surface exposure, essentiality and druggability features. Returns candidates with their features. It predicts no binding, affinity or inhibition for any of them, and the worth-binding score it reports is a separate axis from the confidence that the identification itself is correct.",
+      "entry": "hpc_pilots.intake:run_intake",
+      "endpoint": null,
+      "parameters": [
+        {
+          "name": "accession",
+          "kind": "str",
+          "meaning": "NCBI nucleotide accession for the genome to read.",
+          "required": true,
+          "default": null,
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "exclude_organism",
+          "kind": "str",
+          "meaning": "Organism removed from the reference before identifying, which scores a curated genome as if it were novel.",
+          "required": false,
+          "default": null,
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "top",
+          "kind": "int",
+          "meaning": "How many of the longest ORFs to identify.",
+          "required": false,
+          "default": 12,
+          "enum": [],
+          "enum_from": null,
+          "minimum": 1,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "remote",
+          "kind": "bool",
+          "meaning": "Whether identification may fall back to the remote aligner. The default local k-mer path is the one the recorded runs used.",
+          "required": false,
+          "default": true,
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "record",
+          "kind": "bool",
+          "meaning": "Whether the function writes its own artifact. A call made inside an episode passes False, because the episode writes the record.",
+          "required": false,
+          "default": true,
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        }
+      ],
+      "returns": [
+        [
+          "targets",
+          "tuple",
+          "Ranked candidate rows carrying score, conservation and tier."
+        ],
+        [
+          "rubric",
+          "dict",
+          "The stated ranking weights, which are not fitted."
+        ],
+        [
+          "provenance",
+          "dict",
+          "Host, commit and time, from common.provenance."
+        ]
+      ],
+      "return_kind": "artifact",
+      "rows": null,
+      "cost_seconds": 0.0,
+      "worst_case_seconds": null,
+      "cost_network_calls": null,
+      "reaches_network": true,
+      "cost_actions": 1,
+      "requires": [],
+      "failures": [
+        {
+          "symptom": "A holdout that removes nothing raises rather than proceeding",
+          "cause": "`build_index(require_removal=True)` refuses an exclusion that matched no reference entry, because a holdout that silently removed nothing would report leakage as generalisation.",
+          "raises": "ValueError",
+          "observed_in": []
+        },
+        {
+          "symptom": "The remote aligner reports a non-finished status",
+          "cause": "The EBI service queues; a 15-minute RUNNING queue is on the record as the reason the local k-mer path is the default.",
+          "raises": "RuntimeError",
+          "observed_in": []
+        }
+      ],
+      "check": null,
+      "produces_evidence": false,
+      "date_field": null,
+      "citation": "Identification derives from the named reviewed UniProt release. A ranked target row is not a cited claim and cannot satisfy a dossier axis alone.",
+      "warning": "The worth-binding score and the identification confidence are different axes and must not be pooled. A high score resting on a hydropathy-only assignment is a row a reader has to be able to see."
+    },
+    "structures.evidence": {
+      "name": "structures.evidence",
+      "version": 2,
+      "summary": "Dated structural coverage per declared target, from PDBe and UniProt.",
+      "description": "For each target in the structures config, resolves the UniProt entry, the declared or derived residue ranges, and the PDBe entries covering them, then reports the earliest deposition date and best resolution. The structure count is a proxy for how much attention a target has received; it is not a pocket score, not a druggability estimate, and the two must never be pooled.",
+      "entry": "hpc_pilots.structures_evidence:build",
+      "endpoint": null,
+      "parameters": [
+        {
+          "name": "minimum",
+          "kind": "float",
+          "meaning": "Fraction of a declared range a structure must cover to count.",
+          "required": false,
+          "default": 0.5,
+          "enum": [],
+          "enum_from": null,
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "record",
+          "kind": "bool",
+          "meaning": "Whether the function writes its own artifact. A call made inside an episode passes False, because the episode writes the record.",
+          "required": false,
+          "default": true,
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        }
+      ],
+      "returns": [
+        [
+          "targets",
+          "dict",
+          "Target name to a dated row carrying accession, structures, earliest_deposition, earliest_pdb, best_resolution, methods and pdb_ids."
+        ],
+        [
+          "coverage_threshold",
+          "float",
+          "The minimum echoed back."
+        ],
+        [
+          "sources",
+          "tuple",
+          "The three endpoints and their licence terms."
+        ],
+        [
+          "content_sha256",
+          "str",
+          "Identity of the payload with volatile timestamps stripped."
+        ],
+        [
+          "provenance",
+          "dict",
+          "Host, commit and time, from common.provenance."
+        ]
+      ],
+      "return_kind": "evidence",
+      "rows": "targets",
+      "cost_seconds": 0.0,
+      "worst_case_seconds": null,
+      "cost_network_calls": null,
+      "reaches_network": true,
+      "cost_actions": 1,
+      "requires": [],
+      "failures": [
+        {
+          "symptom": "urllib.error.HTTPError from the PDBe or UniProt host",
+          "cause": "Both are public endpoints with no declared rate limit here, and the entry-summary call POSTs in batches of 400.",
+          "raises": "RuntimeError",
+          "observed_in": []
+        }
+      ],
+      "check": null,
+      "produces_evidence": true,
+      "date_field": "earliest_deposition",
+      "citation": "The UniProt accession and the PDBe entry identifiers covering the declared range. A count with no entry identifiers is not a cited claim.",
+      "warning": "A structure count is a research-attention proxy and a pocket score is not. They are different axes and must not be pooled. Coverage is computed per entry rather than per chain, because an obligate complex is two polymer entities and a per-chain test returns zero for every such structure ever deposited."
+    }
+  }
+}
