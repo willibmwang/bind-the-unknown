@@ -1,5 +1,6 @@
 import json
 import time
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -2450,3 +2451,46 @@ def test_the_cli_reports_drift_between_the_registry_and_its_snapshot():
     with contextlib.redirect_stdout(out):
         cli_main(["tools"])
     assert sorted(json.loads(out.getvalue())) == sorted(tools.TOOLS)
+
+
+def test_an_emergency_artifact_names_the_tool_set_it_ran_against():
+    # A result that cannot name its tool set cannot be compared with one run under a different
+    # set, and a later spec edit would silently reinterpret it. The digest goes at the top
+    # level beside config_sha256 and deliberately not into provenance(), whose key set is
+    # asserted by exact equality elsewhere in this file and is embedded in every artifact.
+    from hpc_pilots.emergency import run_emergency
+
+    outputs = run_emergency("coronaviridae", "rubric", smoke=True)
+    recorded = json.loads(Path(outputs[0]).read_text())
+    assert recorded["tool_set_sha256"] == tools.spec_set_digest()
+    assert "tool_set_sha256" not in recorded["provenance"]
+    # Absence is meaningful and must not be read as an empty registry: the episodes recorded
+    # before the registry existed carry no such key, and backfilling one would assert
+    # something nobody can verify.
+    before = json.loads((ROOT / "runs/emergency/coronaviridae_rubric.json").read_text())
+    assert "config_sha256" in before and "tool_set_sha256" not in before
+
+
+def test_the_absent_structure_backend_string_is_byte_identical_to_the_one_on_the_record():
+    # Thirteen recorded artifacts carry this string and `structure_requests_unserviced` counts
+    # it. It is also the discipline the whole tool layer inherits: a tool whose backend is
+    # missing returns an explicit absence that is charged, rather than a plausible value for
+    # something it did not compute. Rewording it would break the count and the discipline at
+    # once, so it is pinned against the record rather than against a memory of the record.
+    import ast
+
+    expected = ("no structure backend configured; request recorded and charged, "
+                "no structural claim produced")
+    on_the_record = {r["result"]
+                     for path in (ROOT / "runs/emergency").glob("*.json")
+                     for r in json.loads(path.read_text()).get("trace", [])
+                     if isinstance(r.get("result"), str)
+                     and "no structure backend" in r["result"]}
+    assert on_the_record == {expected}, \
+        f"the recorded artifacts carry {on_the_record}, not the string this test pins"
+    # And the source still emits exactly that. Adjacent literals are joined by the parser, so
+    # reading the constants is robust where reassembling the source text is not.
+    literals = {node.value
+                for node in ast.walk(ast.parse((ROOT / "hpc_pilots/emergency.py").read_text()))
+                if isinstance(node, ast.Constant) and isinstance(node.value, str)}
+    assert expected in literals, "the no-backend string moved away from what the runs carry"

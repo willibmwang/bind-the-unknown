@@ -20,6 +20,7 @@ import time
 from .chemistry import library_spec
 from .common import ROOT, Agent, ContentFiltered, digest, provenance, write_json
 from .dossier import ACTIONS, AXES, leaders, rank
+from .tools import spec_set_digest
 from .targets import PACKETS, packet
 
 POLICIES = ("rubric", "scripted", "coverage", "coverage_static", "agent")
@@ -529,6 +530,10 @@ def run_emergency(name, policy, smoke=False, control=None, repeat=1):
                        "control": control, "smoke": smoke, "status": "complete",
                        "replicate": replicate, "replicates_requested": repeat,
                        "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
+                       # Which tool set this episode ran against. Absent in the runs
+                       # recorded before the registry existed, and absence there means
+                       # exactly that -- not that the registry was empty.
+                       "tool_set_sha256": spec_set_digest(),
                        "provenance": provenance()})
         if agent:
             result["agent"] = agent.report()

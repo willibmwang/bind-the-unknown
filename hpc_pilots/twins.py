@@ -54,6 +54,7 @@ import time
 
 from .common import ROOT, Agent, ContentFiltered, digest, provenance, write_json
 from .dossier import ACTIONS, AXES, leaders, rank
+from .tools import spec_set_digest
 from .emergency import (SYSTEM, _coverage_action, _retrievable, _rubric_action,
                         _scripted_action, decision_relevant, offers_by_target)
 from .lattice import lattice_action
@@ -804,6 +805,7 @@ def run_twins(name, policy, seed=None, attempts=400, limit=None, smoke=False,
                   None if relabelling is None else residual_candidates(
                       [translate(s, relabelling) for s in paired]),
               "config_sha256": digest(ROOT / "hpc_pilots/configs/today.json"),
+              "tool_set_sha256": spec_set_digest(),
               "provenance": provenance(),
               "units": "decision rounds are synthetic, not calendar time",
               "interpretation": "Decision-process measurement on matched states. No binding, "
