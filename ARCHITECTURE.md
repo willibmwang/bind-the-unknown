@@ -56,6 +56,10 @@ the PDFs. It is self-validating (§8) and is not part of the research pipeline.
 | `targets.py` | 192 | Hand-authored evidence packets: 3 families, 11 targets, 59 evidence entries, 8 synthetic update probes. |
 | `emergency.py` | 221 | Timed decision episodes over a packet: evidence released on a schedule, a deadline, an action budget, and scoring of whether the system updated when it should and held when it should not. |
 | `chemistry.py` | 135 | Macrocycle building-block registry: initiators, closure chemistry, nine non-canonical block classes, library specification and encoding. |
+| `tools.py` | 549 | The tool registry: what a tool is called, how it is reached, what it costs, how it fails, and whether its return may be cited. Deliberately **not** the action space — of the six entries in `dossier.ACTIONS`, three are episode control flow and one is a dossier operation, and none is a callable. |
+| `chief.py` | 407 | Validates a tool call, executes it, and returns an envelope that says what the return is worth. Draws the line between raising and charging exactly where the emitted schema's expressive power ends. |
+| `finder.py` | 178 | Which tools a policy may reach this round, and the record of why. Defaults to showing everything, because the action block is 2.0% of the state and withholding a tool is a reachability change rather than a cost saving. |
+| `optimizer.py` | 534 | Proposes spec corrections from recorded runs, behind a guard on the edits. Propose-only and structurally so: it writes only under `runs/tools/`, which nothing in the package reads. |
 | `summarize.py` | 165 | Aggregation into CSVs and figures. Excludes smoke and incomplete runs structurally. |
 | `submit.py` | 85 | SLURM submission with a dependency DAG and a submission registry that doubles as an idempotency lock. |
 | `stage_model.py` | 29 | Pins a local model by commit SHA with per-file hashes; excludes `*.py` so no model code is downloaded. |
@@ -222,6 +226,13 @@ regenerate is a result I cannot defend at review.
 - **Hash everything.** Every download carries URL, SHA-256, bytes and verification time. Every
   manifest hashes outcomes, features, splits and the config. Every run embeds the dataset
   manifest hash and config hash.
+- **A result names the tool set it ran against.** Every emergency and twins artifact carries
+  a `tool_set_sha256` beside its `config_sha256`, so a spec edit cannot silently reinterpret a
+  finished run. Candidate spec sets go into a new `configs/tools.v{n}.json` rather than editing
+  an existing one, for the same reason `today.json` is treated as byte-immutable, and every
+  earlier snapshot keeps its digest so an old run can still be resolved to the specs it named.
+  Absence of the key means recorded-before-the-registry, not ran-with-an-empty-registry, and it
+  is deliberately not backfilled.
 - **Config immutability as a device.** `configs/today.json` is treated as byte-immutable;
   new work goes into new config files, purely so the `config_sha256` embedded in already
   recorded runs still verifies. Both newer configs carry a note saying so.
