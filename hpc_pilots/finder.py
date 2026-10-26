@@ -1,11 +1,30 @@
 """Which tools to show a policy this round, and the record of why.
 
 At the scale this repository actually runs, the honest answer is all of them, and the
-measurement says so. The action block is 511 characters against a 26,198-character
-coronaviridae state -- 2.0% -- and six tools carrying parameter blocks takes it to roughly
-9%. It would take on the order of sixty-five tools before the block matched the dossiers
-sitting beside it. Below that, a retrieval stage can only spend reachability to buy nothing,
-so `all` is the default and it writes down that it showed everything.
+measurement says so -- but the measurement that first said so was wrong, and the correction
+is worth more than the conclusion it left standing.
+
+The action block is 511 characters against a 24,348-character coronaviridae state, 2.1%.
+From that this docstring estimated that six tools carrying parameter blocks would reach
+roughly 9% and that it would take on the order of sixty-five tools before the block matched
+the dossiers beside it. Both numbers came from imagining a parameter list. Built and
+measured, **one** tool's policy-facing view is 2,486 characters -- 9.3% of the state it
+joins, and 4.9 times the whole six-entry action block -- so the real threshold is around
+**nine** tools, not sixty-five. The estimate was off by a factor of seven.
+
+The reason is the part worth keeping: seventy per cent of a tool's view is prose, and the
+prose is the caveats. `returns[].meaning`, `description`, `failures[].cause`, `citation` and
+`warning` carry the structure-count-is-an-attention-proxy labelling, the predicts-no-binding
+disclaimer and the recorded causes. So the obvious way to make the block fit -- trim the
+text -- deletes exactly what makes a tool safe to show a decider, and the cheap optimisation
+is inverted: the block is expensive *because* it is honest.
+
+The conclusion survives the correction, because three tools are registered and the action
+space reaches one, and both are under nine. What does not survive is the headroom: the
+condition under which `keyword` earns its place arrives at single digits.
+
+Below that threshold a retrieval stage can only spend reachability to buy nothing, so `all`
+is the default and it writes down that it showed everything.
 
 **Withholding a tool is a result-affecting change, not an optimisation.** The property this
 project exists to guarantee is that a policy cannot reach an answer it has not earned, and a
@@ -24,10 +43,15 @@ never pathogen names, never claim text, never source strings. The terms are sort
 the axis-order nuisance is a measured quantity -- 0.116 -- and a query that depended on the
 order of a list would be reading it.
 
-**Each stage states the condition under which it earns its place**, rather than a guess:
+**Each stage states the condition under which it earns its place**, rather than a guess --
+and the correction above is the argument for doing it that way. Only `all`'s threshold moved,
+because it was the only one resting on a byte count. `keyword` rests on the size of the flat
+schema's property union, `tfidf` on inverse document frequency going sparse, and the absent
+LLM stage on budget accounting; none of the three cites a number that the measurement
+touched. A stated condition localises a bad estimate to the one claim that depended on it.
 
-* `all` -- up to around sixty-five tools, where the block reaches the size of the state it
-  sits in.
+* `all` -- up to around nine tools, where the block reaches the size of the dossiers it sits
+  beside. Measured, not estimated; the estimate said sixty-five.
 * `keyword` -- from around fifteen. Not prompt size but the flat schema: past that, the
   property union carries parameters no shown tool needs on most rounds, and every surplus
   nullable property is a branch the decoder can take wrongly.

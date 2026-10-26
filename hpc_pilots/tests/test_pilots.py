@@ -1,6 +1,10 @@
+import ast
+import dataclasses
 import json
+import os
 import time
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 import pandas as pd
@@ -9,6 +13,10 @@ import pytest
 from hpc_pilots.__main__ import main as cli_main
 from hpc_pilots.arms import ARMS
 from hpc_pilots import chief
+from hpc_pilots import common
+from hpc_pilots import emergency
+from hpc_pilots import invariance
+from hpc_pilots import twins
 from hpc_pilots import finder
 from hpc_pilots import optimizer
 from hpc_pilots import surrogates
@@ -2840,6 +2848,10 @@ class _DesignToolAgent:
     filtered = 0
     transport_retries = 0
     incidents = []
+    # Declared rather than defaulted by the episode. A `getattr(agent, "shows_tools", False)`
+    # would hand a stub that forgot the flag the arm that pools with the record, which is the
+    # silent fallback this repository treats as corruption.
+    shows_tools = False
 
     def __init__(self):
         self.n = 0
@@ -3257,3 +3269,236 @@ def test_the_optimizer_records_what_an_adversary_got_past_it():
     assert escape["field"] == "failures" and escape["would_close_it"]
     # And the as-submitted figure must not be reported without the caveat that inflates it.
     assert "inflated" in result["adversary"]["note"]
+
+
+class _StateCapturingAgent(_DesignToolAgent):
+    """Keeps the state it was handed, so a test can assert on what the policy actually read."""
+
+    def __init__(self, shows_tools=False):
+        super().__init__()
+        self.shows_tools = shows_tools
+        self.states = []
+
+    def act(self, task, state, allowed, fields=None, system=None, tools=None, choices=None):
+        self.states.append(json.loads(json.dumps(state)))
+        return super().act(task, state, allowed, fields=fields, system=system,
+                           tools=tools, choices=choices)
+
+
+def test_the_tool_block_is_absent_by_default_and_additive_when_asked_for():
+    # The default is the arm that stays comparable with the roughly forty recorded episodes,
+    # so the absence is the thing under test. When the block does arrive it must be purely
+    # additive: every other key byte-identical, so the only difference between the two arms
+    # is the block itself and not some field that moved while nobody was looking.
+    off = _StateCapturingAgent(shows_tools=False)
+    on = _StateCapturingAgent(shows_tools=True)
+    run_episode("coronaviridae", "agent", agent=off)
+    run_episode("coronaviridae", "agent", agent=on)
+    assert len(off.states) == len(on.states) >= 2
+    for before, after in zip(off.states, on.states):
+        assert "available_tools" not in before
+        assert "available_tools" in after
+        assert {k: v for k, v in after.items() if k != "available_tools"} == before
+
+
+def test_the_tool_block_shows_only_tools_an_action_can_actually_dispatch():
+    # Three tools are registered and the action space reaches one. Showing the other two
+    # would hand the policy an accurate description of work no action it can take produces --
+    # and `request_structure`, the action that sounds like it would produce it, returns a
+    # stated absence. That is a fabrication channel pointed at the policy.
+    assert set(emergency.ACTION_TOOLS) <= set(emergency.ACTIONS)
+    reachable = {n for names in emergency.ACTION_TOOLS.values() for n in names}
+    assert reachable < set(tools.TOOLS)
+    # The table tracks the dispatch chain rather than the memory of whoever last edited it:
+    # recovered from source, so moving a `chief.call` without the table fails here.
+    source = ast.parse(Path(emergency.__file__).read_text())
+    named = {a.value for node in ast.walk(source)
+             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+             and node.func.id == "tool"
+             for a in node.args if isinstance(a, ast.Constant)}
+    assert named == reachable
+    agent_ = _StateCapturingAgent(shows_tools=True)
+    run_episode("coronaviridae", "agent", agent=agent_)
+    assert set(agent_.states[0]["available_tools"]) == reachable
+
+
+def test_the_policy_view_withholds_the_fields_that_are_not_addressed_to_a_decider():
+    # Four kinds of field live on a spec and one is addressed to a policy. A module path is
+    # unreachable from any action; `trust` tells a policy which argument to launder; `raises`
+    # is a dispatch detail.
+    spec = tools.tool("structures.evidence")
+    view = tools.policy_view([spec])[spec.name]
+    text = json.dumps(view)
+    assert "hpc_pilots.structures_evidence" not in text and "entry" not in view
+    assert "trust" not in text and "user_only" not in text
+    assert "RuntimeError" not in text
+    for field in ("endpoint", "requires", "version", "cost_seconds", "worst_case_seconds"):
+        assert field not in view
+    # What it does keep is the part that bears on a decision: the caveat, the citation
+    # obligation, and whether the return can substantiate an axis at all.
+    assert view["produces_evidence"] is True and view["citation"]
+    assert "attention proxy" in view["warning"]
+    assert [p["name"] for p in view["parameters"]] == [p.name for p in spec.parameters]
+    # An unmeasured cost reads as unmeasured. Shown 0.0, a decider would be told the call is
+    # free, and no artifact in this repository supports that; a string where a number would
+    # go is what `request_structure` already returns instead of a plausible claim.
+    assert view["cost"]["median_seconds"] == tools.UNMEASURED
+    assert view["cost"]["actions"] == 1
+
+
+def test_a_run_path_on_a_failure_never_reaches_the_policy():
+    # The sharp one, and the reason the projection is a function rather than a field tuple.
+    # `observed_in` holds paths under `runs/`, and those spell a family as a source literal
+    # that `relabel_packet` cannot rewrite. Every registered failure has an empty tuple
+    # today, so reading the live registry would pass vacuously and fail silently the first
+    # time a proposal is merged -- and the optimiser's evidence guard refuses any proposal
+    # that cites no artifact path, so a merged failure arrives carrying exactly this.
+    planted = tools.Tool(
+        name="planted.observed", version=1, summary="s", description="d",
+        entry="hpc_pilots.chemistry:library_spec",
+        failures=(tools.Failure("a quoted symptom", "a recorded cause", "ValueError",
+                                observed_in=("runs/emergency/coronaviridae_rubric.json",)),))
+    shown = json.dumps(tools.policy_view([planted]))
+    assert "runs/emergency" not in shown and "coronaviridae" not in shown
+    # And the part worth showing survives, so this is a projection and not a deletion.
+    assert "a quoted symptom" in shown and "a recorded cause" in shown
+    # The auditable record still carries it, which is the whole point of the split.
+    assert "coronaviridae" in json.dumps(planted.record())
+
+
+def test_a_target_name_written_into_a_spec_is_caught_by_the_identity_orbit():
+    # The orbit scrub over the tool block finds nothing today, which on its own is an
+    # assertion rather than a guard. This plants the leak it exists to catch: an enum whose
+    # values are written into source survives `relabel_packet`, which rewrites packet content
+    # and not source constants, so the policy would read the real name while the certificate
+    # read a renamed packet. `enum_from` exists so a per-episode vocabulary is bound late.
+    leaky = tools.Tool(name="planted.leak", version=1, summary="s", description="d",
+                       entry="hpc_pilots.chemistry:library_spec",
+                       parameters=(tools.Parameter("t", "str", "which target",
+                                                   enum=("Mpro (nsp5)",)),))
+    saved_tools = dict(tools.TOOLS)
+    saved_actions = dict(emergency.ACTION_TOOLS)
+    try:
+        tools.TOOLS["planted.leak"] = leaky
+        emergency.ACTION_TOOLS["invoke_design_tool"] = ("chemistry.library_spec",
+                                                        "planted.leak")
+        elements = invariance.group("coronaviridae", "identity", 20261021, 4)
+        verdicts = [invariance.certify("coronaviridae", e) for e in elements]
+        assert all(v["surviving_tokens"] for v in verdicts)
+        assert not any(v["certified"] for v in verdicts)
+        # An uncertified element stops the orbit rather than being skipped, so the leak
+        # cannot be averaged away over whichever elements happened to pass.
+        assert all(v["checks"]["no_declared_token_survives"] is False for v in verdicts)
+    finally:
+        tools.TOOLS.clear(); tools.TOOLS.update(saved_tools)
+        emergency.ACTION_TOOLS.clear(); emergency.ACTION_TOOLS.update(saved_actions)
+    # With the plant removed the orbit is clean again, so the failure above was the plant.
+    assert all(invariance.certify("coronaviridae", e)["certified"]
+               for e in invariance.group("coronaviridae", "identity", 20261021, 4))
+
+
+def test_a_late_bound_vocabulary_reaches_the_block_and_a_missing_one_refuses():
+    # The mechanism that makes the previous test's plant unnecessary in real specs. A missing
+    # vocabulary must raise rather than widen to unconstrained, because an unconstrained
+    # schema is the permissive reading of an absent one.
+    late = tools.Tool(name="planted.late", version=1, summary="s", description="d",
+                      entry="hpc_pilots.chemistry:library_spec",
+                      parameters=(tools.Parameter("t", "str", "which target",
+                                                  enum_from="target"),))
+    view = tools.policy_view([late], {"target": ["A", "B"]})["planted.late"]
+    assert view["parameters"][0]["admissible"] == ["A", "B"]
+    with pytest.raises(ValueError, match="the caller did not supply"):
+        tools.policy_view([late], {"axis": ["conservation"]})
+    # And the positive control for the previous test's detector, because a detector verified
+    # only on negatives is not verified: the same parameter bound late resolves to the
+    # *relabelled* names, so the block carries the renamed packet's vocabulary and the
+    # certificate stays clean where the hard-coded enum failed on all four elements.
+    saved_tools = dict(tools.TOOLS)
+    saved_actions = dict(emergency.ACTION_TOOLS)
+    try:
+        tools.TOOLS["planted.late"] = late
+        emergency.ACTION_TOOLS["invoke_design_tool"] = ("planted.late",)
+        element = invariance.group("coronaviridae", "identity", 20261021, 4)[0]
+        _, renamed, _, _ = invariance.relabel_packet("coronaviridae", element)
+        state = twins._state_for_policy(renamed, set(), 1, 8, 11, list(ACTIONS),
+                                        shows_tools=True)
+        admissible = state["available_tools"]["planted.late"]["parameters"][0]["admissible"]
+        assert admissible == [d.target for d in renamed]
+        assert admissible != [d.target for d in packet("coronaviridae")[1]]
+        certificate = invariance.certify("coronaviridae", element)
+        assert certificate["certified"] and not certificate["surviving_tokens"]
+    finally:
+        tools.TOOLS.clear(); tools.TOOLS.update(saved_tools)
+        emergency.ACTION_TOOLS.clear(); emergency.ACTION_TOOLS.update(saved_actions)
+
+
+def test_showing_the_specs_is_a_distinct_policy_label_and_a_typo_is_not_off():
+    # Hazard five: the input text changes, so no episode recorded before this is comparable
+    # with one after it even at identical payload bytes -- the schema is unmoved and the
+    # prompt is not. The label is the device that already keeps hosted runs from pooling with
+    # local ones, and it is read off the same flag that builds the block so the two cannot
+    # disagree about which arm a file holds.
+    environment = {"PILOT_LLM_URL": "http://localhost:8000/v1/chat/completions",
+                   "PILOT_LLM_MODEL": "stub-model"}
+    with mock.patch.dict(os.environ, {**environment, "PILOT_TOOL_STATE": "0"}, clear=False):
+        plain = common.Agent()
+    with mock.patch.dict(os.environ, {**environment, "PILOT_TOOL_STATE": "1"}, clear=False):
+        shown = common.Agent()
+    assert plain.label == "agent" and plain.shows_tools is False
+    assert shown.label == "agent-toolstate" and shown.shows_tools is True
+    assert plain.report()["tool_state"] == "0" and shown.report()["tool_state"] == "1"
+    # A typo must not read as off, because off is the arm that pools with the record.
+    with mock.patch.dict(os.environ, {**environment, "PILOT_TOOL_STATE": "true"}, clear=False):
+        with pytest.raises(RuntimeError, match="Unknown PILOT_TOOL_STATE"):
+            common.Agent()
+
+
+def test_the_tool_block_costs_more_state_than_the_action_block_it_sits_beside():
+    # Measured rather than asserted, because the finder's stated threshold was computed from
+    # an estimate that was wrong by a factor of seven and the correction is in its docstring.
+    # One tool's policy view is roughly five times the whole six-entry action block, and the
+    # reason is that seventy per cent of it is prose: the caveats, the citation obligation and
+    # the recorded causes. Trimming the block to fit would mean trimming exactly the
+    # disclaimers that make a tool safe to show, which inverts the obvious optimisation.
+    spec, dossiers, _, _ = packet("coronaviridae")
+    actions = len(json.dumps({a: ACTIONS[a] for a in ACTIONS}))
+    one = len(json.dumps(tools.policy_view([tools.tool("chemistry.library_spec")])))
+    everything = len(json.dumps(tools.policy_view(
+        [tools.tool(n) for n in sorted(tools.TOOLS)])))
+    assert one > 4 * actions
+    per_tool = everything / len(tools.TOOLS)
+    state = len(json.dumps({"dossiers": [d.state(1) for d in dossiers]}))
+    # The condition under which `all` stops being the honest default, recomputed from the
+    # real per-tool cost instead of the estimate: single digits, not sixty-five.
+    assert 5 < state / per_tool < 15
+
+
+def test_every_spec_field_is_classified_as_shown_or_withheld():
+    # `POLICY_VISIBLE` and `WITHHELD_FROM_POLICY` would otherwise be documentation that
+    # nothing checks, and `policy_view` builds its output by hand. A field added to `Tool`
+    # later would then be withheld by omission -- the safe direction, but unrecorded, so a
+    # reader could not tell a deliberate exclusion from a forgotten one. This makes adding a
+    # field to the record fail here until somebody says which kind it is.
+    classified = set(tools.POLICY_VISIBLE) | set(tools.WITHHELD_FROM_POLICY)
+    for record, prefix in ((tools.Tool, ""), (tools.Parameter, "parameters."),
+                           (tools.Failure, "failures.")):
+        for field in dataclasses.fields(record):
+            name = prefix + field.name
+            assert name in classified, \
+                f"{name} is neither shown to a policy nor recorded as withheld"
+    # And nothing is claimed both ways.
+    assert not set(tools.POLICY_VISIBLE) & set(tools.WITHHELD_FROM_POLICY)
+    # The withheld half is a reason per field, not a bare list: a field excluded without a
+    # stated reason is indistinguishable from one excluded by accident.
+    assert all(reason for reason in tools.WITHHELD_FROM_POLICY.values())
+    # And the shown half is not aspirational: every field it names must actually appear in a
+    # view built from a spec that declares one, or the table claims more than the code does.
+    view = tools.policy_view([tools.tool("structures.evidence")])["structures.evidence"]
+    flat = set(view) | {"name", "cost_actions", "cost_network_calls"}
+    flat |= {f"parameters.{k}" for p_ in view["parameters"] for k in p_}
+    flat |= {f"failures.{k}" for f_ in view["failures"] for k in f_}
+    missing = {f for f in tools.POLICY_VISIBLE if f not in flat}
+    # Exactly one, and it is absence rather than withholding: no v1 parameter declares a
+    # length ceiling, and a bound shown as null would read to a decider as a bound of null.
+    # The numeric bounds do appear, so dropping one from the view fails here.
+    assert missing == {"parameters.max_length"}

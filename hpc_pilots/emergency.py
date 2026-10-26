@@ -21,13 +21,34 @@ from .chemistry import library_spec
 from . import chief
 from .common import ROOT, Agent, ContentFiltered, digest, provenance, write_json
 from .dossier import ACTIONS, AXES, leaders, rank
-from .tools import spec_set_digest, tool
+from .tools import policy_view, spec_set_digest, tool
 
 # The wall clock one tool call may claim, which the dispatcher refuses against before
 # dispatch rather than discovering at round three. Declared and not measured: no v1 tool
 # declares a worst case, so the gate is inert today and is here so that the first tool
 # which does declare one is refused by a number somebody chose rather than by a timeout.
 TOOL_WALL_BUDGET_SECONDS = 600
+
+# Which registered tool each action actually dispatches. Three facts follow from it being a
+# table rather than an assumption.
+#
+# The registry holds three tools and the action space reaches exactly one of them. That is
+# not an oversight to be tidied away: `ACTIONS` is the move set, and three of its six entries
+# are episode control flow while `structures.evidence` and `intake.rank_targets` are reached
+# by `structure` and `intake` as whole runs, never from inside an episode.
+#
+# So the policy-facing tool block is built from this table and not from the registry. A
+# decider shown a spec for `structures.evidence` would be reading an accurate description of
+# dated structural coverage that no action it can take will produce -- and the action that
+# sounds like it would, `request_structure`, returns a stated absence. Documentation for
+# uncommissionable work is a fabrication channel pointed at the policy, which is the same
+# defect as a fabricated return, arriving one step earlier.
+#
+# Pinned both ways by a test: every key is an action, and the union of the values equals the
+# `tool(...)` literals this module's dispatch chain actually names, recovered with `ast` so
+# the table tracks the code rather than the memory of whoever last edited it.
+ACTION_TOOLS = {"invoke_design_tool": ("chemistry.library_spec",)}
+
 from .targets import PACKETS, packet
 
 POLICIES = ("rubric", "scripted", "coverage", "coverage_static", "agent")
@@ -329,10 +350,18 @@ def run_episode(name, policy, deadline=8, call_budget=8, agent=None, control=Non
                      "dossiers": [d.state(round_) for d in dossiers],
                      "retrievable_axes": [{"target": t, "axis": a} for t, a in sorted(available)],
                      "available_actions": {a: ACTIONS[a] for a in allowed}}
+            choices = {"target": [d.target for d in dossiers], "axis": list(AXES)}
+            # The specs reach the policy only under the label that says so. `shows_tools` is
+            # read off the agent rather than passed in, so the state and the filename cannot
+            # disagree about which arm this is. The schema is untouched here -- `tools=` is
+            # not passed -- so the one thing that changes is the prompt text, which is what
+            # makes this arm's before and after readable.
+            if agent.shows_tools:
+                state["available_tools"] = policy_view(
+                    [tool(n) for a in sorted(allowed) for n in ACTION_TOOLS.get(a, ())],
+                    choices)
             answer = agent.act("Choose the next scientific action for this emergency target "
-                               "decision.", state, allowed, fields={
-                                   "target": [d.target for d in dossiers],
-                                   "axis": list(AXES)}, system=SYSTEM)
+                               "decision.", state, allowed, fields=choices, system=SYSTEM)
             action, target, axis = answer["action"], answer["target"], answer["axis"]
         else:
             raise ValueError(f"Unknown policy {policy!r}")

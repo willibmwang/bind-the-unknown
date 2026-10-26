@@ -54,9 +54,10 @@ import time
 
 from .common import ROOT, Agent, ContentFiltered, digest, provenance, write_json
 from .dossier import ACTIONS, AXES, leaders, rank
-from .tools import spec_set_digest
-from .emergency import (SYSTEM, _coverage_action, _retrievable, _rubric_action,
-                        _scripted_action, decision_relevant, offers_by_target)
+from .tools import policy_view, spec_set_digest, tool
+from .emergency import (ACTION_TOOLS, SYSTEM, _coverage_action, _retrievable,
+                        _rubric_action, _scripted_action, decision_relevant,
+                        offers_by_target)
 from .lattice import lattice_action
 from .streams import stream
 from .targets import PACKETS, packet
@@ -288,7 +289,8 @@ def pair(states, seed):
     return pairs, unmatched
 
 
-def _state_for_policy(dossiers, available, now, deadline, remaining, allowed, axes=None):
+def _state_for_policy(dossiers, available, now, deadline, remaining, allowed, axes=None,
+                      shows_tools=False):
     """The decision state, in the shape an episode presents it.
 
     Assembled from the same fields `run_episode` assembles, so a probe measures the episode's
@@ -311,7 +313,18 @@ def _state_for_policy(dossiers, available, now, deadline, remaining, allowed, ax
             "retrievable_axes": [{"target": t, "axis": a}
                                  for t, a in sorted(available,
                                                     key=lambda p: (p[0], order.index(p[1])))],
-            "available_actions": {a: ACTIONS[a] for a in allowed}}
+            "available_actions": {a: ACTIONS[a] for a in allowed},
+            # The axis vocabulary here is `order`, the permuted presentation order, while the
+            # schema `probe` emits beside it uses the declared order. That reads like a
+            # mismatch and is the point: the block is part of the state, and permuting the
+            # presentation is the whole instrument -- the local model chose the first-declared
+            # axis in 39 probes of 40, which is only visible if something permutes the list.
+            # The schema is not presentation and is not permuted. Same set either way, so no
+            # value admissible in one is inadmissible in the other.
+            **({"available_tools": policy_view(
+                [tool(n) for a in sorted(allowed) for n in ACTION_TOOLS.get(a, ())],
+                {"target": [d.target for d in dossiers], "axis": order})}
+               if shows_tools else {})}
 
 
 def translate(state, relabelling):
@@ -468,7 +481,8 @@ def probe(state, policy, agent=None, relabelling=None, deadline=8, key=None):
         answer = agent.act("Choose the next scientific action for this emergency target "
                            "decision.",
                            _state_for_policy(dossiers, available, now, deadline,
-                                             deadline - now, allowed, axis_order),
+                                             deadline - now, allowed, axis_order,
+                                             shows_tools=agent.shows_tools),
                            allowed, fields={"target": [d.target for d in dossiers],
                                             "axis": list(AXES)}, system=SYSTEM)
         action, target, axis = answer["action"], answer["target"], answer["axis"]

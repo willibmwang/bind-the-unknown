@@ -547,3 +547,109 @@ def snapshot():
                     "tools.v{n+1}.json rather than editing this file, which is the device "
                     "configs/today.json already uses.",
             "tools": {name: TOOLS[name].record() for name in sorted(TOOLS)}}
+
+
+# What a policy may read off a spec, and what it may not. The split is not tidiness: this
+# module's records carry four kinds of field, and only one kind is addressed to a decider.
+#
+# `entry`, `check`, `requires` and `endpoint` are how the caller reaches the work. A decider
+# cannot act on a module path, and showing one invites reasoning about internals no action
+# can touch.
+#
+# `trust` is an instruction to the caller about where a value must have come from. Handing it
+# to the model inverts it -- a field annotated "must trace to the task statement" tells a
+# policy which argument to launder, which is the opposite of what the annotation is for. The
+# schema emitter already strips it for this reason; so does this.
+#
+# `raises` is a dispatch detail. `observed_in` is the sharp one, and the reason this function
+# exists rather than a tuple of field names. It holds paths under `runs/`, and those paths
+# carry family names as source literals -- `runs/emergency/coronaviridae_rubric.json` spells
+# a pathogen that `relabel_packet` would have renamed everywhere else, because relabelling
+# rewrites packet content and not strings written into source. Today every registered failure
+# has an empty `observed_in`, so withholding it changes nothing. It stops changing nothing the
+# first time a proposal is merged, because `guard_evidence_is_recorded_not_inferred` refuses a
+# proposal that cites no artifact path: **the field that makes a proposed failure auditable is
+# the field that must never reach the decider.** Pinned by a test that plants a path rather
+# than reading the empty tuple, which would pass vacuously and fail silently on that merge.
+# Every field of `Tool`, `Parameter` and `Failure` appears in exactly one of these two,
+# prefixed for the nested records, and a test fails until a newly added field is classified.
+# Without that the tables are documentation nothing checks, because `policy_view` builds its
+# output by hand: a field added later would be withheld by omission, which is the safe
+# direction but leaves a reader unable to tell a deliberate exclusion from a forgotten one.
+POLICY_VISIBLE = ("name", "summary", "description", "parameters", "returns", "return_kind",
+                  "rows", "cost_actions", "cost_network_calls", "failures", "warning",
+                  "produces_evidence", "citation",
+                  "parameters.name", "parameters.kind", "parameters.meaning",
+                  "parameters.required", "parameters.default", "parameters.minimum",
+                  "parameters.maximum", "parameters.max_length",
+                  "failures.symptom", "failures.cause")
+WITHHELD_FROM_POLICY = {
+    "entry": "a module path; no action can reach it",
+    "check": "a module path; no action can reach it",
+    "endpoint": "a config key; no action can reach it",
+    "requires": "import names; the caller checks them before dispatch",
+    "version": "bookkeeping for the digest, not a fact about the work",
+    "cost_seconds": "reported as cost.median_seconds, 'unmeasured' while it is 0.0",
+    "worst_case_seconds": "the caller's wall gate, enforced before the policy is asked",
+    "date_field": "a key name the caller reads to date an envelope; the policy learns the "
+                  "dating rule from returns and citation, which say the date is the one the "
+                  "claim entered the record and not the one it was fetched on",
+    "parameters.trust": "tells a policy which argument to launder",
+    "parameters.enum": "superseded by the resolved admissible set",
+    "parameters.enum_from": "superseded by the resolved admissible set",
+    "failures.raises": "an exception class the caller branches on",
+    "failures.observed_in": "run paths carry family names as source literals",
+}
+
+UNMEASURED = "unmeasured"
+
+
+def _policy_parameter(parameter, choices):
+    view = {"name": parameter.name, "kind": parameter.json_type(),
+            "meaning": parameter.meaning, "required": parameter.required}
+    if not parameter.required:
+        view["default"] = parameter.default
+    admissible = parameter.values(choices)
+    if admissible:
+        view["admissible"] = list(admissible)
+    for bound in ("minimum", "maximum", "max_length"):
+        if getattr(parameter, bound) is not None:
+            view[bound] = getattr(parameter, bound)
+    return view
+
+
+def policy_view(specs, choices=None):
+    """The tool block a policy reads, projected from the specs the caller is willing to show.
+
+    `specs` is an ordered sequence of `Tool` records, which is what a finder returns, so the
+    order shown is the order decided rather than registration order. `choices` resolves a
+    parameter's late-bound vocabulary and is passed through to `Parameter.values`, which
+    raises on a declared `enum_from` the caller did not supply -- a missing vocabulary must
+    not read as a permissive schema.
+
+    `cost.median_seconds` reads `"unmeasured"` rather than `0.0` for the three v1 tools. The
+    float is the honest internal value, but shown to a decider a zero is a claim that the
+    call is free, and no artifact in this repository supports it. A string where a number
+    would go is this project's existing way of saying a thing was not computed, which is what
+    `request_structure` returns instead of a plausible structural claim.
+    """
+    block = {}
+    for spec in specs:
+        cost = {"actions": spec.cost_actions,
+                "median_seconds": UNMEASURED if not spec.cost_seconds else spec.cost_seconds,
+                "network_calls": spec.cost_network_calls}
+        view = {"summary": spec.summary, "description": spec.description,
+                "parameters": [_policy_parameter(p, choices) for p in spec.parameters],
+                "returns": [{"key": k, "kind": kind, "meaning": meaning}
+                            for k, kind, meaning in spec.returns],
+                "return_kind": spec.return_kind, "cost": cost,
+                "produces_evidence": spec.produces_evidence,
+                "failures": [{"symptom": f.symptom, "cause": f.cause} for f in spec.failures]}
+        if spec.rows:
+            view["rows"] = spec.rows
+        if spec.produces_evidence:
+            view["citation"] = spec.citation
+        if spec.warning:
+            view["warning"] = spec.warning
+        block[spec.name] = view
+    return block

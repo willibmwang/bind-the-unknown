@@ -182,6 +182,9 @@ MAX_TOKENS_KEY = {"openai": "max_completion_tokens"}
 # count but the first parameter-name collision, at which point `_union` raises rather than
 # letting one tool's bounds constrain another tool's decoding.
 TOOL_SCHEMA_MODES = ("flat", "nested", "two_call")
+# Off by default, and the default is the one that stays comparable with the roughly forty
+# recorded episodes. `1` puts the registry's policy-facing projection into the state.
+TOOL_STATE_MODES = ("0", "1")
 
 RETRYABLE_FINISH = {"content_filter"}
 
@@ -321,6 +324,22 @@ class Agent:
         # comparable with a single-call run and the two must never pool.
         if self.tool_schema_mode != "flat":
             self.label = f"{self.label}-{self.tool_schema_mode}"
+        # Whether the tool specs themselves reach the policy, as opposed to being the shape
+        # the caller validates against. Read here rather than passed in by the episode so
+        # that the flag and the label cannot disagree, which is the defect `arms.py` was
+        # written to end: a run whose state carried tool specs under the plain `agent` label
+        # would pool with the recorded episodes it is not comparable to.
+        self.tool_state = os.environ.get("PILOT_TOOL_STATE", "0")
+        if self.tool_state not in TOOL_STATE_MODES:
+            raise RuntimeError(f"Unknown PILOT_TOOL_STATE {self.tool_state!r}; known values "
+                               f"are {list(TOOL_STATE_MODES)}. A typo must not read as off, "
+                               f"because the off state is the one that pools with the record.")
+        self.shows_tools = self.tool_state == "1"
+        # The input text changes, so no episode recorded before this is comparable with one
+        # after it even at identical payload bytes -- the schema is unmoved and the prompt is
+        # not. Hazard five of the plan, and the reason this is a label and not a parameter.
+        if self.shows_tools:
+            self.label = f"{self.label}-toolstate"
         self.calls = 0
         # Requests per action: two under `two_call`, one otherwise. Recorded so that
         # `calls / tool_turns` still recovers the retry count, which `calls` alone stops
@@ -480,4 +499,5 @@ class Agent:
                 "seconds": self.seconds, "tokens": self.tokens,
                 "filtered_attempts": self.filtered, "transport_retries": self.transport_retries,
                 "incidents": self.incidents, "history": self.history,
-                "tool_schema_mode": self.tool_schema_mode, "tool_turns": self.tool_turns}
+                "tool_schema_mode": self.tool_schema_mode, "tool_turns": self.tool_turns,
+                "tool_state": self.tool_state}

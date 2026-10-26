@@ -486,8 +486,30 @@ def certify(name, relabelling, deadline=8):
     # all twenty-four certificates. It stops being a no-op the moment an action carries a
     # parameter block whose vocabulary is bound per episode, which is exactly when a target
     # name could reach the policy through a channel this check was not looking at.
+    #
+    # The tool block is scanned for the same reason, built the way the episode builds it
+    # rather than from the registry, so that the thing scanned is again the thing shown.
+    #
+    # It still finds nothing, and the honest reason is that no registered spec binds a
+    # vocabulary late, so the block is as much a set of source constants as the action block
+    # is. What has changed is that the scan is now tested rather than assumed: a spec whose
+    # `enum` writes a target name into source makes all four identity elements report a
+    # surviving token and fail certification, which stops the orbit, while the same parameter
+    # declared `enum_from` resolves to the renamed packet's own names and certifies clean. A
+    # detector verified only on negatives is not verified, which is the line `answer_key`
+    # already makes about this orbit.
+    #
+    # Imported inside the call because the table lives beside the dispatch chain that
+    # justifies it, and `invariance` is imported by things that have no business loading an
+    # episode runner.
+    from .emergency import ACTION_TOOLS
+    from .tools import policy_view, tool
+
+    shown = [tool(n) for a in sorted(ACTION_TOOLS) for n in ACTION_TOOLS[a]]
     policy_facing = [spec, [d.state(deadline) for d in dossiers], probes,
-                     {a: ACTIONS[a] for a in ACTIONS}]
+                     {a: ACTIONS[a] for a in ACTIONS},
+                     policy_view(shown, {"target": [d.target for d in dossiers],
+                                         "axis": list(AXES)})]
     scrub = leaks(policy_facing, lexicon(name)) \
         if relabelling.kind == "identity" else {}
 
