@@ -130,6 +130,13 @@ def main(argv=None):
                    help="Write configs/tools.v{version}.json; refuses to overwrite one")
     p.add_argument("--check", action="store_true",
                    help="Report drift against the committed snapshot and exit non-zero")
+    p = sub.add_parser("optimize",
+                       help="Evaluate spec-edit proposals behind the guard; propose only")
+    p.add_argument("--runs", default="runs/emergency",
+                   help="Artifact tree a proposal must cite")
+    p.add_argument("--gap", action="store_true",
+                   help="Report which proposable fields the record is silent about, and stop")
+    p.add_argument("--smoke", action="store_true")
     args = parser.parse_args(argv)
     if args.command == "prepare":
         from .data import prepare_binding, prepare_atlas_manifest
@@ -262,6 +269,12 @@ def main(argv=None):
                                      "produces_evidence": TOOLS[name].produces_evidence,
                                      "parameters": [q.name for q in TOOLS[name].parameters]}
                               for name in sorted(TOOLS)}, indent=2))
+    elif args.command == "optimize":
+        from .optimizer import instrumentation_gap, run_optimize
+        if args.gap:
+            print(json.dumps(instrumentation_gap(args.runs), indent=2))
+        else:
+            run_optimize(args.runs, smoke=args.smoke)
     else:
         from .summarize import summarize
         summarize()

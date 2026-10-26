@@ -10,6 +10,7 @@ from hpc_pilots.__main__ import main as cli_main
 from hpc_pilots.arms import ARMS
 from hpc_pilots import chief
 from hpc_pilots import finder
+from hpc_pilots import optimizer
 from hpc_pilots import surrogates
 from hpc_pilots import tools
 from hpc_pilots.binding import (design_matrix, enrichment, pick_batch, replay, run_arm,
@@ -3043,3 +3044,135 @@ def test_the_certificate_scrubs_the_action_block_the_policy_actually_reads():
     assert leaks([planted], lexicon("coronaviridae")), \
         "a target name planted in an action description was not detected"
     assert not leaks([{a: ACTIONS[a] for a in ACTIONS}], lexicon("coronaviridae"))
+
+
+def test_each_proposal_guard_catches_the_edit_it_exists_for():
+    # The method improve.py states: a guard nobody has tried to break is an assertion, not a
+    # guard. The predictions are recorded before the run and are not tuned to match it, so a
+    # hack caught by a different guard than predicted is reported as a finding about the guard.
+    result = optimizer.run_optimize(smoke=True)
+    assert result["planted_hacks"] == 6
+    assert result["planted_hacks_caught"] == 6, result["planted_hacks_escaped"]
+    assert result["planted_hacks_escaped"] == []
+    assert result["guard_predictions_wrong"] == [], result["guard_predictions_wrong"]
+    # And nothing is admitted, because nothing in the record could justify a proposal.
+    assert result["proposals"] == [] and result["proposals_admitted"] == 0
+    # A full catch rate on hacks written by the guards' own author is weak evidence, and the
+    # artifact has to say so rather than leaving the number to speak for itself.
+    assert "weak evidence" in result["interpretation"]
+
+
+def test_the_optimizer_refuses_an_edit_no_recorded_field_supports():
+    # The grader's own outputs are absent from SUPPORTED_BY on purpose: a spec edit justified
+    # by chosen_matches_reference or decision_relevant_rate is Goodharting by construction.
+    design = tools.tool("chemistry.library_spec")
+    goodhart = optimizer.Proposal(
+        tool="chemistry.library_spec", field="description",
+        before=design.description, after=design.description + " Prefer this early.",
+        evidence=(("runs/emergency/coronaviridae_rubric.json",
+                   "metrics.chosen_matches_reference", True),),
+        rationale="justified by the grader")
+    passed, detail = optimizer.guard_evidence_is_recorded_not_inferred(goodhart)
+    assert passed is False and "no recorded field supports" in detail
+    # A summary edit is unsupported until retrieval is instrumented, and the refusal is a
+    # statement about what is recorded rather than about the edit.
+    bait = optimizer.Proposal(tool="chemistry.library_spec", field="summary",
+                              before=design.summary, after="library design macrocycle tool")
+    assert optimizer.guard_evidence_is_recorded_not_inferred(bait)[0] is False
+    # Deleting a failure can never be supported: runs record occurrences, never absences.
+    structures = tools.tool("structures.evidence")
+    deletion = optimizer.Proposal(tool="structures.evidence", field="failures",
+                                  before=structures.failures, after=())
+    passed, detail = optimizer.guard_edit_is_within_the_proposable_set(deletion)
+    assert passed is False and "add-only" in detail
+    # And a field outside the proposable set is refused by name rather than evaluated.
+    frozen = optimizer.Proposal(tool="structures.evidence", field="citation",
+                                before=structures.citation, after="anything")
+    assert optimizer.guard_edit_is_within_the_proposable_set(frozen)[0] is False
+
+
+def test_the_optimizer_never_writes_outside_its_proposal_store(monkeypatch):
+    # Propose-only, enforced rather than configured. The registry is read from source and this
+    # module writes only JSON under runs/tools/, a tree nothing in the package reads -- so the
+    # loop *cannot* apply an edit, which is a stronger claim than being set not to.
+    written = []
+    monkeypatch.setattr("hpc_pilots.optimizer.write_json",
+                        lambda path, payload: written.append(str(path)))
+    optimizer.run_optimize(smoke=True)
+    assert written, "the optimizer wrote nothing at all"
+    for path in written:
+        assert "/runs/tools/" in path, f"the optimizer wrote outside its store: {path}"
+    # The registry is untouched by a run, including by the planted edits it evaluates.
+    assert tools.spec_set_digest() == \
+        json.loads((ROOT / "hpc_pilots/configs"
+                    / f"tools.v{tools.TOOL_SET_VERSION}.json").read_text())["tool_set_sha256"]
+
+
+def test_a_proposal_authored_against_a_stale_spec_is_refused():
+    # Otherwise it would be applied to a spec that has since moved, and the merge would carry
+    # a `before` nobody can reconcile with what was registered.
+    design = tools.tool("chemistry.library_spec")
+    stale = optimizer.Proposal(tool="chemistry.library_spec", field="warning",
+                               before="a value this spec has never held",
+                               after=design.warning + " Measured.")
+    passed, detail = optimizer.guard_proposal_is_current_and_moves_the_digest(stale)
+    assert passed is False and "authored against" in detail
+    # A proposal that changes nothing cannot move the digest, and a no-op merge would make an
+    # already recorded tool_set_sha256 ambiguous about which specs it named.
+    noop = optimizer.Proposal(tool="chemistry.library_spec", field="warning",
+                              before=design.warning, after=design.warning)
+    assert optimizer.guard_proposal_is_current_and_moves_the_digest(noop)[0] is False
+
+
+def test_a_cost_claim_is_recomputed_from_the_calls_it_cites():
+    # Cost deflation is the cheapest available hack in an action-budgeted arm: a tool that
+    # claims to be free gets chosen. So the guard recomputes the statistic rather than
+    # accepting the number, and refuses a claim resting on too small a sample.
+    intake = tools.tool("intake.rank_targets")
+    thin = optimizer.Proposal(tool="intake.rank_targets", field="cost_seconds",
+                              before=intake.cost_seconds, after=2.0,
+                              evidence=tuple(("runs/emergency/coronaviridae_rubric.json",
+                                              "trace[].tool_seconds", 9.0) for _ in range(5)))
+    passed, detail = optimizer.guard_cost_claim_is_measured(thin)
+    assert passed is False and "floor" in detail
+    enough = tuple(("runs/emergency/coronaviridae_rubric.json", "trace[].tool_seconds", 9.0)
+                   for _ in range(optimizer.MINIMUM_CALLS_FOR_A_COST_CLAIM))
+    wrong = optimizer.Proposal(tool="intake.rank_targets", field="cost_seconds",
+                               before=intake.cost_seconds, after=2.0, evidence=enough)
+    passed, detail = optimizer.guard_cost_claim_is_measured(wrong)
+    assert passed is False and "recomputed median" in detail
+    right = optimizer.Proposal(tool="intake.rank_targets", field="cost_seconds",
+                               before=intake.cost_seconds, after=9.0, evidence=enough)
+    assert optimizer.guard_cost_claim_is_measured(right)[0] is True
+
+
+def test_a_zero_fidelity_says_whether_it_means_complete_or_uninstrumented():
+    # A zero meaning "the spec predicts everything observed" and a zero meaning "nothing was
+    # observed" are opposite situations, and reporting both as 0 would make an uninstrumented
+    # tool look like a fully characterised one.
+    for name in tools.TOOLS:
+        measured = optimizer.fidelity(name)
+        assert measured["fidelity"] == 0 and measured["observed"] == 0
+        assert "uninstrumented" in measured["interpretation"]
+    gap = optimizer.instrumentation_gap()
+    assert gap["pointers_present"] == []
+    assert not any(info["proposable"] for info in gap["fields"].values()), \
+        "a field is advertised as proposable while the record is silent about it"
+
+
+def test_an_agent_incident_does_not_license_a_failure_on_a_network_free_tool():
+    # Found by the gap report rather than by review. The only incidents on record are
+    # content_filter, which is a property of a provider's moderation and which no tool can
+    # experience -- so eight recorded filters would otherwise have licensed a failure mode on
+    # a local, network-free library-definition tool. The admissible set is an allowlist, not a
+    # denylist: the first attempt excluded the LLM-only keys it knew of and missed `chars` and
+    # `content_head`, so the field read as licensed.
+    design = tools.tool("chemistry.library_spec")
+    assert not design.is_remote() and not design.cost_network_calls
+    borrowed = optimizer.Proposal(
+        tool="chemistry.library_spec", field="failures", before=design.failures,
+        after=design.failures + (tools.Failure("filtered", "the provider filtered it", ""),),
+        evidence=(("runs/emergency/coronaviridae_agent-anthropic-claude-sonnet-5-5_rep01.json",
+                   "agent.incidents[]", {"finish_reason": "content_filter"}),))
+    passed, detail = optimizer.guard_evidence_is_recorded_not_inferred(borrowed)
+    assert passed is False and "reaches no network" in detail
