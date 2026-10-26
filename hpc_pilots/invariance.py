@@ -68,7 +68,7 @@ import re
 from dataclasses import dataclass
 
 from .common import ROOT, provenance, write_json
-from .dossier import AXES, Dossier, leaders, rank
+from .dossier import ACTIONS, AXES, Dossier, leaders, rank
 from .targets import PACKETS, packet
 
 KINDS = ("null", "presentation", "identity", "axis_order")
@@ -480,7 +480,15 @@ def certify(name, relabelling, deadline=8):
                      for t, a in decision_relevant(fresh_base, base_pool, set(), 1)}
     moved_relevant = set(decision_relevant(fresh, pool, set(), 1))
 
-    scrub = leaks([spec, [d.state(deadline) for d in dossiers], probes], lexicon(name)) \
+    # The action block is scrubbed alongside the state, because the thing scanned should be
+    # the thing the policy reads. It carries only source constants today -- action names and
+    # their descriptions -- so adding it finds nothing, and the verdicts are unchanged across
+    # all twenty-four certificates. It stops being a no-op the moment an action carries a
+    # parameter block whose vocabulary is bound per episode, which is exactly when a target
+    # name could reach the policy through a channel this check was not looking at.
+    policy_facing = [spec, [d.state(deadline) for d in dossiers], probes,
+                     {a: ACTIONS[a] for a in ACTIONS}]
+    scrub = leaks(policy_facing, lexicon(name)) \
         if relabelling.kind == "identity" else {}
 
     declared = lexicon(name)

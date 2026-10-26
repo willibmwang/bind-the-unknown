@@ -3002,3 +3002,44 @@ def test_the_shuffle_floor_is_replayable_and_refuses_to_run_without_a_seed():
     assert first != other or len(ACTIONS) - len(finder.PINNED) < 3
     with pytest.raises(ValueError, match="needs a seed"):
         finder.find(list(ACTIONS), ACTIONS, state, mode="shuffle", limit=4)
+
+
+def test_the_oracle_free_guard_sees_a_field_nested_inside_a_block():
+    # The flat `set(built)` this replaced saw only the top level, which was sufficient while
+    # every field the policy reads sat there. It stops being sufficient the moment the state
+    # carries a nested block -- a per-tool parameter block is one -- because a field named
+    # after the oracle would sit inside it and the check would pass while the leak was in the
+    # state. A guard that cannot see where the state grew is not a guard.
+    from hpc_pilots.improve import EVALUATOR_VOCABULARY, _every_key, guard_state_is_oracle_free
+
+    nested = {"decision_round": 0,
+              "available_tools": {"retrieve_evidence":
+                                  {"parameters": [{"decision_relevant": 1}]}}}
+    assert not EVALUATOR_VOCABULARY & set(nested), "the flat scan would have passed this"
+    assert EVALUATOR_VOCABULARY & set(_every_key(nested)) == {"decision_relevant"}
+    # Lists and tuples are walked too, since a parameter block is a sequence of records.
+    assert "grade" in set(_every_key({"a": [{"b": ({"grade": 1},)}]}))
+    # And the committed instrument is still clean under the stricter scan, so the change is a
+    # strengthening and not a new finding about the state as it stands.
+    clean, detail = guard_state_is_oracle_free()
+    assert clean is True, detail
+
+
+def test_the_certificate_scrubs_the_action_block_the_policy_actually_reads():
+    # The thing scanned should be the thing the policy reads. The action block carries only
+    # source constants today, so adding it found nothing across all twenty-four certificates
+    # -- but it stops being a no-op the moment an action carries a parameter block whose
+    # vocabulary is bound per episode, which is exactly when a target name could reach the
+    # policy through a channel this check was not looking at.
+    from hpc_pilots.invariance import certify, group, leaks, lexicon
+
+    for name in PACKETS:
+        for element in group(name, "identity", seed=7, count=1):
+            certificate = certify(name, element)
+            assert certificate["checks"]["no_declared_token_survives"] is True
+    # The scan itself must be able to find a name planted in an action description, or the
+    # addition to the scrub list is decorative.
+    planted = {"retrieve_evidence": "Retrieve evidence; Mpro (nsp5) usually leads."}
+    assert leaks([planted], lexicon("coronaviridae")), \
+        "a target name planted in an action description was not detected"
+    assert not leaks([{a: ACTIONS[a] for a in ACTIONS}], lexicon("coronaviridae"))

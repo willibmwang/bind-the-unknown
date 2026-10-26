@@ -314,6 +314,32 @@ CANDIDATES = (
 ) + ADVERSARIAL
 
 
+# The evaluator's own vocabulary. Hoisted from inside the guard so that the optimiser's
+# check on a proposed tool description can scan against the same list, rather than against a
+# second copy that would drift from this one.
+EVALUATOR_VOCABULARY = frozenset({
+    "grade", "grades", "graded_moves", "optimal", "relevant", "best_grade",
+    "chance_grade", "attainment", "decision_relevant"})
+
+
+def _every_key(obj):
+    """Every mapping key at every depth, so a nested block cannot hide one.
+
+    The flat `set(built)` this replaced saw only the top level, which was sufficient while
+    every field the policy reads sat there. It stops being sufficient the moment the state
+    carries a nested block -- a per-tool parameter block is one -- because a field named after
+    the oracle would sit inside it and the check would pass while the leak was in the state.
+    A guard that cannot see where the state grew is not a guard.
+    """
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            yield key
+            yield from _every_key(value)
+    elif isinstance(obj, (list, tuple)):
+        for item in obj:
+            yield from _every_key(item)
+
+
 def guard_state_is_oracle_free(packet="coronaviridae"):
     """Build the policy-visible state with the oracle patched to raise.
 
@@ -347,9 +373,7 @@ def guard_state_is_oracle_free(packet="coronaviridae"):
         twins.graded_moves = saved
     # A field the evaluator computes can also arrive by name rather than by call, so the
     # built state is additionally checked against the oracle's own vocabulary.
-    forbidden = {"grade", "grades", "graded_moves", "optimal", "relevant", "best_grade",
-                 "chance_grade", "attainment", "decision_relevant"}
-    leaked = sorted(forbidden & set(built))
+    leaked = sorted(EVALUATOR_VOCABULARY & set(_every_key(built)))
     return (not leaked), f"state carries evaluator fields {leaked}" if leaked else "clean"
 
 
