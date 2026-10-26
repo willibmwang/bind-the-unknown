@@ -269,7 +269,18 @@ def _trusted_fields_policy(spec, arguments, context):
         value = arguments.get(parameter.name)
         if value is None:
             continue
-        if value not in context.get("trusted", ()):
+        # An empty trusted set with a `user_only` parameter denies every call that supplies a
+        # value, for ever, and `redact=True` means the policy sees only a refusal that reads
+        # like its own mistake -- so a harness defect would present as policy behaviour while
+        # the policy kept spending charged actions on it. No caller in this repository
+        # populates `trusted`, so declaring `user_only` today is a kill switch wearing the
+        # shape of a hardening. Found by an adversary, not by review. It fails loudly instead.
+        if not context.get("trusted"):
+            raise RuntimeError(
+                f"{spec.name}.{parameter.name} declares trust='user_only' and the caller "
+                f"supplied no trusted set, so every call naming it would be denied for ever. "
+                f"Populate chief.context(trusted=...) before declaring a trusted field.")
+        if value not in context["trusted"]:
             return Denied(f"{spec.name}.{parameter.name} does not trace to the task statement",
                           redact=True)
     return Allowed()

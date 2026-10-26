@@ -2680,19 +2680,20 @@ def test_a_tool_with_no_policy_is_denied_rather_than_assumed_safe():
         entry="hpc_pilots.chemistry:library_spec",
         parameters=(tools.Parameter("initiator", "str", "m", required=False,
                                     default="ClAc-D-Tyr", trust="user_only"),))
-    denied = chief.check_policy(gated, {"initiator": "injected"}, chief.context())
+    # With no trusted set this raises rather than denying for ever -- see
+    # test_a_trusted_field_nobody_can_satisfy_fails_loudly_instead_of_denying_for_ever, which
+    # is the adversary's finding. The denial path needs a trusted set that the value misses.
+    supplied = chief.context(trusted=("asked-for",))
+    denied = chief.check_policy(gated, {"initiator": "injected"}, supplied)
     assert isinstance(denied, chief.Denied) and denied.redact is True
     assert isinstance(
-        chief._trusted_fields_policy(gated, {"initiator": "asked-for"},
-                                     chief.context(trusted=("asked-for",))),
+        chief._trusted_fields_policy(gated, {"initiator": "asked-for"}, supplied),
         chief.Allowed)
     # The gates compose, and the trust gate alone is not sufficient: a tool that traces its
     # arguments to the task and that nothing has decided about is still denied. Passing one
     # gate is not passing the set, which is what default-deny is for.
-    assert isinstance(
-        chief.check_policy(gated, {"initiator": "asked-for"},
-                           chief.context(trusted=("asked-for",))),
-        chief.Denied)
+    assert isinstance(chief.check_policy(gated, {"initiator": "asked-for"}, supplied),
+                      chief.Denied)
 
 
 def test_a_tool_context_is_constructible_with_the_oracle_patched_to_raise(monkeypatch):
@@ -3176,3 +3177,83 @@ def test_an_agent_incident_does_not_license_a_failure_on_a_network_free_tool():
                    "agent.incidents[]", {"finish_reason": "content_filter"}),))
     passed, detail = optimizer.guard_evidence_is_recorded_not_inferred(borrowed)
     assert passed is False and "reaches no network" in detail
+
+
+def test_a_trusted_field_nobody_can_satisfy_fails_loudly_instead_of_denying_for_ever():
+    # Found by an adversary, not by review. No caller in this repository populates
+    # context["trusted"], so a parameter declaring trust="user_only" would deny every call
+    # supplying a value, for ever -- and redact=True means the policy sees only a refusal that
+    # reads like its own mistake, so a harness defect presents as policy behaviour while the
+    # policy keeps spending charged actions on it. A kill switch wearing the shape of a
+    # hardening is exactly the proposal an optimiser would rate as a strict improvement.
+    gated = tools.Tool(
+        name="gated", version=1, summary="s", description="d",
+        entry="hpc_pilots.chemistry:library_spec",
+        parameters=(tools.Parameter("initiator", "str", "m", trust="user_only"),))
+    with pytest.raises(RuntimeError, match="no trusted set"):
+        chief.check_policy(gated, {"initiator": "anything"}, chief.context())
+    # With a trusted set supplied it behaves as designed, in both directions.
+    supplied = chief.context(trusted=("asked-for",))
+    assert isinstance(chief._trusted_fields_policy(gated, {"initiator": "asked-for"}, supplied),
+                      chief.Allowed)
+    assert isinstance(chief._trusted_fields_policy(gated, {"initiator": "injected"}, supplied),
+                      chief.Denied)
+
+
+def test_proposed_text_may_not_introduce_the_retrieval_query_vocabulary():
+    # finder._query is built from AXES and ASSESSMENTS so that no relabelling can move the
+    # shown set. The consequence an adversary found is that prose drawn from the same
+    # vocabulary moves it instead, and the identity orbit is blind to that by construction. The
+    # scan is against AXES itself, because the attack that found this used no suspicious
+    # language -- "accessibility" and "precedent" are ordinary English in a chemistry sentence.
+    design = tools.tool("chemistry.library_spec")
+    bait = optimizer.Proposal(
+        tool="chemistry.library_spec", field="summary", before=design.summary,
+        after=("Define a focused thioether-macrocycle library over a randomised region, given "
+               "a target's accessibility and the precedent available for it."))
+    passed, detail = optimizer.guard_text_avoids_the_retrieval_vocabulary(bait)
+    assert passed is False
+    assert "accessibility" in detail and "precedent" in detail
+    # A summary that adds no axis vocabulary is untouched by this guard.
+    plain = optimizer.Proposal(tool="chemistry.library_spec", field="summary",
+                               before=design.summary,
+                               after=design.summary + " Returns a definition only.")
+    assert optimizer.guard_text_avoids_the_retrieval_vocabulary(plain)[0] is True
+
+
+def test_a_failures_edit_may_extend_a_cause_and_may_not_rewrite_it():
+    # add-only on the tuple does not stop an entry being replaced by one with the same symptom
+    # and a narrower cause. An adversary used exactly that to turn "a holdout that silently
+    # removed nothing would report leakage as generalisation" into a note about string
+    # matching, which leaves a reader every reason to work around the error.
+    intake = tools.tool("intake.rank_targets")
+    original = intake.failures[0]
+    narrowed = tools.Failure(original.symptom, "A spelling difference leaves entries in place.",
+                             original.raises, original.observed_in)
+    rewrite = optimizer.Proposal(tool="intake.rank_targets", field="failures",
+                                 before=intake.failures,
+                                 after=(narrowed,) + intake.failures[1:])
+    passed, detail = optimizer.guard_a_replaced_failure_keeps_its_cause(rewrite)
+    assert passed is False and "rewritten rather than extended" in detail
+    extended = tools.Failure(original.symptom, original.cause + " Also observed for Nipah.",
+                             original.raises, original.observed_in)
+    widen = optimizer.Proposal(tool="intake.rank_targets", field="failures",
+                               before=intake.failures,
+                               after=(extended,) + intake.failures[1:])
+    assert optimizer.guard_a_replaced_failure_keeps_its_cause(widen)[0] is True
+
+
+def test_the_optimizer_records_what_an_adversary_got_past_it():
+    # A guard set is worth what an adversary could not get past it. The author's own planted
+    # set scored six of six; an independent adversary scored seven of twelve on the merits,
+    # and one of its attacks defeats every guard here. That escape is recorded rather than
+    # patched until the number looks better, and rather than widened into NOT_ADJUDICABLE --
+    # which would convert a known hole into a claimed design decision.
+    result = optimizer.run_optimize(smoke=True)
+    assert result["adversary"]["caught_on_the_merits"] == 7
+    assert result["adversary"]["escaping_unguarded"] == 1
+    assert len(result["open_escapes"]) == 1
+    escape = result["open_escapes"][0]
+    assert escape["field"] == "failures" and escape["would_close_it"]
+    # And the as-submitted figure must not be reported without the caveat that inflates it.
+    assert "inflated" in result["adversary"]["note"]

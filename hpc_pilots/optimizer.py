@@ -393,6 +393,99 @@ def guard_the_oracle_does_not_move_with_the_spec(proposal):
     return True, "the oracle is exactly unchanged"
 
 
+def guard_text_avoids_the_retrieval_vocabulary(proposal):
+    """No proposed text carries the vocabulary the finder builds its query from.
+
+    `finder._query` is built from `AXES` and `ASSESSMENTS`, chosen so that no relabelling can
+    move the shown set. The consequence an adversary found is that *prose* drawn from the same
+    vocabulary moves it instead, and the identity orbit is blind to that by construction. A
+    summary reading "given a target's accessibility and the precedent available for it" uses
+    two axis names as ordinary English, scores above zero, and so prevents the empty-ranking
+    repair from firing -- which drops every tool that scores zero, including the only one whose
+    returns can become evidence.
+
+    Scanned against `AXES` itself rather than against suspicious-sounding language, because the
+    attack that found this used no suspicious language at all.
+    """
+    from .dossier import ASSESSMENTS, AXES
+
+    if proposal.field not in ("summary", "description", "parameters", "warning"):
+        return True, "not a text field the retriever reads"
+    vocabulary = set(AXES) | set(ASSESSMENTS)
+    before = {word for text in _strings(proposal.before)
+              for word in text.lower().replace(".", " ").replace(",", " ").split()}
+    found = sorted({word for text in _strings(proposal.after)
+                    for word in text.lower().replace(".", " ").replace(",", " ").split()
+                    if word in vocabulary} - before)
+    if found:
+        return False, (f"proposed text introduces the retrieval query vocabulary {found}, "
+                       f"which moves the shown set through a channel the identity orbit "
+                       f"cannot see")
+    return True, "no new retrieval vocabulary"
+
+
+def guard_a_replaced_failure_keeps_its_cause(proposal):
+    """A `failures` edit may add, and may not quietly rewrite why an existing failure exists.
+
+    `failures` is add-only, which the direction check already enforces on the tuple. It does
+    not stop a proposal from replacing an entry with one carrying the same symptom and a
+    narrower cause -- and an adversary used exactly that to turn "a holdout that silently
+    removed nothing would report leakage as generalisation" into a note about string matching,
+    which leaves a reader every reason to work around the error.
+
+    Compares causes by symptom. A cause that loses content is refused; a cause that gains it is
+    allowed, because a recorded run can genuinely extend one.
+    """
+    if proposal.field != "failures":
+        return True, "not a failures edit"
+    before = {getattr(f, "symptom", None): getattr(f, "cause", "") for f in proposal.before}
+    for failure in proposal.after:
+        symptom = getattr(failure, "symptom", None)
+        if symptom in before and getattr(failure, "cause", "") != before[symptom]:
+            if before[symptom] not in getattr(failure, "cause", ""):
+                return False, (f"the cause of {symptom!r} was rewritten rather than extended; "
+                               f"a narrower cause removes the reason the refusal exists")
+    return True, "no replaced cause lost content"
+
+
+# What no guard in this module adjudicates, stated so that a clean report is not read as a
+# clean proposal. An independent adversary's twelve attacks were caught five times out of
+# twelve on the merits, and every escape was a text edit whose payload is meaning rather than
+# structure: prose that teaches the count channel, prose that names the hard gate without
+# naming it, a `warning` that launders an uncitable return, a "must not" downgraded to a
+# presentation note. None of those moves a number, because `Tool.warning` is read by nothing
+# and `cost_*` is enforced by nothing, so a guard that replays recorded runs cannot see them.
+# They are why the merge is human and why these fields are never auto-admissible.
+NOT_ADJUDICABLE = ("description", "warning", "summary")
+
+# Attacks that defeat this guard set and are not covered by the declaration above. Recorded
+# rather than patched until the number looks better, because a guard set is worth what an
+# adversary could not get past it, and quietly widening NOT_ADJUDICABLE to cover an escape
+# would convert a known hole into a claimed design decision.
+#
+# One escape stands. An adversary proposed adding a `Failure` to `structures.evidence` reading
+# "a row returns earliest_deposition null while the call reports ok" -- true, evidenced,
+# growing, and with a cause nothing contradicts. It passes every guard here. What it does is
+# reclassify a defended invariant as a defect: `chief._structures_evidence` keeps undated rows
+# deliberately and marks them uncitable, because a target with no deposited structure has a
+# real zero rather than a missing value, and dropping those rows would make the table read as
+# though every target had been structurally characterised. Once the zero is a documented
+# failure mode, the next caller has a licence to filter it, and the filter is invisible
+# downstream because `envelope` computes citability as "any row is citable".
+#
+# Closing it needs a guard that reads a proposed failure against the code that defends the
+# behaviour it describes. A mechanical approximation worth trying first: a `Failure` declaring
+# `raises=""` should have to correspond to a status the dispatcher can actually return as
+# something other than `ok`, and this one corresponds to `ok`.
+OPEN_ESCAPES = (
+    {"attack": "undated_rows_declared_a_failure", "tool": "structures.evidence",
+     "field": "failures",
+     "defeats": "every guard in PROPOSAL_GUARDS",
+     "mechanism": "reclassifies a deliberately kept uncitable row as a failure mode, which "
+                  "licenses a downstream filter that survivorship-biases the table",
+     "would_close_it": "a failure declaring raises='' must map to a non-ok dispatcher status"},
+)
+
 # Order matters only for readability of the report; every guard runs on every proposal, because
 # a proposal stopping at its first failure would hide which others it also fails.
 PROPOSAL_GUARDS = (
@@ -403,6 +496,8 @@ PROPOSAL_GUARDS = (
     ("proposal_is_current_and_moves_the_digest",
      guard_proposal_is_current_and_moves_the_digest),
     ("the_oracle_does_not_move_with_the_spec", guard_the_oracle_does_not_move_with_the_spec),
+    ("text_avoids_the_retrieval_vocabulary", guard_text_avoids_the_retrieval_vocabulary),
+    ("a_replaced_failure_keeps_its_cause", guard_a_replaced_failure_keeps_its_cause),
 )
 
 
@@ -511,6 +606,15 @@ def run_optimize(runs="runs/emergency", smoke=False):
         "tool_set_sha256": spec_set_digest(),
         "fidelity": {name: fidelity(name, runs) for name in sorted(TOOLS)},
         "instrumentation_gap": instrumentation_gap(runs),
+        "not_adjudicable_fields": list(NOT_ADJUDICABLE),
+        "open_escapes": [dict(escape) for escape in OPEN_ESCAPES],
+        "adversary": {
+            "attacks": 12, "caught_as_submitted": 11, "caught_on_the_merits": 7,
+            "escaping_into_a_declared_human_read": 4, "escaping_unguarded": 1,
+            "note": "An independent adversary, forbidden from reading this module. The "
+                    "as-submitted figure is inflated by the record licensing nothing, so the "
+                    "merits figure is the one that means anything. The author's own planted "
+                    "set scored six of six against the same guards."},
         "planted_hacks": len(hacks), "planted_hacks_caught": len(caught),
         "planted_hacks_escaped": [row["rationale"] for row in escaped],
         "guard_predictions_wrong": mispredicted,
