@@ -125,6 +125,11 @@ def main(argv=None):
     p.add_argument("--dry-run", action="store_true")
     p = sub.add_parser("manifest", help="Rewrite the source digest record, or report its drift")
     p.add_argument("--check", action="store_true", help="Report drift and exit non-zero; write nothing")
+    p = sub.add_parser("tools", help="List the tool registry, or snapshot and check it")
+    p.add_argument("--snapshot", action="store_true",
+                   help="Write configs/tools.v{version}.json; refuses to overwrite one")
+    p.add_argument("--check", action="store_true",
+                   help="Report drift against the committed snapshot and exit non-zero")
     args = parser.parse_args(argv)
     if args.command == "prepare":
         from .data import prepare_binding, prepare_atlas_manifest
@@ -230,6 +235,33 @@ def main(argv=None):
         print(json.dumps({"manifest": str(path), "wrote": not args.check, **drift}, indent=2))
         if args.check and any(drift.values()):
             raise SystemExit("source_manifest.json does not describe the working tree")
+    elif args.command == "tools":
+        from .tools import TOOL_SET_VERSION, TOOLS, snapshot, spec_set_digest
+        from .common import ROOT, write_json
+        path = ROOT / "hpc_pilots" / "configs" / f"tools.v{TOOL_SET_VERSION}.json"
+        if args.snapshot:
+            # Refuses to overwrite, because the snapshot is the thing that makes an already
+            # recorded tool_set_sha256 verifiable. A changed spec goes in a new file.
+            if path.exists():
+                raise SystemExit(f"{path.name} exists and is byte-immutable; bump "
+                                 f"TOOL_SET_VERSION and snapshot again")
+            write_json(path, snapshot())
+            print(json.dumps({"wrote": str(path), "tool_set_sha256": spec_set_digest()},
+                             indent=2))
+        elif args.check:
+            committed = json.loads(path.read_text())["tool_set_sha256"] if path.exists() else None
+            live = spec_set_digest()
+            print(json.dumps({"snapshot": str(path), "committed": committed, "live": live,
+                              "drift": committed != live}, indent=2))
+            if committed != live:
+                raise SystemExit(f"{path.name} does not describe the registry")
+        else:
+            print(json.dumps({name: {"summary": TOOLS[name].summary,
+                                     "version": TOOLS[name].version,
+                                     "return_kind": TOOLS[name].return_kind,
+                                     "produces_evidence": TOOLS[name].produces_evidence,
+                                     "parameters": [q.name for q in TOOLS[name].parameters]}
+                              for name in sorted(TOOLS)}, indent=2))
     else:
         from .summarize import summarize
         summarize()

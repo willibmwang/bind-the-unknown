@@ -8,6 +8,7 @@ import pytest
 from hpc_pilots.__main__ import main as cli_main
 from hpc_pilots.arms import ARMS
 from hpc_pilots import surrogates
+from hpc_pilots import tools
 from hpc_pilots.binding import (design_matrix, enrichment, pick_batch, replay, run_arm,
                                 run_binding)
 from hpc_pilots.calibration import calibration_metrics, trajectory
@@ -2295,3 +2296,157 @@ def test_the_state_blind_policy_is_not_the_orbits_name_blind_control():
         blind = run_orbit(name, "rubric", count=2, attempts=200,
                           kinds=("null", "identity"))["earned"]["challenger_best"]
         assert blind["attributable_to_identity"] == 0.0, name
+
+
+def test_a_tool_spec_describes_the_function_it_names():
+    # A spec is a claim about a function and nothing enforces it. The declared list can drift
+    # from the signature it describes and every call still works, right up to the one that
+    # does not -- and by then the caller has been trusting the spec for weeks. So the
+    # conformance check is here rather than in a docstring.
+    import inspect
+
+    for name in sorted(tools.TOOLS):
+        spec = tools.TOOLS[name]
+        signature = inspect.signature(spec.resolve())
+        for parameter in spec.parameters:
+            assert parameter.name in signature.parameters, \
+                f"{name} declares {parameter.name!r}, which is not in its signature"
+            actual = signature.parameters[parameter.name]
+            has_default = actual.default is not inspect.Parameter.empty
+            # `required` is not a judgement about importance. It is whether the signature has
+            # a default, and conflating the two is how a reader learns the spec was written
+            # from the docstring rather than from the function.
+            assert parameter.required is not has_default, \
+                f"{name}.{parameter.name} declares required={parameter.required}"
+            if has_default:
+                assert parameter.default == actual.default, \
+                    f"{name}.{parameter.name} declares a default the signature does not have"
+        if spec.check:
+            spec.resolve("check")
+
+
+def test_an_unregistered_tool_raises_instead_of_resolving():
+    # A typo in a spec name, or an artifact naming a tool that has since been renamed, must
+    # stop rather than resolve to something. There is no sensible default tool, and a silent
+    # substitution would be indistinguishable from the caller having asked for it.
+    with pytest.raises(ValueError, match="Unknown tool"):
+        tools.tool("intake.rank_target")
+    with pytest.raises(ValueError, match="already registered"):
+        tools.register(tools.Tool(
+            name="intake.rank_targets", version=99, summary="s", description="d",
+            entry="hpc_pilots.intake:run_intake"))
+    with pytest.raises(TypeError, match="Tool record"):
+        tools.register({"name": "not-a-record"})
+    # An entry point naming an attribute that does not exist is a spec describing a function
+    # nobody can call, which is worse than no spec because the caller trusts it.
+    with pytest.raises(ValueError, match="no attribute"):
+        tools.Tool(name="x", version=1, summary="s", description="d",
+                   entry="hpc_pilots.intake:no_such_function").resolve()
+
+
+def test_a_tool_whose_dependency_is_absent_names_the_dependency():
+    # The scientific environment is deliberately free of torch. Checking declared imports
+    # before dispatch means a missing backend names its cause, instead of surfacing as an
+    # ImportError from inside the fifth round of an episode, where it is not a diagnosis.
+    needs_torch = tools.Tool(
+        name="needs-torch", version=1, summary="s", description="d",
+        entry="hpc_pilots.chemistry:library_spec", requires=("torch",))
+    tools.register(needs_torch)
+    try:
+        if needs_torch.available():
+            with pytest.raises(RuntimeError, match="torch"):
+                tools.tool("needs-torch")
+    finally:
+        del tools.TOOLS["needs-torch"]
+
+
+def test_a_tool_that_produces_evidence_declares_where_its_date_comes_from():
+    # The date boundary is the leakage boundary this project is built on: `Dossier.observe`
+    # compares `available_from` against the decision clock. A tool that produced evidence
+    # without saying which returned key dates it would enter a dossier at any clock, so the
+    # obligation is checked at registration and not left to whoever writes the next tool.
+    structures = tools.tool("structures.evidence")
+    assert structures.produces_evidence is True
+    assert structures.date_field == "earliest_deposition"
+    assert structures.citation
+    assert structures.date_field in [key for key, _, _ in structures.returns]
+    with pytest.raises(ValueError, match="produces evidence"):
+        tools.register(tools.Tool(
+            name="undated", version=1, summary="s", description="d",
+            entry="hpc_pilots.chemistry:library_spec", produces_evidence=True))
+    # A ranked target row is not a cited claim, and the registry says so rather than leaving a
+    # caller to infer it from the absence of a date field.
+    assert tools.tool("intake.rank_targets").produces_evidence is False
+    assert "not a cited claim" in tools.tool("intake.rank_targets").citation
+
+
+def test_a_parameter_vocabulary_that_varies_per_episode_is_bound_late():
+    # A spec that hard-coded target names would survive `relabel_packet`, which rewrites packet
+    # content and not source constants. The identity orbit would then read a renamed packet
+    # while the model still saw the real names, and `attributable_to_identity` -- pinned at
+    # exactly zero by two tests -- would stop meaning anything.
+    late = tools.Parameter("target", "str", "Which target.", enum_from="target")
+    assert late.values({"target": ["Mpro (nsp5)", "nsp12"]}) == ("Mpro (nsp5)", "nsp12")
+    # A declared vocabulary the caller did not supply raises rather than widening to
+    # unconstrained, because a missing vocabulary must not read as a permissive schema.
+    with pytest.raises(ValueError, match="did not supply"):
+        late.values({"axis": ["conservation"]})
+    assert tools.Parameter("top", "int", "How many.").values() == ()
+    with pytest.raises(ValueError, match="one vocabulary, not two"):
+        tools.register(tools.Tool(
+            name="two-vocabularies", version=1, summary="s", description="d",
+            entry="hpc_pilots.chemistry:library_spec",
+            parameters=(tools.Parameter("initiator", "str", "m", enum=("a",),
+                                        enum_from="initiator"),)))
+
+
+def test_the_committed_tool_snapshot_matches_the_registry():
+    # The snapshot is a verifier and not a loader: nothing in the package reads it at runtime.
+    # That is what makes an optimiser proposal structurally unable to reach a run -- the only
+    # thing it can write is JSON, and no code path loads JSON into the registry. What the
+    # snapshot buys instead is that editing a spec cannot go unnoticed.
+    path = ROOT / "hpc_pilots" / "configs" / f"tools.v{tools.TOOL_SET_VERSION}.json"
+    assert path.exists(), "the registry has no committed snapshot"
+    committed = json.loads(path.read_text())
+    assert committed["tool_set_sha256"] == tools.spec_set_digest()
+    assert sorted(committed["tools"]) == sorted(tools.TOOLS)
+    # Every earlier snapshot keeps its digest, so the tool_set_sha256 recorded in an already
+    # finished run still verifies. A new spec goes in a new file; this is the device
+    # configs/today.json already uses, applied to the registry.
+    assert committed["tool_set_sha256"] == \
+        "b67cdcfb525a0ff9f8beef3178a9dd8b549d7ea333bfeec9acdd372ad7aba509"
+    # The digest is over what the specs say and not over the file, because the file carries a
+    # generation timestamp and re-cutting a byte-identical registry would otherwise hash
+    # differently -- which is the defect content_digest was written for.
+    assert tools.spec_set_digest() == tools.spec_set_digest()
+
+
+def test_the_cli_reports_drift_between_the_registry_and_its_snapshot():
+    """Editing a spec must turn the snapshot red rather than passing quietly."""
+    import contextlib
+    import io
+
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        cli_main(["tools", "--check"])
+    assert json.loads(out.getvalue())["drift"] is False
+    edited = tools.Tool(
+        name="chemistry.library_spec", version=2,
+        summary=tools.TOOLS["chemistry.library_spec"].summary,
+        description="an edited description",
+        entry="hpc_pilots.chemistry:library_spec")
+    original = tools.TOOLS["chemistry.library_spec"]
+    tools.TOOLS["chemistry.library_spec"] = edited
+    try:
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), pytest.raises(SystemExit):
+            cli_main(["tools", "--check"])
+        assert json.loads(out.getvalue())["drift"] is True
+    finally:
+        tools.TOOLS["chemistry.library_spec"] = original
+    # And the registry is listable without importing anything a tool needs, which is why
+    # entry points are strings: asking what a tool costs must not cost biotite and pyrodigal.
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        cli_main(["tools"])
+    assert sorted(json.loads(out.getvalue())) == sorted(tools.TOOLS)
