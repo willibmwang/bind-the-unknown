@@ -2,6 +2,7 @@ import ast
 import dataclasses
 import json
 import os
+import tempfile
 import time
 from pathlib import Path
 from unittest import mock
@@ -45,7 +46,7 @@ from hpc_pilots.invariance import (IDENTIFYING, KINDS, LEXICON_FLOOR, Relabellin
 from hpc_pilots.twins import generate, grade_move, pair, probe, run_twins
 from hpc_pilots.streams import stream, stream_int
 from hpc_pilots.structure import structure_replay
-from hpc_pilots.summarize import collect, headroom
+from hpc_pilots.summarize import collect, headroom, summarize_emergency
 from hpc_pilots.targets import PACKETS, packet
 
 
@@ -3569,3 +3570,40 @@ def test_the_orbit_scans_exactly_the_strings_the_policy_view_shows():
     withheld = {"failures.raises", "failures.observed_in"}
     assert withheld < set(channels) and len(channels) - len(withheld) == 10
     assert all(w in tools.WITHHELD_FROM_POLICY for w in withheld)
+
+
+def test_the_emergency_summary_groups_by_the_label_and_not_the_requested_policy():
+    # The non-pooling guarantee rests on `Agent.label`, which reaches the artifact filename
+    # and the artifact's top-level `policy`. It did not reach this aggregation: the record was
+    # built by splatting `metrics`, and `metrics["policy"]` is the string the caller asked
+    # for, so a hosted-model episode was grouped under `agent`.
+    #
+    # Checked against the real corpus rather than a fixture, because the point is that the
+    # corpus already disagrees with itself. The first assertion is the one that keeps this
+    # test from going vacuous: if no recorded artifact had a label differing from its
+    # requested policy, grouping by either field would give the same answer and the test
+    # would prove nothing.
+    recorded = [json.loads(p.read_text())
+                for p in sorted((ROOT / "runs/emergency").glob("*.json"))]
+    complete = [d for d in recorded if d.get("status") == "complete" and not d.get("smoke")]
+    disagreeing = [d for d in complete if d["policy"] != d["metrics"].get("policy")]
+    assert disagreeing, "no recorded artifact distinguishes the label from the requested policy"
+    assert all(d["metrics"]["policy"] == "agent" for d in disagreeing)
+    assert {d["policy"] for d in disagreeing} == {"agent-anthropic-claude-sonnet-5-5"}
+
+    directory = Path(tempfile.mkdtemp())
+    summarize_emergency(directory)
+    frame = pd.read_csv(directory / "emergency_metrics.csv")
+    # The label is what the column holds, and the requested string is kept beside it rather
+    # than dropped -- the device `invariance.run_orbit` already uses for the same reason.
+    assert set(frame["policy"]) == {d["policy"] for d in complete if not d.get("control")}
+    assert "agent" not in set(frame["policy"])
+    assert "agent" in set(frame["policy_requested"])
+    for _, row in frame.iterrows():
+        source = json.loads((ROOT / row["file"]).read_text())
+        assert row["policy"] == source["policy"]
+        assert row["policy_requested"] == source["metrics"]["policy"]
+    # And the probe summary groups by the same corrected field, so a hosted run and a
+    # local-model run of the same requested policy land in different rows.
+    probe = pd.read_csv(directory / "memorisation_probe.csv")
+    assert "agent" not in set(probe["policy"])

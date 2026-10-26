@@ -235,7 +235,10 @@ regenerate is a result I cannot defend at review.
   is deliberately not backfilled.
 - **Showing a policy the tool specs is its own arm.** The specs reach the decision state only
   under `PILOT_TOOL_STATE=1`, and that run is labelled `agent-toolstate` so it can never pool
-  with the ~40 recorded episodes. The reason is that the schema is unmoved and the prompt is
+  with the ~40 recorded episodes. The label reaches the artifact filename, the artifact's
+  top-level `policy`, and — since the defect this arm exposed was fixed — the `policy` column
+  the emergency summary groups by; `policy_requested` keeps the string the caller asked for
+  beside it. The reason is that the schema is unmoved and the prompt is
   not: the input text changes, so no episode recorded before it is comparable with one after it
   even at identical payload bytes. The flag is read off `common.Agent` rather than passed in by
   the episode, so the state and the filename cannot disagree about which arm a file holds, and

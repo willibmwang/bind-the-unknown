@@ -374,8 +374,23 @@ def summarize_emergency(directory):
             continue
         if data.get("status") != "complete":
             continue
+        # `policy` is set AFTER the metrics splat, and this is the whole point. The artifact
+        # carries two policy strings: the top-level one is `Agent.label`, which is what the
+        # filename uses and what must never pool, and `metrics["policy"]` is the string the
+        # caller asked for. Splatting the metrics and stopping there took the second, so this
+        # aggregation grouped a hosted-model run under `agent` -- 32 of the 45 recorded
+        # artifacts carry a top-level label of `agent-anthropic-claude-sonnet-5-5` against a
+        # `metrics["policy"]` of `agent`, and the summary read `agent` for all of them.
+        #
+        # It was latent only because every agent artifact on disk happens to be the same
+        # hosted model, so pooling them pooled like with like. It stops being latent the
+        # moment two labels coexist, which a local-model run, a `two_call` run or a
+        # `-toolstate` run all do. The three sibling aggregations in this module already read
+        # `data["policy"]`; this one reached the label by accident and missed.
         record = {"file": str(path.relative_to(ROOT)), "packet": data["family_packet"],
-                  "replicate": data.get("replicate", 1), **data["metrics"]}
+                  "replicate": data.get("replicate", 1), **data["metrics"],
+                  "policy": data["policy"],
+                  "policy_requested": data["metrics"].get("policy")}
         (probe if data.get("control") else rows).append(record)
     if rows:
         pd.DataFrame(rows).to_csv(directory / "emergency_metrics.csv", index=False)
