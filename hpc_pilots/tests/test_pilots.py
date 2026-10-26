@@ -3502,3 +3502,70 @@ def test_every_spec_field_is_classified_as_shown_or_withheld():
     # length ceiling, and a bound shown as null would read to a decider as a bound of null.
     # The numeric bounds do appear, so dropping one from the view fails here.
     assert missing == {"parameters.max_length"}
+
+
+def test_the_orbit_scans_exactly_the_strings_the_policy_view_shows():
+    # The invariant that makes the previous two tests more than anecdotes. Planting a target
+    # name in each string-bearing field of a spec in turn, the orbit catches it if and only
+    # if the policy view shows that field. Ten channels are shown and all ten are caught;
+    # `failures.raises` and `failures.observed_in` are withheld and are correctly not caught,
+    # because a string the policy never reads cannot leak to it.
+    #
+    # Stated as a biconditional rather than a list of caught channels, and the biconditional
+    # holds by construction rather than by coincidence: `certify` calls `policy_view` and
+    # scrubs whatever it returns, recursively, so widening the projection widens the scan in
+    # the same edit. Checked rather than assumed -- widening `policy_view` to show
+    # `observed_in` and changing nothing else does make the orbit catch a planted path.
+    #
+    # So what this test pins is the architecture and not two lists agreeing: the scanned
+    # object is the shown object. It fails if somebody makes `certify` scan an enumerated
+    # field list, or `Tool.record()`, or the registry instead of the table of dispatchable
+    # tools -- each of which would reintroduce a projection the orbit does not follow.
+    leak = "Mpro (nsp5)"
+
+    def spec(**overrides):
+        fields = dict(name="planted", version=1, summary="s", description="d",
+                      entry="hpc_pilots.chemistry:library_spec")
+        fields.update(overrides)
+        return tools.Tool(**fields)
+
+    channels = {
+        "summary": spec(summary=leak),
+        "description": spec(description=f"Use this on {leak} first."),
+        "warning": spec(warning=f"Only validated for {leak}"),
+        "citation": spec(produces_evidence=True, date_field="d", citation=leak),
+        "returns": spec(returns=((leak, "str", "the row for it"),)),
+        "parameters.meaning": spec(parameters=(tools.Parameter("t", "str", f"pick {leak}"),)),
+        "parameters.enum": spec(parameters=(tools.Parameter("t", "str", "m", enum=(leak,)),)),
+        "parameters.default": spec(parameters=(tools.Parameter("t", "str", "m", required=False,
+                                                               default=leak),)),
+        "failures.symptom": spec(failures=(tools.Failure(f"{leak} not found", "c",
+                                                         "ValueError"),)),
+        "failures.cause": spec(failures=(tools.Failure("s", f"happens for {leak}",
+                                                       "ValueError"),)),
+        "failures.raises": spec(failures=(tools.Failure("s", "c", leak),)),
+        "failures.observed_in": spec(failures=(tools.Failure(
+            "s", "c", "ValueError", observed_in=(f"runs/emergency/{leak}.json",)),)),
+    }
+    saved_tools = dict(tools.TOOLS)
+    saved_actions = dict(emergency.ACTION_TOOLS)
+    elements = invariance.group("coronaviridae", "identity", 20261021, 2)
+    try:
+        for channel, planted in channels.items():
+            tools.TOOLS.clear(); tools.TOOLS.update(saved_tools)
+            tools.TOOLS["planted"] = planted
+            emergency.ACTION_TOOLS.clear()
+            emergency.ACTION_TOOLS["invoke_design_tool"] = ("planted",)
+            shown = leak in json.dumps(tools.policy_view([planted]))
+            caught = [bool(invariance.certify("coronaviridae", e)["surviving_tokens"])
+                      for e in elements]
+            assert all(caught) == shown and any(caught) == shown, \
+                f"{channel}: shown to the policy is {shown} but caught by the orbit is {caught}"
+    finally:
+        tools.TOOLS.clear(); tools.TOOLS.update(saved_tools)
+        emergency.ACTION_TOOLS.clear(); emergency.ACTION_TOOLS.update(saved_actions)
+    # Ten shown, two withheld. Pinned so that moving a field across the line is a visible
+    # edit to this count rather than a silent change in what a decider can read.
+    withheld = {"failures.raises", "failures.observed_in"}
+    assert withheld < set(channels) and len(channels) - len(withheld) == 10
+    assert all(w in tools.WITHHELD_FROM_POLICY for w in withheld)
