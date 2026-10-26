@@ -9,6 +9,7 @@ import pytest
 from hpc_pilots.__main__ import main as cli_main
 from hpc_pilots.arms import ARMS
 from hpc_pilots import chief
+from hpc_pilots import finder
 from hpc_pilots import surrogates
 from hpc_pilots import tools
 from hpc_pilots.binding import (design_matrix, enrichment, pick_batch, replay, run_arm,
@@ -20,7 +21,7 @@ from hpc_pilots.common import (Agent, COMMITTED_MODEL_MANIFEST, STAGED_MODEL_MAN
                                content_digest, digest, model_manifest, provenance,
                                source_manifest)
 from hpc_pilots.data import AA, encode_variants, pool_geometry
-from hpc_pilots.dossier import AXES, Dossier, evidence, leaders, rank
+from hpc_pilots.dossier import ACTIONS, AXES, Dossier, evidence, leaders, rank
 from hpc_pilots.emergency import decision_relevant, run_episode
 from hpc_pilots.lattice import lattice, lattice_action
 from hpc_pilots.monitor import audit_rule_robustness, packet_verdict, run_monitor
@@ -2900,3 +2901,104 @@ def test_the_recorded_deterministic_cells_still_reproduce_every_number_they_reco
                     f"now {fresh.get(key)!r}"
             seen += 1
     assert seen, "no recorded deterministic cell was available to compare against"
+
+
+def _finder_state(name, element=None):
+    """A policy-facing state for the finder, optionally under a relabelling."""
+    from hpc_pilots.invariance import relabel_packet
+
+    spec, dossiers, entries, probes = \
+        relabel_packet(name, element) if element is not None else packet(name)
+    return {"decision_round": 0, "rounds_remaining": 8,
+            "dossiers": [d.state(0) for d in dossiers],
+            "retrievable_axes": [{"target": t, "axis": e["axis"]}
+                                 for t, e in sorted(entries,
+                                                    key=lambda p: (p[0], p[1]["axis"]))]}
+
+
+def test_the_finder_shows_everything_at_this_scale_and_says_so_in_the_record():
+    # 511 characters of action block against a 26,198-character state is 2.0%, and it would
+    # take on the order of sixty-five tools before the block matched the dossiers beside it.
+    # Below that a retrieval stage can only spend reachability to buy nothing, so the default
+    # shows everything and writes that down rather than leaving it to be inferred.
+    shown, record = finder.find(list(ACTIONS), ACTIONS, _finder_state("coronaviridae"))
+    assert record["mode"] == "all"
+    assert shown == list(ACTIONS) and record["withheld"] == []
+    assert record["offered"] == len(ACTIONS)
+    with pytest.raises(ValueError, match="Unknown finder"):
+        finder.find(list(ACTIONS), ACTIONS, {}, mode="embeddings")
+
+
+def test_the_finder_can_never_withhold_the_action_that_ends_an_episode():
+    # A finder that hid `stop` would make `terminal_condition`, `deadline_met` and
+    # `actions_unspent_at_exit` properties of the retriever, and one that hid
+    # `recommend_experiment` would make `recommendation_issued` one. Both would be read as
+    # policy behaviour, so this raises rather than being reported.
+    def withholds_a_terminal(names, descriptions, state, limit, seed):
+        return [n for n in names if n != "stop"], {"query": (), "note": "test stage"}
+
+    finder.FINDERS["withholds"] = withholds_a_terminal
+    try:
+        with pytest.raises(ValueError, match="pinned"):
+            finder.find(list(ACTIONS), ACTIONS, {}, mode="withholds")
+    finally:
+        del finder.FINDERS["withholds"]
+    # Pinning holds through the floor too, which is the one stage that does withhold.
+    shown, record = finder.find(list(ACTIONS), ACTIONS, _finder_state("coronaviridae"),
+                                mode="shuffle", limit=4, seed=11)
+    assert set(finder.PINNED) <= set(shown)
+    assert len(shown) == 4 and len(record["withheld"]) == 2
+
+
+def test_the_shown_set_does_not_move_under_a_relabelling():
+    # The constraint that shapes the module. Two tests pin attributable_to_identity at exactly
+    # zero for the rubric on all three packets, so a query built from dossier text would make
+    # the shown set a function of the target names -- and even the rubric, which reads no
+    # state, would have its reachable set move under a rename. The query is therefore drawn
+    # from AXES and ASSESSMENTS, which relabel_packet does not touch, and sorted, because the
+    # axis-order nuisance is a measured quantity and a query that read a list's order would be
+    # reading it.
+    from hpc_pilots.invariance import group
+
+    for name in PACKETS:
+        baseline = {mode: finder.find(list(ACTIONS), ACTIONS, _finder_state(name), mode=mode)[0]
+                    for mode in ("all", "keyword", "tfidf")}
+        for kind in ("identity", "presentation", "axis_order"):
+            for element in group(name, kind, seed=7, count=2):
+                state = _finder_state(name, element)
+                for mode, expected in baseline.items():
+                    shown, _ = finder.find(list(ACTIONS), ACTIONS, state, mode=mode)
+                    assert shown == expected, \
+                        f"{name}/{kind}/{mode}: the shown set moved under a relabelling"
+
+
+def test_a_ranking_that_matched_nothing_shows_everything_rather_than_blacking_out():
+    # Measured on the action space this is the common case, not the edge: the query is axis
+    # names and the six action descriptions do not contain them, so keyword ranks nothing. The
+    # conservative direction is to show everything -- which is what `all` does and what the
+    # recorded runs already have -- because showing only the pinned pair would make
+    # retrieve_evidence unreachable and change an episode's outcome for a reason that has
+    # nothing to do with the policy. What must never be silent is the blackout.
+    state = _finder_state("coronaviridae")
+    for mode in ("keyword", "tfidf"):
+        shown, record = finder.find(list(ACTIONS), ACTIONS, state, mode=mode)
+        assert record["empty_ranking"] is True
+        assert shown == list(ACTIONS), f"{mode} blacked out instead of failing open"
+        assert record["withheld"] == []
+    # An arm reporting empty_ranking on every round is a finder doing nothing, which is a
+    # finding about the finder and has to be visible in the artifact to be one.
+    assert finder.find(list(ACTIONS), ACTIONS, state)[1]["empty_ranking"] is False
+
+
+def test_the_shuffle_floor_is_replayable_and_refuses_to_run_without_a_seed():
+    # The floor exists so that a keyword stage which does not beat it at equal count is known
+    # to be doing nothing -- the same move _coverage_action makes as a counting control. A
+    # floor that could not be replayed would not be a control.
+    state = _finder_state("coronaviridae")
+    first, _ = finder.find(list(ACTIONS), ACTIONS, state, mode="shuffle", limit=4, seed=11)
+    again, _ = finder.find(list(ACTIONS), ACTIONS, state, mode="shuffle", limit=4, seed=11)
+    other, _ = finder.find(list(ACTIONS), ACTIONS, state, mode="shuffle", limit=4, seed=12)
+    assert first == again
+    assert first != other or len(ACTIONS) - len(finder.PINNED) < 3
+    with pytest.raises(ValueError, match="needs a seed"):
+        finder.find(list(ACTIONS), ACTIONS, state, mode="shuffle", limit=4)
