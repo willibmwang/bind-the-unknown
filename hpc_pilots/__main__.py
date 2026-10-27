@@ -130,6 +130,16 @@ def main(argv=None):
                    help="Write configs/tools.v{version}.json; refuses to overwrite one")
     p.add_argument("--check", action="store_true",
                    help="Report drift against the committed snapshot and exit non-zero")
+    p = sub.add_parser("selector",
+                       help="Rank which tool to call next for a stated situation")
+    p.add_argument("--known", nargs="*", default=["genome_accession"],
+                   help="Facts the state holds; defaults to a bare genome accession, which is "
+                        "the state a campaign actually starts in")
+    p.add_argument("--unresolved", nargs="*", default=None,
+                   help="Axes with no sufficient claim yet; defaults to all seven")
+    p.add_argument("--proposed", action="store_true",
+                   help="Include the declared-but-unbuilt lanes, to ask what building them "
+                        "would buy. Nothing dispatches from them and the output says so")
     p = sub.add_parser("optimize",
                        help="Evaluate spec-edit proposals behind the guard; propose only")
     p.add_argument("--runs", default="runs/emergency",
@@ -269,6 +279,25 @@ def main(argv=None):
                                      "produces_evidence": TOOLS[name].produces_evidence,
                                      "parameters": [q.name for q in TOOLS[name].parameters]}
                               for name in sorted(TOOLS)}, indent=2))
+    elif args.command == "selector":
+        from .selector import AXES, PROPOSED, REQUIREMENTS, Situation, rank
+        # Merged rather than substituted, so asking what an unbuilt lane would buy still ranks
+        # it against the tools that exist. `includes_unbuilt_lanes` is in the output because a
+        # reader who missed the flag would otherwise read a plan naming capabilities no action
+        # can reach, which is the one way this command could mislead.
+        requirements = {**REQUIREMENTS, **PROPOSED} if args.proposed else None
+        situation = Situation(
+            known=frozenset(args.known),
+            unresolved=tuple(AXES if args.unresolved is None else args.unresolved))
+        ordered = rank(situation, requirements=requirements)
+        print(json.dumps(
+            {"known": sorted(situation.known), "unresolved": list(situation.unresolved),
+             "includes_unbuilt_lanes": bool(args.proposed),
+             "first": next((p.tool for p in ordered if p.callable_now), None),
+             "order": [{"tool": p.tool, "callable_now": p.callable_now,
+                        "blocked_on": list(p.blocked_on), "unlocks": list(p.unlocks),
+                        "gates_unresolved": list(p.gates_unresolved),
+                        "why": p.why, "scope": p.scope} for p in ordered]}, indent=2))
     elif args.command == "optimize":
         from .optimizer import instrumentation_gap, run_optimize
         if args.gap:

@@ -4197,3 +4197,40 @@ def test_a_situation_naming_an_unenumerated_fact_or_axis_raises():
 def test_a_tool_with_no_requirement_entry_names_itself_rather_than_being_unrankable():
     with pytest.raises(ValueError, match="No requirement declared"):
         selector.blocked_on("nothing.declared", selector.from_sequence())
+
+
+def test_the_selector_cli_says_when_its_plan_names_tools_nobody_has_built():
+    """A plan that cites an unbuilt lane must be unable to read as a capability report."""
+    import contextlib
+    import io
+
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        cli_main(["selector"])
+    live = json.loads(out.getvalue())
+    assert live["includes_unbuilt_lanes"] is False
+    assert live["first"] == "structures.evidence"
+    assert [row["tool"] for row in live["order"]] == sorted(tools.TOOLS, key=lambda n: (
+        -len(selector.REQUIREMENTS[n].gates), n)), "the CLI order is not the ranked order"
+    # The flag changes the answer, and the output says so in the same breath. A reader who
+    # missed the flag would otherwise take a plan naming `literature.search` as a statement
+    # that a literature lane exists.
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        cli_main(["selector", "--proposed"])
+    hypothetical = json.loads(out.getvalue())
+    assert hypothetical["includes_unbuilt_lanes"] is True
+    assert hypothetical["first"] == "intake.rank_targets"
+    named = {row["tool"] for row in hypothetical["order"]}
+    assert named - set(tools.TOOLS) == set(selector.PROPOSED)
+    # And a situation can be stated on the command line, which is what makes the thing usable
+    # for the question it exists to answer rather than only for the default one.
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        cli_main(["selector", "--proposed", "--known", "protein_family",
+                  "--unresolved", "conservation"])
+    narrowed = json.loads(out.getvalue())
+    assert narrowed["first"] == "literature.search"
+    rows = {row["tool"]: row for row in narrowed["order"]}
+    assert rows["literature.search"]["gates_unresolved"] == ["conservation"]
+    assert rows["intake.rank_targets"]["blocked_on"] == ["genome_accession"]
