@@ -2676,6 +2676,116 @@ def test_a_tool_that_raises_is_recorded_as_failed_and_is_not_retried(monkeypatch
     assert len(calls) == 1, "a tool failure was retried, which is resampling"
 
 
+def test_a_successful_call_records_the_wall_time_it_spent_and_not_the_one_it_declared():
+    # Before the caller measured, `_library_spec` passed an explicit `seconds=None` and the
+    # other two dispatchers omitted it, so every *successful* call carried no wall time while
+    # every *failed* one carried a real measurement -- the exact opposite of the asymmetry a
+    # cost record wants. `cost_seconds` stays on the spec as the declaration; the envelope
+    # carries what the call actually cost, and the two must never be the same number by
+    # construction, or a proposal to change the declaration could not be contradicted.
+    spec = tools.tool("chemistry.library_spec")
+    out = chief.call(spec, {}, chief.context())
+    assert out["status"] == "ok"
+    assert out["seconds"] is not None, "a successful call recorded no wall time"
+    assert out["seconds"] >= 0.0
+    assert spec.cost_seconds == 0.0, "the declaration is unmeasured and stays that way"
+    assert out["seconds"] is not spec.cost_seconds
+
+
+def test_a_refusal_before_dispatch_records_no_wall_time_because_nothing_ran():
+    # A charged refusal is not a call that took no time; it is a call that never happened. A
+    # zero here would enter the cost record as a measurement of work, and `cost_seconds` is
+    # exactly the field such a zero would drag downwards.
+    spec = tools.tool("structures.evidence")
+    refused = chief.call(spec, {"minimum": 5.0}, chief.context())
+    assert refused["status"] == "rejected"
+    assert refused["seconds"] is None and refused["network_calls"] is None
+    absent = tools.Tool(name="unwired-too", version=1, summary="s", description="d",
+                        entry="hpc_pilots.chemistry:library_spec")
+    unavailable = chief.call(absent, {}, chief.context())
+    assert unavailable["status"] == "unavailable"
+    assert unavailable["seconds"] is None and unavailable["network_calls"] is None
+
+
+def test_outbound_requests_are_counted_at_the_transport_rather_than_declared(monkeypatch):
+    # `optimizer` names `trace[].tool_network_calls` as the evidence a proposal to change
+    # `cost_network_calls` would need, and nothing in this package had ever written that key --
+    # so the declared network cost of every tool was unfalsifiable. Counted at the transport
+    # because a tool reaches the network through whatever it imports, and a tally maintained by
+    # hand drifts the first time one of them changes.
+    import urllib.request
+
+    monkeypatch.setattr(urllib.request, "urlopen",
+                        lambda *a, **k: (_ for _ in ()).throw(AssertionError("unreachable")))
+
+    opened = []
+
+    def reaching(**kw):
+        # Two requests, through the transport the counter instruments, with the response never
+        # read: this test is about the count and not about any payload.
+        for host in ("one", "two"):
+            opened.append(host)
+            try:
+                urllib.request.urlopen(f"https://{host}.invalid")
+            except AssertionError:
+                pass
+        return {"initiator": "x", "theoretical_diversity": 0}
+
+    monkeypatch.setattr("hpc_pilots.chemistry.library_spec", reaching)
+    out = chief.call(tools.tool("chemistry.library_spec"), {}, chief.context())
+    assert out["status"] == "ok" and opened == ["one", "two"]
+    assert out["network_calls"] == 2, "the transport count did not reach the envelope"
+
+
+def test_requests_made_outside_a_dispatch_are_not_attributed_to_the_next_one(monkeypatch):
+    # The instrument reports what one dispatch spent. A global running total would answer a
+    # question nobody asked of it, and would let unrelated traffic inflate the recorded cost of
+    # whichever tool happened to be called next.
+    import urllib.request
+
+    monkeypatch.setattr(urllib.request, "urlopen", lambda *a, **k: None)
+    chief._install_request_counter()
+    urllib.request.urlopen("https://outside.invalid")
+    urllib.request.urlopen("https://outside.invalid")
+    assert getattr(chief._REQUESTS, "count", None) is None, "counted outside any window"
+    out = chief.call(tools.tool("chemistry.library_spec"), {}, chief.context())
+    assert out["network_calls"] == 0, "traffic from outside the window was charged to a tool"
+
+
+def test_a_nested_counting_window_is_not_lost_from_the_enclosing_total(monkeypatch):
+    # An inner dispatch's requests are counted by both windows. The alternative silently
+    # under-reports whichever call happened to nest, which is the harder defect to notice
+    # because the inner number looks right.
+    import urllib.request
+
+    monkeypatch.setattr(urllib.request, "urlopen", lambda *a, **k: None)
+    with chief.counting_requests() as outer:
+        urllib.request.urlopen("https://a.invalid")
+        with chief.counting_requests() as inner:
+            urllib.request.urlopen("https://b.invalid")
+            urllib.request.urlopen("https://c.invalid")
+        assert inner["made"] == 2
+    assert outer["made"] == 3, "the enclosing window lost the nested requests"
+    assert getattr(chief._REQUESTS, "count", None) is None, "the window did not close"
+
+
+def test_the_transport_counter_does_not_double_wrap_and_double_count(monkeypatch):
+    # Idempotent by a marker on the wrapper rather than a module flag, so a reload cannot put
+    # two layers on one transport. Two layers would count every request twice, which is a
+    # number that is quietly wrong rather than absent -- the worse of the two failures.
+    import urllib.request
+
+    monkeypatch.setattr(urllib.request, "urlopen", lambda *a, **k: None)
+    chief._install_request_counter()
+    once = urllib.request.urlopen
+    chief._install_request_counter()
+    chief._install_request_counter()
+    assert urllib.request.urlopen is once, "the transport was wrapped more than once"
+    with chief.counting_requests() as tally:
+        urllib.request.urlopen("https://a.invalid")
+    assert tally["made"] == 1
+
+
 def test_a_tool_with_no_policy_is_denied_rather_than_assumed_safe():
     # Default-deny, and both polarities, because a published capability system shipped a
     # policy whose is_trusted test was inverted -- it denied trusted ids and allowed untrusted

@@ -40,8 +40,11 @@ not write anything. A tool returns; the episode loop writes. Five rules keep tha
 each is checked rather than documented, because `offload` already had to state the first one
 and a container is a much more obvious boundary than a function call.
 """
+import contextlib
+import functools
 import importlib.util
 import socket
+import threading
 import time
 from dataclasses import dataclass
 
@@ -173,7 +176,8 @@ def semantics(spec, arguments):
 
 
 def envelope(spec, arguments, status, value=None, source=None, source_kind=None,
-             available_from=None, rows=None, note="", detail=None, seconds=None):
+             available_from=None, rows=None, note="", detail=None, seconds=None,
+             network_calls=None):
     """A tool return, carrying the provenance that decides whether it can become evidence.
 
     Three rules, enforced here rather than written down, because each one has a precedent in
@@ -201,6 +205,12 @@ def envelope(spec, arguments, status, value=None, source=None, source_kind=None,
     one call on `structures.evidence` produces eleven claims of which some are genuinely
     undated -- a target with no deposited structure has no earliest deposition, and that is a
     real zero rather than a missing value.
+
+    **`seconds` and `network_calls` are measured, never declared.** They are what this call
+    spent; `cost_seconds` and `cost_network_calls` on the spec are what it was advertised to
+    cost. Keeping them in different places is the whole point -- a record that reported the
+    declaration back would make every cost proposal unfalsifiable, which is the objection this
+    project already raises against a guessed `cost_seconds`.
     """
     if status not in STATUSES:
         raise ValueError(f"Unknown status {status!r}; known statuses are {list(STATUSES)}")
@@ -232,6 +242,11 @@ def envelope(spec, arguments, status, value=None, source=None, source_kind=None,
             "verified": citable and source_kind in VERIFIED_KINDS,
             "source": source, "source_kind": source_kind, "available_from": available_from,
             "note": note, "detail": detail, "seconds": seconds,
+            # What the call actually spent, as opposed to what the spec declares it costs.
+            # Both are left None by a dispatcher that does not measure them and filled by
+            # `call`, which is the only place that can: a dispatcher sees neither the clock it
+            # started on nor the requests its callee made.
+            "network_calls": network_calls,
             "host": socket.gethostname(),
             "interpretation": "A tool return. Citability and verification are properties of "
                               "the source, not of the value, and a status other than ok "
@@ -331,6 +346,74 @@ def context(dossiers=None, now=0, wall_budget_seconds=600, trusted=()):
             "trusted": frozenset(trusted)}
 
 
+# Outbound request accounting. Thread-local, and patched at the transport exactly once.
+#
+# `cost_network_calls` is a declared number with no instrument behind it. `optimizer` names
+# `trace[].tool_network_calls` as the evidence a proposal to change that field would need, and
+# nothing in this package has ever written that key -- so a proposal to change a network cost
+# could never be contradicted by a run, which is the shape of an unfalsifiable proposal and the
+# same objection this project raises against a guessed `cost_seconds`.
+#
+# Counted at the transport rather than at each call site, because a tool reaches the network
+# through whatever it imports and a tally maintained by hand drifts the first time one of them
+# changes. Thread-local because `sweep` runs cells concurrently and a shared counter would
+# attribute one cell's requests to another.
+#
+# The honest limit, which `reaches_network` and not this number is what covers: this counts
+# `urllib.request.urlopen`, which is what every networked tool in this repository uses. A tool
+# reaching the network through another transport counts zero here, and a zero from this
+# instrument therefore means "none seen" rather than "none made".
+_REQUESTS = threading.local()
+
+
+def _install_request_counter():
+    """Wrap `urlopen` once, idempotently, so a dispatch window can count what it spent.
+
+    Idempotent by a marker on the wrapper rather than by a module flag, so that a reload of
+    this module cannot double-wrap a transport that is already counted -- two layers would
+    count every request twice and the number would be quietly wrong rather than absent.
+    """
+    import urllib.request
+
+    if getattr(urllib.request.urlopen, "_chief_counted", False):
+        return
+    original = urllib.request.urlopen
+
+    @functools.wraps(original)
+    def counted(*args, **kwargs):
+        pending = getattr(_REQUESTS, "count", None)
+        # Outside a window the count is None, and a request made there is deliberately not
+        # recorded anywhere: this instrument reports what one dispatch spent, and a global
+        # total would answer a question nobody asked of it.
+        if pending is not None:
+            _REQUESTS.count = pending + 1
+        return original(*args, **kwargs)
+
+    counted._chief_counted = True
+    urllib.request.urlopen = counted
+
+
+@contextlib.contextmanager
+def counting_requests():
+    """Count outbound requests made on this thread for the duration of the block.
+
+    Yields a mapping whose `made` key is final once the block exits. A nested window adds its
+    own total back into the enclosing one on exit, so an inner dispatch's requests are counted
+    by both and not lost by the outer -- the alternative silently under-reports whichever call
+    happened to nest.
+    """
+    _install_request_counter()
+    previous = getattr(_REQUESTS, "count", None)
+    _REQUESTS.count = 0
+    tally = {"made": 0}
+    try:
+        yield tally
+    finally:
+        made = _REQUESTS.count
+        tally["made"] = made
+        _REQUESTS.count = None if previous is None else previous + made
+
+
 def call(spec, arguments, context):
     """One validated tool call to one envelope. Never a fabricated value.
 
@@ -365,13 +448,25 @@ def call(spec, arguments, context):
                  f"wall budget of {context['wall_budget_seconds']}s; refused before dispatch")
     started = time.perf_counter()
     try:
-        return DISPATCH[spec.name](spec, arguments, context,
-                                   lambda **kw: envelope(spec, arguments, **kw))
+        with counting_requests() as tally:
+            result = DISPATCH[spec.name](spec, arguments, context,
+                                         lambda **kw: envelope(spec, arguments, **kw))
     except Exception as failure:
         # Caught here and nowhere else, and not retried: retrying a tool failure is resampling.
         return envelope(spec, arguments, "failed",
                         note=f"{type(failure).__name__}: {str(failure)[:200]}",
-                        seconds=time.perf_counter() - started)
+                        seconds=time.perf_counter() - started,
+                        network_calls=tally["made"])
+    # Filled by the caller, and only where the dispatcher left None. Before this, two of the
+    # three dispatchers never passed `seconds` and the third passed an explicit None, so every
+    # successful call in the record carried no wall time while every failed one did -- the
+    # exact opposite of the asymmetry a cost record wants. A dispatcher that genuinely measures
+    # something finer than this clock still wins, because only None is overwritten.
+    if result["seconds"] is None:
+        result["seconds"] = time.perf_counter() - started
+    if result["network_calls"] is None:
+        result["network_calls"] = tally["made"]
+    return result
 
 
 def _library_spec(spec, arguments, context, wrap):
