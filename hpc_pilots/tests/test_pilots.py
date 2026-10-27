@@ -2950,6 +2950,42 @@ def test_the_finder_shows_everything_at_this_scale_and_says_so_in_the_record():
         finder.find(list(ACTIONS), ACTIONS, {}, mode="embeddings")
 
 
+def test_a_finder_stage_may_not_invent_a_tool_that_was_never_offered():
+    # The guard this replaces tested `shown`, which is built by filtering `names`, so
+    # `set(shown) <= set(names)` held by construction and the raise could never fire. Testing
+    # the wrong operand did worse than leave it inert: a stage returning one unoffered name
+    # produced `shown=[]` with `empty_ranking=False`, so the record attested that the finder
+    # had deliberately withheld every offered action. A false reachability claim, emitted by
+    # the module whose docstring promises every path through it is recorded.
+    def fabricates_everything(names, descriptions, state, limit, seed):
+        return ["NOT-AN-OFFERED-TOOL"], {"query": (), "note": "test stage"}
+
+    def fabricates_one(names, descriptions, state, limit, seed):
+        return [names[0], "GHOST"], {"query": (), "note": "test stage"}
+
+    finder.FINDERS["fabricates_everything"] = fabricates_everything
+    finder.FINDERS["fabricates_one"] = fabricates_one
+    try:
+        for mode in ("fabricates_everything", "fabricates_one"):
+            with pytest.raises(ValueError, match="which were not offered"):
+                finder.find(list(ACTIONS), ACTIONS, {}, mode=mode)
+    finally:
+        del finder.FINDERS["fabricates_everything"], finder.FINDERS["fabricates_one"]
+    # The positive control, which is the half that was missing: every registered stage ranks
+    # only names it was given, so none of them trips the new refusal. A guard verified only
+    # on its violation is a guard that might refuse everything.
+    for mode in sorted(finder.FINDERS):
+        shown, record = finder.find(list(ACTIONS), ACTIONS, _finder_state("coronaviridae"),
+                                    mode=mode, seed=20261021)
+        assert set(shown) <= set(ACTIONS)
+        assert shown, f"{mode} showed nothing, so the refusal above proves nothing about it"
+    # And the record's own claim is the thing that was false. A withheld list is only
+    # trustworthy if a name outside the offered set cannot reach it.
+    shown, record = finder.find(list(ACTIONS), ACTIONS, _finder_state("coronaviridae"))
+    assert set(record["shown"]) | set(record["withheld"]) == set(ACTIONS)
+    assert not set(record["withheld"]) & set(record["shown"])
+
+
 def test_the_finder_can_never_withhold_the_action_that_ends_an_episode():
     # A finder that hid `stop` would make `terminal_condition`, `deadline_met` and
     # `actions_unspent_at_exit` properties of the retriever, and one that hid

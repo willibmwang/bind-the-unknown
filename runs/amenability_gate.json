@@ -1,0 +1,148 @@
+{
+  "experiment": "amenability-gate-v2",
+  "status": "complete",
+  "question": "With localisation resolved per chain and the patch measured over replicates, does the macrocycle-amenability gate become usable?",
+  "answer": "It becomes honest rather than confident. Both defects are fixed and the fix to the second shows the gate cannot be a hard threshold: the patch moves by up to 496 square angstroms across structures of the same domain, which is comparable to the 600 threshold, so most real targets fall in the borderline band and that is the correct report rather than a failure of the gate.",
+  "fix_1_per_chain_localisation": {
+    "problem": "Subcellular location was read from the entry. For a polyprotein the entry is the polyprotein, so SARS-CoV-2's cytosolic main protease read as surface-exposed through nsp3, nsp4 and nsp6, which genuinely are membrane proteins.",
+    "fix": "UniProt scopes these per molecule; the replicase carries fourteen separate SUBCELLULAR LOCATION comments. They are now matched to the mature chain.",
+    "second_finding": "An `any` over locations was also wrong. The main protease is annotated in four compartments including Host extracellular space -- a real annotation -- so any single exposed location made an intracellular drug target read as a surface protein. A majority rule gives 0.25 and False."
+  },
+  "fix_2_replicate_structures": {
+    "problem": "One structure is one sample of an ensemble. The main protease measured 343 square angstroms through one homolog and 825 through another.",
+    "fix": "Median over up to five structures of the same domain, with the range reported.",
+    "finding": "The spread is large enough to matter: 200 square angstroms on the main protease, 496 on the spike receptor-binding domain whose range of 592 to 1088 straddles the threshold. The gate now reports borderline whenever the measured range crosses the cut, rather than asserting a side of it."
+  },
+  "targets": [
+    {
+      "target": "SARS-CoV-2 Mpro",
+      "clinical_modality": "small molecule",
+      "location_scope": "chain",
+      "locations": [
+        "Host cytoplasm",
+        "Host Golgi apparatus",
+        "Host nucleus",
+        "Host extracellular space"
+      ],
+      "exposed": false,
+      "exposed_fraction": 0.25,
+      "patch_median": 651.0,
+      "patch_range": [
+        625.1,
+        824.6
+      ],
+      "patch_spread": 199.5,
+      "structures_measured": 5,
+      "gate": "no"
+    },
+    {
+      "target": "SARS-CoV-2 PLpro",
+      "clinical_modality": "none approved",
+      "location_scope": "chain",
+      "locations": [
+        "Host endoplasmic reticulum membrane"
+      ],
+      "exposed": false,
+      "exposed_fraction": 0.0,
+      "patch_median": 404.9,
+      "patch_range": [
+        358.5,
+        409.6
+      ],
+      "patch_spread": 51.1,
+      "structures_measured": 5,
+      "gate": "no"
+    },
+    {
+      "target": "SARS-CoV-2 nsp13",
+      "clinical_modality": "none approved",
+      "location_scope": "chain",
+      "locations": [
+        "Host endoplasmic reticulum-Golgi intermediate compartment"
+      ],
+      "exposed": false,
+      "exposed_fraction": 0.0,
+      "patch_median": 1247.2,
+      "patch_range": [
+        998.4,
+        1303.3
+      ],
+      "patch_spread": 304.9,
+      "structures_measured": 5,
+      "gate": "no"
+    },
+    {
+      "target": "SARS-CoV-2 Spike RBD",
+      "clinical_modality": "antibody",
+      "location_scope": "entry",
+      "locations": [
+        "Virion membrane",
+        "Host endoplasmic reticulum-Golgi intermediate compartment membrane",
+        "Host cell membrane"
+      ],
+      "exposed": true,
+      "exposed_fraction": 0.667,
+      "patch_median": 842.3,
+      "patch_range": [
+        592.0,
+        1088.2
+      ],
+      "patch_spread": 496.2,
+      "structures_measured": 5,
+      "gate": "borderline"
+    },
+    {
+      "target": "Nipah G",
+      "clinical_modality": "antibody",
+      "location_scope": "entry",
+      "locations": [
+        "Virion membrane",
+        "Host cell membrane"
+      ],
+      "exposed": true,
+      "exposed_fraction": 1.0,
+      "patch_median": 447.4,
+      "patch_range": [
+        364.2,
+        512.1
+      ],
+      "patch_spread": 147.9,
+      "structures_measured": 5,
+      "gate": "borderline"
+    },
+    {
+      "target": "Nipah F",
+      "clinical_modality": "none approved",
+      "location_scope": "entry",
+      "locations": [
+        "Virion membrane",
+        "Host cell membrane"
+      ],
+      "exposed": true,
+      "exposed_fraction": 1.0,
+      "patch_median": 442.7,
+      "patch_range": [
+        287.3,
+        647.3
+      ],
+      "patch_spread": 360.0,
+      "structures_measured": 5,
+      "gate": "borderline"
+    }
+  ],
+  "limitations": [
+    "Six targets, chosen to span the contrast rather than sampled.",
+    "The borderline band is wide once measurement spread is propagated, so the gate separates clear negatives from everything else rather than sorting the middle.",
+    "No validation against measured macrocycle binding exists, because no such labelled set exists. Clinical modality is a proxy and a loose one."
+  ],
+  "provenance": {
+    "host": "MWPF4GD0LT.yu.yale.edu",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "8015567d96d4986ebc6b304fe823b1c23d5151ac",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-10-23T00:03:29.941864+00:00"
+  }
+}

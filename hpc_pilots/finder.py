@@ -169,6 +169,24 @@ def find(names, descriptions=None, state=None, mode=None, limit=None, seed=None)
     if chosen not in FINDERS:
         raise ValueError(f"Unknown finder {chosen!r}; registered finders are {sorted(FINDERS)}")
     ranked, record = FINDERS[chosen](names, descriptions or {}, state or {}, limit, seed)
+    # Checked on `ranked`, which is the stage's own return and the only thing here that can
+    # carry a name nobody offered. The check this replaces tested `shown`, which is built by
+    # filtering `names`, so `set(shown) <= set(names)` held by construction and the raise
+    # could never fire. Testing the wrong operand did not merely leave the guard inert: a
+    # stage returning one unoffered name produced `shown=[]` with `empty_ranking=False`, so
+    # the record attested that the finder had deliberately withheld every offered action --
+    # a false statement about reachability, emitted by the module whose docstring promises
+    # that every path through it is recorded. An inert guard is a missing guard; a guard on
+    # the wrong operand is a fabrication channel.
+    #
+    # Before the blackout repair below, because that repair would rewrite `ranked` to the
+    # full offered set and hide exactly the case this catches.
+    fabricated = [name for name in ranked if name not in set(names)]
+    if fabricated:
+        raise ValueError(f"The finder stage {chosen!r} returned {fabricated}, which were not "
+                         f"offered; a stage may rank and withhold what it was given and may "
+                         f"not invent a tool, because the record would then describe a "
+                         f"reachable set that never existed")
     # A ranking stage that matched nothing shows everything, and says so. Measured on the
     # action space this is the common case rather than the edge: the query is axis names and
     # the action descriptions do not contain them, so `keyword` over the six actions ranks
@@ -192,8 +210,6 @@ def find(names, descriptions=None, state=None, mode=None, limit=None, seed=None)
                          f"terminal action makes the episode's end a property of the "
                          f"retriever rather than of the policy")
     shown = [name for name in names if name in set(ranked)]
-    if not set(shown) <= set(names):
-        raise ValueError("The finder showed a tool that was not offered")
     return shown, {**record, "mode": chosen, "offered": len(names), "shown": shown,
                    "empty_ranking": empty_ranking,
                    "withheld": [name for name in names if name not in shown],

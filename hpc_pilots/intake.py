@@ -28,8 +28,14 @@ over fifteen minutes on the afternoon this was written, which makes a whole-geno
 unbounded in a way an emergency tool cannot be. So identification runs against a reference set
 fetched once -- the reviewed viral proteins, 17,535 entries and 10 MB -- indexed on 5-mers and
 searched locally. A genome resolves in about ten seconds. BLAST remains available behind
-`identify_remote` for the case where k-mer identity is too blunt, which is remote homology
-below roughly 25% identity.
+`identify`, reached through `annotate`, which `run_intake` does not call -- so the service is
+reachable and is off every recorded path.
+
+The case where k-mer identity is too blunt -- remote homology below roughly 25% identity -- is
+answered locally instead, by `identify_remote`: reduced-alphabet seeding then Smith-Waterman
+with Karlin-Altschul expectations. That function's name is about the *homology* being remote
+and not about the *service* being remote, and this paragraph previously named it as the BLAST
+escape hatch, which sent a reader to the one tier that never leaves the machine.
 
 **How far the control actually reaches, measured rather than assumed.** The organism-name
 holdout below is an *isolate* holdout: ICTV places SARS-CoV, SARS-CoV-2 and three bat
@@ -565,6 +571,148 @@ def score_candidate(hits, records):
         "locations": sorted(locations)[:4]}
 
 
+def chain_locations(accession, description=None):
+    """Subcellular locations for one mature chain, not for the entry it sits in.
+
+    UniProt scopes these per molecule and the entry-level read was discarding it. Every
+    SUBCELLULAR LOCATION comment on a polyprotein carries a `molecule` naming the chain it
+    describes: SARS-CoV-2's replicase holds fourteen of them, and the main protease's says
+    host cytoplasm, Golgi and nucleus while nsp3's says endoplasmic reticulum membrane.
+    Flattening them to the entry made Mpro read as surface-exposed through nsp3, nsp4 and
+    nsp6, which genuinely are membrane proteins.
+
+    With no description, or none matching, the entry-wide union is returned and the caller is
+    told which it got. A union over a polyprotein is close to meaningless and a consumer
+    should know it is looking at one.
+    """
+    payload = _entry(accession)
+    per_molecule, general = {}, []
+    for comment in payload.get("comments", []):
+        if comment["commentType"] != "SUBCELLULAR LOCATION":
+            continue
+        values = [spot.get("location", {}).get("value")
+                  for spot in comment.get("subcellularLocations", [])]
+        values = [v for v in values if v]
+        molecule = comment.get("molecule")
+        if molecule:
+            per_molecule.setdefault(molecule.lower(), []).extend(values)
+        else:
+            general.extend(values)
+
+    if description:
+        wanted = description.lower()
+        for molecule, values in per_molecule.items():
+            if molecule == wanted or wanted in molecule or molecule in wanted:
+                return {"locations": values, "scope": "chain", "molecule": molecule}
+    union = list(general) + [v for values in per_molecule.values() for v in values]
+    return {"locations": union,
+            "scope": "entry" if not per_molecule else "entry union over chains",
+            "molecule": None}
+
+
+def exposed_from_locations(locations):
+    """Is this protein predominantly somewhere a macrocycle can reach without crossing a
+    membrane?
+
+    A majority rather than an `any`, and the difference is not pedantic. SARS-CoV-2's main
+    protease is annotated in four compartments and one of them is `Host extracellular space`
+    -- a real annotation, not an error -- so `any` made the target of an intracellular drug
+    read as a surface protein. A protein found in four places and exposed in one is
+    predominantly inside, and nirmatrelvir reaches it by being cell-permeable rather than by
+    meeting it outside.
+
+    Returns the fraction alongside the verdict, because a protein at exactly half is a
+    different kind of claim from one at all four of four and the gate should be able to say so.
+    """
+    from .geometry import EXPOSED_LOCATIONS
+
+    lowered = [spot.lower() for spot in locations]
+    if not lowered:
+        return {"exposed": False, "fraction": 0.0, "n": 0}
+    hits = sum(1 for spot in lowered
+               if any(term in spot for term in EXPOSED_LOCATIONS))
+    fraction = hits / len(lowered)
+    return {"exposed": fraction >= 0.5, "fraction": round(fraction, 3), "n": len(lowered)}
+
+
+def amenable(features):
+    """Can a macrocycle bind this target at all? A gate, not a rank.
+
+    The surface markers failed as a scoring term in both forms tried, and the reason they
+    failed is that they answer a different question from the one the ranking asks. The
+    ranking asks which target to pursue. This asks whether the molecule class can reach it,
+    and those come apart: a target can be the best in the genome and still have no surface a
+    macrocycle can lie across, which is a reason to pick a different modality rather than a
+    reason to demote the target.
+
+    Two conditions, and both are necessary. The patch has to be large enough to host the
+    footprint, and the protein has to be somewhere a macrocycle can get to.
+
+    The second is doing more work than it appears. Nipah's matrix protein carries the largest
+    patch measured anywhere, 1,236 square angstroms, and is not a drug target: that surface is
+    an oligomerisation interface on the inner face of the virion. UniProt separates it
+    correctly -- matrix is `Virion`, the glycoproteins are `Virion membrane` -- which is why
+    the gate reads localisation rather than hydropathy. A signal peptide would get this wrong:
+    Nipah's G is a type II membrane protein with an uncleaved signal anchor and shows no
+    signal peptide at all, while being the most exposed protein on the particle.
+
+    Returns None rather than False when there is no structure, because "no surface was
+    measured" and "the surface is unsuitable" are different statements and only one of them is
+    about the target.
+
+    **Two limitations that make this advisory rather than decisive, both measured.**
+
+    The localisation it reads is annotated on the entry, and for a polyprotein the entry is
+    the polyprotein. SARS-CoV-2's replicase lists `Host cell membrane` among its locations --
+    correctly, since nsp3, nsp4 and nsp6 are membrane proteins -- so the main protease, which
+    is cytosolic, reads as surface-exposed through its parent. That is the same parent-versus-
+    chain defect already fixed for structure selection, still present in this axis, and it
+    means the gate is unreliable for any mature chain of a polyprotein until localisation is
+    resolved per chain.
+
+    And the patch itself moves with the structure chosen. The main protease measures 343
+    square angstroms through one homolog's entry and 825 through another, a factor of 2.4 on
+    the quantity the gate thresholds. A single structure is a sample of a conformational
+    ensemble and is treated here as if it were the protein.
+    """
+    patch = features.get("hydrophobic_patch_area")
+    if patch is None:
+        return None
+    if not features.get("surface_exposed"):
+        return "no"
+    # Three-valued, because a binary gate puts a hard edge where the evidence has none.
+    # A macrocyclic peptide buries four to eight hundred square angstroms in total, and the
+    # hydrophobic patch is the core of that site rather than all of it -- hot-spot analyses
+    # put roughly half the binding energy in a small apolar core, with polar contacts around
+    # it. So a patch at half the footprint is a plausible site and a patch at the full
+    # footprint is a comfortable one, and the band between them is genuinely uncertain.
+    #
+    # Nipah's G is the case that forced this. It is the most exposed protein on the particle
+    # and the target of the only antibody ever given to a human for the disease, and it
+    # measures 534 square angstroms against a 600 threshold. Lowering the threshold to admit
+    # it would be fitting the gate to a target already known to be good, which is the error
+    # this file has now recorded three times. Reporting it as uncertain is what the
+    # measurement supports.
+    # The measured spread decides the verdict, not the median alone. Measuring the patch over
+    # five structures of the same domain rather than one showed the quantity moving by 200
+    # square angstroms on the main protease and 496 on the spike receptor-binding domain --
+    # a spread comparable to the 600 threshold itself, with the range 592 to 1088 straddling
+    # it. A hard cut on a median that uncertain reports a confidence the measurement does not
+    # have, so a range crossing the threshold is reported as borderline whatever the median
+    # says.
+    low = features.get("patch_area_min", patch)
+    high = features.get("patch_area_max", patch)
+    if low >= MACROCYCLE_FOOTPRINT_A2:
+        return "yes"
+    if high < 0.5 * MACROCYCLE_FOOTPRINT_A2:
+        return "no"
+    return "borderline"
+
+
+# A macrocyclic peptide buries roughly this much on binding. Repeated from `geometry` so the
+# gate can be evaluated without importing the structural stack.
+MACROCYCLE_FOOTPRINT_A2 = 600.0
+
 # Mean macrocycle surface score over the six structures in `runs/surface_markers.json`, which
 # span two enzyme pockets and four interfaces. Used to centre the surface term so that a
 # candidate with no structure is neutral rather than penalised.
@@ -593,7 +741,21 @@ def enrich_with_surface(ranked, top=12):
             continue
         row["features"]["surface_score"] = markers["surface_score"]
         row["features"]["hydrophobic_patch_area"] = markers.get("hydrophobic_patch_area")
+        row["features"]["patch_area_min"] = markers.get("patch_area_min")
+        row["features"]["patch_area_max"] = markers.get("patch_area_max")
+        row["features"]["patch_area_spread"] = markers.get("patch_area_spread")
+        row["features"]["structures_measured"] = markers.get("structures_measured")
         row["features"]["structure_used"] = f"{markers['pdb_id']}:{markers.get('chain')}"
+        # Localisation resolved for this chain, not inherited from the polyprotein.
+        described = (row["features"].get("chain_description") or row.get("name") or "")
+        scoped = chain_locations(accession, described)
+        row["features"]["chain_locations"] = scoped["locations"][:4]
+        row["features"]["location_scope"] = scoped["scope"]
+        if scoped["scope"] == "chain":
+            verdict = exposed_from_locations(scoped["locations"])
+            row["features"]["surface_exposed"] = verdict["exposed"]
+            row["features"]["exposed_fraction_of_locations"] = verdict["fraction"]
+        row["features"]["macrocycle_amenable"] = amenable(row["features"])
     # Not re-sorted. The markers are reported beside the ranking and do not change it.
     return ranked
 

@@ -46,6 +46,11 @@ from .common import ROOT
 
 RCSB_FILE = "https://files.rcsb.org/download/"
 
+# Subcellular locations that put a protein where a macrocycle can reach it without crossing a
+# membrane. Kept here so `intake` and the gate read one list.
+EXPOSED_LOCATIONS = ("virion membrane", "host cell membrane", "virion surface", "secreted",
+                     "cell surface", "host extracellular")
+
 # Kyte-Doolittle positive residues, the ones that form binding hot spots. Tryptophan and
 # tyrosine are included despite middling hydropathy because aromatic side chains dominate
 # peptide and macrocycle interfaces in practice.
@@ -268,7 +273,7 @@ def representative_structure(accession, minimum_residues=50, interval=None):
 
     from .structures_evidence import covers
 
-    best = None
+    ranked = []
     for row in chains(accession):
         resolution = row.get("resolution")
         if resolution is None:
@@ -283,14 +288,21 @@ def representative_structure(accession, minimum_residues=50, interval=None):
         # patch of 381 square angstroms, which is the replicase's and none of theirs.
         if interval and not covers(row, interval, 0.5):
             continue
-        if best is None or resolution < best[0]:
-            best = (resolution, row["pdb_id"], row["chain_id"])
-    if best is None:
+        ranked.append((resolution, row["pdb_id"], row["chain_id"]))
+    if not ranked:
         return None
-    return {"pdb_id": best[1], "chain": best[2], "resolution": best[0]}
+    ranked.sort()
+
+    # Returned as a list rather than a single pick, because the best-resolution entry is
+    # often the newest and the newest are frequently mmCIF-only: RCSB stopped emitting legacy
+    # PDB files for recent depositions, so the 1.16-angstrom main-protease structure this
+    # chose first answers 404. Picking on resolution selects for exactly the entries most
+    # likely to be missing the format, which is why one pick is not enough.
+    return [{"pdb_id": pdb, "chain": chain, "resolution": resolution}
+            for resolution, pdb, chain in ranked[:8]]
 
 
-def surface_for_accession(accession, interval=None, cache={}):
+def surface_for_accession(accession, interval=None, replicates=5, cache={}):
     """Surface markers for a UniProt accession via its best deposited structure.
 
     Cached in process. A genome's candidates frequently share a homolog -- every mature chain
@@ -301,13 +313,53 @@ def surface_for_accession(accession, interval=None, cache={}):
     if key in cache:
         return cache[key]
     try:
-        pick = representative_structure(accession, interval=interval)
-        if pick is None:
+        picks = representative_structure(accession, interval=interval)
+        if not picks:
             cache[key] = None
             return None
-        markers = surface_markers(pick["pdb_id"], pick["chain"])
-        markers["resolution"] = pick["resolution"]
-        markers["surface_score"] = macrocycle_surface_score(markers)
+        # Measured over several structures of the same domain, not one. A single structure is
+        # one sample of a conformational ensemble and the quantity being thresholded moves
+        # with it: SARS-CoV-2's main protease measures 343 square angstroms through one
+        # homolog's entry and 825 through another, a factor of 2.4. Reporting one number from
+        # one crystal as though it were the protein is what made the amenability gate
+        # unusable, and a median over a handful with the spread beside it is what makes it
+        # readable -- a target whose patch is 600 give or take 40 is a different claim from
+        # one that is 600 give or take 300.
+        samples = []
+        for pick in picks:
+            try:
+                measured = surface_markers(pick["pdb_id"], pick["chain"])
+            except Exception:                             # noqa: BLE001
+                continue
+            if measured.get("error"):
+                continue
+            measured["resolution"] = pick["resolution"]
+            measured["surface_score"] = macrocycle_surface_score(measured)
+            samples.append(measured)
+            if len(samples) >= replicates:
+                break
+        if not samples:
+            cache[key] = {"error": "no candidate structure could be downloaded or parsed",
+                          "surface_score": None}
+            return cache[key]
+
+        def median(values):
+            ordered = sorted(values)
+            middle = len(ordered) // 2
+            if len(ordered) % 2:
+                return ordered[middle]
+            return (ordered[middle - 1] + ordered[middle]) / 2
+
+        areas = [m["hydrophobic_patch_area"] for m in samples]
+        scores = [m["surface_score"] for m in samples if m["surface_score"] is not None]
+        markers = dict(samples[0])
+        markers["hydrophobic_patch_area"] = round(median(areas), 1)
+        markers["patch_area_min"] = round(min(areas), 1)
+        markers["patch_area_max"] = round(max(areas), 1)
+        markers["patch_area_spread"] = round(max(areas) - min(areas), 1)
+        markers["structures_measured"] = len(samples)
+        markers["structures_used"] = [f"{m['pdb_id']}:{m['chain']}" for m in samples]
+        markers["surface_score"] = round(median(scores), 4) if scores else None
         cache[key] = markers
     except Exception as error:                            # noqa: BLE001
         # Reported as absent rather than raised. A target with no usable structure is the
