@@ -25,6 +25,8 @@ from hpc_pilots import finder
 from hpc_pilots import optimizer
 from hpc_pilots import surrogates
 from hpc_pilots import tools
+from hpc_pilots import selector
+from hpc_pilots import dossier as dossier_module
 from hpc_pilots.binding import (design_matrix, enrichment, pick_batch, replay, run_arm,
                                 run_binding)
 from hpc_pilots.calibration import calibration_metrics, trajectory
@@ -4049,3 +4051,149 @@ def test_every_declared_vocabulary_is_one_some_caller_actually_supplies():
     finally:
         for live, restored in zip((tools.TOOLS, emergency.ACTION_TOOLS, chief.DISPATCH), saved):
             live.clear(); live.update(restored)
+
+
+def test_the_selector_axes_are_exactly_the_dossier_axes():
+    # The selector says which axis a tool can speak to, and `dossier` owns what an axis is. A
+    # vocabulary of its own would let a tool gate something no dossier has, which reads
+    # downstream as an axis that can never be satisfied rather than as a typo here.
+    assert tuple(selector.AXES) == tuple(dossier_module.AXES)
+
+
+def test_every_registered_tool_has_a_requirement_and_every_requirement_a_registered_tool():
+    # Both directions, and the first is the one that matters: a tool added to the registry with
+    # no entry here is silently unrankable, and an unrankable tool reads to a policy exactly
+    # like a tool that is never worth calling. The device is the one `ACTION_TOOLS` already
+    # uses -- a table beside the code that reads it, pinned against the registry by a test.
+    assert set(selector.REQUIREMENTS) == set(tools.TOOLS), (
+        "the requirement table and the registry disagree about which tools exist")
+
+
+def test_no_proposed_tool_is_registered_so_nothing_can_dispatch_from_it():
+    # The load-bearing property of the hypothetical table. A decider shown a spec for work
+    # nobody has commissioned would be reading an accurate description of a capability no
+    # action can reach, which `emergency.py` already identifies as a fabrication channel
+    # pointed at the policy. Keeping the two tables disjoint makes that structural.
+    overlap = sorted(set(selector.PROPOSED) & set(tools.TOOLS))
+    assert not overlap, f"{overlap} is both proposed and registered; one of them is a lie"
+    assert not (set(selector.PROPOSED) & set(chief.DISPATCH)), "a proposed tool is dispatchable"
+
+
+def test_a_requirement_names_only_enumerated_facts_and_axes():
+    # A fact kind nobody enumerated is a precondition nobody decided about, and a typo in one
+    # would read as an unsatisfiable requirement for ever rather than as a mistake.
+    for table in (selector.REQUIREMENTS, selector.PROPOSED):
+        for name, requirement in table.items():
+            for fact in tuple(requirement.needs) + tuple(requirement.needs_any):
+                assert fact in selector.FACTS, f"{name} needs {fact!r}, which is not a fact"
+            for fact in requirement.provides:
+                assert fact in selector.FACTS, f"{name} provides {fact!r}, which is not a fact"
+            for axis in requirement.gates:
+                assert axis in selector.AXES, f"{name} gates {axis!r}, which is not an axis"
+
+
+def test_a_tool_that_gates_an_axis_is_one_the_registry_says_produces_evidence():
+    # `produces_evidence` is the spec's claim that a return may be observed into a dossier, and
+    # gating an axis is a claim that it may substantiate one. The second cannot be true where
+    # the first is false, and `chemistry.library_spec` is the case that makes it concrete: it
+    # computes its answer honestly and is still not evidence, because a library definition is a
+    # design choice rather than a finding about the world.
+    for name, requirement in selector.REQUIREMENTS.items():
+        if requirement.gates:
+            assert tools.tool(name).produces_evidence, (
+                f"{name} gates {requirement.gates} but its spec says it is not evidence")
+
+
+def test_from_a_bare_sequence_the_flat_registry_picks_by_axis_coverage_alone():
+    # The measured state of the registry, recorded because it is the argument for what to build
+    # next rather than a defect to tidy away. Nothing registered consumes what identification
+    # produces -- `structures.evidence` reads its targets from a config file and cannot be
+    # pointed at a newly identified one -- so identification unlocks nothing, every tool is
+    # callable from the start, and the first call is settled by the only tool that bears on any
+    # axis at all.
+    situation = selector.from_sequence()
+    assert selector.first(situation).tool == "structures.evidence"
+    by_name = {p.tool: p for p in selector.rank(situation)}
+    assert by_name["intake.rank_targets"].unlocks == (), (
+        "identification unlocked something; the graph is no longer flat and this test is the "
+        "record of when it was")
+    assert all(p.callable_now for p in by_name.values())
+
+
+def test_building_the_three_lanes_moves_identification_to_the_front():
+    # The ordering question only becomes interesting once something consumes an identity. With
+    # the lanes declared, identification stops being one callable option among four and becomes
+    # the call that widens the action set, which is what `score[1]` is for.
+    merged = {**selector.REQUIREMENTS, **selector.PROPOSED}
+    situation = selector.from_sequence()
+    best = selector.first(situation, requirements=merged)
+    assert best.tool == "intake.rank_targets"
+    assert best.unlocks == ("families.entries", "literature.search")
+    # And once an identity exists, the tool bearing on the most unresolved axes leads.
+    identified = selector.Situation(
+        known=frozenset({"genome_accession", "target_name", "protein_accession",
+                         "residue_ranges"}),
+        unresolved=selector.AXES)
+    assert selector.first(identified, requirements=merged).tool == "literature.search"
+
+
+def test_a_blocked_tool_is_reported_with_what_blocks_it_rather_than_dropped():
+    # A policy shown only its callable moves cannot tell a tool that is useless from a tool
+    # that is one call away, and under a budget the second is the more useful thing to know.
+    situation = selector.from_sequence()
+    blocked = {p.tool: p for p in selector.rank(situation, requirements=selector.PROPOSED)
+               if not p.callable_now}
+    assert blocked["families.entries"].blocked_on == ("protein_accession",)
+    assert blocked["families.entries"].unlocks == (), "a blocked tool advertised unlocking"
+    assert "blocked" in blocked["families.entries"].why
+
+
+def test_an_unsatisfied_disjunction_is_one_obstruction_and_either_alternative_clears_it():
+    # A literature query is answerable from a target name or from a family assignment. Folding
+    # that into a conjunction would make it unreachable until both existed, which would hide
+    # the one route that works when the target itself is unknown. Listing both alternatives
+    # separately would read as two obstructions when either alone clears it.
+    nothing = selector.Situation(known=frozenset(), unresolved=selector.AXES)
+    assert selector.blocked_on("literature.search", nothing, selector.PROPOSED) == (
+        ("target_name|protein_family",))
+    for fact in ("target_name", "protein_family"):
+        held = selector.Situation(known=frozenset({fact}), unresolved=selector.AXES)
+        assert selector.blocked_on("literature.search", held, selector.PROPOSED) == (), (
+            f"{fact} alone did not clear the disjunction")
+    assert "|" not in "".join(selector.FACTS), "the join character is also a fact character"
+
+
+def test_the_order_is_total_so_a_recorded_sequence_is_reproducible():
+    # A tie broken by dict order would make the recorded sequence depend on registration
+    # order, which is the defect `spec_set_digest` sorts to avoid. Name is the last term of the
+    # key and always present, so no two proposals can compare equal.
+    situation = selector.from_sequence()
+    merged = {**selector.REQUIREMENTS, **selector.PROPOSED}
+    once = [p.tool for p in selector.rank(situation, requirements=merged)]
+    again = [p.tool for p in selector.rank(situation, requirements=merged)]
+    assert once == again
+    scores = [p.score for p in selector.rank(situation, requirements=merged)]
+    assert len(set(scores)) == len(scores), "two proposals compared equal"
+    assert scores == sorted(scores), "the returned order is not the score order"
+
+
+def test_first_returns_nothing_rather_than_a_tool_whose_inputs_do_not_exist():
+    # Returning the best blocked tool is how a selector launders an impossibility into an
+    # instruction. With nothing known, every proposed lane is blocked and the honest answer is
+    # that there is no call to make.
+    nothing = selector.Situation(known=frozenset(), unresolved=selector.AXES)
+    assert selector.first(nothing, requirements=selector.PROPOSED) is None
+    assert all(not p.callable_now
+               for p in selector.rank(nothing, requirements=selector.PROPOSED))
+
+
+def test_a_situation_naming_an_unenumerated_fact_or_axis_raises():
+    with pytest.raises(ValueError, match="not in FACTS"):
+        selector.Situation(known=frozenset({"vibes"}))
+    with pytest.raises(ValueError, match="not in AXES"):
+        selector.Situation(unresolved=("druggability",))
+
+
+def test_a_tool_with_no_requirement_entry_names_itself_rather_than_being_unrankable():
+    with pytest.raises(ValueError, match="No requirement declared"):
+        selector.blocked_on("nothing.declared", selector.from_sequence())
