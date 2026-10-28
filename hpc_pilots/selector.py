@@ -194,11 +194,19 @@ REQUIREMENTS = {
         # Either identity will do, and the family route is the one that works when the target
         # itself is unknown: nothing is published about a novel target and a great deal is
         # published about its family.
-        needs_any=("target_name", "protein_family"),
+        # `genome_accession` belongs here and was missing, which understated the onset by a
+        # whole lane. The query builder has an accession route, and it works on the one fact a
+        # campaign starts with: `subject_kind="accession"` on NC_045512.2 sent
+        # `(ACCESSION_ID:"NC_045512.2" OR ACCESSION_ID:"NC_045512")` and returned 4719 hits in
+        # 2.5 seconds. Declaring the lane blocked at onset left the selector's first round with
+        # one informative move where it has two.
+        needs_any=("genome_accession", "target_name", "protein_family"),
         provides=(),
         # Gates nothing yet, deliberately. A hit count is attention and the dated claim lives
         # per hit, so substantiating an axis needs a row-set design this does not have. The
         # tool is the retrieval; admitting a retrieved paper into a dossier is the next step.
+        # Worth naming: every row already carries `first_publication_date`, so this lane holds
+        # the only genuine per-row date among the six and is the cheapest one to promote.
         gates=(),
         scope="Europe PMC indexes preprints and full text, so a count here is not comparable "
               "with a PubMed count -- measured at 1173 against 25 on one query.",
@@ -237,8 +245,13 @@ REQUIREMENTS = {
     "similarity.homologs": Requirement(
         needs=(),
         # A sequence is enough, and that is the point: this lane does not need an identity, so
-        # it still answers for a target nothing recognises.
-        needs_any=("protein_sequence", "protein_accession"),
+        # it still answers for a target nothing recognises. `genome_accession` belongs here too
+        # and was missing: the lane resolves coding sequences from a nucleotide accession
+        # itself, which the spec's own `query` parameter says and which I had not carried into
+        # the requirement. Verified on NC_045512.2 -- it resolved the CDS catalogue and
+        # returned five homologs at identity 1.0 over six requests, from the one fact a
+        # campaign starts with.
+        needs_any=("genome_accession", "protein_sequence", "protein_accession"),
         provides=("homolog_accession", "protein_family"),
         gates=(),
         scope="EBI HMMER, keyless and about two seconds against SwissProt. The job model is "
@@ -248,11 +261,27 @@ REQUIREMENTS = {
     "structures.predicted": Requirement(
         needs=("protein_accession",),
         provides=(),
-        # The second instrument on `accessibility`, and the one that answers for a target with
-        # no deposited structure. It must not gate `precedent`: a prediction is not a
+        # Gates nothing, and this is a correction. I registered it against `accessibility` on
+        # the reasoning that a predicted model answers for a target nobody has solved. An
+        # independent reviewer read the payload and the claim does not survive it: `coverage`
+        # fetches a model inventory and confidence vectors, never downloads coordinates, and
+        # computes nothing geometric. The recorded record for P03470 carries no key matching
+        # exposure, solvent, access, surface or burial -- its one range block holds a single
+        # number, a QMEANDisCo of 0.913, which is template agreement and not solvent exposure.
+        # The module's own limitation says the confidence "does not say the site is
+        # solvent-exposed, is a pocket, is bindable, or is accessible in vivo". The axis asks
+        # whether the epitope is solvent-exposed in the relevant conformation, so gating it on
+        # a model-quality score is the confidence-as-accessibility error with the label
+        # changed.
+        #
+        # It can be earned back without a new endpoint: every model row carries a `model_url`,
+        # so exposure is computable from those coordinates exactly as `geometry.py` computes it
+        # from deposited ones. That is the work, and until it is done the axis stays open.
+        #
+        # It must not gate `precedent` either, for the separate reason: a prediction is not a
         # deposition, and AlphaFold modelled every reference proteome whether or not anyone
         # cared, so a predicted-model count carries no attention signal at all.
-        gates=("accessibility",),
+        gates=(),
         scope="Reports a predicted model, never an experimental one; models marked "
               "experimentally determined are partitioned out and counted separately.",
     ),

@@ -4161,38 +4161,40 @@ def test_from_a_bare_sequence_identification_leads_because_it_unlocks_the_surfac
     # building something that consumes an identity, and this is that something.
     situation = selector.from_sequence()
     by_name = {p.tool: p for p in selector.rank(situation)}
-    # Seven of the nine others, so the first call is no longer a judgement about axis coverage
-    # at all. Before the onset lanes were built it unlocked nothing and this was a close call.
-    assert by_name["intake.rank_targets"].unlocks == (
-        "bioactivity.prior_binders", "families.entries", "geometry.surface_markers",
-        "literature.search", "similarity.homologs", "structures.folded",
-        "structures.predicted")
-    assert selector.first(situation).tool == "intake.rank_targets"
-    # Exactly three tools are callable from a bare accession, and the two that are not
-    # identification bear on nothing or on one axis. Every other tool is blocked, and blocked
-    # tools are reported rather than dropped: a policy shown only its callable moves cannot
-    # tell a useless tool from one that is one call away, and under a budget the second is the
-    # more useful thing to know.
+    # Five of the ten are callable from a bare genome accession, and identification unlocks the
+    # other five. Both halves of that were wrong when first written, and the error went the same
+    # way twice: I declared `literature.search` and `similarity.homologs` as needing an identity
+    # when both resolve the starting accession themselves, so the table reported three callable
+    # moves where there are five and credited identification with unlocking seven. An
+    # independent reviewer read the payloads and checked. Verified since: the literature lane
+    # returns 4719 hits on NC_045512.2 in 2.5 s, and the homology lane resolves that accession's
+    # coding sequences and returns five homologs at identity 1.0.
     callable_now = {name for name, p in by_name.items() if p.callable_now}
     assert callable_now == {"intake.rank_targets", "structures.evidence",
-                            "chemistry.library_spec"}
-    # What blocks each of the rest, which is the shape of the dependency graph. Everything
-    # waits on something identification produces, and the two structural lanes wait on
-    # different facts -- one on an accession, one on a sequence. That split is the point: a
-    # novel target has a sequence and no accession.
+                            "chemistry.library_spec", "literature.search",
+                            "similarity.homologs"}
+    assert by_name["intake.rank_targets"].unlocks == (
+        "bioactivity.prior_binders", "families.entries", "geometry.surface_markers",
+        "structures.folded", "structures.predicted")
+    assert selector.first(situation).tool == "intake.rank_targets"
+    # What blocks the rest, which is the shape of the dependency graph. The two structural lanes
+    # wait on different facts -- one on an accession, one on a sequence -- and that split is the
+    # point: a novel target has a sequence and no accession.
     assert by_name["geometry.surface_markers"].blocked_on == ("protein_accession",)
     assert by_name["structures.predicted"].blocked_on == ("protein_accession",)
     assert by_name["structures.folded"].blocked_on == ("protein_sequence",)
-    assert by_name["literature.search"].blocked_on == ("target_name|protein_family",)
-    assert by_name["similarity.homologs"].blocked_on == (
-        "protein_sequence|protein_accession",)
-    # Two tools bear on accessibility now and they are complements, not duplicates: one
-    # measures deposited conformations and is silent without them, the other reports predicted
-    # models and answers for a target nobody has solved. `structures.evidence` declines the
-    # axis by its own warning -- a structure count is an attention proxy and must not be
-    # pooled with a pocket score.
+    assert by_name["families.entries"].blocked_on == (
+        "protein_accession|protein_sequence",)
+    # One tool bears on accessibility, and that too is a correction. `structures.predicted` was
+    # registered against the axis on the reasoning that a predicted model answers for a target
+    # nobody has solved. It computes no exposure quantity at all: it fetches a model inventory
+    # and confidence vectors, never downloads coordinates, and its own limitation says the
+    # confidence "does not say the site is solvent-exposed". Gating the axis on a model-quality
+    # score is the confidence-as-accessibility error with the label changed, which is the exact
+    # error this registration set out to avoid.
     gating = {name for name, r in selector.REQUIREMENTS.items() if "accessibility" in r.gates}
-    assert gating == {"geometry.surface_markers", "structures.predicted"}
+    assert gating == {"geometry.surface_markers"}, (
+        "accessibility is gated by something that measures no surface")
     # And five of the seven axes are still gated by nothing, which is the honest state and the
     # argument for what to build next. `reagent_tractability` is the hard gate and the one no
     # public record plausibly answers.
@@ -4250,14 +4252,16 @@ def test_a_blocked_tool_is_reported_with_what_blocks_it_rather_than_dropped():
 
 
 def test_an_unsatisfied_disjunction_is_one_obstruction_and_either_alternative_clears_it():
-    # A literature query is answerable from a target name or from a family assignment. Folding
-    # that into a conjunction would make it unreachable until both existed, which would hide
-    # the one route that works when the target itself is unknown. Listing both alternatives
-    # separately would read as two obstructions when either alone clears it.
+    # A literature query is answerable from the starting accession, from a target name, or from
+    # a family assignment. Folding those into a conjunction would make the lane unreachable
+    # until all three existed, which would hide both routes that matter -- the accession route,
+    # which is the only informative call available before anything is known, and the family
+    # route, which works when the target itself is unpublished. Listing the alternatives
+    # separately would read as three obstructions when any one alone clears it.
     nothing = selector.Situation(known=frozenset(), unresolved=selector.AXES)
     assert selector.blocked_on("literature.search", nothing) == (
-        ("target_name|protein_family",))
-    for fact in ("target_name", "protein_family"):
+        ("genome_accession|target_name|protein_family",))
+    for fact in ("genome_accession", "target_name", "protein_family"):
         held = selector.Situation(known=frozenset({fact}), unresolved=selector.AXES)
         assert selector.blocked_on("literature.search", held) == (), (
             f"{fact} alone did not clear the disjunction")
