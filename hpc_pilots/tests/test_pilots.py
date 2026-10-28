@@ -2456,7 +2456,8 @@ def test_the_committed_tool_snapshot_matches_the_registry():
     historical = {1: "b67cdcfb525a0ff9f8beef3178a9dd8b549d7ea333bfeec9acdd372ad7aba509",
                   2: "ff961039576d258eaff1c8bee4e506222ec4d0660e6ae5e088167c74e40e37d7",
                   3: "5d29f0de726f3e8c0604b46ae05c48f2b038f4e0c41c6efec96781e467be535e",
-                  4: "2ca8fc87a995fbf3cedd9b1ec2fe521d8689083912cea15c48627a4c4dc08f5c"}
+                  4: "2ca8fc87a995fbf3cedd9b1ec2fe521d8689083912cea15c48627a4c4dc08f5c",
+                  5: "8036f97b39606f9c587382301dec6bb9885bfcdee8bb1586be7ff65bc01d99db"}
     for version, expected in historical.items():
         earlier = ROOT / "hpc_pilots" / "configs" / f"tools.v{version}.json"
         assert json.loads(earlier.read_text())["tool_set_sha256"] == expected, \
@@ -4236,9 +4237,16 @@ def test_a_blocked_tool_is_reported_with_what_blocks_it_rather_than_dropped():
     situation = selector.from_sequence()
     blocked = {p.tool: p for p in selector.rank(situation)
                if not p.callable_now}
-    assert blocked["families.entries"].blocked_on == ("protein_accession",)
+    # Reported as one obstruction joined by `|`, because either input clears it: the lane keys
+    # on the MD5 of a sequence, so an accession is a convenience and not a requirement. Listing
+    # the two separately would read as two things standing in the way when either alone is
+    # enough, and `|` is never a member of `FACTS` so it cannot be mistaken for one.
+    assert blocked["families.entries"].blocked_on == (
+        "protein_accession|protein_sequence",)
     assert blocked["families.entries"].unlocks == (), "a blocked tool advertised unlocking"
     assert "blocked" in blocked["families.entries"].why
+    # The accession-only lanes read differently, which is the distinction worth keeping visible.
+    assert blocked["geometry.surface_markers"].blocked_on == ("protein_accession",)
 
 
 def test_an_unsatisfied_disjunction_is_one_obstruction_and_either_alternative_clears_it():

@@ -204,11 +204,35 @@ REQUIREMENTS = {
               "with a PubMed count -- measured at 1173 against 25 on one query.",
     ),
     "families.entries": Requirement(
-        needs=("protein_accession",),
-        provides=("protein_family",),
+        needs=(),
+        # Either input works, and the sequence route is the one that matters here. The lane is
+        # keyed on the MD5 of the sequence rather than on an accession, so a translated reading
+        # frame that no reviewed database has catalogued can still be annotated -- the second
+        # lane, beside folding, that reaches a protein nothing has named. Declaring this as
+        # needing an accession would have shut it for exactly that case.
+        needs_any=("protein_accession", "protein_sequence"),
+        # `residue_ranges` too, and it is the more useful of the two. The lane derives the
+        # boundaries this repository currently hand-authors in `configs/structures.json`: it
+        # independently placed the coronavirus main protease at 3264-3575 of the polyprotein
+        # and the nsp16-like domain at 6800-7095. A range is what turns a claim about a protein
+        # into a claim about a site, which is what both the structural lookup and a binder need.
+        provides=("protein_family", "residue_ranges"),
+        # Gates nothing, and the author of this lane proposed four axes including
+        # `reagent_tractability`. That one is refused on the lane's own description, which says
+        # a family assignment "is never a measurement on this pathogen" and "predicts no
+        # binding, no affinity and no druggability". Whether a soluble, correctly folded,
+        # immobilisable reagent can be obtained is a wet-lab fact; inferring it from what
+        # relatives of this protein are annotated with would put the hard gate on an
+        # annotation. The other three are refused for the reason every retrieval lane here is:
+        # the dates are per row -- two member databases are frozen at 2010 and 2020 releases --
+        # and an axis claim needs a dated claim.
         gates=(),
         scope="An assignment is transferred from relatives and is never a measurement on this "
-              "pathogen.",
+              "pathogen. Roughly half the matches on a long polyprotein come from a neural "
+              "predictor that borrows member-database accessions, so curated hits and "
+              "predictions are indistinguishable by accession alone and are never pooled; two "
+              "member databases are also long frozen, which is why every row carries the "
+              "release that served it.",
     ),
     "similarity.homologs": Requirement(
         needs=(),

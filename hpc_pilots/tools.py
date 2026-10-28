@@ -61,7 +61,7 @@ from .common import content_digest
 
 # Bumped by hand when a snapshot is cut. Deliberately not derived from the specs: a digest
 # answers whether two spec sets differ, a version answers which file a reader should open.
-TOOL_SET_VERSION = 5
+TOOL_SET_VERSION = 6
 
 # The declared types a parameter may take. Short on purpose, and not a coercion table: a
 # string where an integer is declared is a contract violation and not an input to parse.
@@ -770,7 +770,12 @@ TOOLS = {
                  ("content_sha256", "str", "Identity of the payload with timestamps stripped."),
                  ("provenance", "dict", "Host, commit and time, from common.provenance.")),
         return_kind="artifact",
-        cost_seconds=50.0, worst_case_seconds=300.0, cost_network_calls=15,
+        # Median of eight timed calls across four accessions, not one reading: the spread ran
+        # 4.5 s to 24.9 s and the same accession measured 19.4 s and 23.4 s, so the variance is
+        # the host's and not the input's. The worst case is declared well above it because a
+        # long polyprotein with eighty integrated entries costs fifteen calls at the default
+        # cap, and the wall gate has to be able to refuse that before dispatch.
+        cost_seconds=21.2, worst_case_seconds=300.0, cost_network_calls=6,
         reaches_network=True, cost_actions=1,
         requires=(),
         failures=(
