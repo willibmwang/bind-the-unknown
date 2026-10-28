@@ -2506,8 +2506,26 @@ def test_an_emergency_artifact_names_the_tool_set_it_ran_against():
     # Absence is meaningful and must not be read as an empty registry: the episodes recorded
     # before the registry existed carry no such key, and backfilling one would assert
     # something nobody can verify.
-    before = json.loads((ROOT / "runs/emergency/coronaviridae_rubric.json").read_text())
-    assert "config_sha256" in before and "tool_set_sha256" not in before
+    #
+    # Asserted over the whole tree rather than against one named file, because naming one made
+    # this test depend on a single artifact staying un-regenerated -- and it did not. Running
+    # `emergency --family coronaviridae --policy rubric` by hand to check an unrelated metric
+    # overwrote `coronaviridae_rubric.json` with a post-registry episode, `runs/` is gitignored
+    # so there was no copy to restore, and the test failed on a file that no longer described
+    # what it was chosen to describe. Five sibling pre-registry rubric episodes survived. The
+    # property worth pinning was never about that one path: it is that the tree still holds at
+    # least one episode predating the registry, and that no such episode has been backfilled.
+    pre_registry = []
+    for path in sorted((ROOT / "runs/emergency").glob("*.json")):
+        document = json.loads(path.read_text())
+        if "tool_set_sha256" not in document:
+            assert "config_sha256" in document, \
+                f"{path.name} names neither a config nor a tool set"
+            pre_registry.append(path.name)
+    assert pre_registry, (
+        "no recorded episode predates the tool registry any more. Either every one was "
+        "regenerated, or a key was backfilled onto artifacts that cannot verify it; absence "
+        "of the key means recorded-before-the-registry and is deliberately not filled in.")
 
 
 def test_the_absent_structure_backend_string_is_byte_identical_to_the_one_on_the_record():
@@ -3322,10 +3340,23 @@ def test_a_zero_fidelity_says_whether_it_means_complete_or_uninstrumented():
         measured = optimizer.fidelity(name)
         assert measured["fidelity"] == 0 and measured["observed"] == 0
         assert "uninstrumented" in measured["interpretation"]
+    # The measured state of the emergency tree, and it is not the empty one this test used to
+    # assert. Three pointers were in all 45 recorded artifacts the whole time -- every episode
+    # records `metrics.actions_used`, every trace row records `action`, and every agent episode
+    # records a rationale -- and the gap report could not see any of them, because its detector
+    # covered six of the ten pointers `SUPPORTED_BY` licenses. So `cost_actions` and
+    # `description` read as uninstrumented while the record had licensed them since the first
+    # episode. The empty `pointers_present` that stood here was a property of the detector.
     gap = optimizer.instrumentation_gap()
-    assert gap["pointers_present"] == []
-    assert not any(info["proposable"] for info in gap["fields"].values()), \
-        "a field is advertised as proposable while the record is silent about it"
+    assert gap["pointers_present"] == ["agent.history[].response.rationale",
+                                       "metrics.actions_used", "trace[].action"]
+    assert sorted(name for name, info in gap["fields"].items() if info["proposable"]) == \
+        ["cost_actions", "description"]
+    # What stays silent is what the tool layer has never written: no trace row in this tree
+    # carries a tool, so nothing licenses a `failures` or a cost-of-a-call edit.
+    for field in ("failures", "cost_seconds", "cost_network_calls"):
+        assert not gap["fields"][field]["proposable"], \
+            f"{field} is advertised as proposable while no tool call is on this record"
 
 
 def test_an_agent_incident_does_not_license_a_failure_on_a_network_free_tool():
@@ -4234,3 +4265,274 @@ def test_the_selector_cli_says_when_its_plan_names_tools_nobody_has_built():
     rows = {row["tool"]: row for row in narrowed["order"]}
     assert rows["literature.search"]["gates_unresolved"] == ["conservation"]
     assert rows["intake.rank_targets"]["blocked_on"] == ["genome_accession"]
+
+
+def test_a_successful_call_is_not_read_as_an_unexplained_failure(tmp_path, monkeypatch):
+    # The defect that only became visible once a tool had been called. `fidelity` collected
+    # every `trace[].result` string for the named tool and subtracted the declared symptoms,
+    # so a *successful* call's result string counted as an outcome the spec fails to predict.
+    # The live call site writes `"focused thioether macrocycle library proposed; no property
+    # predicted"` on success, so the first real corpus would have had the optimiser propose
+    # declaring that sentence a failure mode of the tool.
+    #
+    # The repair needs the status in the row, which is the instrumentation this arm was
+    # missing: a result string alone cannot say which kind of outcome it is.
+    tree = tmp_path / "corpus"
+    tree.mkdir()
+    (tree / "run.json").write_text(json.dumps({"trace": [
+        {"tool": "chemistry.library_spec", "tool_status": "ok",
+         "result": "focused thioether macrocycle library proposed; no property predicted"},
+        {"tool": "chemistry.library_spec", "tool_status": "empty",
+         "result": "empty: the call found nothing"},
+    ]}))
+    monkeypatch.setattr(optimizer, "ROOT", tmp_path)
+    measured = optimizer.fidelity("chemistry.library_spec", "corpus")
+    assert measured["fidelity"] == 0 and measured["unexplained"] == []
+    assert measured["succeeded"] == 2 and measured["observed"] == 0
+    assert "only ever succeeded" in measured["interpretation"], \
+        "a tool that only succeeded reads as uninstrumented or as fully characterised"
+    # And a row with no status is counted apart rather than defaulted into either bucket,
+    # because defaulting it to a failure is the defect and defaulting it to a success would
+    # hide every failure the live call site has recorded without one.
+    (tree / "run.json").write_text(json.dumps({"trace": [
+        {"tool": "chemistry.library_spec", "result": "something happened"}]}))
+    blind = optimizer.fidelity("chemistry.library_spec", "corpus")
+    assert blind["unclassifiable"] == 1 and blind["observed"] == 0
+    assert "carry no status" in blind["interpretation"]
+
+
+def test_a_templated_symptom_matches_the_string_a_run_actually_records():
+    # `Failure.symptom` is "what appears in an artifact when it happens, quoted where a run has
+    # quoted it", so a symptom carrying a placeholder is explicitly not a quote. The substring
+    # matcher could not match one: the spec declares `'<name>' is not a registered chloroacetyl
+    # initiator` and the exerciser recorded `ValueError: 'ClAc-Nonsense' is not a registered
+    # chloroacetyl initiator`, and neither string contains the other. A correctly declared
+    # failure read as unexplained, and the optimiser would have proposed a near-duplicate.
+    declared = "'<name>' is not a registered chloroacetyl initiator"
+    recorded = ("ValueError: 'ClAc-Nonsense' is not a registered chloroacetyl initiator")
+    assert declared not in recorded and recorded not in declared
+    assert optimizer._matches(declared, recorded)
+    # Still not a fuzzy match. A symptom whose literal segments are absent does not match, and
+    # one whose segments appear out of order does not either.
+    assert not optimizer._matches(declared, "ValueError: the initiator table is empty")
+    assert not optimizer._matches("<a> first then second",
+                                  "second happened and then first happened")
+
+
+def test_every_pointer_that_licenses_a_field_is_one_the_gap_report_can_detect():
+    # Four of the ten licensed pointers had no detector, so `cost_actions` and `description`
+    # could never have become proposable however much a run recorded. A licence nothing can
+    # satisfy is indistinguishable from a correct spec, which is the one confusion this module
+    # exists to prevent. Pinned in both directions so that adding a pointer to the licence
+    # table without a detector fails here rather than quietly reporting the field silent.
+    licensed = {pointer for pointers in optimizer.SUPPORTED_BY.values()
+                for pointer in pointers}
+    assert licensed <= optimizer._DETECTABLE, \
+        f"licensed but undetectable: {sorted(licensed - optimizer._DETECTABLE)}"
+    assert optimizer._DETECTABLE - licensed == set(), \
+        "the detector looks for a pointer no field is licensed by"
+
+
+def test_a_decoder_error_is_not_admissible_as_a_tools_own_failure_mode():
+    # Found by running the dispatcher, not by reading it. `chief.call` does not validate its
+    # arguments -- `common.Agent` calls `schema_conformance` on the model's reply and `call`
+    # trusts the caller -- so dispatching `intake.rank_targets` with no arguments records
+    # `TypeError: run_intake() missing 1 required positional argument: 'accession'` as a tool
+    # failure. That string satisfies every other guard: evidenced, add-only, oracle-free, not a
+    # cost claim, current. Admitting it writes a caller's bug onto the tool's record, after
+    # which the spec documents a failure the tool does not have.
+    intake_spec = tools.tool("intake.rank_targets")
+    assert any(p.name == "accession" and p.required for p in intake_spec.parameters), \
+        "the spec no longer declares the argument whose absence this guard is about"
+    laundered = optimizer.Proposal(
+        tool="intake.rank_targets", field="failures", before=intake_spec.failures,
+        after=intake_spec.failures + (tools.Failure(
+            "TypeError: run_intake() missing 1 required positional argument: 'accession'",
+            "Recorded on a dispatched call.", "TypeError"),))
+    passed, detail = optimizer.guard_a_failure_is_the_tools_and_not_the_callers(laundered)
+    assert passed is False
+    assert "built wrongly" in detail and "validate the arguments" in detail
+    # An honest failure of the same tool is untouched by this guard.
+    genuine = optimizer.Proposal(
+        tool="intake.rank_targets", field="failures", before=intake_spec.failures,
+        after=intake_spec.failures + (tools.Failure(
+            "RuntimeError: the endpoint returned 503", "Recorded twice.", "RuntimeError"),))
+    assert optimizer.guard_a_failure_is_the_tools_and_not_the_callers(genuine)[0] is True
+
+
+def test_a_stated_refusal_evidenced_only_by_successful_calls_is_refused(tmp_path, monkeypatch):
+    # Closes the escape this module recorded as open. An adversary proposed declaring "a row
+    # returns earliest_deposition null while the call reports ok" a failure mode of
+    # `structures.evidence` -- true, evidenced, add-only, with a cause nothing contradicts.
+    # What it does is reclassify a defended invariant as a defect: undated rows are kept
+    # deliberately and marked uncitable, because a target with no deposited structure has a
+    # real zero rather than a missing value. Once it is a documented failure, the next caller
+    # has a licence to filter it, and the filter is invisible downstream.
+    monkeypatch.setattr(optimizer, "ROOT", tmp_path)
+    corpus = tmp_path / "corpus"
+    corpus.mkdir()
+    (corpus / "run.json").write_text(json.dumps({"trace": [
+        {"tool": "structures.evidence", "tool_status": "ok",
+         "result": "a row returns earliest_deposition null while the call reports ok"}]}))
+    structures = tools.tool("structures.evidence")
+    reclassified = optimizer.Proposal(
+        tool="structures.evidence", field="failures", before=structures.failures,
+        after=structures.failures + (tools.Failure(
+            "a row returns earliest_deposition null while the call reports ok",
+            "Recorded once on a successful call.", ""),),
+        evidence=(("corpus/run.json", "trace[].result",
+                   "a row returns earliest_deposition null while the call reports ok"),))
+    passed, detail = optimizer.guard_a_stated_refusal_maps_to_a_non_ok_status(reclassified)
+    assert passed is False
+    assert "describes the tool working" in detail and "real zero" in detail
+    # The same shape, on the record as a genuine non-ok outcome, is admissible. The guard is
+    # about what the dispatcher reported, not about how the sentence reads.
+    (corpus / "run.json").write_text(json.dumps({"trace": [
+        {"tool": "structures.evidence", "tool_status": "rejected",
+         "result": "rejected: minimum=5.0 is above the declared maximum 1.0",
+         "rejected": {"reason": "rejected: minimum=5.0 is above the declared maximum 1.0"}}]}))
+    charged = optimizer.Proposal(
+        tool="structures.evidence", field="failures", before=structures.failures,
+        after=structures.failures + (tools.Failure(
+            "rejected: minimum=5.0 is above the declared maximum 1.0",
+            "Recorded once as a charged refusal.", ""),),
+        evidence=(("corpus/run.json", "trace[].result",
+                   "rejected: minimum=5.0 is above the declared maximum 1.0"),))
+    assert optimizer.guard_a_stated_refusal_maps_to_a_non_ok_status(charged)[0] is True
+
+
+def test_the_proposer_reads_a_cost_off_the_record_and_the_guard_recomputes_it(tmp_path,
+                                                                             monkeypatch):
+    # The half this module did not have. It carried eight guards and no proposer, so the
+    # guards had only ever run on hacks written by their own author -- which the module's own
+    # docstring calls weak evidence. A proposal is derived from recorded values and chooses
+    # nothing: the guard recomputes the median from the same triples it is handed, so a
+    # proposal that picked its own number is refused rather than trusted.
+    monkeypatch.setattr(optimizer, "ROOT", tmp_path)
+    corpus = tmp_path / "corpus"
+    corpus.mkdir()
+    floor = optimizer.MINIMUM_CALLS_FOR_A_COST_CLAIM
+    (corpus / "run.json").write_text(json.dumps({"trace": [
+        {"tool": "chemistry.library_spec", "action": "call_tool", "tool_status": "ok",
+         "result": "ok", "tool_seconds": 2.0, "tool_network_calls": 0}
+        for _ in range(floor)]}))
+    proposals = {(p.tool, p.field): p for p in optimizer.propose("corpus")}
+    assert ("chemistry.library_spec", "cost_seconds") in proposals, \
+        "a cost the record supports at the floor was not proposed"
+    cost = proposals[("chemistry.library_spec", "cost_seconds")]
+    assert cost.before == 0.0 and cost.after == 2.0
+    assert len(cost.evidence) == floor
+    assert optimizer.guard_cost_claim_is_measured(cost)[0] is True
+    # A network cost is not proposed from the same rows, because every one of them recorded
+    # zero and the spec already declares zero: a proposal that changes nothing cannot move the
+    # digest and is not a proposal.
+    assert ("chemistry.library_spec", "cost_network_calls") not in proposals
+    # One call short of the floor and nothing is proposed at all. A median over fewer is a
+    # draw, and the refusal is a statement about the sample rather than about the value.
+    (corpus / "run.json").write_text(json.dumps({"trace": [
+        {"tool": "chemistry.library_spec", "action": "call_tool", "tool_status": "ok",
+         "result": "ok", "tool_seconds": 2.0} for _ in range(floor - 1)]}))
+    assert not [p for p in optimizer.propose("corpus") if p.field == "cost_seconds"]
+
+
+def test_a_refused_call_contributes_no_cost_sample(tmp_path, monkeypatch):
+    # A charged refusal is not a call that took no time; it is a call that never happened.
+    # `chief.call` leaves `seconds` None for anything refused before dispatch precisely so it
+    # cannot be averaged in, and the proposer must honour that: a zero entering the sample is
+    # exactly what drags a declared cost downwards, which is the cheapest hack in an
+    # action-budgeted arm.
+    monkeypatch.setattr(optimizer, "ROOT", tmp_path)
+    corpus = tmp_path / "corpus"
+    corpus.mkdir()
+    floor = optimizer.MINIMUM_CALLS_FOR_A_COST_CLAIM
+    rows = [{"tool": "chemistry.library_spec", "action": "call_tool", "tool_status": "ok",
+             "result": "ok", "tool_seconds": 4.0} for _ in range(floor)]
+    rows += [{"tool": "chemistry.library_spec", "action": "call_tool",
+              "tool_status": "rejected", "result": "rejected: refused before dispatch",
+              "tool_seconds": None} for _ in range(floor)]
+    (corpus / "run.json").write_text(json.dumps({"trace": rows}))
+    cost = next(p for p in optimizer.propose("corpus") if p.field == "cost_seconds")
+    assert cost.after == 4.0, "a refused call entered the cost sample"
+    assert all(value == 4.0 for _, _, value in cost.evidence)
+
+
+def test_the_exerciser_writes_outside_the_tree_the_optimiser_writes(monkeypatch):
+    # The separation is load-bearing rather than tidy. `run_optimize` writes only under
+    # `runs/tools/`, pinned by the test above that intercepts `write_json`. Had the corpus
+    # lived under `runs/tools/` too, that test would still have passed while the optimiser
+    # could write into the very corpus it grades itself against -- a loop authoring its own
+    # evidence. The two trees are disjoint and this pins it.
+    from hpc_pilots import exercise
+
+    assert not exercise.CORPUS.startswith("runs/tools"), \
+        "the corpus sits inside the optimiser's own output tree"
+    assert "runs/tools" not in exercise.CORPUS
+    # And the optimiser does not import the module that chooses the arguments. If it could
+    # reach `GRID` it could propose the cells its own evidence comes from, and cost deflation
+    # is then one line: call the cheapest cell to the floor and declare the median.
+    source = (ROOT / "hpc_pilots/optimizer.py").read_text()
+    assert "import exercise" not in source and "from .exercise" not in source
+
+
+def test_a_cost_claim_that_understates_a_recorded_call_is_refused(tmp_path, monkeypatch):
+    # The guard that refused the first proposal this module ever produced, which is why it
+    # exists. `chemistry.library_spec` measured over 21 calls: the first took 20.1 ms and the
+    # next twenty about 5.7 us, because the first pays the module import and the monomer-table
+    # construction. The median is a steady-state figure, `cost_seconds` is read as the cost of
+    # a call, and `guard_cost_claim_is_measured` recomputes the median and certifies it --
+    # cost deflation certified by the guard built to prevent cost deflation.
+    monkeypatch.setattr(optimizer, "ROOT", tmp_path)
+    corpus = tmp_path / "corpus"
+    corpus.mkdir()
+    floor = optimizer.MINIMUM_CALLS_FOR_A_COST_CLAIM
+    rows = [{"tool": "chemistry.library_spec", "action": "call_tool", "tool_status": "ok",
+             "result": "ok", "tool_seconds": 0.0201, "tool_network_calls": 0, "cold": True}]
+    rows += [{"tool": "chemistry.library_spec", "action": "call_tool", "tool_status": "ok",
+              "result": "ok", "tool_seconds": 5.7e-06, "tool_network_calls": 0, "cold": False}
+             for _ in range(floor)]
+    (corpus / "run.json").write_text(json.dumps({"trace": rows}))
+    deflated = next(p for p in optimizer.propose("corpus") if p.field == "cost_seconds")
+    # The sample is at the floor and the median reproduces, so the older cost guard admits it.
+    assert optimizer.guard_cost_claim_is_measured(deflated)[0] is True
+    passed, detail = optimizer.guard_a_cost_claim_covers_every_recorded_call(deflated)
+    assert passed is False
+    assert "first call to the tool" in detail and "worst_case_seconds" in detail, detail
+    assert "3526x" in detail or "x" in detail
+    # And the repair is not a better statistic: `worst_case_seconds` is the field that carries
+    # the spread, and it is deliberately not proposable, so no edit to cost_seconds can
+    # represent this record. Pinned here because the guard's reason depends on it.
+    assert "worst_case_seconds" not in tools.PROPOSABLE
+
+    # A tool whose one-time setup is negligible beside its real cost is unaffected. The
+    # network tool measured 63.9 s cold against a ~53 s warm median, a spread of 1.2x, and a
+    # guard that refused that too would make every cost claim unprovable.
+    structures = tmp_path / "wide"
+    structures.mkdir()
+    wide = [{"tool": "structures.evidence", "action": "call_tool", "tool_status": "ok",
+             "result": "ok", "tool_seconds": 63.9, "tool_network_calls": 36, "cold": True}]
+    wide += [{"tool": "structures.evidence", "action": "call_tool", "tool_status": "ok",
+              "result": "ok", "tool_seconds": 53.0, "tool_network_calls": 36, "cold": False}
+             for _ in range(floor)]
+    (structures / "run.json").write_text(json.dumps({"trace": wide}))
+    honest = next(p for p in optimizer.propose("wide") if p.field == "cost_seconds")
+    assert honest.after == 53.0
+    assert optimizer.guard_a_cost_claim_covers_every_recorded_call(honest)[0] is True
+
+
+def test_the_exerciser_takes_both_medians_over_the_same_population(tmp_path, monkeypatch):
+    # They were taken over different ones: the seconds median filtered to successful calls
+    # while the network median accepted every status with a non-None count. A cell that fails
+    # before issuing a request then contributed a zero to the network median while being
+    # excluded from the seconds median -- a silent deflation path into `cost_network_calls`,
+    # which is exactly the field `optimizer.SUPPORTED_BY` licenses `trace[].tool_network_calls`
+    # for. Pinned by reading the committed artifact rather than by re-running the grid, which
+    # would spend eighteen minutes and seven hundred requests to assert an arithmetic property.
+    from hpc_pilots import exercise
+
+    source = (ROOT / "hpc_pilots/exercise.py").read_text()
+    assert 'for row in successful' in source
+    assert 'counted = [row["tool_network_calls"] for row in successful' in source, \
+        "the network median is drawn from a population the seconds median is not"
+    # And the cold call is reported apart, because one scalar cannot carry a 3500x spread.
+    assert '"cold_seconds"' in source and '"warm_seconds_median"' in source
+    assert exercise.Cell({}, "ok").repeats == 1

@@ -140,10 +140,24 @@ def main(argv=None):
     p.add_argument("--proposed", action="store_true",
                    help="Include the declared-but-unbuilt lanes, to ask what building them "
                         "would buy. Nothing dispatches from them and the output says so")
+    p = sub.add_parser("exercise",
+                       help="Call each registered tool across its declared grid and record "
+                            "what the call spent")
+    p.add_argument("--tool", nargs="*", default=None, dest="tools_",
+                   help="Which tools to exercise; defaults to every tool with a declared "
+                        "grid. Cannot select which cells run")
+    p.add_argument("--repeats-scale", type=int, default=1,
+                   help="Multiply the per-cell repeats of the cells expected to succeed. "
+                        "Scale 1 is sized to clear the cost floor exactly")
+    p.add_argument("--smoke", action="store_true")
     p = sub.add_parser("optimize",
                        help="Evaluate spec-edit proposals behind the guard; propose only")
-    p.add_argument("--runs", default="runs/emergency",
-                   help="Artifact tree a proposal must cite")
+    p.add_argument("--runs", default="runs/toolcalls",
+                   help="Artifact tree a proposal must cite. Defaults to the tool-call corpus "
+                        "`exercise` writes, because that is the only tree whose trace rows "
+                        "name a tool: pointed at runs/emergency the report read 'no call to "
+                        "this tool is on the record' with 23 instrumented rows on disk. Pass "
+                        "runs/emergency for the episode view of the same fields")
     p.add_argument("--gap", action="store_true",
                    help="Report which proposable fields the record is silent about, and stop")
     p.add_argument("--smoke", action="store_true")
@@ -298,6 +312,9 @@ def main(argv=None):
                         "blocked_on": list(p.blocked_on), "unlocks": list(p.unlocks),
                         "gates_unresolved": list(p.gates_unresolved),
                         "why": p.why, "scope": p.scope} for p in ordered]}, indent=2))
+    elif args.command == "exercise":
+        from .exercise import run_exercise
+        run_exercise(tools_=args.tools_, repeats_scale=args.repeats_scale, smoke=args.smoke)
     elif args.command == "optimize":
         from .optimizer import instrumentation_gap, run_optimize
         if args.gap:
