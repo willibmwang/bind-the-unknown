@@ -166,6 +166,24 @@ GRID = {
 }
 
 
+# Registered tools with no grid here, and therefore with a declared cost no record can
+# contradict. Stated rather than left to be noticed, because an unmeasured declaration is
+# exactly what this module was built to end: `structures.evidence` declared zero seconds and
+# spends sixty, and nobody could tell until something counted.
+#
+# All six are the onset lanes. Each was measured a handful of times when it was written -- the
+# numbers in their specs come from those calls and not from guesses -- but a handful is below
+# the twenty-call floor a cost claim needs, so the optimiser can neither confirm nor move them.
+# Building their grids is cheap for the folding lane and expensive for the rest: the three that
+# fan out across public hosts would spend several hundred requests to clear the floor once.
+#
+# Deliberately not a silent gap. `python -m hpc_pilots exercise` runs only the grids declared
+# above, and a reader comparing the registry against `runs/toolcalls/` would otherwise find six
+# tools missing with nothing saying why.
+UNGRIDDED = ("literature.search", "families.entries", "similarity.homologs",
+             "structures.predicted", "structures.folded", "bioactivity.prior_binders")
+
+
 def _row(index, name, cell, envelope, cold):
     """One recorded call, in the shape `optimizer.fidelity` and `instrumentation_gap` read.
 

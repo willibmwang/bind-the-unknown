@@ -189,6 +189,67 @@ REQUIREMENTS = {
         provides=("target_name", "protein_accession", "residue_ranges", "protein_sequence"),
         gates=(),
     ),
+    "literature.search": Requirement(
+        needs=(),
+        # Either identity will do, and the family route is the one that works when the target
+        # itself is unknown: nothing is published about a novel target and a great deal is
+        # published about its family.
+        needs_any=("target_name", "protein_family"),
+        provides=(),
+        # Gates nothing yet, deliberately. A hit count is attention and the dated claim lives
+        # per hit, so substantiating an axis needs a row-set design this does not have. The
+        # tool is the retrieval; admitting a retrieved paper into a dossier is the next step.
+        gates=(),
+        scope="Europe PMC indexes preprints and full text, so a count here is not comparable "
+              "with a PubMed count -- measured at 1173 against 25 on one query.",
+    ),
+    "families.entries": Requirement(
+        needs=("protein_accession",),
+        provides=("protein_family",),
+        gates=(),
+        scope="An assignment is transferred from relatives and is never a measurement on this "
+              "pathogen.",
+    ),
+    "similarity.homologs": Requirement(
+        needs=(),
+        # A sequence is enough, and that is the point: this lane does not need an identity, so
+        # it still answers for a target nothing recognises.
+        needs_any=("protein_sequence", "protein_accession"),
+        provides=("homolog_accession", "protein_family"),
+        gates=(),
+        scope="EBI HMMER, keyless and about two seconds against SwissProt. The job model is "
+              "pollable with a real ceiling, so the wall gate can refuse it -- unlike the "
+              "BLAST dispatcher this project had declared, which requires an email address.",
+    ),
+    "structures.predicted": Requirement(
+        needs=("protein_accession",),
+        provides=(),
+        # The second instrument on `accessibility`, and the one that answers for a target with
+        # no deposited structure. It must not gate `precedent`: a prediction is not a
+        # deposition, and AlphaFold modelled every reference proteome whether or not anyone
+        # cared, so a predicted-model count carries no attention signal at all.
+        gates=("accessibility",),
+        scope="Reports a predicted model, never an experimental one; models marked "
+              "experimentally determined are partitioned out and counted separately.",
+    ),
+    "structures.folded": Requirement(
+        needs=("protein_sequence",),
+        provides=(),
+        # Gates nothing, on the tool's own argument. The burial proxy is computed on one
+        # monomer in vacuum, and for a viral glycoprotein the biological unit is usually a
+        # trimer -- so a surface scored exposed here may be an oligomeric interface that is
+        # never exposed in the assembled particle, which is `accessibility` answered wrongly.
+        gates=(),
+        scope="The only structural lane keyed on a sequence rather than an accession, so the "
+              "only one that answers for a target with no reviewed entry.",
+    ),
+    "bioactivity.prior_binders": Requirement(
+        needs=("protein_accession",),
+        provides=(),
+        gates=(),
+        scope="Three independent public lanes. A lane that could not be reached is reported "
+              "apart from a lane that returned nothing.",
+    ),
 }
 
 
@@ -352,37 +413,36 @@ def first(situation, names=None, requirements=None):
 # callable -- and `structures.evidence` reaches PDBe and UniProt. InterPro's REST API is free
 # and unauthenticated, keyed on the accession identification already yields, but the exact
 # path below is from third-party summaries and is unverified here.
-PROPOSED = {
-    "similarity.homologs": Requirement(
-        needs=("genome_accession",),
-        provides=("homolog_accession", "protein_family"),
-        gates=("conservation",),
-        scope="EBI NCBI-BLAST REST, which intake.py already calls behind its remote flag. A "
-              "job queue: a 15-minute RUNNING status is on the record as the reason the local "
-              "k-mer path is intake's default, so promoting this to a tool means declaring a "
-              "worst case the wall gate can refuse.",
-    ),
-    "families.entries": Requirement(
-        needs=("protein_accession",),
-        provides=("protein_family",),
-        gates=("conservation", "precedent"),
-        scope="InterPro REST, free and unauthenticated. Family assignment is an annotation "
-              "transferred from relatives, never a measurement on this pathogen.",
-    ),
-    "literature.search": Requirement(
-        needs=(),
-        # Either identity will do, and the family route is the one that works when the target
-        # itself is unknown: nothing is published about a novel target and a great deal is
-        # published about its family.
-        needs_any=("target_name", "protein_family"),
-        provides=(),
-        gates=("essentiality", "conservation", "assay_availability", "public_labels",
-               "precedent"),
-        scope="Europe PMC REST, free and unauthenticated, with a FIRST_PDATE range filter. "
-              "The date filter is the point: a date-limited query is what lets a hindsight "
-              "audit say something falsifiable about what was knowable when.",
-    ),
-}
+PROPOSED = {}
+"""Empty, and empty for the reason the table existed: everything in it got built.
+
+It held three lanes -- `similarity.homologs`, `families.entries` and `literature.search` --
+and all three are now registered tools with dispatchers, so keeping them here would make
+`--proposed` claim as unbuilt what the registry serves. A test pins that no name here is
+registered, and it is the pin that forced this edit rather than letting the two tables drift.
+
+Two of the three were not built as declared, which is the useful record. The homology lane
+named EBI's NCBI-BLAST REST service; that endpoint answers HTTP 400 without an `email` field,
+so it is not an unauthenticated tool and the lane shipped on EBI's HMMER phmmer API instead --
+keyless, and about two seconds against SwissProt where the service this project blamed for a
+fifteen-minute queue was the wrong one to blame. The literature lane named Europe PMC and kept
+it, and the reason it was chosen held up: a publication-date ceiling is what makes a hindsight
+audit falsifiable.
+
+**What should be declared here next, stated as an argument rather than a table.** Five of the
+seven dossier axes are gated by no registered tool: `reagent_tractability`, `essentiality`,
+`conservation`, `assay_availability` and `public_labels`. The first is the hard gate, and it is
+the one no database lookup plausibly answers -- whether a soluble, correctly folded,
+immobilisable reagent can be obtained is a wet-lab fact, and a tool claiming it from public
+records would be the worst overclaim available here. The other four are reachable in principle:
+three of the built lanes already retrieve material bearing on them and none is declared as
+evidence yet, because an axis claim needs a *dated* claim and their dates are per-row -- a
+publication date, a bioactivity year, a database release. That row-set work is the next thing
+to build, and it needs no new endpoint.
+
+Entries go back in this table only with an endpoint verified live, which is how the three that
+left it were written.
+"""
 
 
 def from_sequence(genome_accession=True, unresolved=AXES):

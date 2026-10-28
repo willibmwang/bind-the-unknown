@@ -144,6 +144,20 @@ BENIGN = frozenset({
     # whose stated purpose is that a real leak not be lost among them is the defect that
     # report already recovered from once.
     "EBI", "NCBI", "JSON", "ORF", "RUNNING",
+    # From the six onset lanes, same treatment and same reason. Each falls in a class above:
+    # `HMMER` and `BLAST` are program names; `PMC`, `IEDB` and `DB` name database hosts or
+    # the suffix of one, like `PDB`; `ESM` and the `SWISS`/`MODEL` pair name modelling
+    # services, split by the hyphen in SWISS-MODEL because `-` is not a word character;
+    # `FASTA` and `ISO` are formats like `SMILES` and `JSON`; `MED` is a Europe PMC index
+    # label; `HTTP` is a protocol quoted inside a failure's cause; and `pLDDT` is a
+    # confidence metric like `IC50` and `KD`.
+    #
+    # None is a target identifier, which is the thing this report exists to surface. Listing
+    # them is not a way of quieting the report: thirteen standing false positives would make
+    # a real leak unfindable, which is the exact failure the report recovered from when a
+    # bare `TGT` from inside every code arrived 9415 times.
+    "HMMER", "BLAST", "PMC", "IEDB", "DB", "ESM", "SWISS", "MODEL", "FASTA", "ISO", "MED",
+    "HTTP", "pLDDT",
 })
 
 

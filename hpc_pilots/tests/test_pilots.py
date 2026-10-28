@@ -2449,10 +2449,14 @@ def test_the_committed_tool_snapshot_matches_the_registry():
     # fifty-nine recorded artifacts name, so it is pinned here rather than trusted.
     # v4 registers `geometry.surface_markers`, the macrocycle surface instrument that had been
     # written, unreachable from any tool, and broken on every input because `freesasa` was not
-    # installed. v3 is pinned here now rather than trusted, for the same reason v2 is.
+    # installed. v5 registers the six onset lanes -- literature, families, homologs, predicted
+    # and folded structure, and prior binders -- which takes the registry from four tools to
+    # ten and empties `selector.PROPOSED`. Every earlier digest is pinned rather than trusted,
+    # because a recorded run naming one has to stay resolvable.
     historical = {1: "b67cdcfb525a0ff9f8beef3178a9dd8b549d7ea333bfeec9acdd372ad7aba509",
                   2: "ff961039576d258eaff1c8bee4e506222ec4d0660e6ae5e088167c74e40e37d7",
-                  3: "5d29f0de726f3e8c0604b46ae05c48f2b038f4e0c41c6efec96781e467be535e"}
+                  3: "5d29f0de726f3e8c0604b46ae05c48f2b038f4e0c41c6efec96781e467be535e",
+                  4: "2ca8fc87a995fbf3cedd9b1ec2fe521d8689083912cea15c48627a4c4dc08f5c"}
     for version, expected in historical.items():
         earlier = ROOT / "hpc_pilots" / "configs" / f"tools.v{version}.json"
         assert json.loads(earlier.read_text())["tool_set_sha256"] == expected, \
@@ -3996,6 +4000,11 @@ def test_the_undeclared_identifier_report_covers_what_the_policy_reads():
     # stand, because the report's whole purpose is that a real leak not be lost among false
     # positives -- a defect it has already recovered from once.
     assert {"EBI", "NCBI", "JSON", "ORF", "RUNNING"} <= invariance.BENIGN
+    # And the thirteen the onset lanes contributed, for the same reason. Program names,
+    # database hosts, formats, a protocol and a confidence metric -- no target identifier
+    # among them, which is what the report exists to surface.
+    assert {"HMMER", "BLAST", "PMC", "IEDB", "DB", "ESM", "SWISS", "MODEL", "FASTA", "ISO",
+            "MED", "HTTP", "pLDDT"} <= invariance.BENIGN
     everything = tools.policy_view([tools.tool(n) for n in sorted(tools.TOOLS)])
     assert invariance.residual_candidates(everything) == {}
 
@@ -4151,52 +4160,81 @@ def test_from_a_bare_sequence_identification_leads_because_it_unlocks_the_surfac
     # building something that consumes an identity, and this is that something.
     situation = selector.from_sequence()
     by_name = {p.tool: p for p in selector.rank(situation)}
-    assert by_name["intake.rank_targets"].unlocks == ("geometry.surface_markers",)
+    # Seven of the nine others, so the first call is no longer a judgement about axis coverage
+    # at all. Before the onset lanes were built it unlocked nothing and this was a close call.
+    assert by_name["intake.rank_targets"].unlocks == (
+        "bioactivity.prior_binders", "families.entries", "geometry.surface_markers",
+        "literature.search", "similarity.homologs", "structures.folded",
+        "structures.predicted")
     assert selector.first(situation).tool == "intake.rank_targets"
-    # The surface tool is the one blocked at onset, and it is reported rather than dropped: a
-    # policy shown only its callable moves cannot tell a useless tool from one call away.
-    assert by_name["geometry.surface_markers"].callable_now is False
+    # Exactly three tools are callable from a bare accession, and the two that are not
+    # identification bear on nothing or on one axis. Every other tool is blocked, and blocked
+    # tools are reported rather than dropped: a policy shown only its callable moves cannot
+    # tell a useless tool from one that is one call away, and under a budget the second is the
+    # more useful thing to know.
+    callable_now = {name for name, p in by_name.items() if p.callable_now}
+    assert callable_now == {"intake.rank_targets", "structures.evidence",
+                            "chemistry.library_spec"}
+    # What blocks each of the rest, which is the shape of the dependency graph. Everything
+    # waits on something identification produces, and the two structural lanes wait on
+    # different facts -- one on an accession, one on a sequence. That split is the point: a
+    # novel target has a sequence and no accession.
     assert by_name["geometry.surface_markers"].blocked_on == ("protein_accession",)
-    assert all(p.callable_now for name, p in by_name.items()
-               if name != "geometry.surface_markers")
-    # And it is the only registered tool bearing on accessibility, which is the axis
-    # `structures.evidence` declines by its own warning -- a structure count is an attention
-    # proxy and must not be pooled with a pocket score.
+    assert by_name["structures.predicted"].blocked_on == ("protein_accession",)
+    assert by_name["structures.folded"].blocked_on == ("protein_sequence",)
+    assert by_name["literature.search"].blocked_on == ("target_name|protein_family",)
+    assert by_name["similarity.homologs"].blocked_on == (
+        "protein_sequence|protein_accession",)
+    # Two tools bear on accessibility now and they are complements, not duplicates: one
+    # measures deposited conformations and is silent without them, the other reports predicted
+    # models and answers for a target nobody has solved. `structures.evidence` declines the
+    # axis by its own warning -- a structure count is an attention proxy and must not be
+    # pooled with a pocket score.
     gating = {name for name, r in selector.REQUIREMENTS.items() if "accessibility" in r.gates}
-    assert gating == {"geometry.surface_markers"}
+    assert gating == {"geometry.surface_markers", "structures.predicted"}
+    # And five of the seven axes are still gated by nothing, which is the honest state and the
+    # argument for what to build next. `reagent_tractability` is the hard gate and the one no
+    # public record plausibly answers.
+    ungated = [axis for axis in selector.AXES
+               if not any(axis in r.gates for r in selector.REQUIREMENTS.values())]
+    assert ungated == ["reagent_tractability", "essentiality", "conservation",
+                       "assay_availability", "public_labels"]
 
 
-def test_building_the_three_lanes_moves_identification_to_the_front():
-    # The ordering question only becomes interesting once something consumes an identity. With
-    # the lanes declared, identification stops being one callable option among four and becomes
-    # the call that widens the action set, which is what `score[1]` is for.
+def test_every_lane_this_project_declared_unbuilt_is_now_registered():
+    # This test used to assert that *declaring* the three lanes would move identification to
+    # the front, against a registry where it unlocked nothing. They are built, so the premise
+    # is gone and the conclusion is now a property of the live registry, asserted in the test
+    # above. What is worth pinning here is the thing that replaced it.
     #
-    # `geometry.surface_markers` joined that set by being registered, so identification now
-    # unlocks a real tool and not only hypothetical ones. The distinction the `--proposed` flag
-    # exists to preserve still holds: two of these three names are tools nobody has built, and
-    # the live ranking in the test above reports only the one that exists.
-    merged = {**selector.REQUIREMENTS, **selector.PROPOSED}
-    situation = selector.from_sequence()
-    best = selector.first(situation, requirements=merged)
-    assert best.tool == "intake.rank_targets"
-    assert best.unlocks == ("families.entries", "geometry.surface_markers",
-                            "literature.search")
-    assert set(best.unlocks) & set(selector.PROPOSED) == {"families.entries",
-                                                          "literature.search"}
-    assert set(best.unlocks) & set(tools.TOOLS) == {"geometry.surface_markers"}
-    # And once an identity exists, the tool bearing on the most unresolved axes leads.
-    identified = selector.Situation(
-        known=frozenset({"genome_accession", "target_name", "protein_accession",
-                         "residue_ranges"}),
-        unresolved=selector.AXES)
-    assert selector.first(identified, requirements=merged).tool == "literature.search"
+    # `PROPOSED` is empty, and a test elsewhere pins that no name in it is registered or
+    # dispatchable. Those two facts together are the claim: there is no declared capability
+    # this repository does not serve. The failure mode they rule out is the one the table was
+    # built to rule out -- a policy shown an accurate description of work no action can
+    # commission, which `emergency.py` calls a fabrication channel pointed at the policy.
+    assert selector.PROPOSED == {}, (
+        "a lane is declared unbuilt again; it must carry a live-verified endpoint and must "
+        "not name a registered tool")
+    for name in ("similarity.homologs", "families.entries", "literature.search"):
+        assert name in tools.TOOLS, f"{name} was declared and is no longer registered"
+        assert name in chief.DISPATCH, f"{name} is registered with no dispatcher"
+        assert name in selector.REQUIREMENTS, f"{name} is registered and unrankable"
+    # Two of the three did not ship on the endpoint they were declared with, and the homology
+    # one is the reason to keep this comment: `selector` named EBI's NCBI-BLAST REST service,
+    # which answers HTTP 400 without an `email` field, so it could never have been an
+    # unauthenticated tool. A declared endpoint is a hypothesis until something calls it.
+    assert "HMMER" in tools.tool("similarity.homologs").description or \
+        "hmmer" in tools.tool("similarity.homologs").entry.lower()
 
 
 def test_a_blocked_tool_is_reported_with_what_blocks_it_rather_than_dropped():
     # A policy shown only its callable moves cannot tell a tool that is useless from a tool
     # that is one call away, and under a budget the second is the more useful thing to know.
+    # Read off the live registry now. It used to need `PROPOSED`, because every registered
+    # tool was callable from an empty state -- which was itself the finding that nothing
+    # consumed an identity. Seven of ten are blocked at onset today.
     situation = selector.from_sequence()
-    blocked = {p.tool: p for p in selector.rank(situation, requirements=selector.PROPOSED)
+    blocked = {p.tool: p for p in selector.rank(situation)
                if not p.callable_now}
     assert blocked["families.entries"].blocked_on == ("protein_accession",)
     assert blocked["families.entries"].unlocks == (), "a blocked tool advertised unlocking"
@@ -4209,11 +4247,11 @@ def test_an_unsatisfied_disjunction_is_one_obstruction_and_either_alternative_cl
     # the one route that works when the target itself is unknown. Listing both alternatives
     # separately would read as two obstructions when either alone clears it.
     nothing = selector.Situation(known=frozenset(), unresolved=selector.AXES)
-    assert selector.blocked_on("literature.search", nothing, selector.PROPOSED) == (
+    assert selector.blocked_on("literature.search", nothing) == (
         ("target_name|protein_family",))
     for fact in ("target_name", "protein_family"):
         held = selector.Situation(known=frozenset({fact}), unresolved=selector.AXES)
-        assert selector.blocked_on("literature.search", held, selector.PROPOSED) == (), (
+        assert selector.blocked_on("literature.search", held) == (), (
             f"{fact} alone did not clear the disjunction")
     assert "|" not in "".join(selector.FACTS), "the join character is also a fact character"
 
@@ -4254,8 +4292,8 @@ def test_a_tool_with_no_requirement_entry_names_itself_rather_than_being_unranka
         selector.blocked_on("nothing.declared", selector.from_sequence())
 
 
-def test_the_selector_cli_says_when_its_plan_names_tools_nobody_has_built():
-    """A plan that cites an unbuilt lane must be unable to read as a capability report."""
+def test_the_selector_cli_ranks_the_live_registry_and_states_a_situation():
+    """The CLI must report the ranked order, and must take the situation it is asked about."""
     import contextlib
     import io
 
@@ -4264,17 +4302,19 @@ def test_the_selector_cli_says_when_its_plan_names_tools_nobody_has_built():
         cli_main(["selector"])
     live = json.loads(out.getvalue())
     assert live["includes_unbuilt_lanes"] is False
-    # Identification leads now that something consumes an identity. Before
-    # `geometry.surface_markers` was registered the graph was flat and the first call fell to
-    # axis coverage alone, which put `structures.evidence` in front.
     assert live["first"] == "intake.rank_targets"
-    assert [row["tool"] for row in live["order"]] == sorted(tools.TOOLS, key=lambda n: (
-        0 if not selector.blocked_on(n, selector.from_sequence()) else 1,
-        -len(selector.unlocked_by(n, selector.from_sequence())),
-        -len(selector.REQUIREMENTS[n].gates), n)), "the CLI order is not the ranked order"
-    # The flag changes the answer, and the output says so in the same breath. A reader who
-    # missed the flag would otherwise take a plan naming `literature.search` as a statement
-    # that a literature lane exists.
+    # Compared against `rank` itself rather than against a re-derivation of its sort key. An
+    # earlier version of this assertion rebuilt the key here and disagreed, because `rank`
+    # computes `unlocks` only for a callable tool and the copy computed it for every tool --
+    # so a blocked tool was ordered by work it cannot do. A test that reimplements the thing
+    # it checks tests the reimplementation.
+    assert [row["tool"] for row in live["order"]] == \
+        [p.tool for p in selector.rank(selector.from_sequence())], \
+        "the CLI order is not the ranked order"
+
+    # The flag still says so in the same breath, and with nothing left to add it adds nothing.
+    # This is the state the flag was built for, inverted: it existed so a plan naming an
+    # unbuilt lane could not read as a capability report, and there are no unbuilt lanes.
     out = io.StringIO()
     with contextlib.redirect_stdout(out):
         cli_main(["selector", "--proposed"])
@@ -4282,18 +4322,35 @@ def test_the_selector_cli_says_when_its_plan_names_tools_nobody_has_built():
     assert hypothetical["includes_unbuilt_lanes"] is True
     assert hypothetical["first"] == "intake.rank_targets"
     named = {row["tool"] for row in hypothetical["order"]}
-    assert named - set(tools.TOOLS) == set(selector.PROPOSED)
-    # And a situation can be stated on the command line, which is what makes the thing usable
-    # for the question it exists to answer rather than only for the default one.
+    assert named == set(tools.TOOLS), "the flag added a lane that is not in the registry"
+    assert named - set(tools.TOOLS) == set(selector.PROPOSED) == set()
+
+    # A situation can be stated on the command line, which is what makes the thing usable for
+    # the question it exists to answer rather than only for the default one. Holding a family
+    # and nothing else, the literature lane is callable -- which is the whole premise of the
+    # family route, since nothing is published about a novel target and a great deal is
+    # published about its family.
     out = io.StringIO()
     with contextlib.redirect_stdout(out):
-        cli_main(["selector", "--proposed", "--known", "protein_family",
+        cli_main(["selector", "--known", "protein_family",
                   "--unresolved", "conservation"])
     narrowed = json.loads(out.getvalue())
-    assert narrowed["first"] == "literature.search"
     rows = {row["tool"]: row for row in narrowed["order"]}
-    assert rows["literature.search"]["gates_unresolved"] == ["conservation"]
+    assert rows["literature.search"]["callable_now"] is True
     assert rows["intake.rank_targets"]["blocked_on"] == ["genome_accession"]
+
+    # And it does not lead, which is the honest consequence of how it had to be registered.
+    # The declared lane claimed five axes including this one. The built tool gates none, and
+    # the reason is an invariant rather than a preference: a test in this file pins that a
+    # tool gating an axis must declare `produces_evidence`, which obliges a `date_field`, and
+    # Europe PMC's dates are per hit -- a publication has its own publication date. Turning
+    # retrieved hits into dated dossier rows is a row-set design this tool does not have, and
+    # claiming the axis before building it would let a hit count substantiate conservation.
+    # So retrieval is built and substantiation is not, and the ranking says so by ordering it
+    # on name alone.
+    assert rows["literature.search"]["gates_unresolved"] == []
+    assert tools.tool("literature.search").produces_evidence is False
+    assert narrowed["first"] != "literature.search"
 
 
 def test_a_successful_call_is_not_read_as_an_unexplained_failure(tmp_path, monkeypatch):
@@ -4565,3 +4622,50 @@ def test_the_exerciser_takes_both_medians_over_the_same_population(tmp_path, mon
     # And the cold call is reported apart, because one scalar cannot carry a 3500x spread.
     assert '"cold_seconds"' in source and '"warm_seconds_median"' in source
     assert exercise.Cell({}, "ok").repeats == 1
+
+
+def test_a_structural_lane_stays_open_for_a_target_identification_cannot_name():
+    # The central claim of the onset work, and the reason the ORF translation is carried into
+    # `intake`'s output instead of being dropped from it.
+    #
+    # Identification does not degrade gracefully. The holdout study in this repository measured
+    # the shape: SARS-CoV-2 survives an isolate holdout with scores falling to 0.30-0.84, and
+    # collapses at the species rung to one identified ORF and none of the targets; Nipah
+    # collapses at the genus rung to zero. The failure is a cliff rather than a slope, and it
+    # fails empty rather than wrong. So the case worth designing for is the one where
+    # identification returns no accession at all -- which is the premise of the whole project,
+    # since a genuinely novel target has no reviewed entry anywhere.
+    #
+    # Every structural endpoint this repository reached before now resolves an accession: PDBe
+    # coverage, UniProt chain locations, AlphaFold DB. All of them return a true and useless
+    # zero in that case. Six-frame translation needs no reference, so the sequence survives the
+    # cliff, and a single-sequence folding endpoint needs nothing else.
+    onset = selector.from_sequence()
+    assert selector.first(onset).tool == "intake.rank_targets"
+
+    # Identification ran and recognised nothing, so it yielded a sequence and no identity.
+    # Two lanes are still open, and one of them is structural.
+    unnamed = selector.Situation(
+        known=frozenset({"genome_accession", "protein_sequence"}),
+        unresolved=selector.AXES)
+    open_now = {p.tool for p in selector.rank(unnamed) if p.callable_now}
+    assert "structures.folded" in open_now, (
+        "a target identification cannot name has no structural lane; the sequence is the only "
+        "input it can supply and nothing consumes one")
+    assert "similarity.homologs" in open_now
+    # And the accession-keyed structural lanes are correctly shut, not quietly answering.
+    assert "geometry.surface_markers" not in open_now
+    assert "structures.predicted" not in open_now
+
+    # Identification succeeded, so everything opens and the macrocycle surface leads -- the one
+    # instrument written for the molecule class this project exists to design.
+    named = selector.Situation(
+        known=frozenset({"genome_accession", "target_name", "protein_accession",
+                         "residue_ranges", "protein_sequence"}),
+        unresolved=selector.AXES)
+    assert all(p.callable_now for p in selector.rank(named))
+    assert selector.first(named).tool == "geometry.surface_markers"
+
+    # The fact itself has to come from identification, or none of the above is reachable.
+    assert "protein_sequence" in selector.REQUIREMENTS["intake.rank_targets"].provides
+    assert "protein_sequence" in selector.FACTS

@@ -61,7 +61,7 @@ from .common import content_digest
 
 # Bumped by hand when a snapshot is cut. Deliberately not derived from the specs: a digest
 # answers whether two spec sets differ, a version answers which file a reader should open.
-TOOL_SET_VERSION = 4
+TOOL_SET_VERSION = 5
 
 # The declared types a parameter may take. Short on purpose, and not a coercion table: a
 # string where an integer is declared is a contract violation and not an input to parse.
@@ -625,7 +625,478 @@ TOOLS = {
                 "conformations: the spread across structures of one domain reached a factor "
                 "of six on haemagglutinin, so a single number from a single crystal is the "
                 "error this tool is built to avoid reporting."),
+    # ------------------------------------------------------------------------------------
+    # The onset lanes. Six capabilities, surveyed live against the alternatives and built as
+    # their own modules, then registered here so an action can reach them. Three were declared
+    # in `selector.PROPOSED` and unbuilt; three are new. Each module's docstring carries the
+    # survey that chose its endpoint and the measurement behind its declared cost.
+    #
+    # One standing decision across all six, and it is the conservative one. Only
+    # `structures.predicted` declares `produces_evidence`. The others retrieve, annotate or
+    # compute something real and still cannot substantiate a dossier axis yet, because the axis
+    # claim needs a *dated* claim and their dates are per-row rather than per-call: a
+    # publication has its own publication date, a bioactivity its own year, a family assignment
+    # its database release. Turning those into dated dossier entries is a row-set design per
+    # tool, and declaring the axis before doing it would let a hit count substantiate
+    # essentiality -- which is the overclaim this project guards hardest against. So they are
+    # registered as artifacts that *provide facts*, which is what opens the chain, and the axis
+    # work is named rather than assumed.
+    "literature.search": Tool(
+        name="literature.search", version=1,
+        summary="Date-limited literature retrieval for a target name, protein family or "
+                "accession.",
+        description="Queries Europe PMC's fielded search over title and abstract, optionally "
+                    "bounded by a publication-date ceiling, and returns hit counts by source "
+                    "and publication type together with the top hits and whether each carries "
+                    "an abstract. Europe PMC was chosen over NCBI E-utilities, OpenAlex, "
+                    "Crossref and Semantic Scholar on four measured criteria; the decisive one "
+                    "is that it indexes preprints and full text, returning 1173 hits where "
+                    "PubMed returned 25 on the same query, and at onset the preprints are the "
+                    "literature. A count is evidence of attention and of nothing else.",
+        entry="hpc_pilots.literature:search",
+        parameters=(
+            Parameter("subject", "str",
+                      "The term, family accession or protein accession to query for.",
+                      required=True),
+            Parameter("subject_kind", "str",
+                      "Which kind of subject was supplied, which selects how the query is "
+                      "built.",
+                      required=False, default="term",
+                      enum=("term", "family", "accession")),
+            Parameter("scope", "str", "Which fields the query searches.",
+                      required=False, default="title_abstract",
+                      enum=("title_abstract", "title", "all")),
+            Parameter("date_from", "str",
+                      "Inclusive ISO publication-date floor, or absent for no floor.",
+                      required=False, default=None),
+            Parameter("date_to", "str",
+                      "Inclusive ISO publication-date ceiling. The field that makes a "
+                      "hindsight audit falsifiable: without it a replay reads today's "
+                      "literature and reports it as what was knowable then.",
+                      required=False, default=None),
+            Parameter("top", "int", "How many hits to return in full.",
+                      required=False, default=10, minimum=1, maximum=100),
+            Parameter("per_axis", "bool",
+                      "Whether to also run one narrowed count per dossier axis.",
+                      required=False, default=True),
+            Parameter("record", "bool",
+                      "Whether the function writes its own artifact. An episode passes False.",
+                      required=False, default=True),
+        ),
+        returns=(("hit_count", "int", "Total hits matching the query under the date bound."),
+                 ("hits", "dict", "The top hits, with identifiers, titles, dates and sources."),
+                 ("axes", "dict", "One narrowed hit count per dossier axis, when requested."),
+                 ("by_source", "dict", "Hits split by index: MED, PMC, preprint, patent."),
+                 ("by_publication_type", "dict", "Hits split by publication type."),
+                 ("preprints_returned", "int", "How many of the returned hits are preprints."),
+                 ("hits_with_abstract", "int", "How many returned hits carry an abstract."),
+                 ("date_filter_verified", "dict",
+                  "The control that proves the date bound was honoured: the clause, the hit "
+                  "count with and without it, and whether the two differ. Europe PMC discards "
+                  "an unparseable date clause silently and answers HTTP 200 with the "
+                  "unfiltered corpus, so a tool that trusted the status code would hand an "
+                  "auditor the wrong decade. Measured: 8244 hits unbounded against 4464 "
+                  "bounded."),
+                 ("query", "str", "The exact query string sent."),
+                 ("sources", "tuple", "The endpoint and its terms."),
+                 ("provenance", "dict", "Host, commit and time, from common.provenance.")),
+        return_kind="artifact",
+        cost_seconds=10.0, worst_case_seconds=90.0, cost_network_calls=8,
+        reaches_network=True, cost_actions=1,
+        requires=(),
+        failures=(
+            Failure("the date clause did not discriminate",
+                    "Europe PMC echoes an unparseable date clause back and returns the "
+                    "unfiltered corpus at HTTP 200. The control query is run precisely so "
+                    "this is caught rather than trusted, and a non-discriminating clause is "
+                    "reported in `date_filter_verified` rather than silently accepted.",
+                    ""),
+            Failure("urllib.error.HTTPError from the Europe PMC host",
+                    "A public keyless endpoint with no declared rate limit. Observed as an "
+                    "HTTP error rather than a throttling response.",
+                    "RuntimeError"),
+        ),
+        produces_evidence=False, date_field=None,
+        citation="The hit identifiers and the exact query, including the date clause and the "
+                 "control counts. A hit count with no query is not a citable claim, and a "
+                 "count whose date clause was not verified is not a claim about any period.",
+        warning="A publication count measures attention, not truth. It cannot substantiate an "
+                "axis on its own: a target with a thousand papers and no functional assay is "
+                "still a target with no assay. Retrieving a paper and admitting its claim into "
+                "a dossier are different operations, and only the first is implemented here."),
+    "families.entries": Tool(
+        name="families.entries", version=1,
+        summary="Family, domain and site assignments claiming one protein, with residue ranges.",
+        description="Resolves InterPro's integrated entries for a protein accession and "
+                    "returns each family, domain and functional site with the member database "
+                    "that asserted it, its accession, and the residue ranges it covers. The "
+                    "residue ranges are the point: they turn a claim about a protein into a "
+                    "claim about a site, which is what a structural lookup and a binder both "
+                    "need. Also returns a literature query key, which is how a novel target "
+                    "reaches a literature that has never heard of it.",
+        entry="hpc_pilots.families:entries",
+        parameters=(
+            Parameter("accession", "str",
+                      "UniProt accession whose entries are resolved, or the caller's label "
+                      "when a sequence is supplied instead.",
+                      required=True),
+            Parameter("sequence", "str",
+                      "Amino-acid sequence to scan when no accession resolves, or empty.",
+                      required=False, default=""),
+            Parameter("include_predicted", "bool",
+                      "Whether to include assignments from predicted rather than curated "
+                      "member databases.",
+                      required=False, default=True),
+            Parameter("max_families", "int", "How many assignments to return.",
+                      required=False, default=12, minimum=1, maximum=100),
+            Parameter("record", "bool",
+                      "Whether the function writes its own artifact. An episode passes False.",
+                      required=False, default=True),
+        ),
+        returns=(("families", "tuple",
+                  "Family and domain assignments, each with its member database, accession, "
+                  "name and residue ranges."),
+                 ("assignments", "dict", "Assignments grouped by what kind of claim each is."),
+                 ("functional_sites", "tuple", "Site-level assignments where any were made."),
+                 ("literature_key", "str",
+                  "The family name or accession best suited to a literature query, which is "
+                  "the route that works when the target itself is unpublished."),
+                 ("counts", "dict", "How many assignments of each kind were returned."),
+                 ("database_releases", "dict", "The member database releases consulted."),
+                 ("absences", "tuple",
+                  "Databases that returned nothing, kept apart from databases that were not "
+                  "reached, because a silent absence and an unreached source are different."),
+                 ("organism", "str", "The organism the accession belongs to."),
+                 ("content_sha256", "str", "Identity of the payload with timestamps stripped."),
+                 ("provenance", "dict", "Host, commit and time, from common.provenance.")),
+        return_kind="artifact",
+        cost_seconds=50.0, worst_case_seconds=300.0, cost_network_calls=15,
+        reaches_network=True, cost_actions=1,
+        requires=(),
+        failures=(
+            Failure("urllib.error.HTTPError from the InterPro host",
+                    "A public keyless endpoint. A 404 on one member database is recorded as "
+                    "an absence rather than raised, because a protein with no entry in one "
+                    "database is the ordinary case; an error on the integrated endpoint "
+                    "raises.",
+                    "RuntimeError"),
+        ),
+        produces_evidence=False, date_field=None,
+        citation="The InterPro entry accessions, the member databases that asserted them and "
+                 "their releases. A family name with no entry accession is not a cited claim.",
+        warning="A family assignment is an annotation transferred from relatives and is never "
+                "a measurement on this pathogen. Conservation across curated database entries "
+                "is also not conservation across circulating strains, and the two are "
+                "routinely conflated."),
+    "similarity.homologs": Tool(
+        name="similarity.homologs", version=1,
+        summary="Homologs of one protein with identity, E-value and source organism.",
+        description="Submits a sequence to EBI's HMMER phmmer service and returns the hits "
+                    "above an inclusion threshold, each with its percentage identity, "
+                    "E-value, source organism and domain architecture. HMMER was chosen after "
+                    "the endpoint this project had declared turned out to require an email "
+                    "address: EBI's job dispatcher answers HTTP 400 without one, so it is not "
+                    "an unauthenticated tool. HMMER needs no key and answered a 306-residue "
+                    "query against SwissProt in two seconds, where NCBI BLAST was still "
+                    "waiting past a minute.",
+        entry="hpc_pilots.homologs:search",
+        parameters=(
+            Parameter("query", "str",
+                      "An amino-acid sequence, or a nucleotide accession whose coding "
+                      "sequences are resolved first.",
+                      required=True),
+            Parameter("database", "str", "Which HMMER target database to search.",
+                      required=False, default="swissprot"),
+            Parameter("max_hits", "int", "How many hits to return.",
+                      required=False, default=50, minimum=1, maximum=500),
+            Parameter("min_identity", "float",
+                      "Percentage-identity floor below which a hit is dropped.",
+                      required=False, default=0.0, minimum=0.0, maximum=100.0),
+            Parameter("cds_index", "int",
+                      "Which coding sequence to use when the query was an accession.",
+                      required=False, default=0, minimum=0),
+            Parameter("max_wait_seconds", "float",
+                      "Ceiling on polling. Crossing it raises, because a timeout is a failure "
+                      "and not an empty hit list.",
+                      required=False, default=120.0, minimum=1.0),
+            Parameter("record", "bool",
+                      "Whether the function writes its own artifact. An episode passes False.",
+                      required=False, default=True),
+        ),
+        returns=(("homologs", "tuple",
+                  "Homologs, each with accession, identity, E-value, organism and "
+                  "architecture."),
+                 ("homolog_count", "int", "How many homologs are returned."),
+                 ("hits_without_measured_identity", "int",
+                  "Hits the service returned with no computable identity, counted rather than "
+                  "dropped: a hit with no identity cannot be filtered by one and must not "
+                  "silently vanish through the identity floor."),
+                 ("hits_dropped_by_min_identity", "int",
+                  "How many the identity floor removed, so the floor's effect is visible."),
+                 ("best_identity", "float", "The highest percentage identity returned."),
+                 ("identity_warning", "str",
+                  "Names the best identity and says what it does not license. A homolog is "
+                  "somebody else's accession, and treating a low-identity hit as the query's "
+                  "own identity is the conflation this repository already warns about."),
+                 ("hits_above_inclusion_threshold", "int", "How many hits HMMER included."),
+                 ("distinct_species", "int", "How many organisms the hits span."),
+                 ("distinct_pfam_accessions", "int", "How many architectures the hits span."),
+                 ("database_name", "str", "Which database was searched."),
+                 ("database_release_date", "str", "The release the search ran against."),
+                 ("database_entries_searched", "int", "How many entries were searched."),
+                 ("declared_databases_not_served", "tuple",
+                  "Databases the service advertises and did not serve, recorded rather than "
+                  "retried."),
+                 ("content_sha256", "str", "Identity of the payload with timestamps stripped."),
+                 ("provenance", "dict", "Host, commit and time, from common.provenance.")),
+        return_kind="artifact",
+        cost_seconds=9.0, worst_case_seconds=120.0, cost_network_calls=6,
+        reaches_network=True, cost_actions=1,
+        requires=(),
+        failures=(
+            Failure("the poll ceiling was crossed before the job finished",
+                    "A job queue can stall. The ceiling raises rather than returning an empty "
+                    "hit list, because an empty list is a finding and a timeout is not.",
+                    "RuntimeError"),
+            Failure("urllib.error.HTTPError from the EBI HMMER host",
+                    "A public keyless endpoint. Observed as an HTTP error on submission or on "
+                    "result retrieval.",
+                    "RuntimeError"),
+        ),
+        produces_evidence=False, date_field=None,
+        citation="The hit accessions with their identities and E-values, and the database "
+                 "release searched. A homolog name with no identity is not a cited claim.",
+        warning="A homolog is another organism's protein. Its accession is not this target's "
+                "identity, its annotation is not this target's annotation, and conservation "
+                "measured across curated entries is not conservation across circulating "
+                "strains."),
+    "structures.predicted": Tool(
+        name="structures.predicted", version=1,
+        summary="Predicted structural models per accession, with per-range confidence.",
+        description="Inventories predicted models for a protein accession through the "
+                    "3D-Beacons aggregator and retrieves per-residue confidence from "
+                    "AlphaFold DB, then summarises confidence over requested residue ranges. "
+                    "Both sources are needed and neither answers alone: AlphaFold DB reports "
+                    "a 404 and an empty body for an accession the aggregator shows a "
+                    "template-based model for, and the aggregator's residue endpoint silently "
+                    "covers one provider. Models marked experimentally determined are "
+                    "partitioned out and counted separately, never pooled into the predicted "
+                    "count.",
+        entry="hpc_pilots.predicted_structure:coverage",
+        parameters=(
+            Parameter("accession", "str",
+                      "UniProt accession whose predicted models are inventoried.",
+                      required=True),
+            Parameter("residue_ranges", "tuple",
+                      "Residue intervals to summarise confidence over, or empty for the whole "
+                      "chain.",
+                      required=False, default=()),
+            Parameter("confident_plddt", "float",
+                      "Per-residue confidence at or above which a residue counts as "
+                      "confidently modelled.",
+                      required=False, default=70.0, minimum=0.0, maximum=100.0),
+            Parameter("residue_detail", "bool",
+                      "Whether to return the full per-residue confidence vector.",
+                      required=False, default=False),
+            Parameter("record", "bool",
+                      "Whether the function writes its own artifact. An episode passes False.",
+                      required=False, default=True),
+        ),
+        returns=(("any_prediction_exists", "bool",
+                  "Whether any predicted model was found. False is a finding: it means no "
+                  "modelling pipeline has covered this accession."),
+                 ("predicted_models", "tuple",
+                  "The predicted models, with provider, coverage and model-level quality."),
+                 ("excluded_experimental", "tuple",
+                  "Models the aggregator returned that are experimentally determined. "
+                  "Partitioned out rather than dropped, because a reader who sees models "
+                  "vanish deserves to know which tool owns them."),
+                 ("excluded_experimental_count", "int", "How many were partitioned out."),
+                 ("predicted_model_count", "int", "How many predicted models were found."),
+                 ("ranges", "dict",
+                  "Per-requested-range confidence summary. A low-confidence stretch usually "
+                  "means disorder, which is a real finding about the site rather than a gap."),
+                 ("ranges_with_no_model", "tuple",
+                  "Requested ranges no model covers, kept apart from ranges a model covers "
+                  "badly."),
+                 ("plddt_bands", "dict",
+                  "Residue counts per confidence band, so a mean cannot hide a bimodal "
+                  "distribution."),
+                 ("mean_confidence_by_metric", "dict",
+                  "Mean confidence per metric, because providers do not share one: AlphaFold "
+                  "reports pLDDT and SWISS-MODEL reports QMEANDisCo, and averaging across "
+                  "them would produce a number in no units at all."),
+                 ("sequence_length", "int", "Residues in the UniProt entry."),
+                 ("latest_model_created", "str", "When the most recent model was created."),
+                 ("earliest_model_created", "str",
+                  "When the earliest predicted model was created. This claim is knowable from "
+                  "that date and no earlier, which is what lets it enter a dated dossier."),
+                 ("alphafold_host_served_models", "bool",
+                  "Whether AlphaFold DB served anything for this accession, kept apart from "
+                  "whether a prediction exists at all."),
+                 ("content_sha256", "str", "Identity of the payload with timestamps stripped."),
+                 ("provenance", "dict", "Host, commit and time, from common.provenance.")),
+        return_kind="evidence",
+        cost_seconds=7.0, worst_case_seconds=120.0, cost_network_calls=2,
+        reaches_network=True, cost_actions=1,
+        requires=(),
+        failures=(
+            Failure("urllib.error.HTTPError from the 3D-Beacons or AlphaFold host",
+                    "Public keyless endpoints. A 404 from the AlphaFold prediction endpoint is "
+                    "recorded as that host serving nothing rather than as an absent "
+                    "prediction, because the two differ and the difference was measured on an "
+                    "accession this project already singles out.",
+                    "RuntimeError"),
+        ),
+        produces_evidence=True, date_field="earliest_model_created",
+        citation="The model identifiers with their providers and creation dates, and the "
+                 "confidence threshold applied. A confident fraction with no model identifiers "
+                 "is not a cited claim.",
+        warning="A predicted model is not a deposited one and must never be pooled into a "
+                "structural count. It is also not evidence that the protein adopts that "
+                "conformation: a confidence score is the model's confidence, not its accuracy, "
+                "and it is least trustworthy on exactly the sparse-homology proteins this "
+                "project cares about."),
+    "structures.folded": Tool(
+        name="structures.folded", version=1,
+        summary="Fold one amino-acid sequence with ESMFold, keyed on the sequence.",
+        description="Submits a sequence to the ESM Atlas folding endpoint and returns the "
+                    "predicted coordinates, the per-residue confidence parsed from the "
+                    "B-factor column, and a neighbour-count burial proxy. This is the only "
+                    "structural lane whose input a genuinely unknown target can supply: every "
+                    "other one resolves an accession, and a novel protein has none, so they "
+                    "return a true and useless zero for the case this project is named for. "
+                    "ESMFold runs single-sequence with no alignment and no template.",
+        entry="hpc_pilots.folded_structure:fold",
+        parameters=(
+            Parameter("sequence", "str",
+                      "Amino-acid sequence. A FASTA block is accepted and its header dropped.",
+                      required=True),
+            Parameter("target_name", "str",
+                      "A label carried into the record, or empty.",
+                      required=False, default=""),
+            Parameter("neighbour_cutoff", "float",
+                      "Radius in angstroms within which a beta-carbon counts as a neighbour "
+                      "for the burial proxy.",
+                      required=False, default=10.0, minimum=1.0, maximum=30.0),
+            Parameter("confident_plddt", "float",
+                      "Per-residue confidence at or above which a residue counts as "
+                      "confidently modelled.",
+                      required=False, default=70.0, minimum=0.0, maximum=100.0),
+            Parameter("record", "bool",
+                      "Whether the function writes its own artifact. An episode passes False.",
+                      required=False, default=True),
+        ),
+        returns=(("folded", "bool", "Whether the endpoint returned coordinates."),
+                 ("plddt", "tuple", "Per-residue model confidence."),
+                 ("confident_fraction", "float",
+                  "Share of residues at or above the confidence threshold."),
+                 ("low_confidence_runs", "tuple",
+                  "Contiguous stretches below the threshold, which usually mean disorder."),
+                 ("exposure_proxy", "tuple",
+                  "Per-residue neighbour counts. A contact number, labelled a proxy "
+                  "everywhere: no solvent model, no sidechain packing past the beta carbon, "
+                  "no probe radius. It is not solvent-accessible surface area."),
+                 ("alignment_verified", "bool",
+                  "Whether the returned coordinates align residue-for-residue with the "
+                  "sequence submitted."),
+                 ("alignment_mismatches", "tuple",
+                  "Positions where they did not, which is how a silently truncated or "
+                  "reordered return is caught."),
+                 ("absence", "dict",
+                  "Why nothing was folded, when nothing was. An explicit recorded absence "
+                  "rather than an empty structure."),
+                 ("content_sha256", "str", "Identity of the payload with timestamps stripped."),
+                 ("provenance", "dict", "Host, commit and time, from common.provenance.")),
+        return_kind="artifact",
+        cost_seconds=0.7, worst_case_seconds=300.0, cost_network_calls=1,
+        reaches_network=True, cost_actions=1,
+        requires=(),
+        failures=(
+            Failure("the folding endpoint returned no coordinates",
+                    "The ESM Atlas service has been intermittently unavailable. Recorded as "
+                    "an explicit absence with the reason, rather than as an empty structure "
+                    "that would read downstream as a protein with no fold.",
+                    ""),
+            Failure("the sequence exceeds what the endpoint accepts",
+                    "The service bounds sequence length. A long polyprotein has to be split "
+                    "before folding, and the refusal says so rather than truncating silently.",
+                    ""),
+        ),
+        produces_evidence=False, date_field=None,
+        citation="The sequence digest, the endpoint and the confidence vector. A fold with no "
+                 "sequence digest cannot be checked against the sequence it claims to be of.",
+        warning="One monomer, one conformation, in vacuum: no partners, no glycans, no "
+                "membrane, no ensemble. For a viral glycoprotein the biological unit is "
+                "usually a trimer, so a surface scored here as exposed may be an oligomeric "
+                "interface that is never solvent-exposed in the assembled particle. That is "
+                "the precise question `accessibility` asks, answered wrongly, which is why "
+                "this tool gates no axis."),
+    "bioactivity.prior_binders": Tool(
+        name="bioactivity.prior_binders", version=1,
+        summary="Prior bioactivities, assay formats and public mutational landscapes for one "
+                "protein.",
+        description="Queries ChEMBL for recorded bioactivities against a target accession, "
+                    "IEDB for mapped epitopes, and MaveDB for deep mutational scanning "
+                    "datasets, then reports what each lane found and which lanes could not be "
+                    "reached. Peptide and macrocycle-shaped molecules are separated from small "
+                    "molecules, because the question this project asks of precedent is narrow: "
+                    "not whether anything has ever bound the target, but whether anything of "
+                    "the molecule class under development has.",
+        entry="hpc_pilots.bioactivity:binders_and_assays",
+        parameters=(
+            Parameter("accession", "str",
+                      "UniProt accession the lanes are keyed on.", required=True),
+            Parameter("target_name", "str",
+                      "A name used where a lane cannot be queried by accession, or absent.",
+                      required=False, default=None),
+            Parameter("max_molecules", "int",
+                      "How many bioactivity records to retrieve and shape-classify.",
+                      required=False, default=50, minimum=1, maximum=500),
+            Parameter("record", "bool",
+                      "Whether the function writes its own artifact. An episode passes False.",
+                      required=False, default=True),
+        ),
+        returns=(("chembl", "dict",
+                  "Bioactivity counts and assay formats, split by molecule shape."),
+                 ("iedb", "dict", "Mapped epitopes, where any were found."),
+                 ("mavedb", "dict",
+                  "Public mutational-scanning datasets naming this protein."),
+                 ("axis_bearing", "dict",
+                  "What each lane's return does and does not license per axis, stated in the "
+                  "payload so a count cannot travel without it."),
+                 ("earliest_evidence_year", "int",
+                  "The earliest year any retrieved record was published."),
+                 ("lanes_unavailable", "tuple",
+                  "Lanes that could not be reached, kept apart from lanes that returned "
+                  "nothing. An unreached source is not an absence of evidence."),
+                 ("content_sha256", "str", "Identity of the payload with timestamps stripped."),
+                 ("provenance", "dict", "Host, commit and time, from common.provenance.")),
+        return_kind="artifact",
+        cost_seconds=94.0, worst_case_seconds=600.0, cost_network_calls=16,
+        reaches_network=True, cost_actions=1,
+        requires=(),
+        failures=(
+            Failure("a lane could not be reached",
+                    "Three independent public endpoints. One being unavailable is recorded in "
+                    "`lanes_unavailable` rather than raised, because the other two still "
+                    "answer and an unreached lane must not read as an empty one.",
+                    ""),
+            Failure("urllib.error.HTTPError from the ChEMBL, IEDB or MaveDB host",
+                    "Public keyless endpoints. Raised when the integrated query itself fails "
+                    "rather than one lane.",
+                    "RuntimeError"),
+        ),
+        produces_evidence=False, date_field=None,
+        citation="The ChEMBL activity and assay identifiers, the IEDB epitope identifiers and "
+                 "the MaveDB dataset accessions, with the year each was published. A row count "
+                 "with no identifiers is not a cited claim.",
+        warning="A row in a bioactivity database is not an assay you can run, and a count of "
+                "them is not an available assay. A small-molecule bioactivity is also not "
+                "precedent for a macrocycle, which is why the shapes are separated rather "
+                "than totalled."),
 }
+
 
 
 def tool(name):

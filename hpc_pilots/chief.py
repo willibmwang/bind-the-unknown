@@ -315,7 +315,9 @@ POLICIES = ()
 # is the behaviour working: the call came back `rejected` with "no policy covers" rather than
 # succeeding because nobody had thought about it.
 NO_SIDE_EFFECT = ("chemistry.library_spec", "intake.rank_targets", "structures.evidence",
-                  "geometry.surface_markers")
+                  "geometry.surface_markers", "literature.search", "families.entries",
+                  "similarity.homologs", "structures.predicted", "structures.folded",
+                  "bioactivity.prior_binders")
 
 
 def check_policy(spec, arguments, context):
@@ -558,6 +560,90 @@ def _rank_targets(spec, arguments, context, wrap):
                 source="Identification against the named reviewed UniProt release")
 
 
+# Where each onset lane's return comes from, which is the only thing that decides whether it
+# can be cited. Declared per tool rather than defaulted, because the lanes genuinely differ and
+# one blanket value would be wrong for at least one of them: five retrieve what a public
+# database already holds, while `structures.folded` asks a model to compute a structure that
+# did not exist until the call was made. Reporting that as an `external_record` would give a
+# fresh prediction the standing of a deposition, which is the conflation `structures.predicted`
+# partitions its own return to avoid.
+ONSET_SOURCE_KINDS = {
+    "literature.search": "external_record",
+    "families.entries": "external_record",
+    "similarity.homologs": "external_record",
+    "structures.predicted": "external_record",
+    "structures.folded": "computed",
+    "bioactivity.prior_binders": "external_record",
+}
+
+# Which payload key says whether the call found anything, per tool. A lane that found nothing
+# returns `empty`, not `failed`: a successful call that found nothing is a finding, and
+# `chief.STATUSES` separates them for the reason `structures.evidence` already pays for.
+# Declared rather than sniffed, because guessing from whichever key happens to be present
+# makes the meaning of `empty` depend on a dict's shape.
+ONSET_FOUND_KEYS = {
+    "literature.search": "hit_count",
+    "families.entries": "families",
+    "similarity.homologs": "homolog_count",
+    "structures.predicted": "any_prediction_exists",
+    "structures.folded": "folded",
+    "bioactivity.prior_binders": None,
+}
+
+
+def _passthrough(spec, arguments, context, wrap):
+    """Dispatch an onset lane whose payload is already the return, with `record` forced off.
+
+    One adapter for six tools because they share a shape: each takes a `record` keyword and
+    each returns a dict that is the payload. `record=False` is forced rather than defaulted --
+    the episode writes the record, and a tool that wrote its own would put a second artifact on
+    disk that no run names.
+
+    The two per-tool facts an adapter cannot infer are declared above: where the return came
+    from, and which key says whether it found anything.
+    """
+    name = spec.name
+    payload = spec.resolve()(**{**arguments, "record": False})
+    absence = payload.get("absence") if isinstance(payload, dict) else None
+    key = ONSET_FOUND_KEYS.get(name)
+    # The declared key decides, and `absence` is consulted only where no key is declared. The
+    # first version had it the other way round and read `literature.search` as empty on a call
+    # that found 4464 hits: that payload always carries an `absence` dict, because the field
+    # reports *which per-axis queries* came back zero rather than whether the call found
+    # nothing. A truthy dict is not a truthy claim, and treating one as the other turned a
+    # successful retrieval into a recorded absence.
+    found = bool(payload.get(key)) if key else not absence
+    date = payload.get(spec.date_field) if (spec.date_field and isinstance(payload, dict)) \
+        else None
+    if not found:
+        return wrap(status="empty", value=None,
+                    source_kind=ONSET_SOURCE_KINDS[name],
+                    source=f"{name} over its declared endpoints",
+                    note=str(absence) if absence
+                    else "the call succeeded and found nothing",
+                    detail={"lanes_unavailable": payload.get("lanes_unavailable")}
+                    if isinstance(payload, dict) and payload.get("lanes_unavailable")
+                    else None)
+    if spec.produces_evidence and date is None:
+        # A dated tool that found something and cannot date it. The envelope refuses a citable
+        # claim with no `available_from`, and rightly: `Dossier.observe` compares that field
+        # against the decision clock, so an undated claim enters at any clock. Returned on an
+        # uncitable row so the finding stays visible and unusable, which is the pattern
+        # `_structures_evidence` applies to a target with no deposited structure.
+        return wrap(status="ok", value=payload,
+                    rows=({"name": str(arguments.get("accession") or name),
+                           "available_from": None, "citable": False,
+                           "value": {"reason": f"{name} found a result with no "
+                                               f"{spec.date_field!r}, so it cannot be placed "
+                                               f"on the decision clock"}},),
+                    source_kind=ONSET_SOURCE_KINDS[name],
+                    source=f"{name} over its declared endpoints")
+    return wrap(status="ok", value=payload,
+                source_kind=ONSET_SOURCE_KINDS[name],
+                source=f"{name} over its declared endpoints",
+                available_from=str(date) if date is not None else None)
+
+
 # The only name-to-callable table. An adapter takes the spec, the validated arguments, the
 # context and the envelope constructor, and returns an envelope. It never writes: every
 # pipeline it wraps is called with `record=False`, because the episode writes the record and a
@@ -567,4 +653,10 @@ DISPATCH = {
     "structures.evidence": _structures_evidence,
     "intake.rank_targets": _rank_targets,
     "geometry.surface_markers": _surface_markers,
+    "literature.search": _passthrough,
+    "families.entries": _passthrough,
+    "similarity.homologs": _passthrough,
+    "structures.predicted": _passthrough,
+    "structures.folded": _passthrough,
+    "bioactivity.prior_binders": _passthrough,
 }
