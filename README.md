@@ -155,31 +155,6 @@ The adversarial and confound reviews in [reviews/](reviews/) exist for the same 
 
 ---
 
-## What this repository does not establish
-
-Stated plainly, because several documents here could be skimmed as though it did.
-
-- **No binding affinity, functional inhibition, antiviral activity or therapeutic efficacy** is
-  asserted anywhere.
-- **No macrocycle and no non-canonical residue has been measured.** The chemistry registry is
-  literature block classes, not the SynX catalog, and library enumeration predicts nothing.
-- **Structure requests are an honest stub.** A request is recorded and charged against the budget,
-  and returns a string saying no structural claim was produced.
-- **No non-smoke agent run exists for the binding or structural arms.** The missing runs are
-  exactly the agent policy, and GPU inference has not been validated on an allocation. This is the
-  largest near-term gap.
-- **Target recommendations are proposals pending expert review**, not independent citations. Three
-  are flagged `verified=false` and must not be used as positive controls.
-- **Update probes are synthetic**, and the code says so. They test evidence-following, not the
-  absence of pretrained knowledge.
-- **Date-limited retrieval does not remove knowledge already in model weights.** Any historical
-  reconstruction states that limit.
-- Enrichment ratios are a readout shape, not an affinity. Endpoints are never pooled across
-  landscapes: GB1 is an IgG binding selection, Mpro is FRET cleavage plus growth, and both
-  haemagglutinin scans are viral replication.
-
----
-
 ## Repository map
 
 | Path | What is in it |
