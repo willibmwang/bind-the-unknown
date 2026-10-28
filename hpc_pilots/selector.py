@@ -55,6 +55,21 @@ FACTS = (
     # A reviewed protein accession. What a structural lookup is keyed on; a sequence is not a
     # substitute, because the endpoints this repository reaches resolve accessions and not
     # sequences.
+    #
+    # That last clause was a statement about the endpoints reached, not about the world, and it
+    # has been narrowed rather than deleted: it holds for PDBe coverage, for UniProt chain
+    # locations and for AlphaFold DB, all of which resolve an accession. It does not hold for a
+    # single-sequence folding endpoint, which is why `protein_sequence` is now a fact of its
+    # own. The distinction matters because a genuinely unknown protein -- the project's premise
+    # -- has no reviewed accession, so every accession-keyed lane returns a true and useless
+    # zero for exactly the case the work is about.
+    "protein_sequence",
+    # One candidate's amino-acid sequence, which ORF calling yields directly from a genome and
+    # which needs no identification at all. The only structural input a novel target can
+    # supply. Distinct from `protein_accession` on purpose and in the same way
+    # `homolog_accession` is: a sequence is what the pathogen has, an accession is what a
+    # curated database has, and a pipeline that silently treats one as the other is the
+    # conflation this tuple exists to prevent.
     "residue_ranges",
     # Declared or derived residue intervals for a named target. What makes structural coverage
     # a statement about a site rather than about a whole chain.
@@ -162,7 +177,16 @@ REQUIREMENTS = {
         # The one tool in the registry that turns the fact a campaign starts with into the facts
         # every other tool is keyed on. Everything else is downstream of it by construction, not
         # by preference.
-        provides=("target_name", "protein_accession", "residue_ranges"),
+        #
+        # `protein_sequence` is declared now because the ORF translation is carried into the
+        # output rather than dropped from it. This is the only fact here that does not depend on
+        # identification succeeding: the first three are what a reviewed database says about a
+        # relative, and a genome with no recognisable homolog yields none of them -- the holdout
+        # work measured exactly that, a cliff to zero identified ORFs at the species rung. The
+        # sequence survives that cliff, because six-frame translation needs no reference at all.
+        # So this is the fact that keeps a structural lane open for a target nothing recognises,
+        # which is the case the whole project is named for.
+        provides=("target_name", "protein_accession", "residue_ranges", "protein_sequence"),
         gates=(),
     ),
 }

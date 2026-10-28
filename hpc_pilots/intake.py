@@ -875,8 +875,25 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
         topology = None if hits else membrane_topology(orf["protein"])
         if topology and topology["likely_surface"]:
             tier = "topology"
+        # `protein` is carried now, and the omission it replaces was the single break in the
+        # onset chain. `orfs` translates every reading frame and this dict then kept the
+        # coordinates and dropped the sequence, so the one input a genuinely unknown target can
+        # supply was computed and discarded. Everything downstream is keyed on an accession --
+        # PDBe coverage, UniProt locations, AlphaFold DB -- and a novel protein has none, so
+        # every structural lane returned a true and useless zero for exactly the case this
+        # project is about. A single-sequence folding endpoint needs the sequence and nothing
+        # else, and this is the only place it exists.
+        #
+        # The coordinates alone are not a substitute. They are sufficient to re-derive the
+        # sequence, but only by re-fetching the genome and re-translating, which makes a second
+        # caller reimplement the translation and the frame arithmetic this function already did.
+        #
+        # Cost of carrying it: the ranked output is `top` rows, twelve by default, so this adds
+        # roughly twenty kilobytes to a payload that is already hundreds. The payload shape
+        # changes, so `content_sha256` moves for runs recorded from here on; artifacts already
+        # on disk keep the digest they were written with, which is what that field is for.
         candidates.append({"orf": {k: orf[k] for k in
-                                   ("strand", "frame", "nt_start", "length_aa")}
+                                   ("strand", "frame", "nt_start", "length_aa", "protein")}
                                   | {"segment": orf.get("segment", 0)},
                            "hits": hits, "tier": tier, "topology": topology})
 

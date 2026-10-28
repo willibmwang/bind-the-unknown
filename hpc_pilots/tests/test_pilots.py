@@ -4170,11 +4170,20 @@ def test_building_the_three_lanes_moves_identification_to_the_front():
     # The ordering question only becomes interesting once something consumes an identity. With
     # the lanes declared, identification stops being one callable option among four and becomes
     # the call that widens the action set, which is what `score[1]` is for.
+    #
+    # `geometry.surface_markers` joined that set by being registered, so identification now
+    # unlocks a real tool and not only hypothetical ones. The distinction the `--proposed` flag
+    # exists to preserve still holds: two of these three names are tools nobody has built, and
+    # the live ranking in the test above reports only the one that exists.
     merged = {**selector.REQUIREMENTS, **selector.PROPOSED}
     situation = selector.from_sequence()
     best = selector.first(situation, requirements=merged)
     assert best.tool == "intake.rank_targets"
-    assert best.unlocks == ("families.entries", "literature.search")
+    assert best.unlocks == ("families.entries", "geometry.surface_markers",
+                            "literature.search")
+    assert set(best.unlocks) & set(selector.PROPOSED) == {"families.entries",
+                                                          "literature.search"}
+    assert set(best.unlocks) & set(tools.TOOLS) == {"geometry.surface_markers"}
     # And once an identity exists, the tool bearing on the most unresolved axes leads.
     identified = selector.Situation(
         known=frozenset({"genome_accession", "target_name", "protein_accession",
