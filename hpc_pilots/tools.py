@@ -61,7 +61,7 @@ from .common import content_digest
 
 # Bumped by hand when a snapshot is cut. Deliberately not derived from the specs: a digest
 # answers whether two spec sets differ, a version answers which file a reader should open.
-TOOL_SET_VERSION = 3
+TOOL_SET_VERSION = 4
 
 # The declared types a parameter may take. Short on purpose, and not a coercion table: a
 # string where an integer is declared is a contract violation and not an input to parse.
@@ -266,9 +266,18 @@ class Tool:
     requires: tuple = field(default_factory=tuple)
     """Import names that must be available, checked by `available()` before dispatch so a
     missing backend names its cause instead of surfacing as an ImportError from inside the
-    fifth round of an episode. Only what the *default* path needs: `intake` reaches `Bio` at
-    line 1309 and `pyrodigal` at 1448, both off the default viral path, so declaring them
-    would refuse a tool that works. Not a version pin -- `requirements.lock.txt` is that."""
+    fifth round of an episode. Only what the *default* path needs. Not a version pin --
+    `requirements.lock.txt` is that.
+
+    This docstring used to claim that `intake` reaches `Bio` and `pyrodigal` "both off the
+    default viral path, so declaring them would refuse a tool that works", and the first half
+    was wrong. `run_intake` defaults to `remote=True` and builds the aligner unconditionally
+    before the ORF loop, so `Bio` is squarely on the default path: with it absent the call
+    returned a charged `failed` envelope carrying an unexplained `ModuleNotFoundError`, which
+    no declared `Failure` predicts and which the optimiser would read as a failure mode of the
+    tool rather than of the environment. `pyrodigal` genuinely is off the default path and
+    stays undeclared. The lesson generalises -- `geometry` had the same defect with `freesasa`,
+    where the ImportError was caught and rewritten as a sentence about downloads."""
     failures: tuple = field(default_factory=tuple)
     """`Failure` records. The one field a run's record can genuinely extend, because
     `trace[].result` and `agent.incidents[]` log failures as they happen. Never exhaustive,
@@ -469,7 +478,12 @@ TOOLS = {
         return_kind="artifact",
         cost_seconds=0.0, worst_case_seconds=None, cost_network_calls=None,
         reaches_network=True, cost_actions=1,
-        requires=(),
+        # `Bio` is on the default path, not off it. `run_intake` defaults to `remote=True` and
+        # builds the aligner before the ORF loop, so with biopython absent the call came back
+        # as a charged tool failure carrying `ModuleNotFoundError: No module named 'Bio'` --
+        # an environment problem recorded as a property of the tool, and one no declared
+        # failure here predicts. `pyrodigal` really is off the default path and stays out.
+        requires=("Bio",),
         failures=(
             Failure("A holdout that removes nothing raises rather than proceeding",
                     "`build_index(require_removal=True)` refuses an exclusion that matched "
@@ -487,6 +501,130 @@ TOOLS = {
         warning="The worth-binding score and the identification confidence are different "
                 "axes and must not be pooled. A high score resting on a hydropathy-only "
                 "assignment is a row a reader has to be able to see."),
+    # The most macrocycle-specific capability in the repository, and until now it was reachable
+    # from nothing: `geometry.surface_markers` had exactly one consumer,
+    # `intake.enrich_with_surface`, and that function has no caller anywhere. So the one
+    # instrument written for the molecule class this project exists to design was dead code.
+    #
+    # It also did not run. `freesasa`, the C library every marker is computed with, was absent
+    # from the scientific environment, and `surface_for_accession` caught the ImportError and
+    # reported it as "no candidate structure could be downloaded or parsed" -- a missing
+    # backend presented as a network or parsing failure, which sends a reader to the wrong
+    # place. With the library installed the tool answers in about three seconds: SARS-CoV-2
+    # spike reports a 965 square-angstrom contiguous hydrophobic patch, the ORF1ab polyprotein
+    # 762, and influenza haemagglutinin 238 with a spread from 182 to 1131 across five
+    # structures of the same domain.
+    #
+    # This is the one registered tool that bears on `accessibility`. `structures.evidence`
+    # deliberately does not: its own warning says a structure count is a research-attention
+    # proxy and must never be pooled with a pocket score, so the axis asking whether an
+    # epitope is solvent-exposed had no instrument at all.
+    "geometry.surface_markers": Tool(
+        name="geometry.surface_markers", version=1,
+        summary="Macrocycle-shaped surface markers for one protein accession, from deposited "
+                "structures.",
+        description="Resolves the best-resolution deposited chains for a UniProt accession, "
+                    "optionally restricted to a residue interval, and computes per-structure "
+                    "solvent accessibility with freesasa. Reports the largest contiguous "
+                    "exposed hydrophobic patch as a median over up to five structures of the "
+                    "same domain, with the minimum, maximum and spread beside it, plus the "
+                    "exposed fraction, the patch as a share of total surface, and the count "
+                    "of N-linked glycosylation sequons within glycan reach of the patch. The "
+                    "markers are interface-shaped rather than pocket-shaped on purpose: a "
+                    "small-molecule druggability score is calibrated on deep enclosed "
+                    "cavities and a macrocycle binds the opposite, so on pocket depth the "
+                    "main protease outscores the spike receptor-binding domain, which is "
+                    "correct for a small molecule and backwards here. It measures a surface "
+                    "and predicts no affinity.",
+        entry="hpc_pilots.geometry:surface_for_accession",
+        parameters=(
+            Parameter("accession", "str",
+                      "Reviewed UniProt accession whose best deposited chains are measured.",
+                      required=True),
+            Parameter("interval", "dict",
+                      "Residue interval to restrict the representative-structure choice to, "
+                      "or absent for the whole chain.",
+                      required=False, default=None),
+            Parameter("replicates", "int",
+                      "How many structures of the same domain to measure before taking the "
+                      "median.",
+                      required=False, default=5, minimum=1, maximum=10),
+        ),
+        returns=(("hydrophobic_patch_area", "float",
+                  "Median largest contiguous exposed hydrophobic patch, square angstroms. A "
+                  "macrocyclic peptide buries roughly 400 to 800 on binding."),
+                 ("patch_area_min", "float", "Smallest across the structures measured."),
+                 ("patch_area_max", "float", "Largest across the structures measured."),
+                 ("patch_area_spread", "float",
+                  "Max minus min. A patch of 600 give or take 40 is a different claim from "
+                  "600 give or take 300, and one structure is one sample of an ensemble."),
+                 ("exposed_fraction", "float", "Share of residues at or above the exposure "
+                                               "cut."),
+                 ("patch_fraction_of_surface", "float",
+                  "The patch as a share of total surface, which separates one large "
+                  "contiguous site from a large protein carrying many small ones."),
+                 ("sequons_near_patch", "int",
+                  "N-linked sequons within glycan reach of the patch. The honest "
+                  "counterweight on a viral surface protein: a conserved exposed patch "
+                  "covered in glycan is not the opportunity its area suggests."),
+                 ("surface_score", "float",
+                  "One stated, unfitted weighting of the markers for a macrocycle. Not "
+                  "fitted, because there is no labelled set of macrocycle-amenable targets "
+                  "to fit against and building one from the targets under test is circular."),
+                 ("structures_measured", "int", "How many structures the median is over."),
+                 ("structures_used", "tuple", "The pdb_id:chain pairs measured."),
+                 ("available_from", "str",
+                  "Earliest deposition date among the structures measured, or absent when "
+                  "none could be resolved. When this claim became knowable -- a patch is "
+                  "evidence from the day the coordinates showing it were deposited, not from "
+                  "the day it was computed, and `Dossier.observe` compares this against the "
+                  "decision clock."),
+                 ("deposition_dates", "dict",
+                  "Each measured entry's deposition date, so the earliest can be checked "
+                  "rather than taken.")),
+        return_kind="evidence",
+        # Measured over three real accessions, not declared. 14.5 s for the first call in a
+        # process against 3.0 s for the next two, because the first pays the freesasa import
+        # and downloads five structures that `fetch_structure` then caches on disk. The
+        # declared figure is the warm one and the worst case is set well above the cold one,
+        # which is the split `worst_case_seconds` exists for.
+        cost_seconds=3.0, worst_case_seconds=120.0, cost_network_calls=4,
+        reaches_network=True, cost_actions=1,
+        # Declared, which is what makes an absent backend name itself. Without this the
+        # ImportError was being caught and rewritten into a sentence about downloads.
+        requires=("freesasa",),
+        failures=(
+            Failure("no candidate structure could be measured",
+                    "Returned, not raised: a target with no usable deposited structure is "
+                    "the ordinary case for a novel pathogen and the ranker has to keep "
+                    "working without one. The return carries the per-structure reasons and "
+                    "the chains that were offered, so an empty answer can be told apart "
+                    "from a broken one.",
+                    ""),
+            Failure("None for an accession with no representative structure",
+                    "`representative_structure` skips chains shorter than its floor, because "
+                    "a peptide fragment co-crystallised with something else has a surface "
+                    "but not the target's. An accession whose only entries are such "
+                    "fragments resolves to nothing.",
+                    ""),
+        ),
+        # Evidence, and only because the return is dated. A marker computed from a structure
+        # carries no date of its own, and an undated claim defeats the boundary the historical
+        # replays rest on: `Dossier.observe` compares `available_from` against the decision
+        # clock, so a claim with no date enters at any clock. The date is the earliest
+        # deposition among the structures actually measured, which is the same rule
+        # `structures.evidence` applies -- the first coordinates to show a surface are what
+        # made it knowable. A call whose dates cannot be resolved returns the markers on an
+        # uncitable row rather than dropping them or dating them at fetch time.
+        produces_evidence=True, date_field="available_from",
+        citation="The pdb_id:chain pairs in `structures_used` and the freesasa version. A "
+                 "patch area with no structures named is not a cited claim, and the median "
+                 "without the spread is not the measurement.",
+        warning="A surface marker is not an affinity, not a druggability score and not a "
+                "prediction that any macrocycle binds. It is also computed on deposited "
+                "conformations: the spread across structures of one domain reached a factor "
+                "of six on haemagglutinin, so a single number from a single crystal is the "
+                "error this tool is built to avoid reporting."),
 }
 
 

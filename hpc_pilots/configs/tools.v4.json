@@ -1,0 +1,469 @@
+{
+  "version": 4,
+  "generated_at_utc": "2026-10-28T01:28:33.857735+00:00",
+  "tool_set_sha256": "2ca8fc87a995fbf3cedd9b1ec2fe521d8689083912cea15c48627a4c4dc08f5c",
+  "note": "Byte-immutable once committed, so the tool_set_sha256 embedded in already-recorded runs still verifies. A changed spec goes in a new tools.v{n+1}.json rather than editing this file, which is the device configs/today.json already uses.",
+  "tools": {
+    "chemistry.library_spec": {
+      "name": "chemistry.library_spec",
+      "version": 2,
+      "summary": "Define a focused thioether-macrocycle library over a randomised region.",
+      "description": "Returns a library definition: a fixed chloroacetyl initiator, a randomised region of the given length bounds, a downstream cysteine closure, and the elongator alphabet implied by the requested monomer classes. It defines a library and does not synthesise, screen or score one, and the theoretical diversity it reports is a count of sequences the definition admits rather than a prediction that any of them bind.",
+      "entry": "hpc_pilots.chemistry:library_spec",
+      "endpoint": null,
+      "parameters": [
+        {
+          "name": "initiator",
+          "kind": "str",
+          "meaning": "Chloroacetyl initiator, which must be one the chemistry module registers.",
+          "required": false,
+          "default": "ClAc-D-Tyr",
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "random_region",
+          "kind": "tuple",
+          "meaning": "Inclusive (low, high) length bounds for the randomised region.",
+          "required": false,
+          "default": [
+            4,
+            8
+          ],
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "elongator_classes",
+          "kind": "tuple",
+          "meaning": "Monomer classes admitted into the elongator alphabet.",
+          "required": false,
+          "default": [
+            "canonical",
+            "N-methyl",
+            "D-alpha-amino"
+          ],
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        }
+      ],
+      "returns": [
+        [
+          "initiator",
+          "str",
+          "The initiator the library fixes."
+        ],
+        [
+          "closure_residue",
+          "str",
+          "The residue that closes the macrocycle."
+        ],
+        [
+          "random_region",
+          "tuple",
+          "The length bounds, as [low, high]."
+        ],
+        [
+          "elongator_alphabet",
+          "tuple",
+          "Monomer codes the region draws from."
+        ],
+        [
+          "theoretical_diversity",
+          "int",
+          "Sequences the definition admits. Not a library that exists, and not a count of anything measured."
+        ]
+      ],
+      "return_kind": "artifact",
+      "rows": null,
+      "cost_seconds": 0.0,
+      "worst_case_seconds": null,
+      "cost_network_calls": 0,
+      "reaches_network": false,
+      "cost_actions": 1,
+      "requires": [],
+      "failures": [
+        {
+          "symptom": "'<name>' is not a registered chloroacetyl initiator",
+          "cause": "The initiator is validated against the chemistry module's own table, which is narrower than the set of strings the schema admits.",
+          "raises": "ValueError",
+          "observed_in": []
+        },
+        {
+          "symptom": "Invalid randomised-region bounds",
+          "cause": "The bounds must satisfy 1 <= low <= high, which a JSON schema cannot express portably, so the function enforces it.",
+          "raises": "ValueError",
+          "observed_in": []
+        },
+        {
+          "symptom": "Empty elongator alphabet",
+          "cause": "Every requested monomer class was unknown, leaving nothing to draw from.",
+          "raises": "ValueError",
+          "observed_in": []
+        }
+      ],
+      "check": null,
+      "produces_evidence": false,
+      "date_field": null,
+      "citation": "A library definition is a design choice, not a cited claim, and cannot substantiate a dossier axis on its own.",
+      "warning": "Theoretical diversity is a combinatorial count over the definition. It is not a synthesised library, not a screened one, and no macrocycle has been measured anywhere in this repository."
+    },
+    "geometry.surface_markers": {
+      "name": "geometry.surface_markers",
+      "version": 1,
+      "summary": "Macrocycle-shaped surface markers for one protein accession, from deposited structures.",
+      "description": "Resolves the best-resolution deposited chains for a UniProt accession, optionally restricted to a residue interval, and computes per-structure solvent accessibility with freesasa. Reports the largest contiguous exposed hydrophobic patch as a median over up to five structures of the same domain, with the minimum, maximum and spread beside it, plus the exposed fraction, the patch as a share of total surface, and the count of N-linked glycosylation sequons within glycan reach of the patch. The markers are interface-shaped rather than pocket-shaped on purpose: a small-molecule druggability score is calibrated on deep enclosed cavities and a macrocycle binds the opposite, so on pocket depth the main protease outscores the spike receptor-binding domain, which is correct for a small molecule and backwards here. It measures a surface and predicts no affinity.",
+      "entry": "hpc_pilots.geometry:surface_for_accession",
+      "endpoint": null,
+      "parameters": [
+        {
+          "name": "accession",
+          "kind": "str",
+          "meaning": "Reviewed UniProt accession whose best deposited chains are measured.",
+          "required": true,
+          "default": null,
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "interval",
+          "kind": "dict",
+          "meaning": "Residue interval to restrict the representative-structure choice to, or absent for the whole chain.",
+          "required": false,
+          "default": null,
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "replicates",
+          "kind": "int",
+          "meaning": "How many structures of the same domain to measure before taking the median.",
+          "required": false,
+          "default": 5,
+          "enum": [],
+          "enum_from": null,
+          "minimum": 1,
+          "maximum": 10,
+          "max_length": null,
+          "trust": "any"
+        }
+      ],
+      "returns": [
+        [
+          "hydrophobic_patch_area",
+          "float",
+          "Median largest contiguous exposed hydrophobic patch, square angstroms. A macrocyclic peptide buries roughly 400 to 800 on binding."
+        ],
+        [
+          "patch_area_min",
+          "float",
+          "Smallest across the structures measured."
+        ],
+        [
+          "patch_area_max",
+          "float",
+          "Largest across the structures measured."
+        ],
+        [
+          "patch_area_spread",
+          "float",
+          "Max minus min. A patch of 600 give or take 40 is a different claim from 600 give or take 300, and one structure is one sample of an ensemble."
+        ],
+        [
+          "exposed_fraction",
+          "float",
+          "Share of residues at or above the exposure cut."
+        ],
+        [
+          "patch_fraction_of_surface",
+          "float",
+          "The patch as a share of total surface, which separates one large contiguous site from a large protein carrying many small ones."
+        ],
+        [
+          "sequons_near_patch",
+          "int",
+          "N-linked sequons within glycan reach of the patch. The honest counterweight on a viral surface protein: a conserved exposed patch covered in glycan is not the opportunity its area suggests."
+        ],
+        [
+          "surface_score",
+          "float",
+          "One stated, unfitted weighting of the markers for a macrocycle. Not fitted, because there is no labelled set of macrocycle-amenable targets to fit against and building one from the targets under test is circular."
+        ],
+        [
+          "structures_measured",
+          "int",
+          "How many structures the median is over."
+        ],
+        [
+          "structures_used",
+          "tuple",
+          "The pdb_id:chain pairs measured."
+        ],
+        [
+          "available_from",
+          "str",
+          "Earliest deposition date among the structures measured, or absent when none could be resolved. When this claim became knowable -- a patch is evidence from the day the coordinates showing it were deposited, not from the day it was computed, and `Dossier.observe` compares this against the decision clock."
+        ],
+        [
+          "deposition_dates",
+          "dict",
+          "Each measured entry's deposition date, so the earliest can be checked rather than taken."
+        ]
+      ],
+      "return_kind": "evidence",
+      "rows": null,
+      "cost_seconds": 3.0,
+      "worst_case_seconds": 120.0,
+      "cost_network_calls": 4,
+      "reaches_network": true,
+      "cost_actions": 1,
+      "requires": [
+        "freesasa"
+      ],
+      "failures": [
+        {
+          "symptom": "no candidate structure could be measured",
+          "cause": "Returned, not raised: a target with no usable deposited structure is the ordinary case for a novel pathogen and the ranker has to keep working without one. The return carries the per-structure reasons and the chains that were offered, so an empty answer can be told apart from a broken one.",
+          "raises": "",
+          "observed_in": []
+        },
+        {
+          "symptom": "None for an accession with no representative structure",
+          "cause": "`representative_structure` skips chains shorter than its floor, because a peptide fragment co-crystallised with something else has a surface but not the target's. An accession whose only entries are such fragments resolves to nothing.",
+          "raises": "",
+          "observed_in": []
+        }
+      ],
+      "check": null,
+      "produces_evidence": true,
+      "date_field": "available_from",
+      "citation": "The pdb_id:chain pairs in `structures_used` and the freesasa version. A patch area with no structures named is not a cited claim, and the median without the spread is not the measurement.",
+      "warning": "A surface marker is not an affinity, not a druggability score and not a prediction that any macrocycle binds. It is also computed on deposited conformations: the spread across structures of one domain reached a factor of six on haemagglutinin, so a single number from a single crystal is the error this tool is built to avoid reporting."
+    },
+    "intake.rank_targets": {
+      "name": "intake.rank_targets",
+      "version": 2,
+      "summary": "Pathogen genome accession to a ranked list of candidate binding targets.",
+      "description": "Six-frame ORF calling, homology identification against a reviewed UniProt reference, then a stated and unfitted ranking over conservation, surface exposure, essentiality and druggability features. Returns candidates with their features. It predicts no binding, affinity or inhibition for any of them, and the worth-binding score it reports is a separate axis from the confidence that the identification itself is correct.",
+      "entry": "hpc_pilots.intake:run_intake",
+      "endpoint": null,
+      "parameters": [
+        {
+          "name": "accession",
+          "kind": "str",
+          "meaning": "NCBI nucleotide accession for the genome to read.",
+          "required": true,
+          "default": null,
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "exclude_organism",
+          "kind": "str",
+          "meaning": "Organism removed from the reference before identifying, which scores a curated genome as if it were novel.",
+          "required": false,
+          "default": null,
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "top",
+          "kind": "int",
+          "meaning": "How many of the longest ORFs to identify.",
+          "required": false,
+          "default": 12,
+          "enum": [],
+          "enum_from": null,
+          "minimum": 1,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "remote",
+          "kind": "bool",
+          "meaning": "Whether identification may fall back to the remote aligner. The default local k-mer path is the one the recorded runs used.",
+          "required": false,
+          "default": true,
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "record",
+          "kind": "bool",
+          "meaning": "Whether the function writes its own artifact. A call made inside an episode passes False, because the episode writes the record.",
+          "required": false,
+          "default": true,
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        }
+      ],
+      "returns": [
+        [
+          "targets",
+          "tuple",
+          "Ranked candidate rows carrying score, conservation and tier."
+        ],
+        [
+          "rubric",
+          "dict",
+          "The stated ranking weights, which are not fitted."
+        ],
+        [
+          "provenance",
+          "dict",
+          "Host, commit and time, from common.provenance."
+        ]
+      ],
+      "return_kind": "artifact",
+      "rows": null,
+      "cost_seconds": 0.0,
+      "worst_case_seconds": null,
+      "cost_network_calls": null,
+      "reaches_network": true,
+      "cost_actions": 1,
+      "requires": [
+        "Bio"
+      ],
+      "failures": [
+        {
+          "symptom": "A holdout that removes nothing raises rather than proceeding",
+          "cause": "`build_index(require_removal=True)` refuses an exclusion that matched no reference entry, because a holdout that silently removed nothing would report leakage as generalisation.",
+          "raises": "ValueError",
+          "observed_in": []
+        },
+        {
+          "symptom": "The remote aligner reports a non-finished status",
+          "cause": "The EBI service queues; a 15-minute RUNNING queue is on the record as the reason the local k-mer path is the default.",
+          "raises": "RuntimeError",
+          "observed_in": []
+        }
+      ],
+      "check": null,
+      "produces_evidence": false,
+      "date_field": null,
+      "citation": "Identification derives from the named reviewed UniProt release. A ranked target row is not a cited claim and cannot satisfy a dossier axis alone.",
+      "warning": "The worth-binding score and the identification confidence are different axes and must not be pooled. A high score resting on a hydropathy-only assignment is a row a reader has to be able to see."
+    },
+    "structures.evidence": {
+      "name": "structures.evidence",
+      "version": 2,
+      "summary": "Dated structural coverage per declared target, from PDBe and UniProt.",
+      "description": "For each target in the structures config, resolves the UniProt entry, the declared or derived residue ranges, and the PDBe entries covering them, then reports the earliest deposition date and best resolution. The structure count is a proxy for how much attention a target has received; it is not a pocket score, not a druggability estimate, and the two must never be pooled.",
+      "entry": "hpc_pilots.structures_evidence:build",
+      "endpoint": null,
+      "parameters": [
+        {
+          "name": "minimum",
+          "kind": "float",
+          "meaning": "Fraction of a declared range a structure must cover to count.",
+          "required": false,
+          "default": 0.5,
+          "enum": [],
+          "enum_from": null,
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "max_length": null,
+          "trust": "any"
+        },
+        {
+          "name": "record",
+          "kind": "bool",
+          "meaning": "Whether the function writes its own artifact. A call made inside an episode passes False, because the episode writes the record.",
+          "required": false,
+          "default": true,
+          "enum": [],
+          "enum_from": null,
+          "minimum": null,
+          "maximum": null,
+          "max_length": null,
+          "trust": "any"
+        }
+      ],
+      "returns": [
+        [
+          "targets",
+          "dict",
+          "Target name to a dated row carrying accession, structures, earliest_deposition, earliest_pdb, best_resolution, methods and pdb_ids."
+        ],
+        [
+          "coverage_threshold",
+          "float",
+          "The minimum echoed back."
+        ],
+        [
+          "sources",
+          "tuple",
+          "The three endpoints and their licence terms."
+        ],
+        [
+          "content_sha256",
+          "str",
+          "Identity of the payload with volatile timestamps stripped."
+        ],
+        [
+          "provenance",
+          "dict",
+          "Host, commit and time, from common.provenance."
+        ]
+      ],
+      "return_kind": "evidence",
+      "rows": "targets",
+      "cost_seconds": 0.0,
+      "worst_case_seconds": null,
+      "cost_network_calls": null,
+      "reaches_network": true,
+      "cost_actions": 1,
+      "requires": [],
+      "failures": [
+        {
+          "symptom": "urllib.error.HTTPError from the PDBe or UniProt host",
+          "cause": "Both are public endpoints with no declared rate limit here, and the entry-summary call POSTs in batches of 400.",
+          "raises": "RuntimeError",
+          "observed_in": []
+        }
+      ],
+      "check": null,
+      "produces_evidence": true,
+      "date_field": "earliest_deposition",
+      "citation": "The UniProt accession and the PDBe entry identifiers covering the declared range. A count with no entry identifiers is not a cited claim.",
+      "warning": "A structure count is a research-attention proxy and a pocket score is not. They are different axes and must not be pooled. Coverage is computed per entry rather than per chain, because an obligate complex is two polymer entities and a per-chain test returns zero for every such structure ever deposited."
+    }
+  }
+}

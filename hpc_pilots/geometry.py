@@ -309,7 +309,15 @@ def surface_for_accession(accession, interval=None, replicates=5, cache={}):
     of a polyprotein resolves to the same entry -- and the SASA calculation is the expensive
     step in the ranking.
     """
-    key = (accession, tuple(interval.values()) if interval else None)
+    # `replicates` belongs in the key and was missing from it. The median is taken over up to
+    # `replicates` structures, so it is an input to the answer and not a performance knob: with
+    # it absent from the key, a call with `replicates=1` and a later call with `replicates=5`
+    # returned the same cached number, and the second caller's argument was silently ignored.
+    # Registering this function as a tool is what made that reachable -- `replicates` is now a
+    # declared parameter a policy can set, so a key that drops it would let the schema promise
+    # a control the code does not offer, which is the defect `pick_batch` already had once with
+    # `forest_trees` and `ucb_beta`.
+    key = (accession, tuple(interval.values()) if interval else None, replicates)
     if key in cache:
         return cache[key]
     try:
@@ -325,13 +333,22 @@ def surface_for_accession(accession, interval=None, replicates=5, cache={}):
         # unusable, and a median over a handful with the spread beside it is what makes it
         # readable -- a target whose patch is 600 give or take 40 is a different claim from
         # one that is 600 give or take 300.
-        samples = []
+        samples, reasons = [], []
         for pick in picks:
             try:
                 measured = surface_markers(pick["pdb_id"], pick["chain"])
-            except Exception:                             # noqa: BLE001
+            except ImportError:
+                # Never swallowed into a per-structure skip. A missing SASA backend fails
+                # identically on every structure, so swallowing it turns one environment
+                # problem into "no structure could be parsed" and sends the reader to the
+                # network. Raised so the caller's `requires` check is what reports it.
+                raise
+            except Exception as failure:                  # noqa: BLE001
+                reasons.append(f"{pick['pdb_id']}:{pick['chain']}: "
+                               f"{type(failure).__name__}: {str(failure)[:120]}")
                 continue
             if measured.get("error"):
+                reasons.append(f"{pick['pdb_id']}:{pick['chain']}: {measured['error']}")
                 continue
             measured["resolution"] = pick["resolution"]
             measured["surface_score"] = macrocycle_surface_score(measured)
@@ -339,7 +356,20 @@ def surface_for_accession(accession, interval=None, replicates=5, cache={}):
             if len(samples) >= replicates:
                 break
         if not samples:
-            cache[key] = {"error": "no candidate structure could be downloaded or parsed",
+            # Why nothing was measured, not just that nothing was. The bare string blamed the
+            # network or the file in every case, and for a long time the actual cause was an
+            # absent `freesasa` -- the C library every marker here is computed with, missing
+            # from the scientific environment, reported as a download failure. A target with
+            # no usable deposited structure and an environment with no SASA backend are
+            # opposite situations: the first is a finding about the target and the ordinary
+            # case for a novel pathogen, the second is a machine that cannot answer the
+            # question at all. `tools.py` declares `freesasa` under `requires` so the caller
+            # returns an explicit charged absence before dispatch, and this is the message for
+            # a direct caller that bypasses it.
+            cache[key] = {"error": f"no candidate structure could be measured: "
+                                   f"{reasons[0] if reasons else 'no structure parsed'}",
+                          "reasons": sorted(set(reasons)),
+                          "structures_offered": [f"{p['pdb_id']}:{p['chain']}" for p in picks],
                           "surface_score": None}
             return cache[key]
 
@@ -360,7 +390,33 @@ def surface_for_accession(accession, interval=None, replicates=5, cache={}):
         markers["structures_measured"] = len(samples)
         markers["structures_used"] = [f"{m['pdb_id']}:{m['chain']}" for m in samples]
         markers["surface_score"] = round(median(scores), 4) if scores else None
+        # When this claim became knowable, which is the earliest deposition among the
+        # structures it was actually measured on. Without it the markers are a 2026
+        # calculation with no date, and `Dossier.observe` compares `available_from` against
+        # the decision clock -- so an undated claim enters a dossier at any clock and silently
+        # opens the temporal boundary the historical replays depend on. A patch is not
+        # evidence from the day it was computed; it is evidence from the day the coordinates
+        # that show it were deposited.
+        #
+        # Earliest rather than latest, matching `structures_evidence`'s own rule: the first
+        # structure that shows the surface is the one that made it knowable. Failure to
+        # resolve a date leaves it None and the caller marks the claim uncitable, which keeps
+        # a measured surface visible and unusable rather than dropping it.
+        try:
+            from .structures_evidence import dates
+
+            stamps = dates([m["pdb_id"] for m in samples])
+            markers["deposition_dates"] = {pdb: stamps[pdb] for pdb in sorted(stamps)}
+            markers["available_from"] = min(stamps.values()) if stamps else None
+        except Exception as failure:                      # noqa: BLE001
+            markers["deposition_dates"] = {}
+            markers["available_from"] = None
+            markers["dating_error"] = f"{type(failure).__name__}: {str(failure)[:160]}"
         cache[key] = markers
+    except ImportError:
+        # Not cached and not converted. An absent backend is a property of the machine, and
+        # caching it would make the first call's environment the answer for the whole process.
+        raise
     except Exception as error:                            # noqa: BLE001
         # Reported as absent rather than raised. A target with no usable structure is the
         # ordinary case for a novel pathogen, and the ranker has to keep working without one.

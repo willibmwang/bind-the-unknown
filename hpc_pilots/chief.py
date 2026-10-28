@@ -307,7 +307,15 @@ POLICIES = ()
 
 # Tools that change nothing outside their return and so need no policy at all. Being explicit
 # about which those are is what makes default-deny affordable.
-NO_SIDE_EFFECT = ("chemistry.library_spec", "intake.rank_targets", "structures.evidence")
+# `geometry.surface_markers` is here with one thing stated rather than waved past: it writes
+# coordinate files into `data/raw/structures/` through `geometry.fetch_structure`. That is a
+# download cache in the tree `common.download` already caches into, not an artifact a run
+# names, and the rule this tuple encodes is about the latter -- a tool returns, the episode
+# writes. Registering it without an entry here was the first thing default-deny caught, which
+# is the behaviour working: the call came back `rejected` with "no policy covers" rather than
+# succeeding because nobody had thought about it.
+NO_SIDE_EFFECT = ("chemistry.library_spec", "intake.rank_targets", "structures.evidence",
+                  "geometry.surface_markers")
 
 
 def check_policy(spec, arguments, context):
@@ -496,6 +504,54 @@ def _structures_evidence(spec, arguments, context, wrap):
                 available_from=None)
 
 
+def _surface_markers(spec, arguments, context, wrap):
+    """Macrocycle surface markers for one accession.
+
+    Three returns are distinguished where the underlying function conflates two of them. The
+    function answers `None` when no deposited chain is long enough to be the target's surface,
+    and a dict carrying `error` when chains were offered and none could be measured. Both are
+    successful calls that produced no marker, so both are `empty` rather than `failed` -- the
+    distinction `STATUSES` draws, and the reason a target with no usable structure must not be
+    counted as a tool that broke. The reasons travel in `detail` so an empty answer can still
+    be told apart from a broken machine.
+
+    `source_kind` is `computed` and not `external_record`. The coordinates are an external
+    record; the patch area is a calculation over them with a stated cut-off, and reporting it
+    as a record would let a computed number inherit a deposition's standing.
+    """
+    value = spec.resolve()(**arguments)
+    if value is None:
+        return wrap(status="empty", value=None, source_kind="computed",
+                    source="RCSB coordinates via PDBe best_structures, measured with freesasa",
+                    note=f"no deposited chain for {arguments.get('accession')!r} is long "
+                         f"enough to carry the target's surface")
+    if value.get("error"):
+        return wrap(status="empty", value=None, source_kind="computed",
+                    source="RCSB coordinates via PDBe best_structures, measured with freesasa",
+                    note=value["error"],
+                    detail={"reasons": value.get("reasons"),
+                            "structures_offered": value.get("structures_offered")})
+    # One row, carrying the date and its own citability, rather than a flat dated return. The
+    # envelope refuses a citable claim with no `available_from`, and a surface measured on
+    # structures whose deposition dates could not be resolved is exactly that: a real
+    # measurement that cannot be placed on the decision clock. Dropping it would hide a
+    # computed surface; dating it at fetch time would launder a 2026 calculation into evidence
+    # from whenever the caller likes. The row keeps it visible and uncitable, which is the
+    # discipline `_structures_evidence` already applies to a target with no deposited
+    # structure.
+    return wrap(status="ok",
+                value={key: value[key] for key in value if key != "deposition_dates"},
+                rows=({"name": arguments.get("accession"),
+                       "available_from": value.get("available_from"),
+                       "citable": value.get("available_from") is not None,
+                       "value": {"deposition_dates": value.get("deposition_dates"),
+                                 "structures_used": value.get("structures_used")}},),
+                source_kind="computed", available_from=value.get("available_from"),
+                source="RCSB coordinates via PDBe best_structures, measured with freesasa",
+                detail=({"dating_error": value["dating_error"]}
+                        if value.get("dating_error") else None))
+
+
 def _rank_targets(spec, arguments, context, wrap):
     payload = spec.resolve()(**{**arguments, "record": False})
     return wrap(status="ok", value=payload, source_kind="computed",
@@ -510,4 +566,5 @@ DISPATCH = {
     "chemistry.library_spec": _library_spec,
     "structures.evidence": _structures_evidence,
     "intake.rank_targets": _rank_targets,
+    "geometry.surface_markers": _surface_markers,
 }

@@ -2447,8 +2447,12 @@ def test_the_committed_tool_snapshot_matches_the_registry():
     # `reaches_network`, because two specs declared zero calls while reaching PDBe, UniProt,
     # NCBI and EBI, and `optimizer` was reading that count as a capability. v2 is the digest
     # fifty-nine recorded artifacts name, so it is pinned here rather than trusted.
+    # v4 registers `geometry.surface_markers`, the macrocycle surface instrument that had been
+    # written, unreachable from any tool, and broken on every input because `freesasa` was not
+    # installed. v3 is pinned here now rather than trusted, for the same reason v2 is.
     historical = {1: "b67cdcfb525a0ff9f8beef3178a9dd8b549d7ea333bfeec9acdd372ad7aba509",
-                  2: "ff961039576d258eaff1c8bee4e506222ec4d0660e6ae5e088167c74e40e37d7"}
+                  2: "ff961039576d258eaff1c8bee4e506222ec4d0660e6ae5e088167c74e40e37d7",
+                  3: "5d29f0de726f3e8c0604b46ae05c48f2b038f4e0c41c6efec96781e467be535e"}
     for version, expected in historical.items():
         earlier = ROOT / "hpc_pilots" / "configs" / f"tools.v{version}.json"
         assert json.loads(earlier.read_text())["tool_set_sha256"] == expected, \
@@ -4135,20 +4139,31 @@ def test_a_tool_that_gates_an_axis_is_one_the_registry_says_produces_evidence():
                 f"{name} gates {requirement.gates} but its spec says it is not evidence")
 
 
-def test_from_a_bare_sequence_the_flat_registry_picks_by_axis_coverage_alone():
-    # The measured state of the registry, recorded because it is the argument for what to build
-    # next rather than a defect to tidy away. Nothing registered consumes what identification
-    # produces -- `structures.evidence` reads its targets from a config file and cannot be
-    # pointed at a newly identified one -- so identification unlocks nothing, every tool is
-    # callable from the start, and the first call is settled by the only tool that bears on any
-    # axis at all.
+def test_from_a_bare_sequence_identification_leads_because_it_unlocks_the_surface_tool():
+    # This test used to record a flat graph, and said so: nothing registered consumed what
+    # identification produced, so `intake.rank_targets` unlocked nothing and the first call
+    # was settled by axis coverage alone. Registering `geometry.surface_markers`, which needs
+    # a `protein_accession`, ends that. Identification stops being one callable option among
+    # four and becomes the call that widens the action set, which is what `score[1]` is for
+    # and the one real judgement in the ranking.
+    #
+    # The graph being flat was never a property worth preserving. It was the argument for
+    # building something that consumes an identity, and this is that something.
     situation = selector.from_sequence()
-    assert selector.first(situation).tool == "structures.evidence"
     by_name = {p.tool: p for p in selector.rank(situation)}
-    assert by_name["intake.rank_targets"].unlocks == (), (
-        "identification unlocked something; the graph is no longer flat and this test is the "
-        "record of when it was")
-    assert all(p.callable_now for p in by_name.values())
+    assert by_name["intake.rank_targets"].unlocks == ("geometry.surface_markers",)
+    assert selector.first(situation).tool == "intake.rank_targets"
+    # The surface tool is the one blocked at onset, and it is reported rather than dropped: a
+    # policy shown only its callable moves cannot tell a useless tool from one call away.
+    assert by_name["geometry.surface_markers"].callable_now is False
+    assert by_name["geometry.surface_markers"].blocked_on == ("protein_accession",)
+    assert all(p.callable_now for name, p in by_name.items()
+               if name != "geometry.surface_markers")
+    # And it is the only registered tool bearing on accessibility, which is the axis
+    # `structures.evidence` declines by its own warning -- a structure count is an attention
+    # proxy and must not be pooled with a pocket score.
+    gating = {name for name, r in selector.REQUIREMENTS.items() if "accessibility" in r.gates}
+    assert gating == {"geometry.surface_markers"}
 
 
 def test_building_the_three_lanes_moves_identification_to_the_front():
@@ -4240,8 +4255,13 @@ def test_the_selector_cli_says_when_its_plan_names_tools_nobody_has_built():
         cli_main(["selector"])
     live = json.loads(out.getvalue())
     assert live["includes_unbuilt_lanes"] is False
-    assert live["first"] == "structures.evidence"
+    # Identification leads now that something consumes an identity. Before
+    # `geometry.surface_markers` was registered the graph was flat and the first call fell to
+    # axis coverage alone, which put `structures.evidence` in front.
+    assert live["first"] == "intake.rank_targets"
     assert [row["tool"] for row in live["order"]] == sorted(tools.TOOLS, key=lambda n: (
+        0 if not selector.blocked_on(n, selector.from_sequence()) else 1,
+        -len(selector.unlocked_by(n, selector.from_sequence())),
         -len(selector.REQUIREMENTS[n].gates), n)), "the CLI order is not the ranked order"
     # The flag changes the answer, and the output says so in the same breath. A reader who
     # missed the flag would otherwise take a plan naming `literature.search` as a statement

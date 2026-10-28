@@ -138,6 +138,25 @@ REQUIREMENTS = {
         scope="Reads its targets from configs/structures.json and cannot speak about a target "
               "that is not declared there, however much the state knows about it.",
     ),
+    "geometry.surface_markers": Requirement(
+        needs=("protein_accession",),
+        provides=(),
+        # The only registered tool that bears on `accessibility`, which is the axis asking
+        # whether an epitope is solvent-exposed in the relevant conformation. That is exactly
+        # what a largest-contiguous-exposed-hydrophobic-patch measurement answers, and exactly
+        # what `structures.evidence` declines to answer: its own warning says a structure count
+        # is a research-attention proxy that must never be pooled with a pocket score.
+        #
+        # It does not gate `precedent`. A measured surface is not a prior campaign, and it does
+        # not gate `reagent_tractability` either, however tempting: `exposed_fraction` speaks to
+        # whether a domain presents itself, not to whether it can be expressed, folded and
+        # immobilised through multiple selection rounds, which is the hard gate and which no
+        # structural calculation answers.
+        gates=("accessibility",),
+        scope="Measures deposited conformations, so it is silent on a target with no usable "
+              "deposited chain -- the ordinary case for a novel pathogen, and the case a "
+              "sequence-based prediction would have to cover instead.",
+    ),
     "intake.rank_targets": Requirement(
         needs=("genome_accession",),
         # The one tool in the registry that turns the fact a campaign starts with into the facts

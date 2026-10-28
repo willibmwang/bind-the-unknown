@@ -117,6 +117,46 @@ GRID = {
                  "`rejected` row -- a pointer the optimiser licenses and nothing has ever "
                  "written"),
     ),
+    # Distinct arguments, one call each, and the reason is a result rather than a style note.
+    # The first version of this grid repeated two accessions ten times and measured 5.2 us per
+    # call against a first call of 4.08 s -- a spread of 777,000x -- because
+    # `surface_for_accession` memoises in process on a mutable default argument. Repeating an
+    # argument against a memoised function measures the dict lookup, not the tool. A cost grid
+    # has to defeat whatever cache the tool holds or it is an instrument pointed at the cache.
+    #
+    # Six accessions cannot clear the twenty-call floor, so no cost claim is possible for this
+    # tool from this grid, and that is the honest outcome rather than a gap to paper over: a
+    # tool whose answer is memoised on `(accession, interval, replicates)` has exactly as many
+    # distinct real calls as the registry has declared targets.
+    "geometry.surface_markers": (
+        Cell({"accession": "P0DTD1"}, "ok",
+             why="SARS-CoV-2 ORF1ab polyprotein; five measurable chains, a 762 square-angstrom "
+                 "patch, dated 2020-11-17"),
+        Cell({"accession": "P0DTC2"}, "ok",
+             why="SARS-CoV-2 spike; the largest patch measured anywhere in the registry"),
+        Cell({"accession": "P03452"}, "ok",
+             why="influenza haemagglutinin; the case where the spread across structures of one "
+                 "domain reached a factor of six, which is the argument for the median"),
+        Cell({"accession": "P15659"}, "ok", why="influenza PA-PB1 interface"),
+        Cell({"accession": "Q9IH62"}, "ok", why="henipavirus G attachment glycoprotein"),
+        Cell({"accession": "P03470"}, "empty",
+             why="influenza neuraminidase. No deposited chain is long enough to carry the "
+                 "target's surface, so the call succeeds and finds nothing -- a real zero and "
+                 "the ordinary case for a novel pathogen, not a failure. This is also the "
+                 "accession whose deep mutational scan a packet cites while assessing its "
+                 "reagent tractability as strong, so the absence is worth having on the record"),
+        Cell({"accession": "P0DTD1", "replicates": 1}, "ok",
+             why="the same accession at a different replicate count. Before `replicates` was "
+                 "added to the memo key this returned the five-structure answer, so a declared "
+                 "parameter a policy can set was silently ignored"),
+        Cell({"accession": "P0DTD1", "replicates": 0}, "rejected",
+             why="below the declared minimum of 1. A bound a strict JSON schema cannot carry "
+                 "is charged rather than raised, so this cell writes a `rejected` row"),
+        Cell({"accession": "not-an-accession"}, "empty",
+             why="a well-formed string that resolves to nothing. Charged, and distinguishable "
+                 "from a target that exists and has no usable structure only by the reasons "
+                 "the return carries"),
+    ),
     "intake.rank_targets": (
         Cell({"accession": "NC_045512.2"}, "ok", repeats=2,
              why="one real accession. Kept to two calls: this pipeline calls a remote "
