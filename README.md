@@ -30,15 +30,113 @@ Which target do you pursue, and what do you measure?
 
 The object of interest is not a prediction. It is an allocation.
 
-**How it works.** A policy acts through a registry of tools against a seven-axis target dossier,
-choosing from six actions: retrieve evidence, request structure, rerank, invoke a design tool,
-recommend an experiment, stop. Every call is charged against the budget, and evidence dated after
-the decision clock is refused with the refusal recorded.
+A campaign starts from a single fact: a pathogen genome accession. Everything below follows from
+that one input.
+
+#### The tools it can call
+
+Ten tools are registered and every one is dispatchable. Each answers a different scientific
+question, and each reads live public endpoints rather than a cached snapshot.
+
+| Tool | What it answers | Reads |
+| --- | --- | --- |
+| `intake.rank_targets` | Genome accession to a ranked list of candidate binding targets | NCBI, reviewed UniProt |
+| `literature.search` | Date-limited literature for a target name, family or accession | Europe PMC |
+| `similarity.homologs` | Homologs of one protein, with identity, E-value and source organism | EBI HMMER |
+| `families.entries` | Family, domain and site assignments claiming a protein, with residue ranges | InterPro |
+| `structures.evidence` | Dated structural coverage per declared target | PDBe, UniProt |
+| `structures.predicted` | Predicted models per accession, with per-range confidence | 3D-Beacons, AlphaFold DB |
+| `structures.folded` | Folds one amino-acid sequence, keyed on the sequence itself | ESMFold |
+| `geometry.surface_markers` | Macrocycle-shaped surface markers from deposited structures | RCSB, PDBe |
+| `bioactivity.prior_binders` | Prior bioactivities, assay formats and public mutational landscapes | ChEMBL, IEDB, MaveDB |
+| `chemistry.library_spec` | Defines a focused thioether-macrocycle library over a randomised region | Local tables only |
+
+Which dossier axes these instrument, and how firmly:
+
+| Axis | Instrument |
+| --- | --- |
+| Accessibility | Measured surfaces on deposited structures |
+| Precedent | Dated structural coverage |
+| Essentiality, conservation, assay availability, public labels | Retrieval only |
+| Reagent tractability | A wet-lab fact no public record answers |
+
+**Retrieval only** means the tool fetches real material bearing on the axis and is deliberately
+not permitted to substantiate it. Substantiating an axis needs a *dated* claim, because the date
+boundary is what keeps a historical replay honest, and these tools carry dates per row rather
+than per call. Letting a hit count stand in for a measurement is the exact failure the system is
+built to prevent.
+
+#### How it chooses which tool to call
+
+**By reachability, not relevance.** This is the one idea worth carrying away. A tool is not
+something you may call because it sounds apposite. It is something you may call because *its
+inputs exist*. From a bare genome accession, a literature query has no target name to query for
+and a structural lookup has no accession to look up. Those tools are not expensive and not
+irrelevant, they are unreachable, and no amount of matching a query against tool summaries
+discovers that, because the obstruction is in the state and not in the text. The earlier
+text-matching retriever was measured as returning nothing at this scale, which is the expected
+result for a handful of tools whose summaries share a vocabulary.
+
+So each tool declares what it needs in the state and what its return puts there. The selector
+then reports every tool as a proposal, ordered on a tuple:
+
+1. **Callable before blocked.**
+2. **Among callable, whichever unblocks more other tools.**
+3. **Then whichever speaks to more unresolved axes.**
+4. **Then name**, always, so the order is total and a run reproduces rather than depending on
+   registration order.
+
+Step 2 before step 3 is the real judgement in the module, and it is documented as such. A call
+that widens the action set changes what every later round may do, while a call that speaks to an
+axis changes one number. Under a budget that binds, the option value is worth more than the
+increment. Because it is also the assumption most likely to be wrong, it is one comparison in a
+documented tuple rather than a weight buried in a sum, so there is a single term to change.
+
+**Blocked tools are reported, never dropped**, each naming what it is blocked on. A policy shown
+only its callable moves cannot tell a tool that is useless from a tool that is one call away, and
+under a budget the second is the more useful thing to know.
+
+**It does not rank by cost.** Seven of the ten specs now carry measured wall time and request
+counts, but three still declare zero, and for the deposited-structure tool that zero is wrong by
+about 60 seconds and 36 outbound requests per call. A cost-weighted order would be a preference
+computed partly from numbers nobody has taken, so cost waits in the tie-break slot until the
+record is complete. Measured costs today span more than two orders of magnitude, from 0.7 seconds
+to fold a sequence to 94 seconds for prior binders, so the ordering will change once they land.
+
+#### Where that leads, from one accession
+
+Run the selector on a bare genome accession and five of the ten tools are callable. Identification
+unlocks exactly the other five, so the dependency graph has a single bottleneck and identification
+is it. It also leads because it is the only tool that enumerates and ranks candidates rather than
+answering about one you have already named.
+
+1. **Identify candidate targets.** Six-frame translation and homology against reviewed UniProt,
+   from the accession alone. Yields target names, protein accessions, residue ranges and the
+   translated sequences.
+2. **Branch on what identification found.** With a protein accession, five more tools open. With
+   no recognisable homolog, the translated sequence alone still opens the folding and family
+   lanes.
+3. **Gather evidence per axis.** Literature, family annotation, deposited structures, predicted
+   models and prior binders.
+4. **Measure the surface a macrocycle would bind.** Largest contiguous exposed hydrophobic patch,
+   as a median across several structures of the same domain with the spread beside it.
+
+Carrying the translated sequence through step 1 is what makes step 2 work for a genuinely novel
+protein. Every structural lane resolves an accession, and a novel protein has none, so before the
+sequence was retained those lanes returned a true and useless zero for exactly the case the
+project is named for.
+
+#### What each result carries
+
+A number without its caveat travels further than the caveat does, so each tool carries a standing
+warning into every result that used it. A predicted model is not a deposition. A family
+assignment is not a measurement on this pathogen. A homolog is somebody else's protein. A row in
+a bioactivity database is not an assay anyone can run.
 
 **Where it stands.** This is the arm that has actually been running, because it can run on public
-data without waiting for anyone. It currently goes from a raw genome to a ranked list of
-countermeasure targets, and the recent work has been about finding where that chain breaks. See
-[what the co-scientist arm found](#what-the-co-scientist-arm-found).
+data without waiting for anyone. See
+[what the co-scientist arm found](#what-the-co-scientist-arm-found) for the measured results,
+including the two that came back negative.
 
 ### Arm 2 · Molecular prediction (the primary research object)
 
