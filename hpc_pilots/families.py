@@ -473,9 +473,18 @@ def entries(accession, sequence="", include_predicted=True, max_families=12, rec
     # literature query can actually use.
     families = {}
     wanted = [r["entry"] for r in ranges]
+    dated = {r["entry"]: r["database_release_date"] for r in ranges}
     for key in wanted[:max(0, int(max_families))]:
         row = _family(key, calls, sources, absences)
         if row:
+            # The date a dossier would read as `available_from`, carried on the row rather
+            # than at the top level because one call returns one dated claim per family and a
+            # single top-level date would date them all by the newest. It is the release date
+            # of the oldest member database serving this assignment: an upper bound on when
+            # the assignment became knowable, and not the date of any measurement.
+            row["database_release_date"] = dated.get(key)
+            row["interpro_release_date"] = (databases.get("interpro") or {}).get("released")
+            row["interpro_version"] = (databases.get("interpro") or {}).get("version")
             families[key] = row
     if len(wanted) > max(0, int(max_families)):
         absences.append({"what": "family sizes beyond the cap",
