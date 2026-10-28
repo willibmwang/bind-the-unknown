@@ -3,7 +3,7 @@
 **Prepared 20 October 2026.** Companion to
 [PROJECT_OVERVIEW_AND_PLAN.md](PROJECT_OVERVIEW_AND_PLAN.md). Describes the system as it
 stands at commit `9ebaa38`: thirteen Python modules in `hpc_pilots/` (~1,830 lines), a SLURM
-execution layer, and the planning and document tooling under `output/`.
+execution layer, and the document and figure tooling under `output/`.
 
 This document is organised around *why*, not around an API listing. §9 states honestly what
 runs, what is partial and what is a stub, and §10 lists defects found while writing it.
@@ -38,8 +38,8 @@ something specific.
 | **Policy** | `binding.py`, `structure.py`, `common.Agent` | The procedures being compared, behind one interface | Comparisons are matched *by construction* rather than by care. All policies share the same surrogate model and the same initial observations at a given seed. |
 | **Evaluation** | `calibration.py`, `summarize.py` | Scoring, surrogate audits, aggregation, figures, resource accounting | Kept entirely off the policy path, so a policy cannot read a metric it has not earned. |
 
-A fifth, non-scientific layer under `output/` generates the delivery plan, the Gantt chart and
-the PDFs. It is self-validating (§8) and is not part of the research pipeline.
+A fifth, non-scientific layer under `output/` renders these documents to PDF and draws the
+figures. It is not part of the research pipeline.
 
 ---
 
@@ -347,7 +347,7 @@ about line coverage.
 
 ## 10. Defects found while documenting this, and what they turned up
 
-Six were recorded on 20 October; five are closed, and the sixth turned out to matter far more
+Five were recorded on 20 October; all are closed, and the last turned out to matter far more
 than it looked.
 
 1. **Dead configuration** — *closed.* `pick_batch` read `forest_trees` and `ucb_beta` from
@@ -365,9 +365,7 @@ than it looked.
    alongside it: staging resolved the revision from the repository head when no staged manifest
    existed, which in a clean checkout staged whatever was current and defeated the pin.
 4. **Unused `initial_labels`** — *closed*, wired in rather than coinciding with the default.
-5. **The effort-allocation check self-declares as superseded** — *open.* Generated against the
-   14 October baseline of 78 tasks.
-6. **Provenance gap in the run records** — *closed, and it found something.* Every run, episode
+5. **Provenance gap in the run records** — *closed, and it found something.* Every run, episode
    and audit now carries host, platform, Python version, commit, SLURM identifiers and a
    `git_dirty` flag. Closing it answered the question it was raised about, and the answer was not
    the expected one — see below.

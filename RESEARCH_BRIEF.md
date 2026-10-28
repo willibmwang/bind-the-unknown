@@ -8,7 +8,7 @@ Deliver an **emergency AI co-scientist** that helps experts decide what to pursu
 
 Emergency conditions must be represented explicitly: incomplete pathogen knowledge, evolving or conflicting evidence, deadlines, tool and compute costs, and limited experimental capacity. The system should maintain an evidence-backed decision state, recommend the next useful action, and explain its rationale and uncertainties for expert review.
 
-Sources: `SynX_MATS_11.0_Project_WW.pdf`; the user's expanded scope; meeting notes dated 5 and 9 October 2026. All original stretch goals are mandatory:
+Sources: `SynX_MATS_11.0_Project_WW.pdf`; my expanded scope; meeting notes dated 5 and 9 October 2026. All original stretch goals are mandatory:
 
 - Modular prototype covering pathogen intake, evidence retrieval, structure tools, target and epitope ranking, and library design.
 - Evidence-backed target dossiers, including confidence, conservation, accessibility, essentiality evidence, reagent tractability, and uncertainties.
@@ -18,7 +18,7 @@ Sources: `SynX_MATS_11.0_Project_WW.pdf`; the user's expanded scope; meeting not
 - Implemented and evaluated SynX design-platform improvements.
 - One completed mRNA display selection round against a designed library, with analysis and feedback into the system.
 
-The user's scope expansion includes experimental execution. Scheduling, access, and laboratory work must be coordinated with SynX.
+My scope expansion includes experimental execution. Scheduling, access, and laboratory work must be coordinated with SynX.
 
 ## Meeting evidence and its status
 
@@ -40,7 +40,7 @@ Evaluate the system at three connected levels:
 2. **Supporting: molecular tools.** Reliability of structure/design/scoring tools, molecular ranking, chemical and structural transfer, and any gain from experimental adaptation.
 3. **End-to-end validation.** Historical COVID-19 reconstruction, two prototype pathogen families, and the required prospective display round, with conclusions limited to the actual measurements.
 
-Few-shot peptide ranking is a supporting research proposal that may improve the design/selection module. It does not define the overall project. The user plans to upload a separate few-shot evaluation proposal to this folder; that proposal has not yet been received or reviewed. Reconcile its assumptions and experiments after it arrives, and measure any module improvement separately from the agent's decision policy.
+Few-shot peptide ranking is a supporting research proposal that may improve the design/selection module. It does not define the overall project. A separate few-shot evaluation proposal is planned for this folder; it is not yet in place or reviewed. Reconcile its assumptions and experiments after it arrives, and measure any module improvement separately from the agent's decision policy.
 
 The first experiments should establish whether emergency constraints create a measurable decision-making challenge and whether the proposed policy improves over simpler workflows. Molecular data audits determine the feasible supporting evaluations. Preserve the overall framing if one proposed molecular method fails.
 
@@ -141,21 +141,9 @@ This is a planning estimate. Begin the evidence-based pilot without waiting for 
 
 End-of-week outputs: a benchmark episode specification, baseline dossier scorecard, evidence-update trajectories, an initial resource-accounting report, and a focused policy-development hypothesis. Molecular audit/results are additional outputs as data become available. Experimental coordination proceeds from the start.
 
-## Resources to request from Askar
-
-The user reports that resources are available in principle after asking Askar. No access, export permission, compute allocation, or laboratory slot is confirmed here. This list is prepared for the user; no message has been sent.
-
-1. Expert collaborators for episode/rubric review, evidence corpora and timestamps for the historical and prototype-family cases, and available decision/resource logs.
-2. Portal/API access and a reproducible export from one representative campaign, including failed and low-scoring candidates.
-3. Supported non-canonical building-block catalog, stereochemistry, codon mappings, structures, existing Rosetta parameters/rotamer assets, and display compatibility constraints.
-4. Paired computational and experimental measurements with raw endpoints, parent/mutant relationships, assay conditions, replicates, censoring, and campaign metadata.
-5. Current pipeline code and versions, scoring/refolding configurations, compute access and allocation, and applicable software licenses.
-6. A named experimental collaborator, selection-round slot, expected turnaround, available reagent/assay infrastructure, and the feasible scope of orthogonal validation.
-7. Paper authorship expectations, publication review timeline, and permission to release code, benchmark definitions, and supporting data.
-
 ## Milestones and decision gates
 
-The detailed, dated plan is [TEN_WEEK_DELIVERY_PLAN.md](output/TEN_WEEK_DELIVERY_PLAN.md), with 82 task windows, owners, dependencies, artifacts, acceptance criteria, workload estimates, and laboratory/API risks. Task ids carry their stream (GATE, COSCI, MOL, LAB, SAFE, TRAIN, FCAST, PAPER). It is rebaselined from October 14 (W3D3) and re-adjusted October 19 (W4D1); elapsed weeks are not marked complete without evidence, and only four tasks carry a Complete status with named evidence. The user's London visit is the November 8 week, corresponding to W7 workdays November 9–13. Exact itinerary and final presentation day remain unconfirmed.
+The project runs to ten weeks, with the final week 30 November – 4 December. The dated gates and the week-by-week shape are in [PROJECT_OVERVIEW_AND_PLAN.md](PROJECT_OVERVIEW_AND_PLAN.md) §7. Task ids carry their stream (GATE, COSCI, MOL, LAB, SAFE, TRAIN, FCAST, PAPER). No elapsed week is marked complete without named evidence. The London visit is the November 8 week, corresponding to W7 workdays November 9–13. Exact itinerary and final presentation day remain unconfirmed.
 
 The newly supplied [Thinking Machines grant](</Users/ww/Desktop/Desktop - William’s MacBook Pro/YALE/26-27 postgrad/Thinking Machines Lab/ww_TML_Safety_Grant.pdf>) adds a proposed ML contribution: forecast larger-budget post-training biological reasoning uplift from zero-shot agentic stress signatures and cheap low-budget measurements. The delivery plan recommends one paper narrative around this forecasting question, with the emergency scientist and required SynX work as applied validation. This recommendation avoids committing to two independent full research papers in the remaining time; the emergency system and every original mandatory output remain required.
 

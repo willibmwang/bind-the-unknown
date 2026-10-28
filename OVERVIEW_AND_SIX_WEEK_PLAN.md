@@ -321,7 +321,7 @@ authenticated and is the fallback lane if cluster GPU does not materialise.
 
 | ID | Task | Acceptance |
 | --- | --- | --- |
-| LAB-* | SynX engagement per the existing register | Named experimental owner and a booked slot, or a written re-specification |
+| LAB-* | SynX engagement | Named experimental owner and a booked slot, or a written re-specification |
 | MOL-01..04 | Platform chemistry representation, if the export has arrived | Building-block registry populated; otherwise the deliverable is re-specified against public data at the W7 gate |
 | GATE-* | Mid-point gate: confirm or re-specify the platform-improvement deliverable | A decision recorded either way |
 
@@ -333,7 +333,7 @@ Treat compute-heavy work as unavailable this week and schedule accordingly.
 | --- | --- | --- |
 | COSCI-25 | Historical reconstruction episode on evidence restricted to an early window | Decision trace and its leakage audit, with the no-retrieval floor reported beside it |
 | MOL-10 | Transfer test: canonical-trained surrogate applied to the non-canonical library | Reported with the geometry bound; a null stated as a null |
-| SAFE-* | Safety benchmark preparation per the register | Per the register's acceptance criteria |
+| SAFE-* | Safety benchmark preparation | Preparation artifacts committed, with scope and limits stated |
 | FCAST-11 | Power analysis and the unit-of-analysis statement for every headline comparison | Every reported comparison carries an interval and a stated independent unit |
 
 **W9, 23–27 November — writing, with results frozen.**

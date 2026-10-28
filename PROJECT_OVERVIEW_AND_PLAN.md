@@ -4,11 +4,10 @@
 week is 30 November – 4 December.
 
 This document is the project overview and plan agreed in our last conversation. It is written
-to be read in one sitting and to be argued with. Three companion documents carry the detail:
-[ARCHITECTURE.md](ARCHITECTURE.md) for the system, [W4_DEBRIEF_AND_TARGET_SELECTION.md](W4_DEBRIEF_AND_TARGET_SELECTION.md)
-for the October results and target analysis, and
-[output/TEN_WEEK_DELIVERY_PLAN.md](output/TEN_WEEK_DELIVERY_PLAN.md) for the 82-task register
-with dependencies, owners and acceptance criteria.
+to be read in one sitting and to be argued with. Two companion documents carry the detail:
+[ARCHITECTURE.md](ARCHITECTURE.md) for the system, and
+[W4_DEBRIEF_AND_TARGET_SELECTION.md](W4_DEBRIEF_AND_TARGET_SELECTION.md)
+for the October results and target analysis.
 
 **Nothing below asserts binding affinity, functional inhibition, antiviral activity or
 therapeutic efficacy.** No macrocyclic peptide and no non-canonical amino acid has yet been
@@ -937,11 +936,6 @@ uncomfortable way round to read: the top three are the primary arm and all three
 | **W8 · Nov 16–20** | Training harness; throughput and spend gate; **lab readout due 18 Nov** | Throughput gate, 19 Nov |
 | **W9 · Nov 23–27** | Forecasts saved before held-out reveal; analysis; independent review | **Results freeze, 27 Nov** |
 | **W10 · Nov 30–Dec 4** | Clean reproduction, manuscript, artifact, rehearsals, final handoff | Handoff, 4 Dec |
-
-The register holds 82 tasks across eight streams and 273 estimated hands-on hours, of which 14
-are delivered. A task reads `Planned` unless a status line names its evidence; only four
-currently do. The generator checks for missing and cyclic dependencies and for window ordering,
-and fails rather than emitting an inconsistent chart.
 
 ### 7.3 Capacity, stated plainly
 

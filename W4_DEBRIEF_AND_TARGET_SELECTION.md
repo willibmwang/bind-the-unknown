@@ -37,8 +37,7 @@ Oct 22–23) and GATE-06 (feasibility and novelty review, Oct 23).
 > GB1". Checked on 20 October: the paper is real and is the right molecule class, but its
 > per-variant data was **never deposited** — no availability statement, no accession, no
 > supplementary table, only rasterised heatmaps. It is also 1,828 variants against GB1's 536,962,
-> about 0.3% the size rather than larger, and it is entirely single-substitution. A request to
-> the authors is drafted at [output/data_request_rogers_suga.md](output/data_request_rogers_suga.md).
+> about 0.3% the size rather than larger, and it is entirely single-substitution.
 >
 > Unaffected: everything in §1 (dataset engineering), §3 (targets) and §4 (architecture).
 
