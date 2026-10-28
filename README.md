@@ -3,9 +3,9 @@
 Designing macrocyclic peptides that bind a viral target, and deciding what to measure when you
 only get one experiment.
 
-This repository holds two connected pieces of work. The first predicts which molecules bind. The
-second decides which target and which molecules are worth the one experimental round the project
-gets. Everything here runs on public data, and every result is graded against outcomes that were
+This repository holds two connected pieces of work. The first decides which target and which
+molecules are worth the one experimental round the project gets. The second predicts which
+molecules bind. Everything here runs on public data, and every result is graded against outcomes that were
 already known before the code ran, so nothing needs a human reviewer or a laboratory to score.
 
 **Read this first, then pick a document from [the reading order](#documents) below.**
@@ -14,12 +14,38 @@ already known before the code ran, so nothing needs a human reviewer or a labora
 
 ## The two arms
 
-### Arm 1 · Molecular prediction (the primary arm)
+Numbered top down, by where each sits in the stack: Arm 1 allocates the scarce experimental
+capacity that Arm 2 consumes.
+
+**The numbering is not a ranking.** Arm 2 is the primary research object. The project exists to
+design macrocycles, and the allocation layer is in service of that. Earlier drafts of the project
+documents inverted this, and the correction is recorded in
+[PROJECT_OVERVIEW_AND_PLAN.md](PROJECT_OVERVIEW_AND_PLAN.md) §2.1.
+
+### Arm 1 · The tool-calling co-scientist (the allocation layer)
+
+**The question.** A new pathogen appears. Evidence is incomplete, it conflicts, and it arrives
+late. There is a deadline, a fixed budget of actions, and roughly one shot at the laboratory.
+Which target do you pursue, and what do you measure?
+
+The object of interest is not a prediction. It is an allocation.
+
+**How it works.** A policy acts through a registry of tools against a seven-axis target dossier,
+choosing from six actions: retrieve evidence, request structure, rerank, invoke a design tool,
+recommend an experiment, stop. Every call is charged against the budget, and evidence dated after
+the decision clock is refused with the refusal recorded.
+
+**Where it stands.** This is the arm that has actually been running, because it can run on public
+data without waiting for anyone. It currently goes from a raw genome to a ranked list of
+countermeasure targets, and the recent work has been about finding where that chain breaks. See
+[what the co-scientist arm found](#what-the-co-scientist-arm-found).
+
+### Arm 2 · Molecular prediction (the primary research object)
 
 **The question.** Can we predict which macrocyclic peptides bind a chosen viral target, and use
 those predictions to design a better library for SynX's mRNA display platform?
 
-This is what the project is actually for. A better design process, measured against what the
+This is what the project is ultimately for. A better design process, measured against what the
 platform does today, is the deliverable.
 
 **Where it stands.** Blocked, and honestly so. The macrocycle chemistry is represented and tested,
@@ -28,37 +54,23 @@ identifiers, SMILES, stereochemistry, reprogrammed codons, Rosetta parameters, r
 All of it waits on the SynX campaign export. **No macrocycle and no non-canonical residue has been
 measured anywhere in this repository.** The physics-based non-canonical track is untouched.
 
-That blockage is the critical path, not a line in a risk table.
+That blockage is the critical path, not a line in a risk table. It is also why the arm that sits
+above is the one with results: when the molecular work could not proceed, decision-policy work on
+public data could.
 
-**What exists instead, and why it is worth having.** While the export was pending, the only
-available work was on public canonical-protein datasets. That produced a result which turns out to
-be a statement about prediction rather than about policy: a condition on *when sequence-to-binding
-is learnable from a handful of labels*. See [the surviving result](#the-surviving-result).
+**What exists instead, and why it is worth having.** The available work was on public
+canonical-protein datasets. It produced a result which turns out to be a statement about
+prediction rather than about policy: a condition on *when sequence-to-binding is learnable from a
+handful of labels*. See [the surviving result](#the-surviving-result).
 
-### Arm 2 · The emergency co-scientist (the allocation layer)
-
-**The question.** A new pathogen appears. Evidence is incomplete, it conflicts, and it arrives
-late. There is a deadline, a fixed budget of actions, and roughly one shot at the laboratory.
-Which target do you pursue, and what do you measure?
-
-The object of interest is not a prediction. It is an allocation.
-
-**Where it stands.** This is the arm that has actually been running, because it can run on public
-data without waiting for anyone. It currently goes from a raw genome to a ranked list of
-countermeasure targets, and the recent work has been about finding where that chain breaks.
-
-**How the two relate.** Arm 2 sits *above* Arm 1. It allocates the scarce experimental capacity
-that the molecular work consumes. It is not a substitute for the molecular question, and earlier
-drafts of the project documents had this inverted. The correction is recorded in
-[PROJECT_OVERVIEW_AND_PLAN.md](PROJECT_OVERVIEW_AND_PLAN.md) §2.1.
-
-| | Arm 1 · Molecular prediction | Arm 2 · Co-scientist |
+| | Arm 1 · Co-scientist | Arm 2 · Molecular prediction |
 | --- | --- | --- |
-| **Decides** | Which molecules bind | Which target, and what to measure |
-| **Primary?** | Yes | No, it is the layer above |
-| **Runs today?** | No, chemistry is represented but unwired | Yes, on public data |
-| **Blocked on** | The SynX campaign export | Nothing |
-| **Evaluated by** | Studies E0–E7, [overview](PROJECT_OVERVIEW_AND_PLAN.md) §6.1 | Studies S0–S4, §6.2 |
+| **Decides** | Which target, and what to measure | Which molecules bind |
+| **Where it sits** | The allocation layer, above Arm 2 | The work being allocated for |
+| **Primary research object?** | No | Yes |
+| **Runs today?** | Yes, on public data | No, chemistry is represented but unwired |
+| **Blocked on** | Nothing | The SynX campaign export |
+| **Evaluated by** | Studies S0–S4, [overview](PROJECT_OVERVIEW_AND_PLAN.md) §6.2 | Studies E0–E7, §6.1 |
 
 ---
 
@@ -77,6 +89,23 @@ Isolation is enforced by construction rather than by care, and
 ---
 
 ## What has actually been measured
+
+### What the co-scientist arm found
+
+Each of these is a recorded experiment in [runs/](runs/) carrying its own question and answer.
+
+| Experiment | Finding |
+| --- | --- |
+| `intake_validation` | Genome to ranked targets recovers the real countermeasure targets across three virus families, with the pathogen's own proteins removed from the reference. Every expected target lands in the top eight. |
+| `holdout_ladder` | Push the nearest curated relative further away and the pipeline does not degrade, it **stops**. It needs a relative close enough to be conspecific or congeneric. The rank where this happens differs by family, because viral species boundaries are not calibrated to sequence identity. |
+| `identification_cascade` | Past that cliff, two different mechanisms recover two different things. Conserved enzymes come back through remote homology because they genuinely have distant relatives. Family-specific surface proteins have none, so no homology method finds them. Those are the antibody targets, and they are recovered from their own sequence instead, as a class. |
+| `cross_kingdom_intake` | Genome to targets transfers from viruses to a bacterium, but only after replacing the candidate-selection step. Identification and ranking carry over unchanged; six-frame calling and length ranking do not. |
+| `surface_markers` | A target can be scored from structure without penalising the very interfaces macrocycles exist to bind. Scoring the largest contiguous exposed hydrophobic patch ranks spike RBD above the main protease, the reverse of a small-molecule druggability score and the right way round for this project. |
+| `surface_in_ranker` | Those markers do **not** improve the ranking, in either form tried. The change was withdrawn. They are computed and reported, not scored. |
+| `amenability_gate` | The macrocycle-amenability gate becomes honest rather than confident. The patch moves by up to 496 square angstroms across structures of the same domain, comparable to the 600 threshold, so most real targets fall in a borderline band. Reporting that band is the correct result, not a failure. |
+| `coverage_channel` | Equalising axis coverage across targets does not remove a policy's advantage from counting offers. It relocates it to dossier order at almost unchanged size. |
+
+Identification is the single bottleneck in the chain.
 
 ### The surviving result
 
@@ -113,23 +142,6 @@ but there must be one, and whether one can be fitted is knowable in advance.
 **The limitation that matters most.** Every landscape behind this result is canonical residues on a
 folded protein domain. None contains a macrocycle, a non-canonical residue or a cyclisation, so
 none of it speaks to the molecule class the project exists to design.
-
-### What the co-scientist arm found
-
-Each of these is a recorded experiment in [runs/](runs/) carrying its own question and answer.
-
-| Experiment | Finding |
-| --- | --- |
-| `intake_validation` | Genome to ranked targets recovers the real countermeasure targets across three virus families, with the pathogen's own proteins removed from the reference. Every expected target lands in the top eight. |
-| `holdout_ladder` | Push the nearest curated relative further away and the pipeline does not degrade, it **stops**. It needs a relative close enough to be conspecific or congeneric. The rank where this happens differs by family, because viral species boundaries are not calibrated to sequence identity. |
-| `identification_cascade` | Past that cliff, two different mechanisms recover two different things. Conserved enzymes come back through remote homology because they genuinely have distant relatives. Family-specific surface proteins have none, so no homology method finds them. Those are the antibody targets, and they are recovered from their own sequence instead, as a class. |
-| `cross_kingdom_intake` | Genome to targets transfers from viruses to a bacterium, but only after replacing the candidate-selection step. Identification and ranking carry over unchanged; six-frame calling and length ranking do not. |
-| `surface_markers` | A target can be scored from structure without penalising the very interfaces macrocycles exist to bind. Scoring the largest contiguous exposed hydrophobic patch ranks spike RBD above the main protease, the reverse of a small-molecule druggability score and the right way round for this project. |
-| `surface_in_ranker` | Those markers do **not** improve the ranking, in either form tried. The change was withdrawn. They are computed and reported, not scored. |
-| `amenability_gate` | The macrocycle-amenability gate becomes honest rather than confident. The patch moves by up to 496 square angstroms across structures of the same domain, comparable to the 600 threshold, so most real targets fall in a borderline band. Reporting that band is the correct result, not a failure. |
-| `coverage_channel` | Equalising axis coverage across targets does not remove a policy's advantage from counting offers. It relocates it to dossier order at almost unchanged size. |
-
-Identification is the single bottleneck in the chain.
 
 ### Claims that were withdrawn
 
