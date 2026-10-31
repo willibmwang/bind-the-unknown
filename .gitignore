@@ -81,3 +81,8 @@ runs/improve/
 # worth more than the apparent agreement it would otherwise have reported.
 !runs/amenability_gate.json
 .venv-pfn/
+
+# The notebook points MPLCONFIGDIR here so a stale user-level matplotlibrc cannot print a
+# backend warning into a demo. It is a cache, never a record.
+notebooks/.mplcache/
+notebooks/.ipynb_checkpoints/
