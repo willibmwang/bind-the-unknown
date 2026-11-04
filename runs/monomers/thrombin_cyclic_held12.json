@@ -1,0 +1,289 @@
+{
+  "experiment": "monomer-transfer",
+  "landscape": "thrombin_cyclic",
+  "control": null,
+  "status": "complete",
+  "seed": 1060407322,
+  "budget": 128,
+  "top_fraction": 0.05,
+  "held_out_monomers": [
+    "A13",
+    "A14",
+    "A9",
+    "X10",
+    "X13",
+    "X14",
+    "X15",
+    "X19",
+    "X2",
+    "X24",
+    "X28",
+    "X29"
+  ],
+  "held_out_count": 12,
+  "holdout_positions": [
+    1,
+    2,
+    5
+  ],
+  "train_members": 3336,
+  "test_members": 5112,
+  "library_members": 8448,
+  "descriptors": [
+    "mw",
+    "logp",
+    "tpsa",
+    "hbd",
+    "hba",
+    "rotb",
+    "rings",
+    "aromatic",
+    "heavy",
+    "fcsp3"
+  ],
+  "results": [
+    {
+      "encoder": "vocabulary",
+      "model": "forest",
+      "columns": 78,
+      "representation": "one-hot token index",
+      "constant_columns": 0,
+      "held_out_spearman": 0.3097,
+      "seen_spearman": 0.8072,
+      "selection": {
+        "labels": 128,
+        "best_score": 83.46153846153847,
+        "top_fraction": 0.05,
+        "top_hits": 67,
+        "top_recall": 0.25868725868725867,
+        "hits_in_pool": 259,
+        "pool_candidates": 5112,
+        "threshold": 37.69230769230769,
+        "ties_at_threshold": 4,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 3983,
+        "tied_predictions": 3983,
+        "tied_rate": 1.0,
+        "compared": 0,
+        "concordance": null
+      }
+    },
+    {
+      "encoder": "vocabulary",
+      "model": "ridge",
+      "columns": 78,
+      "representation": "one-hot token index",
+      "constant_columns": 0,
+      "held_out_spearman": 0.1673,
+      "seen_spearman": 0.4574,
+      "selection": {
+        "labels": 128,
+        "best_score": 79.38461538461539,
+        "top_fraction": 0.05,
+        "top_hits": 64,
+        "top_recall": 0.2471042471042471,
+        "hits_in_pool": 259,
+        "pool_candidates": 5112,
+        "threshold": 37.69230769230769,
+        "ties_at_threshold": 4,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 3983,
+        "tied_predictions": 3981,
+        "tied_rate": 0.9995,
+        "compared": 2,
+        "concordance": 0.5
+      }
+    },
+    {
+      "encoder": "descriptor",
+      "model": "forest",
+      "columns": 66,
+      "representation": "10 RDKit descriptors plus an absence indicator per position",
+      "constant_columns": 20,
+      "held_out_spearman": 0.2561,
+      "seen_spearman": 0.8448,
+      "selection": {
+        "labels": 128,
+        "best_score": 90.0,
+        "top_fraction": 0.05,
+        "top_hits": 61,
+        "top_recall": 0.23552123552123552,
+        "hits_in_pool": 259,
+        "pool_candidates": 5112,
+        "threshold": 37.69230769230769,
+        "ties_at_threshold": 4,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 3983,
+        "tied_predictions": 211,
+        "tied_rate": 0.053,
+        "compared": 3772,
+        "concordance": 0.5273
+      }
+    },
+    {
+      "encoder": "descriptor",
+      "model": "ridge",
+      "columns": 66,
+      "representation": "10 RDKit descriptors plus an absence indicator per position",
+      "constant_columns": 20,
+      "held_out_spearman": 0.1488,
+      "seen_spearman": 0.4519,
+      "selection": {
+        "labels": 128,
+        "best_score": 87.23076923076923,
+        "top_fraction": 0.05,
+        "top_hits": 68,
+        "top_recall": 0.2625482625482625,
+        "hits_in_pool": 259,
+        "pool_candidates": 5112,
+        "threshold": 37.69230769230769,
+        "ties_at_threshold": 4,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 3983,
+        "tied_predictions": 210,
+        "tied_rate": 0.0527,
+        "compared": 3773,
+        "concordance": 0.5144
+      }
+    },
+    {
+      "encoder": "both",
+      "model": "forest",
+      "columns": 144,
+      "representation": "one-hot token index concatenated with 10 RDKit descriptors plus an absence indicator per position",
+      "constant_columns": 20,
+      "held_out_spearman": 0.2589,
+      "seen_spearman": 0.8788,
+      "selection": {
+        "labels": 128,
+        "best_score": 90.0,
+        "top_fraction": 0.05,
+        "top_hits": 65,
+        "top_recall": 0.25096525096525096,
+        "hits_in_pool": 259,
+        "pool_candidates": 5112,
+        "threshold": 37.69230769230769,
+        "ties_at_threshold": 4,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 3983,
+        "tied_predictions": 211,
+        "tied_rate": 0.053,
+        "compared": 3772,
+        "concordance": 0.5199
+      }
+    },
+    {
+      "encoder": "both",
+      "model": "ridge",
+      "columns": 144,
+      "representation": "one-hot token index concatenated with 10 RDKit descriptors plus an absence indicator per position",
+      "constant_columns": 20,
+      "held_out_spearman": 0.1524,
+      "seen_spearman": 0.4579,
+      "selection": {
+        "labels": 128,
+        "best_score": 90.0,
+        "top_fraction": 0.05,
+        "top_hits": 70,
+        "top_recall": 0.2702702702702703,
+        "hits_in_pool": 259,
+        "pool_candidates": 5112,
+        "threshold": 37.69230769230769,
+        "ties_at_threshold": 4,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 3983,
+        "tied_predictions": 210,
+        "tied_rate": 0.0527,
+        "compared": 3773,
+        "concordance": 0.5144
+      }
+    },
+    {
+      "encoder": "descriptor_shuffled",
+      "model": "forest",
+      "columns": 66,
+      "representation": "10 RDKit descriptors plus an absence indicator per position",
+      "constant_columns": 20,
+      "held_out_spearman": 0.0351,
+      "seen_spearman": 0.8612,
+      "selection": {
+        "labels": 128,
+        "best_score": 75.46153846153847,
+        "top_fraction": 0.05,
+        "top_hits": 8,
+        "top_recall": 0.03088803088803089,
+        "hits_in_pool": 259,
+        "pool_candidates": 5112,
+        "threshold": 37.69230769230769,
+        "ties_at_threshold": 4,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 3983,
+        "tied_predictions": 524,
+        "tied_rate": 0.1316,
+        "compared": 3459,
+        "concordance": 0.486
+      }
+    },
+    {
+      "encoder": "descriptor_shuffled",
+      "model": "ridge",
+      "columns": 66,
+      "representation": "10 RDKit descriptors plus an absence indicator per position",
+      "constant_columns": 20,
+      "held_out_spearman": -0.1111,
+      "seen_spearman": 0.4537,
+      "selection": {
+        "labels": 128,
+        "best_score": 63.92307692307693,
+        "top_fraction": 0.05,
+        "top_hits": 3,
+        "top_recall": 0.011583011583011582,
+        "hits_in_pool": 259,
+        "pool_candidates": 5112,
+        "threshold": 37.69230769230769,
+        "ties_at_threshold": 4,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 3983,
+        "tied_predictions": 0,
+        "tied_rate": 0.0,
+        "compared": 3983,
+        "concordance": 0.481
+      }
+    }
+  ],
+  "dataset_content_sha256": "a1592846ce664d9b1cd86f9a550f491c996f34fb7b9d2a034cfa76d2267f1b78",
+  "display_config_sha256": "d3efd21b3f3ebe73af7fde036c2d55b81adaac83fe5da44f9164348d0aaae763",
+  "provenance": {
+    "host": "WilliamsMBP236",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "9aae34156e467600e9f09a2ec53238942f78b036",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-10-21T16:52:24.595252+00:00"
+  },
+  "endpoint_warning": "Enrichment is not affinity, functional inhibition or antiviral activity. Do not pool metrics across landscapes with different endpoints or geometries.",
+  "interpretation": "A monomer-wise split measures whether a surrogate can rank a library member built from a building block it has never seen measured. The tied-prediction rate is structural for a one-hot encoding, not an empirical finding. No binding, affinity, inhibition or antiviral property is predicted for any member.",
+  "limitations": [
+    "Descriptors are per-monomer. They describe the building blocks and capture nothing about the assembled macrocycle, its conformation or the ring.",
+    "The held-out monomers are drawn from one library against one target, so the comparison is within this landscape and is not a benchmark-breadth claim.",
+    "Members are not independent replicates; they are draws from one combinatorial library measured in one campaign."
+  ]
+}
