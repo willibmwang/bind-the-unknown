@@ -8,7 +8,13 @@ molecules are worth the one experimental round the project gets. The second pred
 molecules bind. Everything here runs on public data, and every result is graded against outcomes that were
 already known before the code ran, so nothing needs a human reviewer or a laboratory to score.
 
-**Read this first, then pick a document from [the reading order](#documents) below.**
+**Start with the notebook.**
+[**notebooks/double_arm_mvp.ipynb**](notebooks/double_arm_mvp.ipynb) walks through both arms in
+one sitting and computes every number it shows from the records in [runs/](runs/) at execution
+time. It is committed with its outputs, so GitHub renders the whole thing, tables and figures
+included, without running anything. Details in [the notebook](#the-notebook) below.
+
+**Then read this page, and pick a document from [the reading order](#documents).**
 
 ---
 
@@ -172,6 +178,53 @@ handful of labels*. See [the surviving result](#the-surviving-result).
 
 ---
 
+## The notebook
+
+[**notebooks/double_arm_mvp.ipynb**](notebooks/double_arm_mvp.ipynb) is the shortest honest route
+through this project. It was built to be run live and talked through, which forced two rules on
+it, and both are worth stating because they are what makes it trustworthy.
+
+1. **No live database calls.** The ten registered tools read NCBI, UniProt, Europe PMC, EBI
+   HMMER, InterPro, PDBe, AlphaFold, RCSB and ChEMBL, and a measured call costs between 0.7 and
+   94 seconds. A demo wired to them is one outage away from failing in front of an audience, so
+   every cell reads the committed run records instead. The one exception is the tool selector,
+   which is pure decision logic and needs no network at all, so it runs for real.
+2. **Nothing is retyped.** Numbers come out of [runs/](runs/) when the cell executes. If a record
+   changes, the notebook changes with it, and no figure in it can drift away from the recorded
+   result. Where a number genuinely is not in any file, the cell says so in a comment naming the
+   document it was quoted from.
+
+| § | Section | What you see |
+| --- | --- | --- |
+| 0 | Setup and data availability | Which records this machine can actually see, before anything tries to read one |
+| 1.1 | Reachability, not relevance | The selector ranking all ten tools from a bare genome accession, computed live |
+| 1.2 | What the co-scientist arm found | The eight recorded experiments, each reporting its own answer field |
+| 1.3 | Genome to ranked targets | Recovered countermeasure targets across three virus families and one bacterium |
+| 1.4 | The identification cliff | Where the pipeline stops rather than degrades |
+| 1.5 | The surface a macrocycle would bind | Patch medians with their spread, and why the amenability gate is borderline |
+| 2.1 | The surviving result | Acquisition gain against pool coverage, from the per-pool records |
+| 2.2 | Tested by intervention | Narrow the pool and the effect returns; destroy feature sharing and it disappears |
+| 2.3 | What Arm 2 is blocked on | The null chemistry fields, enumerated from the repository rather than asserted |
+| 3 | What to say about this | The three claims worth defending, and the one caveat that belongs beside them |
+
+Sections 1.2 to 1.5 read records that are tracked, so they work in a fresh clone. Section 2.1
+reads per-pool summaries that are **gitignored by design**: they exist on the machine that ran
+them, and section 0 reports their absence rather than letting a later cell fail. Rebuild them
+with `python -m hpc_pilots summarize`.
+
+```bash
+pip install -r requirements.lock.txt
+jupyter lab notebooks/double_arm_mvp.ipynb      # or: jupyter notebook
+```
+
+To rerun it start to finish without opening it:
+
+```bash
+jupyter nbconvert --to notebook --execute --inplace notebooks/double_arm_mvp.ipynb
+```
+
+---
+
 ## How the grading works
 
 The same pattern produces every number here. Take a dataset where the outcome is already known for
@@ -257,6 +310,7 @@ The adversarial and confound reviews in [reviews/](reviews/) exist for the same 
 
 | Path | What is in it |
 | --- | --- |
+| [notebooks/](notebooks/) | The runnable walkthrough of both arms, committed with its outputs. Described [above](#the-notebook). |
 | [hpc_pilots/](hpc_pilots/) | All the code. 40 modules, about 18,900 lines, plus the SLURM execution layer. |
 | [hpc_pilots/configs/](hpc_pilots/configs/) | Landscape, target, method and tool-set definitions. Treated as byte-immutable once a run has embedded a config hash, so new work goes into a new file. |
 | [runs/](runs/) | Recorded results, one file per experiment, each stating its own question and answer. |
@@ -304,6 +358,11 @@ python -m pytest hpc_pilots/tests -q
 ---
 
 ## Documents
+
+Before any of these, run or read
+[**notebooks/double_arm_mvp.ipynb**](notebooks/double_arm_mvp.ipynb), which covers both arms in
+one sitting and shows its working. The documents below are where the reasoning is set out in
+full.
 
 In reading order. Items 1 to 6 are also committed as PDFs.
 
