@@ -104,6 +104,27 @@ GRID = {
              reproduces="Empty elongator alphabet",
              why="every requested class unknown leaves nothing to draw from"),
     ),
+    # Gridded so the lookup a room is most likely to ask for by name is replayable without a
+    # network. The predictions below were written before the first run, per this module's rule,
+    # and the cell that turned out to be mispredicted is left as it was written.
+    "structures.predicted": (
+        Cell({"accession": "P0DTD1"}, "ok", repeats=3,
+             why="SARS-CoV-2 ORF1ab, which carries nsp5, and the accession the notebook "
+                 "dispatches live, so the recording and the live panel are the same call"),
+        Cell({"accession": "P0DTC2"}, "ok", repeats=2,
+             why="spike, the other target this project singles out, so the cost claim rests "
+                 "on more than one protein and more than one model count"),
+        Cell({"accession": "P0DTD1", "confident_plddt": 70.0}, "ok", repeats=2,
+             why="the declared default named explicitly, to check the default in force is the "
+                 "one the registry advertises"),
+        Cell({"accession": "P0DTD1", "confident_plddt": 101.0}, "rejected",
+             why="above the declared maximum of 100.0, the cell that writes a `rejected` row "
+                 "for this tool"),
+        Cell({"accession": "P00000"}, "failed",
+             reproduces="urllib.error.HTTPError from the 3D-Beacons or AlphaFold host",
+             why="a syntactically valid accession no host serves, which the spec declares "
+                 "raises rather than returning an absent prediction"),
+    ),
     "structures.evidence": (
         Cell({}, "ok", repeats=10,
              why="the default coverage threshold; the expensive cell, ~53 s and 36 outbound "
@@ -181,7 +202,7 @@ GRID = {
 # above, and a reader comparing the registry against `runs/toolcalls/` would otherwise find six
 # tools missing with nothing saying why.
 UNGRIDDED = ("literature.search", "families.entries", "similarity.homologs",
-             "structures.predicted", "structures.folded", "bioactivity.prior_binders")
+             "structures.folded", "bioactivity.prior_binders")
 
 
 def _row(index, name, cell, envelope, cold):
