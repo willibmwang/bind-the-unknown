@@ -61,7 +61,7 @@ from .common import content_digest
 
 # Bumped by hand when a snapshot is cut. Deliberately not derived from the specs: a digest
 # answers whether two spec sets differ, a version answers which file a reader should open.
-TOOL_SET_VERSION = 6
+TOOL_SET_VERSION = 7
 
 # The declared types a parameter may take. Short on purpose, and not a coercion table: a
 # string where an integer is declared is a contract violation and not an input to parse.
@@ -642,7 +642,7 @@ TOOLS = {
     # registered as artifacts that *provide facts*, which is what opens the chain, and the axis
     # work is named rather than assumed.
     "literature.search": Tool(
-        name="literature.search", version=1,
+        name="literature.search", version=2,
         summary="Date-limited literature retrieval for a target name, protein family or "
                 "accession.",
         description="Queries Europe PMC's fielded search over title and abstract, optionally "
@@ -662,7 +662,12 @@ TOOLS = {
                       "Which kind of subject was supplied, which selects how the query is "
                       "built.",
                       required=False, default="term",
-                      enum=("term", "family", "accession")),
+                      # Mirrors literature.SUBJECT_KINDS. It read ("term", "family",
+                      # "accession"), advertising a value the function refuses and omitting one
+                      # it accepts, so a decoder honouring the published schema could spend an
+                      # action on subject_kind="family" and have the result recorded as the
+                      # tool's own failure.
+                      enum=("term", "accession", "query")),
             Parameter("scope", "str", "Which fields the query searches.",
                       required=False, default="title_abstract",
                       enum=("title_abstract", "title", "all")),

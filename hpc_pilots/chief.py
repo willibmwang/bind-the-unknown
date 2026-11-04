@@ -159,6 +159,19 @@ def semantics(spec, arguments):
         value = arguments.get(parameter.name)
         if value is None:
             continue
+        # Statically declared enums are re-checked here even though `schema_conformance`
+        # already raises on them, because `call` does not run that function and a caller may
+        # not either. Without this a value the spec forbids reaches the tool and comes back as
+        # the tool's own failure, which misattributes a caller's error to the tool and puts it
+        # in the record `optimizer.fidelity` reads. Charged rather than raised, because `call`
+        # returns an envelope and a refusal before dispatch is exactly what `rejected` means.
+        #
+        # Only `enum` is checked and never `enum_from`: a vocabulary-sourced set needs the
+        # caller's `choices`, which this function is not given, and widening to unconstrained
+        # when it is absent would turn a missing vocabulary into a permissive check. Those stay
+        # with `schema_conformance`, which has the vocabulary.
+        if parameter.enum and value not in parameter.enum:
+            return (f"{parameter.name}={value!r} is not one of {tuple(parameter.enum)}")
         if parameter.minimum is not None and value < parameter.minimum:
             return (f"{parameter.name}={value!r} is below the declared minimum "
                     f"{parameter.minimum}")
