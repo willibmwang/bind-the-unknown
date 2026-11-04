@@ -1,221 +1,228 @@
 # bind-the-unknown
 
-Designing macrocyclic peptides that bind a viral target, and deciding what to measure when you
-only get one experiment.
+**Before a library is synthesised, this says whether a model fitted on the first round of
+measurements will be worth acting on.** That is a property of how the library was designed rather
+than of the target, so the answer is available at design time and costs no assay to get. Where the
+candidates share randomised positions with the members already measured, a weak model trained on
+128 measurements picks good binders well enough to act on: a mean gain of +0.173 to +0.321 over
+picking at random from the same batch. Where they share no positions, the gain is +0.010 to +0.033
+and nothing downstream recovers it. The result is established on published datasets of canonical
+protein variants, which is why a SynX campaign is its natural next test.
 
-This repository holds two connected pieces of work. The first decides which target and which
-molecules are worth the one experimental round the project gets. The second predicts which
-molecules bind. Everything here runs on public data, and every result is graded against outcomes that were
-already known before the code ran, so nothing needs a human reviewer or a laboratory to score.
+**The rest of this system gets you to a library worth asking that question about.** From a
+pathogen genome accession and nothing else, it ranks candidate targets, folds the one it picks,
+measures the surface a macrocyclic peptide would have to bind, and defines a focused
+thioether-macrocycle library over that surface. It runs today against public endpoints at NCBI,
+UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, 3D-Beacons, AlphaFold DB, ESMFold, RCSB and
+ChEMBL, and it has been run across three virus families and one bacterium.
 
-**Start with the notebook.**
-[**notebooks/double_arm_mvp.ipynb**](notebooks/double_arm_mvp.ipynb) walks through both arms in
-one sitting and computes every number it shows from the records in [runs/](runs/) at execution
-time. It is committed with its outputs, so GitHub renders the whole thing, tables and figures
-included, without running anything. Details in [the notebook](#the-notebook) below.
-
-**Then read this page, and pick a document from [the reading order](#documents).**
+**Start with the notebook.** [notebooks/double_arm_mvp.ipynb](notebooks/double_arm_mvp.ipynb)
+runs the whole path in one sitting and computes every number it shows when the cell executes. It
+is committed with its outputs, so GitHub renders all of it without running anything.
 
 ---
 
-## The two arms
+## What this produces, from a genome to a library
 
-Numbered top down, by where each sits in the stack: Arm 1 allocates the scarce experimental
-capacity that Arm 2 consumes.
+**Five things come out of this system, and each one is an object you can hold.** The notebook
+builds them in order.
 
-**Arm 1, the co-scientist, is the primary research object.** It is the part that decides which
-target to pursue and what to measure when evidence is incomplete and there is roughly one shot at
-the bench, and it is the part that runs today against live public endpoints. Arm 2 answers which
-molecules bind, which is the question the co-scientist allocates capacity to.
+**A target, chosen from a pathogen genome rather than from a shortlist.** The only input is one
+genome accession. The pipeline reads that genome in all six frames to get every protein it could
+encode, matches those against reviewed UniProt entries, and ranks what it finds. It has run on
+SARS-CoV-2, Nipah virus, influenza A PR8 and *Mycobacterium tuberculosis*, each time with the
+pathogen's own proteins deleted from the reference so identification had to work through a
+relative.
 
-### Arm 1 · The tool-calling co-scientist (the primary research object)
+**A structure for that target, including for a protein with no close curated relative.** The
+folding tool takes an amino-acid sequence and returns coordinates, which is the one structural
+route open to a protein nobody has solved. The committed example is in
+[runs/folded_structure/](runs/folded_structure/): the 306-residue SARS-CoV-2 main protease, 193227
+bytes of coordinates. The predictor's own confidence in each residue averages 62.57 out of 100,
+and 46.4 per cent of residues are at or above 70. Confidence is not accuracy.
 
-**The question.** A new pathogen appears. Evidence is incomplete, it conflicts, and it arrives
-late. There is a deadline, a fixed budget of actions, and roughly one shot at the laboratory.
-Which target do you pursue, and what do you measure?
+**A measured binding surface on that target.** The surface tool measures the largest unbroken
+exposed greasy area on the outside of the protein, which is what a macrocycle has to lie across.
+It reports a median with the spread over replicate structures of the same domain. At a 10
+angstrom contact cutoff the spike receptor-binding domain carries 682.2 square angstroms against
+the main protease's 415.2. **That ordering is the reverse of a conventional small-molecule
+druggability score, and the right way round for macrocycles**, which bury a few hundred square
+angstroms flat rather than reaching into a pocket.
 
-The object of interest is not a prediction. It is an allocation.
+**A focused library definition over that surface.** `chemistry.library_spec` returns a
+chloroacetyl initiator, `ClAc-D-Tyr`, a randomised region of 4 to 8 positions drawn from 25
+building blocks, and a cysteine that closes the ring through a spontaneous thioether. The
+definition allows 158,945,703,125 distinct sequences.
 
-A campaign starts from a single fact: a pathogen genome accession. Everything below follows from
-that one input.
+**A go/no-go on whether modelling will help for that library, before any assay.** That is the
+result in the opening paragraph, measured in [what has been measured](#what-has-been-measured).
+It is the strongest thing here, because a property of the design can be read off the moment the
+library is specified.
 
-#### The tools it can call
+## How the target gets chosen
 
-Ten tools are registered and every one is dispatchable. Each answers a different scientific
-question, and each reads live public endpoints rather than a cached snapshot.
+**You cannot call a tool because it sounds relevant. You can call it only when you already have
+what it needs.** From a genome accession alone, the folding tool has no sequence to fold, and the
+family, predicted-structure, surface and bioactivity tools have no protein accession to look up.
+Those tools are not expensive and not irrelevant, they have nothing to act on yet. Matching a
+query against tool descriptions never finds that out, because the obstruction is in what you know
+and not in the words.
 
-| Tool | What it answers | Reads |
+So each tool declares what it needs and what its result supplies, and the selector proposes all
+10 of them in a fixed order:
+
+1. Tools you can run now, before tools you cannot.
+2. Among those, whichever produces the facts most other tools are waiting on.
+3. Then whichever answers more of the questions still open about the target.
+4. Then name, so the order is total and a run reproduces.
+
+**The second rule before the third is the real judgement.** A call that makes other calls possible
+changes what every later round may do, while a call that answers one open question changes one
+number. Tools you cannot run yet are reported rather than dropped, each naming the fact it lacks.
+
+From a bare genome accession, five of the 10 tools are runnable. Identification is the only one of
+the five that produces facts the others need, and it produces all of them, so the chain has a
+single bottleneck.
+
+| Tool | What you get | Reads |
 | --- | --- | --- |
-| `intake.rank_targets` | Genome accession to a ranked list of candidate binding targets | NCBI, reviewed UniProt |
-| `literature.search` | Date-limited literature for a target name, family or accession | Europe PMC |
-| `similarity.homologs` | Homologs of one protein, with identity, E-value and source organism | EBI HMMER |
-| `families.entries` | Family, domain and site assignments claiming a protein, with residue ranges | InterPro |
-| `structures.evidence` | Dated structural coverage per declared target | PDBe, UniProt |
-| `structures.predicted` | Predicted models per accession, with per-range confidence | 3D-Beacons, AlphaFold DB |
-| `structures.folded` | Folds one amino-acid sequence, keyed on the sequence itself | ESMFold |
-| `geometry.surface_markers` | Macrocycle-shaped surface markers from deposited structures | RCSB, PDBe |
-| `bioactivity.prior_binders` | Prior bioactivities, assay formats and public mutational landscapes | ChEMBL, IEDB, MaveDB |
-| `chemistry.library_spec` | Defines a focused thioether-macrocycle library over a randomised region | Local tables only |
+| `intake.rank_targets` | Genome accession in, ranked candidate targets out | NCBI, UniProt |
+| `literature.search` | Date-limited literature for a name or accession | Europe PMC |
+| `similarity.homologs` | Related proteins in other organisms, with identity | EBI HMMER |
+| `families.entries` | Families, domains and sites, with residue ranges | InterPro |
+| `structures.evidence` | Dated structural coverage for a named target | PDBe, UniProt |
+| `structures.predicted` | Predicted models, with per-range confidence | 3D-Beacons, AlphaFold DB |
+| `structures.folded` | Coordinates for one amino-acid sequence | ESMFold |
+| `geometry.surface_markers` | The surface area a macrocycle would cover | RCSB, PDBe |
+| `bioactivity.prior_binders` | Prior bioactivities, assay formats, public scans | ChEMBL, IEDB, MaveDB |
+| `chemistry.library_spec` | A focused macrocycle library over a randomised region | Local tables |
 
-Which dossier axes these instrument, and how firmly:
+**Four of them fetch real material and are deliberately not allowed to settle a question on
+their own.** They return evidence a person still has to weigh, so the system records what
+they found and does not let a hit count stand in for a measurement.
 
-| Axis | Instrument |
+## What has been measured
+
+Every number below comes from a dataset where the outcome was already known for every candidate
+and then hidden behind an evaluator. A decision procedure asks for a few outcomes at a time under
+a fixed budget, and what it chose is scored against the hidden truth. Grading is therefore exact
+and automatic, and needs no human reviewer and no laboratory. Each run below is a record in
+[runs/](runs/) carrying its own question and answer.
+
+### Choosing the target
+
+Three of the four pathogens beat a random ranking of their own candidates, at p = 0.000862,
+0.0121 and 0.000399. Nipah virus, with three targets among eight candidates, is underpowered at
+that size and is recorded as not established rather than as a pass or a failure.
+
+| Experiment | What it found |
 | --- | --- |
-| Accessibility | Measured surfaces on deposited structures |
-| Precedent | Dated structural coverage |
-| Essentiality, conservation, assay availability, public labels | Retrieval only |
-| Reagent tractability | A wet-lab fact no public record answers |
+| `intake_validation` | With the pathogen's own proteins removed from the reference, the ranking still recovers the real countermeasure targets across three virus families. |
+| `holdout_ladder` | Delete ever-closer relatives from the reference and the pipeline does not degrade, it **stops**. It needs a known relative from the same species or at least the same genus. |
+| `identification_cascade` | Past that point, conserved enzymes still come back through distant matches. Family-specific surface proteins have no distant relatives, so they are recognised from their own sequence instead, as a surface protein rather than by name. Those are the antibody targets. |
+| `cross_kingdom_intake` | Genome to targets transfers to a bacterium once the candidate-selection step is replaced. All four first-line tuberculosis drug target complexes rank inside the top 92 of 4,085 predicted genes. |
+| `surface_markers` | Scoring the largest unbroken exposed greasy area puts the spike receptor-binding domain above the main protease at every contact cutoff measured, so a target can be scored from structure without penalising the interfaces macrocycles exist to bind. |
+| `amenability_gate` | Over five structures of the same domain that area moves by up to 496.2 square angstroms, against one macrocycle footprint of 600, so the gate reports the range with the median inside it. |
 
-**Retrieval only** means the tool fetches real material bearing on the axis and is deliberately
-not permitted to substantiate it. Substantiating an axis needs a *dated* claim, because the date
-boundary is what keeps a historical replay honest, and these tools carry dates per row rather
-than per call. Letting a hit count stand in for a measurement is the exact failure the system is
-built to prevent.
+### The result
 
-#### How it chooses which tool to call
+**Whether a model helps depends on whether the candidates vary at the same sequence positions as
+the members already measured.** When they do, a weak model fitted on 128 measurements picks
+held-out binders well enough to act on. When they do not, correlation sits near 0.1.
 
-**By reachability, not relevance.** This is the one idea worth carrying away. A tool is not
-something you may call because it sounds apposite. It is something you may call because *its
-inputs exist*. From a bare genome accession, a literature query has no target name to query for
-and a structural lookup has no accession to look up. Those tools are not expensive and not
-irrelevant, they are unreachable, and no amount of matching a query against tool summaries
-discovers that, because the obstruction is in the state and not in the text. The earlier
-text-matching retriever was measured as returning nothing at this scale, which is the expected
-result for a handful of tools whose summaries share a vocabulary.
+Correlation alone could not establish that, so it was tested by intervening in both directions
+with everything else held fixed. These rows are quoted from
+[ADJUDICATION_COMBINATORIAL_GAIN.md](ADJUDICATION_COMBINATORIAL_GAIN.md).
 
-So each tool declares what it needs in the state and what its return puts there. The selector
-then reports every tool as a proposal, ordered on a tuple:
-
-1. **Callable before blocked.**
-2. **Among callable, whichever unblocks more other tools.**
-3. **Then whichever speaks to more unresolved axes.**
-4. **Then name**, always, so the order is total and a run reproduces rather than depending on
-   registration order.
-
-Step 2 before step 3 is the real judgement in the module, and it is documented as such. A call
-that widens the action set changes what every later round may do, while a call that speaks to an
-axis changes one number. Under a budget that binds, the option value is worth more than the
-increment. Because it is also the assumption most likely to be wrong, it is one comparison in a
-documented tuple rather than a weight buried in a sum, so there is a single term to change.
-
-**Blocked tools are reported, never dropped**, each naming what it is blocked on. A policy shown
-only its callable moves cannot tell a tool that is useless from a tool that is one call away, and
-under a budget the second is the more useful thing to know.
-
-**It does not rank by cost.** Seven of the ten specs now carry measured wall time and request
-counts, but three still declare zero, and for the deposited-structure tool that zero is wrong by
-about 60 seconds and 36 outbound requests per call. A cost-weighted order would be a preference
-computed partly from numbers nobody has taken, so cost waits in the tie-break slot until the
-record is complete. Measured costs today span more than two orders of magnitude, from 0.7 seconds
-to fold a sequence to 94 seconds for prior binders, so the ordering will change once they land.
-
-#### Where that leads, from one accession
-
-Run the selector on a bare genome accession and five of the ten tools are callable. Identification
-unlocks exactly the other five, so the dependency graph has a single bottleneck and identification
-is it. It also leads because it is the only tool that enumerates and ranks candidates rather than
-answering about one you have already named.
-
-1. **Identify candidate targets.** Six-frame translation and homology against reviewed UniProt,
-   from the accession alone. Yields target names, protein accessions, residue ranges and the
-   translated sequences.
-2. **Branch on what identification found.** With a protein accession, five more tools open. With
-   no recognisable homolog, the translated sequence alone still opens the folding and family
-   lanes.
-3. **Gather evidence per axis.** Literature, family annotation, deposited structures, predicted
-   models and prior binders.
-4. **Measure the surface a macrocycle would bind.** Largest contiguous exposed hydrophobic patch,
-   as a median across several structures of the same domain with the spread beside it.
-
-Carrying the translated sequence through step 1 is what makes step 2 work for a genuinely novel
-protein. Every structural lane resolves an accession, and a novel protein has none, so before the
-sequence was retained those lanes returned a true and useless zero for exactly the case the
-project is named for.
-
-#### What each result carries
-
-A number without its caveat travels further than the caveat does, so each tool carries a standing
-warning into every result that used it. A predicted model is not a deposition. A family
-assignment is not a measurement on this pathogen. A homolog is somebody else's protein. A row in
-a bioactivity database is not an assay anyone can run.
-
-**Where it stands.** This is the arm that has actually been running, because it can run on public
-data without waiting for anyone. See
-[what the co-scientist arm found](#what-the-co-scientist-arm-found) for the measured results,
-including the two that came back negative.
-
-### Arm 2 · Molecular prediction
-
-**The question.** Can we predict which macrocyclic peptides bind a chosen viral target, and use
-those predictions to design a better library for SynX's mRNA display platform?
-
-**Where it stands.** The macrocycle chemistry is wired. `hpc_pilots/chemistry.py` holds a block
-registry of 29 blocks across 20 canonical and 9 non-canonical classes, exposed through
-`chemistry.library_spec`, a registered tool an `emergency` action can dispatch, which returns a
-thioether-macrocycle library definition over 25 elongators admitting 158,945,703,125 sequences.
-
-It also runs on a real macrocycle dataset. `thrombin_cyclic` stages 8,448 unique cyclic peptides
-built from named non-canonical monomers against a quantitative thrombin endpoint, with two
-distinct cyclisation chemistries modelled explicitly and SMILES recovered for 47 monomers so
-RDKit descriptors could be computed. It carries its own experiment: hold monomers out of training
-and ask whether a surrogate can rank library members built from blocks it has never seen measured.
-
-What a SynX campaign supplies is the remaining 8 of 13 registry fields, which are the
-platform-specific ones: chemical identifiers, CCD codes, SMILES, stereochemistry descriptors,
-molecular weights, reprogrammed codons, Rosetta parameters and rotamer libraries. That list is the
-interface, written down to the field.
-
-**The main acquisition result below is on canonical-protein landscapes**, which is why a SynX
-campaign is its natural next test. See [the surviving result](#the-surviving-result).
-
-| | Arm 1 · Co-scientist | Arm 2 · Molecular prediction |
+| Intervention | Gain over random | Model correlation |
 | --- | --- | --- |
-| **Decides** | Which target, and what to measure | Which molecules bind |
-| **Where it sits** | The allocation layer, above Arm 2 | The work being allocated for |
-| **Primary research object?** | Yes | No |
-| **Runs today?** | Yes, against live public endpoints | Yes, on staged landscapes including one macrocycle library |
-| **Awaits from SynX** | Nothing | 8 of 13 registry fields, the platform-specific ones |
-| **Evaluated by** | Studies S0–S4, [overview](PROJECT_OVERVIEW_AND_PLAN.md) §6.2 | Studies E0–E7, §6.1 |
+| Influenza H3, batches narrowed to 28 variable positions | +0.104 to **+0.250** | 0.10 to 0.63 |
+| The same, widened to 55, 150 and 566 positions | +0.159, +0.019, 0.000 | 0.42, 0.18, 0.10 |
+| GB1 double mutants relabelled to share no positions | +0.242 to **−0.019** | 0.66 to 0.03 |
 
----
+The first takes the pathogen case that had looked like a failure and recovers the whole effect by
+narrowing the batch. The second keeps the same variants, the same hidden scores and the same
+combinations, removes only the sharing of positions, and the effect goes away.
+
+**It then held on two unrelated proteins against a prediction committed to the repository before
+the test ran.** [PREREGISTRATION_COVERAGE.md](PREREGISTRATION_COVERAGE.md) predicted at least
++0.15 improving in at least 7 of 10 batches and reports +0.254 on both. Recomputed from the
+per-batch records, the replication gives +0.2423 on the GRB2 SH3 domain improving in 10 of 10
+batches and +0.2077 on KRAS in 8 of 10.
+
+**The split holds across all eight datasets at the matched 512-candidate batch**, each reformatted without
+changing a measurement. The four varying more than two positions gain +0.173 to +0.321, and the
+four varying two positions gain +0.010 to +0.033. The ranges do not overlap, and the exact
+permutation over dataset labels gives 1 of 70 arrangements, p = 0.014.
+
+**The favourable regime is a randomised region of a few positions over an alphabet**, which is
+what an mRNA display library is. A weak predictor is enough, but there has to be one, and whether
+one can be fitted is knowable in advance.
+
+## Where this meets a SynX campaign
+
+**This system picks a target, measures the surface a macrocycle would have to bind, defines a
+focused library over it, and says in advance whether a model fitted on the first round of
+measurements would be worth trusting.** What it has not done is measure a macrocycle itself.
+
+**The chemistry is represented down to the field.** `hpc_pilots/chemistry.py` holds 29 building
+blocks, 20 canonical and 9 non-canonical classes, reached through the `chemistry.library_spec`
+tool that the `invoke_design_tool` action dispatches. One published dataset staged here is a real
+macrocycle library: `thrombin_cyclic` holds 8,448 unique cyclic peptides built from named
+non-canonical monomers against a quantitative thrombin endpoint. Two cyclisation chemistries are
+modelled explicitly, and SMILES were recovered for 47 monomers so molecular descriptors could be
+computed.
+
+**What this repository cannot supply is the per-block data that only a campaign produces.** The
+block registry has 13 fields. The module fills five itself, and eight come from a platform export:
+chemical identifier, CCD code, SMILES, stereochemistry descriptor, molecular weight, reprogrammed
+codon, Rosetta parameters and rotamer library. All eight are empty for all 29 blocks, 232 cells of
+232. Those eight fields are the interface, named exactly, which is why the loop closes the moment
+that data exists. Measured members come back as the first round a model is fitted on, the go/no-go
+test runs on the design that produced them, and the next library definition is chosen with that
+model in hand.
+
+Three questions about the handoff are open:
+
+- In what form should a library definition arrive to be synthesisable as written, block codes
+  against your own catalog or a structure per position?
+- Which endpoint should a model be fitted on, enrichment across selection rounds or a measurement
+  on the picked members afterwards?
+- How many positions does a campaign's randomised region usually vary, since that count is the one
+  input the go/no-go test needs?
 
 ## The notebook
 
-[**notebooks/double_arm_mvp.ipynb**](notebooks/double_arm_mvp.ipynb) is the shortest honest route
-through this project. It was built to be run live and talked through, which forced two rules on
-it, and both are worth stating because they are what makes it trustworthy.
-
-1. **Tool calls run live, and every call reports what it cost.** §1.2 dispatches against the real
-   endpoints through the project's own tool layer, `chief.call`, and renders each call as a panel
-   carrying the wall seconds and outbound request count it actually spent beside what its spec
-   declared. A measured call costs between 0.7 and 94 seconds, so the default path calls the
-   cheap tools and names the price of the expensive ones rather than paying it in front of an
-   audience. Setting `LIVE = False` replays committed recordings of real calls through the same
-   panel, which is what to do in a room with no network.
-2. **Nothing is retyped.** Numbers come out of [runs/](runs/), or out of a live return, when the
-   cell executes. If a record changes, the notebook changes with it, and no figure in it can
-   drift away from the recorded result. Where a number genuinely is not in any file, the cell
-   says so in a comment naming the document it was quoted from.
+**[notebooks/double_arm_mvp.ipynb](notebooks/double_arm_mvp.ipynb) is the shortest route through
+this project**, and §1.2 dispatches real calls against the real endpoints while it is open,
+printing what each one spent in seconds and outbound requests. Set `LIVE = False` and the panels
+play back calls recorded earlier instead of making new ones, which is what to do in a room with no
+network. Nothing is retyped: every figure is computed from [runs/](runs/) or from a live
+return when the cell executes.
 
 | § | Section | What you see |
 | --- | --- | --- |
-| 0 | Setup and data availability | Which records this machine can actually see, before anything tries to read one |
-| 1.1 | Reachability, not relevance | The selector ranking all ten tools from a bare genome accession, computed live |
-| 1.2 | Watching a tool run | A call dispatched live through `chief.call`, rendered as an instrument readout, with the structure it returns |
-| 1.3 | What the co-scientist arm found | The eight recorded experiments, each reporting its own answer field |
-| 1.4 | Genome to ranked targets | Recovered countermeasure targets across three virus families and one bacterium |
+| 0 | Setup and data availability | Which records this machine can see, before anything reads one |
+| 1.1 | Reachability, not relevance | Which tools you can actually run from a bare accession, ranked live |
+| 1.2 | Watching a tool run | Calls dispatched live, each as an instrument readout, with a structure |
+| 1.3 | What the recorded runs found | Each recorded experiment, reporting its own answer field |
+| 1.4 | Genome to ranked targets | Recovered countermeasure targets, three viruses and one bacterium |
 | 1.5 | The identification cliff | Where the pipeline stops rather than degrades |
-| 1.6 | The surface a macrocycle would bind | Patch medians with their spread, and why the amenability gate is borderline |
-| 2.1 | The surviving result | Acquisition gain against pool coverage, from the per-pool records |
-| 2.2 | Tested by intervention | Narrow the pool and the effect returns; destroy feature sharing and it disappears |
-| 2.3 | What Arm 2 is blocked on | The null chemistry fields, enumerated from the repository rather than asserted |
-| 3 | What to say about this | The three claims worth defending, and the one caveat that belongs beside them |
+| 1.6 | The surface a macrocycle would bind | Patch medians with the spread across replicate structures |
+| 2.1 | The result | Gain against shared positions, from the per-batch records |
+| 2.2 | Tested by intervention | Narrow the batch and the effect returns; remove sharing and it goes |
+| 2.3 | What a campaign supplies | The chemistry that is wired, and the fields a campaign fills |
+| 3 | What to say about this | The three claims worth defending |
 
-Sections 1.3 to 1.6 read records that are tracked, so they work in a fresh clone. Section 1.2
-needs the network when `LIVE` is true and falls back to committed recordings when it is not.
-Section 2.1 reads per-pool summaries that are **gitignored by design**: they exist on the machine
-that ran them, and section 0 reports their absence rather than letting a later cell fail. Rebuild
-them with `python -m hpc_pilots summarize`.
+**Budget the cold number, not the cached one.** Registered costs run from 0.7 seconds for a fold
+to 94 seconds for the bioactivity lookup, but that 0.7 seconds is a cached result.
+[hpc_pilots/folded_structure.py](hpc_pilots/folded_structure.py) measures a cold fold at 1.8, 5.0,
+12.1 and 25.6 seconds for 50, 200, 300 and 400 residues, and 12.8 seconds for the 306-residue main
+protease. Every target here is cold on first sight.
+
+Every record the notebook reads is committed, so the whole thing runs in a fresh clone with no
+rebuild step. The spinnable 3D view needs a browser and a
+network, so §1.2 draws a static structure beside it that renders everywhere.
 
 ```bash
 pip install -r hpc_pilots/requirements.lock.txt   # the pipeline
@@ -223,130 +230,28 @@ pip install -r notebooks/requirements.txt         # the notebook's own extras
 jupyter lab notebooks/double_arm_mvp.ipynb        # or: jupyter notebook
 ```
 
-The notebook's extras are kept in their own file because they are presentation dependencies that
-nothing under `hpc_pilots/` imports, so a pin there cannot change a recorded result. One of them,
-`py3Dmol`, is what draws the interactive structure in §1.2. It fetches 3Dmol.js from a CDN when
-the cell renders, so the spinnable viewer needs a browser with a network connection and does not
-survive GitHub, which strips scripts out of notebook output. §1.2 therefore draws a static
-structure beside it, and that one renders everywhere.
-
-To rerun it start to finish without opening it:
-
-```bash
-jupyter nbconvert --to notebook --execute --inplace notebooks/double_arm_mvp.ipynb
-```
-
----
-
-## How the grading works
-
-The same pattern produces every number here. Take a dataset where the outcome is already known for
-every candidate. Hide all of it behind an evaluator. Let a decision procedure request a few
-outcomes at a time under a fixed budget, optionally with results delayed by a few rounds. Score
-what it chose against the hidden truth.
-
-Because the truth was known in advance, grading is exact and automatic. Almost all of the
-engineering exists to guarantee one property: **a policy cannot reach an answer it has not earned.**
-Isolation is enforced by construction rather than by care, and
-[ARCHITECTURE.md](ARCHITECTURE.md) §4 is about how.
-
----
-
-## What has actually been measured
-
-### What the co-scientist arm found
-
-Each of these is a recorded experiment in [runs/](runs/) carrying its own question and answer.
-
-| Experiment | Finding |
-| --- | --- |
-| `intake_validation` | Genome to ranked targets recovers the real countermeasure targets across three virus families, with the pathogen's own proteins removed from the reference. Every expected target lands in the top eight. |
-| `holdout_ladder` | Push the nearest curated relative further away and the pipeline does not degrade, it **stops**. It needs a relative close enough to be conspecific or congeneric. The rank where this happens differs by family, because viral species boundaries are not calibrated to sequence identity. |
-| `identification_cascade` | Past that cliff, two different mechanisms recover two different things. Conserved enzymes come back through remote homology because they genuinely have distant relatives. Family-specific surface proteins have none, so no homology method finds them. Those are the antibody targets, and they are recovered from their own sequence instead, as a class. |
-| `cross_kingdom_intake` | Genome to targets transfers from viruses to a bacterium, but only after replacing the candidate-selection step. Identification and ranking carry over unchanged; six-frame calling and length ranking do not. |
-| `surface_markers` | A target can be scored from structure without penalising the very interfaces macrocycles exist to bind. Scoring the largest contiguous exposed hydrophobic patch ranks spike RBD above the main protease, the reverse of a small-molecule druggability score and the right way round for this project. |
-| `surface_in_ranker` | Those markers do **not** improve the ranking, in either form tried. The change was withdrawn. They are computed and reported, not scored. |
-| `amenability_gate` | The macrocycle-amenability gate becomes honest rather than confident. The patch moves by up to 496 square angstroms across structures of the same domain, comparable to the 600 threshold, so most real targets fall in a borderline band. Reporting that band is the correct result, not a failure. |
-| `coverage_channel` | Equalising axis coverage across targets does not remove a policy's advantage from counting offers. It relocates it to dossier order at almost unchanged size. |
-
-Identification is the single bottleneck in the chain.
-
-### The surviving result
-
-Acquisition gain is governed by **how densely the candidate pool covers the variable positions the
-model has to learn from**. In plainer terms: a weak model fitted on 128 measurements predicts
-held-out binding well enough to act on *only when the candidates share sequence coordinates with
-the labelled ones*. Where they do not, correlation sits near 0.1 and nothing downstream helps.
-
-This is a computable property of a library's design, available before any assay is run.
-
-Correlation would not have established it, so it was tested by intervention in both directions
-with everything else held fixed:
-
-| Intervention | Greedy gain | Model correlation |
-| --- | --- | --- |
-| Influenza H3, pools narrowed to 28 variable positions | +0.104 → **+0.250** | 0.10 → 0.63 |
-| Same, widened to 55 / 150 / 566 positions | +0.159 / +0.019 / 0.000 | 0.42 / 0.18 / 0.10 |
-| GB1 doubles re-encoded to share no feature levels | +0.242 → **−0.019** | 0.66 → 0.03 |
-
-The first takes the pathogen case that appeared to fail and recovers the whole effect by narrowing
-the pool. The second keeps the same variants, the same hidden scores and the same combinatorial
-structure, destroys only the feature sharing, and removes the effect entirely.
-
-It then held on two unrelated proteins against a prediction **written down and committed first**,
-in [PREREGISTRATION_COVERAGE.md](PREREGISTRATION_COVERAGE.md). Predicted at least +0.15 improving
-in at least 7 of 10 pools; observed +0.254 and +0.254. Every criterion passed. Across all eight
-staged landscapes the high-coverage and low-coverage groups do not overlap, and the permutation
-test over landscape labels gives p = 0.014.
-
-**Why this matters for library design.** The favourable regime is a randomised region of a few
-positions over an alphabet, which is what an mRNA display library *is*. A weak predictor is enough,
-but there must be one, and whether one can be fitted is knowable in advance.
-
-**The limitation that matters most.** Every landscape behind this result is canonical residues on a
-folded protein domain. None contains a macrocycle, a non-canonical residue or a cyclisation, so
-none of it speaks to the molecule class the project exists to design.
-
-### Claims that were withdrawn
-
-This repository withdraws results in writing when they fail, and each withdrawal becomes a
-permanent check in the code so it cannot quietly return. Three are set out in full in
-[PROJECT_OVERVIEW_AND_PLAN.md](PROJECT_OVERVIEW_AND_PLAN.md) §4.1, including the project's
-then-best result, which turned out to be an arithmetic identity that a feedback-blind random
-policy reproduces exactly. Two further axis claims were withdrawn in the most recent work.
-
-The adversarial and confound reviews in [reviews/](reviews/) exist for the same purpose.
-
----
-
-## Repository map
+## Running it, and what is in the repository
 
 | Path | What is in it |
 | --- | --- |
-| [notebooks/](notebooks/) | The runnable walkthrough of both arms, committed with its outputs. Described [above](#the-notebook). |
-| [hpc_pilots/](hpc_pilots/) | All the code. 40 modules, about 18,900 lines, plus the SLURM execution layer. |
-| [hpc_pilots/configs/](hpc_pilots/configs/) | Landscape, target, method and tool-set definitions. Treated as byte-immutable once a run has embedded a config hash, so new work goes into a new file. |
-| [runs/](runs/) | Recorded results, one file per experiment, each stating its own question and answer. |
-| [reviews/](reviews/) | Adversarial and confound reviews written against this project's own claims. |
+| [notebooks/](notebooks/) | The runnable walkthrough, committed with its outputs. |
+| [hpc_pilots/](hpc_pilots/) | All the code: 40 modules, about 19,000 lines, the SLURM layer, and the dataset, target, method and tool-set definitions in [configs/](hpc_pilots/configs/). |
+| [runs/](runs/) | Recorded results, one file per experiment. |
+| [reviews/](reviews/) | Adversarial and confound reviews. |
 | [output/](output/) | Figures and the Markdown-to-PDF builder for the documents. |
-| `data/` | Staged datasets. Gitignored; rebuild with the `prepare` commands. |
 
-Scale of what is staged: GB1 at 149,360 rows, a 536,962-row GB1-Olson landscape staged to restore
-headroom the small pathogen pools cannot provide, three pathogen landscapes, four
-method-development landscapes with measured binding endpoints, and evidence packets covering 11
-targets across three viral families.
-
----
-
-## Running it
+Staged data is gitignored and rebuilt by the `prepare` commands: 10 datasets, including GB1 at
+149,360 rows and a 536,962-row GB1-Olson scan, plus evidence packets covering 11 targets across
+three viral families.
 
 Model access is configured by environment variable (`PILOT_LLM_PROVIDER`, `PILOT_LLM_MODEL` and a
-provider key) read from a gitignored `.env`. [.env.example](.env.example) documents the keys. No
-secret is in the repository.
+provider key) read from a gitignored `.env`, documented in [.env.example](.env.example). No secret
+is in the repository. Every download records where it came from and when, and every run records
+the dataset and the settings it used.
 
 ```bash
 python -m hpc_pilots prepare                              # GB1 + ATLAS selection manifest
-python -m hpc_pilots prepare-target --landscape mpro      # one pathogen landscape
+python -m hpc_pilots prepare-target --landscape mpro      # one pathogen dataset
 python -m hpc_pilots target --landscape mpro --pool 0 --policy ucb --delay 3
 python -m hpc_pilots targets                              # build the evidence packets
 python -m hpc_pilots chemistry                            # build the block registry
@@ -356,44 +261,17 @@ python -m hpc_pilots summarize
 python -m hpc_pilots.submit --with-agent                  # the SLURM chain
 ```
 
-Provenance is checkable rather than promised. Every download carries a URL, SHA-256, byte count
-and verification time; every run embeds its dataset and config hashes and the tool set it ran
-against; and `python -m hpc_pilots manifest --check` reports drift without writing.
-
-**Tests.** 191 tests, 190 passing. One failure is known and open:
-`test_a_vocabulary_encoding_cannot_tell_two_unseen_monomers_apart` reports a tied rate of 1.0
-against a threshold of 0.01.
-
-```bash
-python -m pytest hpc_pilots/tests -q
-```
-
----
-
 ## Documents
 
-Before any of these, run or read
-[**notebooks/double_arm_mvp.ipynb**](notebooks/double_arm_mvp.ipynb), which covers both arms in
-one sitting and shows its working. The documents below are where the reasoning is set out in
-full.
+Read or run [notebooks/double_arm_mvp.ipynb](notebooks/double_arm_mvp.ipynb) first. These four set
+out the reasoning in full, and are committed as PDFs as well as Markdown.
 
-In reading order. Items 1 to 6 are also committed as PDFs.
-
-1. **[PROJECT_OVERVIEW_AND_PLAN.md](PROJECT_OVERVIEW_AND_PLAN.md)** — the project in one sitting:
-   the goal, why it has this shape, what has been measured, targets, and the evaluation design.
-   Start here.
-2. **[ARCHITECTURE.md](ARCHITECTURE.md)** — the system and the reasoning behind it, organised
-   around *why* rather than as an API listing. §9 states what runs, what is partial and what is a
-   stub. §10 lists defects found while writing it.
-3. **[W4_DEBRIEF_AND_TARGET_SELECTION.md](W4_DEBRIEF_AND_TARGET_SELECTION.md)** — the October
-   results and target analysis. Left unrevised as the record of what was believed on 19 October,
-   and carries a correction notice at its head.
-4. **[ADJUDICATION_COMBINATORIAL_GAIN.md](ADJUDICATION_COMBINATORIAL_GAIN.md)** and
-   **[PREREGISTRATION_COVERAGE.md](PREREGISTRATION_COVERAGE.md)** — the intervention tests behind
-   the surviving result, and the replication prediction committed before the replays ran.
-5. **[PROTOTYPE_AND_PRIORITY_PATHOGENS.md](PROTOTYPE_AND_PRIORITY_PATHOGENS.md)** — background on
-   the prototype-pathogen framing, including a bounded negative finding about family
-   generalisation.
-6. **[reviews/](reviews/)** — the adversarial and confound reviews.
-7. **[hpc_pilots/README.md](hpc_pilots/README.md)** — the pilots and domain layer, module by
-   module, each stating what it does not establish.
+1. **[PROJECT_OVERVIEW_AND_PLAN.md](PROJECT_OVERVIEW_AND_PLAN.md)**, the project in one sitting:
+   the goal, what has been measured, the targets and the evaluation design.
+2. **[ARCHITECTURE.md](ARCHITECTURE.md)**, the system and the reasoning behind it, organised
+   around why rather than as an API listing.
+3. **[ADJUDICATION_COMBINATORIAL_GAIN.md](ADJUDICATION_COMBINATORIAL_GAIN.md)** and
+   **[PREREGISTRATION_COVERAGE.md](PREREGISTRATION_COVERAGE.md)**, the intervention tests behind
+   the result and the prediction committed before it ran.
+4. **[reviews/](reviews/)**, the adversarial and confound reviews, written against this project's
+   own claims.
