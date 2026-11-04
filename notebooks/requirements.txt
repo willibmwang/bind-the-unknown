@@ -1,0 +1,19 @@
+# Extras the walkthrough notebook needs, on top of hpc_pilots/requirements.lock.txt.
+#
+# Kept apart from that lock file because these are presentation dependencies and not
+# pipeline ones: nothing under hpc_pilots/ imports them, and a stale pin here cannot
+# change a recorded result. The lock file stays byte-stable, which is the same
+# discipline configs/ is held to.
+#
+# py3Dmol is pinned because it is the one that renders a structure, so a change in it
+# changes what an audience sees. It is a thin wrapper that loads 3Dmol.js from a CDN at
+# render time, so the interactive viewer needs a network connection in the browser and
+# will not render on GitHub, which strips scripts from notebook output. Section 1.2
+# therefore draws a static matplotlib structure as well, and that one survives both.
+py3Dmol==2.5.5
+
+# Left unpinned on purpose. The notebook is run from whatever Jupyter the reader already
+# has, and this project has two interpreters in play with ipywidgets 7 and 8 between them.
+# Nothing in the notebook depends on a widget, so either major version is fine.
+jupyterlab
+ipywidgets

@@ -184,38 +184,50 @@ handful of labels*. See [the surviving result](#the-surviving-result).
 through this project. It was built to be run live and talked through, which forced two rules on
 it, and both are worth stating because they are what makes it trustworthy.
 
-1. **No live database calls.** The ten registered tools read NCBI, UniProt, Europe PMC, EBI
-   HMMER, InterPro, PDBe, AlphaFold, RCSB and ChEMBL, and a measured call costs between 0.7 and
-   94 seconds. A demo wired to them is one outage away from failing in front of an audience, so
-   every cell reads the committed run records instead. The one exception is the tool selector,
-   which is pure decision logic and needs no network at all, so it runs for real.
-2. **Nothing is retyped.** Numbers come out of [runs/](runs/) when the cell executes. If a record
-   changes, the notebook changes with it, and no figure in it can drift away from the recorded
-   result. Where a number genuinely is not in any file, the cell says so in a comment naming the
-   document it was quoted from.
+1. **Tool calls run live, and every call reports what it cost.** §1.2 dispatches against the real
+   endpoints through the project's own tool layer, `chief.call`, and renders each call as a panel
+   carrying the wall seconds and outbound request count it actually spent beside what its spec
+   declared. A measured call costs between 0.7 and 94 seconds, so the default path calls the
+   cheap tools and names the price of the expensive ones rather than paying it in front of an
+   audience. Setting `LIVE = False` replays committed recordings of real calls through the same
+   panel, which is what to do in a room with no network.
+2. **Nothing is retyped.** Numbers come out of [runs/](runs/), or out of a live return, when the
+   cell executes. If a record changes, the notebook changes with it, and no figure in it can
+   drift away from the recorded result. Where a number genuinely is not in any file, the cell
+   says so in a comment naming the document it was quoted from.
 
 | § | Section | What you see |
 | --- | --- | --- |
 | 0 | Setup and data availability | Which records this machine can actually see, before anything tries to read one |
 | 1.1 | Reachability, not relevance | The selector ranking all ten tools from a bare genome accession, computed live |
-| 1.2 | What the co-scientist arm found | The eight recorded experiments, each reporting its own answer field |
-| 1.3 | Genome to ranked targets | Recovered countermeasure targets across three virus families and one bacterium |
-| 1.4 | The identification cliff | Where the pipeline stops rather than degrades |
-| 1.5 | The surface a macrocycle would bind | Patch medians with their spread, and why the amenability gate is borderline |
+| 1.2 | Watching a tool run | A call dispatched live through `chief.call`, rendered as an instrument readout, with the structure it returns |
+| 1.3 | What the co-scientist arm found | The eight recorded experiments, each reporting its own answer field |
+| 1.4 | Genome to ranked targets | Recovered countermeasure targets across three virus families and one bacterium |
+| 1.5 | The identification cliff | Where the pipeline stops rather than degrades |
+| 1.6 | The surface a macrocycle would bind | Patch medians with their spread, and why the amenability gate is borderline |
 | 2.1 | The surviving result | Acquisition gain against pool coverage, from the per-pool records |
 | 2.2 | Tested by intervention | Narrow the pool and the effect returns; destroy feature sharing and it disappears |
 | 2.3 | What Arm 2 is blocked on | The null chemistry fields, enumerated from the repository rather than asserted |
 | 3 | What to say about this | The three claims worth defending, and the one caveat that belongs beside them |
 
-Sections 1.2 to 1.5 read records that are tracked, so they work in a fresh clone. Section 2.1
-reads per-pool summaries that are **gitignored by design**: they exist on the machine that ran
-them, and section 0 reports their absence rather than letting a later cell fail. Rebuild them
-with `python -m hpc_pilots summarize`.
+Sections 1.3 to 1.6 read records that are tracked, so they work in a fresh clone. Section 1.2
+needs the network when `LIVE` is true and falls back to committed recordings when it is not.
+Section 2.1 reads per-pool summaries that are **gitignored by design**: they exist on the machine
+that ran them, and section 0 reports their absence rather than letting a later cell fail. Rebuild
+them with `python -m hpc_pilots summarize`.
 
 ```bash
-pip install -r requirements.lock.txt
-jupyter lab notebooks/double_arm_mvp.ipynb      # or: jupyter notebook
+pip install -r hpc_pilots/requirements.lock.txt   # the pipeline
+pip install -r notebooks/requirements.txt         # the notebook's own extras
+jupyter lab notebooks/double_arm_mvp.ipynb        # or: jupyter notebook
 ```
+
+The notebook's extras are kept in their own file because they are presentation dependencies that
+nothing under `hpc_pilots/` imports, so a pin there cannot change a recorded result. One of them,
+`py3Dmol`, is what draws the interactive structure in §1.2. It fetches 3Dmol.js from a CDN when
+the cell renders, so the spinnable viewer needs a browser with a network connection and does not
+survive GitHub, which strips scripts out of notebook output. §1.2 therefore draws a static
+structure beside it, and that one renders everywhere.
 
 To rerun it start to finish without opening it:
 
