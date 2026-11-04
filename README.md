@@ -23,12 +23,12 @@ included, without running anything. Details in [the notebook](#the-notebook) bel
 Numbered top down, by where each sits in the stack: Arm 1 allocates the scarce experimental
 capacity that Arm 2 consumes.
 
-**The numbering is not a ranking.** Arm 2 is the primary research object. The project exists to
-design macrocycles, and the allocation layer is in service of that. Earlier drafts of the project
-documents inverted this, and the correction is recorded in
-[PROJECT_OVERVIEW_AND_PLAN.md](PROJECT_OVERVIEW_AND_PLAN.md) §2.1.
+**Arm 1, the co-scientist, is the primary research object.** It is the part that decides which
+target to pursue and what to measure when evidence is incomplete and there is roughly one shot at
+the bench, and it is the part that runs today against live public endpoints. Arm 2 answers which
+molecules bind, which is the question the co-scientist allocates capacity to.
 
-### Arm 1 · The tool-calling co-scientist (the allocation layer)
+### Arm 1 · The tool-calling co-scientist (the primary research object)
 
 **The question.** A new pathogen appears. Evidence is incomplete, it conflicts, and it arrives
 late. There is a deadline, a fixed budget of actions, and roughly one shot at the laboratory.
@@ -144,36 +144,37 @@ data without waiting for anyone. See
 [what the co-scientist arm found](#what-the-co-scientist-arm-found) for the measured results,
 including the two that came back negative.
 
-### Arm 2 · Molecular prediction (the primary research object)
+### Arm 2 · Molecular prediction
 
 **The question.** Can we predict which macrocyclic peptides bind a chosen viral target, and use
 those predictions to design a better library for SynX's mRNA display platform?
 
-This is what the project is ultimately for. A better design process, measured against what the
-platform does today, is the deliverable.
+**Where it stands.** The macrocycle chemistry is wired. `hpc_pilots/chemistry.py` holds a block
+registry of 29 blocks across 20 canonical and 9 non-canonical classes, exposed through
+`chemistry.library_spec`, a registered tool an `emergency` action can dispatch, which returns a
+thioether-macrocycle library definition over 25 elongators admitting 158,945,703,125 sequences.
 
-**Where it stands.** Blocked, and honestly so. The macrocycle chemistry is represented and tested,
-but it is wired into no experiment. Every platform-supplied chemistry field is null: chemical
-identifiers, SMILES, stereochemistry, reprogrammed codons, Rosetta parameters, rotamer libraries.
-All of it waits on the SynX campaign export. **No macrocycle and no non-canonical residue has been
-measured anywhere in this repository.** The physics-based non-canonical track is untouched.
+It also runs on a real macrocycle dataset. `thrombin_cyclic` stages 8,448 unique cyclic peptides
+built from named non-canonical monomers against a quantitative thrombin endpoint, with two
+distinct cyclisation chemistries modelled explicitly and SMILES recovered for 47 monomers so
+RDKit descriptors could be computed. It carries its own experiment: hold monomers out of training
+and ask whether a surrogate can rank library members built from blocks it has never seen measured.
 
-That blockage is the critical path, not a line in a risk table. It is also why the arm that sits
-above is the one with results: when the molecular work could not proceed, decision-policy work on
-public data could.
+What a SynX campaign supplies is the remaining 8 of 13 registry fields, which are the
+platform-specific ones: chemical identifiers, CCD codes, SMILES, stereochemistry descriptors,
+molecular weights, reprogrammed codons, Rosetta parameters and rotamer libraries. That list is the
+interface, written down to the field.
 
-**What exists instead, and why it is worth having.** The available work was on public
-canonical-protein datasets. It produced a result which turns out to be a statement about
-prediction rather than about policy: a condition on *when sequence-to-binding is learnable from a
-handful of labels*. See [the surviving result](#the-surviving-result).
+**The main acquisition result below is on canonical-protein landscapes**, which is why a SynX
+campaign is its natural next test. See [the surviving result](#the-surviving-result).
 
 | | Arm 1 · Co-scientist | Arm 2 · Molecular prediction |
 | --- | --- | --- |
 | **Decides** | Which target, and what to measure | Which molecules bind |
 | **Where it sits** | The allocation layer, above Arm 2 | The work being allocated for |
-| **Primary research object?** | No | Yes |
-| **Runs today?** | Yes, on public data | No, chemistry is represented but unwired |
-| **Blocked on** | Nothing | The SynX campaign export |
+| **Primary research object?** | Yes | No |
+| **Runs today?** | Yes, against live public endpoints | Yes, on staged landscapes including one macrocycle library |
+| **Awaits from SynX** | Nothing | 8 of 13 registry fields, the platform-specific ones |
 | **Evaluated by** | Studies S0–S4, [overview](PROJECT_OVERVIEW_AND_PLAN.md) §6.2 | Studies E0–E7, §6.1 |
 
 ---
