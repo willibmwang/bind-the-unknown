@@ -239,11 +239,20 @@ GRID = {
              why="the term this module's endpoint survey measured at 45481 hits unbounded, so "
                  "the default cell lands beside a recorded count and three calls give the "
                  "cost a sample"),
-        Cell({"subject": "RNA-dependent RNA polymerase", "subject_kind": "family",
+        # This cell read subject_kind="family" and predicted ok. It observed failed, because
+        # the registry advertised an enum the function refuses. The spec was corrected rather
+        # than the prediction: SUBJECT_KINDS is (term, accession, query), so the second query
+        # shape is "query" and the family route is a family accession under "accession".
+        Cell({"subject": "RNA-dependent RNA polymerase", "subject_kind": "query",
               "date_to": "2019-12-31"}, "ok",
-             why="the family route under a publication-date ceiling, which is the only "
-                 "configuration a historical replay may use. A second subject and a second "
-                 "query shape, and the one cell that makes the tool run its control query"),
+             why="the second query shape under a publication-date ceiling, which is the only "
+                 "configuration a historical replay may use. A second subject and the one "
+                 "cell that makes the tool run its control query"),
+        Cell({"subject": "nsp5", "subject_kind": "family"}, "rejected",
+             why="the value the registry used to advertise and the function never accepted. "
+                 "Pins that an argument outside a declared enum is refused before dispatch "
+                 "and charged to the caller, rather than reaching the tool and being recorded "
+                 "as the tool's own failure"),
         Cell({"subject": "nsp5", "top": 101}, "rejected",
              why="above the declared maximum of 100. The function raises on the same bound, "
                  "so this cell also pins that the charged refusal comes first and nothing is "
