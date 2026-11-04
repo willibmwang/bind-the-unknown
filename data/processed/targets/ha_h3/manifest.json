@@ -1,0 +1,59 @@
+{
+  "landscape": "ha_h3",
+  "dataset": "C6KNH7_9INFA_Lee_2018",
+  "rows": 10754,
+  "target": "Haemagglutinin (H3N2)",
+  "pathogen": "Influenza A H3N2",
+  "family": "Orthomyxoviridae",
+  "variable_positions": 566,
+  "sequence_length": 566,
+  "feature_encoding": "(position index, substituted residue index) for a single substitution",
+  "cardinalities": [
+    566,
+    20
+  ],
+  "endpoint": "viral replication; growth fitness, not binding affinity",
+  "reported_selection_assay": "Viral replication",
+  "direction": "higher DMS_score is better within this assay only",
+  "pool_geometry": {
+    "rows": 10754,
+    "pool_size": 512,
+    "evaluation_pools": 20,
+    "development_pool_size": 512,
+    "candidates_used": 10752,
+    "candidates_unused": 2,
+    "disjoint": true,
+    "requested_pool_size": 512,
+    "requested_pools": 20,
+    "reduced": false
+  },
+  "top_fraction": 0.05,
+  "top_fraction_note": "A 512-candidate pool holds about five members at the 1% threshold used for GB1, too few for a stable recall estimate. Pathogen pools use 5%. These figures must never be compared with the GB1 1% figures.",
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/reference_files/DMS_substitutions.csv",
+      "path": "data/raw/proteingym_metadata.csv",
+      "sha256": "a8f498011532a74aa9fe556a50555a75e928c5837d19c06a87592ae04049b308",
+      "bytes": 208734,
+      "verified_at_utc": "2026-10-20T20:08:58.533713+00:00"
+    },
+    {
+      "url": "https://marks.hms.harvard.edu/proteingym/ProteinGym_v1.3/DMS_ProteinGym_substitutions.zip",
+      "path": "data/raw/proteingym_v1.3.zip",
+      "sha256": "3a83766254ac9ac9984ec25cb73c6e010ea4418f5e35f143933e6b6e6473b921",
+      "bytes": 43021128,
+      "verified_at_utc": "2026-10-20T20:08:58.556795+00:00"
+    }
+  ],
+  "targets_config_sha256": "74ec686d86d793093cd52fa3c1dc63ba63561565cafcdab3cf40ad55b3f54d3a",
+  "outcomes_sha256": "fb605ae010f8ae94924d26168a64a2b3c394f1fc79156ab4e4403dd58f63dd53",
+  "features_sha256": "e6d18906a332888441b504c72389ec725cfe25ad817aa19d47117e5717abeeb9",
+  "splits_sha256": "eb3a8596cbcf11ecacd8f9492624c17654f23627c7fca9180655cb74b58e4ff0",
+  "limitations": [
+    "The measured endpoint is viral replication; growth fitness, not binding affinity. It is not a macrocycle binding measurement and not an antiviral activity measurement.",
+    "Canonical single substitutions only: no non-canonical residue, no cyclisation and no macrocycle appears in this landscape.",
+    "Pools are sub-landscapes of one protein. Pool spread is descriptive variability, not biological replication across independent targets.",
+    "Metrics must not be pooled across landscapes with different assay endpoints."
+  ],
+  "content_sha256": "a59e7b255a9b760773499f989fd829fde0f0aeb62a6e8e710fdcb32ae52f60a2"
+}

@@ -1,0 +1,148 @@
+{
+  "landscape": "il17c_bioactivity",
+  "rows": 62,
+  "duplicates_collapsed": 13,
+  "descriptors": null,
+  "descriptors_sha256": null,
+  "monomers_without_structures": [],
+  "target": "IL-17C, against the IL-17C/IL-17RE interaction",
+  "modality": "macrocyclic peptide, measured bioactivity",
+  "cyclisation": "As above; not encoded in the released file.",
+  "noncanonical": "Not represented in the released sequences.",
+  "randomised_positions": 12,
+  "feature_encoding": "categorical symbol at each randomised position, vocabulary read from the library itself",
+  "cardinalities": [
+    2,
+    11,
+    4,
+    2,
+    9,
+    9,
+    4,
+    3,
+    5,
+    14,
+    3,
+    3
+  ],
+  "vocabularies": [
+    [
+      "H",
+      "I"
+    ],
+    [
+      "A",
+      "D",
+      "E",
+      "H",
+      "I",
+      "K",
+      "L",
+      "Q",
+      "R",
+      "V",
+      "Y"
+    ],
+    [
+      "F",
+      "H",
+      "Q",
+      "Y"
+    ],
+    [
+      "F",
+      "Y"
+    ],
+    [
+      "A",
+      "F",
+      "K",
+      "N",
+      "Q",
+      "R",
+      "S",
+      "V",
+      "Y"
+    ],
+    [
+      "A",
+      "F",
+      "I",
+      "L",
+      "N",
+      "Q",
+      "S",
+      "T",
+      "V"
+    ],
+    [
+      "F",
+      "H",
+      "I",
+      "L"
+    ],
+    [
+      "F",
+      "I",
+      "Y"
+    ],
+    [
+      "A",
+      "G",
+      "Q",
+      "S",
+      "Y"
+    ],
+    [
+      "A",
+      "D",
+      "E",
+      "G",
+      "H",
+      "K",
+      "L",
+      "N",
+      "P",
+      "R",
+      "S",
+      "T",
+      "V",
+      "Y"
+    ],
+    [
+      "I",
+      "L",
+      "S"
+    ],
+    [
+      "A",
+      "G",
+      "I"
+    ]
+  ],
+  "endpoint": "measured bioactivity against the IL-17C/IL-17RE interaction",
+  "direction": "higher is better",
+  "censoring": "Unknown; no limits are stated in the released file.",
+  "pool_geometry": {
+    "pooled": false,
+    "rows": 62,
+    "reason": "too few members for two disjoint pools; no replay is possible"
+  },
+  "top_fraction": 0.1,
+  "rationale": "Only 75 members, so it cannot support a replay and is staged for one reason: 51 of them also carry an enrichment value in il17c_display. That is a paired enrichment-to-bioactivity link on one target, which is the only material in this project that bears on whether display enrichment predicts an orthogonal endpoint. Use it for that comparison, not for acquisition experiments.",
+  "source": "Zhai et al., PepExplainer: an explainable deep learning model for selection-based macrocyclic peptide bioactivity prediction and optimization, Eur J Med Chem 2024;275:116628, doi:10.1016/j.ejmech.2024.116524. Data file taken from the authors' code repository, github.com/zhaisilong/PepExplainer (MIT licence), retrieved 20 October 2026.",
+  "display_config_sha256": "d3efd21b3f3ebe73af7fde036c2d55b81adaac83fe5da44f9164348d0aaae763",
+  "input_sha256": "ebcf74a029cd16bbd18155405412818da95d6c2036a2bc6a791c6fedf3862f8c",
+  "outcomes_sha256": "a7caf6f01ecdd71bd4e94382c46a221c05d5467a8bc5816f5f1f4e4b18742638",
+  "features_sha256": "19d7aecde86780803614c1c432a255b666349f21c656295d921093c51f5d68f4",
+  "splits_sha256": "599c570a2fbf89483544e29fd754b2cf620f83e399724f2cb7dee3fc5c230fb9",
+  "limitations": [
+    "These libraries were released as part of a published model's code repository. They are secondary distributions, not the original measurements, and no replicate structure, assay protocol or measurement error is available for any of them.",
+    "Enrichment, bioactivity and reported activity are three different endpoints on two different targets. Metrics are never pooled across these landscapes.",
+    "None of these is a pathogen target. They are substrates for developing and testing binding prediction on the correct molecule class, and establish nothing about Coronaviridae or Orthomyxoviridae.",
+    "No result from these landscapes speaks to the SynX platform's own chemistry, which remains blocked on the campaign export.",
+    "75 members cannot support disjoint pools at any useful geometry. Any pool statistic computed from it is descriptive.",
+    "The 51 paired members are those somebody chose to synthesise and assay, so they are a selected subset of the display library and not a random sample of it."
+  ],
+  "content_sha256": "34dd957411674bba0a0ab4c8d3b8b7354940108351ea769fc3e6d869fdd78ca2"
+}

@@ -1,0 +1,59 @@
+{
+  "landscape": "mpro",
+  "dataset": "R1AB_SARS2_Flynn_2022",
+  "rows": 5725,
+  "target": "Mpro (nsp5)",
+  "pathogen": "SARS-CoV-2",
+  "family": "Coronaviridae",
+  "variable_positions": 303,
+  "sequence_length": 306,
+  "feature_encoding": "(position index, substituted residue index) for a single substitution",
+  "cardinalities": [
+    303,
+    20
+  ],
+  "endpoint": "FRET peptide cleavage and growth; enzymatic function, not binding affinity",
+  "reported_selection_assay": "FRET, Growth",
+  "direction": "higher DMS_score is better within this assay only",
+  "pool_geometry": {
+    "rows": 5725,
+    "pool_size": 512,
+    "evaluation_pools": 10,
+    "development_pool_size": 512,
+    "candidates_used": 5632,
+    "candidates_unused": 93,
+    "disjoint": true,
+    "requested_pool_size": 512,
+    "requested_pools": 20,
+    "reduced": true
+  },
+  "top_fraction": 0.05,
+  "top_fraction_note": "A 512-candidate pool holds about five members at the 1% threshold used for GB1, too few for a stable recall estimate. Pathogen pools use 5%. These figures must never be compared with the GB1 1% figures.",
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/main/reference_files/DMS_substitutions.csv",
+      "path": "data/raw/proteingym_metadata.csv",
+      "sha256": "a8f498011532a74aa9fe556a50555a75e928c5837d19c06a87592ae04049b308",
+      "bytes": 208734,
+      "verified_at_utc": "2026-10-20T20:08:57.688779+00:00"
+    },
+    {
+      "url": "https://marks.hms.harvard.edu/proteingym/ProteinGym_v1.3/DMS_ProteinGym_substitutions.zip",
+      "path": "data/raw/proteingym_v1.3.zip",
+      "sha256": "3a83766254ac9ac9984ec25cb73c6e010ea4418f5e35f143933e6b6e6473b921",
+      "bytes": 43021128,
+      "verified_at_utc": "2026-10-20T20:08:57.710628+00:00"
+    }
+  ],
+  "targets_config_sha256": "74ec686d86d793093cd52fa3c1dc63ba63561565cafcdab3cf40ad55b3f54d3a",
+  "outcomes_sha256": "5dc84d1af06136ccdf4d2ed6225785e8b699556b51f27da3e088f927cb81756b",
+  "features_sha256": "5d3301e523fa1b7eb8c1ed2389ddc8c87f67c9e049ce6fc1610adf58186faa22",
+  "splits_sha256": "27346d33219a8ece07dba3d87c10d1f839b8211887192723aedf3f80e672b169",
+  "limitations": [
+    "The measured endpoint is FRET peptide cleavage and growth; enzymatic function, not binding affinity. It is not a macrocycle binding measurement and not an antiviral activity measurement.",
+    "Canonical single substitutions only: no non-canonical residue, no cyclisation and no macrocycle appears in this landscape.",
+    "Pools are sub-landscapes of one protein. Pool spread is descriptive variability, not biological replication across independent targets.",
+    "Metrics must not be pooled across landscapes with different assay endpoints."
+  ],
+  "content_sha256": "2d7de4069199dcbe30958ede0e49d15521dd6e27f0c7da73eafb2b777f06e16d"
+}
