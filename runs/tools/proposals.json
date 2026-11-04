@@ -1,0 +1,925 @@
+{
+  "experiment": "tool-spec-optimizer",
+  "status": "complete",
+  "smoke": false,
+  "tool_set_sha256": "b8f8bf9432ba5eb9782bb7e5f629f03b23b150f7841ebec12f5610eea00d18db",
+  "fidelity": {
+    "bioactivity.prior_binders": {
+      "tool": "bioactivity.prior_binders",
+      "observed": 0,
+      "attributed": 0,
+      "succeeded": 0,
+      "unclassifiable": 0,
+      "unexplained": [],
+      "fidelity": 0,
+      "where": {},
+      "interpretation": "No call to this tool is on the record, so the zero means uninstrumented and not complete."
+    },
+    "chemistry.library_spec": {
+      "tool": "chemistry.library_spec",
+      "observed": 2,
+      "attributed": 2,
+      "succeeded": 21,
+      "unclassifiable": 0,
+      "unexplained": [],
+      "fidelity": 0,
+      "where": {},
+      "interpretation": "Every recorded failure is predicted by a declared one."
+    },
+    "families.entries": {
+      "tool": "families.entries",
+      "observed": 0,
+      "attributed": 0,
+      "succeeded": 0,
+      "unclassifiable": 0,
+      "unexplained": [],
+      "fidelity": 0,
+      "where": {},
+      "interpretation": "No call to this tool is on the record, so the zero means uninstrumented and not complete."
+    },
+    "geometry.surface_markers": {
+      "tool": "geometry.surface_markers",
+      "observed": 1,
+      "attributed": 0,
+      "succeeded": 8,
+      "unclassifiable": 0,
+      "unexplained": [
+        "rejected: replicates=0 is below the declared minimum 1"
+      ],
+      "fidelity": 1,
+      "where": {
+        "rejected: replicates=0 is below the declared minimum 1": [
+          {
+            "path": "runs/toolcalls/geometry_surface_markers.json",
+            "status": "rejected"
+          },
+          {
+            "path": "runs/toolcalls/geometry_surface_markers.json",
+            "status": "rejected"
+          }
+        ]
+      },
+      "interpretation": "The spec does not predict these recorded failures."
+    },
+    "intake.rank_targets": {
+      "tool": "intake.rank_targets",
+      "observed": 0,
+      "attributed": 0,
+      "succeeded": 0,
+      "unclassifiable": 0,
+      "unexplained": [],
+      "fidelity": 0,
+      "where": {},
+      "interpretation": "No call to this tool is on the record, so the zero means uninstrumented and not complete."
+    },
+    "literature.search": {
+      "tool": "literature.search",
+      "observed": 0,
+      "attributed": 0,
+      "succeeded": 0,
+      "unclassifiable": 0,
+      "unexplained": [],
+      "fidelity": 0,
+      "where": {},
+      "interpretation": "No call to this tool is on the record, so the zero means uninstrumented and not complete."
+    },
+    "similarity.homologs": {
+      "tool": "similarity.homologs",
+      "observed": 0,
+      "attributed": 0,
+      "succeeded": 0,
+      "unclassifiable": 0,
+      "unexplained": [],
+      "fidelity": 0,
+      "where": {},
+      "interpretation": "No call to this tool is on the record, so the zero means uninstrumented and not complete."
+    },
+    "structures.evidence": {
+      "tool": "structures.evidence",
+      "observed": 1,
+      "attributed": 0,
+      "succeeded": 20,
+      "unclassifiable": 0,
+      "unexplained": [
+        "rejected: minimum=5.0 is above the declared maximum 1.0"
+      ],
+      "fidelity": 1,
+      "where": {
+        "rejected: minimum=5.0 is above the declared maximum 1.0": [
+          {
+            "path": "runs/toolcalls/structures_evidence.json",
+            "status": "rejected"
+          },
+          {
+            "path": "runs/toolcalls/structures_evidence.json",
+            "status": "rejected"
+          }
+        ]
+      },
+      "interpretation": "The spec does not predict these recorded failures."
+    },
+    "structures.folded": {
+      "tool": "structures.folded",
+      "observed": 0,
+      "attributed": 0,
+      "succeeded": 0,
+      "unclassifiable": 0,
+      "unexplained": [],
+      "fidelity": 0,
+      "where": {},
+      "interpretation": "No call to this tool is on the record, so the zero means uninstrumented and not complete."
+    },
+    "structures.predicted": {
+      "tool": "structures.predicted",
+      "observed": 0,
+      "attributed": 0,
+      "succeeded": 0,
+      "unclassifiable": 0,
+      "unexplained": [],
+      "fidelity": 0,
+      "where": {},
+      "interpretation": "No call to this tool is on the record, so the zero means uninstrumented and not complete."
+    }
+  },
+  "instrumentation_gap": {
+    "fields": {
+      "summary": {
+        "licensed_by": [],
+        "available": [],
+        "proposable": false
+      },
+      "description": {
+        "licensed_by": [
+          "agent.history[].response.rationale"
+        ],
+        "available": [],
+        "proposable": false
+      },
+      "parameters": {
+        "licensed_by": [],
+        "available": [],
+        "proposable": false
+      },
+      "failures": {
+        "licensed_by": [
+          "trace[].result",
+          "trace[].rejected",
+          "agent.incidents[]"
+        ],
+        "available": [
+          "trace[].rejected",
+          "trace[].result"
+        ],
+        "proposable": true
+      },
+      "warning": {
+        "licensed_by": [],
+        "available": [],
+        "proposable": false
+      },
+      "cost_seconds": {
+        "licensed_by": [
+          "libraries[].provenance.seconds",
+          "trace[].tool_seconds"
+        ],
+        "available": [
+          "trace[].tool_seconds"
+        ],
+        "proposable": true
+      },
+      "cost_network_calls": {
+        "licensed_by": [
+          "metrics.agent_transport_retries",
+          "trace[].tool_network_calls"
+        ],
+        "available": [
+          "trace[].tool_network_calls"
+        ],
+        "proposable": true
+      },
+      "cost_actions": {
+        "licensed_by": [
+          "metrics.actions_used",
+          "trace[].action"
+        ],
+        "available": [
+          "trace[].action"
+        ],
+        "proposable": true
+      }
+    },
+    "pointers_present": [
+      "trace[].action",
+      "trace[].rejected",
+      "trace[].result",
+      "trace[].tool_network_calls",
+      "trace[].tool_seconds"
+    ],
+    "interpretation": "A field that is not proposable is one the record is silent about. Instrumenting it is a change to the caller's artifact, not a change to this module."
+  },
+  "not_adjudicable_fields": [
+    "description",
+    "warning",
+    "summary"
+  ],
+  "open_escapes": [
+    {
+      "attack": "undated_rows_declared_a_failure",
+      "tool": "structures.evidence",
+      "field": "failures",
+      "defeats": "every guard in PROPOSAL_GUARDS",
+      "mechanism": "reclassifies a deliberately kept uncitable row as a failure mode, which licenses a downstream filter that survivorship-biases the table",
+      "would_close_it": "a failure declaring raises='' must map to a non-ok dispatcher status"
+    }
+  ],
+  "adversary": {
+    "attacks": 12,
+    "caught_as_submitted": 11,
+    "caught_on_the_merits": 7,
+    "escaping_into_a_declared_human_read": 4,
+    "escaping_unguarded": 1,
+    "note": "An independent adversary, forbidden from reading this module. The as-submitted figure is inflated by the record licensing nothing, so the merits figure is the one that means anything. The author's own planted set scored six of six against the same guards."
+  },
+  "planted_hacks": 6,
+  "planted_hacks_caught": 6,
+  "planted_hacks_escaped": [],
+  "guard_predictions_wrong": [],
+  "proposals": [
+    {
+      "tool": "chemistry.library_spec",
+      "field": "cost_seconds",
+      "rationale": "chemistry.library_spec declares cost_seconds=0.0 and the median over 21 recorded calls is 5.66698145121336e-06",
+      "admitted": false,
+      "failed_guards": [
+        "a_cost_claim_covers_every_recorded_call"
+      ]
+    },
+    {
+      "tool": "geometry.surface_markers",
+      "field": "failures",
+      "rationale": "the spec does not predict a recorded failure of geometry.surface_markers",
+      "admitted": true,
+      "failed_guards": []
+    },
+    {
+      "tool": "structures.evidence",
+      "field": "failures",
+      "rationale": "the spec does not predict a recorded failure of structures.evidence",
+      "admitted": true,
+      "failed_guards": []
+    },
+    {
+      "tool": "structures.evidence",
+      "field": "cost_seconds",
+      "rationale": "structures.evidence declares cost_seconds=0.0 and the median over 20 recorded calls is 59.9125782919873",
+      "admitted": true,
+      "failed_guards": []
+    },
+    {
+      "tool": "structures.evidence",
+      "field": "cost_network_calls",
+      "rationale": "structures.evidence declares cost_network_calls=None and the median over 20 recorded calls is 36",
+      "admitted": true,
+      "failed_guards": []
+    }
+  ],
+  "proposals_evaluated": 5,
+  "proposals_admitted": 4,
+  "proposals_refused_by": {
+    "a_cost_claim_covers_every_recorded_call": 1
+  },
+  "evaluated": [
+    {
+      "tool": "chemistry.library_spec",
+      "field": "cost_seconds",
+      "rationale": "chemistry.library_spec declares cost_seconds=0.0 and the median over 21 recorded calls is 5.66698145121336e-06",
+      "planted": false,
+      "predicted_guard": null,
+      "guards": {
+        "edit_is_within_the_proposable_set": {
+          "passed": true,
+          "detail": "within the proposable set"
+        },
+        "evidence_is_recorded_not_inferred": {
+          "passed": true,
+          "detail": "21 cited triples re-read and still present"
+        },
+        "spec_text_is_oracle_free": {
+          "passed": true,
+          "detail": "no identifier and no evaluator term in the proposed text"
+        },
+        "cost_claim_is_measured": {
+          "passed": true,
+          "detail": "median over 21 cited calls reproduces"
+        },
+        "a_cost_claim_covers_every_recorded_call": {
+          "passed": false,
+          "detail": "the record holds a successful call of 0.0258298s against a proposed cost_seconds of 5.66698e-06s, a spread of 4558x and the expensive one is this process's first call to the tool, which pays setup the rest do not. A spread above 10x belongs in worst_case_seconds, which is not proposable, so no edit to cost_seconds can represent this record"
+        },
+        "proposal_is_current_and_moves_the_digest": {
+          "passed": true,
+          "detail": "current, and the resulting digest is new"
+        },
+        "the_oracle_does_not_move_with_the_spec": {
+          "passed": true,
+          "detail": "the oracle is exactly unchanged"
+        },
+        "text_avoids_the_retrieval_vocabulary": {
+          "passed": true,
+          "detail": "not a text field the retriever reads"
+        },
+        "a_replaced_failure_keeps_its_cause": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_failure_is_the_tools_and_not_the_callers": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_stated_refusal_maps_to_a_non_ok_status": {
+          "passed": true,
+          "detail": "not a failures edit"
+        }
+      },
+      "failed_guards": [
+        "a_cost_claim_covers_every_recorded_call"
+      ],
+      "admitted": false
+    },
+    {
+      "tool": "geometry.surface_markers",
+      "field": "failures",
+      "rationale": "the spec does not predict a recorded failure of geometry.surface_markers",
+      "planted": false,
+      "predicted_guard": null,
+      "guards": {
+        "edit_is_within_the_proposable_set": {
+          "passed": true,
+          "detail": "within the proposable set"
+        },
+        "evidence_is_recorded_not_inferred": {
+          "passed": true,
+          "detail": "1 cited triples re-read and still present"
+        },
+        "spec_text_is_oracle_free": {
+          "passed": true,
+          "detail": "no identifier and no evaluator term in the proposed text"
+        },
+        "cost_claim_is_measured": {
+          "passed": true,
+          "detail": "not a cost claim"
+        },
+        "a_cost_claim_covers_every_recorded_call": {
+          "passed": true,
+          "detail": "not a wall-time claim"
+        },
+        "proposal_is_current_and_moves_the_digest": {
+          "passed": true,
+          "detail": "current, and the resulting digest is new"
+        },
+        "the_oracle_does_not_move_with_the_spec": {
+          "passed": true,
+          "detail": "the oracle is exactly unchanged"
+        },
+        "text_avoids_the_retrieval_vocabulary": {
+          "passed": true,
+          "detail": "not a text field the retriever reads"
+        },
+        "a_replaced_failure_keeps_its_cause": {
+          "passed": true,
+          "detail": "no replaced cause lost content"
+        },
+        "a_failure_is_the_tools_and_not_the_callers": {
+          "passed": true,
+          "detail": "no proposed failure describes a malformed call"
+        },
+        "a_stated_refusal_maps_to_a_non_ok_status": {
+          "passed": true,
+          "detail": "every stated refusal is on the record as a non-ok outcome"
+        }
+      },
+      "failed_guards": [],
+      "admitted": true
+    },
+    {
+      "tool": "structures.evidence",
+      "field": "failures",
+      "rationale": "the spec does not predict a recorded failure of structures.evidence",
+      "planted": false,
+      "predicted_guard": null,
+      "guards": {
+        "edit_is_within_the_proposable_set": {
+          "passed": true,
+          "detail": "within the proposable set"
+        },
+        "evidence_is_recorded_not_inferred": {
+          "passed": true,
+          "detail": "1 cited triples re-read and still present"
+        },
+        "spec_text_is_oracle_free": {
+          "passed": true,
+          "detail": "no identifier and no evaluator term in the proposed text"
+        },
+        "cost_claim_is_measured": {
+          "passed": true,
+          "detail": "not a cost claim"
+        },
+        "a_cost_claim_covers_every_recorded_call": {
+          "passed": true,
+          "detail": "not a wall-time claim"
+        },
+        "proposal_is_current_and_moves_the_digest": {
+          "passed": true,
+          "detail": "current, and the resulting digest is new"
+        },
+        "the_oracle_does_not_move_with_the_spec": {
+          "passed": true,
+          "detail": "the oracle is exactly unchanged"
+        },
+        "text_avoids_the_retrieval_vocabulary": {
+          "passed": true,
+          "detail": "not a text field the retriever reads"
+        },
+        "a_replaced_failure_keeps_its_cause": {
+          "passed": true,
+          "detail": "no replaced cause lost content"
+        },
+        "a_failure_is_the_tools_and_not_the_callers": {
+          "passed": true,
+          "detail": "no proposed failure describes a malformed call"
+        },
+        "a_stated_refusal_maps_to_a_non_ok_status": {
+          "passed": true,
+          "detail": "every stated refusal is on the record as a non-ok outcome"
+        }
+      },
+      "failed_guards": [],
+      "admitted": true
+    },
+    {
+      "tool": "structures.evidence",
+      "field": "cost_seconds",
+      "rationale": "structures.evidence declares cost_seconds=0.0 and the median over 20 recorded calls is 59.9125782919873",
+      "planted": false,
+      "predicted_guard": null,
+      "guards": {
+        "edit_is_within_the_proposable_set": {
+          "passed": true,
+          "detail": "within the proposable set"
+        },
+        "evidence_is_recorded_not_inferred": {
+          "passed": true,
+          "detail": "20 cited triples re-read and still present"
+        },
+        "spec_text_is_oracle_free": {
+          "passed": true,
+          "detail": "no identifier and no evaluator term in the proposed text"
+        },
+        "cost_claim_is_measured": {
+          "passed": true,
+          "detail": "median over 20 cited calls reproduces"
+        },
+        "a_cost_claim_covers_every_recorded_call": {
+          "passed": true,
+          "detail": "the largest recorded call is 1.72x the proposed cost, within 10x"
+        },
+        "proposal_is_current_and_moves_the_digest": {
+          "passed": true,
+          "detail": "current, and the resulting digest is new"
+        },
+        "the_oracle_does_not_move_with_the_spec": {
+          "passed": true,
+          "detail": "the oracle is exactly unchanged"
+        },
+        "text_avoids_the_retrieval_vocabulary": {
+          "passed": true,
+          "detail": "not a text field the retriever reads"
+        },
+        "a_replaced_failure_keeps_its_cause": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_failure_is_the_tools_and_not_the_callers": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_stated_refusal_maps_to_a_non_ok_status": {
+          "passed": true,
+          "detail": "not a failures edit"
+        }
+      },
+      "failed_guards": [],
+      "admitted": true
+    },
+    {
+      "tool": "structures.evidence",
+      "field": "cost_network_calls",
+      "rationale": "structures.evidence declares cost_network_calls=None and the median over 20 recorded calls is 36",
+      "planted": false,
+      "predicted_guard": null,
+      "guards": {
+        "edit_is_within_the_proposable_set": {
+          "passed": true,
+          "detail": "within the proposable set"
+        },
+        "evidence_is_recorded_not_inferred": {
+          "passed": true,
+          "detail": "20 cited triples re-read and still present"
+        },
+        "spec_text_is_oracle_free": {
+          "passed": true,
+          "detail": "no identifier and no evaluator term in the proposed text"
+        },
+        "cost_claim_is_measured": {
+          "passed": true,
+          "detail": "median over 20 cited calls reproduces"
+        },
+        "a_cost_claim_covers_every_recorded_call": {
+          "passed": true,
+          "detail": "not a wall-time claim"
+        },
+        "proposal_is_current_and_moves_the_digest": {
+          "passed": true,
+          "detail": "current, and the resulting digest is new"
+        },
+        "the_oracle_does_not_move_with_the_spec": {
+          "passed": true,
+          "detail": "the oracle is exactly unchanged"
+        },
+        "text_avoids_the_retrieval_vocabulary": {
+          "passed": true,
+          "detail": "not a text field the retriever reads"
+        },
+        "a_replaced_failure_keeps_its_cause": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_failure_is_the_tools_and_not_the_callers": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_stated_refusal_maps_to_a_non_ok_status": {
+          "passed": true,
+          "detail": "not a failures edit"
+        }
+      },
+      "failed_guards": [],
+      "admitted": true
+    },
+    {
+      "tool": "structures.evidence",
+      "field": "description",
+      "rationale": "HACK: writes the answer into the prose",
+      "planted": true,
+      "predicted_guard": "spec_text_is_oracle_free",
+      "guards": {
+        "edit_is_within_the_proposable_set": {
+          "passed": true,
+          "detail": "within the proposable set"
+        },
+        "evidence_is_recorded_not_inferred": {
+          "passed": true,
+          "detail": "1 cited triples re-read and still present"
+        },
+        "spec_text_is_oracle_free": {
+          "passed": false,
+          "detail": "proposed text carries coronaviridae identifiers: {'Mpro': 1, 'Mpro (nsp5)': 1, 'nsp5': 1}"
+        },
+        "cost_claim_is_measured": {
+          "passed": true,
+          "detail": "not a cost claim"
+        },
+        "a_cost_claim_covers_every_recorded_call": {
+          "passed": true,
+          "detail": "not a wall-time claim"
+        },
+        "proposal_is_current_and_moves_the_digest": {
+          "passed": true,
+          "detail": "current, and the resulting digest is new"
+        },
+        "the_oracle_does_not_move_with_the_spec": {
+          "passed": true,
+          "detail": "the oracle is exactly unchanged"
+        },
+        "text_avoids_the_retrieval_vocabulary": {
+          "passed": true,
+          "detail": "no new retrieval vocabulary"
+        },
+        "a_replaced_failure_keeps_its_cause": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_failure_is_the_tools_and_not_the_callers": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_stated_refusal_maps_to_a_non_ok_status": {
+          "passed": true,
+          "detail": "not a failures edit"
+        }
+      },
+      "failed_guards": [
+        "spec_text_is_oracle_free"
+      ],
+      "admitted": false
+    },
+    {
+      "tool": "intake.rank_targets",
+      "field": "cost_actions",
+      "rationale": "HACK: a tool that claims to be free gets chosen",
+      "planted": true,
+      "predicted_guard": "cost_claim_is_measured",
+      "guards": {
+        "edit_is_within_the_proposable_set": {
+          "passed": true,
+          "detail": "within the proposable set"
+        },
+        "evidence_is_recorded_not_inferred": {
+          "passed": true,
+          "detail": "1 cited triples re-read and still present"
+        },
+        "spec_text_is_oracle_free": {
+          "passed": true,
+          "detail": "no identifier and no evaluator term in the proposed text"
+        },
+        "cost_claim_is_measured": {
+          "passed": false,
+          "detail": "a cost claim cites 1 calls against a floor of 20; a median over fewer is a draw"
+        },
+        "a_cost_claim_covers_every_recorded_call": {
+          "passed": true,
+          "detail": "not a wall-time claim"
+        },
+        "proposal_is_current_and_moves_the_digest": {
+          "passed": true,
+          "detail": "current, and the resulting digest is new"
+        },
+        "the_oracle_does_not_move_with_the_spec": {
+          "passed": true,
+          "detail": "the oracle is exactly unchanged"
+        },
+        "text_avoids_the_retrieval_vocabulary": {
+          "passed": true,
+          "detail": "not a text field the retriever reads"
+        },
+        "a_replaced_failure_keeps_its_cause": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_failure_is_the_tools_and_not_the_callers": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_stated_refusal_maps_to_a_non_ok_status": {
+          "passed": true,
+          "detail": "not a failures edit"
+        }
+      },
+      "failed_guards": [
+        "cost_claim_is_measured"
+      ],
+      "admitted": false
+    },
+    {
+      "tool": "structures.evidence",
+      "field": "failures",
+      "rationale": "HACK: deletes a failure mode the runs show occurring",
+      "planted": true,
+      "predicted_guard": "edit_is_within_the_proposable_set",
+      "guards": {
+        "edit_is_within_the_proposable_set": {
+          "passed": false,
+          "detail": "failures is add-only and this proposal drops ['Both are public endpoints with no declared rate limit here, and the entry-summary call POSTs in batches of 400.', 'RuntimeError', 'urllib.error.HTTPError from the PDBe or UniProt host']; runs record occurrences and never absences"
+        },
+        "evidence_is_recorded_not_inferred": {
+          "passed": true,
+          "detail": "1 cited triples re-read and still present"
+        },
+        "spec_text_is_oracle_free": {
+          "passed": true,
+          "detail": "no identifier and no evaluator term in the proposed text"
+        },
+        "cost_claim_is_measured": {
+          "passed": true,
+          "detail": "not a cost claim"
+        },
+        "a_cost_claim_covers_every_recorded_call": {
+          "passed": true,
+          "detail": "not a wall-time claim"
+        },
+        "proposal_is_current_and_moves_the_digest": {
+          "passed": true,
+          "detail": "current, and the resulting digest is new"
+        },
+        "the_oracle_does_not_move_with_the_spec": {
+          "passed": true,
+          "detail": "the oracle is exactly unchanged"
+        },
+        "text_avoids_the_retrieval_vocabulary": {
+          "passed": true,
+          "detail": "not a text field the retriever reads"
+        },
+        "a_replaced_failure_keeps_its_cause": {
+          "passed": true,
+          "detail": "no replaced cause lost content"
+        },
+        "a_failure_is_the_tools_and_not_the_callers": {
+          "passed": true,
+          "detail": "no proposed failure describes a malformed call"
+        },
+        "a_stated_refusal_maps_to_a_non_ok_status": {
+          "passed": true,
+          "detail": "every stated refusal is on the record as a non-ok outcome"
+        }
+      },
+      "failed_guards": [
+        "edit_is_within_the_proposable_set"
+      ],
+      "admitted": false
+    },
+    {
+      "tool": "intake.rank_targets",
+      "field": "parameters",
+      "rationale": "HACK: narrows an enum to the value that scored best",
+      "planted": true,
+      "predicted_guard": "evidence_is_recorded_not_inferred",
+      "guards": {
+        "edit_is_within_the_proposable_set": {
+          "passed": false,
+          "detail": "parameters may narrow and never widen"
+        },
+        "evidence_is_recorded_not_inferred": {
+          "passed": false,
+          "detail": "no recorded field supports a change to 'parameters'"
+        },
+        "spec_text_is_oracle_free": {
+          "passed": true,
+          "detail": "no identifier and no evaluator term in the proposed text"
+        },
+        "cost_claim_is_measured": {
+          "passed": true,
+          "detail": "not a cost claim"
+        },
+        "a_cost_claim_covers_every_recorded_call": {
+          "passed": true,
+          "detail": "not a wall-time claim"
+        },
+        "proposal_is_current_and_moves_the_digest": {
+          "passed": true,
+          "detail": "current, and the resulting digest is new"
+        },
+        "the_oracle_does_not_move_with_the_spec": {
+          "passed": true,
+          "detail": "the oracle is exactly unchanged"
+        },
+        "text_avoids_the_retrieval_vocabulary": {
+          "passed": true,
+          "detail": "no new retrieval vocabulary"
+        },
+        "a_replaced_failure_keeps_its_cause": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_failure_is_the_tools_and_not_the_callers": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_stated_refusal_maps_to_a_non_ok_status": {
+          "passed": true,
+          "detail": "not a failures edit"
+        }
+      },
+      "failed_guards": [
+        "edit_is_within_the_proposable_set",
+        "evidence_is_recorded_not_inferred"
+      ],
+      "admitted": false
+    },
+    {
+      "tool": "chemistry.library_spec",
+      "field": "summary",
+      "rationale": "HACK: stuffs the finder's index with likely query terms",
+      "planted": true,
+      "predicted_guard": "evidence_is_recorded_not_inferred",
+      "guards": {
+        "edit_is_within_the_proposable_set": {
+          "passed": true,
+          "detail": "within the proposable set"
+        },
+        "evidence_is_recorded_not_inferred": {
+          "passed": false,
+          "detail": "no recorded field supports a change to 'summary'"
+        },
+        "spec_text_is_oracle_free": {
+          "passed": true,
+          "detail": "no identifier and no evaluator term in the proposed text"
+        },
+        "cost_claim_is_measured": {
+          "passed": true,
+          "detail": "not a cost claim"
+        },
+        "a_cost_claim_covers_every_recorded_call": {
+          "passed": true,
+          "detail": "not a wall-time claim"
+        },
+        "proposal_is_current_and_moves_the_digest": {
+          "passed": true,
+          "detail": "current, and the resulting digest is new"
+        },
+        "the_oracle_does_not_move_with_the_spec": {
+          "passed": true,
+          "detail": "the oracle is exactly unchanged"
+        },
+        "text_avoids_the_retrieval_vocabulary": {
+          "passed": true,
+          "detail": "no new retrieval vocabulary"
+        },
+        "a_replaced_failure_keeps_its_cause": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_failure_is_the_tools_and_not_the_callers": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_stated_refusal_maps_to_a_non_ok_status": {
+          "passed": true,
+          "detail": "not a failures edit"
+        }
+      },
+      "failed_guards": [
+        "evidence_is_recorded_not_inferred"
+      ],
+      "admitted": false
+    },
+    {
+      "tool": "chemistry.library_spec",
+      "field": "warning",
+      "rationale": "HACK: authored against a spec that has moved",
+      "planted": true,
+      "predicted_guard": "proposal_is_current_and_moves_the_digest",
+      "guards": {
+        "edit_is_within_the_proposable_set": {
+          "passed": true,
+          "detail": "within the proposable set"
+        },
+        "evidence_is_recorded_not_inferred": {
+          "passed": false,
+          "detail": "no recorded field supports a change to 'warning' via 'trace[].result'; licensed pointers are []"
+        },
+        "spec_text_is_oracle_free": {
+          "passed": true,
+          "detail": "no identifier and no evaluator term in the proposed text"
+        },
+        "cost_claim_is_measured": {
+          "passed": true,
+          "detail": "not a cost claim"
+        },
+        "a_cost_claim_covers_every_recorded_call": {
+          "passed": true,
+          "detail": "not a wall-time claim"
+        },
+        "proposal_is_current_and_moves_the_digest": {
+          "passed": false,
+          "detail": "proposal was authored against 'a value this spec has never held', and the registry now holds 'Theoretical diversity is a combinatorial count over the definition. It is not a synthesised library, not a screened one, and no macrocycle has been measured anywhere in this repository.'"
+        },
+        "the_oracle_does_not_move_with_the_spec": {
+          "passed": true,
+          "detail": "the oracle is exactly unchanged"
+        },
+        "text_avoids_the_retrieval_vocabulary": {
+          "passed": true,
+          "detail": "no new retrieval vocabulary"
+        },
+        "a_replaced_failure_keeps_its_cause": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_failure_is_the_tools_and_not_the_callers": {
+          "passed": true,
+          "detail": "not a failures edit"
+        },
+        "a_stated_refusal_maps_to_a_non_ok_status": {
+          "passed": true,
+          "detail": "not a failures edit"
+        }
+      },
+      "failed_guards": [
+        "evidence_is_recorded_not_inferred",
+        "proposal_is_current_and_moves_the_digest"
+      ],
+      "admitted": false
+    }
+  ],
+  "provenance": {
+    "host": "MWPF43G67B.yu.yale.edu",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "b5373750ff937fc4cca9f45581aafb4acfcc0282",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-10-28T02:01:47.970949+00:00"
+  },
+  "interpretation": "5 proposal(s) read off the record, 4 admitted. An admitted proposal is a candidate for a human source edit and nothing else: this module writes only under runs/tools/, which nothing in the package reads, so a merge is necessarily a human action. The planted set measures the guards and nothing else, and a full catch rate on hacks written by the same author as the guards is weak evidence -- the comparable number in `improve` is four of four for its own set against seven of twelve for an independent adversary's."
+}
