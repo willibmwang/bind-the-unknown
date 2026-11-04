@@ -1,0 +1,195 @@
+{
+  "experiment": "tool-call-exercise",
+  "status": "complete",
+  "smoke": false,
+  "tool_set_sha256": "b8f8bf9432ba5eb9782bb7e5f629f03b23b150f7841ebec12f5610eea00d18db",
+  "grid_cells": 6,
+  "provenance": {
+    "host": "WilliamsMBP260.stdusr.yale.internal",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "b2c720db7fe26f5364c4969dac6e85829bc79725",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-04T19:49:26.567795+00:00"
+  },
+  "interpretation": "Measured spend per call, from a grid declared in source. `declared` is what the spec advertises and `measured` is what the calls cost; the two are different claims and a proposal to move the first must cite the second. A refused call records None rather than zero.",
+  "tool": "structures.folded",
+  "tool_version": 1,
+  "declared": {
+    "cost_seconds": 0.7,
+    "cost_network_calls": 1,
+    "cost_actions": 1,
+    "worst_case_seconds": 300.0,
+    "reaches_network": true
+  },
+  "calls": 6,
+  "by_status": {
+    "ok": 3,
+    "empty": 1,
+    "rejected": 2
+  },
+  "measured": {
+    "timed_calls": 4,
+    "successful_timed_calls": 4,
+    "seconds_median": 0.1783504589984659,
+    "seconds_min": 0.024902708013541996,
+    "seconds_max": 0.6313204580219463,
+    "network_calls_median": 1,
+    "cold_seconds": 0.6313204580219463,
+    "warm_calls": 3,
+    "warm_seconds_median": 0.1624292089836672
+  },
+  "mispredictions": [
+    {
+      "arguments": {
+        "sequence": "MSDNGPQNQRNAPRITFGGPSDSTGSNQNGERSGARSKQRRPQGLPNNTASWFTALTQHGKEDLKFPRGQGVPINTNSSPDDQIGYYRRATRRIRGGDGKMKDLSPRWYFYYLGTGPEAGLPYGANKDGIIWVATEGALNTPKDHIGTRNPANNAAIVLQLPQGTTLPKGFYAEGSRGGSQASSRSSSRSRNSSRNSTPGSSRGTSPARMAGNGGDAALALLLLDRLNQLESKMSGKGQQQQGQTVTKKSAAEASKKPRQKRTATKAYNVTQAFGRRGPEQTQGNFGDQELIRQGTDYKHWPQIAQFAPSASAFFGMSRIGMEVTPSGTWLTYTGAIKLDDKDPNFKDQVILLNKHIDAYKTFPPTEPKKDKKKKADETQALPQRQKKQQTVTLLPAADLDDFSKQLQQSMSSADSTQA",
+        "target_name": "N (P0DTC9)"
+      },
+      "expected": "empty",
+      "observed": "empty",
+      "result": "{'reason': 'sequence_too_long', 'detail': \"419 residues exceeds the measured 400-residue ceiling, above which the host returns HTTP 413 'Sequence is longer than 400.'\", 'http_status': None, 'attempts': 0, 'note': 'Refused locally, so no request was spent on a deterministic no. This is a real limit on the lane and a real zero for this target: a full-length viral glycoprotein cannot be folded here, and folding a fragment of it answers a different question.'}",
+      "reproduces": "the sequence exceeds what the endpoint accepts",
+      "finding": "the cell reproduced the declared failure, but the string the run records matches no declared symptom by substring, so `fidelity` will read a correctly declared failure as unexplained"
+    }
+  ],
+  "trace": [
+    {
+      "round": 0,
+      "action": "call_tool",
+      "tool": "structures.folded",
+      "tool_version": 1,
+      "arguments": {
+        "sequence": "SGFRKMAFPSGKVEGCMVQVTCGTTTLNGLWLDDVVYCPRHVICTSEDMLNPNYEDLLIRKSNHNFLVQAGNVQLRVIGHSMQNCVLKLKVDTANPKTPKYKFVRIQPGQTFSVLACYNGSPSGVYQCAMRPNFTIKGSFLNGSCGSVGFNIDYDCVSFCYMHHMELPTGVHAGTDLEGNFYGPFVDRQTAQAAGTDTTITVNVLAWLYAAVINGDRWFLNRFTTTLNDFNLVAMKYNYEPLTQDHVDILGPLSAQTGIAVLDMCASLKELLQNGMNGRTILGSALLEDEFTPFDVVRQCSGVTFQ",
+        "target_name": "Mpro (nsp5)"
+      },
+      "tool_status": "ok",
+      "result": "ok: call returned with no note",
+      "tool_seconds": 0.6313204580219463,
+      "tool_network_calls": 1,
+      "rejected": null,
+      "citable": false,
+      "source_kind": "computed",
+      "rows": null,
+      "expected_status": "ok",
+      "reproduces": null,
+      "status_as_predicted": true,
+      "cold": true
+    },
+    {
+      "round": 1,
+      "action": "call_tool",
+      "tool": "structures.folded",
+      "tool_version": 1,
+      "arguments": {
+        "sequence": "MYSFVSEETGTLIVNSVLLFLAFVVFLLVTLAILTALRLCAYCCNIVNVSLVKPSFYVYSRVKNLNSSRVPDLLV",
+        "target_name": "E (P0DTC4)"
+      },
+      "tool_status": "ok",
+      "result": "ok: call returned with no note",
+      "tool_seconds": 0.1783504589984659,
+      "tool_network_calls": 1,
+      "rejected": null,
+      "citable": false,
+      "source_kind": "computed",
+      "rows": null,
+      "expected_status": "ok",
+      "reproduces": null,
+      "status_as_predicted": true,
+      "cold": false
+    },
+    {
+      "round": 2,
+      "action": "call_tool",
+      "tool": "structures.folded",
+      "tool_version": 1,
+      "arguments": {
+        "sequence": "MKIILFLALITLATCELYHYQECVRGTTVLLKEPCSSGTYEGNSPFHPLADNKFALTCFSTQFAFACPDGVKHVYQLRARSVSPKLFIRQEEVQELYSPIFLIVAAIVFITLCFTLKRKTE",
+        "target_name": "ORF7a (P0DTC7)"
+      },
+      "tool_status": "ok",
+      "result": "ok: call returned with no note",
+      "tool_seconds": 0.1624292089836672,
+      "tool_network_calls": 1,
+      "rejected": null,
+      "citable": false,
+      "source_kind": "computed",
+      "rows": null,
+      "expected_status": "ok",
+      "reproduces": null,
+      "status_as_predicted": true,
+      "cold": false
+    },
+    {
+      "round": 3,
+      "action": "call_tool",
+      "tool": "structures.folded",
+      "tool_version": 1,
+      "arguments": {
+        "sequence": "MSDNGPQNQRNAPRITFGGPSDSTGSNQNGERSGARSKQRRPQGLPNNTASWFTALTQHGKEDLKFPRGQGVPINTNSSPDDQIGYYRRATRRIRGGDGKMKDLSPRWYFYYLGTGPEAGLPYGANKDGIIWVATEGALNTPKDHIGTRNPANNAAIVLQLPQGTTLPKGFYAEGSRGGSQASSRSSSRSRNSSRNSTPGSSRGTSPARMAGNGGDAALALLLLDRLNQLESKMSGKGQQQQGQTVTKKSAAEASKKPRQKRTATKAYNVTQAFGRRGPEQTQGNFGDQELIRQGTDYKHWPQIAQFAPSASAFFGMSRIGMEVTPSGTWLTYTGAIKLDDKDPNFKDQVILLNKHIDAYKTFPPTEPKKDKKKKADETQALPQRQKKQQTVTLLPAADLDDFSKQLQQSMSSADSTQA",
+        "target_name": "N (P0DTC9)"
+      },
+      "tool_status": "empty",
+      "result": "{'reason': 'sequence_too_long', 'detail': \"419 residues exceeds the measured 400-residue ceiling, above which the host returns HTTP 413 'Sequence is longer than 400.'\", 'http_status': None, 'attempts': 0, 'note': 'Refused locally, so no request was spent on a deterministic no. This is a real limit on the lane and a real zero for this target: a full-length viral glycoprotein cannot be folded here, and folding a fragment of it answers a different question.'}",
+      "tool_seconds": 0.024902708013541996,
+      "tool_network_calls": 0,
+      "rejected": null,
+      "citable": false,
+      "source_kind": "computed",
+      "rows": null,
+      "expected_status": "empty",
+      "reproduces": "the sequence exceeds what the endpoint accepts",
+      "status_as_predicted": true,
+      "cold": false
+    },
+    {
+      "round": 4,
+      "action": "call_tool",
+      "tool": "structures.folded",
+      "tool_version": 1,
+      "arguments": {
+        "sequence": "SGFRKMAFPSGKVEGCMVQVTCGTTTLNGLWLDDVVYCPRHVICTSEDMLNPNYEDLLIRKSNHNFLVQAGNVQLRVIGHSMQNCVLKLKVDTANPKTPKYKFVRIQPGQTFSVLACYNGSPSGVYQCAMRPNFTIKGSFLNGSCGSVGFNIDYDCVSFCYMHHMELPTGVHAGTDLEGNFYGPFVDRQTAQAAGTDTTITVNVLAWLYAAVINGDRWFLNRFTTTLNDFNLVAMKYNYEPLTQDHVDILGPLSAQTGIAVLDMCASLKELLQNGMNGRTILGSALLEDEFTPFDVVRQCSGVTFQ",
+        "confident_plddt": 101.0
+      },
+      "tool_status": "rejected",
+      "result": "rejected: confident_plddt=101.0 is above the declared maximum 100.0",
+      "tool_seconds": null,
+      "tool_network_calls": null,
+      "rejected": {
+        "reason": "rejected: confident_plddt=101.0 is above the declared maximum 100.0"
+      },
+      "citable": false,
+      "source_kind": null,
+      "rows": null,
+      "expected_status": "rejected",
+      "reproduces": null,
+      "status_as_predicted": true,
+      "cold": false
+    },
+    {
+      "round": 5,
+      "action": "call_tool",
+      "tool": "structures.folded",
+      "tool_version": 1,
+      "arguments": {
+        "sequence": "SGFRKMAFPSGKVEGCMVQVTCGTTTLNGLWLDDVVYCPRHVICTSEDMLNPNYEDLLIRKSNHNFLVQAGNVQLRVIGHSMQNCVLKLKVDTANPKTPKYKFVRIQPGQTFSVLACYNGSPSGVYQCAMRPNFTIKGSFLNGSCGSVGFNIDYDCVSFCYMHHMELPTGVHAGTDLEGNFYGPFVDRQTAQAAGTDTTITVNVLAWLYAAVINGDRWFLNRFTTTLNDFNLVAMKYNYEPLTQDHVDILGPLSAQTGIAVLDMCASLKELLQNGMNGRTILGSALLEDEFTPFDVVRQCSGVTFQ",
+        "neighbour_cutoff": 0.5
+      },
+      "tool_status": "rejected",
+      "result": "rejected: neighbour_cutoff=0.5 is below the declared minimum 1.0",
+      "tool_seconds": null,
+      "tool_network_calls": null,
+      "rejected": {
+        "reason": "rejected: neighbour_cutoff=0.5 is below the declared minimum 1.0"
+      },
+      "citable": false,
+      "source_kind": null,
+      "rows": null,
+      "expected_status": "rejected",
+      "reproduces": null,
+      "status_as_predicted": true,
+      "cold": false
+    }
+  ]
+}

@@ -17,3 +17,9 @@ py3Dmol==2.5.5
 # Nothing in the notebook depends on a widget, so either major version is fine.
 jupyterlab
 ipywidgets
+
+# Optional. intake.rank_targets, the genome-to-targets tool, declares it, and section 1.2 pins
+# that panel to replay so the section runs without it. Install it to pin that panel live
+# instead. Already in hpc_pilots/requirements.lock.txt; repeated here because the kernel a
+# reader opens the notebook under is often not the one the pipeline runs in.
+biopython

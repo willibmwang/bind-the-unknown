@@ -1,0 +1,133 @@
+{
+  "experiment": "tool-call-exercise",
+  "status": "complete",
+  "smoke": false,
+  "tool_set_sha256": "b8f8bf9432ba5eb9782bb7e5f629f03b23b150f7841ebec12f5610eea00d18db",
+  "grid_cells": 4,
+  "provenance": {
+    "host": "WilliamsMBP260.stdusr.yale.internal",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "9caf9a78453fb933f149c15091890f7efbf9d652",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-04T19:53:37.771553+00:00"
+  },
+  "interpretation": "Measured spend per call, from a grid declared in source. `declared` is what the spec advertises and `measured` is what the calls cost; the two are different claims and a proposal to move the first must cite the second. A refused call records None rather than zero.",
+  "tool": "bioactivity.prior_binders",
+  "tool_version": 1,
+  "declared": {
+    "cost_seconds": 94.0,
+    "cost_network_calls": 16,
+    "cost_actions": 1,
+    "worst_case_seconds": 600.0,
+    "reaches_network": true
+  },
+  "calls": 4,
+  "by_status": {
+    "ok": 3,
+    "rejected": 1
+  },
+  "measured": {
+    "timed_calls": 3,
+    "successful_timed_calls": 3,
+    "seconds_median": 21.91407995900954,
+    "seconds_min": 1.939049167005578,
+    "seconds_max": 90.81244987499667,
+    "network_calls_median": 13,
+    "cold_seconds": 90.81244987499667,
+    "warm_calls": 2,
+    "warm_seconds_median": 21.91407995900954
+  },
+  "mispredictions": [],
+  "trace": [
+    {
+      "round": 0,
+      "action": "call_tool",
+      "tool": "bioactivity.prior_binders",
+      "tool_version": 1,
+      "arguments": {
+        "accession": "P0DTD1"
+      },
+      "tool_status": "ok",
+      "result": "ok: call returned with no note",
+      "tool_seconds": 90.81244987499667,
+      "tool_network_calls": 15,
+      "rejected": null,
+      "citable": false,
+      "source_kind": "external_record",
+      "rows": null,
+      "expected_status": "ok",
+      "reproduces": null,
+      "status_as_predicted": true,
+      "cold": true
+    },
+    {
+      "round": 1,
+      "action": "call_tool",
+      "tool": "bioactivity.prior_binders",
+      "tool_version": 1,
+      "arguments": {
+        "accession": "P0DTC2"
+      },
+      "tool_status": "ok",
+      "result": "ok: call returned with no note",
+      "tool_seconds": 21.91407995900954,
+      "tool_network_calls": 13,
+      "rejected": null,
+      "citable": false,
+      "source_kind": "external_record",
+      "rows": null,
+      "expected_status": "ok",
+      "reproduces": null,
+      "status_as_predicted": true,
+      "cold": false
+    },
+    {
+      "round": 2,
+      "action": "call_tool",
+      "tool": "bioactivity.prior_binders",
+      "tool_version": 1,
+      "arguments": {
+        "accession": "P0DTD1",
+        "max_molecules": 501
+      },
+      "tool_status": "rejected",
+      "result": "rejected: max_molecules=501 is above the declared maximum 500",
+      "tool_seconds": null,
+      "tool_network_calls": null,
+      "rejected": {
+        "reason": "rejected: max_molecules=501 is above the declared maximum 500"
+      },
+      "citable": false,
+      "source_kind": null,
+      "rows": null,
+      "expected_status": "rejected",
+      "reproduces": null,
+      "status_as_predicted": true,
+      "cold": false
+    },
+    {
+      "round": 3,
+      "action": "call_tool",
+      "tool": "bioactivity.prior_binders",
+      "tool_version": 1,
+      "arguments": {
+        "accession": "P00000"
+      },
+      "tool_status": "ok",
+      "result": "ok: call returned with no note",
+      "tool_seconds": 1.939049167005578,
+      "tool_network_calls": 3,
+      "rejected": null,
+      "citable": false,
+      "source_kind": "external_record",
+      "rows": null,
+      "expected_status": "ok",
+      "reproduces": null,
+      "status_as_predicted": true,
+      "cold": false
+    }
+  ]
+}

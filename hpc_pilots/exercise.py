@@ -54,6 +54,45 @@ CORPUS = "runs/toolcalls"
 # nothing. Set above the slowest measured call by a wide margin rather than tuned to it.
 WALL_BUDGET_SECONDS = 600
 
+# The sequences the folding and homology grids submit, written out here rather than read off
+# disk. A grid declared in source is the first property this module's docstring claims, and a
+# cell whose argument came from a file is a cell whose argument something else can change
+# between runs. Each is a real protein and each is identified by where it came from, so a
+# reader can check the string rather than take it.
+#
+# SARS-CoV-2 main protease, nsp5, 306 residues, recovered from the CA trace of the committed
+# fold in `runs/folded_structure/mpro_nsp5.pdb` and checked against that record's own
+# `sequence_sha256` (50ec1901...91c92e). The same sequence the notebook folds, so the grid and
+# the live panel submit one string.
+MPRO_NSP5 = (
+    "SGFRKMAFPSGKVEGCMVQVTCGTTTLNGLWLDDVVYCPRHVICTSEDMLNPNYEDLLIRKSNHNFLVQAGN"
+    "VQLRVIGHSMQNCVLKLKVDTANPKTPKYKFVRIQPGQTFSVLACYNGSPSGVYQCAMRPNFTIKGSFLNGS"
+    "CGSVGFNIDYDCVSFCYMHHMELPTGVHAGTDLEGNFYGPFVDRQTAQAAGTDTTITVNVLAWLYAAVINGD"
+    "RWFLNRFTTTLNDFNLVAMKYNYEPLTQDHVDILGPLSAQTGIAVLDMCASLKELLQNGMNGRTILGSALLE"
+    "DEFTPFDVVRQCSGVTFQ")
+# SARS-CoV-2 envelope protein E, P0DTC4, 75 residues, and ORF7a, P0DTC7, 121 residues, both
+# read from the reviewed UniProt reference this project already identifies against,
+# `data/raw/reference/viral_reviewed.fasta`. Two further real proteins of the same pathogen at
+# two further lengths, which is what the folding grid needs: the host caches by sequence, so a
+# second length is the only way to see a cold call twice.
+ENVELOPE_P0DTC4 = (
+    "MYSFVSEETGTLIVNSVLLFLAFVVFLLVTLAILTALRLCAYCCNIVNVSLVKPSFYVYSRVKNLNSSRVPD"
+    "LLV")
+ORF7A_P0DTC7 = (
+    "MKIILFLALITLATCELYHYQECVRGTTVLLKEPCSSGTYEGNSPFHPLADNKFALTCFSTQFAFACPDGVK"
+    "HVYQLRARSVSPKLFIRQEEVQELYSPIFLIVAAIVFITLCFTLKRKTE")
+# SARS-CoV-2 nucleoprotein, P0DTC9, 419 residues, from the same reference. Nineteen residues
+# over the 400-residue ceiling `folded_structure.MAX_RESIDUES` measured, which is what makes it
+# the cell for the declared length refusal: a real protein of the pathogen under study that
+# this lane cannot fold, rather than a string lengthened until the bound tripped.
+NUCLEOPROTEIN_P0DTC9 = (
+    "MSDNGPQNQRNAPRITFGGPSDSTGSNQNGERSGARSKQRRPQGLPNNTASWFTALTQHGKEDLKFPRGQGV"
+    "PINTNSSPDDQIGYYRRATRRIRGGDGKMKDLSPRWYFYYLGTGPEAGLPYGANKDGIIWVATEGALNTPKD"
+    "HIGTRNPANNAAIVLQLPQGTTLPKGFYAEGSRGGSQASSRSSSRSRNSSRNSTPGSSRGTSPARMAGNGGD"
+    "AALALLLLDRLNQLESKMSGKGQQQQGQTVTKKSAAEASKKPRQKRTATKAYNVTQAFGRRGPEQTQGNFGD"
+    "QELIRQGTDYKHWPQIAQFAPSASAFFGMSRIGMEVTPSGTWLTYTGAIKLDDKDPNFKDQVILLNKHIDAY"
+    "KTFPPTEPKKDKKKKADETQALPQRQKKQQTVTLLPAADLDDFSKQLQQSMSSADSTQA")
+
 
 @dataclass(frozen=True)
 class Cell:
@@ -184,6 +223,155 @@ GRID = {
                  "aligner, and a cost claim it cannot support is better absent than drawn "
                  "from a sample of two"),
     ),
+    # Four calls at the declared ten seconds each, which is the whole grid's budget against a
+    # public keyless index with no published rate limit. `nsp12` is the term this module's own
+    # endpoint survey measured, so the default cell's count can be read against a number
+    # already on the record rather than only against itself.
+    #
+    # Neither declared failure has a cell, and the reason is a property of the failures rather
+    # than a gap. "The date clause did not discriminate" is reported inside
+    # `date_filter_verified` at HTTP 200 by design -- the control query exists precisely so it
+    # never becomes a status -- so no argument can turn it into one. The HTTPError is a
+    # condition of the host and the only way to provoke it from here is to abuse the endpoint.
+    # A cell that claimed either would be a prediction about something it cannot cause.
+    "literature.search": (
+        Cell({"subject": "nsp12"}, "ok", repeats=3,
+             why="the term this module's endpoint survey measured at 45481 hits unbounded, so "
+                 "the default cell lands beside a recorded count and three calls give the "
+                 "cost a sample"),
+        Cell({"subject": "RNA-dependent RNA polymerase", "subject_kind": "family",
+              "date_to": "2019-12-31"}, "ok",
+             why="the family route under a publication-date ceiling, which is the only "
+                 "configuration a historical replay may use. A second subject and a second "
+                 "query shape, and the one cell that makes the tool run its control query"),
+        Cell({"subject": "nsp5", "top": 101}, "rejected",
+             why="above the declared maximum of 100. The function raises on the same bound, "
+                 "so this cell also pins that the charged refusal comes first and nothing is "
+                 "sent"),
+        Cell({"subject": "Zzqxv-not-a-protein", "per_axis": False}, "empty",
+             why="a well-formed query the index has never seen. A successful call that found "
+                 "nothing, which for a novel pathogen is the ordinary answer and not a "
+                 "failure; `per_axis` off so a true zero costs one request rather than eight"),
+    ),
+    # Three accessions, one call each, and the reason is the one the geometry grid gives: the
+    # declared 21.2 s is already a median of eight calls whose spread ran 4.5 s to 24.9 s on
+    # the *same* accession, so the variance here is the host's. Against variance that large a
+    # second call on one accession buys less than a first call on another, and three distinct
+    # proteins cost 65 s where repeats to the twenty-call floor would cost seven minutes and
+    # 120 requests against a public endpoint.
+    "families.entries": (
+        Cell({"accession": "P0DTD1"}, "ok",
+             why="SARS-CoV-2 ORF1ab, the accession every other lane in this grid set is keyed "
+                 "on, and the long polyprotein whose entry count is what the 300 s worst case "
+                 "is declared for"),
+        Cell({"accession": "P0DTC2"}, "ok",
+             why="spike, a single-domain glycoprotein rather than a polyprotein, so the cost "
+                 "claim spans both shapes the registry's targets take"),
+        Cell({"accession": "P03452"}, "ok",
+             why="influenza haemagglutinin, a second organism, which is the axis the two "
+                 "coronavirus cells cannot vary"),
+        Cell({"accession": "P0DTD1", "max_families": 101}, "rejected",
+             why="above the declared maximum of 100, the cell that writes a `rejected` row "
+                 "for this tool"),
+        Cell({"accession": "P00000"}, "failed",
+             reproduces="urllib.error.HTTPError from the InterPro host",
+             why="a syntactically valid accession InterPro serves nothing for. The spec draws "
+                 "the line here explicitly -- a 404 from one member database is an absence, a "
+                 "404 from the integrated endpoint raises -- so this cell is the one that "
+                 "says which side of it an unknown accession falls on"),
+    ),
+    # The query is a sequence or a nucleotide accession, and both routes are exercised because
+    # they are different amounts of work: the accession route resolves coding sequences first,
+    # so its cost is not the sequence route's cost plus noise.
+    "similarity.homologs": (
+        Cell({"query": MPRO_NSP5}, "ok", repeats=2,
+             why="the 306-residue query this module's endpoint comparison timed at two "
+                 "seconds against SwissProt, which is the measurement the 9 s declaration was "
+                 "drawn from"),
+        Cell({"query": "NC_045512.2"}, "ok",
+             why="the accession route, on the genome accession every arm of this project "
+                 "starts from. A distinct argument and a distinct code path, so the cost "
+                 "claim does not rest on one sequence handed straight to the submitter"),
+        Cell({"query": MPRO_NSP5, "max_hits": 501}, "rejected",
+             why="above the declared maximum of 500, the cell that writes a `rejected` row "
+                 "for this tool"),
+        Cell({"query": MPRO_NSP5, "max_wait_seconds": 1.0}, "failed",
+             reproduces="the poll ceiling was crossed before the job finished",
+             why="the declared minimum ceiling, so the call is charged rather than refused, "
+                 "and one second is below the two this query has been measured to need. The "
+                 "spec says a crossed ceiling raises rather than returning an empty hit list, "
+                 "and this is the cell that holds it to that"),
+    ),
+    # Distinct sequences, one call each, for the reason the geometry grid learned the hard way
+    # and this module's own docstring quotes: the ESM Atlas caches by sequence, so a repeated
+    # call is about twenty times faster and a grid that repeated one sequence would be an
+    # instrument pointed at the host's cache. Three lengths instead, 75, 121 and 306 residues,
+    # against measured cold times of 1.8 s at 50 and 12.1 s at 300.
+    #
+    # Measured after the fact, and recorded here because it falsifies the reasoning above
+    # rather than the predictions: the three folds took 0.631 s, 0.178 s and 0.162 s at one
+    # request each, so none of them was cold. The host's cache is not per-machine, and three
+    # reviewed proteins of the most-studied pathogen on the index are in it already. The `why`
+    # on the second and third cells says they measure a cold fold, and that claim is wrong;
+    # it is left as written, because the rule here is that nothing is edited to agree with the
+    # outcome. What a cold fold of this lane costs is still only on the record in the module
+    # docstring's own 1.8 s / 5.0 s / 12.1 s / 25.6 s series, and a sequence nobody has ever
+    # submitted is what it would take to add to it.
+    "structures.folded": (
+        Cell({"sequence": MPRO_NSP5, "target_name": "Mpro (nsp5)"}, "ok",
+             why="the sequence the committed fold in runs/folded_structure/ was taken from, so "
+                 "the recording and the notebook's live panel submit the same string and the "
+                 "two can be compared byte for byte"),
+        Cell({"sequence": ENVELOPE_P0DTC4, "target_name": "E (P0DTC4)"}, "ok",
+             why="75 residues, the short end. A sequence this host has not been asked for from "
+                 "here before, so it measures a cold fold rather than a cache hit"),
+        Cell({"sequence": ORF7A_P0DTC7, "target_name": "ORF7a (P0DTC7)"}, "ok",
+             why="121 residues, a third length, which is what turns two readings into a claim "
+                 "about how cost scales rather than two unconnected numbers"),
+        Cell({"sequence": NUCLEOPROTEIN_P0DTC9, "target_name": "N (P0DTC9)"}, "empty",
+             reproduces="the sequence exceeds what the endpoint accepts",
+             why="419 residues against the measured 400-residue ceiling. Predicted `empty` "
+                 "rather than `failed`: the spec says the refusal is a stated absence and not "
+                 "a raise, and the module refuses locally, so this cell should also spend no "
+                 "request at all"),
+        Cell({"sequence": MPRO_NSP5, "confident_plddt": 101.0}, "rejected",
+             why="above the declared maximum of 100.0, the same bound and the same expected "
+                 "row as the predicted-structure grid's confidence cell"),
+        Cell({"sequence": MPRO_NSP5, "neighbour_cutoff": 0.5}, "rejected",
+             why="below the declared minimum of 1.0 angstrom. The function raises on a "
+                 "non-positive cutoff of its own accord, so this cell pins that the charged "
+                 "refusal arrives first and the sequence is never sent"),
+    ),
+    # The most expensive tool in the registry: 94 s and 16 requests per call across three
+    # independent public hosts. Every valid cell is a single call, so there is no median here
+    # and the artifact's `seconds_median` over one or two readings is the reading itself. That
+    # is the honest trade. Twenty calls to clear the cost floor would be half an hour and
+    # better than three hundred requests to ChEMBL, IEDB and MaveDB, and no cost claim is worth
+    # that to three services that charge nothing.
+    #
+    # Neither declared failure has a cell. "A lane could not be reached" is recorded in
+    # `lanes_unavailable` rather than raised, by design, so it is an outage and not an argument;
+    # the HTTPError on the integrated query is the same kind of condition. The fourth cell is
+    # the nearest thing an argument can reach, and it is written as a prediction rather than as
+    # a reproduction of either.
+    "bioactivity.prior_binders": (
+        Cell({"accession": "P0DTD1"}, "ok",
+             why="SARS-CoV-2 ORF1ab, the accession the notebook's refusal panel names and the "
+                 "one every other grid here is keyed on"),
+        Cell({"accession": "P0DTC2"}, "ok",
+             why="spike, where the prior-binder question has a different answer in every lane, "
+                 "so the cost claim rests on two proteins rather than one"),
+        Cell({"accession": "P0DTD1", "max_molecules": 501}, "rejected",
+             why="above the declared maximum of 500, the cell that writes a `rejected` row for "
+                 "this tool and the only cheap cell in the grid"),
+        Cell({"accession": "P00000"}, "ok",
+             why="an accession no lane holds a record for. Predicted `ok` and not `empty`: "
+                 "this tool declares no key that says whether it found anything, so three "
+                 "lanes answering with nothing is a successful call reporting three zeros, and "
+                 "distinguishing that from an unreached lane is what `lanes_unavailable` is "
+                 "for. If the prediction is wrong the dispatcher reads absence from a payload "
+                 "that does not carry it, which is worth finding out"),
+    ),
 }
 
 
@@ -192,17 +380,25 @@ GRID = {
 # exactly what this module was built to end: `structures.evidence` declared zero seconds and
 # spends sixty, and nobody could tell until something counted.
 #
-# All six are the onset lanes. Each was measured a handful of times when it was written -- the
-# numbers in their specs come from those calls and not from guesses -- but a handful is below
-# the twenty-call floor a cost claim needs, so the optimiser can neither confirm nor move them.
-# Building their grids is cheap for the folding lane and expensive for the rest: the three that
-# fan out across public hosts would spend several hundred requests to clear the floor once.
+# Empty, as of the five onset grids above. Every registered tool now has a grid and a recording
+# under `runs/toolcalls/`, so `set(GRID) | set(UNGRIDDED)` and `set(TOOLS)` agree with nothing
+# in this tuple, and this is where a tool goes when a later one cannot be exercised here.
+#
+# Nothing in the test suite pins that partition today, which is worth saying plainly while the
+# tuple is empty: an eleventh tool can be registered with no grid and no entry here, and the
+# only thing that would notice is a reader comparing the registry against this file.
+#
+# What the grids above do *not* claim is a cost at the twenty-call floor. Six of the ten run
+# one or three calls per cell, because clearing the floor for `bioactivity.prior_binders`
+# alone would be half an hour and several hundred requests against three services that charge
+# nothing for them. A median over one call is the reading, and the artifacts say so in
+# `successful_timed_calls`; the optimiser reads the floor off that field and declines on its
+# own, which is the behaviour wanted rather than a shortfall to apologise for.
 #
 # Deliberately not a silent gap. `python -m hpc_pilots exercise` runs only the grids declared
-# above, and a reader comparing the registry against `runs/toolcalls/` would otherwise find six
-# tools missing with nothing saying why.
-UNGRIDDED = ("literature.search", "families.entries", "similarity.homologs",
-             "structures.folded", "bioactivity.prior_binders")
+# above, and a reader comparing the registry against `runs/toolcalls/` would otherwise find a
+# tool missing with nothing saying why.
+UNGRIDDED = ()
 
 
 def _row(index, name, cell, envelope, cold):
