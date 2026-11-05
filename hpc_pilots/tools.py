@@ -30,7 +30,7 @@ Three further decisions are worth defending.
 **Every entry point is a string, not a callable.** `entry` is `"hpc_pilots.intake:run_intake"`,
 resolved by `resolve()` at call time, and `check` is the same shape. Three things follow.
 This module imports nothing but the standard library and `common` -- itself pure stdlib --
-so a caller that wants one tool's declared cost does not pay for biotite and pyrodigal to
+so a caller that wants one tool's declared cost does not pay for biotite and freesasa to
 get it, which is the property `arms` states as "nothing here reads a file or imports numpy".
 The whole registry is JSON-serialisable, so a spec set has a content digest and a run can
 name the tool set it ran against. And the specs can be diffed, which is what makes a
@@ -269,14 +269,13 @@ class Tool:
     fifth round of an episode. Only what the *default* path needs. Not a version pin --
     `requirements.lock.txt` is that.
 
-    This docstring used to claim that `intake` reaches `Bio` and `pyrodigal` "both off the
-    default viral path, so declaring them would refuse a tool that works", and the first half
-    was wrong. `run_intake` defaults to `remote=True` and builds the aligner unconditionally
-    before the ORF loop, so `Bio` is squarely on the default path: with it absent the call
-    returned a charged `failed` envelope carrying an unexplained `ModuleNotFoundError`, which
-    no declared `Failure` predicts and which the optimiser would read as a failure mode of the
-    tool rather than of the environment. `pyrodigal` genuinely is off the default path and
-    stays undeclared. The lesson generalises -- `geometry` had the same defect with `freesasa`,
+    This docstring used to claim that `intake` reaches `Bio` off the default viral path, so
+    that declaring it would refuse a tool that works. That was wrong. `run_intake` defaults to
+    `remote=True` and builds the aligner unconditionally before the ORF loop, so `Bio` is
+    squarely on the default path: with it absent the call returned a charged `failed` envelope
+    carrying an unexplained `ModuleNotFoundError`, which no declared `Failure` predicts and
+    which the optimiser would read as a failure mode of the tool rather than of the
+    environment. The lesson generalises -- `geometry` had the same defect with `freesasa`,
     where the ImportError was caught and rewritten as a sentence about downloads."""
     failures: tuple = field(default_factory=tuple)
     """`Failure` records. The one field a run's record can genuinely extend, because
@@ -482,7 +481,7 @@ TOOLS = {
         # builds the aligner before the ORF loop, so with biopython absent the call came back
         # as a charged tool failure carrying `ModuleNotFoundError: No module named 'Bio'` --
         # an environment problem recorded as a property of the tool, and one no declared
-        # failure here predicts. `pyrodigal` really is off the default path and stays out.
+        # failure here predicts.
         requires=("Bio",),
         failures=(
             Failure("A holdout that removes nothing raises rather than proceeding",

@@ -71,10 +71,10 @@ def surface_rows(ranked, replicates=5):
     """One surface row per ranked candidate, measured or refused with the reason.
 
     Exhaustive over `ranked` on purpose, and the `top=12` cap that `enrich_with_surface`
-    applies is not repeated here. That cap is a cost control for a bacterial genome of four
-    thousand genes and it is the right one there; applied to a viral genome of twenty-three
-    candidates it drops nothing a reader would accept being dropped, and it dropped the
-    polymerase for a year by dropping nothing visible.
+    applies is not repeated here. That cap is a cost control on the stage that costs seconds
+    per structure, and on a viral genome of twenty-three candidates it drops nothing a reader
+    would accept being dropped -- it dropped the polymerase for a year by dropping nothing
+    visible.
 
     A row is never absent. `measured` is False with `unmeasured_because` naming which of the
     three situations obtained, because "this protein has no surface a macrocycle could lie
@@ -585,7 +585,7 @@ def fold_stage(ranked, ceiling=400, pool=()):
     return folded, rows
 
 
-def _case(accession, exclude_organism, top, replicates, fold, label, scope="viral"):
+def _case(accession, exclude_organism, top, replicates, fold, label):
     """Every stage of the onset arm, once, against one reference."""
     from . import chemistry
     from .intake import decompose, rank_score, run_intake
@@ -593,14 +593,12 @@ def _case(accession, exclude_organism, top, replicates, fold, label, scope="vira
     stages, clock = [], time.time()
 
     started = time.time()
-    intake = run_intake(accession, exclude_organism=exclude_organism, top=top, record=False,
-                        scope=scope)
+    intake = run_intake(accession, exclude_organism=exclude_organism, top=top, record=False)
     stages.append({
         "stage": 1, "name": "Genome to candidate proteins", "tool": "intake.rank_targets",
         "endpoints": ["NCBI efetch", "UniProt"],
         "input": {"genome_accession": accession,
-                  "reference_excluded_organism": exclude_organism,
-                  "reference_scope": scope},
+                  "reference_excluded_organism": exclude_organism},
         "output": {"genome_length_nt": intake["genome_length_nt"],
                    "segments": intake["segments"],
                    "orfs_found": intake["orfs_found"],
@@ -714,7 +712,6 @@ def _case(accession, exclude_organism, top, replicates, fold, label, scope="vira
         "case": label,
         "genome_accession": accession,
         "reference_excluded_organism": exclude_organism,
-        "reference_scope": scope,
         "stages": stages,
         "scores": scored,
         "surfaces": rows,
@@ -751,16 +748,9 @@ HOLDOUT = "severe acute respiratory syndrome coronavirus 2"
 # because joining them would create reading frames across a junction that exists in no
 # molecule and those frames would be called as ORFs.
 #
-# Mycobacterium tuberculosis is deliberately absent, and the reason is a property of this
-# function rather than of the pathogen. `run_intake` calls ORFs in six frames and ranks them
-# by length, which is right for a 30 kb virus and wrong for a 4.4 Mb chromosome: the genome
-# yields 15,787 six-frame ORFs of which 2,534 are at least as long as the target of
-# isoniazid, so length puts it past two thousandth. The pieces that fix it exist and have no
-# caller -- `candidate_genes` switches to a prokaryotic gene model on genome size, and
-# `prescreen` ranks on the hit's own name instead of its length -- which is the same defect
-# as the one this module was written for, one layer up. `runs/cross_kingdom_intake.json`
-# records that the transfer works once that step is replaced. Until it is wired here, this
-# chain is viral and says so.
+# Three families rather than three strains, because the question these rows answer is whether
+# a coverage number is a property of the pipeline or of how much structural work a pathogen's
+# relatives have had, and three isolates of one family could not tell those apart.
 GENOMES = (
     {"pathogen": "SARS-CoV-2", "accession": "NC_045512.2", "holdout": HOLDOUT},
     {"pathogen": "Nipah virus", "accession": "NC_002728.1", "holdout": "Nipah virus"},
@@ -844,7 +834,7 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
     return payload
 
 
-def one(accession, pathogen=None, holdout=None, scope="viral", top=12, replicates=5,
+def one(accession, pathogen=None, holdout=None, top=12, replicates=5,
         fold=True, record=False):
     """The whole chain on one genome the caller names. The entry point for a new pathogen.
 
@@ -862,10 +852,10 @@ def one(accession, pathogen=None, holdout=None, scope="viral", top=12, replicate
     reports back as `reference_entries_removed` -- zero there means the holdout matched nothing
     and the run is self-identified whatever it was asked for.
 
-    `scope` picks the reference set: `viral` by default, and `bacteria`, `fungi` or `all` for
-    the rest. It is not inferred, because a reference that silently did not contain the
-    pathogen's relatives would look exactly like a pathogen with no relatives, and those are
-    opposite findings.
+    The reference is reviewed viral proteins, because this is antiviral work. A genome over
+    `intake.VIRAL_GENOME_LIMIT_NT` is refused rather than ranked: nothing would identify
+    against that reference and the result would be a shortlist of whichever reading frames
+    happened to be longest.
 
     Writes nothing by default. The committed records are the three validated pathogens, and a
     exploratory run should not quietly overwrite them; pass `record=True` to write
@@ -874,8 +864,7 @@ def one(accession, pathogen=None, holdout=None, scope="viral", top=12, replicate
     label = pathogen or accession
     case = _case(accession, holdout, top, replicates, fold,
                  f"{label}, " + (f"{holdout} held out" if holdout
-                                 else "nothing held out of the reference"),
-                 scope=scope)
+                                 else "nothing held out of the reference"))
     case["pathogen"] = label
     if record:
         stem = re.sub(r"[^A-Za-z0-9]+", "_", accession.split(",")[0]).strip("_")
@@ -901,8 +890,7 @@ def sweep(genomes=GENOMES, top=12, replicates=5, fold=True, record=True):
         started = time.time()
         try:
             case = _case(genome["accession"], genome["holdout"], top, replicates, fold,
-                         f"{genome['pathogen']}, {genome['holdout']} held out",
-                         scope=genome.get("scope", "viral"))
+                         f"{genome['pathogen']}, {genome['holdout']} held out")
             case["pathogen"] = genome["pathogen"]
             rows.append(case)
         except Exception as failure:                      # noqa: BLE001
@@ -937,10 +925,9 @@ def sweep(genomes=GENOMES, top=12, replicates=5, fold=True, record=True):
             "records for, so they are not a sample of anything.",
             "Every row holds its own organism out, so the surfaces are the nearest curated "
             "relative's and not the pathogen's.",
-            "Mycobacterium tuberculosis is not here. `run_intake` ranks six-frame ORFs by "
-            "length, which does not transfer to a 4.4 Mb chromosome; the candidate-selection "
-            "step that does is recorded in runs/cross_kingdom_intake.json and is not wired "
-            "into this function.",
+            "Viral genomes only. This is antiviral work: the reference is reviewed viral "
+            "proteins and the gene calling is six-frame, and `run_intake` refuses a genome "
+            "too large to be viral rather than ranking it.",
             "A stage that fails for one genome is recorded as an error row rather than "
             "dropping the genome, for the same reason the surface stage refuses in writing."],
         "interpretation": "A record of what each stage produced on each genome. No binding, "

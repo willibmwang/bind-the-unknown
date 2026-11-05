@@ -15,8 +15,7 @@ measures the surface a macrocyclic peptide would have to bind, and defines a foc
 thioether-macrocycle library for that molecule class. The library definition does not yet read
 the measured surface, which the flowchart below draws as the dashed arrow it is. It runs today
 against public endpoints at NCBI, UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, 3D-Beacons,
-AlphaFold DB, ESMFold, RCSB and ChEMBL, and it has been run across three virus families and one
-bacterium.
+AlphaFold DB, ESMFold, RCSB and ChEMBL, and it has been run across three virus families.
 
 **Start with the notebook.** [notebooks/double_arm_mvp.ipynb](notebooks/double_arm_mvp.ipynb)
 runs the whole path in one sitting and computes every number it shows when the cell executes. It
@@ -91,13 +90,13 @@ protein is usually an entry with no deposited structure of its own, although inf
 are among the best solved in virology. That spread is what says the coverage number is a
 property of the pathogen rather than of the code.
 
-**And §1.6c of the notebook takes a pathogen of your own**, as does
+**And §0.2 of the notebook takes a pathogen of your own**, as does
 `python -m hpc_pilots chain --accession <id> --pathogen <name>`. MERS-CoV, `NC_019843.3`, a
 genome nothing here had looked at: 19 chains ranked, 19 surface rows for them, 19 of 19 located
 in the genome's own translation, and the main protease it folded hashes to something that is
 not SARS-CoV-2's — it found MERS's own, through a coronavirus relative, which is what the
-system claims to do. A genome over 500,000 nt is refused rather than ranked, because
-six-frame ORFs ordered by length do not transfer to a chromosome.
+system claims to do. A genome too large to be viral is refused rather than ranked: this is
+antiviral work, and the reference it identifies against is reviewed viral proteins.
 
 ---
 
@@ -109,9 +108,8 @@ builds them in order.
 **A target, chosen from a pathogen genome rather than from a shortlist.** The only input is one
 genome accession. The pipeline reads that genome in all six frames to get every protein it could
 encode, matches those against reviewed UniProt entries, and ranks what it finds. It has run on
-SARS-CoV-2, Nipah virus, influenza A PR8 and *Mycobacterium tuberculosis*, each time with the
-pathogen's own proteins deleted from the reference so identification had to work through a
-relative.
+SARS-CoV-2, Nipah virus and influenza A PR8, each time with the pathogen's own proteins
+deleted from the reference so identification had to work through a relative.
 
 **A structure for that target, including for a protein with no close curated relative.** The
 folding tool takes an amino-acid sequence and returns coordinates, which is the one structural
@@ -193,16 +191,15 @@ and automatic, and needs no human reviewer and no laboratory. Each run below is 
 
 ### Choosing the target
 
-Three of the four pathogens beat a random ranking of their own candidates, at p = 0.000862,
-0.0121 and 0.000399. Nipah virus, with three targets among eight candidates, is underpowered at
-that size and is recorded as not established rather than as a pass or a failure.
+Two of the three pathogens beat a random ranking of their own candidates, at p = 0.000862 and
+0.0121. Nipah virus, with three targets among eight candidates, is underpowered at that size
+and is recorded as not established rather than as a pass or a failure.
 
 | Experiment | What it found |
 | --- | --- |
 | `intake_validation` | With the pathogen's own proteins removed from the reference, the ranking still recovers the real countermeasure targets across three virus families. |
 | `holdout_ladder` | Delete ever-closer relatives from the reference and the pipeline does not degrade, it **stops**. It needs a known relative from the same species or at least the same genus. |
 | `identification_cascade` | Past that point, conserved enzymes still come back through distant matches. Family-specific surface proteins have no distant relatives, so they are recognised from their own sequence instead, as a surface protein rather than by name. Those are the antibody targets. |
-| `cross_kingdom_intake` | Genome to targets transfers to a bacterium once the candidate-selection step is replaced. All four first-line tuberculosis drug target complexes rank inside the top 92 of 4,085 predicted genes. |
 | `surface_markers` | Scoring the largest unbroken exposed greasy area puts the spike receptor-binding domain above the main protease at every contact cutoff measured, so a target can be scored from structure without penalising the interfaces macrocycles exist to bind. |
 | `amenability_gate` | Over five structures of the same domain the patch moves by up to 1850 square angstroms, against one macrocycle footprint of 600, so the gate reports the range with the median inside it. Generated from `configs/structures.json`, so all 12 declared targets get a row: 11 measured, 1 refused with the reason. The band now has an edge on both sides: a patch covering more than 15% of its domain's own surface is a region rather than a site and cannot read `yes`. |
 | `onset_chain` | One genome in, and what each of the five stages handed the next, under both references. The surface stage emits one row per ranked chain, measured or refused, in both. |
@@ -288,27 +285,27 @@ return when the cell executes.
 | --- | --- | --- |
 | 0 | Setup and data availability | Which records this machine can see, before anything reads one |
 | 0.1 | The whole workflow on one page | The two arms as a flowchart, drawn from one run of the chain |
+| 0.2 | Run it on a pathogen of your own | One NCBI accession in, the whole chain out, live |
 | 1.1 | Reachability, not relevance | Which tools you can actually run from a bare accession, ranked live |
 | 1.2 | Watching a tool run | Calls dispatched live, each as an instrument readout, with a structure |
 | 1.3 | What the recorded runs found | Each recorded experiment, reporting its own answer field |
-| 1.4 | Genome to ranked targets | Recovered countermeasure targets, three viruses and one bacterium |
+| 1.4 | Genome to ranked targets | Recovered countermeasure targets across three virus families |
 | 1.4a | Every candidate's score, term by term | The five stated weights, and what each protein earned on each |
 | 1.5 | The identification cliff | Where the pipeline stops rather than degrades |
 | 1.6 | The surface a macrocycle would bind | Patch medians with the spread across replicate structures |
 | 1.6a | Every chain, and nothing dropped | One surface row per ranked chain, measured or refused with the reason |
 | 1.6b | The same stages on three pathogens | Coverage as a property of the pathogen, not of the code |
-| 1.6c | Run it on a pathogen of your own | One accession in, the whole chain out, live |
 | 2.1 | The result | Gain against shared positions, from the per-batch records |
 | 2.2 | Tested by intervention | Narrow the batch and the effect returns; remove sharing and it goes |
 | 2.3 | What a campaign supplies | The chemistry that is wired, and the fields a campaign fills |
 | 3 | One genome in, a ranked candidate list out | The whole chain on SARS-CoV-2, ending in a ranked shortlist |
 
-**§1.6c takes a pathogen of your own.** One NCBI nucleotide accession goes in — several
-separated by commas for a segmented genome — and the same five stages run against the same
-endpoints, printing the same ledger, for a pathogen nothing here has looked at. No target
-list, no structure, no name. A genome over 500,000 nt is refused rather than ranked, because
-six-frame ORFs ordered by length do not transfer to a chromosome and a confident wrong
-shortlist is the one output worse than none.
+**§0.2 takes a pathogen of your own, and it is near the top for that reason.** One NCBI
+nucleotide accession goes in — several separated by commas for a segmented genome — and the
+same five stages run against the same endpoints, printing the same ledger, for a pathogen
+nothing here has looked at. No target list, no structure, no name. A genome too large to be
+viral is refused rather than ranked: nothing would identify against a reviewed viral reference,
+and a confident wrong shortlist is the one output worse than none.
 
 **Budget the cold number, not the cached one.** Registered costs run from 0.7 seconds for a fold
 to 94 seconds for the bioactivity lookup, but that 0.7 seconds is a cached result.

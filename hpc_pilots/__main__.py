@@ -125,11 +125,6 @@ def main(argv=None):
                    help="Organism deleted from the reference before identifying, spelled as "
                         "UniProt spells it. Absent is correct for a genuinely new pathogen, "
                         "which has nothing curated to delete")
-    p.add_argument("--scope", default="viral",
-                   choices=("viral", "bacteria", "fungi", "all"),
-                   help="Which reviewed reference set to identify against. Not inferred: a "
-                        "reference that does not contain the pathogen's relatives looks "
-                        "exactly like a pathogen that has none")
     p = sub.add_parser("gate",
                        help="Measure the macrocycle-amenability gate over every target "
                             "declared in configs/structures.json")
@@ -283,7 +278,7 @@ def main(argv=None):
         if args.pathogen:
             from .chain import one as one_chain
             case = one_chain(args.accession, pathogen=args.pathogen, holdout=args.holdout,
-                             scope=args.scope, top=args.top, replicates=args.replicates,
+                             top=args.top, replicates=args.replicates,
                              fold=not args.no_fold, record=True)
             print(_json.dumps({"case": case["case"], "coverage": case["coverage"],
                                "stages": [{k: st[k] for k in ("stage", "tool", "input",

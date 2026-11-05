@@ -2494,7 +2494,7 @@ def test_the_cli_reports_drift_between_the_registry_and_its_snapshot():
     finally:
         tools.TOOLS["chemistry.library_spec"] = original
     # And the registry is listable without importing anything a tool needs, which is why
-    # entry points are strings: asking what a tool costs must not cost biotite and pyrodigal.
+    # entry points are strings: asking what a tool costs must not cost biotite and freesasa.
     out = io.StringIO()
     with contextlib.redirect_stdout(out):
         cli_main(["tools"])

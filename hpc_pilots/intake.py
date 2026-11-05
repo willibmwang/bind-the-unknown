@@ -76,6 +76,7 @@ import concurrent.futures
 import json
 import re
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -105,6 +106,35 @@ def translate(nt):
     return "".join(CODONS.get(nt[i:i + 3], "X") for i in range(0, len(nt) - 2, 3))
 
 
+# Statuses that mean "ask again" rather than "there is no such thing". NCBI answers a burst
+# of unauthenticated efetch calls with 429, and UniProt and the rest answer maintenance with
+# 503; a 404 is a fact about the accession and retrying it only delays the right answer.
+#
+# This matters most at the one place a stranger touches this code. Someone pasting their own
+# accession into the notebook and getting `HTTP Error 429` reads it as "my accession is
+# wrong", which is the single most discouraging wrong conclusion available here, and two of
+# the five example genomes in that cell returned it while being checked.
+TRANSIENT_HTTP = (429, 500, 502, 503, 504)
+
+
+def _fetch(url, timeout=180, data=None, attempts=4, backoff=2.0):
+    """One request, retried on the statuses that mean the server is busy rather than sure."""
+    import time as _time
+
+    for attempt in range(attempts):
+        try:
+            request = urllib.request.Request(url, data=data) if data is not None else url
+            with urllib.request.urlopen(request, timeout=timeout) as handle:
+                return handle.read()
+        except urllib.error.HTTPError as error:
+            if error.code not in TRANSIENT_HTTP or attempt == attempts - 1:
+                raise
+        except (urllib.error.URLError, TimeoutError, ConnectionError):
+            if attempt == attempts - 1:
+                raise
+        _time.sleep(backoff * (attempt + 1))
+
+
 def fetch_genome(accession):
     """One genome from NCBI, as (header, sequence). No annotation is requested.
 
@@ -117,8 +147,7 @@ def fetch_genome(accession):
     """
     query = urllib.parse.urlencode({"db": "nuccore", "id": accession,
                                     "rettype": "fasta", "retmode": "text"})
-    with urllib.request.urlopen(f"{EFETCH}?{query}", timeout=180) as handle:
-        text = handle.read().decode()
+    text = _fetch(f"{EFETCH}?{query}", timeout=180).decode()
     records = fasta_records(text)
     if not records:
         raise ValueError(f"{accession} did not return FASTA; got {text[:80]!r}")
@@ -287,25 +316,16 @@ UNIPROT_STREAM = "https://rest.uniprot.org/uniprotkb/stream"
 # sequences nobody has curated, and the point of the reference is that a hit against it carries
 # a name somebody stands behind.
 #
-# Scope is a parameter because the default is a real limitation rather than a neutral choice.
-# Indexing viruses alone means a bacterial genome identifies nothing at all -- not distantly,
-# not weakly, nothing -- and the failure looks exactly like the cross-family failure the
-# cascade exists to handle while having an entirely different cause. Measured sizes, from
-# UniProt on 22 October 2026:
+# One scope, because this project is antiviral work. The reference is reviewed viral proteins
+# and nothing else, which is a limitation worth stating rather than a default worth hiding: a
+# genome from outside that set identifies nothing at all -- not distantly, not weakly, nothing
+# -- and the failure looks exactly like the cross-family failure the cascade exists to handle
+# while having an entirely different cause. `run_intake` refuses such a genome on size rather
+# than ranking it, so the two never get confused.
 #
-#   viral      17,529 entries     6M residues    index builds in ~5s
-#   fungi      38,309 entries    13M residues
-#   bacteria  337,292 entries   118M residues    twenty times the default
-#   all       575,748 entries   202M residues
-#
-# The exact-seed index is a dict of sets and its memory grows with residues, so the larger
-# scopes are offered and their cost is stated rather than assumed to be free.
-SCOPES = {
-    "viral": "(taxonomy_id:10239) AND (reviewed:true)",
-    "bacteria": "(taxonomy_id:2) AND (reviewed:true)",
-    "fungi": "(taxonomy_id:4751) AND (reviewed:true)",
-    "all": "reviewed:true",
-}
+# Measured on 22 October 2026: 17,529 reviewed viral entries, 6M residues, indexed in about
+# five seconds. The exact-seed index is a dict of sets and its memory grows with residues.
+SCOPES = {"viral": "(taxonomy_id:10239) AND (reviewed:true)"}
 REFERENCE_QUERY = SCOPES["viral"]
 
 KMER = 5
@@ -460,12 +480,11 @@ DRUGGABLE = {"protease": 3, "proteinase": 3, "peptidase": 3,
              # ranked sixth, below the matrix protein, until these three lines existed -- the
              # same failure as "proteinase", one family later.
              "hemagglutinin": 2, "haemagglutinin": 2, "neuraminidase": 3,
-             # Bacterial and general enzyme classes. This is the THIRD time this table has
-             # been wrong in the same way -- "proteinase" demoted the main protease of
+             # General enzyme classes a virus can carry. This is the THIRD time this table
+             # has been wrong in the same way -- "proteinase" demoted the main protease of
              # SARS-CoV-2 to eleventh, "hemagglutinin" demoted influenza's antibody target to
-             # sixth, and the whole of it scored every bacterial drug target at zero: DNA
-             # gyrase, InhA and ATP synthase, which are what fluoroquinolones, isoniazid and
-             # bedaquiline bind.
+             # sixth, and a whole class of targets scored zero for being absent from one
+             # author's vocabulary rather than for being undruggable.
              #
              # The pattern is the finding and a fourth patch will not end it. A hand-written
              # keyword list encodes whichever domain its author had in mind, and the failure
@@ -475,10 +494,9 @@ DRUGGABLE = {"protease": 3, "proteinase": 3, "peptidase": 3,
              # ChEMBL and DrugBank both publish what has actually been drugged. Until that
              # exists here, this list is a known weak point and is documented as one rather
              # than presented as complete.
-             "gyrase": 3, "topoisomerase": 3, "reductase": 3, "synthase": 2, "synthetase": 2,
+             "topoisomerase": 3, "reductase": 3, "synthase": 2, "synthetase": 2,
              "dehydrogenase": 2, "kinase": 2, "ligase": 2, "isomerase": 1, "lyase": 1,
-             "transpeptidase": 3, "penicillin-binding": 3, "ribosomal protein": 2,
-             "elongation factor": 2, "atp synthase": 3, "carboxylase": 1, "oxidase": 1}
+             "carboxylase": 1, "oxidase": 1}
 
 # Keywords implying the protein is required for the virus to replicate at all. Binding a
 # dispensable protein cannot become a therapeutic, which is the same argument the dossier's
@@ -486,11 +504,8 @@ DRUGGABLE = {"protease": 3, "proteinase": 3, "peptidase": 3,
 ESSENTIAL = ("polymerase", "helicase", "protease", "proteinase", "peptidase", "capsid",
              "nucleoprotein", "spike", "fusion", "attachment", "entry into host",
              "hemagglutinin", "haemagglutinin", "neuraminidase",
-             # Bacterial essentials: replication, transcription, translation and cell-wall
-             # synthesis are the four processes every approved antibacterial class attacks.
-             "gyrase", "topoisomerase", "ribosomal protein", "elongation factor",
-             "transpeptidase", "penicillin-binding", "atp synthase", "replication initiator",
-             "dna polymerase", "rna polymerase", "cell wall", "peptidoglycan")
+             # Replication and transcription, named the several ways entries spell them.
+             "topoisomerase", "replication initiator", "dna polymerase", "rna polymerase")
 
 
 def homolog_records(accessions, chunk=25):
@@ -760,9 +775,9 @@ def enrich_with_surface(ranked, top=12):
     """Attach structure-derived surface markers to the highest-ranked candidates.
 
     Only the top few, because the accessibility calculation costs seconds per structure and a
-    bacterial genome produces more than a thousand identified genes. The name-derived score
-    orders the field cheaply; this re-scores the head of it with something that does not
-    depend on what the protein is called.
+    segmented genome decomposed into mature chains produces more candidates than are worth
+    measuring. The name-derived score orders the field cheaply; this re-scores the head of it
+    with something that does not depend on what the protein is called.
     """
     from .geometry import surface_for_accession
 
@@ -820,8 +835,9 @@ def rank_score(features):
     # structure and does not know what the protein is called.
     #
     # The keyword class remains the fallback rather than being deleted, because most
-    # candidates in a bacterial genome will never have a structure fetched for them and a
-    # ranker that scores them all identically is worse than one using a flawed proxy.
+    # candidates never have a structure fetched for them -- the surface stage reaches the head
+    # of the list and no further -- and a ranker that scores the rest identically is worse
+    # than one using a flawed proxy.
     # The surface markers are computed and reported and are deliberately NOT scored. Two
     # forms were measured against the ranking they were meant to improve and both made it
     # worse.
@@ -860,27 +876,21 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
     species holdout cannot speak to.
     """
     segments = genome_records(accession)
-    # A genome too large for six-frame calling is refused here rather than ranked wrongly.
-    # `orfs` returns every stretch between stops and the selection below keeps the longest,
-    # which is right for a 30 kb virus and silently wrong for a chromosome: Mycobacterium
-    # tuberculosis yields 15,787 six-frame ORFs of which 2,534 are at least as long as the
-    # target of isoniazid, so length puts the drug target past two thousandth and returns a
-    # confident shortlist containing none of the proteins anyone treats the disease with.
-    #
-    # The two pieces that fix it are in this module and have no caller: `candidate_genes`
-    # switches to a prokaryotic gene model above this size, and `prescreen` ranks a candidate
-    # on its hit's name rather than its length. Wiring them is a change to the selection step
-    # and to the reference index behind it, and `runs/cross_kingdom_intake.json` records that
-    # the transfer works once it is made. Until then this refuses, because a confident wrong
-    # ranking is the one output worse than none.
+    # A genome too large to be viral is refused here rather than ranked wrongly. This is
+    # antiviral work: the reference is reviewed viral proteins, `orfs` returns every stretch
+    # between stops, and the selection below keeps the longest. All three are right for a 30 kb
+    # virus and all three fail silently on anything larger -- nothing identifies against a
+    # viral reference, and length ranking on a chromosome returns a confident shortlist of
+    # whichever long reading frames happened to be longest. Refusing is the only honest
+    # answer, because a confident wrong ranking is the one output worse than none.
     total_nt = sum(len(part) for _, part in segments)
     if total_nt > VIRAL_GENOME_LIMIT_NT:
         raise ValueError(
-            f"{accession} is {total_nt:,} nt, over the {VIRAL_GENOME_LIMIT_NT:,} nt this "
-            f"function calls genes for. Six-frame ORFs ranked by length do not transfer to a "
-            f"genome this size: the candidate-selection step has to be replaced first "
-            f"(`candidate_genes` and `prescreen` in this module, neither wired), and "
-            f"runs/cross_kingdom_intake.json records what that changes.")
+            f"{accession} is {total_nt:,} nt, over the {VIRAL_GENOME_LIMIT_NT:,} nt limit "
+            f"this function treats as viral. The reference here is reviewed viral proteins "
+            f"and the gene calling is six-frame, so a genome this size would identify "
+            f"nothing and then be ranked by length anyway. This project is antiviral work "
+            f"and does not cover it.")
     found = []
     for index, (segment_header, segment) in enumerate(segments):
         for orf in orfs(segment, minimum_aa):
@@ -1512,75 +1522,14 @@ def membrane_topology(protein, window=19, threshold=1.6):
 
 
 # ---------------------------------------------------------------------------
-# Prokaryotic genomes, where six-frame calling and length ranking both fail.
+# The size beyond which this is not a viral genome.
 
-# Above this, a genome is not viral and the viral heuristics stop being safe. The largest
-# genome in the families this project models is around 200 kb; a small bacterial chromosome is
-# ten times that.
+# The largest genome in the families this project models is around 200 kb. Above this a genome
+# is something else, and every heuristic here -- six-frame calling, ranking by length, a
+# reviewed viral reference -- stops being safe at once. `run_intake` refuses rather than
+# ranking, because all three fail silently and a confident wrong shortlist is the one output
+# worse than none.
 VIRAL_GENOME_LIMIT_NT = 500_000
-
-
-def predict_genes(seq, minimum_aa=60):
-    """Protein-coding genes by prokaryotic gene prediction, not by reading frames.
-
-    Six-frame calling plus a length ranking is a viral heuristic and it does not transfer.
-    SARS-CoV-2 yields twenty-eight open reading frames and its real products are the longest
-    of them. Mycobacterium tuberculosis yields 15,787, of which 2,534 are at least as long as
-    InhA -- the target of isoniazid, at 269 residues -- so ranking by length puts the drug
-    target somewhere past two thousandth and returns a confident list containing none of the
-    proteins anyone treats the disease with.
-
-    Prodigal's model finds 4,085 genes in the same genome in two seconds, against an
-    annotation of roughly 4,000. The difference is not sensitivity, it is that a gene is
-    defined by coding statistics and ribosome-binding signals rather than by the absence of a
-    stop codon.
-    """
-    import pyrodigal
-
-    finder = pyrodigal.GeneFinder()
-    finder.train(seq)
-    found = []
-    for gene in finder.find_genes(seq):
-        protein = gene.translate().rstrip("*")
-        if len(protein) < minimum_aa:
-            continue
-        found.append({"strand": "+" if gene.strand > 0 else "-", "frame": 0,
-                      "nt_start": gene.begin, "length_aa": len(protein),
-                      "protein": protein, "called_by": "pyrodigal"})
-    return found
-
-
-def candidate_genes(segments, minimum_aa=MINIMUM_AA):
-    """Candidate proteins from a genome, by whichever caller the genome's size warrants.
-
-    Returned with the caller named on every record, because the two are not interchangeable
-    and a result that does not say which produced it cannot be compared with one that does.
-    """
-    total = sum(len(part) for _, part in segments)
-    prokaryotic = total > VIRAL_GENOME_LIMIT_NT
-    found = []
-    for index, (header, part) in enumerate(segments):
-        called = predict_genes(part, minimum_aa) if prokaryotic else orfs(part, minimum_aa)
-        for record in called:
-            found.append({**record, "segment": index, "segment_header": header,
-                          "called_by": record.get("called_by", "six-frame")})
-    found.sort(key=lambda record: -record["length_aa"])
-    return found, prokaryotic
-
-
-def prescreen(name):
-    """Target-class score from a hit's name alone, for ranking before any network call.
-
-    A bacterial genome yields thousands of identified genes and the full feature set costs a
-    UniProt lookup each. The hit's own name is already in hand from the reference, and it
-    carries the two things that matter most for whether a protein is worth pursuing, so it is
-    used to choose which few hundred get the expensive treatment. This is a prefilter and not
-    the ranking; anything it admits is scored properly afterwards.
-    """
-    lowered = (name or "").lower()
-    druggable = max([weight for term, weight in DRUGGABLE.items() if term in lowered] or [0])
-    essential = any(term in lowered for term in ESSENTIAL)
-    return druggable + (1 if essential else 0)
 
 
 # ---------------------------------------------------------------------------
@@ -1595,9 +1544,8 @@ def rank_enrichment(ranks, candidates):
     the list, and it would have read as a pass had the ranking been random.
 
     Computed exactly over all placements of k targets among n candidates, which is tractable
-    at viral scale, and by normal approximation when the binomial coefficient is too large --
-    a bacterial genome yields thousands of candidates and C(1662, 4) is about three hundred
-    billion.
+    at viral scale, and by normal approximation when the binomial coefficient is too large to
+    enumerate, which a few thousand candidates reaches.
 
     Returns the one-sided p, the mean percentile, and which method was used, because a p of
     0.07 on eight candidates and a p of 0.0004 on sixteen hundred are different kinds of
@@ -1661,7 +1609,7 @@ def rank_enrichment(ranks, candidates):
             # to every pathogen, never chosen per pathogen. Nipah's observed ranks of 1, 3 and
             # 4 give p = 0.071 against eight candidates and p = 0.006 against seventeen, with
             # nothing about the ranking changed -- so counting unidentified reading frames as
-            # candidates would rescue it and would be selecting the denominator that gives the
-            # wanted answer. The rule here is candidates the pipeline identified and ranked,
-            # and it is the same rule for the bacterium with its 1,662.
+            # candidates would rescue it and would be selecting the denominator that gives
+            # the wanted answer. The rule here is candidates the pipeline identified and
+            # ranked, and it is the same rule at every genome size.
             "denominator_rule": "candidates identified and ranked by the pipeline"}
