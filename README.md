@@ -212,7 +212,7 @@ return when the cell executes.
 | 2.1 | The result | Gain against shared positions, from the per-batch records |
 | 2.2 | Tested by intervention | Narrow the batch and the effect returns; remove sharing and it goes |
 | 2.3 | What a campaign supplies | The chemistry that is wired, and the fields a campaign fills |
-| 3 | What to say about this | The three claims worth defending |
+| 3 | One genome in, a ranked candidate list out | The whole chain on SARS-CoV-2, ending in a ranked shortlist |
 
 **Budget the cold number, not the cached one.** Registered costs run from 0.7 seconds for a fold
 to 94 seconds for the bioactivity lookup, but that 0.7 seconds is a cached result.
@@ -222,7 +222,9 @@ protease. Every target here is cold on first sight.
 
 Every record the notebook reads is committed, so the whole thing runs in a fresh clone with no
 rebuild step. The spinnable 3D view needs a browser and a
-network, so §1.2 draws a static structure beside it that renders everywhere.
+network, so §1.2 draws a static structure beside it that renders everywhere. The panel machinery
+those sections render through is in [notebooks/panels.py](notebooks/panels.py) rather than in a
+cell, so the page opens on the calls and their output instead of on their plumbing.
 
 ```bash
 pip install -r hpc_pilots/requirements.lock.txt   # the pipeline
