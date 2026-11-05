@@ -103,6 +103,22 @@ def main(argv=None):
     p.add_argument("--top", type=int, default=12, help="Longest ORFs to identify")
     p.add_argument("--no-decompose", action="store_true",
                    help="Rank whole ORFs without expanding polyproteins into mature chains")
+    p = sub.add_parser("chain",
+                       help="Run every stage of the onset arm on one genome and record "
+                            "what each stage handed the next")
+    p.add_argument("--accession", default="NC_045512.2",
+                   help="NCBI nucleotide accession for the genome")
+    p.add_argument("--top", type=int, default=12, help="Longest ORFs to identify")
+    p.add_argument("--replicates", type=int, default=5,
+                   help="Structures of one domain the surface median is taken over")
+    p.add_argument("--no-fold", action="store_true",
+                   help="Skip the folding stage, which is the one call that leaves this "
+                        "machine for a prediction rather than a record")
+    p = sub.add_parser("gate",
+                       help="Measure the macrocycle-amenability gate over every target "
+                            "declared in configs/structures.json")
+    p.add_argument("--replicates", type=int, default=5,
+                   help="Structures of one domain the patch median is taken over")
     p = sub.add_parser("structures",
                        help="Fetch per-target structural evidence with deposition dates")
     p.add_argument("--coverage", type=float, default=0.5,
@@ -240,6 +256,31 @@ def main(argv=None):
              "nearest_homolog": r.get("nearest_homolog"),
              "features": r.get("features")}
             for i, r in enumerate(rows[:args.top], 1) if r.get("identified")], indent=2))
+    elif args.command == "chain":
+        from .chain import run as run_chain
+        import json as _json
+        payload = run_chain(args.accession, top=args.top, replicates=args.replicates,
+                            fold=not args.no_fold)
+        # The coverage table only. The record on disk carries every row; what a reader wants
+        # at the terminal is whether each stage covered what it was handed, under each
+        # reference, because that is the question a silent subset never answers.
+        for case in payload["cases"]:
+            print(f"\n{case['case']}  ({case['seconds']:.0f} s)")
+            print(_json.dumps(case["coverage"], indent=2))
+    elif args.command == "gate":
+        from .chain import gate_table
+        import json as _json
+        payload = gate_table(replicates=args.replicates)
+        print(_json.dumps({k: payload[k] for k in
+                           ("targets_declared", "rows", "nothing_dropped", "measured",
+                            "unmeasured")}, indent=2))
+        for row in payload["targets"]:
+            if row["measured"]:
+                print(f"  {row['target']:28s} {row['patch_median']:>8.1f}  "
+                      f"spread {row['patch_spread']:>7.1f}  gate {row['gate']}")
+            else:
+                print(f"  {row['target']:28s}  not measured: "
+                      f"{row['unmeasured_because'][:70]}")
     elif args.command == "structures":
         from .structures_evidence import build
         import json as _json

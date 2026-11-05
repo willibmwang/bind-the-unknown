@@ -12,13 +12,75 @@ protein variants, which is why a SynX campaign is its natural next test.
 **The rest of this system gets you to a library worth asking that question about.** From a
 pathogen genome accession and nothing else, it ranks candidate targets, folds the one it picks,
 measures the surface a macrocyclic peptide would have to bind, and defines a focused
-thioether-macrocycle library over that surface. It runs today against public endpoints at NCBI,
-UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, 3D-Beacons, AlphaFold DB, ESMFold, RCSB and
-ChEMBL, and it has been run across three virus families and one bacterium.
+thioether-macrocycle library for that molecule class. The library definition does not yet read
+the measured surface, which the flowchart below draws as the dashed arrow it is. It runs today
+against public endpoints at NCBI, UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, 3D-Beacons,
+AlphaFold DB, ESMFold, RCSB and ChEMBL, and it has been run across three virus families and one
+bacterium.
 
 **Start with the notebook.** [notebooks/double_arm_mvp.ipynb](notebooks/double_arm_mvp.ipynb)
 runs the whole path in one sitting and computes every number it shows when the cell executes. It
 is committed with its outputs, so GitHub renders all of it without running anything.
+
+---
+
+## The two arms, and what flows between them
+
+**Arm 1 runs from a genome accession. Arm 2 answers one question about a library design. One
+number crosses between them.** Every count below is read from
+[runs/onset_chain.json](runs/onset_chain.json), written by `python -m hpc_pilots chain`, which
+runs all five stages on the SARS-CoV-2 reference genome against the live endpoints. §0.1 of the
+notebook draws the same record as a figure.
+
+```mermaid
+flowchart TB
+    G(["<b>one pathogen genome accession</b><br/>NC_045512.2 · 29,903 nt · no target name, no shortlist"])
+
+    subgraph ARM1 ["ARM 1 · the onset co-scientist · five stages, live against public endpoints"]
+      direction TB
+      S1["<b>1 · intake.rank_targets</b> · NCBI, UniProt<br/>out: 28 ORFs in six frames, 9 identified against 17,529 reviewed entries"]
+      S2["<b>2 · decompose + rank_score</b> · UniProt<br/>out: 21 mature chains, each scored<br/>3·conservation + 2·exposed + 1.5·essential + 0.5·structures + 0.8·druggable"]
+      S3["<b>3 · geometry.surface_markers</b> · PDBe, RCSB<br/>out: 21 rows for 21 chains, 20 measured and 1 refused with the reason<br/>largest exposed hydrophobic patch, median over 5 structures, with the range"]
+      S4["<b>4 · structures.folded</b> · ESM Atlas<br/>out: coordinates and per-residue confidence<br/>14 of 21 chains can supply their own sequence"]
+      S5["<b>5 · chemistry.library_spec</b> · local tables<br/>out: ClAc-D-Tyr, 4–8 randomised positions over 25 blocks<br/>158,945,703,125 sequences"]
+    end
+
+    subgraph ARM2 ["ARM 2 · will a model fitted on the first round be worth acting on?"]
+      S6["<b>6 · the go / no-go, before any assay</b><br/>out: candidates share the measured positions → +0.173 to +0.321<br/>candidates share none of them → +0.010 to +0.033"]
+    end
+
+    G -->|genome_accession| S1
+    S1 -->|"target_name · protein_accession · residue_ranges · protein_sequence<br/>all four facts the other nine tools are waiting on"| S2
+    S2 -->|"one accession and one residue range per chain"| S3
+    S2 -->|"one amino-acid sequence"| S4
+    S3 -. "nothing: library_spec reads no measured surface" .-> S5
+    S5 -->|"how many positions the library randomises<br/>the only number that crosses between the arms"| S6
+    S6 -. "measured members would return as round 1<br/>232 of 232 registry cells are empty" .-> S5
+```
+
+**The two dashed arrows are the point of drawing this.** `chemistry.library_spec` takes an
+initiator, a length range and a set of elongator classes. It takes no patch area, no accession
+and no residue range, so the library it defines is the same library whatever stage 3 measured:
+"a focused library over that surface" states an intent and not a data path. And the campaign
+data that would feed arm 2's answer back into the next design does not exist yet.
+
+**The chain is recorded twice, because the reference changes what every later stage receives.**
+Identified through its own curated entries, the later stages work — the residue ranges are the
+pathogen's own, so the surface stage measures 20 of 21 chains and the folding stage cuts 14 of
+21 out of the genome's own translation, reproducing the committed main-protease fold byte for
+byte — but conservation is identity to the nearest curated relative, the nearest relative is
+the protein itself, and the heaviest term in the rubric scores every candidate alike. With
+SARS-CoV-2 deleted from the reference, which is what every validation run below uses, the
+ranking separates and the later stages lose most of their input: 9 of 20 chains keep a
+measurable surface and 4 of 20 can supply a sequence to fold. Neither case alone is the
+system.
+
+**No chain is dropped between stages in either case**, which was not true until this record
+existed. `intake.enrich_with_surface` had no caller anywhere in the package, so the only
+surfaces ever measured were six named by hand, and SARS-CoV-2's RNA-directed RNA polymerase —
+fifth of the ranked candidates, with an approved antiviral against it — was never asked about.
+It measures 486.6 square angstroms with a spread of 1319.8 across five structures of the same
+domain, and gates `no` on localisation: the polymerase is inside the cell.
 
 ---
 
@@ -49,10 +111,13 @@ the main protease's 415.2. **That ordering is the reverse of a conventional smal
 druggability score, and the right way round for macrocycles**, which bury a few hundred square
 angstroms flat rather than reaching into a pocket.
 
-**A focused library definition over that surface.** `chemistry.library_spec` returns a
+**A focused library definition for that molecule class.** `chemistry.library_spec` returns a
 chloroacetyl initiator, `ClAc-D-Tyr`, a randomised region of 4 to 8 positions drawn from 25
 building blocks, and a cysteine that closes the ring through a spontaneous thioether. The
-definition allows 158,945,703,125 distinct sequences.
+definition allows 158,945,703,125 distinct sequences. It takes an initiator, a length range
+and a set of elongator classes, and nothing the surface stage measured, so the library is the
+same library whatever target it was reached from. That is the one break in the chain that is a
+design gap rather than a measurement limit.
 
 **A go/no-go on whether modelling will help for that library, before any assay.** That is the
 result in the opening paragraph, measured in [what has been measured](#what-has-been-measured).
@@ -122,7 +187,8 @@ that size and is recorded as not established rather than as a pass or a failure.
 | `identification_cascade` | Past that point, conserved enzymes still come back through distant matches. Family-specific surface proteins have no distant relatives, so they are recognised from their own sequence instead, as a surface protein rather than by name. Those are the antibody targets. |
 | `cross_kingdom_intake` | Genome to targets transfers to a bacterium once the candidate-selection step is replaced. All four first-line tuberculosis drug target complexes rank inside the top 92 of 4,085 predicted genes. |
 | `surface_markers` | Scoring the largest unbroken exposed greasy area puts the spike receptor-binding domain above the main protease at every contact cutoff measured, so a target can be scored from structure without penalising the interfaces macrocycles exist to bind. |
-| `amenability_gate` | Over five structures of the same domain that area moves by up to 496.2 square angstroms, against one macrocycle footprint of 600, so the gate reports the range with the median inside it. |
+| `amenability_gate` | Over five structures of the same domain the patch moves by up to 1625 square angstroms, against one macrocycle footprint of 600, so the gate reports the range with the median inside it. Generated from `configs/structures.json`, so all 12 declared targets get a row: 11 measured, 1 refused with the reason. |
+| `onset_chain` | One genome in, and what each of the five stages handed the next, under both references. The surface stage emits one row per ranked chain, measured or refused, in both. |
 
 ### The result
 
@@ -203,12 +269,15 @@ return when the cell executes.
 | § | Section | What you see |
 | --- | --- | --- |
 | 0 | Setup and data availability | Which records this machine can see, before anything reads one |
+| 0.1 | The whole workflow on one page | The two arms as a flowchart, drawn from one run of the chain |
 | 1.1 | Reachability, not relevance | Which tools you can actually run from a bare accession, ranked live |
 | 1.2 | Watching a tool run | Calls dispatched live, each as an instrument readout, with a structure |
 | 1.3 | What the recorded runs found | Each recorded experiment, reporting its own answer field |
 | 1.4 | Genome to ranked targets | Recovered countermeasure targets, three viruses and one bacterium |
+| 1.4a | Every candidate's score, term by term | The five stated weights, and what each protein earned on each |
 | 1.5 | The identification cliff | Where the pipeline stops rather than degrades |
 | 1.6 | The surface a macrocycle would bind | Patch medians with the spread across replicate structures |
+| 1.6a | Every chain, and nothing dropped | One surface row per ranked chain, measured or refused with the reason |
 | 2.1 | The result | Gain against shared positions, from the per-batch records |
 | 2.2 | Tested by intervention | Narrow the batch and the effect returns; remove sharing and it goes |
 | 2.3 | What a campaign supplies | The chemistry that is wired, and the fields a campaign fills |
@@ -256,6 +325,8 @@ python -m hpc_pilots prepare                              # GB1 + ATLAS selectio
 python -m hpc_pilots prepare-target --landscape mpro      # one pathogen dataset
 python -m hpc_pilots target --landscape mpro --pool 0 --policy ucb --delay 3
 python -m hpc_pilots targets                              # build the evidence packets
+python -m hpc_pilots chain                                # one genome through every stage, both references
+python -m hpc_pilots gate                                 # the amenability gate over every declared target
 python -m hpc_pilots chemistry                            # build the block registry
 python -m hpc_pilots emergency --family coronaviridae --policy agent
 python -m hpc_pilots calibration

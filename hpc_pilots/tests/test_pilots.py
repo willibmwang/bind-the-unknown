@@ -4681,3 +4681,101 @@ def test_a_structural_lane_stays_open_for_a_target_identification_cannot_name():
     # The fact itself has to come from identification, or none of the above is reachable.
     assert "protein_sequence" in selector.REQUIREMENTS["intake.rank_targets"].provides
     assert "protein_sequence" in selector.FACTS
+
+
+def test_no_ranked_candidate_loses_its_surface_row():
+    """A stage may refuse a candidate. It may not quietly cover fewer than it was handed.
+
+    This is the regression for a defect that survived a year because its symptom was an
+    absence. `intake.enrich_with_surface` had no caller anywhere in the package, so the only
+    surfaces ever measured were the six named by hand in the script that wrote the gate
+    record. SARS-CoV-2's RNA-directed RNA polymerase ranks fifth of the pipeline's own
+    candidates for the genome this project leads with, is the target of an approved antiviral,
+    and had no surface measurement -- not refused, not reported as unmeasurable, never asked
+    about. From outside, a stage covering a subset of its input is indistinguishable from a
+    stage covering all of it.
+
+    So the invariant is counted, not described: one surface row per ranked chain, in every
+    case the chain was run under. A row may say it could not be measured, and must then say
+    why, because "no deposited chain covers this range" is a claim about what has been solved
+    and "the patch is too small" is a claim about the protein.
+    """
+    import json
+
+    from hpc_pilots.common import ROOT
+
+    path = ROOT / "runs/onset_chain.json"
+    if not path.exists():
+        pytest.skip("onset chain artifact absent; rebuild with `python -m hpc_pilots chain`")
+    payload = json.loads(path.read_text())
+
+    assert payload["cases"], "the chain records at least one reference"
+    for case in payload["cases"]:
+        stages = {s["stage"]: s for s in case["stages"]}
+        handed = stages[3]["input"]["candidates_in"]
+        rows = case["surfaces"]
+        assert len(rows) == handed == len(case["scores"]), (
+            case["case"], len(rows), handed, len(case["scores"]))
+        assert stages[3]["output"]["nothing_dropped"] is True, case["case"]
+        assert case["coverage"]["surface_covers_every_chain"] is True, case["case"]
+        for row in rows:
+            if not row["measured"]:
+                assert row["unmeasured_because"], (case["case"], row["target"])
+
+    # And the specific target whose absence this exists to prevent, by name.
+    first = payload["cases"][0]
+    named = {row["target"] for row in first["surfaces"]}
+    assert any("RNA-directed RNA polymerase" in name for name in named), sorted(named)
+
+
+def test_the_gate_covers_every_target_its_config_declares():
+    """The gate's input is the config, so a target missing from the gate is missing from it.
+
+    The point is not that twelve is the right number. It is that the number is not chosen in
+    a script any more: adding a target to `configs/structures.json` adds a gate row, and a
+    target with no row is a target with no config entry, where the absence is visible to
+    anyone reading the file.
+    """
+    import json
+
+    from hpc_pilots.common import ROOT
+    from hpc_pilots.structures_evidence import config
+
+    path = ROOT / "runs/amenability_gate.json"
+    if not path.exists():
+        pytest.skip("gate artifact absent; rebuild with `python -m hpc_pilots gate`")
+    payload = json.loads(path.read_text())
+    declared = config()["targets"]
+
+    assert payload["rows"] == len(payload["targets"]) == payload["targets_declared"]
+    assert payload["nothing_dropped"] is True
+    assert {row["target"] for row in payload["targets"]} == set(declared), (
+        sorted({row["target"] for row in payload["targets"]} ^ set(declared)))
+    for row in payload["targets"]:
+        assert row["measured"] or row["unmeasured_because"], row["target"]
+        # Every label names the agent it is a proxy for, so a reader can check it.
+        assert declared[row["target"]]["clinical_modality"]
+        assert declared[row["target"]]["modality_agent"]
+
+    # RdRp is the row this test was written for, and it carries a verdict rather than a gap.
+    rdrp = next(row for row in payload["targets"] if row["target"] == "RdRp (nsp12)")
+    assert rdrp["measured"], rdrp
+    assert rdrp["gate"] in ("yes", "borderline", "no")
+
+
+def test_a_mature_chain_is_not_folded_at_another_species_coordinates():
+    """The slice has to be the right residues, not merely the right length.
+
+    Mature-chain boundaries are annotated on the homolog, and a holdout makes the homolog a
+    different species. SARS-CoV's main protease starts at 3241 and SARS-CoV-2's at 3264, so
+    slicing one genome's translation at the other's coordinates yields 306 residues -- the
+    correct length -- beginning 23 residues into the wrong window. A length check alone
+    accepts that and folds a shifted fragment under the target's name.
+    """
+    from hpc_pilots.chain import _ungapped_identity
+
+    assert _ungapped_identity("MKTAYIAK", "MKTAYIAK") == 1.0
+    assert _ungapped_identity("MKTAYIAK", "AYIAKQQQ") < 0.5
+    # Different lengths and absent sides are None, never a number a threshold could pass.
+    assert _ungapped_identity("MKTA", "MKTAY") is None
+    assert _ungapped_identity("MKTA", None) is None

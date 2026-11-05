@@ -1,22 +1,32 @@
 {
-  "experiment": "amenability-gate-v2",
+  "experiment": "amenability-gate-v3",
   "status": "complete",
-  "question": "With localisation resolved per chain and the patch measured over replicates, does the macrocycle-amenability gate become usable?",
-  "answer": "It becomes honest rather than confident. Both defects are fixed and the fix to the second shows the gate cannot be a hard threshold: the patch moves by up to 496 square angstroms across structures of the same domain, which is comparable to the 600 threshold, so most real targets fall in the borderline band and that is the correct report rather than a failure of the gate.",
-  "fix_1_per_chain_localisation": {
-    "problem": "Subcellular location was read from the entry. For a polyprotein the entry is the polyprotein, so SARS-CoV-2's cytosolic main protease read as surface-exposed through nsp3, nsp4 and nsp6, which genuinely are membrane proteins.",
-    "fix": "UniProt scopes these per molecule; the replicase carries fourteen separate SUBCELLULAR LOCATION comments. They are now matched to the mature chain.",
-    "second_finding": "An `any` over locations was also wrong. The main protease is annotated in four compartments including Host extracellular space -- a real annotation -- so any single exposed location made an intracellular drug target read as a surface protein. A majority rule gives 0.25 and False."
+  "question": "Over every target the structures config declares -- not a hand-picked subset -- does the macrocycle-amenability gate separate anything?",
+  "answer": "It separates clear refusals from everything else, and the reason it cannot do more is now measured on more targets rather than fewer. The patch moves by up to 1625 square angstroms across structures of one domain (Spike S2 stem-helix), against a footprint of 600, so most rows are borderline and that is the honest report. Localisation, which the gate reads before area, decides all 6 refusals. 3 of them would pass on patch area alone: Mpro (nsp5), PA-PB1 interface, nsp13 helicase.",
+  "fix_3_nothing_dropped": {
+    "problem": "v2 measured six targets named in a script. SARS-CoV-2's RdRp was not one of them while ranking fifth of the pipeline's own candidates for the genome this project leads with, and the record did not say it was absent. An unasked target and a refused target looked the same.",
+    "fix": "The gate is generated from `configs/structures.json`, every declared target gets a row, and an unmeasurable one carries the reason. `targets_declared` equals `rows`.",
+    "finding": "RdRp measures a patch of 486.6 square angstroms over 5 structures of the same domain, with a spread of 1319.8 -- the 2nd widest spread of the 11 measured, behind Spike S2 stem-helix, and wider than the 600 square-angstrom footprint the gate thresholds on. Its gate verdict is no, decided on localisation: the polymerase is inside the cell. That is a usable answer and it was not available before, which is the whole cost of the omission."
   },
-  "fix_2_replicate_structures": {
-    "problem": "One structure is one sample of an ensemble. The main protease measured 343 square angstroms through one homolog and 825 through another.",
-    "fix": "Median over up to five structures of the same domain, with the range reported.",
-    "finding": "The spread is large enough to matter: 200 square angstroms on the main protease, 496 on the spike receptor-binding domain whose range of 592 to 1088 straddles the threshold. The gate now reports borderline whenever the measured range crosses the cut, rather than asserting a side of it."
-  },
+  "footprint_a2": 600.0,
+  "targets_declared": 12,
+  "rows": 12,
+  "nothing_dropped": true,
+  "measured": 11,
+  "unmeasured": 1,
   "targets": [
     {
-      "target": "SARS-CoV-2 Mpro",
+      "target": "Mpro (nsp5)",
+      "accession": "P0DTD1",
       "clinical_modality": "small molecule",
+      "modality_agent": "nirmatrelvir (Paxlovid), approved",
+      "measured": true,
+      "unmeasured_because": null,
+      "interval": {
+        "start": 3264,
+        "end": 3569
+      },
+      "interval_is_one_of": 1,
       "location_scope": "chain",
       "locations": [
         "Host cytoplasm",
@@ -33,17 +43,38 @@
       ],
       "patch_spread": 199.5,
       "structures_measured": 5,
-      "gate": "no"
+      "structures_used": [
+        "7gef:A",
+        "7k3t:A",
+        "7gbe:A",
+        "7geh:A",
+        "6yb7:A"
+      ],
+      "available_from": "2020-03-16",
+      "gate": "no",
+      "gate_on_area_alone": "yes"
     },
     {
-      "target": "SARS-CoV-2 PLpro",
+      "target": "PLpro (nsp3)",
+      "accession": "P0DTD1",
       "clinical_modality": "none approved",
-      "location_scope": "chain",
+      "modality_agent": "no approved agent against this domain",
+      "measured": true,
+      "unmeasured_because": null,
+      "interval": {
+        "start": 1634,
+        "end": 1898
+      },
+      "interval_is_one_of": 1,
+      "location_scope": "entry union over chains",
       "locations": [
+        "Host cytoplasm",
+        "Host cytoplasm",
+        "Host endosome",
         "Host endoplasmic reticulum membrane"
       ],
       "exposed": false,
-      "exposed_fraction": 0.0,
+      "exposed_fraction": 0.034,
       "patch_median": 404.9,
       "patch_range": [
         358.5,
@@ -51,11 +82,106 @@
       ],
       "patch_spread": 51.1,
       "structures_measured": 5,
-      "gate": "no"
+      "structures_used": [
+        "7uv5:A",
+        "8fwn:A",
+        "9f7r:A",
+        "6wrh:A",
+        "9f7u:A"
+      ],
+      "available_from": "2020-04-29",
+      "gate": "no",
+      "gate_on_area_alone": "borderline"
     },
     {
-      "target": "SARS-CoV-2 nsp13",
+      "target": "nsp10/nsp16 interface",
+      "accession": "P0DTD1",
       "clinical_modality": "none approved",
+      "modality_agent": "no approved agent against this interface",
+      "measured": true,
+      "unmeasured_because": null,
+      "interval": {
+        "start": 4254,
+        "end": 4392
+      },
+      "interval_is_one_of": 2,
+      "location_scope": "chain",
+      "locations": [
+        "Host cytoplasm, host perinuclear region",
+        "Host cytoplasm",
+        "Host endoplasmic reticulum"
+      ],
+      "exposed": false,
+      "exposed_fraction": 0.0,
+      "patch_median": 563.1,
+      "patch_range": [
+        279.7,
+        958.8
+      ],
+      "patch_spread": 679.1,
+      "structures_measured": 5,
+      "structures_used": [
+        "9fzk:A",
+        "6zpe:A",
+        "7mc5:M",
+        "7oru:A",
+        "8ov1:B"
+      ],
+      "available_from": "2020-07-08",
+      "gate": "no",
+      "gate_on_area_alone": "borderline"
+    },
+    {
+      "target": "RdRp (nsp12)",
+      "accession": "P0DTD1",
+      "clinical_modality": "small molecule",
+      "modality_agent": "remdesivir, approved; molnupiravir, authorised",
+      "measured": true,
+      "unmeasured_because": null,
+      "interval": {
+        "start": 4393,
+        "end": 5324
+      },
+      "interval_is_one_of": 1,
+      "location_scope": "entry union over chains",
+      "locations": [
+        "Host cytoplasm",
+        "Host cytoplasm",
+        "Host endosome",
+        "Host endoplasmic reticulum membrane"
+      ],
+      "exposed": false,
+      "exposed_fraction": 0.034,
+      "patch_median": 486.6,
+      "patch_range": [
+        362.9,
+        1682.7
+      ],
+      "patch_spread": 1319.8,
+      "structures_measured": 5,
+      "structures_used": [
+        "7aap:A",
+        "7bv2:A",
+        "7d4f:A",
+        "9dj8:A",
+        "7doi:A"
+      ],
+      "available_from": "2020-04-09",
+      "gate": "no",
+      "gate_on_area_alone": "borderline"
+    },
+    {
+      "target": "nsp13 helicase",
+      "accession": "P0DTD1",
+      "clinical_modality": "none approved",
+      "modality_agent": "no approved agent against this chain",
+      "measured": true,
+      "unmeasured_because": null,
+      "interval": {
+        "start": 5325,
+        "end": 5925
+      },
+      "interval_is_one_of": 1,
       "location_scope": "chain",
       "locations": [
         "Host endoplasmic reticulum-Golgi intermediate compartment"
@@ -69,11 +195,29 @@
       ],
       "patch_spread": 304.9,
       "structures_measured": 5,
-      "gate": "no"
+      "structures_used": [
+        "5rl9:A",
+        "5rl9:B",
+        "5rm2:A",
+        "5rm2:B",
+        "9i51:A"
+      ],
+      "available_from": "2020-09-16",
+      "gate": "no",
+      "gate_on_area_alone": "yes"
     },
     {
-      "target": "SARS-CoV-2 Spike RBD",
+      "target": "Spike RBD",
+      "accession": "P0DTC2",
       "clinical_modality": "antibody",
+      "modality_agent": "sotrovimab, tixagevimab-cilgavimab, both authorised",
+      "measured": true,
+      "unmeasured_because": null,
+      "interval": {
+        "start": 319,
+        "end": 541
+      },
+      "interval_is_one_of": 1,
       "location_scope": "entry",
       "locations": [
         "Virion membrane",
@@ -89,11 +233,155 @@
       ],
       "patch_spread": 496.2,
       "structures_measured": 5,
-      "gate": "borderline"
+      "structures_used": [
+        "7z8o:A",
+        "9fc2:A",
+        "7eam:A",
+        "7eam:B",
+        "7sd5:A"
+      ],
+      "available_from": "2021-03-07",
+      "gate": "borderline",
+      "gate_on_area_alone": "borderline"
     },
     {
-      "target": "Nipah G",
+      "target": "Spike S2 stem-helix",
+      "accession": "P0DTC2",
+      "clinical_modality": "none approved",
+      "modality_agent": "S2P6 and CC40.8 are research antibodies",
+      "measured": true,
+      "unmeasured_because": null,
+      "interval": {
+        "start": 1140,
+        "end": 1161
+      },
+      "interval_is_one_of": 1,
+      "location_scope": "entry",
+      "locations": [
+        "Virion membrane",
+        "Host endoplasmic reticulum-Golgi intermediate compartment membrane",
+        "Host cell membrane"
+      ],
+      "exposed": true,
+      "exposed_fraction": 0.667,
+      "patch_median": 1738.4,
+      "patch_range": [
+        224.8,
+        1849.6
+      ],
+      "patch_spread": 1624.8,
+      "structures_measured": 5,
+      "structures_used": [
+        "7y9n:A",
+        "7cot:A",
+        "7cot:B",
+        "7cot:C",
+        "8dlw:A"
+      ],
+      "available_from": "2020-08-05",
+      "gate": "borderline",
+      "gate_on_area_alone": "borderline"
+    },
+    {
+      "target": "HA stem (HA2 helix A)",
+      "accession": "P03452",
+      "clinical_modality": "none approved",
+      "modality_agent": "stem-directed antibodies are in trials only",
+      "measured": true,
+      "unmeasured_because": null,
+      "interval": {
+        "start": 418,
+        "end": 475
+      },
+      "interval_is_one_of": 1,
+      "location_scope": "entry",
+      "locations": [
+        "Virion membrane",
+        "Host apical cell membrane"
+      ],
+      "exposed": true,
+      "exposed_fraction": 0.5,
+      "patch_median": 301.8,
+      "patch_range": [
+        256.5,
+        1130.8
+      ],
+      "patch_spread": 874.3,
+      "structures_measured": 5,
+      "structures_used": [
+        "5vli:B",
+        "9phs:B",
+        "9phs:D",
+        "9phs:F",
+        "1rvx:B"
+      ],
+      "available_from": "2003-12-15",
+      "gate": "borderline",
+      "gate_on_area_alone": "borderline"
+    },
+    {
+      "target": "NA catalytic site",
+      "accession": "P03470",
+      "clinical_modality": "small molecule",
+      "modality_agent": "oseltamivir and zanamivir, approved",
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to P03470 at all, so the range cannot be covered by anything. The protein may be well solved under another accession; this entry is not it.",
+      "interval": {
+        "start": 1,
+        "end": 453
+      },
+      "interval_is_one_of": 1,
+      "chains_mapped_to_accession": 0
+    },
+    {
+      "target": "PA-PB1 interface",
+      "accession": "P15659",
+      "clinical_modality": "none approved",
+      "modality_agent": "baloxavir binds the PA endonuclease domain, not this interface",
+      "measured": true,
+      "unmeasured_because": null,
+      "interval": {
+        "start": 239,
+        "end": 716
+      },
+      "interval_is_one_of": 1,
+      "location_scope": "entry",
+      "locations": [
+        "Host cytoplasm",
+        "Host nucleus"
+      ],
+      "exposed": false,
+      "exposed_fraction": 0.0,
+      "patch_median": 686.9,
+      "patch_range": [
+        683.8,
+        870.7
+      ],
+      "patch_spread": 186.9,
+      "structures_measured": 5,
+      "structures_used": [
+        "4iuj:A",
+        "5ieq:A",
+        "5if5:A",
+        "5if8:A",
+        "5if2:A"
+      ],
+      "available_from": "2013-01-21",
+      "gate": "no",
+      "gate_on_area_alone": "yes"
+    },
+    {
+      "target": "G attachment glycoprotein",
+      "accession": "Q9IH62",
       "clinical_modality": "antibody",
+      "modality_agent": "m102.4, compassionate use only",
+      "measured": true,
+      "unmeasured_because": null,
+      "interval": {
+        "start": 1,
+        "end": 602
+      },
+      "interval_is_one_of": 1,
       "location_scope": "entry",
       "locations": [
         "Virion membrane",
@@ -108,11 +396,29 @@
       ],
       "patch_spread": 147.9,
       "structures_measured": 5,
-      "gate": "borderline"
+      "structures_used": [
+        "2vsm:A",
+        "2vwd:A",
+        "2vwd:B",
+        "3d11:A",
+        "8ja5:A"
+      ],
+      "available_from": "2008-04-25",
+      "gate": "borderline",
+      "gate_on_area_alone": "borderline"
     },
     {
-      "target": "Nipah F",
+      "target": "F fusion glycoprotein",
+      "accession": "Q9IH63",
       "clinical_modality": "none approved",
+      "modality_agent": "no approved agent against Nipah F",
+      "measured": true,
+      "unmeasured_because": null,
+      "interval": {
+        "start": 27,
+        "end": 546
+      },
+      "interval_is_one_of": 1,
       "location_scope": "entry",
       "locations": [
         "Virion membrane",
@@ -120,29 +426,39 @@
       ],
       "exposed": true,
       "exposed_fraction": 1.0,
-      "patch_median": 442.7,
+      "patch_median": 362.6,
       "patch_range": [
-        287.3,
-        647.3
+        357.2,
+        381.5
       ],
-      "patch_spread": 360.0,
+      "patch_spread": 24.3,
       "structures_measured": 5,
-      "gate": "borderline"
+      "structures_used": [
+        "9ua9:A",
+        "9ua9:B",
+        "9ua9:C",
+        "9uaa:A",
+        "9uaa:B"
+      ],
+      "available_from": "2025-03-31",
+      "gate": "borderline",
+      "gate_on_area_alone": "borderline"
     }
   ],
   "limitations": [
-    "Six targets, chosen to span the contrast rather than sampled.",
+    "Twelve targets, declared in a config to span the modality contrast rather than sampled from anything.",
     "The borderline band is wide once measurement spread is propagated, so the gate separates clear negatives from everything else rather than sorting the middle.",
-    "No validation against measured macrocycle binding exists, because no such labelled set exists. Clinical modality is a proxy and a loose one."
+    "No validation against measured macrocycle binding exists, because no such labelled set exists. Clinical modality is a proxy and a loose one, which is why each label names its agent.",
+    "A target whose declared ranges are two -- the nsp10/nsp16 interface -- is measured on the first, so its row is about one chain and not the interface."
   ],
   "provenance": {
-    "host": "MWPF4GD0LT.yu.yale.edu",
+    "host": "Williams-MacBook-Pro-260.local",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "8015567d96d4986ebc6b304fe823b1c23d5151ac",
+    "git_commit": "c6c83756eab090a207f7a8220b2db4a505487242",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-10-23T00:03:29.941864+00:00"
+    "recorded_at_utc": "2026-11-05T19:40:02.607856+00:00"
   }
 }

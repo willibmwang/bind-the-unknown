@@ -666,3 +666,243 @@ def plan_table():
         if d["missing_dependencies"]:
             print(f"  {'':<27}needs {', '.join(d['missing_dependencies'])}, "
                   "absent in this kernel")
+
+
+
+# ----------------------------------------------------------------- the workflow flowchart
+# Three hues, and nothing is identified by hue alone: every node carries its own words and
+# every edge its own label, so the diagram survives being printed in grey. The trio was
+# checked rather than chosen -- OKLab dE under deuteran, protan and tritan simulation, worst
+# adjacent pair 9.2, normal-vision floor 24.0, all three inside the lightness band and over
+# the chroma floor -- which is the discipline `PLDDT_BANDS` above is already under.
+ARM1, ARM2, BREAK = "#2a78d6", "#1baf7a", "#eb6834"
+PALE1, PALE2, PALEB = "#eaf2fc", "#e7f7f0", "#fdeee6"
+
+
+class _Flow:
+    """A top-down cursor that computes every height from the text it is given.
+
+    Laying a flowchart out by hand in axes fractions is how the first version of this
+    collided its own labels: a box whose height is guessed does not grow when its body gains
+    a line, and every number in this figure comes out of a record that is free to change. So
+    nothing here is positioned absolutely. A node's height is its line count times the line
+    height for its font size, an edge's height is its label's line count, and the cursor walks
+    down. Re-running with a longer label moves the figure rather than breaking it.
+    """
+
+    def __init__(self, ax, axes_height_inches, left, width, gutter, top):
+        self.ax, self.h_in = ax, axes_height_inches
+        self.left, self.width, self.gutter = left, width, gutter
+        self.y = top
+
+    def line(self, size, spacing=1.45):
+        """One text line, as a fraction of the axes height."""
+        return size * spacing / 72.0 / self.h_in
+
+    def node(self, title, body, edge, face, x, width, title_size=10.5, body_size=9.0,
+             pad=0.007):
+        from matplotlib.patches import FancyBboxPatch
+
+        lines = body.count("\n") + 1 if body else 0
+        th, bh = self.line(title_size, 1.3), self.line(body_size)
+        height = pad * 2 + th + (0.004 + lines * bh if lines else 0)
+        bottom = self.y - height
+        self.ax.add_patch(FancyBboxPatch(
+            (x, bottom), width, height,
+            boxstyle="round,pad=0.003,rounding_size=0.010",
+            linewidth=1.4, edgecolor=edge, facecolor=face, zorder=2))
+        self.ax.text(x + 0.012, self.y - pad, title, fontsize=title_size, color=edge,
+                     fontweight="bold", va="top", ha="left", zorder=3)
+        if body:
+            self.ax.text(x + 0.012, self.y - pad - th - 0.004, body, fontsize=body_size,
+                         color=INK, va="top", ha="left", linespacing=1.45, zorder=3)
+        # The cursor moves by the height this node actually took. Two callers used to
+        # subtract a height they recomputed by hand from the same font sizes, which is a
+        # second copy of this arithmetic that a longer label silently invalidates.
+        self.y = bottom
+        return bottom, height
+
+    def row(self, title, body, out, edge, face, out_face, **kw):
+        """A stage and its output, side by side, with the arrow between them."""
+        top = self.y
+        b1, h1 = self.node(title, body, edge, face, self.left, self.width, **kw)
+        self.y = top                      # the two nodes in a row start at the same height
+        b2, h2 = self.node("out", out, edge, out_face, self.left + self.width + self.gutter,
+                           self.width, title_size=8.5, **kw)
+        mid = top - min(h1, h2) / 2
+        self.ax.annotate("", xy=(self.left + self.width + self.gutter, mid),
+                         xytext=(self.left + self.width, mid),
+                         arrowprops=dict(arrowstyle="-|>,head_width=0.2,head_length=0.4",
+                                         linewidth=1.3, color=edge, shrinkA=2, shrinkB=2),
+                         zorder=1)
+        self.y = top - max(h1, h2)
+        return self.y
+
+    def edge(self, label, colour=INK2, dashed=False, size=8.5, pad=0.010):
+        """A labelled vertical arrow. The gap is as tall as the label needs."""
+        lines = label.count("\n") + 1 if label else 0
+        height = pad * 2 + lines * self.line(size)
+        x = self.left + self.width / 2
+        self.ax.annotate("", xy=(x, self.y - height), xytext=(x, self.y),
+                         arrowprops=dict(arrowstyle="-|>,head_width=0.22,head_length=0.45",
+                                         linewidth=1.6, color=colour, shrinkA=0, shrinkB=0,
+                                         linestyle=(0, (4, 3)) if dashed else "solid"),
+                         zorder=1)
+        if label:
+            self.ax.text(x + 0.014, self.y - height / 2, label, fontsize=size, color=colour,
+                         va="center", ha="left", linespacing=1.45, style="italic", zorder=3)
+        self.y -= height
+        return self.y
+
+
+def _band(ax, y_top, y_bottom, title, subtitle, colour, face, right=1.0):
+    """The arm label in the left margin, with its rows tinted behind them."""
+    height = y_top - y_bottom
+    ax.add_patch(plt.Rectangle((-0.035, y_bottom), right + 0.035, height, facecolor=face,
+                               edgecolor="none", zorder=0))
+    ax.add_patch(plt.Rectangle((-0.035, y_bottom), 0.012, height, facecolor=colour,
+                               edgecolor="none", zorder=1))
+    ax.text(-0.052, y_top - 0.012, f"{title}\n{subtitle}", fontsize=10.5, color=colour,
+            fontweight="bold", va="top", ha="right", linespacing=1.7, zorder=3)
+
+
+def workflow_figure(chain, case=0, gain_shared="+0.173 to +0.321",
+                    gain_unshared="+0.010 to +0.033", height=14.6):
+    """The two arms as a flowchart: what each stage takes, what it returns, what it hands on.
+
+    Every count is read out of the chain record passed in, so the picture cannot drift from
+    the run. The three things it is drawn to make visible, which a list of tools does not:
+
+    * the single bottleneck -- one stage supplies all four facts the other nine tools wait on;
+    * the stage that used to cover less than its input, now exhaustive by construction;
+    * the two arrows that are *not* there, drawn dashed in a third hue rather than omitted.
+
+    `gain_shared` and `gain_unshared` come from the per-batch summaries section 2.1 reads, and
+    are passed in so the figure and the table quote the same source.
+    """
+    # The record holds one entry per reference the genome was identified against, because
+    # which reference is used changes what every later stage receives. `case` picks which one
+    # the figure draws, and the subtitle names it, so a reader is never looking at a coverage
+    # number without the setting that produced it.
+    run = chain["cases"][case] if "cases" in chain else chain
+    stages = {s["stage"]: s for s in run["stages"]}
+    out = {n: stages[n]["output"] for n in stages}
+    surf, lib = out[3], out[5]
+    surf = {**surf, **stages[3]['input']}   # the stage's own in and out, one dict
+
+    fig = plt.figure(figsize=(13.6, height), dpi=100, facecolor=SURFACE)
+    ax = fig.add_axes([0.105, 0.008, 0.885, 0.942])
+    ax.set_xlim(-0.30, 1.03)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+    flow = _Flow(ax, axes_height_inches=height * 0.942, left=0.0, width=0.47, gutter=0.06,
+                 top=0.995)
+
+    fig.text(0.105, 0.992, "One genome in, and what each stage hands the next",
+             fontsize=16, color=INK, fontweight="bold", ha="left", va="top")
+    fig.text(0.105, 0.972,
+             f"{run['genome_accession']}  ·  {run['case']}  ·  every count is read from "
+             "runs/onset_chain.json, written by  python -m hpc_pilots chain",
+             fontsize=9.5, color=INK2, ha="left", va="top")
+
+    flow.node("INPUT  ·  one pathogen genome accession",
+              f"{run['genome_accession']}   ·   {out[1]['genome_length_nt']:,} nt   ·   "
+              f"{out[1]['segments']} segment\n"
+              "Nothing else: no target name, no shortlist, no structure.",
+              INK, "#f3f3f1", 0.0, 0.47 * 2 + 0.06)
+    flow.edge("genome_accession")
+
+    arm1_top = flow.y + 0.006
+    flow.row("1 · intake.rank_targets",
+             f"NCBI · UniProt   ·   {stages[1]['seconds']} s\n"
+             f"in:  the accession, and nothing else",
+             f"{out[1]['orfs_found']} ORFs called in six frames, "
+             f"{out[1]['orfs_ranked']} ranked\n"
+             f"{out[1]['identified']} identified against "
+             f"{out[1]['reference_entries']:,} reviewed entries\n"
+             f"{out[1]['unidentified']} not identified, and reported as such",
+             ARM1, SURFACE, PALE1)
+    flow.edge("target_name · protein_accession · residue_ranges · protein_sequence\n"
+              "— all four facts the other nine tools are waiting on, from this one call",
+              colour=ARM1)
+    flow.row("2 · intake.decompose  +  rank_score",
+             f"UniProt   ·   {stages[2]['seconds']} s\n"
+             f"in:  {out[1]['identified']} identified candidates",
+             f"{out[2]['chains_out']} mature chains, each with a score\n"
+             "score = 3·conservation + 2·exposed + 1.5·essential\n"
+             "          + 0.5·min(1, structures/50) + 0.8·druggable\n"
+             "every term is a stated weight; nothing here is fitted",
+             ARM1, SURFACE, PALE1)
+    flow.edge(f"one accession and one residue range per chain — "
+              f"{surf['candidates_in']} of {out[2]['chains_out']} go on,\n"
+              f"and {out[4]['foldable']} of {out[2]['chains_out']} can also supply their own "
+              "sequence to stage 4", colour=ARM1)
+    flow.row("3 · geometry.surface_markers",
+             f"PDBe · RCSB · UniProt   ·   {stages[3]['seconds']} s\n"
+             f"in:  {surf['candidates_in']} chains, each as accession + residue range",
+             f"{surf['rows_out']} rows for {surf['candidates_in']} chains: "
+             f"{surf['measured']} measured, {surf['unmeasured']} refused with a reason\n"
+             "largest exposed hydrophobic patch, median of 5 structures\n"
+             f"gate:  {surf['gate_yes']} yes  ·  {surf['gate_borderline']} borderline  ·  "
+             f"{surf['gate_no']} no",
+             ARM1, SURFACE, PALE1)
+    flow.edge("a patch median and a patch range per chain", colour=ARM1)
+    flow.row("4 · structures.folded",
+             f"ESM Atlas   ·   {stages[4]['seconds']} s\n"
+             "in:  one amino-acid sequence — from stage 2, not stage 3",
+             f"{out[4]['foldable']} of "
+             f"{out[4]['foldable'] + out[4]['not_foldable']} chains could supply their own "
+             f"sequence\nfolded {out[4]['folded_target']}, {out[4]['residues']} residues\n"
+             f"mean pLDDT {out[4]['mean_plddt']}, "
+             f"{round(100 * (out[4]['at_or_above_70'] or 0), 1)}% at or above 70\n"
+             "— the predictor's confidence in itself, not accuracy",
+             ARM1, SURFACE, PALE1)
+    flow.edge("", colour=BREAK, dashed=True, pad=0.007)
+    flow.node("THE ARROW THAT IS NOT THERE",
+              "Stage 5 reads nothing stages 1 to 4 measured. `library_spec` takes an "
+              "initiator, a length\nrange and a set of elongator classes — no patch area, "
+              "no accession, no residue range.\nThe library is the same library whatever the "
+              "surface stage found, so \"a focused library\nover that surface\" states an "
+              "intent and not a data path.",
+              BREAK, PALEB, 0.0, 0.47 * 2 + 0.06, title_size=10)
+    flow.edge("", colour=BREAK, dashed=True, pad=0.007)
+    flow.row("5 · chemistry.library_spec",
+             f"local tables   ·   {stages[5]['seconds']} s\n"
+             "in:  nothing from upstream",
+             f"{lib['initiator']} initiator, {lib['random_region'][0]}–"
+             f"{lib['random_region'][1]} randomised positions\n"
+             f"over {lib['alphabet_size']} building blocks, "
+             f"{lib['closure_residue']} closes the ring by thioether\n"
+             f"{lib['theoretical_diversity']:,} distinct sequences allowed",
+             ARM1, SURFACE, PALE1)
+    arm1_bottom = flow.y - 0.008
+    _band(ax, arm1_top, arm1_bottom, "ARM 1",
+          "the onset\nco-scientist\n\nfive stages,\n"
+          f"{run['seconds']:.0f} s end\nto end, live\nagainst public\nendpoints",
+          ARM1, PALE1)
+    flow.y = arm1_bottom
+    flow.edge(f"how many positions the library randomises  "
+              f"({lib['random_region'][0]}–{lib['random_region'][1]})\n"
+              "— the only number that crosses from one arm to the other", colour=ARM2)
+
+    arm2_top = flow.y + 0.006
+    flow.row("6 · the go / no-go, before any assay",
+             "in:  how many positions the library varies, and whether the\n"
+             "      candidates vary at the same positions as the members\n"
+             "      already measured.   No assay. No structure. No target.",
+             f"candidates share the measured positions  →   {gain_shared}\n"
+             f"candidates share none of them               →   {gain_unshared}\n"
+             "gain over random from the same batch, on 128 measurements",
+             ARM2, SURFACE, PALE2)
+    flow.edge("a decision, before anything is synthesised:\n"
+              "build this library, or redesign it so the positions overlap", colour=ARM2)
+    flow.node("WHAT WOULD CLOSE THE LOOP, AND IS NOT WIRED EITHER",
+              "Measured members come back from a campaign as the first round a model is "
+              "fitted on,\nand the go/no-go runs on the design that produced them. Eight "
+              "registry fields are that\ninterface, named exactly, and all eight are empty "
+              "for all 29 blocks: 232 cells of 232.",
+              BREAK, PALEB, 0.0, 0.47 * 2 + 0.06, title_size=10)
+    _band(ax, arm2_top, flow.y - 0.004, "ARM 2",
+          "will a model\nfitted on the\nfirst round be\nworth acting on?\n\n"
+          "answerable at\ndesign time, and\nthe strongest\nresult here", ARM2, PALE2)
+    return fig

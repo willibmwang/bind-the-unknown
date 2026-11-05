@@ -6,37 +6,53 @@
     "declared": "A residue range with no corresponding UniProt feature, carried with an explicit citation. The S2 stem-helix epitope is the case -- it is a real and well-mapped antibody target with no feature in P0DTC2 -- and a declared range without a source is refused rather than defaulted."
   },
   "targets": {
-    "Mpro (nsp5)": {"accession": "P0DTD1", "ranges": [
+    "Mpro (nsp5)": {"accession": "P0DTD1", "clinical_modality": "small molecule",
+      "modality_agent": "nirmatrelvir (Paxlovid), approved", "ranges": [
       {"source": "uniprot_feature", "type": "Chain", "description": "3C-like proteinase nsp5"}]},
-    "PLpro (nsp3)": {"accession": "P0DTD1", "ranges": [
+    "PLpro (nsp3)": {"accession": "P0DTD1", "clinical_modality": "none approved",
+      "modality_agent": "no approved agent against this domain", "ranges": [
       {"source": "uniprot_feature", "type": "Domain", "description": "Peptidase C16"}],
       "caveat": "Counted on the Peptidase C16 catalytic domain rather than on the whole nsp3 chain. The first version of this entry used the chain, which is 1,945 residues against the domain's 265, so the coverage threshold excluded every construct that was actually of PLpro and returned three structures where there are hundreds. The count was described in this field as an upper bound and was in fact a severe undercount, which is the failure mode a caveat written before the number is checked tends to have."},
-    "nsp10/nsp16 interface": {"accession": "P0DTD1", "ranges": [
+    "nsp10/nsp16 interface": {"accession": "P0DTD1", "clinical_modality": "none approved",
+      "modality_agent": "no approved agent against this interface", "ranges": [
       {"source": "uniprot_feature", "type": "Chain", "description": "Non-structural protein 10"},
       {"source": "uniprot_feature", "type": "Chain", "description": "2'-O-methyltransferase nsp16"}],
       "requires_all_ranges": true,
       "caveat": "An obligate two-protein complex, so a structure counts only if it covers both chains. That is stricter than the other entries and is the point: a structure of nsp16 alone is not evidence that the interface is a tractable reagent."},
-    "nsp13 helicase": {"accession": "P0DTD1", "ranges": [
+    "RdRp (nsp12)": {"accession": "P0DTD1", "clinical_modality": "small molecule",
+      "modality_agent": "remdesivir, approved; molnupiravir, authorised", "ranges": [
+      {"source": "uniprot_feature", "type": "Chain",
+       "description": "RNA-directed RNA polymerase nsp12"}],
+      "caveat": "Added 2026-11-05, after review found it absent. It was the one SARS-CoV-2 chain this file had never listed, while ranking fifth of the twenty-three candidates the pipeline puts up for the genome the project leads with -- so the target with an approved antiviral against it (remdesivir) had no structural evidence row and no surface measurement. Nothing excluded it; nobody added it. The omission is recorded here rather than quietly repaired because a target absent from a config is invisible in exactly the way a target that scored badly is not."},
+    "nsp13 helicase": {"accession": "P0DTD1", "clinical_modality": "none approved",
+      "modality_agent": "no approved agent against this chain", "ranges": [
       {"source": "uniprot_feature", "type": "Chain", "description": "Helicase nsp13"}]},
-    "Spike RBD": {"accession": "P0DTC2", "ranges": [
+    "Spike RBD": {"accession": "P0DTC2", "clinical_modality": "antibody",
+      "modality_agent": "sotrovimab, tixagevimab-cilgavimab, both authorised", "ranges": [
       {"source": "uniprot_feature", "type": "Region", "description": "Receptor-binding domain (RBD)"}]},
-    "Spike S2 stem-helix": {"accession": "P0DTC2", "ranges": [
+    "Spike S2 stem-helix": {"accession": "P0DTC2", "clinical_modality": "none approved",
+      "modality_agent": "S2P6 and CC40.8 are research antibodies", "ranges": [
       {"source": "declared", "start": 1140, "end": 1161,
        "citation": "Stem-helix epitope of betacoronavirus S2, as mapped by the broadly neutralising antibodies S2P6 and CC40.8. No corresponding feature exists in P0DTC2, so the range is declared and cited rather than derived."}]},
-    "HA stem (HA2 helix A)": {"accession": "P03452", "ranges": [
+    "HA stem (HA2 helix A)": {"accession": "P03452", "clinical_modality": "none approved",
+      "modality_agent": "stem-directed antibodies are in trials only", "ranges": [
       {"source": "declared", "start": 418, "end": 475,
        "citation": "HA2 helix A, numbered on the HA0 precursor. Declared because UniProt carries HA1/HA2 chains but no helix-A feature."}],
       "caveat": "P03452 is A/Puerto Rico/8/1934 H1, which is not the strain of either deep mutational scan the packet cites. Structure counts are for this accession only and do not transfer across subtypes."},
-    "NA catalytic site": {"accession": "P03470", "ranges": [
+    "NA catalytic site": {"accession": "P03470", "clinical_modality": "small molecule",
+      "modality_agent": "oseltamivir and zanamivir, approved", "ranges": [
       {"source": "uniprot_feature", "type": "Chain", "description": "Neuraminidase"}],
       "caveat": "The whole sialidase chain, not the catalytic site. Almost every NA structure covers the catalytic site, so the two counts are close, but they are not the same quantity."},
-    "PA-PB1 interface": {"accession": "P15659", "ranges": [
+    "PA-PB1 interface": {"accession": "P15659", "clinical_modality": "none approved",
+      "modality_agent": "baloxavir binds the PA endonuclease domain, not this interface", "ranges": [
       {"source": "declared", "start": 239, "end": 716,
        "citation": "PA C-terminal domain, which carries the PB1 N-terminal peptide binding site."}],
       "caveat": "Counted on PA alone. A structure of the PA C-terminal domain without the PB1 peptide is not evidence that the interface is tractable, and this count does not separate them."},
-    "G attachment glycoprotein": {"accession": "Q9IH62", "ranges": [
+    "G attachment glycoprotein": {"accession": "Q9IH62", "clinical_modality": "antibody",
+      "modality_agent": "m102.4, compassionate use only", "ranges": [
       {"source": "uniprot_feature", "type": "Chain", "description": "Glycoprotein G"}]},
-    "F fusion glycoprotein": {"accession": "Q9IH63", "ranges": [
+    "F fusion glycoprotein": {"accession": "Q9IH63", "clinical_modality": "none approved",
+      "modality_agent": "no approved agent against Nipah F", "ranges": [
       {"source": "uniprot_feature", "type": "Chain", "description": "Fusion glycoprotein F0"}]}
   }
 }
