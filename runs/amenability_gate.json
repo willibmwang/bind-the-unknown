@@ -2,13 +2,25 @@
   "experiment": "amenability-gate-v3",
   "status": "complete",
   "question": "Over every target the structures config declares -- not a hand-picked subset -- does the macrocycle-amenability gate separate anything?",
-  "answer": "It separates clear refusals from everything else, and the reason it cannot do more is now measured on more targets rather than fewer. The patch moves by up to 1625 square angstroms across structures of one domain (Spike S2 stem-helix), against a footprint of 600, so most rows are borderline and that is the honest report. Localisation, which the gate reads before area, decides all 6 refusals. 3 of them would pass on patch area alone: Mpro (nsp5), PA-PB1 interface, nsp13 helicase.",
+  "answer": "It separates clear refusals from everything else, and the reason it cannot do more is now measured on more targets rather than fewer. The patch moves by up to 1850 square angstroms across structures of one domain (Spike S2 stem-helix), against a footprint of 600, so most rows are borderline and that is the honest report. Localisation, which the gate reads before area, decides all 6 refusals. 3 of them would pass on patch area alone: Mpro (nsp5), PA-PB1 interface, nsp13 helicase.",
   "fix_3_nothing_dropped": {
     "problem": "v2 measured six targets named in a script. SARS-CoV-2's RdRp was not one of them while ranking fifth of the pipeline's own candidates for the genome this project leads with, and the record did not say it was absent. An unasked target and a refused target looked the same.",
     "fix": "The gate is generated from `configs/structures.json`, every declared target gets a row, and an unmeasurable one carries the reason. `targets_declared` equals `rows`.",
     "finding": "RdRp measures a patch of 486.6 square angstroms over 5 structures of the same domain, with a spread of 1319.8 -- the 2nd widest spread of the 11 measured, behind Spike S2 stem-helix, and wider than the 600 square-angstrom footprint the gate thresholds on. Its gate verdict is no, decided on localisation: the polymerase is inside the cell. That is a usable answer and it was not available before, which is the whole cost of the omission."
   },
   "footprint_a2": 600.0,
+  "patch_fraction_ceiling": 0.15,
+  "fix_4_the_gate_had_no_ceiling": {
+    "problem": "The band had a floor at half a footprint and nothing above, so the larger the patch the more confidently the gate read `yes`. The largest patches in a viral genome are percolated surfaces and membrane proteins measured out of their bilayer, and neither is a site a macrocycle can be put on.",
+    "fix": "A patch covering more than `patch_fraction_ceiling` of the domain's own accessible surface is reported borderline rather than yes. The quantity is a fraction and not an area because the failure is percolation, which scales with the chain.",
+    "sensitivity": "Every row carries `gate_at_ceiling` at 0.10, 0.15 and 0.20, and `gate_without_ceiling` beside it.",
+    "effect_here": "None of the 11 measured rows changes verdict. The oversized patches in this set belong to proteins the gate refuses on localisation before it reaches area at all -- 6 of 11 are annotated inside the cell -- so the ceiling closes a hole that nothing in this config currently falls into. It is not decorative: the chain record's nsp4 reports 7,558 square angstroms over a quarter of its own surface, and that row is only refused today because nsp4 is a membrane protein."
+  },
+  "fix_5_the_patch_search_is_clipped_to_the_domain": {
+    "problem": "The residue interval selected which structure to measure and then did not restrict the measurement, so the quantity was the largest patch anywhere on the deposited chain. For a construct larger than the target that is not the target's patch.",
+    "fix": "The patch search and the surface it is reported as a fraction of are confined to the domain. Accessibility is still computed on the whole deposited file, partners included, because a domain cut out of its chain exposes a face that was never solvent-facing.",
+    "numbering": "The clip needs the chain's author numbering. PDBe's mapping endpoint publishes it for some entries and null for others, so where it is absent the offset is inferred from the structure's own residues against the reference sequence and accepted only above 0.9 agreement. `structures_clipped_to_domain` says how many of each row's replicates the clip actually reached."
+  },
   "targets_declared": 12,
   "rows": 12,
   "nothing_dropped": true,
@@ -50,9 +62,18 @@
         "7geh:A",
         "6yb7:A"
       ],
+      "structures_clipped_to_domain": 5,
+      "patch_fraction_of_surface": 0.046,
+      "residues_in_range": 304,
       "available_from": "2020-03-16",
       "gate": "no",
-      "gate_on_area_alone": "yes"
+      "gate_on_area_alone": "yes",
+      "gate_at_ceiling": {
+        "0.1": "no",
+        "0.15": "no",
+        "0.2": "no"
+      },
+      "gate_without_ceiling": "no"
     },
     {
       "target": "PLpro (nsp3)",
@@ -89,9 +110,18 @@
         "6wrh:A",
         "9f7u:A"
       ],
+      "structures_clipped_to_domain": 5,
+      "patch_fraction_of_surface": 0.035,
+      "residues_in_range": 245,
       "available_from": "2020-04-29",
       "gate": "no",
-      "gate_on_area_alone": "borderline"
+      "gate_on_area_alone": "borderline",
+      "gate_at_ceiling": {
+        "0.1": "no",
+        "0.15": "no",
+        "0.2": "no"
+      },
+      "gate_without_ceiling": "no"
     },
     {
       "target": "nsp10/nsp16 interface",
@@ -127,9 +157,18 @@
         "7oru:A",
         "8ov1:B"
       ],
+      "structures_clipped_to_domain": 5,
+      "patch_fraction_of_surface": 0.087,
+      "residues_in_range": 124,
       "available_from": "2020-07-08",
       "gate": "no",
-      "gate_on_area_alone": "borderline"
+      "gate_on_area_alone": "borderline",
+      "gate_at_ceiling": {
+        "0.1": "no",
+        "0.15": "no",
+        "0.2": "no"
+      },
+      "gate_without_ceiling": "no"
     },
     {
       "target": "RdRp (nsp12)",
@@ -166,9 +205,18 @@
         "9dj8:A",
         "7doi:A"
       ],
+      "structures_clipped_to_domain": 5,
+      "patch_fraction_of_surface": 0.015,
+      "residues_in_range": 906,
       "available_from": "2020-04-09",
       "gate": "no",
-      "gate_on_area_alone": "borderline"
+      "gate_on_area_alone": "borderline",
+      "gate_at_ceiling": {
+        "0.1": "no",
+        "0.15": "no",
+        "0.2": "no"
+      },
+      "gate_without_ceiling": "no"
     },
     {
       "target": "nsp13 helicase",
@@ -202,9 +250,18 @@
         "5rm2:B",
         "9i51:A"
       ],
+      "structures_clipped_to_domain": 5,
+      "patch_fraction_of_surface": 0.05,
+      "residues_in_range": 576,
       "available_from": "2020-09-16",
       "gate": "no",
-      "gate_on_area_alone": "yes"
+      "gate_on_area_alone": "yes",
+      "gate_at_ceiling": {
+        "0.1": "no",
+        "0.15": "no",
+        "0.2": "no"
+      },
+      "gate_without_ceiling": "no"
     },
     {
       "target": "Spike RBD",
@@ -240,9 +297,18 @@
         "7eam:B",
         "7sd5:A"
       ],
+      "structures_clipped_to_domain": 5,
+      "patch_fraction_of_surface": 0.092,
+      "residues_in_range": 195,
       "available_from": "2021-03-07",
       "gate": "borderline",
-      "gate_on_area_alone": "borderline"
+      "gate_on_area_alone": "borderline",
+      "gate_at_ceiling": {
+        "0.1": "borderline",
+        "0.15": "borderline",
+        "0.2": "borderline"
+      },
+      "gate_without_ceiling": "borderline"
     },
     {
       "target": "Spike S2 stem-helix",
@@ -264,23 +330,31 @@
       ],
       "exposed": true,
       "exposed_fraction": 0.667,
-      "patch_median": 1738.4,
+      "patch_median": 1771.9,
       "patch_range": [
-        224.8,
+        0,
         1849.6
       ],
-      "patch_spread": 1624.8,
-      "structures_measured": 5,
+      "patch_spread": 1849.6,
+      "structures_measured": 4,
       "structures_used": [
-        "7y9n:A",
         "7cot:A",
         "7cot:B",
         "7cot:C",
         "8dlw:A"
       ],
+      "structures_clipped_to_domain": 1,
+      "patch_fraction_of_surface": 0.205,
+      "residues_in_range": 112,
       "available_from": "2020-08-05",
       "gate": "borderline",
-      "gate_on_area_alone": "borderline"
+      "gate_on_area_alone": "borderline",
+      "gate_at_ceiling": {
+        "0.1": "borderline",
+        "0.15": "borderline",
+        "0.2": "borderline"
+      },
+      "gate_without_ceiling": "borderline"
     },
     {
       "target": "HA stem (HA2 helix A)",
@@ -301,12 +375,12 @@
       ],
       "exposed": true,
       "exposed_fraction": 0.5,
-      "patch_median": 301.8,
+      "patch_median": 0,
       "patch_range": [
-        256.5,
-        1130.8
+        0,
+        985.3
       ],
-      "patch_spread": 874.3,
+      "patch_spread": 985.3,
       "structures_measured": 5,
       "structures_used": [
         "5vli:B",
@@ -315,9 +389,18 @@
         "9phs:F",
         "1rvx:B"
       ],
+      "structures_clipped_to_domain": 5,
+      "patch_fraction_of_surface": 0.0,
+      "residues_in_range": 58,
       "available_from": "2003-12-15",
       "gate": "borderline",
-      "gate_on_area_alone": "borderline"
+      "gate_on_area_alone": "borderline",
+      "gate_at_ceiling": {
+        "0.1": "borderline",
+        "0.15": "borderline",
+        "0.2": "borderline"
+      },
+      "gate_without_ceiling": "borderline"
     },
     {
       "target": "NA catalytic site",
@@ -366,9 +449,18 @@
         "5if8:A",
         "5if2:A"
       ],
+      "structures_clipped_to_domain": 5,
+      "patch_fraction_of_surface": 0.035,
+      "residues_in_range": 408,
       "available_from": "2013-01-21",
       "gate": "no",
-      "gate_on_area_alone": "yes"
+      "gate_on_area_alone": "yes",
+      "gate_at_ceiling": {
+        "0.1": "no",
+        "0.15": "no",
+        "0.2": "no"
+      },
+      "gate_without_ceiling": "no"
     },
     {
       "target": "G attachment glycoprotein",
@@ -403,9 +495,18 @@
         "3d11:A",
         "8ja5:A"
       ],
+      "structures_clipped_to_domain": 5,
+      "patch_fraction_of_surface": 0.026,
+      "residues_in_range": 413,
       "available_from": "2008-04-25",
       "gate": "borderline",
-      "gate_on_area_alone": "borderline"
+      "gate_on_area_alone": "borderline",
+      "gate_at_ceiling": {
+        "0.1": "borderline",
+        "0.15": "borderline",
+        "0.2": "borderline"
+      },
+      "gate_without_ceiling": "borderline"
     },
     {
       "target": "F fusion glycoprotein",
@@ -440,9 +541,18 @@
         "9uaa:A",
         "9uaa:B"
       ],
+      "structures_clipped_to_domain": 5,
+      "patch_fraction_of_surface": 0.021,
+      "residues_in_range": 443,
       "available_from": "2025-03-31",
       "gate": "borderline",
-      "gate_on_area_alone": "borderline"
+      "gate_on_area_alone": "borderline",
+      "gate_at_ceiling": {
+        "0.1": "borderline",
+        "0.15": "borderline",
+        "0.2": "borderline"
+      },
+      "gate_without_ceiling": "borderline"
     }
   ],
   "limitations": [
@@ -455,10 +565,10 @@
     "host": "Williams-MacBook-Pro-260.local",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "c6c83756eab090a207f7a8220b2db4a505487242",
+    "git_commit": "c4b07ad89eba647eb7baa5a641b439c6113b9241",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-11-05T19:40:02.607856+00:00"
+    "recorded_at_utc": "2026-11-05T21:06:51.654215+00:00"
   }
 }

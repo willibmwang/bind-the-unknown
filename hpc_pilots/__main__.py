@@ -114,6 +114,22 @@ def main(argv=None):
     p.add_argument("--no-fold", action="store_true",
                    help="Skip the folding stage, which is the one call that leaves this "
                         "machine for a prediction rather than a record")
+    p.add_argument("--genomes", action="store_true",
+                   help="Run the chain on every genome in chain.GENOMES, each with its own "
+                        "organism held out, and write runs/onset_chain_genomes.json")
+    p.add_argument("--pathogen",
+                   help="Run the chain on one genome of your own, under this name. Any NCBI "
+                        "nucleotide accession works, or several separated by commas for a "
+                        "segmented genome; nothing else about the pathogen is needed")
+    p.add_argument("--holdout",
+                   help="Organism deleted from the reference before identifying, spelled as "
+                        "UniProt spells it. Absent is correct for a genuinely new pathogen, "
+                        "which has nothing curated to delete")
+    p.add_argument("--scope", default="viral",
+                   choices=("viral", "bacteria", "fungi", "all"),
+                   help="Which reviewed reference set to identify against. Not inferred: a "
+                        "reference that does not contain the pathogen's relatives looks "
+                        "exactly like a pathogen that has none")
     p = sub.add_parser("gate",
                        help="Measure the macrocycle-amenability gate over every target "
                             "declared in configs/structures.json")
@@ -257,8 +273,23 @@ def main(argv=None):
              "features": r.get("features")}
             for i, r in enumerate(rows[:args.top], 1) if r.get("identified")], indent=2))
     elif args.command == "chain":
-        from .chain import run as run_chain
+        from .chain import run as run_chain, sweep as sweep_chain
         import json as _json
+        if args.genomes:
+            payload = sweep_chain(top=args.top, replicates=args.replicates,
+                                  fold=not args.no_fold)
+            print(_json.dumps(payload["coverage"], indent=2))
+            return 0
+        if args.pathogen:
+            from .chain import one as one_chain
+            case = one_chain(args.accession, pathogen=args.pathogen, holdout=args.holdout,
+                             scope=args.scope, top=args.top, replicates=args.replicates,
+                             fold=not args.no_fold, record=True)
+            print(_json.dumps({"case": case["case"], "coverage": case["coverage"],
+                               "stages": [{k: st[k] for k in ("stage", "tool", "input",
+                                                              "output", "seconds")}
+                                          for st in case["stages"]]}, indent=2))
+            return 0
         payload = run_chain(args.accession, top=args.top, replicates=args.replicates,
                             fold=not args.no_fold)
         # The coverage table only. The record on disk carries every row; what a reader wants

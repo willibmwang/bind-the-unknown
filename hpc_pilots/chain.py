@@ -26,6 +26,7 @@ SASA backend). `candidates_in` equals `rows_out` in the record, and a test pins 
 registered tool dispatches, so a number in this record is the number that tool returns and not
 a second implementation of it. The chain is the composition, written down.
 """
+import re
 import time
 
 from .common import ROOT, provenance, write_json
@@ -111,10 +112,11 @@ def surface_rows(ranked, replicates=5):
             continue
         entry["seconds"] = round(time.time() - started, 2)
         if not markers or markers.get("surface_score") is None:
-            offered = (markers or {}).get("structures_offered") or []
             entry["unmeasured_because"] = ((markers or {}).get("error")
                                            or "no deposited chain covers this residue range")
-            entry["structures_offered"] = offered
+            entry["structures_offered"] = (markers or {}).get("structures_offered") or []
+            entry["chains_mapped_to_accession"] = (markers or {}).get(
+                "chains_mapped_to_accession")
             rows.append(entry)
             continue
         entry.update({
@@ -125,6 +127,9 @@ def surface_rows(ranked, replicates=5):
             "structures_measured": markers["structures_measured"],
             "structures_used": markers["structures_used"],
             "surface_score": markers["surface_score"],
+            "patch_fraction_of_surface": markers["patch_fraction_of_surface"],
+            "structures_clipped_to_domain": markers.get("structures_clipped_to_domain"),
+            "residues_in_range": markers.get("residues_in_range"),
             "exposed_fraction_of_residues": markers["exposed_fraction"],
             "sequons_near_patch": markers["sequons_near_patch"],
             "available_from": markers.get("available_from"),
@@ -143,6 +148,7 @@ def surface_rows(ranked, replicates=5):
         features.update({"hydrophobic_patch_area": markers["hydrophobic_patch_area"],
                          "patch_area_min": markers["patch_area_min"],
                          "patch_area_max": markers["patch_area_max"],
+                         "patch_fraction_of_surface": markers["patch_fraction_of_surface"],
                          "surface_exposed": verdict["exposed"]})
         entry["gate"] = amenable(features)
         rows.append(entry)
@@ -188,6 +194,25 @@ def _rdrp_sentence(measured):
             f"cost of the omission.")
 
 
+def _ceiling_effect(measured):
+    """Whether the ceiling changed any verdict in this run, counted rather than claimed.
+
+    A rule that closes a hole nothing currently falls into is still worth having and is not
+    worth overstating, and the difference between those two sentences is a count.
+    """
+    moved = [r["target"] for r in measured if r["gate"] != r["gate_without_ceiling"]]
+    if not moved:
+        refused_first = sum(1 for r in measured if not r["exposed"])
+        return (f"None of the {len(measured)} measured rows changes verdict. The oversized "
+                f"patches in this set belong to proteins the gate refuses on localisation "
+                f"before it reaches area at all -- {refused_first} of {len(measured)} are "
+                f"annotated inside the cell -- so the ceiling closes a hole that nothing in "
+                f"this config currently falls into. It is not decorative: the chain record's "
+                f"nsp4 reports 7,558 square angstroms over a quarter of its own surface, and "
+                f"that row is only refused today because nsp4 is a membrane protein.")
+    return (f"{len(moved)} of {len(measured)} rows change verdict: " + ", ".join(sorted(moved)))
+
+
 def gate_table(replicates=5, record=True):
     """The macrocycle-amenability gate over every target `configs/structures.json` declares.
 
@@ -207,7 +232,8 @@ def gate_table(replicates=5, record=True):
     localisation read per mature chain rather than off the polyprotein entry.
     """
     from .geometry import surface_for_accession
-    from .intake import amenable, chain_locations, exposed_from_locations
+    from .intake import (PATCH_FRACTION_CEILING, amenable, chain_locations,
+                         exposed_from_locations)
     from .structures_evidence import chains, config, entry, ranges
 
     spec = config()
@@ -258,6 +284,7 @@ def gate_table(replicates=5, record=True):
         features = {"hydrophobic_patch_area": markers["hydrophobic_patch_area"],
                     "patch_area_min": markers["patch_area_min"],
                     "patch_area_max": markers["patch_area_max"],
+                    "patch_fraction_of_surface": markers["patch_fraction_of_surface"],
                     "surface_exposed": verdict["exposed"]}
         row.update({
             "measured": True,
@@ -268,9 +295,20 @@ def gate_table(replicates=5, record=True):
             "patch_spread": markers["patch_area_spread"],
             "structures_measured": markers["structures_measured"],
             "structures_used": markers["structures_used"],
+            "structures_clipped_to_domain": markers.get("structures_clipped_to_domain"),
+            "patch_fraction_of_surface": markers["patch_fraction_of_surface"],
+            "residues_in_range": markers.get("residues_in_range"),
             "available_from": markers.get("available_from"),
             "gate": amenable(features),
-            "gate_on_area_alone": amenable({**features, "surface_exposed": True})})
+            "gate_on_area_alone": amenable({**features, "surface_exposed": True}),
+            # The verdict at three ceilings, for the reason the contact cutoff is reported at
+            # three: a threshold that produces the answer is worth being suspicious of, and
+            # what matters is whether the verdict moves when it does.
+            "gate_at_ceiling": {str(c): amenable(features, max_patch_fraction=c)
+                                for c in (0.10, 0.15, 0.20)},
+            # What the row would have read with no ceiling at all, so the record can say
+            # whether adding one changed any verdict instead of implying that it did.
+            "gate_without_ceiling": amenable(features, max_patch_fraction=1.01)})
         rows.append(row)
 
     measured = [r for r in rows if r["measured"]]
@@ -297,6 +335,37 @@ def gate_table(replicates=5, record=True):
             "finding": _rdrp_sentence(measured),
         },
         "footprint_a2": 600.0,
+        "patch_fraction_ceiling": PATCH_FRACTION_CEILING,
+        "fix_4_the_gate_had_no_ceiling": {
+            "problem": "The band had a floor at half a footprint and nothing above, so the "
+                       "larger the patch the more confidently the gate read `yes`. The "
+                       "largest patches in a viral genome are percolated surfaces and "
+                       "membrane proteins measured out of their bilayer, and neither is a "
+                       "site a macrocycle can be put on.",
+            "fix": "A patch covering more than `patch_fraction_ceiling` of the domain's own "
+                   "accessible surface is reported borderline rather than yes. The quantity "
+                   "is a fraction and not an area because the failure is percolation, which "
+                   "scales with the chain.",
+            "sensitivity": "Every row carries `gate_at_ceiling` at 0.10, 0.15 and 0.20, and "
+                           "`gate_without_ceiling` beside it.",
+            "effect_here": _ceiling_effect(measured),
+        },
+        "fix_5_the_patch_search_is_clipped_to_the_domain": {
+            "problem": "The residue interval selected which structure to measure and then "
+                       "did not restrict the measurement, so the quantity was the largest "
+                       "patch anywhere on the deposited chain. For a construct larger than "
+                       "the target that is not the target's patch.",
+            "fix": "The patch search and the surface it is reported as a fraction of are "
+                   "confined to the domain. Accessibility is still computed on the whole "
+                   "deposited file, partners included, because a domain cut out of its chain "
+                   "exposes a face that was never solvent-facing.",
+            "numbering": "The clip needs the chain's author numbering. PDBe's mapping "
+                         "endpoint publishes it for some entries and null for others, so "
+                         "where it is absent the offset is inferred from the structure's own "
+                         "residues against the reference sequence and accepted only above "
+                         "0.9 agreement. `structures_clipped_to_domain` says how many of "
+                         "each row's replicates the clip actually reached.",
+        },
         "targets_declared": len(spec["targets"]),
         "rows": len(rows),
         "nothing_dropped": len(rows) == len(spec["targets"]),
@@ -338,55 +407,99 @@ def _entry_sequence(accession):
     return _entry(accession)["sequence"]["value"]
 
 
-def _ungapped_identity(a, b):
-    """Fraction of positions that agree, with no alignment. None when either side is absent.
+def locate_chain(orf, chain, aligner=None):
+    """Where the homolog's mature chain sits in this genome's own translation.
 
-    Ungapped on purpose: the question is whether one protein's residue numbering can be used
-    on another's translation as-is, and that is exactly what a position-by-position
-    comparison answers. An alignment would answer a different and easier question.
+    **The question a slice cannot answer.** Mature-chain boundaries are annotated on the
+    homolog, and under a holdout the homolog is a different species, so the pathogen's own
+    numbering is not the relative's. SARS-CoV's main protease begins at 3241 of its
+    polyprotein and SARS-CoV-2's at 3264; slicing one genome's translation at the other's
+    coordinates yields 306 residues, the correct length, starting 23 residues into the wrong
+    window. A length check accepts that. Comparing the slice against the relative's residues
+    rejects it, which is better and still leaves the chain unfolded.
+
+    Aligning finds it. The relative's chain is a sequence, the pathogen's ORF translation is a
+    sequence, and a local alignment reports where in the second the first lies -- in the
+    pathogen's own numbering, across a species boundary, with insertions and deletions
+    absorbed rather than shifting everything after them.
+
+    Returns the span, the sequence, how much of the relative's chain the alignment accounted
+    for, and the identity over the aligned columns. Coverage is the acceptance criterion and
+    identity is reported but not thresholded: identity is low across genera by construction --
+    SARS-CoV-2's spike is about 46 per cent identical to bat coronavirus HKU3's, which is a
+    real relative and a correct assignment -- so thresholding it would refuse exactly the
+    distant relatives the holdout exists to force the pipeline through.
     """
-    if not a or not b or len(a) != len(b):
+    if not orf or not chain:
         return None
-    return round(sum(1 for x, y in zip(a, b) if x == y) / len(a), 4)
+    from .intake import _aligner
+
+    aligner = aligner or _aligner()
+    try:
+        alignment = aligner.align(orf, chain)[0]
+    except Exception:                                     # noqa: BLE001
+        return None
+    blocks = alignment.aligned
+    if len(blocks) < 2 or not len(blocks[0]):
+        return None
+    start, end = int(blocks[0][0][0]), int(blocks[0][-1][1])
+    matched = sum(int(b - a) for a, b in blocks[0])
+    identical = 0
+    for (ts, te), (qs, qe) in zip(blocks[0], blocks[1]):
+        identical += sum(1 for x, y in zip(orf[int(ts):int(te)], chain[int(qs):int(qe)])
+                         if x == y)
+    return {"span": [start + 1, end], "sequence": orf[start:end],
+            "covered": round(matched / len(chain), 4),
+            "identity": round(identical / matched, 4) if matched else 0.0}
 
 
-def fold_stage(ranked, ceiling=400):
-    """The first ranked chain whose own sequence the chain can recover, folded.
+# How much of the relative's mature chain a local alignment has to account for before the
+# window it points at is taken as that chain in this genome. Half is a low bar for a real
+# correspondence and a high one for a chance local hit on a BLOSUM62 alignment of a few
+# hundred residues, and the record carries `covered` on every row so a reader can see where
+# each one fell rather than only which side of the bar it was.
+MINIMUM_CHAIN_COVERAGE = 0.5
+
+
+def fold_stage(ranked, ceiling=400, pool=()):
+    """The first ranked chain whose own sequence the chain can locate, folded.
 
     **Why this is not simply "fold the top candidate".** The folding endpoint takes an
-    amino-acid sequence, and the only pathogen sequence the chain holds is the six-frame
+    amino-acid sequence, and the only pathogen sequence this chain holds is the six-frame
     translation of the genome. The mature-chain boundaries, meanwhile, are annotated on the
-    *homolog's* entry. So cutting a chain out means applying one protein's coordinates to
-    another's translation, and whether that is exact depends on which ORF matched.
+    *homolog's* entry, so cutting a chain out means finding where the relative's chain sits in
+    this genome's translation.
 
-    For SARS-CoV-2 it is exact for the chains inside ORF1a and empty or truncated for the
-    chains past the ribosomal frameshift: `chain_range` is numbered on polyprotein 1ab, the
-    ORF that matched is the 4,405-residue 1a, and the polymerase sits at 4393-5324, of which
-    thirteen residues exist in the ORF. Slicing anyway would have fed the folding endpoint a
-    thirteen-residue fragment under the name of the polymerase, which is worse than refusing.
+    Slicing at the relative's coordinates was the first attempt and it fails two ways. It
+    fails loudly when the numbering does not reach -- `chain_range` is numbered on polyprotein
+    1ab while the ORF that matched is a shorter piece of it, so the polymerase's range selects
+    a handful of residues or none. And it fails quietly when the numbering does reach and is
+    wrong, which is the dangerous one: SARS-CoV's main protease begins at 3241 and
+    SARS-CoV-2's at 3264, so one genome's translation sliced at the other's coordinates gives
+    306 residues, the correct length, starting 23 residues into the wrong window.
 
-    So every candidate gets a row saying whether its sequence was recovered and, when it was,
-    the check that says so: the slice length equals the annotated chain length. That check is
-    what makes the one fold here reproduce the repository's committed fold exactly -- the main
-    protease at 3264-3569 of ORF1a is 306 residues and hashes to the `sequence_sha256` already
-    in `runs/folded_structure/mpro_nsp5.json`.
+    `locate_chain` aligns instead, so the span comes back in the pathogen's own numbering,
+    across a species boundary, with indels absorbed.
 
-    The fix this refusal is standing in for is an alignment: the homolog's annotated chain
-    aligned against the pathogen's ORF translation would give the span in the pathogen's own
-    numbering, for every chain and under a holdout too. `intake` already carries the aligner.
-    Until that exists, nine of twenty-one SARS-CoV-2 candidates cannot reach this stage, and
-    that is a property of the chain and not of the targets.
+    **And it searches every called ORF, not only the one that matched.** A coronavirus
+    polyprotein is translated as two overlapping ORFs through a ribosomal frameshift, so the
+    chains past the shift are genuinely not in the ORF whose match named them -- nsp12 to
+    nsp16 are in ORF1b while the hit that identified them is ORF1a. Searching only the parent
+    is what left the polymerase, the helicase and the two methyltransferases unfoldable; they
+    are in the genome, in a frame the row does not point at. Each chain is aligned against
+    every ranked ORF and the best-covered hit wins, with the ORF it was found in recorded.
     """
     from .folded_structure import fold
+    from .intake import _aligner
 
-    rows, pick, parents = [], None, {}
+    aligner, rows, pick, parents = None, [], None, {}
     for row in ranked:
         if not row.get("identified"):
             continue
         span, orf = row.get("chain_range"), (row.get("orf") or {}).get("protein") or ""
         declared = row.get("length_aa")
         entry = {"target": row.get("name"), "rank": row.get("rank"),
-                 "chain_range": list(span) if span else None,
+                 "chain_range_on_the_relative": list(span) if span else None,
                  "declared_length_aa": declared,
                  "parent_orf_length_aa": len(orf) or None,
                  "sequence_recovered": False, "not_recovered_because": None}
@@ -394,63 +507,85 @@ def fold_stage(ranked, ceiling=400):
             # A whole ORF rather than a chain of one, so the translation *is* the sequence.
             if orf:
                 entry.update({"sequence_recovered": True, "recovered_length_aa": len(orf),
+                              "recovered_sequence": orf,
                               "recovered_by": "the ORF translation is the candidate"})
             else:
                 entry["not_recovered_because"] = "no translated ORF on the row"
+            rows.append(entry)
+            continue
+
+        reference = _homolog_chain(row.get("nearest_homolog"), span, parents)
+        if not reference:
+            entry["not_recovered_because"] = (
+                "the relative's own residues over this range could not be read, so there is "
+                "nothing to look for in this genome's translation.")
+            rows.append(entry)
+            continue
+        entry["reference_chain_length_aa"] = len(reference)
+        aligner = aligner or _aligner()
+
+        # The parent ORF first so a chain found there keeps the simplest provenance, then
+        # every other ranked ORF, because a frameshifted product is in the genome and in
+        # another frame.
+        searched, best = [], None
+        for label, candidate in [("the ORF that matched", orf)] + list(pool):
+            if not candidate or candidate in searched:
+                continue
+            searched.append(candidate)
+            located = locate_chain(candidate, reference, aligner)
+            if located and (best is None or located["covered"] > best[1]["covered"]):
+                best = (label, located, candidate)
+        entry["orfs_searched"] = len(searched)
+        if best is None:
+            entry["not_recovered_because"] = (
+                f"no local alignment of the relative's {len(reference)}-residue chain against "
+                f"any of the {len(searched)} ranked ORFs returned a span.")
+            rows.append(entry)
+            continue
+
+        label, located, source = best
+        entry.update({"found_in": label,
+                      "span_in_this_genome": located["span"],
+                      "recovered_length_aa": len(located["sequence"]),
+                      "chain_covered_by_alignment": located["covered"],
+                      "identity_over_aligned_columns": located["identity"]})
+        if located["covered"] >= MINIMUM_CHAIN_COVERAGE:
+            entry.update({"sequence_recovered": True,
+                          "recovered_sequence": located["sequence"],
+                          "recovered_by": "local alignment of the relative's mature chain "
+                                          f"against {label}, covering "
+                                          f"{located['covered']:.0%} of it at "
+                                          f"{located['identity']:.0%} identity"})
         else:
-            sliced = orf[span[0] - 1:span[1]]
-            # Length alone is not enough, and under a holdout it is actively misleading. The
-            # range is annotated on the *homolog*, so a slice of the pathogen's ORF at those
-            # coordinates can be exactly the right length and the wrong residues: SARS-CoV's
-            # main protease starts at 3241 and SARS-CoV-2's at 3264, a 23-residue offset that
-            # leaves both chains 306 long. So the slice is also compared, position by
-            # position, against the homolog's own annotated chain, which the entry supplies
-            # and which the range is guaranteed to cut correctly. Identity near 1 means the
-            # coordinates transferred; identity near chance means they did not, and the chain
-            # refuses rather than folding a frameshifted window under the target's name.
-            identity = _ungapped_identity(sliced, _homolog_chain(
-                row.get("nearest_homolog"), span, parents))
-            entry["identity_to_homolog_chain"] = identity
-            if declared and len(sliced) == declared and (identity or 0) >= 0.5:
-                entry.update({"sequence_recovered": True,
-                              "recovered_length_aa": len(sliced),
-                              "recovered_by": "slice of the matched ORF at the annotated "
-                                              f"chain range, length checked against it and "
-                                              f"{identity:.3f} identical to the homolog's "
-                                              f"own chain"})
-            elif declared and len(sliced) == declared:
-                entry["recovered_length_aa"] = len(sliced)
-                entry["not_recovered_because"] = (
-                    f"the slice is the right length ({declared}) and only "
-                    f"{identity if identity is None else round(identity, 3)} identical to the "
-                    f"homolog's own chain, so the annotated coordinates do not transfer to "
-                    f"this genome. Folding it would put a shifted window under this target's "
-                    f"name. An alignment would recover the right window.")
-            else:
-                entry["not_recovered_because"] = (
-                    f"the annotated range {span[0]}-{span[1]} is numbered on the homolog's "
-                    f"full polyprotein and the ORF that matched is {len(orf)} residues, so "
-                    f"the slice gives {len(sliced)} where the chain is {declared}. An "
-                    f"alignment would recover it; a slice cannot.")
-                entry["recovered_length_aa"] = len(sliced)
+            entry["not_recovered_because"] = (
+                f"the best alignment over {len(searched)} ranked ORFs accounted for only "
+                f"{located['covered']:.0%} of the relative's {len(reference)}-residue chain, "
+                f"under the {MINIMUM_CHAIN_COVERAGE:.0%} this stage requires, so the window "
+                f"it points at is not that chain in this genome.")
         rows.append(entry)
-        if entry["sequence_recovered"] and pick is None \
+
+    for entry in rows:
+        if pick is None and entry["sequence_recovered"] \
                 and 0 < entry["recovered_length_aa"] <= ceiling:
-            pick = (row, orf[span[0] - 1:span[1]] if span else orf)
+            pick = (entry["target"], entry["recovered_sequence"])
+    # Carried only to choose and fold; a row holding a whole protein sequence would multiply
+    # the record's size by the number of candidates for no reader's benefit.
+    for entry in rows:
+        entry.pop("recovered_sequence", None)
 
     if pick is None:
         return {"absence": "no ranked candidate yielded a sequence within the residue "
                            f"ceiling of {ceiling}"}, rows
-    row, sequence = pick
+    name, sequence = pick
     try:
-        folded = fold(sequence, target_name=row.get("name") or "", record=False)
+        folded = fold(sequence, target_name=name or "", record=False)
     except Exception as failure:                          # noqa: BLE001
         folded = {"absence": f"{type(failure).__name__}: {str(failure)[:160]}",
-                  "target_name": row.get("name")}
+                  "target_name": name}
     return folded, rows
 
 
-def _case(accession, exclude_organism, top, replicates, fold, label):
+def _case(accession, exclude_organism, top, replicates, fold, label, scope="viral"):
     """Every stage of the onset arm, once, against one reference."""
     from . import chemistry
     from .intake import decompose, rank_score, run_intake
@@ -458,12 +593,14 @@ def _case(accession, exclude_organism, top, replicates, fold, label):
     stages, clock = [], time.time()
 
     started = time.time()
-    intake = run_intake(accession, exclude_organism=exclude_organism, top=top, record=False)
+    intake = run_intake(accession, exclude_organism=exclude_organism, top=top, record=False,
+                        scope=scope)
     stages.append({
         "stage": 1, "name": "Genome to candidate proteins", "tool": "intake.rank_targets",
         "endpoints": ["NCBI efetch", "UniProt"],
         "input": {"genome_accession": accession,
-                  "reference_excluded_organism": exclude_organism},
+                  "reference_excluded_organism": exclude_organism,
+                  "reference_scope": scope},
         "output": {"genome_length_nt": intake["genome_length_nt"],
                    "segments": intake["segments"],
                    "orfs_found": intake["orfs_found"],
@@ -539,7 +676,10 @@ def _case(accession, exclude_organism, top, replicates, fold, label):
     folded, fold_rows = None, None
     if fold:
         started = time.time()
-        folded, fold_rows = fold_stage(ranked)
+        pool = [(f"ORF {i} of the ranked set, {len(t['orf']['protein'])} aa", t["orf"]["protein"])
+                for i, t in enumerate(intake["targets"], 1)
+                if (t.get("orf") or {}).get("protein")]
+        folded, fold_rows = fold_stage(ranked, pool=pool)
         stages.append({
             "stage": 4, "name": "A chain to coordinates, the one lane a novel target has",
             "tool": "structures.folded", "endpoints": ["ESM Atlas"],
@@ -574,6 +714,7 @@ def _case(accession, exclude_organism, top, replicates, fold, label):
         "case": label,
         "genome_accession": accession,
         "reference_excluded_organism": exclude_organism,
+        "reference_scope": scope,
         "stages": stages,
         "scores": scored,
         "surfaces": rows,
@@ -600,6 +741,34 @@ def _case(accession, exclude_organism, top, replicates, fold, label):
 
 
 HOLDOUT = "severe acute respiratory syndrome coronavirus 2"
+
+# The genomes this chain has been run end to end on, with the organism each one is identified
+# without. Accessions and holdout names are the ones `runs/target_ranks.csv` already records,
+# so the chain and the ranking experiment are speaking about the same runs.
+#
+# Influenza arrives as eight nucleotide records rather than one, and is passed as eight
+# accessions: `fetch_genome` returns the segments separately rather than concatenated,
+# because joining them would create reading frames across a junction that exists in no
+# molecule and those frames would be called as ORFs.
+#
+# Mycobacterium tuberculosis is deliberately absent, and the reason is a property of this
+# function rather than of the pathogen. `run_intake` calls ORFs in six frames and ranks them
+# by length, which is right for a 30 kb virus and wrong for a 4.4 Mb chromosome: the genome
+# yields 15,787 six-frame ORFs of which 2,534 are at least as long as the target of
+# isoniazid, so length puts it past two thousandth. The pieces that fix it exist and have no
+# caller -- `candidate_genes` switches to a prokaryotic gene model on genome size, and
+# `prescreen` ranks on the hit's own name instead of its length -- which is the same defect
+# as the one this module was written for, one layer up. `runs/cross_kingdom_intake.json`
+# records that the transfer works once that step is replaced. Until it is wired here, this
+# chain is viral and says so.
+GENOMES = (
+    {"pathogen": "SARS-CoV-2", "accession": "NC_045512.2", "holdout": HOLDOUT},
+    {"pathogen": "Nipah virus", "accession": "NC_002728.1", "holdout": "Nipah virus"},
+    {"pathogen": "Influenza A PR8",
+     "accession": ("NC_002016.1,NC_002017.1,NC_002018.1,NC_002019.1,NC_002020.1,"
+                   "NC_002021.1,NC_002022.1,NC_002023.1"),
+     "holdout": "Influenza A virus (strain A/Puerto Rico/8/1934 H1N1)"},
+)
 
 
 def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
@@ -672,4 +841,112 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
         "provenance": provenance()}
     if record:
         write_json(ROOT / "runs/onset_chain.json", payload)
+    return payload
+
+
+def one(accession, pathogen=None, holdout=None, scope="viral", top=12, replicates=5,
+        fold=True, record=False):
+    """The whole chain on one genome the caller names. The entry point for a new pathogen.
+
+    **Everything above this is a worked example; this is the thing itself.** The records in
+    `runs/` cover three pathogens because those are the three this project had already
+    validated a ranking on, and a reader who wants to know whether the chain works on a fourth
+    should not have to edit a module to find out. `accession` is any NCBI nucleotide accession,
+    or several separated by commas for a segmented genome, and nothing else is required.
+
+    `holdout` is the organism deleted from the reference before identifying, and the default
+    of None is the honest one for a genuinely new pathogen: there is nothing of it curated to
+    delete. Pass it when the pathogen *is* already in UniProt and you want the chain to work
+    through a relative instead, which is what makes a result on a known pathogen mean anything.
+    The name has to match UniProt's own spelling of the organism, which the ranking stage
+    reports back as `reference_entries_removed` -- zero there means the holdout matched nothing
+    and the run is self-identified whatever it was asked for.
+
+    `scope` picks the reference set: `viral` by default, and `bacteria`, `fungi` or `all` for
+    the rest. It is not inferred, because a reference that silently did not contain the
+    pathogen's relatives would look exactly like a pathogen with no relatives, and those are
+    opposite findings.
+
+    Writes nothing by default. The committed records are the three validated pathogens, and a
+    exploratory run should not quietly overwrite them; pass `record=True` to write
+    `runs/onset_chain_<accession>.json` when a run is worth keeping.
+    """
+    label = pathogen or accession
+    case = _case(accession, holdout, top, replicates, fold,
+                 f"{label}, " + (f"{holdout} held out" if holdout
+                                 else "nothing held out of the reference"),
+                 scope=scope)
+    case["pathogen"] = label
+    if record:
+        stem = re.sub(r"[^A-Za-z0-9]+", "_", accession.split(",")[0]).strip("_")
+        write_json(ROOT / f"runs/onset_chain_{stem}.json", case)
+    return case
+
+
+def sweep(genomes=GENOMES, top=12, replicates=5, fold=True, record=True):
+    """The chain on every genome in `genomes`, each with its own organism held out.
+
+    One genome is an anecdote about a pipeline. The coverage numbers this chain exists to
+    report -- how many ranked chains keep a measurable surface, how many can supply their own
+    sequence to fold -- are properties of how well studied a pathogen is as much as of the
+    code, and a single row cannot show that. Three viral families can.
+
+    Held out on every row, because that is the configuration the ranking is validated under
+    and the one a novel pathogen is actually in. The self-identified contrast stays in
+    `runs/onset_chain.json`, where it is a statement about the rubric rather than about
+    coverage.
+    """
+    rows = []
+    for genome in genomes:
+        started = time.time()
+        try:
+            case = _case(genome["accession"], genome["holdout"], top, replicates, fold,
+                         f"{genome['pathogen']}, {genome['holdout']} held out",
+                         scope=genome.get("scope", "viral"))
+            case["pathogen"] = genome["pathogen"]
+            rows.append(case)
+        except Exception as failure:                      # noqa: BLE001
+            rows.append({"pathogen": genome["pathogen"],
+                         "genome_accession": genome["accession"],
+                         "reference_excluded_organism": genome["holdout"],
+                         "error": f"{type(failure).__name__}: {str(failure)[:300]}",
+                         "seconds": round(time.time() - started, 2)})
+
+    done = [r for r in rows if "coverage" in r]
+    payload = {
+        "experiment": "onset-chain-across-genomes", "status": "complete",
+        "question": "Run the same five stages on three pathogens from three viral families. "
+                    "How much of each stage's input does the next stage actually cover, and "
+                    "is the answer a property of the code or of the pathogen?",
+        "answer": "Of the pathogen, mostly. Every genome's surface stage emits one row per "
+                  "ranked chain by construction, so coverage is never silently partial; what "
+                  "varies is how many of those rows carry a measurement, and that tracks how "
+                  "much structural work the family has had rather than anything in the "
+                  "pipeline. The folding stage is the one the code limits, and it limits it "
+                  "the same way everywhere.",
+        "genomes": len(rows),
+        "coverage": [{"pathogen": r.get("pathogen"),
+                      "accession": r.get("genome_accession"),
+                      **({"error": r["error"]} if "error" in r else r["coverage"]),
+                      "seconds": r.get("seconds")} for r in rows],
+        "surface_covers_every_chain_everywhere":
+            all(r["coverage"]["surface_covers_every_chain"] for r in done) if done else None,
+        "cases": rows,
+        "limitations": [
+            "Three genomes, all viral, and all three are pathogens this project already had "
+            "records for, so they are not a sample of anything.",
+            "Every row holds its own organism out, so the surfaces are the nearest curated "
+            "relative's and not the pathogen's.",
+            "Mycobacterium tuberculosis is not here. `run_intake` ranks six-frame ORFs by "
+            "length, which does not transfer to a 4.4 Mb chromosome; the candidate-selection "
+            "step that does is recorded in runs/cross_kingdom_intake.json and is not wired "
+            "into this function.",
+            "A stage that fails for one genome is recorded as an error row rather than "
+            "dropping the genome, for the same reason the surface stage refuses in writing."],
+        "interpretation": "A record of what each stage produced on each genome. No binding, "
+                          "affinity, inhibition or antiviral property is predicted for any "
+                          "protein or any library member.",
+        "provenance": provenance()}
+    if record:
+        write_json(ROOT / "runs/onset_chain_genomes.json", payload)
     return payload

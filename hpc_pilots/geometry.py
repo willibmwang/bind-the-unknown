@@ -139,6 +139,16 @@ def _residues(path, chain=None):
     return out
 
 
+def _resnum(number):
+    """The numeric part of an author residue number, insertion code dropped.
+
+    PDB author numbering is a string: `52`, `52A`, `-3`. The clip below and the sequon
+    ordering both need it as an integer, and both were parsing it inline.
+    """
+    digits = "".join(c for c in str(number) if c.isdigit() or c == "-")
+    return int(digits) if digits not in ("", "-") else 0
+
+
 def _letter(three):
     table = {"ALA": "A", "ARG": "R", "ASN": "N", "ASP": "D", "CYS": "C", "GLN": "Q",
              "GLU": "E", "GLY": "G", "HIS": "H", "ILE": "I", "LEU": "L", "LYS": "K",
@@ -147,19 +157,121 @@ def _letter(three):
     return table.get(three.strip().upper(), "X")
 
 
-def surface_markers(pdb_id, chain=None):
-    """Interface-shaped markers for one structure.
+def numbering_offset(residues, sequence, seed=12):
+    """What this chain's author numbering has to be shifted by to read as UniProt positions.
+
+    PDBe's mapping endpoint publishes an author residue number for some entries and `null`
+    for others -- 9fc2 maps the spike at UniProt 332 to 534 and gives no author number for
+    either end -- so a clip depending on it alone stops clipping on roughly half of what it is
+    pointed at, which is the failure this change exists to end. Assuming a convention instead
+    is worse: viral proteins are often deposited in their parent's numbering, mature chains of
+    a polyprotein are usually renumbered from 1, and picking either one blindly selects the
+    wrong residues on everything that uses the other.
+
+    So the offset is read off the structure that was downloaded anyway. A window of residues
+    with consecutive author numbers is a substring of the reference sequence wherever the
+    chain really sits, and finding it gives the shift directly; the shift is then scored
+    against every observed residue, so a window that matched by chance scores badly and is
+    discarded. Returns `(offset, agreement)` with `unp_position = author_number + offset`, or
+    `(None, 0.0)` when nothing lines up.
+
+    Three windows rather than one, because a single window can fall across a modified residue
+    or an engineered mutation, and because a short repeat can place it in the wrong copy.
+    """
+    if not residues or not sequence:
+        return None, 0.0
+    ordered = sorted(residues, key=lambda r: _resnum(r["number"]))
+    numbers = [_resnum(r["number"]) for r in ordered]
+    letters = [_letter(r["residue"]) for r in ordered]
+
+    # Runs of consecutive author numbers, since only those are substrings of the reference.
+    runs, start = [], 0
+    for i in range(1, len(numbers) + 1):
+        if i == len(numbers) or numbers[i] != numbers[i - 1] + 1:
+            if i - start >= seed:
+                runs.append((start, i))
+            start = i
+    if not runs:
+        return None, 0.0
+
+    candidates = set()
+    for low, high in runs:
+        for fraction in (0.25, 0.5, 0.75):
+            at = low + int((high - low - seed) * fraction)
+            window = "".join(letters[at:at + seed])
+            if "X" in window:
+                continue
+            found = sequence.find(window)
+            if found >= 0:
+                candidates.add((found + 1) - numbers[at])
+
+    best, score = None, 0.0
+    for offset in candidates:
+        hits = total = 0
+        for number, letter in zip(numbers, letters):
+            position = number + offset
+            if not 1 <= position <= len(sequence):
+                continue
+            total += 1
+            hits += letter == sequence[position - 1]
+        agreement = hits / total if total else 0.0
+        if agreement > score:
+            best, score = offset, round(agreement, 4)
+    return best, score
+
+
+# How much of a chain's observed sequence has to land where the inferred offset says before
+# the clip is taken from it. High on purpose: not clipping leaves the status quo, which is
+# merely imprecise, while clipping at a wrong offset selects the wrong residues entirely.
+NUMBERING_AGREEMENT = 0.9
+
+
+def surface_markers(pdb_id, chain=None, keep=None, verify=None):
+    """Interface-shaped markers for one structure, optionally for one domain of it.
 
     `chain` restricts the calculation to one polymer, which matters for a complex: the spike
     receptor-binding domain deposited with ACE2 has its best patch buried by the partner, and
     measuring the pair would report the interface as inaccessible when it is the target.
+
+    `keep` is an inclusive `(low, high)` range of author residue numbers, and restricts the
+    patch search to a domain within the chain. **It does not restrict the accessibility
+    calculation**, and the difference is the whole point of the argument. Solvent accessibility
+    is a property of a residue in its surroundings, so a domain cut out of its chain and
+    measured alone exposes the face that was never solvent-facing. The SASA is therefore
+    computed on the deposited file exactly as before, and only the search for a patch -- and
+    the surface the patch is reported as a fraction of -- is confined to the domain.
+
+    Without it the quantity is the largest patch anywhere on the deposited chain, which for a
+    construct much larger than the target is not the target's patch at all: SARS-CoV-2's nsp3
+    is a 1,945-residue chain carrying the 265-residue papain-like protease, and the largest
+    patch on the construct belongs to whichever of its domains happens to carry one.
     """
     residues = _residues(fetch_structure(pdb_id), chain)
     if not residues:
         return {"pdb_id": pdb_id, "chain": chain, "residues": 0, "error": "no residues read"}
 
-    exposed = [r for r in residues if r["rsa"] >= EXPOSED_RSA]
-    total_sasa = sum(r["sasa"] for r in residues)
+    # No author numbering from the mapping endpoint, but a reference sequence to locate the
+    # chain in: infer the shift from the residues themselves and clip at it.
+    agreement, offset = None, None
+    if keep is None and verify and verify.get("sequence") and verify.get("interval"):
+        offset, agreement = numbering_offset(residues, verify["sequence"])
+        if offset is not None and agreement >= NUMBERING_AGREEMENT:
+            low, high = verify["interval"]
+            keep = (low - offset, high - offset)
+
+    # The patch search runs over the domain; the accessibility behind it was computed in the
+    # whole chain's company, partners included.
+    within = residues
+    if keep:
+        low, high = keep
+        within = [r for r in residues if low <= _resnum(r["number"]) <= high]
+        if not within:
+            return {"pdb_id": pdb_id, "chain": chain, "residues": len(residues),
+                    "residues_in_range": 0, "keep": [low, high],
+                    "error": f"no residue of this chain is numbered inside {low}-{high}"}
+
+    exposed = [r for r in within if r["rsa"] >= EXPOSED_RSA]
+    total_sasa = sum(r["sasa"] for r in within)
     hydrophobic = [r for r in exposed if _letter(r["residue"]) in HYDROPHOBIC]
 
     # Connected components over exposed hydrophobic residues. A patch is what a macrocycle can
@@ -195,8 +307,10 @@ def surface_markers(pdb_id, chain=None):
     # Sequons are read on the patch, not the whole protein: shielding matters where the
     # binding would happen. Sequence order within the chain is reconstructed from residue
     # numbers, which is adequate for the N-X-S/T motif.
-    ordered = sorted(residues, key=lambda r: (r["chain"], int("".join(
-        c for c in r["number"] if c.isdigit() or c == "-") or 0)))
+    # Scanned over the whole chain even when the patch search was confined to a domain: a
+    # glycan anchored on the neighbouring domain still reaches across and shields the site.
+    # Only membership in the patch is restricted, never what can shadow it.
+    ordered = sorted(residues, key=lambda r: (r["chain"], _resnum(r["number"])))
     sequence = "".join(_letter(r["residue"]) for r in ordered)
     # Counted NEAR the patch, not in it, and the distinction is the difference between a live
     # term and a dead one. The patch is hydrophobic by construction and asparagine is not
@@ -221,8 +335,11 @@ def surface_markers(pdb_id, chain=None):
 
     return {
         "pdb_id": pdb_id, "chain": chain,
-        "residues": len(residues), "exposed_residues": len(exposed),
-        "exposed_fraction": round(len(exposed) / len(residues), 3),
+        "residues": len(residues), "residues_in_range": len(within),
+        "keep": list(keep) if keep else None,
+        "numbering_agreement": agreement, "numbering_offset": offset,
+        "exposed_residues": len(exposed),
+        "exposed_fraction": round(len(exposed) / len(within), 3),
         "total_sasa": round(total_sasa, 1),
         "hydrophobic_patch_area": round(patch_area, 1),
         "hydrophobic_patch_residues": len(best),
@@ -262,44 +379,97 @@ def macrocycle_surface_score(markers):
 # Attaching surface markers to a ranked candidate.
 
 def representative_structure(accession, minimum_residues=50, interval=None):
-    """The best-resolution deposited chain for one UniProt accession, or None.
+    """The best-resolution deposited chains for one UniProt accession, or None.
 
     Picks on resolution rather than on coverage, because the markers are computed on whatever
     is present and a sharper structure gives better side-chain placement, which is what the
     accessibility calculation depends on. Chains shorter than `minimum_residues` are skipped:
     a peptide fragment co-crystallised with something else has a surface, but not the target's.
-    """
-    from .structures_evidence import chains
 
-    from .structures_evidence import covers
+    **Rows are grouped per chain before anything is decided.** SIFTS returns one row per
+    contiguous mapped segment, so a chain that maps to the accession in two pieces arrives as
+    two rows. Judged separately, each piece can fail the coverage threshold while the chain
+    passes it, and the same chain can be offered twice as if it were two structures.
+
+    Each pick carries `keep`, the author-numbering range answering to `interval`, read from
+    the entry's own UniProt-to-author mapping. The offset is constant within one mapped
+    segment, which is what makes the conversion exact rather than an assumption about the
+    construct -- but it has to come from the mapping endpoint, because the `start` field
+    beside `unp_start` in `best_structures` is the residue's index within the entity and not
+    its author number. A chain whose entry gives no author number is measured unclipped and
+    says so, rather than being clipped in a numbering it does not use.
+
+    Returned as a list rather than a single pick, because the best-resolution entry is often
+    the newest and the newest are frequently mmCIF-only: RCSB stopped emitting legacy PDB
+    files for recent depositions, so the 1.16-angstrom main-protease structure this chose
+    first answers 404. Picking on resolution selects for exactly the entries most likely to be
+    missing the format, which is why one pick is not enough.
+    """
+    from .structures_evidence import chains, residue_mapping
+
+    by_chain = {}
+    for row in chains(accession):
+        if row.get("resolution") is None:
+            continue
+        if row.get("unp_start") is None or row.get("unp_end") is None:
+            continue
+        by_chain.setdefault((row["pdb_id"], row["chain_id"]), []).append(row)
 
     ranked = []
-    for row in chains(accession):
-        resolution = row.get("resolution")
-        if resolution is None:
+    for (pdb, chain), rows in by_chain.items():
+        mapped = sum((r["unp_end"] or 0) - (r["unp_start"] or 0) for r in rows)
+        if mapped < minimum_residues:
             continue
-        length = (row.get("unp_end") or 0) - (row.get("unp_start") or 0)
-        if length < minimum_residues:
-            continue
-        # Restricted to structures actually covering the domain, when one is named. Without
-        # this every mature chain of a polyprotein resolves to the same parent accession and
-        # therefore to the same structure: the main protease, the polymerase, the helicase and
-        # the papain-like protease of SARS-CoV-2 all received one surface score of 2.85 and one
-        # patch of 381 square angstroms, which is the replicase's and none of theirs.
-        if interval and not covers(row, interval, 0.5):
-            continue
-        ranked.append((resolution, row["pdb_id"], row["chain_id"]))
+        if interval:
+            # Restricted to chains actually covering the domain. Without this every mature
+            # chain of a polyprotein resolves to the same parent accession and therefore to
+            # the same structure: the main protease, the polymerase, the helicase and the
+            # papain-like protease of SARS-CoV-2 all received one surface score of 2.85 and
+            # one patch of 381 square angstroms, which is the replicase's and none of theirs.
+            want = interval["end"] - interval["start"] + 1
+            overlap = sum(max(0, min(r["unp_end"], interval["end"])
+                              - max(r["unp_start"], interval["start"]) + 1) for r in rows)
+            if overlap < 0.5 * want:
+                continue
+        ranked.append((min(r["resolution"] for r in rows), pdb, chain))
     if not ranked:
         return None
     ranked.sort()
 
-    # Returned as a list rather than a single pick, because the best-resolution entry is
-    # often the newest and the newest are frequently mmCIF-only: RCSB stopped emitting legacy
-    # PDB files for recent depositions, so the 1.16-angstrom main-protease structure this
-    # chose first answers 404. Picking on resolution selects for exactly the entries most
-    # likely to be missing the format, which is why one pick is not enough.
-    return [{"pdb_id": pdb, "chain": chain, "resolution": resolution}
-            for resolution, pdb, chain in ranked[:8]]
+    # The author numbering is resolved here and not in the loop above, because it costs one
+    # request per entry and the loop above runs over every chain mapped to the accession --
+    # 7,227 of them for the SARS-CoV-2 replicase. Asking PDBe for all of those to use eight is
+    # how this earned a connection reset; the coverage filter needs only the UniProt numbering
+    # that `chains` already returned, and the author numbering is needed only where a
+    # measurement will actually be taken.
+    picks = []
+    for resolution, pdb, chain in ranked[:8]:
+        keep = None
+        if interval:
+            try:
+                segments = residue_mapping(pdb, accession).get(chain, ())
+            except Exception:                             # noqa: BLE001
+                segments = ()
+            spans = []
+            for unp_low, unp_high, auth_low, _ in segments:
+                low = max(unp_low, interval["start"])
+                high = min(unp_high, interval["end"])
+                if low > high:
+                    continue
+                offset = auth_low - unp_low
+                spans.append((low + offset, high + offset))
+            # One range across the mapped segments. A chain whose segments are far apart in
+            # author numbering keeps the residues between them in the search, which is the
+            # conservative direction: it can only make the patch larger, never smaller, so a
+            # clipped measurement never overstates how confined the search was.
+            #
+            # No span at all means the entry published no author numbering for this chain, or
+            # the lookup failed. The chain is then measured whole and says so, through `keep`
+            # coming back null on the markers, rather than being dropped or clipped in a
+            # numbering it does not use.
+            keep = (min(a for a, _ in spans), max(b for _, b in spans)) if spans else None
+        picks.append({"pdb_id": pdb, "chain": chain, "resolution": resolution, "keep": keep})
+    return picks
 
 
 def surface_for_accession(accession, interval=None, replicates=5, cache={}):
@@ -323,8 +493,43 @@ def surface_for_accession(accession, interval=None, replicates=5, cache={}):
     try:
         picks = representative_structure(accession, interval=interval)
         if not picks:
-            cache[key] = None
-            return None
+            # Why there was nothing to measure, not merely that there was nothing. The two
+            # cases read identically from outside and are opposite findings: an accession
+            # PDBe maps no chain to at all is a statement about which entry the pipeline
+            # landed on, and an accession with chains none of which reach the domain is a
+            # statement about what has been solved of that protein. Influenza is the first
+            # case across the board -- its reviewed entries are split so finely by strain
+            # that the nearest curated relative of a held-out protein is usually an entry
+            # with no structure of its own, while influenza proteins are among the best
+            # solved in virology.
+            from .structures_evidence import chains
+
+            try:
+                mapped = len(chains(accession))
+            except Exception:                             # noqa: BLE001
+                mapped = None
+            cache[key] = {
+                "error": (f"PDBe maps no deposited chain to {accession} at all. The protein "
+                          f"may be well solved under another accession; this entry is not it."
+                          if mapped == 0 else
+                          f"{mapped} chains map to {accession} and none covers "
+                          f"{interval['start']}-{interval['end']}" if interval and mapped
+                          else f"no usable deposited chain maps to {accession}"),
+                "chains_mapped_to_accession": mapped,
+                "surface_score": None}
+            return cache[key]
+        # Fetched once per accession and only when a domain was asked for: the fallback test
+        # for a chain whose entry published no author numbering needs the reference sequence
+        # those numbers would index into.
+        verify = None
+        if interval and any(pick.get("keep") is None for pick in picks):
+            try:
+                from .intake import _entry
+
+                verify = {"sequence": _entry(accession)["sequence"]["value"],
+                          "interval": (interval["start"], interval["end"])}
+            except Exception:                             # noqa: BLE001
+                verify = None
         # Measured over several structures of the same domain, not one. A single structure is
         # one sample of a conformational ensemble and the quantity being thresholded moves
         # with it: SARS-CoV-2's main protease measures 343 square angstroms through one
@@ -336,7 +541,8 @@ def surface_for_accession(accession, interval=None, replicates=5, cache={}):
         samples, reasons = [], []
         for pick in picks:
             try:
-                measured = surface_markers(pick["pdb_id"], pick["chain"])
+                measured = surface_markers(pick["pdb_id"], pick["chain"],
+                                           keep=pick.get("keep"), verify=verify)
             except ImportError:
                 # Never swallowed into a per-structure skip. A missing SASA backend fails
                 # identically on every structure, so swallowing it turns one environment
@@ -383,12 +589,31 @@ def surface_for_accession(accession, interval=None, replicates=5, cache={}):
         areas = [m["hydrophobic_patch_area"] for m in samples]
         scores = [m["surface_score"] for m in samples if m["surface_score"] is not None]
         markers = dict(samples[0])
+        # Every quantity a consumer reads has to come from the same place as the area, which
+        # is the median over the replicates. Copying the first sample's dict and overriding
+        # only the areas left the patch fraction and the exposed fraction belonging to
+        # whichever structure happened to sort first: the influenza HA stem reported a median
+        # patch of 0 beside a patch fraction of 0.281, two numbers about different structures
+        # printed as if they described one, and the gate reads both.
+        for field in ("patch_fraction_of_surface", "exposed_fraction"):
+            markers[field] = round(median([m[field] for m in samples]), 3)
+        for field in ("residues", "residues_in_range", "hydrophobic_patch_residues"):
+            values = [m[field] for m in samples if m.get(field) is not None]
+            markers[field] = int(median(values)) if values else None
+        # Singular facts about one structure, and misleading on an aggregate. The per-structure
+        # values stay reachable through `structures_used`.
+        for field in ("keep", "numbering_offset", "numbering_agreement", "resolution"):
+            markers.pop(field, None)
         markers["hydrophobic_patch_area"] = round(median(areas), 1)
         markers["patch_area_min"] = round(min(areas), 1)
         markers["patch_area_max"] = round(max(areas), 1)
         markers["patch_area_spread"] = round(max(areas) - min(areas), 1)
         markers["structures_measured"] = len(samples)
         markers["structures_used"] = [f"{m['pdb_id']}:{m['chain']}" for m in samples]
+        # How many of the replicates the patch search was actually confined to the domain on.
+        # A median taken over a mix of clipped and whole-chain measurements is a mix of two
+        # quantities, and a reader cannot see that from the median.
+        markers["structures_clipped_to_domain"] = sum(1 for m in samples if m.get("keep"))
         markers["surface_score"] = round(median(scores), 4) if scores else None
         # When this claim became knowable, which is the earliest deposition among the
         # structures it was actually measured on. Without it the markers are a 2026

@@ -1,0 +1,3081 @@
+{
+  "experiment": "onset-chain-across-genomes",
+  "status": "complete",
+  "question": "Run the same five stages on three pathogens from three viral families. How much of each stage's input does the next stage actually cover, and is the answer a property of the code or of the pathogen?",
+  "answer": "Of the pathogen, mostly. Every genome's surface stage emits one row per ranked chain by construction, so coverage is never silently partial; what varies is how many of those rows carry a measurement, and that tracks how much structural work the family has had rather than anything in the pipeline. The folding stage is the one the code limits, and it limits it the same way everywhere.",
+  "genomes": 3,
+  "coverage": [
+    {
+      "pathogen": "SARS-CoV-2",
+      "accession": "NC_045512.2",
+      "chains_ranked": 20,
+      "surface_rows": 20,
+      "surface_measured": 9,
+      "surface_refused": 11,
+      "surface_covers_every_chain": true,
+      "fold_rows": 20,
+      "fold_sequence_recovered": 20,
+      "fold_covers_every_chain": true,
+      "seconds": 351.38
+    },
+    {
+      "pathogen": "Nipah virus",
+      "accession": "NC_002728.1",
+      "chains_ranked": 8,
+      "surface_rows": 8,
+      "surface_measured": 6,
+      "surface_refused": 2,
+      "surface_covers_every_chain": true,
+      "fold_rows": 8,
+      "fold_sequence_recovered": 8,
+      "fold_covers_every_chain": true,
+      "seconds": 101.6
+    },
+    {
+      "pathogen": "Influenza A PR8",
+      "accession": "NC_002016.1,NC_002017.1,NC_002018.1,NC_002019.1,NC_002020.1,NC_002021.1,NC_002022.1,NC_002023.1",
+      "chains_ranked": 9,
+      "surface_rows": 9,
+      "surface_measured": 0,
+      "surface_refused": 9,
+      "surface_covers_every_chain": true,
+      "fold_rows": 9,
+      "fold_sequence_recovered": 9,
+      "fold_covers_every_chain": true,
+      "seconds": 46.71
+    }
+  ],
+  "surface_covers_every_chain_everywhere": true,
+  "cases": [
+    {
+      "case": "SARS-CoV-2, severe acute respiratory syndrome coronavirus 2 held out",
+      "genome_accession": "NC_045512.2",
+      "reference_excluded_organism": "severe acute respiratory syndrome coronavirus 2",
+      "stages": [
+        {
+          "stage": 1,
+          "name": "Genome to candidate proteins",
+          "tool": "intake.rank_targets",
+          "endpoints": [
+            "NCBI efetch",
+            "UniProt"
+          ],
+          "input": {
+            "genome_accession": "NC_045512.2",
+            "reference_excluded_organism": "severe acute respiratory syndrome coronavirus 2"
+          },
+          "output": {
+            "genome_length_nt": 29903,
+            "segments": 1,
+            "orfs_found": 28,
+            "orfs_ranked": 12,
+            "reference_entries": 17512,
+            "reference_entries_removed": null,
+            "identified": 9,
+            "unidentified": 3
+          },
+          "seconds": 11.11,
+          "hands_to_next": "one reviewed accession and one residue range per candidate"
+        },
+        {
+          "stage": 2,
+          "name": "Polyproteins to mature chains, and the score for each",
+          "tool": "intake.decompose + intake.rank_score",
+          "endpoints": [
+            "UniProt"
+          ],
+          "input": {
+            "candidates_in": 12
+          },
+          "output": {
+            "chains_out": 20,
+            "rubric": {
+              "conservation": 3.0,
+              "surface_exposed": 2.0,
+              "essential_class": 1.5,
+              "druggable_class": 0.8,
+              "structures_in_family_capped": 0.5
+            },
+            "all_decompositions_reproduce_the_score": true
+          },
+          "seconds": 307.44,
+          "hands_to_next": "every chain, with the accession and range its surface is measured on"
+        },
+        {
+          "stage": 3,
+          "name": "Every chain to a measured surface, or a stated reason",
+          "tool": "geometry.surface_markers",
+          "endpoints": [
+            "PDBe",
+            "RCSB",
+            "UniProt"
+          ],
+          "input": {
+            "candidates_in": 20
+          },
+          "output": {
+            "rows_out": 20,
+            "measured": 9,
+            "unmeasured": 11,
+            "nothing_dropped": true,
+            "gate_yes": 0,
+            "gate_borderline": 0,
+            "gate_no": 9
+          },
+          "seconds": 30.65,
+          "hands_to_next": "a patch median and range per chain; nothing downstream reads it yet"
+        },
+        {
+          "stage": 4,
+          "name": "A chain to coordinates, the one lane a novel target has",
+          "tool": "structures.folded",
+          "endpoints": [
+            "ESM Atlas"
+          ],
+          "input": {
+            "candidates_in": 20
+          },
+          "output": {
+            "foldable": 20,
+            "not_foldable": 0,
+            "folded_target": "3C-like proteinase nsp5",
+            "residues": 306,
+            "mean_plddt": 62.57,
+            "at_or_above_70": 0.4641,
+            "sequence_sha256": "50ec190141bd451b4b7efdf7378d3a516e559004b5335ab9bb341a596691c92e",
+            "error": null
+          },
+          "seconds": 2.18,
+          "hands_to_next": "coordinates. Nothing downstream reads them yet: the surface stage measures deposited structures, not predicted ones"
+        },
+        {
+          "stage": 5,
+          "name": "A library definition over the randomised region",
+          "tool": "chemistry.library_spec",
+          "endpoints": [
+            "local tables"
+          ],
+          "input": {
+            "reads_from_upstream": []
+          },
+          "output": {
+            "initiator": "ClAc-D-Tyr",
+            "closure_residue": "C",
+            "random_region": [
+              4,
+              8
+            ],
+            "alphabet_size": 25,
+            "theoretical_diversity": 158945703125
+          },
+          "seconds": 0.0,
+          "hands_to_next": "the position count the go/no-go test in arm 2 reads"
+        }
+      ],
+      "scores": [
+        {
+          "rank": 1,
+          "target": "Spike protein S2'",
+          "parent": "SPIKE_BCHK3 Spike glycoprotein",
+          "tier": "exact",
+          "nearest_homolog": "Q3LZX1",
+          "chain_range": [
+            785,
+            1242
+          ],
+          "conservation": 0.462,
+          "surface_exposed": true,
+          "essential_class": true,
+          "druggable_class": 2,
+          "structures_in_family": 42,
+          "score_terms": {
+            "conservation": 1.386,
+            "surface_exposed": 2.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.42,
+            "druggable_class": 1.6
+          },
+          "score": 6.906,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 2,
+          "target": "3C-like proteinase nsp5",
+          "parent": "R1AB_SARS Replicase polyprotein 1ab",
+          "tier": "exact",
+          "nearest_homolog": "P0C6X7",
+          "chain_range": [
+            3241,
+            3546
+          ],
+          "conservation": 0.8348,
+          "surface_exposed": false,
+          "essential_class": true,
+          "druggable_class": 3,
+          "structures_in_family": 58,
+          "score_terms": {
+            "conservation": 2.5044,
+            "surface_exposed": 0.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.5,
+            "druggable_class": 2.4
+          },
+          "score": 6.9044,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 3,
+          "target": "Spike protein S2",
+          "parent": "SPIKE_BCHK3 Spike glycoprotein",
+          "tier": "exact",
+          "nearest_homolog": "Q3LZX1",
+          "chain_range": [
+            655,
+            1242
+          ],
+          "conservation": 0.462,
+          "surface_exposed": true,
+          "essential_class": true,
+          "druggable_class": 2,
+          "structures_in_family": 40,
+          "score_terms": {
+            "conservation": 1.386,
+            "surface_exposed": 2.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.4,
+            "druggable_class": 1.6
+          },
+          "score": 6.886,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 4,
+          "target": "Spike protein S1",
+          "parent": "SPIKE_BCHK3 Spike glycoprotein",
+          "tier": "exact",
+          "nearest_homolog": "Q3LZX1",
+          "chain_range": [
+            14,
+            654
+          ],
+          "conservation": 0.462,
+          "surface_exposed": true,
+          "essential_class": true,
+          "druggable_class": 2,
+          "structures_in_family": 39,
+          "score_terms": {
+            "conservation": 1.386,
+            "surface_exposed": 2.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.39,
+            "druggable_class": 1.6
+          },
+          "score": 6.876,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 5,
+          "target": "RNA-directed RNA polymerase nsp12",
+          "parent": "R1AB_SARS Replicase polyprotein 1ab",
+          "tier": "exact",
+          "nearest_homolog": "P0C6X7",
+          "chain_range": [
+            4370,
+            5301
+          ],
+          "conservation": 0.8348,
+          "surface_exposed": false,
+          "essential_class": true,
+          "druggable_class": 3,
+          "structures_in_family": 2,
+          "score_terms": {
+            "conservation": 2.5044,
+            "surface_exposed": 0.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.02,
+            "druggable_class": 2.4
+          },
+          "score": 6.4244,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 6,
+          "target": "Papain-like protease nsp3",
+          "parent": "R1AB_SARS Replicase polyprotein 1ab",
+          "tier": "exact",
+          "nearest_homolog": "P0C6X7",
+          "chain_range": [
+            819,
+            2740
+          ],
+          "conservation": 0.8348,
+          "surface_exposed": false,
+          "essential_class": true,
+          "druggable_class": 3,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 2.5044,
+            "surface_exposed": 0.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.0,
+            "druggable_class": 2.4
+          },
+          "score": 6.4044,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 7,
+          "target": "Helicase nsp13",
+          "parent": "R1AB_SARS Replicase polyprotein 1ab",
+          "tier": "exact",
+          "nearest_homolog": "P0C6X7",
+          "chain_range": [
+            5302,
+            5902
+          ],
+          "conservation": 0.8348,
+          "surface_exposed": false,
+          "essential_class": true,
+          "druggable_class": 2,
+          "structures_in_family": 1,
+          "score_terms": {
+            "conservation": 2.5044,
+            "surface_exposed": 0.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.01,
+            "druggable_class": 1.6
+          },
+          "score": 5.6144,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 8,
+          "target": "VME1_BC279 Membrane protein",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "Q0Q472",
+          "chain_range": null,
+          "conservation": 0.6267,
+          "surface_exposed": true,
+          "essential_class": false,
+          "druggable_class": 2,
+          "structures_in_family": 4,
+          "score_terms": {
+            "conservation": 1.8801,
+            "surface_exposed": 2.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.04,
+            "druggable_class": 1.6
+          },
+          "score": 5.5201,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 9,
+          "target": "AP3A_BC279 Protein 3",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "Q0Q474",
+          "chain_range": null,
+          "conservation": 0.3185,
+          "surface_exposed": true,
+          "essential_class": false,
+          "druggable_class": 2,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 0.9555,
+            "surface_exposed": 2.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.0,
+            "druggable_class": 1.6
+          },
+          "score": 4.5555,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 10,
+          "target": "NCAP_BCRP3 Nucleoprotein",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "Q3I5I7",
+          "chain_range": null,
+          "conservation": 0.6337,
+          "surface_exposed": false,
+          "essential_class": true,
+          "druggable_class": 0,
+          "structures_in_family": 10,
+          "score_terms": {
+            "conservation": 1.9011,
+            "surface_exposed": 0.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.1,
+            "druggable_class": 0.0
+          },
+          "score": 3.5011,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 11,
+          "target": "Non-structural protein 10",
+          "parent": "R1AB_SARS Replicase polyprotein 1ab",
+          "tier": "exact",
+          "nearest_homolog": "P0C6X7",
+          "chain_range": [
+            4231,
+            4369
+          ],
+          "conservation": 0.8348,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 8,
+          "score_terms": {
+            "conservation": 2.5044,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.08,
+            "druggable_class": 0.0
+          },
+          "score": 2.5844,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 12,
+          "target": "Host translation inhibitor nsp1",
+          "parent": "R1AB_SARS Replicase polyprotein 1ab",
+          "tier": "exact",
+          "nearest_homolog": "P0C6X7",
+          "chain_range": [
+            1,
+            180
+          ],
+          "conservation": 0.8348,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 2,
+          "score_terms": {
+            "conservation": 2.5044,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.02,
+            "druggable_class": 0.0
+          },
+          "score": 2.5244,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 13,
+          "target": "Non-structural protein 7",
+          "parent": "R1AB_SARS Replicase polyprotein 1ab",
+          "tier": "exact",
+          "nearest_homolog": "P0C6X7",
+          "chain_range": [
+            3837,
+            3919
+          ],
+          "conservation": 0.8348,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 2,
+          "score_terms": {
+            "conservation": 2.5044,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.02,
+            "druggable_class": 0.0
+          },
+          "score": 2.5244,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 14,
+          "target": "Non-structural protein 8",
+          "parent": "R1AB_SARS Replicase polyprotein 1ab",
+          "tier": "exact",
+          "nearest_homolog": "P0C6X7",
+          "chain_range": [
+            3920,
+            4117
+          ],
+          "conservation": 0.8348,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 2,
+          "score_terms": {
+            "conservation": 2.5044,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.02,
+            "druggable_class": 0.0
+          },
+          "score": 2.5244,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 15,
+          "target": "Viral protein genome-linked nsp9",
+          "parent": "R1AB_SARS Replicase polyprotein 1ab",
+          "tier": "exact",
+          "nearest_homolog": "P0C6X7",
+          "chain_range": [
+            4118,
+            4230
+          ],
+          "conservation": 0.8348,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 2,
+          "score_terms": {
+            "conservation": 2.5044,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.02,
+            "druggable_class": 0.0
+          },
+          "score": 2.5244,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 16,
+          "target": "Non-structural protein 2",
+          "parent": "R1AB_SARS Replicase polyprotein 1ab",
+          "tier": "exact",
+          "nearest_homolog": "P0C6X7",
+          "chain_range": [
+            181,
+            818
+          ],
+          "conservation": 0.8348,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 1,
+          "score_terms": {
+            "conservation": 2.5044,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.01,
+            "druggable_class": 0.0
+          },
+          "score": 2.5144,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 17,
+          "target": "Non-structural protein 4",
+          "parent": "R1AB_SARS Replicase polyprotein 1ab",
+          "tier": "exact",
+          "nearest_homolog": "P0C6X7",
+          "chain_range": [
+            2741,
+            3240
+          ],
+          "conservation": 0.8348,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 2.5044,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.0,
+            "druggable_class": 0.0
+          },
+          "score": 2.5044,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 18,
+          "target": "Non-structural protein 6",
+          "parent": "R1AB_SARS Replicase polyprotein 1ab",
+          "tier": "exact",
+          "nearest_homolog": "P0C6X7",
+          "chain_range": [
+            3547,
+            3836
+          ],
+          "conservation": 0.8348,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 2.5044,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.0,
+            "druggable_class": 0.0
+          },
+          "score": 2.5044,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 19,
+          "target": "Protein 7a",
+          "parent": "NS7A_BCRP3 Protein 7a",
+          "tier": "exact",
+          "nearest_homolog": "Q3I5J0",
+          "chain_range": [
+            16,
+            122
+          ],
+          "conservation": 0.5385,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 1.6155,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.0,
+            "druggable_class": 0.0
+          },
+          "score": 1.6155,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 20,
+          "target": "ORF9B_SARS ORF9b protein",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "P59636",
+          "chain_range": null,
+          "conservation": 0.3011,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 1,
+          "score_terms": {
+            "conservation": 0.9033,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.01,
+            "druggable_class": 0.0
+          },
+          "score": 0.9133,
+          "decomposition_reproduces_score": true
+        }
+      ],
+      "surfaces": [
+        {
+          "target": "Spike protein S2'",
+          "rank": 1,
+          "identified": true,
+          "measured_on_accession": "Q3LZX1",
+          "chain_range": [
+            785,
+            1242
+          ],
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to Q3LZX1 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.82,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "3C-like proteinase nsp5",
+          "rank": 2,
+          "identified": true,
+          "measured_on_accession": "P0C6X7",
+          "chain_range": [
+            3241,
+            3546
+          ],
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 3.77,
+          "patch_median_a2": 562.4,
+          "patch_range_a2": [
+            335.1,
+            690.4
+          ],
+          "patch_spread_a2": 355.3,
+          "structures_measured": 5,
+          "structures_used": [
+            "6w79:A",
+            "6wco:A",
+            "5c5o:A",
+            "5c5o:B",
+            "3tnt:A"
+          ],
+          "surface_score": 2.952,
+          "patch_fraction_of_surface": 0.044,
+          "structures_clipped_to_domain": 5,
+          "residues_in_range": 306,
+          "exposed_fraction_of_residues": 0.48,
+          "sequons_near_patch": 0,
+          "available_from": "2011-09-02",
+          "locations": [
+            "Host cytoplasm",
+            "Host Golgi apparatus"
+          ],
+          "location_scope": "chain",
+          "exposed": false,
+          "exposed_fraction_of_locations": 0.0,
+          "gate": "no"
+        },
+        {
+          "target": "Spike protein S2",
+          "rank": 3,
+          "identified": true,
+          "measured_on_accession": "Q3LZX1",
+          "chain_range": [
+            655,
+            1242
+          ],
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to Q3LZX1 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.81,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "Spike protein S1",
+          "rank": 4,
+          "identified": true,
+          "measured_on_accession": "Q3LZX1",
+          "chain_range": [
+            14,
+            654
+          ],
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to Q3LZX1 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.84,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "RNA-directed RNA polymerase nsp12",
+          "rank": 5,
+          "identified": true,
+          "measured_on_accession": "P0C6X7",
+          "chain_range": [
+            4370,
+            5301
+          ],
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 1.98,
+          "patch_median_a2": 733.1,
+          "patch_range_a2": [
+            665.5,
+            800.8
+          ],
+          "patch_spread_a2": 135.3,
+          "structures_measured": 2,
+          "structures_used": [
+            "6nur:A",
+            "6nus:A"
+          ],
+          "surface_score": 3.6435,
+          "patch_fraction_of_surface": 0.025,
+          "structures_clipped_to_domain": 2,
+          "residues_in_range": 754,
+          "exposed_fraction_of_residues": 0.394,
+          "sequons_near_patch": 0,
+          "available_from": "2019-02-01",
+          "locations": [
+            "Host cytoplasm",
+            "Host endosome",
+            "Host membrane",
+            "Host cytoplasm"
+          ],
+          "location_scope": "entry union over chains",
+          "exposed": false,
+          "exposed_fraction_of_locations": 0.0,
+          "gate": "no"
+        },
+        {
+          "target": "Papain-like protease nsp3",
+          "rank": 6,
+          "identified": true,
+          "measured_on_accession": "P0C6X7",
+          "chain_range": [
+            819,
+            2740
+          ],
+          "measured": false,
+          "unmeasured_because": "180 chains map to P0C6X7 and none covers 819-2740",
+          "seconds": 1.11,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 180
+        },
+        {
+          "target": "Helicase nsp13",
+          "rank": 7,
+          "identified": true,
+          "measured_on_accession": "P0C6X7",
+          "chain_range": [
+            5302,
+            5902
+          ],
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 1.67,
+          "patch_median_a2": 857.9,
+          "patch_range_a2": [
+            758.5,
+            957.2
+          ],
+          "patch_spread_a2": 198.7,
+          "structures_measured": 2,
+          "structures_used": [
+            "6jyt:A",
+            "6jyt:B"
+          ],
+          "surface_score": 3.2145,
+          "patch_fraction_of_surface": 0.03,
+          "structures_clipped_to_domain": 2,
+          "residues_in_range": 587,
+          "exposed_fraction_of_residues": 0.472,
+          "sequons_near_patch": 1,
+          "available_from": "2019-04-28",
+          "locations": [
+            "Host endoplasmic reticulum-Golgi intermediate compartment"
+          ],
+          "location_scope": "chain",
+          "exposed": false,
+          "exposed_fraction_of_locations": 0.0,
+          "gate": "no"
+        },
+        {
+          "target": "VME1_BC279 Membrane protein",
+          "rank": 8,
+          "identified": true,
+          "measured_on_accession": "Q0Q472",
+          "chain_range": null,
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to Q0Q472 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.83,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "AP3A_BC279 Protein 3",
+          "rank": 9,
+          "identified": true,
+          "measured_on_accession": "Q0Q474",
+          "chain_range": null,
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to Q0Q474 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.81,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "NCAP_BCRP3 Nucleoprotein",
+          "rank": 10,
+          "identified": true,
+          "measured_on_accession": "Q3I5I7",
+          "chain_range": null,
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to Q3I5I7 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.82,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "Non-structural protein 10",
+          "rank": 11,
+          "identified": true,
+          "measured_on_accession": "P0C6X7",
+          "chain_range": [
+            4231,
+            4369
+          ],
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 3.55,
+          "patch_median_a2": 618.6,
+          "patch_range_a2": [
+            602.8,
+            670.1
+          ],
+          "patch_spread_a2": 67.3,
+          "structures_measured": 5,
+          "structures_used": [
+            "8c0g:B",
+            "2xyq:B",
+            "2xyv:B",
+            "2xyr:B",
+            "5c8t:A"
+          ],
+          "surface_score": 4.533,
+          "patch_fraction_of_surface": 0.109,
+          "structures_clipped_to_domain": 5,
+          "residues_in_range": 120,
+          "exposed_fraction_of_residues": 0.5,
+          "sequons_near_patch": 0,
+          "available_from": "2010-11-18",
+          "locations": [
+            "Host cytoplasm, host perinuclear region",
+            "Host cytoplasm",
+            "Host endoplasmic reticulum"
+          ],
+          "location_scope": "chain",
+          "exposed": false,
+          "exposed_fraction_of_locations": 0.0,
+          "gate": "no"
+        },
+        {
+          "target": "Host translation inhibitor nsp1",
+          "rank": 12,
+          "identified": true,
+          "measured_on_accession": "P0C6X7",
+          "chain_range": [
+            1,
+            180
+          ],
+          "measured": false,
+          "unmeasured_because": "180 chains map to P0C6X7 and none covers 1-180",
+          "seconds": 1.08,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 180
+        },
+        {
+          "target": "Non-structural protein 7",
+          "rank": 13,
+          "identified": true,
+          "measured_on_accession": "P0C6X7",
+          "chain_range": [
+            3837,
+            3919
+          ],
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 2.24,
+          "patch_median_a2": 119.0,
+          "patch_range_a2": [
+            98.4,
+            230.0
+          ],
+          "patch_spread_a2": 131.6,
+          "structures_measured": 5,
+          "structures_used": [
+            "2ahm:A",
+            "2ahm:B",
+            "2ahm:C",
+            "2ahm:D",
+            "6nur:C"
+          ],
+          "surface_score": 1.41,
+          "patch_fraction_of_surface": 0.042,
+          "structures_clipped_to_domain": 5,
+          "residues_in_range": 73,
+          "exposed_fraction_of_residues": 0.425,
+          "sequons_near_patch": 0,
+          "available_from": "2005-07-28",
+          "locations": [
+            "Host cytoplasm, host perinuclear region",
+            "Host cytoplasm",
+            "Host endoplasmic reticulum"
+          ],
+          "location_scope": "chain",
+          "exposed": false,
+          "exposed_fraction_of_locations": 0.0,
+          "gate": "no"
+        },
+        {
+          "target": "Non-structural protein 8",
+          "rank": 14,
+          "identified": true,
+          "measured_on_accession": "P0C6X7",
+          "chain_range": [
+            3920,
+            4117
+          ],
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 2.06,
+          "patch_median_a2": 664.2,
+          "patch_range_a2": [
+            287.0,
+            1186.0
+          ],
+          "patch_spread_a2": 899.0,
+          "structures_measured": 5,
+          "structures_used": [
+            "5f22:B",
+            "2ahm:E",
+            "2ahm:F",
+            "2ahm:G",
+            "2ahm:H"
+          ],
+          "surface_score": 4.194,
+          "patch_fraction_of_surface": 0.067,
+          "structures_clipped_to_domain": 5,
+          "residues_in_range": 155,
+          "exposed_fraction_of_residues": 0.565,
+          "sequons_near_patch": 0,
+          "available_from": "2005-07-28",
+          "locations": [
+            "Host cytoplasm, host perinuclear region",
+            "Host cytoplasm",
+            "Host endoplasmic reticulum"
+          ],
+          "location_scope": "chain",
+          "exposed": false,
+          "exposed_fraction_of_locations": 0.0,
+          "gate": "no"
+        },
+        {
+          "target": "Viral protein genome-linked nsp9",
+          "rank": 15,
+          "identified": true,
+          "measured_on_accession": "P0C6X7",
+          "chain_range": [
+            4118,
+            4230
+          ],
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 1.65,
+          "patch_median_a2": 318.9,
+          "patch_range_a2": [
+            185.2,
+            746.7
+          ],
+          "patch_spread_a2": 561.5,
+          "structures_measured": 3,
+          "structures_used": [
+            "1qz8:A",
+            "1qz8:B",
+            "1uw7:A"
+          ],
+          "surface_score": 2.3335,
+          "patch_fraction_of_surface": 0.055,
+          "structures_clipped_to_domain": 3,
+          "residues_in_range": 111,
+          "exposed_fraction_of_residues": 0.586,
+          "sequons_near_patch": 1,
+          "available_from": "2003-09-16",
+          "locations": [
+            "Host cytoplasm, host perinuclear region",
+            "Host cytoplasm",
+            "Host endoplasmic reticulum"
+          ],
+          "location_scope": "chain",
+          "exposed": false,
+          "exposed_fraction_of_locations": 0.0,
+          "gate": "no"
+        },
+        {
+          "target": "Non-structural protein 2",
+          "rank": 16,
+          "identified": true,
+          "measured_on_accession": "P0C6X7",
+          "chain_range": [
+            181,
+            818
+          ],
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 1.86,
+          "patch_median_a2": 522.5,
+          "patch_range_a2": [
+            522.5,
+            522.5
+          ],
+          "patch_spread_a2": 0.0,
+          "structures_measured": 1,
+          "structures_used": [
+            "7fac:A"
+          ],
+          "surface_score": 2.9575,
+          "patch_fraction_of_surface": 0.021,
+          "structures_clipped_to_domain": 1,
+          "residues_in_range": 524,
+          "exposed_fraction_of_residues": 0.51,
+          "sequons_near_patch": 1,
+          "available_from": "2021-07-06",
+          "locations": [
+            "Host cytoplasm",
+            "Host endosome"
+          ],
+          "location_scope": "chain",
+          "exposed": false,
+          "exposed_fraction_of_locations": 0.0,
+          "gate": "no"
+        },
+        {
+          "target": "Non-structural protein 4",
+          "rank": 17,
+          "identified": true,
+          "measured_on_accession": "P0C6X7",
+          "chain_range": [
+            2741,
+            3240
+          ],
+          "measured": false,
+          "unmeasured_because": "180 chains map to P0C6X7 and none covers 2741-3240",
+          "seconds": 1.11,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 180
+        },
+        {
+          "target": "Non-structural protein 6",
+          "rank": 18,
+          "identified": true,
+          "measured_on_accession": "P0C6X7",
+          "chain_range": [
+            3547,
+            3836
+          ],
+          "measured": false,
+          "unmeasured_because": "180 chains map to P0C6X7 and none covers 3547-3836",
+          "seconds": 1.48,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 180
+        },
+        {
+          "target": "Protein 7a",
+          "rank": 19,
+          "identified": true,
+          "measured_on_accession": "Q3I5J0",
+          "chain_range": [
+            16,
+            122
+          ],
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to Q3I5J0 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.8,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "ORF9B_SARS ORF9b protein",
+          "rank": 20,
+          "identified": true,
+          "measured_on_accession": "P59636",
+          "chain_range": null,
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 1.37,
+          "patch_median_a2": 562.7,
+          "patch_range_a2": [
+            416.8,
+            720.1
+          ],
+          "patch_spread_a2": 303.3,
+          "structures_measured": 5,
+          "structures_used": [
+            "2cme:A",
+            "2cme:B",
+            "2cme:C",
+            "2cme:D",
+            "2cme:E"
+          ],
+          "surface_score": 4.3105,
+          "patch_fraction_of_surface": 0.128,
+          "structures_clipped_to_domain": 0,
+          "residues_in_range": 77,
+          "exposed_fraction_of_residues": 0.615,
+          "sequons_near_patch": 0,
+          "available_from": "2006-05-06",
+          "locations": [
+            "Virion",
+            "Host cytoplasmic vesicle membrane",
+            "Host cytoplasm",
+            "Host endoplasmic reticulum"
+          ],
+          "location_scope": "entry",
+          "exposed": false,
+          "exposed_fraction_of_locations": 0.0,
+          "gate": "no"
+        }
+      ],
+      "library": {
+        "initiator": "ClAc-D-Tyr",
+        "closure_residue": "C",
+        "random_region": [
+          4,
+          8
+        ],
+        "elongator_classes": [
+          "canonical",
+          "N-methyl",
+          "D-alpha-amino"
+        ],
+        "elongator_alphabet": [
+          "A",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "K",
+          "L",
+          "M",
+          "N",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "V",
+          "W",
+          "Y",
+          "NMe-Gly",
+          "NMe-Ala",
+          "NMe-Phe",
+          "D-Ala",
+          "D-Phe",
+          "D-Ser"
+        ],
+        "cyclisation": "spontaneous thioether between chloroacetyl initiator and downstream Cys",
+        "theoretical_diversity": 158945703125,
+        "endpoint_note": "A library definition only; no binding, enrichment, inhibition or antiviral property is predicted for any member."
+      },
+      "folded": {
+        "target_name": "3C-like proteinase nsp5",
+        "sequence_length": 306,
+        "sequence_sha256": "50ec190141bd451b4b7efdf7378d3a516e559004b5335ab9bb341a596691c92e",
+        "mean_plddt": 62.57,
+        "confident_fraction": 0.4641,
+        "pdb_sha256": "992b9722c9f6cd88ea9555e7582ca99fe753a1f5d4f0cf262bd75707cd765503",
+        "absence": null
+      },
+      "foldable": [
+        {
+          "target": "Spike protein S2'",
+          "rank": 1,
+          "chain_range_on_the_relative": [
+            785,
+            1242
+          ],
+          "declared_length_aa": 458,
+          "parent_orf_length_aa": 1282,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 458,
+          "orfs_searched": 12,
+          "found_in": "the ORF that matched",
+          "span_in_this_genome": [
+            825,
+            1282
+          ],
+          "recovered_length_aa": 458,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.952,
+          "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 95% identity"
+        },
+        {
+          "target": "3C-like proteinase nsp5",
+          "rank": 2,
+          "chain_range_on_the_relative": [
+            3241,
+            3546
+          ],
+          "declared_length_aa": 306,
+          "parent_orf_length_aa": 2595,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 306,
+          "orfs_searched": 12,
+          "found_in": "ORF 3 of the ranked set, 4405 aa",
+          "span_in_this_genome": [
+            3264,
+            3569
+          ],
+          "recovered_length_aa": 306,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.9608,
+          "recovered_by": "local alignment of the relative's mature chain against ORF 3 of the ranked set, 4405 aa, covering 100% of it at 96% identity"
+        },
+        {
+          "target": "Spike protein S2",
+          "rank": 3,
+          "chain_range_on_the_relative": [
+            655,
+            1242
+          ],
+          "declared_length_aa": 588,
+          "parent_orf_length_aa": 1282,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 588,
+          "orfs_searched": 12,
+          "found_in": "the ORF that matched",
+          "span_in_this_genome": [
+            695,
+            1282
+          ],
+          "recovered_length_aa": 588,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.9337,
+          "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 93% identity"
+        },
+        {
+          "target": "Spike protein S1",
+          "rank": 4,
+          "chain_range_on_the_relative": [
+            14,
+            654
+          ],
+          "declared_length_aa": 641,
+          "parent_orf_length_aa": 1282,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 641,
+          "orfs_searched": 12,
+          "found_in": "the ORF that matched",
+          "span_in_this_genome": [
+            24,
+            685
+          ],
+          "recovered_length_aa": 662,
+          "chain_covered_by_alignment": 0.9844,
+          "identity_over_aligned_columns": 0.6577,
+          "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 98% of it at 66% identity"
+        },
+        {
+          "target": "RNA-directed RNA polymerase nsp12",
+          "rank": 5,
+          "chain_range_on_the_relative": [
+            4370,
+            5301
+          ],
+          "declared_length_aa": 932,
+          "parent_orf_length_aa": 2595,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 932,
+          "orfs_searched": 12,
+          "found_in": "the ORF that matched",
+          "span_in_this_genome": [
+            1,
+            823
+          ],
+          "recovered_length_aa": 823,
+          "chain_covered_by_alignment": 0.883,
+          "identity_over_aligned_columns": 0.9708,
+          "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 88% of it at 97% identity"
+        },
+        {
+          "target": "Papain-like protease nsp3",
+          "rank": 6,
+          "chain_range_on_the_relative": [
+            819,
+            2740
+          ],
+          "declared_length_aa": 1922,
+          "parent_orf_length_aa": 2595,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 1922,
+          "orfs_searched": 12,
+          "found_in": "ORF 3 of the ranked set, 4405 aa",
+          "span_in_this_genome": [
+            819,
+            2763
+          ],
+          "recovered_length_aa": 1945,
+          "chain_covered_by_alignment": 0.9964,
+          "identity_over_aligned_columns": 0.7749,
+          "recovered_by": "local alignment of the relative's mature chain against ORF 3 of the ranked set, 4405 aa, covering 100% of it at 77% identity"
+        },
+        {
+          "target": "Helicase nsp13",
+          "rank": 7,
+          "chain_range_on_the_relative": [
+            5302,
+            5902
+          ],
+          "declared_length_aa": 601,
+          "parent_orf_length_aa": 2595,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 601,
+          "orfs_searched": 12,
+          "found_in": "the ORF that matched",
+          "span_in_this_genome": [
+            824,
+            1424
+          ],
+          "recovered_length_aa": 601,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.9983,
+          "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 100% identity"
+        },
+        {
+          "target": "VME1_BC279 Membrane protein",
+          "rank": 8,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 222,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 222,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "AP3A_BC279 Protein 3",
+          "rank": 9,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 275,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 275,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "NCAP_BCRP3 Nucleoprotein",
+          "rank": 10,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 419,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 419,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "Non-structural protein 10",
+          "rank": 11,
+          "chain_range_on_the_relative": [
+            4231,
+            4369
+          ],
+          "declared_length_aa": 139,
+          "parent_orf_length_aa": 2595,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 139,
+          "orfs_searched": 12,
+          "found_in": "ORF 3 of the ranked set, 4405 aa",
+          "span_in_this_genome": [
+            4254,
+            4392
+          ],
+          "recovered_length_aa": 139,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.9712,
+          "recovered_by": "local alignment of the relative's mature chain against ORF 3 of the ranked set, 4405 aa, covering 100% of it at 97% identity"
+        },
+        {
+          "target": "Host translation inhibitor nsp1",
+          "rank": 12,
+          "chain_range_on_the_relative": [
+            1,
+            180
+          ],
+          "declared_length_aa": 180,
+          "parent_orf_length_aa": 2595,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 180,
+          "orfs_searched": 12,
+          "found_in": "ORF 3 of the ranked set, 4405 aa",
+          "span_in_this_genome": [
+            1,
+            180
+          ],
+          "recovered_length_aa": 180,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.8444,
+          "recovered_by": "local alignment of the relative's mature chain against ORF 3 of the ranked set, 4405 aa, covering 100% of it at 84% identity"
+        },
+        {
+          "target": "Non-structural protein 7",
+          "rank": 13,
+          "chain_range_on_the_relative": [
+            3837,
+            3919
+          ],
+          "declared_length_aa": 83,
+          "parent_orf_length_aa": 2595,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 83,
+          "orfs_searched": 12,
+          "found_in": "ORF 3 of the ranked set, 4405 aa",
+          "span_in_this_genome": [
+            3860,
+            3942
+          ],
+          "recovered_length_aa": 83,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.988,
+          "recovered_by": "local alignment of the relative's mature chain against ORF 3 of the ranked set, 4405 aa, covering 100% of it at 99% identity"
+        },
+        {
+          "target": "Non-structural protein 8",
+          "rank": 14,
+          "chain_range_on_the_relative": [
+            3920,
+            4117
+          ],
+          "declared_length_aa": 198,
+          "parent_orf_length_aa": 2595,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 198,
+          "orfs_searched": 12,
+          "found_in": "ORF 3 of the ranked set, 4405 aa",
+          "span_in_this_genome": [
+            3943,
+            4140
+          ],
+          "recovered_length_aa": 198,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.9747,
+          "recovered_by": "local alignment of the relative's mature chain against ORF 3 of the ranked set, 4405 aa, covering 100% of it at 97% identity"
+        },
+        {
+          "target": "Viral protein genome-linked nsp9",
+          "rank": 15,
+          "chain_range_on_the_relative": [
+            4118,
+            4230
+          ],
+          "declared_length_aa": 113,
+          "parent_orf_length_aa": 2595,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 113,
+          "orfs_searched": 12,
+          "found_in": "ORF 3 of the ranked set, 4405 aa",
+          "span_in_this_genome": [
+            4141,
+            4253
+          ],
+          "recovered_length_aa": 113,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.9735,
+          "recovered_by": "local alignment of the relative's mature chain against ORF 3 of the ranked set, 4405 aa, covering 100% of it at 97% identity"
+        },
+        {
+          "target": "Non-structural protein 2",
+          "rank": 16,
+          "chain_range_on_the_relative": [
+            181,
+            818
+          ],
+          "declared_length_aa": 638,
+          "parent_orf_length_aa": 2595,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 638,
+          "orfs_searched": 12,
+          "found_in": "ORF 3 of the ranked set, 4405 aa",
+          "span_in_this_genome": [
+            181,
+            818
+          ],
+          "recovered_length_aa": 638,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.6834,
+          "recovered_by": "local alignment of the relative's mature chain against ORF 3 of the ranked set, 4405 aa, covering 100% of it at 68% identity"
+        },
+        {
+          "target": "Non-structural protein 4",
+          "rank": 17,
+          "chain_range_on_the_relative": [
+            2741,
+            3240
+          ],
+          "declared_length_aa": 500,
+          "parent_orf_length_aa": 2595,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 500,
+          "orfs_searched": 12,
+          "found_in": "ORF 3 of the ranked set, 4405 aa",
+          "span_in_this_genome": [
+            2764,
+            3263
+          ],
+          "recovered_length_aa": 500,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.8,
+          "recovered_by": "local alignment of the relative's mature chain against ORF 3 of the ranked set, 4405 aa, covering 100% of it at 80% identity"
+        },
+        {
+          "target": "Non-structural protein 6",
+          "rank": 18,
+          "chain_range_on_the_relative": [
+            3547,
+            3836
+          ],
+          "declared_length_aa": 290,
+          "parent_orf_length_aa": 2595,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 290,
+          "orfs_searched": 12,
+          "found_in": "ORF 3 of the ranked set, 4405 aa",
+          "span_in_this_genome": [
+            3573,
+            3859
+          ],
+          "recovered_length_aa": 287,
+          "chain_covered_by_alignment": 0.9897,
+          "identity_over_aligned_columns": 0.8815,
+          "recovered_by": "local alignment of the relative's mature chain against ORF 3 of the ranked set, 4405 aa, covering 99% of it at 88% identity"
+        },
+        {
+          "target": "Protein 7a",
+          "rank": 19,
+          "chain_range_on_the_relative": [
+            16,
+            122
+          ],
+          "declared_length_aa": 107,
+          "parent_orf_length_aa": 121,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 107,
+          "orfs_searched": 12,
+          "found_in": "the ORF that matched",
+          "span_in_this_genome": [
+            16,
+            121
+          ],
+          "recovered_length_aa": 106,
+          "chain_covered_by_alignment": 0.9907,
+          "identity_over_aligned_columns": 0.9057,
+          "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 99% of it at 91% identity"
+        },
+        {
+          "target": "ORF9B_SARS ORF9b protein",
+          "rank": 20,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 97,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 97,
+          "recovered_by": "the ORF translation is the candidate"
+        }
+      ],
+      "seconds": 351.38,
+      "coverage": {
+        "chains_ranked": 20,
+        "surface_rows": 20,
+        "surface_measured": 9,
+        "surface_refused": 11,
+        "surface_covers_every_chain": true,
+        "fold_rows": 20,
+        "fold_sequence_recovered": 20,
+        "fold_covers_every_chain": true
+      },
+      "pathogen": "SARS-CoV-2"
+    },
+    {
+      "case": "Nipah virus, Nipah virus held out",
+      "genome_accession": "NC_002728.1",
+      "reference_excluded_organism": "Nipah virus",
+      "stages": [
+        {
+          "stage": 1,
+          "name": "Genome to candidate proteins",
+          "tool": "intake.rank_targets",
+          "endpoints": [
+            "NCBI efetch",
+            "UniProt"
+          ],
+          "input": {
+            "genome_accession": "NC_002728.1",
+            "reference_excluded_organism": "Nipah virus"
+          },
+          "output": {
+            "genome_length_nt": 18246,
+            "segments": 1,
+            "orfs_found": 17,
+            "orfs_ranked": 12,
+            "reference_entries": 17520,
+            "reference_entries_removed": null,
+            "identified": 7,
+            "unidentified": 5
+          },
+          "seconds": 11.22,
+          "hands_to_next": "one reviewed accession and one residue range per candidate"
+        },
+        {
+          "stage": 2,
+          "name": "Polyproteins to mature chains, and the score for each",
+          "tool": "intake.decompose + intake.rank_score",
+          "endpoints": [
+            "UniProt"
+          ],
+          "input": {
+            "candidates_in": 12
+          },
+          "output": {
+            "chains_out": 8,
+            "rubric": {
+              "conservation": 3.0,
+              "surface_exposed": 2.0,
+              "essential_class": 1.5,
+              "druggable_class": 0.8,
+              "structures_in_family_capped": 0.5
+            },
+            "all_decompositions_reproduce_the_score": true
+          },
+          "seconds": 4.68,
+          "hands_to_next": "every chain, with the accession and range its surface is measured on"
+        },
+        {
+          "stage": 3,
+          "name": "Every chain to a measured surface, or a stated reason",
+          "tool": "geometry.surface_markers",
+          "endpoints": [
+            "PDBe",
+            "RCSB",
+            "UniProt"
+          ],
+          "input": {
+            "candidates_in": 8
+          },
+          "output": {
+            "rows_out": 8,
+            "measured": 6,
+            "unmeasured": 2,
+            "nothing_dropped": true,
+            "gate_yes": 0,
+            "gate_borderline": 2,
+            "gate_no": 4
+          },
+          "seconds": 24.42,
+          "hands_to_next": "a patch median and range per chain; nothing downstream reads it yet"
+        },
+        {
+          "stage": 4,
+          "name": "A chain to coordinates, the one lane a novel target has",
+          "tool": "structures.folded",
+          "endpoints": [
+            "ESM Atlas"
+          ],
+          "input": {
+            "candidates_in": 8
+          },
+          "output": {
+            "foldable": 8,
+            "not_foldable": 0,
+            "folded_target": "Fusion glycoprotein F2",
+            "residues": 83,
+            "mean_plddt": null,
+            "at_or_above_70": null,
+            "sequence_sha256": "c552d8d7c0572fa8a613185fb526c4ff2f06e900674c4c3a40b2cf9c54356016",
+            "error": {
+              "reason": "endpoint_unavailable",
+              "detail": "HTTP 504: {\"message\": \"Endpoint request timed out\"}",
+              "http_status": 504,
+              "attempts": 2,
+              "note": "No structure was obtained. This is a statement about this endpoint on this call and not a statement about the target: it must not be read as the sequence being unfoldable, and no fallback keyless ESMFold host exists to retry against."
+            }
+          },
+          "seconds": 61.27,
+          "hands_to_next": "coordinates. Nothing downstream reads them yet: the surface stage measures deposited structures, not predicted ones"
+        },
+        {
+          "stage": 5,
+          "name": "A library definition over the randomised region",
+          "tool": "chemistry.library_spec",
+          "endpoints": [
+            "local tables"
+          ],
+          "input": {
+            "reads_from_upstream": []
+          },
+          "output": {
+            "initiator": "ClAc-D-Tyr",
+            "closure_residue": "C",
+            "random_region": [
+              4,
+              8
+            ],
+            "alphabet_size": 25,
+            "theoretical_diversity": 158945703125
+          },
+          "seconds": 0.0,
+          "hands_to_next": "the position count the go/no-go test in arm 2 reads"
+        }
+      ],
+      "scores": [
+        {
+          "rank": 1,
+          "target": "Fusion glycoprotein F2",
+          "parent": "FUS_HENDH Fusion glycoprotein F0",
+          "tier": "exact",
+          "nearest_homolog": "O89342",
+          "chain_range": [
+            27,
+            109
+          ],
+          "conservation": 0.6292,
+          "surface_exposed": true,
+          "essential_class": true,
+          "druggable_class": 2,
+          "structures_in_family": 5,
+          "score_terms": {
+            "conservation": 1.8876,
+            "surface_exposed": 2.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.05,
+            "druggable_class": 1.6
+          },
+          "score": 7.0376,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 2,
+          "target": "Fusion glycoprotein F1",
+          "parent": "FUS_HENDH Fusion glycoprotein F0",
+          "tier": "exact",
+          "nearest_homolog": "O89342",
+          "chain_range": [
+            110,
+            546
+          ],
+          "conservation": 0.6292,
+          "surface_exposed": true,
+          "essential_class": true,
+          "druggable_class": 2,
+          "structures_in_family": 5,
+          "score_terms": {
+            "conservation": 1.8876,
+            "surface_exposed": 2.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.05,
+            "druggable_class": 1.6
+          },
+          "score": 7.0376,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 3,
+          "target": "GLYCP_HENDH Glycoprotein G",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "O89343",
+          "chain_range": null,
+          "conservation": 0.3913,
+          "surface_exposed": true,
+          "essential_class": true,
+          "druggable_class": 2,
+          "structures_in_family": 13,
+          "score_terms": {
+            "conservation": 1.1739,
+            "surface_exposed": 2.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.13,
+            "druggable_class": 1.6
+          },
+          "score": 6.4039,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 4,
+          "target": "L_HENDH RNA-directed RNA polymerase L",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "O89344",
+          "chain_range": null,
+          "conservation": 0.5785,
+          "surface_exposed": false,
+          "essential_class": true,
+          "druggable_class": 3,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 1.7355,
+            "surface_exposed": 0.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.0,
+            "druggable_class": 2.4
+          },
+          "score": 5.6355,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 5,
+          "target": "NCAP_HENDH Nucleoprotein",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "O89339",
+          "chain_range": null,
+          "conservation": 0.7822,
+          "surface_exposed": false,
+          "essential_class": true,
+          "druggable_class": 0,
+          "structures_in_family": 1,
+          "score_terms": {
+            "conservation": 2.3466,
+            "surface_exposed": 0.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.01,
+            "druggable_class": 0.0
+          },
+          "score": 3.8566,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 6,
+          "target": "MATRX_HENDH Matrix protein",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "O89341",
+          "chain_range": null,
+          "conservation": 0.6667,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 4,
+          "score_terms": {
+            "conservation": 2.0001,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.04,
+            "druggable_class": 0.0
+          },
+          "score": 2.0401,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 7,
+          "target": "C_HENDH Protein C",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "O55779",
+          "chain_range": null,
+          "conservation": 0.5062,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 1.5186,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.0,
+            "druggable_class": 0.0
+          },
+          "score": 1.5186,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 8,
+          "target": "PHOSP_HENDH Phosphoprotein",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "O55778",
+          "chain_range": null,
+          "conservation": 0.2859,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 5,
+          "score_terms": {
+            "conservation": 0.8577,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.05,
+            "druggable_class": 0.0
+          },
+          "score": 0.9077,
+          "decomposition_reproduces_score": true
+        }
+      ],
+      "surfaces": [
+        {
+          "target": "Fusion glycoprotein F2",
+          "rank": 1,
+          "identified": true,
+          "measured_on_accession": "O89342",
+          "chain_range": [
+            27,
+            109
+          ],
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 4.28,
+          "patch_median_a2": 81.8,
+          "patch_range_a2": [
+            81.8,
+            128.2
+          ],
+          "patch_spread_a2": 46.4,
+          "structures_measured": 5,
+          "structures_used": [
+            "7ki6:A",
+            "7ki6:B",
+            "7ki6:E",
+            "8dnr:A",
+            "8dnr:B"
+          ],
+          "surface_score": 0.724,
+          "patch_fraction_of_surface": 0.03,
+          "structures_clipped_to_domain": 5,
+          "residues_in_range": 77,
+          "exposed_fraction_of_residues": 0.39,
+          "sequons_near_patch": 1,
+          "available_from": "2020-10-23",
+          "locations": [
+            "Virion membrane",
+            "Host cell membrane"
+          ],
+          "location_scope": "entry",
+          "exposed": true,
+          "exposed_fraction_of_locations": 1.0,
+          "gate": "no"
+        },
+        {
+          "target": "Fusion glycoprotein F1",
+          "rank": 2,
+          "identified": true,
+          "measured_on_accession": "O89342",
+          "chain_range": [
+            110,
+            546
+          ],
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 2.64,
+          "patch_median_a2": 363.9,
+          "patch_range_a2": [
+            302.3,
+            363.9
+          ],
+          "patch_spread_a2": 61.6,
+          "structures_measured": 5,
+          "structures_used": [
+            "7ki6:A",
+            "7ki6:B",
+            "7ki6:E",
+            "8dnr:A",
+            "8dnr:B"
+          ],
+          "surface_score": 2.0725,
+          "patch_fraction_of_surface": 0.028,
+          "structures_clipped_to_domain": 5,
+          "residues_in_range": 359,
+          "exposed_fraction_of_residues": 0.348,
+          "sequons_near_patch": 1,
+          "available_from": "2020-10-23",
+          "locations": [
+            "Virion membrane",
+            "Host cell membrane"
+          ],
+          "location_scope": "entry",
+          "exposed": true,
+          "exposed_fraction_of_locations": 1.0,
+          "gate": "borderline"
+        },
+        {
+          "target": "GLYCP_HENDH Glycoprotein G",
+          "rank": 3,
+          "identified": true,
+          "measured_on_accession": "O89343",
+          "chain_range": null,
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 2.02,
+          "patch_median_a2": 578.3,
+          "patch_range_a2": [
+            534.5,
+            635.9
+          ],
+          "patch_spread_a2": 101.4,
+          "structures_measured": 5,
+          "structures_used": [
+            "6vy4:A",
+            "6vy4:B",
+            "6pd4:A",
+            "6pd4:B",
+            "6vy6:A"
+          ],
+          "surface_score": 2.4895,
+          "patch_fraction_of_surface": 0.034,
+          "structures_clipped_to_domain": 0,
+          "residues_in_range": 426,
+          "exposed_fraction_of_residues": 0.385,
+          "sequons_near_patch": 3,
+          "available_from": "2019-06-18",
+          "locations": [
+            "Virion membrane",
+            "Host cell membrane"
+          ],
+          "location_scope": "entry",
+          "exposed": true,
+          "exposed_fraction_of_locations": 1.0,
+          "gate": "borderline"
+        },
+        {
+          "target": "L_HENDH RNA-directed RNA polymerase L",
+          "rank": 4,
+          "identified": true,
+          "measured_on_accession": "O89344",
+          "chain_range": null,
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to O89344 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.82,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "NCAP_HENDH Nucleoprotein",
+          "rank": 5,
+          "identified": true,
+          "measured_on_accession": "O89339",
+          "chain_range": null,
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 11.93,
+          "patch_median_a2": 519.5,
+          "patch_range_a2": [
+            503.7,
+            533.1
+          ],
+          "patch_spread_a2": 29.4,
+          "structures_measured": 5,
+          "structures_used": [
+            "8c4h:A",
+            "8c4h:B",
+            "8c4h:C",
+            "8c4h:D",
+            "8c4h:E"
+          ],
+          "surface_score": 3.3425,
+          "patch_fraction_of_surface": 0.038,
+          "structures_clipped_to_domain": 0,
+          "residues_in_range": 394,
+          "exposed_fraction_of_residues": 0.368,
+          "sequons_near_patch": 0,
+          "available_from": "2023-01-04",
+          "locations": [
+            "Virion",
+            "Host cytoplasm"
+          ],
+          "location_scope": "entry",
+          "exposed": false,
+          "exposed_fraction_of_locations": 0.0,
+          "gate": "no"
+        },
+        {
+          "target": "MATRX_HENDH Matrix protein",
+          "rank": 6,
+          "identified": true,
+          "measured_on_accession": "O89341",
+          "chain_range": null,
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 1.11,
+          "patch_median_a2": 1236.4,
+          "patch_range_a2": [
+            1236.4,
+            1236.4
+          ],
+          "patch_spread_a2": 0.0,
+          "structures_measured": 1,
+          "structures_used": [
+            "6bk6:A"
+          ],
+          "surface_score": 4.337,
+          "patch_fraction_of_surface": 0.081,
+          "structures_clipped_to_domain": 0,
+          "residues_in_range": 279,
+          "exposed_fraction_of_residues": 0.527,
+          "sequons_near_patch": 0,
+          "available_from": "2017-11-07",
+          "locations": [
+            "Virion",
+            "Host cytoplasm",
+            "Host nucleus"
+          ],
+          "location_scope": "entry",
+          "exposed": false,
+          "exposed_fraction_of_locations": 0.0,
+          "gate": "no"
+        },
+        {
+          "target": "C_HENDH Protein C",
+          "rank": 7,
+          "identified": true,
+          "measured_on_accession": "O55779",
+          "chain_range": null,
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to O55779 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.81,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "PHOSP_HENDH Phosphoprotein",
+          "rank": 8,
+          "identified": true,
+          "measured_on_accession": "O55778",
+          "chain_range": null,
+          "measured": true,
+          "unmeasured_because": null,
+          "seconds": 0.81,
+          "patch_median_a2": 160.8,
+          "patch_range_a2": [
+            160.2,
+            161.3
+          ],
+          "patch_spread_a2": 1.1,
+          "structures_measured": 2,
+          "structures_used": [
+            "4heo:A",
+            "4heo:B"
+          ],
+          "surface_score": 1.8588,
+          "patch_fraction_of_surface": 0.046,
+          "structures_clipped_to_domain": 0,
+          "residues_in_range": 55,
+          "exposed_fraction_of_residues": 0.59,
+          "sequons_near_patch": 0,
+          "available_from": "2012-10-04",
+          "locations": [],
+          "location_scope": "entry",
+          "exposed": false,
+          "exposed_fraction_of_locations": 0.0,
+          "gate": "no"
+        }
+      ],
+      "library": {
+        "initiator": "ClAc-D-Tyr",
+        "closure_residue": "C",
+        "random_region": [
+          4,
+          8
+        ],
+        "elongator_classes": [
+          "canonical",
+          "N-methyl",
+          "D-alpha-amino"
+        ],
+        "elongator_alphabet": [
+          "A",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "K",
+          "L",
+          "M",
+          "N",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "V",
+          "W",
+          "Y",
+          "NMe-Gly",
+          "NMe-Ala",
+          "NMe-Phe",
+          "D-Ala",
+          "D-Phe",
+          "D-Ser"
+        ],
+        "cyclisation": "spontaneous thioether between chloroacetyl initiator and downstream Cys",
+        "theoretical_diversity": 158945703125,
+        "endpoint_note": "A library definition only; no binding, enrichment, inhibition or antiviral property is predicted for any member."
+      },
+      "folded": {
+        "target_name": "Fusion glycoprotein F2",
+        "sequence_length": 83,
+        "sequence_sha256": "c552d8d7c0572fa8a613185fb526c4ff2f06e900674c4c3a40b2cf9c54356016",
+        "absence": {
+          "reason": "endpoint_unavailable",
+          "detail": "HTTP 504: {\"message\": \"Endpoint request timed out\"}",
+          "http_status": 504,
+          "attempts": 2,
+          "note": "No structure was obtained. This is a statement about this endpoint on this call and not a statement about the target: it must not be read as the sequence being unfoldable, and no fallback keyless ESMFold host exists to retry against."
+        }
+      },
+      "foldable": [
+        {
+          "target": "Fusion glycoprotein F2",
+          "rank": 1,
+          "chain_range_on_the_relative": [
+            27,
+            109
+          ],
+          "declared_length_aa": 83,
+          "parent_orf_length_aa": 546,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 83,
+          "orfs_searched": 12,
+          "found_in": "the ORF that matched",
+          "span_in_this_genome": [
+            27,
+            109
+          ],
+          "recovered_length_aa": 83,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.8675,
+          "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 87% identity"
+        },
+        {
+          "target": "Fusion glycoprotein F1",
+          "rank": 2,
+          "chain_range_on_the_relative": [
+            110,
+            546
+          ],
+          "declared_length_aa": 437,
+          "parent_orf_length_aa": 546,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 437,
+          "orfs_searched": 12,
+          "found_in": "the ORF that matched",
+          "span_in_this_genome": [
+            110,
+            546
+          ],
+          "recovered_length_aa": 437,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.9199,
+          "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 92% identity"
+        },
+        {
+          "target": "GLYCP_HENDH Glycoprotein G",
+          "rank": 3,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 602,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 602,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "L_HENDH RNA-directed RNA polymerase L",
+          "rank": 4,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 2244,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 2244,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "NCAP_HENDH Nucleoprotein",
+          "rank": 5,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 532,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 532,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "MATRX_HENDH Matrix protein",
+          "rank": 6,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 352,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 352,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "C_HENDH Protein C",
+          "rank": 7,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 166,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 166,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "PHOSP_HENDH Phosphoprotein",
+          "rank": 8,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 709,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 709,
+          "recovered_by": "the ORF translation is the candidate"
+        }
+      ],
+      "seconds": 101.6,
+      "coverage": {
+        "chains_ranked": 8,
+        "surface_rows": 8,
+        "surface_measured": 6,
+        "surface_refused": 2,
+        "surface_covers_every_chain": true,
+        "fold_rows": 8,
+        "fold_sequence_recovered": 8,
+        "fold_covers_every_chain": true
+      },
+      "pathogen": "Nipah virus"
+    },
+    {
+      "case": "Influenza A PR8, Influenza A virus (strain A/Puerto Rico/8/1934 H1N1) held out",
+      "genome_accession": "NC_002016.1,NC_002017.1,NC_002018.1,NC_002019.1,NC_002020.1,NC_002021.1,NC_002022.1,NC_002023.1",
+      "reference_excluded_organism": "Influenza A virus (strain A/Puerto Rico/8/1934 H1N1)",
+      "stages": [
+        {
+          "stage": 1,
+          "name": "Genome to candidate proteins",
+          "tool": "intake.rank_targets",
+          "endpoints": [
+            "NCBI efetch",
+            "UniProt"
+          ],
+          "input": {
+            "genome_accession": "NC_002016.1,NC_002017.1,NC_002018.1,NC_002019.1,NC_002020.1,NC_002021.1,NC_002022.1,NC_002023.1",
+            "reference_excluded_organism": "Influenza A virus (strain A/Puerto Rico/8/1934 H1N1)"
+          },
+          "output": {
+            "genome_length_nt": 13588,
+            "segments": 8,
+            "orfs_found": 29,
+            "orfs_ranked": 12,
+            "reference_entries": 17516,
+            "reference_entries_removed": null,
+            "identified": 8,
+            "unidentified": 4
+          },
+          "seconds": 10.65,
+          "hands_to_next": "one reviewed accession and one residue range per candidate"
+        },
+        {
+          "stage": 2,
+          "name": "Polyproteins to mature chains, and the score for each",
+          "tool": "intake.decompose + intake.rank_score",
+          "endpoints": [
+            "UniProt"
+          ],
+          "input": {
+            "candidates_in": 12
+          },
+          "output": {
+            "chains_out": 9,
+            "rubric": {
+              "conservation": 3.0,
+              "surface_exposed": 2.0,
+              "essential_class": 1.5,
+              "druggable_class": 0.8,
+              "structures_in_family_capped": 0.5
+            },
+            "all_decompositions_reproduce_the_score": true
+          },
+          "seconds": 13.68,
+          "hands_to_next": "every chain, with the accession and range its surface is measured on"
+        },
+        {
+          "stage": 3,
+          "name": "Every chain to a measured surface, or a stated reason",
+          "tool": "geometry.surface_markers",
+          "endpoints": [
+            "PDBe",
+            "RCSB",
+            "UniProt"
+          ],
+          "input": {
+            "candidates_in": 9
+          },
+          "output": {
+            "rows_out": 9,
+            "measured": 0,
+            "unmeasured": 9,
+            "nothing_dropped": true,
+            "gate_yes": 0,
+            "gate_borderline": 0,
+            "gate_no": 0
+          },
+          "seconds": 7.43,
+          "hands_to_next": "a patch median and range per chain; nothing downstream reads it yet"
+        },
+        {
+          "stage": 4,
+          "name": "A chain to coordinates, the one lane a novel target has",
+          "tool": "structures.folded",
+          "endpoints": [
+            "ESM Atlas"
+          ],
+          "input": {
+            "candidates_in": 9
+          },
+          "output": {
+            "foldable": 9,
+            "not_foldable": 0,
+            "folded_target": "Hemagglutinin HA1 chain",
+            "residues": 326,
+            "mean_plddt": 50.46,
+            "at_or_above_70": 0.2699,
+            "sequence_sha256": "25095d350176c8ab0bb5de2aa5c24631cb1a664ad75dbea14094dcf9db66a9fa",
+            "error": null
+          },
+          "seconds": 14.95,
+          "hands_to_next": "coordinates. Nothing downstream reads them yet: the surface stage measures deposited structures, not predicted ones"
+        },
+        {
+          "stage": 5,
+          "name": "A library definition over the randomised region",
+          "tool": "chemistry.library_spec",
+          "endpoints": [
+            "local tables"
+          ],
+          "input": {
+            "reads_from_upstream": []
+          },
+          "output": {
+            "initiator": "ClAc-D-Tyr",
+            "closure_residue": "C",
+            "random_region": [
+              4,
+              8
+            ],
+            "alphabet_size": 25,
+            "theoretical_diversity": 158945703125
+          },
+          "seconds": 0.0,
+          "hands_to_next": "the position count the go/no-go test in arm 2 reads"
+        }
+      ],
+      "scores": [
+        {
+          "rank": 1,
+          "target": "NRAM_I36A0 Neuraminidase",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "A4GCI9",
+          "chain_range": null,
+          "conservation": 0.9133,
+          "surface_exposed": true,
+          "essential_class": true,
+          "druggable_class": 3,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 2.7399,
+            "surface_exposed": 2.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.0,
+            "druggable_class": 2.4
+          },
+          "score": 8.6399,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 2,
+          "target": "Hemagglutinin HA1 chain",
+          "parent": "HEMA_I36A0 Hemagglutinin",
+          "tier": "exact",
+          "nearest_homolog": "A4GCI6",
+          "chain_range": [
+            18,
+            343
+          ],
+          "conservation": 0.8378,
+          "surface_exposed": true,
+          "essential_class": true,
+          "druggable_class": 2,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 2.5134,
+            "surface_exposed": 2.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.0,
+            "druggable_class": 1.6
+          },
+          "score": 7.6134,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 3,
+          "target": "Hemagglutinin HA2 chain",
+          "parent": "HEMA_I36A0 Hemagglutinin",
+          "tier": "exact",
+          "nearest_homolog": "A4GCI6",
+          "chain_range": [
+            345,
+            566
+          ],
+          "conservation": 0.8378,
+          "surface_exposed": true,
+          "essential_class": true,
+          "druggable_class": 2,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 2.5134,
+            "surface_exposed": 2.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.0,
+            "druggable_class": 1.6
+          },
+          "score": 7.6134,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 4,
+          "target": "PA_I000X Polymerase acidic protein",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "Q9IQ47",
+          "chain_range": null,
+          "conservation": 0.9859,
+          "surface_exposed": false,
+          "essential_class": true,
+          "druggable_class": 3,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 2.9577,
+            "surface_exposed": 0.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.0,
+            "druggable_class": 2.4
+          },
+          "score": 6.8577,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 5,
+          "target": "PB2_I36A0 Polymerase basic protein 2",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "A4GCJ6",
+          "chain_range": null,
+          "conservation": 0.9669,
+          "surface_exposed": false,
+          "essential_class": true,
+          "druggable_class": 3,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 2.9007,
+            "surface_exposed": 0.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.0,
+            "druggable_class": 2.4
+          },
+          "score": 6.8007,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 6,
+          "target": "RDRP_I06A0 RNA-directed RNA polymerase catalytic subunit",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "B4URE4",
+          "chain_range": null,
+          "conservation": 0.9495,
+          "surface_exposed": false,
+          "essential_class": true,
+          "druggable_class": 3,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 2.8485,
+            "surface_exposed": 0.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.0,
+            "druggable_class": 2.4
+          },
+          "score": 6.7485,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 7,
+          "target": "M1_I06A0 Matrix protein 1",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "B4URD8",
+          "chain_range": null,
+          "conservation": 1.0,
+          "surface_exposed": true,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 3.0,
+            "surface_exposed": 2.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.0,
+            "druggable_class": 0.0
+          },
+          "score": 5.0,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 8,
+          "target": "NCAP_I54A0 Nucleoprotein",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "P31609",
+          "chain_range": null,
+          "conservation": 0.9696,
+          "surface_exposed": false,
+          "essential_class": true,
+          "druggable_class": 0,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 2.9088,
+            "surface_exposed": 0.0,
+            "essential_class": 1.5,
+            "structures_in_family": 0.0,
+            "druggable_class": 0.0
+          },
+          "score": 4.4088,
+          "decomposition_reproduces_score": true
+        },
+        {
+          "rank": 9,
+          "target": "NS1_I06A0 Non-structural protein 1",
+          "parent": null,
+          "tier": "exact",
+          "nearest_homolog": "B4URE2",
+          "chain_range": null,
+          "conservation": 0.9779,
+          "surface_exposed": false,
+          "essential_class": false,
+          "druggable_class": 0,
+          "structures_in_family": 0,
+          "score_terms": {
+            "conservation": 2.9337,
+            "surface_exposed": 0.0,
+            "essential_class": 0.0,
+            "structures_in_family": 0.0,
+            "druggable_class": 0.0
+          },
+          "score": 2.9337,
+          "decomposition_reproduces_score": true
+        }
+      ],
+      "surfaces": [
+        {
+          "target": "NRAM_I36A0 Neuraminidase",
+          "rank": 1,
+          "identified": true,
+          "measured_on_accession": "A4GCI9",
+          "chain_range": null,
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to A4GCI9 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.84,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "Hemagglutinin HA1 chain",
+          "rank": 2,
+          "identified": true,
+          "measured_on_accession": "A4GCI6",
+          "chain_range": [
+            18,
+            343
+          ],
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to A4GCI6 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.82,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "Hemagglutinin HA2 chain",
+          "rank": 3,
+          "identified": true,
+          "measured_on_accession": "A4GCI6",
+          "chain_range": [
+            345,
+            566
+          ],
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to A4GCI6 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.81,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "PA_I000X Polymerase acidic protein",
+          "rank": 4,
+          "identified": true,
+          "measured_on_accession": "Q9IQ47",
+          "chain_range": null,
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to Q9IQ47 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.83,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "PB2_I36A0 Polymerase basic protein 2",
+          "rank": 5,
+          "identified": true,
+          "measured_on_accession": "A4GCJ6",
+          "chain_range": null,
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to A4GCJ6 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.84,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "RDRP_I06A0 RNA-directed RNA polymerase catalytic subunit",
+          "rank": 6,
+          "identified": true,
+          "measured_on_accession": "B4URE4",
+          "chain_range": null,
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to B4URE4 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.81,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "M1_I06A0 Matrix protein 1",
+          "rank": 7,
+          "identified": true,
+          "measured_on_accession": "B4URD8",
+          "chain_range": null,
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to B4URD8 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.84,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "NCAP_I54A0 Nucleoprotein",
+          "rank": 8,
+          "identified": true,
+          "measured_on_accession": "P31609",
+          "chain_range": null,
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to P31609 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.82,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        },
+        {
+          "target": "NS1_I06A0 Non-structural protein 1",
+          "rank": 9,
+          "identified": true,
+          "measured_on_accession": "B4URE2",
+          "chain_range": null,
+          "measured": false,
+          "unmeasured_because": "PDBe maps no deposited chain to B4URE2 at all. The protein may be well solved under another accession; this entry is not it.",
+          "seconds": 0.82,
+          "structures_offered": [],
+          "chains_mapped_to_accession": 0
+        }
+      ],
+      "library": {
+        "initiator": "ClAc-D-Tyr",
+        "closure_residue": "C",
+        "random_region": [
+          4,
+          8
+        ],
+        "elongator_classes": [
+          "canonical",
+          "N-methyl",
+          "D-alpha-amino"
+        ],
+        "elongator_alphabet": [
+          "A",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "K",
+          "L",
+          "M",
+          "N",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "V",
+          "W",
+          "Y",
+          "NMe-Gly",
+          "NMe-Ala",
+          "NMe-Phe",
+          "D-Ala",
+          "D-Phe",
+          "D-Ser"
+        ],
+        "cyclisation": "spontaneous thioether between chloroacetyl initiator and downstream Cys",
+        "theoretical_diversity": 158945703125,
+        "endpoint_note": "A library definition only; no binding, enrichment, inhibition or antiviral property is predicted for any member."
+      },
+      "folded": {
+        "target_name": "Hemagglutinin HA1 chain",
+        "sequence_length": 326,
+        "sequence_sha256": "25095d350176c8ab0bb5de2aa5c24631cb1a664ad75dbea14094dcf9db66a9fa",
+        "mean_plddt": 50.46,
+        "confident_fraction": 0.2699,
+        "pdb_sha256": "07b2aea2dc80fc27407513adc12e754379c0f1bfe8091a489b8294ff0c4e1b69",
+        "absence": null
+      },
+      "foldable": [
+        {
+          "target": "NRAM_I36A0 Neuraminidase",
+          "rank": 1,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 454,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 454,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "Hemagglutinin HA1 chain",
+          "rank": 2,
+          "chain_range_on_the_relative": [
+            18,
+            343
+          ],
+          "declared_length_aa": 326,
+          "parent_orf_length_aa": 566,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 326,
+          "orfs_searched": 12,
+          "found_in": "the ORF that matched",
+          "span_in_this_genome": [
+            18,
+            343
+          ],
+          "recovered_length_aa": 326,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.954,
+          "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 95% identity"
+        },
+        {
+          "target": "Hemagglutinin HA2 chain",
+          "rank": 3,
+          "chain_range_on_the_relative": [
+            345,
+            566
+          ],
+          "declared_length_aa": 222,
+          "parent_orf_length_aa": 566,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "reference_chain_length_aa": 222,
+          "orfs_searched": 12,
+          "found_in": "the ORF that matched",
+          "span_in_this_genome": [
+            345,
+            566
+          ],
+          "recovered_length_aa": 222,
+          "chain_covered_by_alignment": 1.0,
+          "identity_over_aligned_columns": 0.982,
+          "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 98% identity"
+        },
+        {
+          "target": "PA_I000X Polymerase acidic protein",
+          "rank": 4,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 716,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 716,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "PB2_I36A0 Polymerase basic protein 2",
+          "rank": 5,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 759,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 759,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "RDRP_I06A0 RNA-directed RNA polymerase catalytic subunit",
+          "rank": 6,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 757,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 757,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "M1_I06A0 Matrix protein 1",
+          "rank": 7,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 252,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 252,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "NCAP_I54A0 Nucleoprotein",
+          "rank": 8,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 498,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 498,
+          "recovered_by": "the ORF translation is the candidate"
+        },
+        {
+          "target": "NS1_I06A0 Non-structural protein 1",
+          "rank": 9,
+          "chain_range_on_the_relative": null,
+          "declared_length_aa": null,
+          "parent_orf_length_aa": 230,
+          "sequence_recovered": true,
+          "not_recovered_because": null,
+          "recovered_length_aa": 230,
+          "recovered_by": "the ORF translation is the candidate"
+        }
+      ],
+      "seconds": 46.71,
+      "coverage": {
+        "chains_ranked": 9,
+        "surface_rows": 9,
+        "surface_measured": 0,
+        "surface_refused": 9,
+        "surface_covers_every_chain": true,
+        "fold_rows": 9,
+        "fold_sequence_recovered": 9,
+        "fold_covers_every_chain": true
+      },
+      "pathogen": "Influenza A PR8"
+    }
+  ],
+  "limitations": [
+    "Three genomes, all viral, and all three are pathogens this project already had records for, so they are not a sample of anything.",
+    "Every row holds its own organism out, so the surfaces are the nearest curated relative's and not the pathogen's.",
+    "Mycobacterium tuberculosis is not here. `run_intake` ranks six-frame ORFs by length, which does not transfer to a 4.4 Mb chromosome; the candidate-selection step that does is recorded in runs/cross_kingdom_intake.json and is not wired into this function.",
+    "A stage that fails for one genome is recorded as an error row rather than dropping the genome, for the same reason the surface stage refuses in writing."
+  ],
+  "interpretation": "A record of what each stage produced on each genome. No binding, affinity, inhibition or antiviral property is predicted for any protein or any library member.",
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "c4b07ad89eba647eb7baa5a641b439c6113b9241",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-05T21:05:27.128407+00:00"
+  }
+}

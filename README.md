@@ -40,8 +40,8 @@ flowchart TB
       direction TB
       S1["<b>1 · intake.rank_targets</b> · NCBI, UniProt<br/>out: 28 ORFs in six frames, 9 identified against 17,529 reviewed entries"]
       S2["<b>2 · decompose + rank_score</b> · UniProt<br/>out: 21 mature chains, each scored<br/>3·conservation + 2·exposed + 1.5·essential + 0.5·structures + 0.8·druggable"]
-      S3["<b>3 · geometry.surface_markers</b> · PDBe, RCSB<br/>out: 21 rows for 21 chains, 20 measured and 1 refused with the reason<br/>largest exposed hydrophobic patch, median over 5 structures, with the range"]
-      S4["<b>4 · structures.folded</b> · ESM Atlas<br/>out: coordinates and per-residue confidence<br/>14 of 21 chains can supply their own sequence"]
+      S3["<b>3 · geometry.surface_markers</b> · PDBe, RCSB<br/>out: 21 rows for 21 chains, 20 measured and 1 refused with the reason<br/>largest exposed hydrophobic patch within the domain, median over 5 structures"]
+      S4["<b>4 · structures.folded</b> · ESM Atlas<br/>out: coordinates and per-residue confidence<br/>21 of 21 chains located in this genome's own translation"]
       S5["<b>5 · chemistry.library_spec</b> · local tables<br/>out: ClAc-D-Tyr, 4–8 randomised positions over 25 blocks<br/>158,945,703,125 sequences"]
     end
 
@@ -52,7 +52,7 @@ flowchart TB
     G -->|genome_accession| S1
     S1 -->|"target_name · protein_accession · residue_ranges · protein_sequence<br/>all four facts the other nine tools are waiting on"| S2
     S2 -->|"one accession and one residue range per chain"| S3
-    S2 -->|"one amino-acid sequence"| S4
+    S2 -->|"one amino-acid sequence, located by alignment"| S4
     S3 -. "nothing: library_spec reads no measured surface" .-> S5
     S5 -->|"how many positions the library randomises<br/>the only number that crosses between the arms"| S6
     S6 -. "measured members would return as round 1<br/>232 of 232 registry cells are empty" .-> S5
@@ -66,21 +66,38 @@ data that would feed arm 2's answer back into the next design does not exist yet
 
 **The chain is recorded twice, because the reference changes what every later stage receives.**
 Identified through its own curated entries, the later stages work — the residue ranges are the
-pathogen's own, so the surface stage measures 20 of 21 chains and the folding stage cuts 14 of
-21 out of the genome's own translation, reproducing the committed main-protease fold byte for
-byte — but conservation is identity to the nearest curated relative, the nearest relative is
-the protein itself, and the heaviest term in the rubric scores every candidate alike. With
-SARS-CoV-2 deleted from the reference, which is what every validation run below uses, the
-ranking separates and the later stages lose most of their input: 9 of 20 chains keep a
-measurable surface and 4 of 20 can supply a sequence to fold. Neither case alone is the
-system.
+pathogen's own, so the surface stage measures 20 of 21 chains and the folding stage locates
+21 of 21 inside the genome's own translation, reproducing the committed main-protease
+fold byte for byte — but conservation is identity to the nearest curated relative, the nearest
+relative is the protein itself, and the heaviest term in the rubric scores every candidate
+alike. With SARS-CoV-2 deleted from the reference, which is what every validation run below
+uses, the ranking separates and the surface stage loses part of its input:
+9 of 20 chains keep a measurable surface. Neither case alone is the system.
 
-**No chain is dropped between stages in either case**, which was not true until this record
-existed. `intake.enrich_with_surface` had no caller anywhere in the package, so the only
-surfaces ever measured were six named by hand, and SARS-CoV-2's RNA-directed RNA polymerase —
-fifth of the ranked candidates, with an approved antiviral against it — was never asked about.
-It measures 486.6 square angstroms with a spread of 1319.8 across five structures of the same
-domain, and gates `no` on localisation: the polymerase is inside the cell.
+**No chain is dropped between stages in either case, or on any genome**, which was not true
+until this record existed. `intake.enrich_with_surface` had no caller anywhere in the package,
+so the only surfaces ever measured were six named by hand, and SARS-CoV-2's RNA-directed RNA
+polymerase — fifth of the ranked candidates, with an approved antiviral against it — was never
+asked about. It measures 486.6 square angstroms with a spread of 1319.8 across five
+structures of the same domain, and gates `no` on localisation: the polymerase is inside
+the cell.
+
+**The same five stages run on three pathogens from three viral families**, in
+[runs/onset_chain_genomes.json](runs/onset_chain_genomes.json), each with its own organism held
+out. The invariant holds on all of them and the coverage behind it does not: 9 of 20 ranked
+chains keep a measurable surface for SARS-CoV-2, 6 of 8 for Nipah, and 0 of 9 for influenza —
+whose reviewed entries are split so finely by strain that the nearest relative of a held-out
+protein is usually an entry with no deposited structure of its own, although influenza proteins
+are among the best solved in virology. That spread is what says the coverage number is a
+property of the pathogen rather than of the code.
+
+**And §1.6c of the notebook takes a pathogen of your own**, as does
+`python -m hpc_pilots chain --accession <id> --pathogen <name>`. MERS-CoV, `NC_019843.3`, a
+genome nothing here had looked at: 19 chains ranked, 19 surface rows for them, 19 of 19 located
+in the genome's own translation, and the main protease it folded hashes to something that is
+not SARS-CoV-2's — it found MERS's own, through a coronavirus relative, which is what the
+system claims to do. A genome over 500,000 nt is refused rather than ranked, because
+six-frame ORFs ordered by length do not transfer to a chromosome.
 
 ---
 
@@ -187,8 +204,9 @@ that size and is recorded as not established rather than as a pass or a failure.
 | `identification_cascade` | Past that point, conserved enzymes still come back through distant matches. Family-specific surface proteins have no distant relatives, so they are recognised from their own sequence instead, as a surface protein rather than by name. Those are the antibody targets. |
 | `cross_kingdom_intake` | Genome to targets transfers to a bacterium once the candidate-selection step is replaced. All four first-line tuberculosis drug target complexes rank inside the top 92 of 4,085 predicted genes. |
 | `surface_markers` | Scoring the largest unbroken exposed greasy area puts the spike receptor-binding domain above the main protease at every contact cutoff measured, so a target can be scored from structure without penalising the interfaces macrocycles exist to bind. |
-| `amenability_gate` | Over five structures of the same domain the patch moves by up to 1625 square angstroms, against one macrocycle footprint of 600, so the gate reports the range with the median inside it. Generated from `configs/structures.json`, so all 12 declared targets get a row: 11 measured, 1 refused with the reason. |
+| `amenability_gate` | Over five structures of the same domain the patch moves by up to 1850 square angstroms, against one macrocycle footprint of 600, so the gate reports the range with the median inside it. Generated from `configs/structures.json`, so all 12 declared targets get a row: 11 measured, 1 refused with the reason. The band now has an edge on both sides: a patch covering more than 15% of its domain's own surface is a region rather than a site and cannot read `yes`. |
 | `onset_chain` | One genome in, and what each of the five stages handed the next, under both references. The surface stage emits one row per ranked chain, measured or refused, in both. |
+| `onset_chain_genomes` | The same five stages on 3 pathogens from three viral families, each held out from its own reference. One surface row per ranked chain on every genome; how many of those rows carry a measurement runs from 9 of 20 to 0 of 9. |
 
 ### The result
 
@@ -278,10 +296,19 @@ return when the cell executes.
 | 1.5 | The identification cliff | Where the pipeline stops rather than degrades |
 | 1.6 | The surface a macrocycle would bind | Patch medians with the spread across replicate structures |
 | 1.6a | Every chain, and nothing dropped | One surface row per ranked chain, measured or refused with the reason |
+| 1.6b | The same stages on three pathogens | Coverage as a property of the pathogen, not of the code |
+| 1.6c | Run it on a pathogen of your own | One accession in, the whole chain out, live |
 | 2.1 | The result | Gain against shared positions, from the per-batch records |
 | 2.2 | Tested by intervention | Narrow the batch and the effect returns; remove sharing and it goes |
 | 2.3 | What a campaign supplies | The chemistry that is wired, and the fields a campaign fills |
 | 3 | One genome in, a ranked candidate list out | The whole chain on SARS-CoV-2, ending in a ranked shortlist |
+
+**§1.6c takes a pathogen of your own.** One NCBI nucleotide accession goes in — several
+separated by commas for a segmented genome — and the same five stages run against the same
+endpoints, printing the same ledger, for a pathogen nothing here has looked at. No target
+list, no structure, no name. A genome over 500,000 nt is refused rather than ranked, because
+six-frame ORFs ordered by length do not transfer to a chromosome and a confident wrong
+shortlist is the one output worse than none.
 
 **Budget the cold number, not the cached one.** Registered costs run from 0.7 seconds for a fold
 to 94 seconds for the bioactivity lookup, but that 0.7 seconds is a cached result.
@@ -326,6 +353,8 @@ python -m hpc_pilots prepare-target --landscape mpro      # one pathogen dataset
 python -m hpc_pilots target --landscape mpro --pool 0 --policy ucb --delay 3
 python -m hpc_pilots targets                              # build the evidence packets
 python -m hpc_pilots chain                                # one genome through every stage, both references
+python -m hpc_pilots chain --genomes                      # the same stages on three pathogens
+python -m hpc_pilots chain --accession NC_019843.3 --pathogen MERS-CoV   # or one of your own
 python -m hpc_pilots gate                                 # the amenability gate over every declared target
 python -m hpc_pilots chemistry                            # build the block registry
 python -m hpc_pilots emergency --family coronaviridae --policy agent

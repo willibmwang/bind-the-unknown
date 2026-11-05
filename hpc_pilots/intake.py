@@ -635,7 +635,7 @@ def exposed_from_locations(locations):
     return {"exposed": fraction >= 0.5, "fraction": round(fraction, 3), "n": len(lowered)}
 
 
-def amenable(features):
+def amenable(features, max_patch_fraction=None):
     """Can a macrocycle bind this target at all? A gate, not a rank.
 
     The surface markers failed as a scoring term in both forms tried, and the reason they
@@ -645,8 +645,18 @@ def amenable(features):
     macrocycle can lie across, which is a reason to pick a different modality rather than a
     reason to demote the target.
 
-    Two conditions, and both are necessary. The patch has to be large enough to host the
-    footprint, and the protein has to be somewhere a macrocycle can get to.
+    Three conditions, and all are necessary. The protein has to be somewhere a macrocycle can
+    get to, the patch has to be large enough to host the footprint, and it has to be small
+    enough to be a site rather than a region.
+
+    The third was absent for a long time and its absence pointed the wrong way: with a floor
+    at half a footprint and no ceiling, the larger the patch the more confidently this read
+    `yes`. Patch membership is spatial adjacency at ten angstroms, so on a large chain the
+    exposed hydrophobic residues connect into one component wrapping the protein --
+    SARS-CoV-2's nsp4 reports 7,558 square angstroms that way, an order of magnitude over the
+    footprint, marking nothing. The quantity that separates a site from a region is the share
+    of the domain's own surface and not an absolute area, because percolation scales with the
+    chain while a binding site does not.
 
     The second is doing more work than it appears. Nipah's matrix protein carries the largest
     patch measured anywhere, 1,236 square angstroms, and is not a drug target: that surface is
@@ -675,6 +685,8 @@ def amenable(features):
     the quantity the gate thresholds. A single structure is a sample of a conformational
     ensemble and is treated here as if it were the protein.
     """
+    if max_patch_fraction is None:
+        max_patch_fraction = PATCH_FRACTION_CEILING
     patch = features.get("hydrophobic_patch_area")
     if patch is None:
         return None
@@ -700,6 +712,17 @@ def amenable(features):
     # it. A hard cut on a median that uncertain reports a confidence the measurement does not
     # have, so a range crossing the threshold is reported as borderline whatever the median
     # says.
+    # A patch can fail upwards, and the gate used to have no way of saying so: the band had a
+    # floor at half a footprint and no ceiling at all, so the larger the patch the more
+    # confidently it read `yes`. The largest patches in a viral genome belong to percolated
+    # surfaces and to membrane proteins measured out of their bilayer, and neither is a site.
+    # A patch covering more than `max_patch_fraction` of the domain's accessible surface is
+    # therefore reported as uncertain rather than as a pass: there is a great deal of exposed
+    # greasy area and the measurement has not located a macrocycle-sized place within it.
+    fraction = features.get("patch_fraction_of_surface")
+    if fraction is not None and fraction >= max_patch_fraction:
+        return "borderline"
+
     low = features.get("patch_area_min", patch)
     high = features.get("patch_area_max", patch)
     if low >= MACROCYCLE_FOOTPRINT_A2:
@@ -712,6 +735,20 @@ def amenable(features):
 # A macrocyclic peptide buries roughly this much on binding. Repeated from `geometry` so the
 # gate can be evaluated without importing the structural stack.
 MACROCYCLE_FOOTPRINT_A2 = 600.0
+
+# The share of a domain's accessible surface above which the largest patch is no longer a
+# site. Chosen, not derived, and reported at three values in `runs/amenability_gate.json` for
+# the same reason the contact cutoff is: a threshold that produces the verdict is worth being
+# suspicious of, and what matters is whether the direction survives moving it.
+#
+# The quantity is a fraction and not an area because the failure it catches is percolation.
+# Patch membership is spatial adjacency at ten angstroms, so on a large enough chain the
+# exposed hydrophobic residues connect into one component that wraps the protein -- nsp4
+# reports 7,558 square angstroms this way. In absolute terms that clears a 600 square-angstrom
+# footprint by an order of magnitude and reads as the most macrocycle-amenable surface in the
+# genome; as a share of the domain's own surface it is a quarter of it, which is a region and
+# not a place to put a molecule.
+PATCH_FRACTION_CEILING = 0.15
 
 # Mean macrocycle surface score over the six structures in `runs/surface_markers.json`, which
 # span two enzyme pockets and four interfaces. Used to centre the surface term so that a
@@ -744,6 +781,8 @@ def enrich_with_surface(ranked, top=12):
         row["features"]["patch_area_min"] = markers.get("patch_area_min")
         row["features"]["patch_area_max"] = markers.get("patch_area_max")
         row["features"]["patch_area_spread"] = markers.get("patch_area_spread")
+        row["features"]["patch_fraction_of_surface"] = markers.get(
+            "patch_fraction_of_surface")
         row["features"]["structures_measured"] = markers.get("structures_measured")
         row["features"]["structure_used"] = f"{markers['pdb_id']}:{markers.get('chain')}"
         # Localisation resolved for this chain, not inherited from the polyprotein.
@@ -821,6 +860,27 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
     species holdout cannot speak to.
     """
     segments = genome_records(accession)
+    # A genome too large for six-frame calling is refused here rather than ranked wrongly.
+    # `orfs` returns every stretch between stops and the selection below keeps the longest,
+    # which is right for a 30 kb virus and silently wrong for a chromosome: Mycobacterium
+    # tuberculosis yields 15,787 six-frame ORFs of which 2,534 are at least as long as the
+    # target of isoniazid, so length puts the drug target past two thousandth and returns a
+    # confident shortlist containing none of the proteins anyone treats the disease with.
+    #
+    # The two pieces that fix it are in this module and have no caller: `candidate_genes`
+    # switches to a prokaryotic gene model above this size, and `prescreen` ranks a candidate
+    # on its hit's name rather than its length. Wiring them is a change to the selection step
+    # and to the reference index behind it, and `runs/cross_kingdom_intake.json` records that
+    # the transfer works once it is made. Until then this refuses, because a confident wrong
+    # ranking is the one output worse than none.
+    total_nt = sum(len(part) for _, part in segments)
+    if total_nt > VIRAL_GENOME_LIMIT_NT:
+        raise ValueError(
+            f"{accession} is {total_nt:,} nt, over the {VIRAL_GENOME_LIMIT_NT:,} nt this "
+            f"function calls genes for. Six-frame ORFs ranked by length do not transfer to a "
+            f"genome this size: the candidate-selection step has to be replaced first "
+            f"(`candidate_genes` and `prescreen` in this module, neither wired), and "
+            f"runs/cross_kingdom_intake.json records what that changes.")
     found = []
     for index, (segment_header, segment) in enumerate(segments):
         for orf in orfs(segment, minimum_aa):
@@ -856,6 +916,13 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
             entries, exclude_taxid, exclude_rank, known)
     else:
         index, kept = build_index(entries, exclude_organism)
+        # Counted, so a holdout that matched nothing is visible. `removed` was left None on
+        # this branch, which meant a misspelled organism name -- the only part of the input a
+        # caller has to get exactly right, and UniProt's spelling is not always the obvious
+        # one -- produced a run that identified the pathogen through its own curated entries
+        # while reporting that it had been held out. Zero here is the signal that the two
+        # differ, and it costs one subtraction to say so.
+        removed = (len(entries) - len(kept)) if exclude_organism else None
 
     # Three tiers, tried in order of cost. Exact 5-mers answer the easy case in milliseconds.
     # Reduced-alphabet seeding plus Smith-Waterman answers the remote case in seconds, and is

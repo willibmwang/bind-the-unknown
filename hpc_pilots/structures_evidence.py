@@ -42,6 +42,7 @@ from .common import ROOT, content_digest, provenance, write_json
 
 UNIPROT = "https://rest.uniprot.org/uniprotkb/"
 SIFTS = "https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/"
+RESIDUE_MAPPING = "https://www.ebi.ac.uk/pdbe/api/mappings/uniprot/"
 SUMMARY = "https://www.ebi.ac.uk/pdbe/api/pdb/entry/summary/"
 
 # PDBe rejects very long POST bodies, and a failed batch is indistinguishable from an empty
@@ -53,11 +54,36 @@ def config():
     return json.loads((ROOT / "hpc_pilots/configs/structures.json").read_text())
 
 
-def _get(url, timeout=120):
-    with urllib.request.urlopen(url, timeout=timeout) as handle:
-        if handle.status == 204:
-            return None
-        return json.load(handle)
+# Statuses that mean "ask again", as opposed to "there is no such thing". A 503 from PDBe is
+# a minute of maintenance and a 404 is a fact about the accession, and treating the first like
+# the second is how a target came back unmeasurable in `runs/amenability_gate.json` with a
+# reason that described the server rather than the protein.
+TRANSIENT = (429, 500, 502, 503, 504)
+
+
+def _get(url, timeout=120, attempts=4, backoff=2.0):
+    """One JSON GET, retried on the statuses that mean the server is busy rather than sure.
+
+    Linear backoff rather than exponential: these endpoints recover in seconds and the point
+    is to outlast a blip, not to wait politely for minutes inside a measurement. A status
+    outside `TRANSIENT` is raised on the first attempt, because retrying a 404 only delays
+    the correct answer.
+    """
+    import time
+
+    for attempt in range(attempts):
+        try:
+            with urllib.request.urlopen(url, timeout=timeout) as handle:
+                if handle.status == 204:
+                    return None
+                return json.load(handle)
+        except urllib.error.HTTPError as error:
+            if error.code not in TRANSIENT or attempt == attempts - 1:
+                raise
+        except (urllib.error.URLError, TimeoutError, ConnectionError):
+            if attempt == attempts - 1:
+                raise
+        time.sleep(backoff * (attempt + 1))
 
 
 def entry(accession):
@@ -117,6 +143,47 @@ def chains(accession):
             return []
         raise
     return (payload or {}).get(accession, [])
+
+
+def residue_mapping(pdb_id, accession, cache={}):
+    """Per chain, the UniProt-to-author residue correspondence for one entry.
+
+    **Why this is a second call and not a field on `chains`.** `best_structures` reports
+    `start` and `end` beside `unp_start` and `unp_end`, which reads like the author numbering
+    and is not: it is the residue's index within the entity. For the spike receptor-binding
+    domain the entity indices are 4 to 198 where the author numbers are 333 to 527, and a clip
+    applied in the wrong numbering selects no residue at all -- which is what it did, silently,
+    on every chain whose construct does not start at residue 1.
+
+    Returned as `{chain_id: [(unp_start, unp_end, author_start, author_end), ...]}`, one tuple
+    per contiguous mapped segment. A chain whose entry gives no author number is absent, and
+    the caller measures it unclipped rather than guessing an offset.
+    """
+    key = (pdb_id.lower(), accession)
+    if key in cache:
+        return cache[key]
+    try:
+        payload = _get(f"{RESIDUE_MAPPING}{urllib.parse.quote(pdb_id)}")
+    except urllib.error.HTTPError as error:
+        if error.code == 404:
+            cache[key] = {}
+            return {}
+        raise
+    block = ((payload or {}).get(pdb_id.lower(), {}).get("UniProt", {})
+             .get(accession, {}) or {})
+    out = {}
+    for mapping in block.get("mappings", []):
+        chain = mapping.get("chain_id")
+        start, end = mapping.get("start") or {}, mapping.get("end") or {}
+        first, last = start.get("author_residue_number"), end.get("author_residue_number")
+        if chain is None or first is None or last is None:
+            continue
+        if mapping.get("unp_start") is None or mapping.get("unp_end") is None:
+            continue
+        out.setdefault(chain, []).append(
+            (mapping["unp_start"], mapping["unp_end"], first, last))
+    cache[key] = out
+    return out
 
 
 def dates(pdb_ids):

@@ -4728,6 +4728,48 @@ def test_no_ranked_candidate_loses_its_surface_row():
     assert any("RNA-directed RNA polymerase" in name for name in named), sorted(named)
 
 
+def test_every_ranked_chain_is_located_in_the_genome_it_came_from():
+    """The folding stage covers its input too, and now reaches it under a holdout.
+
+    Slicing at the relative's coordinates left four of twenty SARS-CoV-2 chains foldable,
+    because a coronavirus polyprotein is translated as two overlapping ORFs and the chains
+    past the ribosomal frameshift are genuinely not in the ORF whose match named them.
+    Aligning the relative's chain against every ranked ORF finds them: they are in the
+    genome, in a frame the row does not point at.
+
+    What is pinned is the shape rather than the number -- one row per ranked chain, and a row
+    that was not located saying why -- plus the one case that makes the whole stage checkable:
+    under a holdout, with the chain boundaries coming from SARS-CoV, the main protease comes
+    back as the same 306 residues the repository already committed a fold of.
+    """
+    import json
+
+    from hpc_pilots.common import ROOT
+
+    path = ROOT / "runs/onset_chain.json"
+    if not path.exists():
+        pytest.skip("onset chain artifact absent; rebuild with `python -m hpc_pilots chain`")
+    payload = json.loads(path.read_text())
+
+    for case in payload["cases"]:
+        rows = case["foldable"]
+        assert len(rows) == len(case["scores"]) == case["coverage"]["fold_rows"], case["case"]
+        assert case["coverage"]["fold_covers_every_chain"] is True, case["case"]
+        for row in rows:
+            assert row["sequence_recovered"] or row["not_recovered_because"], row["target"]
+            if row.get("chain_covered_by_alignment") is not None:
+                assert 0.0 <= row["chain_covered_by_alignment"] <= 1.0, row
+
+    committed = ROOT / "runs/folded_structure/mpro_nsp5.json"
+    held = next((c for c in payload["cases"] if c["reference_excluded_organism"]), None)
+    if committed.exists() and held and held["folded"]:
+        reference = json.loads(committed.read_text())
+        if held["folded"].get("target_name", "").startswith("3C-like"):
+            assert held["folded"]["sequence_sha256"] == reference["sequence_sha256"], (
+                "the chain located the main protease through a relative and got a different "
+                "sequence from the one the committed fold was taken on")
+
+
 def test_the_gate_covers_every_target_its_config_declares():
     """The gate's input is the config, so a target missing from the gate is missing from it.
 
@@ -4763,19 +4805,110 @@ def test_the_gate_covers_every_target_its_config_declares():
     assert rdrp["gate"] in ("yes", "borderline", "no")
 
 
-def test_a_mature_chain_is_not_folded_at_another_species_coordinates():
-    """The slice has to be the right residues, not merely the right length.
+def test_the_gate_cannot_pass_a_patch_that_is_the_whole_surface():
+    """A patch can fail upwards, and the band used to have no edge on that side.
 
-    Mature-chain boundaries are annotated on the homolog, and a holdout makes the homolog a
-    different species. SARS-CoV's main protease starts at 3241 and SARS-CoV-2's at 3264, so
-    slicing one genome's translation at the other's coordinates yields 306 residues -- the
-    correct length -- beginning 23 residues into the wrong window. A length check alone
-    accepts that and folds a shifted fragment under the target's name.
+    Patch membership is spatial adjacency at ten angstroms, so on a large chain the exposed
+    hydrophobic residues connect into one component wrapping the protein: SARS-CoV-2's nsp4
+    reports 7,558 square angstroms that way. Against a 600 square-angstrom footprint that read
+    as the most macrocycle-amenable surface in the genome, when what it means is that there is
+    a great deal of greasy area and no located site in it. The quantity that tells the two
+    apart is the share of the domain's own surface, because percolation scales with the chain
+    and an absolute area does not.
     """
-    from hpc_pilots.chain import _ungapped_identity
+    from hpc_pilots.intake import PATCH_FRACTION_CEILING, amenable
 
-    assert _ungapped_identity("MKTAYIAK", "MKTAYIAK") == 1.0
-    assert _ungapped_identity("MKTAYIAK", "AYIAKQQQ") < 0.5
-    # Different lengths and absent sides are None, never a number a threshold could pass.
-    assert _ungapped_identity("MKTA", "MKTAY") is None
-    assert _ungapped_identity("MKTA", None) is None
+    site = {"hydrophobic_patch_area": 900.0, "patch_area_min": 900.0,
+            "patch_area_max": 900.0, "surface_exposed": True,
+            "patch_fraction_of_surface": 0.05}
+    assert amenable(site) == "yes"
+
+    # The same area, the same exposure, on a surface it covers a quarter of.
+    region = {**site, "patch_fraction_of_surface": 0.25}
+    assert amenable(region) == "borderline", region
+
+    # The ceiling is a parameter and the record reports the verdict at three values, so a
+    # reader can see whether the answer moved. Here it does, which is what makes it worth
+    # reporting rather than burying.
+    middling = {**site, "patch_fraction_of_surface": 0.12}
+    assert amenable(middling, max_patch_fraction=0.10) == "borderline"
+    assert amenable(middling, max_patch_fraction=0.15) == "yes"
+
+    # A row with no fraction measured is not refused for lacking one.
+    assert amenable({k: v for k, v in site.items()
+                     if k != "patch_fraction_of_surface"}) == "yes"
+    assert 0.0 < PATCH_FRACTION_CEILING < 1.0
+
+
+def test_a_chain_renumbered_from_one_is_still_found_in_its_parent():
+    """The clip needs the chain's own numbering, and may not assume which one it uses.
+
+    Viral proteins are often deposited in their parent polyprotein's numbering and mature
+    chains are usually renumbered from 1. Picking either convention blindly selects the wrong
+    residues on everything that uses the other, and PDBe publishes an author residue number
+    for only some entries, so the offset has to be recoverable from the structure itself.
+    """
+    from hpc_pilots.geometry import numbering_offset
+
+    reference = ("MSDNGPQNQRNAPRITFGGPSDSTGSNQNGERSGARSKQRRPQGLPNNTASWFTALTQHGK"
+                 "EDLKFPRGQGVPINTNSSPDDQIGYYRRATRRIRGGDGKMKDLSPRWYFYYLGTGPEAGLP")
+    # A chain cut out at parent positions 31 to 90, deposited renumbered from 1.
+    chain = reference[30:90]
+    residues = [{"number": str(i + 1), "residue": _three(letter)}
+                for i, letter in enumerate(chain)]
+    offset, agreement = numbering_offset(residues, reference)
+    assert agreement == 1.0, (offset, agreement)
+    # unp_position = author_number + offset, so author 1 is parent 31.
+    assert offset == 30, offset
+
+    # And the same chain deposited in the parent's own numbering needs no shift at all.
+    native = [{"number": str(i + 31), "residue": _three(letter)}
+              for i, letter in enumerate(chain)]
+    offset, agreement = numbering_offset(native, reference)
+    assert (offset, agreement) == (0, 1.0), (offset, agreement)
+
+    # Nothing to line up means no offset, never a confident wrong one.
+    assert numbering_offset(residues, "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW") == (None, 0.0)
+
+
+def _three(letter):
+    """One-letter to three-letter, for building residue records in a test."""
+    table = {"A": "ALA", "R": "ARG", "N": "ASN", "D": "ASP", "C": "CYS", "Q": "GLN",
+             "E": "GLU", "G": "GLY", "H": "HIS", "I": "ILE", "L": "LEU", "K": "LYS",
+             "M": "MET", "F": "PHE", "P": "PRO", "S": "SER", "T": "THR", "W": "TRP",
+             "Y": "TYR", "V": "VAL"}
+    return table[letter]
+
+
+def test_a_mature_chain_is_located_by_alignment_and_not_by_coordinates():
+    """The relative's chain is found in this genome's translation, offset and all.
+
+    This is the fix for the hazard the length check could only refuse: one species' chain
+    coordinates applied to another's polyprotein give a window of the right length in the
+    wrong place. Aligning returns the right window instead, across a species boundary and
+    with indels absorbed, which is what a slice cannot do at any threshold.
+    """
+    pytest.importorskip("Bio")
+    from hpc_pilots.chain import locate_chain
+
+    chain = ("GFRKMAFPSGKVEGCMVQVTCGTTTLNGLWLDDVVYCPRHVICTSEDMLNPNYEDLLIRKS"
+             "NHNFLVQAGNVQLRVIGHSMQNCVLKLKVDTANPKTPKYKFVRIQPGQTFSVLACYNGSPS")
+    # The genome's own translation, with the chain sitting at 201 to 320 of it.
+    orf = "M" + "AGSTVKLPQ" * 22 + chain + "RRSVEGT" * 14
+    at = orf.index(chain) + 1
+    # The relative's copy of the same chain: a handful of substitutions, as a congener's is.
+    relative = list(chain)
+    for position in (3, 19, 44, 71, 96):
+        relative[position] = "A" if relative[position] != "A" else "S"
+    located = locate_chain(orf, "".join(relative))
+
+    assert located is not None
+    assert located["span"] == [at, at + len(chain) - 1], (located["span"], at)
+    assert located["sequence"] == chain
+    assert located["covered"] >= 0.9, located
+    assert 0.9 <= located["identity"] < 1.0, located
+
+    # An unrelated query finds no real correspondence and is refused by coverage, not by a
+    # confident wrong span.
+    stray = locate_chain(orf, "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
+    assert stray is None or stray["covered"] < 0.5, stray
