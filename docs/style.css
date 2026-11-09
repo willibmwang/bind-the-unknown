@@ -80,6 +80,18 @@ a:focus-visible,button:focus-visible,input:focus-visible,[role="button"]:focus-v
 
 /* masthead */
 header.top{padding-block:76px 34px;border-bottom:1px solid var(--rule)}
+/* The landing hero only. Result pages keep the plain header.top above. */
+header.hero{display:grid;grid-template-columns:1.32fr .68fr;align-items:center;gap:48px;
+  min-height:calc(100vh - 62px);border-bottom:0;padding-block:40px 56px}
+.hero-text{min-width:0}
+.hero-art{width:100%;max-width:400px;height:auto;justify-self:center;display:block;
+  /* decorative: the real fold, but the page does not depend on it loading */
+  filter:saturate(1.05)}
+@media(max-width:860px){
+  header.hero{grid-template-columns:1fr;min-height:0;gap:32px;padding-block:56px 32px}
+  .hero-art{max-width:300px;justify-self:start;order:-1}
+}
+.strip.after-hero{margin-top:0;margin-bottom:8px}
 .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--fg-3)}
 h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,4.8vw,50px);line-height:1.12;letter-spacing:-.03em;margin-top:18px}
 /* A hyphen is a break opportunity, so "SARS-CoV-2" splits across lines on a phone.
@@ -102,7 +114,7 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,4.8vw,50px);l
 
 /* The plain-English opener. `.plain` was taken — it is the gloss in a tool-card head — so
    this is `.opener`, and the two must not be merged. */
-.opener{margin-top:40px;padding:28px 30px;background:var(--surface);border:1px solid var(--rule);
+.opener{margin-top:56px;padding:32px 34px;background:var(--surface);border:1px solid var(--rule);
   border-left:3px solid var(--brand);border-radius:14px}
 .opener .lbl{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--fg-3);margin-bottom:12px}
 .opener p{margin:0 0 13px;font-size:18px;line-height:1.6;max-width:66ch}
@@ -110,7 +122,7 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,4.8vw,50px);l
 .opener b{font-weight:600}
 
 /* contents: the same pattern as a research-group index — number, title, one plain line */
-.toc{margin-top:44px}
+.toc{margin-top:72px}
 .toc h2{font-family:var(--display);font-weight:700;font-size:25px;letter-spacing:-.025em}
 .toc .grp{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;
   color:var(--accent);margin:28px 0 4px;padding-top:14px;border-top:1px solid var(--rule)}
@@ -131,9 +143,9 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,4.8vw,50px);l
 }
 
 /* sections */
-section{padding-block:62px 0;counter-increment:sec}
+section{padding-block:96px 0;counter-increment:sec}
 .sec-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:16px;row-gap:7px;
-  align-items:baseline;border-bottom:1px solid var(--rule);padding-bottom:13px;margin-bottom:26px}
+  align-items:baseline;border-bottom:1px solid var(--rule);padding-bottom:15px;margin-bottom:34px}
 .sec-head::before{content:counter(sec,decimal-leading-zero);font-family:var(--mono);font-size:13px;
   font-weight:500;color:var(--accent);letter-spacing:.06em;font-variant-numeric:tabular-nums}
 .sec-head h2{font-family:var(--display);font-weight:700;font-size:clamp(23px,3vw,30px);line-height:1.18;letter-spacing:-.025em}
@@ -156,8 +168,8 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .flow.one{grid-template-columns:1fr;max-width:252px}
 .step{position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:17px 10px 15px;text-align:center;min-width:0}
 .step .ic{display:block;width:100%;max-width:90px;height:auto;margin:0 auto 12px}
-.step .ic .ac{fill:var(--brand)}
-.step .ic .acs{stroke:var(--brand)}
+.ic .ac{fill:var(--brand)}
+.ic .acs{stroke:var(--brand)}
 .armband.a2 .ic .ac{fill:var(--ok)}
 .step .lbl{font-size:14.5px;font-weight:500;line-height:1.3}
 .step .val{font-family:var(--mono);font-size:22px;font-weight:500;letter-spacing:-.02em;margin-top:10px;line-height:1.1;font-variant-numeric:tabular-nums}
@@ -175,6 +187,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .stage{background:var(--surface);border:1px solid var(--rule);border-radius:14px;margin-bottom:13px;overflow:hidden}
 .stage-head{display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding:15px 17px;background:var(--surface-2);border-bottom:1px solid var(--rule)}
 .sn{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--on-accent);background:var(--accent);width:26px;height:26px;display:grid;place-items:center;border-radius:7px;flex:none}
+.stage-head .ic{width:52px;height:auto;flex:none;margin:0}
 .stage-head .what{font-size:17px;font-weight:500;min-width:0}
 .stage-head .secs{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--fg-3);flex:none}
 .io{display:grid;grid-template-columns:1fr 1.25fr;gap:1px;background:var(--rule-2)}
@@ -323,13 +336,13 @@ a{color:var(--accent)}
 .reclink span{font-size:14px;color:var(--fg-3);min-width:0}
 
 /* ---- arm separators ---- */
-.armsep{margin:72px 0 0;padding:26px 28px;border-radius:14px;background:var(--surface-2);border-left:3px solid var(--brand)}
+.armsep{margin:112px 0 0;padding:32px 34px;border-radius:14px;background:var(--surface-2);border-left:3px solid var(--brand)}
 .armsep.two{border-left-color:var(--ok)}
 .armsep .n{font-family:var(--mono);font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent)}
 .armsep.two .n{color:var(--ok)}
 .armsep h2{font-family:var(--display);font-weight:700;font-size:clamp(25px,3.4vw,34px);line-height:1.14;letter-spacing:-.03em;margin-top:10px}
 .armsep p{margin:14px 0 0;color:var(--fg-2);font-size:17px;line-height:1.6;max-width:62ch}
-.armsep + section{padding-top:40px}
+.armsep + section{padding-top:56px}
 
 /* ---- the flowchart page ----
    SVG text neither wraps nor clips at the viewBox edge, so the right-hand annotations have to

@@ -406,6 +406,60 @@ def build_results():
 
 
 # --------------------------------------------------------------------- the other assets
+def build_hero_image():
+    """The hero artwork: the committed fold, drawn as a soft violet volume.
+
+    This is the real backbone from `runs/folded_structure/mpro_nsp5.pdb`, not an illustration,
+    which is the only reason it is allowed to be decorative. Two details matter if you change
+    it. The backbone is straight line segments between alpha carbons, so it has to be smoothed
+    or it reads as a wire diagram. And every pass must be ONE continuous path: drawing the
+    segments separately (a LineCollection, say) composites each overlap on its own and the
+    alpha accumulates until the whole thing is a solid blob.
+    """
+    pdb = RUNS / "folded_structure/mpro_nsp5.pdb"
+    if not pdb.exists():
+        print("  no committed fold on this machine; leaving docs/hero.png as it is")
+        return
+    os.environ.setdefault("MPLCONFIGDIR", "/tmp/mpl-site")
+    os.environ.setdefault("MPLBACKEND", "Agg")
+    import numpy as np
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    xyz = np.array([(float(l[30:38]), float(l[38:46]), float(l[46:54]))
+                    for l in pdb.read_text().splitlines()
+                    if l.startswith("ATOM") and l[12:16].strip() == "CA" and l[16] in (" ", "A")])
+
+    def chaikin(pts, n=4):
+        """Corner cutting: each pass replaces a segment with points at 1/4 and 3/4."""
+        for _ in range(n):
+            a, b = pts[:-1], pts[1:]
+            out = np.empty((2 * len(a), pts.shape[1]))
+            out[0::2] = .75 * a + .25 * b
+            out[1::2] = .25 * a + .75 * b
+            pts = out
+        return pts
+
+    centred = xyz - xyz.mean(0)
+    _, _, vt = np.linalg.svd(centred, full_matrices=False)
+    p = chaikin((centred @ vt[:2].T)[:, ::-1], 4)     # longest axis vertical
+
+    fig = plt.figure(figsize=(6, 7.6), dpi=200)
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.set_axis_off()
+    ax.set_aspect("equal")
+    for lw, alpha in ((58, .030), (44, .038), (32, .050), (22, .065), (14, .085), (8, .11)):
+        ax.plot(p[:, 0], p[:, 1], color="#ac31ff", lw=lw, alpha=alpha,
+                solid_capstyle="round", solid_joinstyle="round")
+    m = 9
+    ax.set_xlim(p[:, 0].min() - m, p[:, 0].max() + m)
+    ax.set_ylim(p[:, 1].min() - m, p[:, 1].max() + m)
+    fig.savefig(DOCS / "hero.png", transparent=True, bbox_inches="tight", pad_inches=0.1)
+    plt.close(fig)
+    print("wrote docs/hero.png")
+
+
 def build_fold_image():
     """The committed fold, drawn through the same function the notebook uses."""
     rec = RUNS / "folded_structure/mpro_nsp5.json"
@@ -455,6 +509,7 @@ def main():
     (DOCS / ".nojekyll").write_text("")      # serve the tree as files, no Jekyll pass
     build_index()
     build_flowchart()
+    build_hero_image()
     build_fold_image()
     build_results()
     if args.notebook:

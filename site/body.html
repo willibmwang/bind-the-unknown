@@ -1,20 +1,25 @@
 <main class="wrap" id="main">
 
-<header class="top">
-  <div class="eyebrow">bind-the-unknown</div>
-  <h1>One <span class="nb">SARS-CoV-2</span> genome in, every step out</h1>
-  <p class="standfirst">The system is given a genome accession and nothing else — no target name, no shortlist, no structure. This is what came back.</p>
-  <dl class="strip">
+<header class="top hero">
+  <div class="hero-text">
+    <div class="eyebrow">bind-the-unknown</div>
+    <h1>One <span class="nb">SARS-CoV-2</span> genome in, every step out</h1>
+    <p class="standfirst">The system is given a genome accession and nothing else — no target name, no shortlist, no structure. This is what came back.</p>
+    <div class="acts">
+      <a class="btn" href="#picked">See what it picked <span aria-hidden="true">→</span></a>
+      <a class="btn ghost" href="#run">Run it on your own pathogen <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+  <img class="hero-art" src="hero.png" alt="" width="1239" height="1416">
+</header>
+
+<dl class="strip after-hero">
     <div><dt>Input</dt><dd>NC_045512.2</dd></div>
     <div><dt>Genome</dt><dd>29,903 letters</dd></div>
     <div><dt>Difficulty</dt><dd>SARS-CoV-2 hidden</dd></div>
     <div><dt>Time taken</dt><dd>86 seconds</dd></div>
   </dl>
-  <div class="acts">
-    <a class="btn" href="#picked">See what it picked <span aria-hidden="true">→</span></a>
-    <a class="btn ghost" href="#run">Run it on your own pathogen <span aria-hidden="true">→</span></a>
-  </div>
-</header>
+
 
 <div class="opener">
   <div class="lbl">In plain terms</div>
@@ -250,7 +255,18 @@
   <div class="sec-head"><h2>The five steps</h2><span class="tag">what went in, what came out</span></div>
 
   <div class="stage">
-    <div class="stage-head"><span class="sn">1</span><span class="what">Read the genome, find the proteins</span><span class="secs">13 s</span></div>
+    <div class="stage-head"><span class="sn">1</span><svg class="ic" aria-hidden="true" viewBox="0 0 100 72">
+            <line x1="6" y1="28" x2="94" y2="28" stroke="currentColor" stroke-width="1.6" opacity=".3"/>
+            <line x1="6" y1="44" x2="94" y2="44" stroke="currentColor" stroke-width="1.6" opacity=".3"/>
+            <line x1="18" y1="28" x2="18" y2="44" stroke="currentColor" stroke-width="1.2" opacity=".16"/>
+            <line x1="34" y1="28" x2="34" y2="44" stroke="currentColor" stroke-width="1.2" opacity=".16"/>
+            <line x1="50" y1="28" x2="50" y2="44" stroke="currentColor" stroke-width="1.2" opacity=".16"/>
+            <line x1="66" y1="28" x2="66" y2="44" stroke="currentColor" stroke-width="1.2" opacity=".16"/>
+            <line x1="82" y1="28" x2="82" y2="44" stroke="currentColor" stroke-width="1.2" opacity=".16"/>
+            <rect class="ac" x="12" y="24" width="24" height="24" rx="3"/>
+            <rect class="ac" x="44" y="24" width="16" height="24" rx="3" opacity=".6"/>
+            <rect class="ac" x="68" y="24" width="12" height="24" rx="3" opacity=".38"/>
+          </svg><span class="what">Read the genome, find the proteins</span><span class="secs">13 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li>One accession, <b>NC_045512.2</b></li><li>SARS-CoV-2 itself hidden from the reference library</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
@@ -262,7 +278,12 @@
   </div>
 
   <div class="stage">
-    <div class="stage-head"><span class="sn">2</span><span class="what">Score and rank them</span><span class="secs">42 s</span></div>
+    <div class="stage-head"><span class="sn">2</span><svg class="ic" aria-hidden="true" viewBox="0 0 100 72">
+            <rect class="ac" x="16" y="14" width="68" height="8" rx="4"/>
+            <rect class="ac" x="16" y="28" width="54" height="8" rx="4" opacity=".72"/>
+            <rect x="16" y="42" width="40" height="8" rx="4" fill="currentColor" opacity=".26"/>
+            <rect x="16" y="56" width="26" height="8" rx="4" fill="currentColor" opacity=".26"/>
+          </svg><span class="what">Score and rank them</span><span class="secs">42 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>12</b> candidates</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
@@ -274,7 +295,12 @@
   </div>
 
   <div class="stage">
-    <div class="stage-head"><span class="sn">3</span><span class="what">Measure the surface a drug would grip</span><span class="secs">30 s</span></div>
+    <div class="stage-head"><span class="sn">3</span><svg class="ic" aria-hidden="true" viewBox="0 0 100 72">
+            <circle cx="50" cy="36" r="25" fill="currentColor" opacity=".1"/>
+            <circle cx="50" cy="36" r="25" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".35"/>
+            <path class="ac" d="M50 11 A25 25 0 0 1 71.65 48.5 L50 36 Z" opacity=".85"/>
+            <circle cx="60" cy="27" r="2.4" fill="currentColor" opacity=".3"/>
+          </svg><span class="what">Measure the surface a drug would grip</span><span class="secs">30 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>20</b> chains</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
@@ -286,7 +312,11 @@
   </div>
 
   <div class="stage">
-    <div class="stage-head"><span class="sn">4</span><span class="what">Predict a 3-D shape</span><span class="secs">2 s</span></div>
+    <div class="stage-head"><span class="sn">4</span><svg class="ic" aria-hidden="true" viewBox="0 0 100 72">
+            <path class="acs" d="M16 52 Q27 16 40 46 Q52 70 62 34 Q70 10 84 26" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle class="ac" cx="16" cy="52" r="4"/>
+            <circle class="ac" cx="84" cy="26" r="4"/>
+          </svg><span class="what">Predict a 3-D shape</span><span class="secs">2 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>20</b> chains</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
@@ -298,7 +328,17 @@
   </div>
 
   <div class="stage">
-    <div class="stage-head"><span class="sn">5</span><span class="what">Define a library to screen</span><span class="secs">instant</span></div>
+    <div class="stage-head"><span class="sn">5</span><svg class="ic" aria-hidden="true" viewBox="0 0 100 72">
+            <circle cx="50" cy="36" r="20" fill="none" stroke="currentColor" stroke-width="2.4" opacity=".32"/>
+            <circle class="ac" cx="70" cy="36" r="4.4"/>
+            <circle class="ac" cx="64.1" cy="21.9" r="4.4" opacity=".8"/>
+            <circle class="ac" cx="50" cy="16" r="4.4" opacity=".62"/>
+            <circle class="ac" cx="35.9" cy="21.9" r="4.4" opacity=".8"/>
+            <circle class="ac" cx="30" cy="36" r="4.4"/>
+            <circle class="ac" cx="35.9" cy="50.1" r="4.4" opacity=".8"/>
+            <circle class="ac" cx="50" cy="56" r="4.4" opacity=".62"/>
+            <circle class="ac" cx="64.1" cy="50.1" r="4.4" opacity=".8"/>
+          </svg><span class="what">Define a library to screen</span><span class="secs">instant</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li>Nothing from the four steps above. The library definition does not read the measured surface — an intention, not yet a connection</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
