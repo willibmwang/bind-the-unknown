@@ -622,6 +622,12 @@ def facts(case):
         "stage2_seconds": round(st[2].get("seconds") or 0),
         "stage3_seconds": round(st[3].get("seconds") or 0),
         "stage4_seconds": round(st[4].get("seconds") or 0) if 4 in st else None,
+        # The tool cards quote the wall clock to one decimal, which is the only place the
+        # page reports a timing precisely enough for rounding to lose information.
+        "s1_exact": f"{st[1].get('seconds', 0):.1f}",
+        "s2_exact": f"{st[2].get('seconds', 0):.1f}",
+        "s3_exact": f"{st[3].get('seconds', 0):.1f}",
+        "s4_exact": f"{st[4].get('seconds', 0):.1f}" if 4 in st else None,
     }
     return {k: v for k, v in values.items() if v is not None}
 

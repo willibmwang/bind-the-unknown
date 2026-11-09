@@ -332,7 +332,7 @@
   <p class="cap">Six tool calls run the five steps above. Each is a named function with a declared cost and a recorded return — not a prompt, and not a model deciding what to do next. What each one gave back is below.</p>
 
   <div class="tool-card" id="t-intake">
-    <div class="tc-head"><span class="sn">1</span><span class="tn">intake.rank_targets</span><span class="plain">Read the genome, find the proteins</span><span class="db">NCBI · UniProt · 12.7 s · 2 requests</span></div>
+    <div class="tc-head"><span class="sn">1</span><span class="tn">intake.rank_targets</span><span class="plain">Read the genome, find the proteins</span><span class="db">NCBI · UniProt · {{s1_exact}} s · 2 requests</span></div>
     <div class="tc-body">
       <dl class="ret">
         <div><dt>Genome read</dt><dd>{{genome_nt}} nt · {{segments}} segment</dd></div>
@@ -349,7 +349,7 @@
   </div>
 
   <div class="tool-card" id="t-score">
-    <div class="tc-head"><span class="sn">2</span><span class="tn">intake.decompose → intake.rank_score</span><span class="plain">Cut polyproteins apart, then score</span><span class="db">UniProt · 41.9 s</span></div>
+    <div class="tc-head"><span class="sn">2</span><span class="tn">intake.decompose → intake.rank_score</span><span class="plain">Cut polyproteins apart, then score</span><span class="db">UniProt · {{s2_exact}} s</span></div>
     <div class="tc-body">
       <dl class="ret">
         <div><dt>Chains out</dt><dd>{{chains}}</dd></div>
@@ -379,7 +379,7 @@
   </div>
 
   <div class="tool-card" id="t-surface">
-    <div class="tc-head"><span class="sn">3</span><span class="tn">geometry.surface_markers</span><span class="plain">Measure the surface a drug would grip</span><span class="db">PDBe · RCSB · UniProt · 29.8 s</span></div>
+    <div class="tc-head"><span class="sn">3</span><span class="tn">geometry.surface_markers</span><span class="plain">Measure the surface a drug would grip</span><span class="db">PDBe · RCSB · UniProt · {{s3_exact}} s</span></div>
     <div class="tc-body">
       <dl class="ret">
         <div><dt>Rows returned</dt><dd>{{rows_out}} for {{chains}} chains</dd></div>
@@ -420,7 +420,7 @@
   </div>
 
   <div class="tool-card" id="t-fold">
-    <div class="tc-head"><span class="sn">4</span><span class="tn">structures.folded</span><span class="plain">Predict a 3-D shape from sequence alone</span><span class="db">ESM Atlas · 2.1 s · 1 request</span></div>
+    <div class="tc-head"><span class="sn">4</span><span class="tn">structures.folded</span><span class="plain">Predict a 3-D shape from sequence alone</span><span class="db">ESM Atlas · {{s4_exact}} s · 1 request</span></div>
     <div class="tc-body">
       <dl class="ret">
         <div><dt>Model</dt><dd>ESMFold v1 (2022-10-18)</dd></div>
