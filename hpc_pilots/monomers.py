@@ -208,16 +208,14 @@ def encode(features, descriptors, flags, vocabularies, train_rows, encoder, seed
     if encoder not in ENCODERS:
         raise ValueError(f"Unknown encoder {encoder!r}; known encoders are {list(ENCODERS)}")
     cardinalities = [len(v) for v in vocabularies]
-    # Built at float64, which is not a performance note. `design_matrix` returns float32 for
-    # the binding replays, and at that precision a ridge's predictions for two members
-    # differing only in an unseen monomer round to the same number: the held-out column has no
-    # training variance, so regularisation alone fixes its coefficient at something tiny but
-    # non-zero, and the resulting difference falls below float32's resolution. The recorded
-    # float32 runs therefore read a tied rate of 1.0 for the linear arm, which looked like the
-    # same structural blindness the tree ensemble has and is not. At float64 the linear arm's
-    # tied rate is 0.0, 0.0006, 0.33 and 0.40 across the four holdout sizes. The tree
-    # ensemble's is 1.0 at both precisions, because no split can use a column with zero
-    # training variance and its predictions are bit-identical either way.
+    # Built at float64 to match the descriptor arms, which standardise and so want the room.
+    # `design_matrix` returns float32 for the binding replays. Precision does not move the
+    # vocabulary arm's tied rate: a held-out monomer's column has zero training variance, so
+    # neither arm has anything to tell two members carrying such a monomer apart, and both
+    # read 1.0 at either precision. An earlier revision of this comment claimed float64 freed
+    # a real linear separation of about 1e-15 and recorded a tied rate of 0.0 for the linear
+    # arm; that separation was solver round-off, not signal, and the sweep now reads 1.0 at
+    # every holdout size and in every draw for both models.
     if encoder == "vocabulary":
         return (design_matrix(features, cardinalities).astype(np.float64),
                 {"kind": "one-hot token index", "constant_columns": 0})
@@ -269,19 +267,18 @@ def paired_discrimination(features, outcomes, predictions, vocabularies, held, p
     held-out monomer are the ones that matter, because that is where a vocabulary model has
     no coefficient for either and must predict them identically.
 
-    `tied_rate` is the measurement, and which models it is structural for is narrower than it
-    first appeared. For a **tree ensemble** over one-hot features it is 1.0 by construction and
-    at any precision: no split can use a column with zero training variance, so the two
-    predictions are bit-identical. For a **linear** model on the same features it is not
-    structural at all -- regularisation alone fixes the unseen column's coefficient at
-    something small and non-zero, so the predictions differ, and the first version of this
-    measurement reported 1.0 only because the design matrix was float32 and the difference fell
-    below its resolution.
+    `tied_rate` is the measurement, and over one-hot features it is 1.0 for **both** model
+    classes, at any precision. A held-out monomer's column carries zero training variance:
+    no tree split can use it and no coefficient is fitted to it, so the two predictions come
+    out identical and the pair is a tie. An earlier revision reported this as structural for
+    the tree ensemble only, and had the linear arm separating nearly every pair by about
+    1e-15; those gaps were solver round-off rather than a margin, and both arms now read 1.0
+    at every holdout size.
 
     `concordance` is reported beside it over the untied pairs, so a model that discriminates
     but discriminates wrongly is distinguishable from one that cannot discriminate at all.
-    `smallest_separation` is reported so a tie can be read as a tie rather than as a margin
-    the dtype could not hold.
+    On the one-hot arms nothing is untied, so it is None. `smallest_separation` is reported
+    so a tie can be read as a tie rather than as a margin the dtype could not hold.
     """
     held_indices = {p: {i for i, s in enumerate(vocabularies[p]) if s in held}
                     for p in positions}
@@ -311,11 +308,12 @@ def paired_discrimination(features, outcomes, predictions, vocabularies, held, p
             "concordance": None if not compared else round(concordant / compared, 4),
             "smallest_separation": None if not gaps else float(min(gaps)),
             "separation_note": "The smallest non-zero prediction gap between two members "
-                               "differing only in an unseen monomer. A tie is only a tie if "
-                               "this is comfortably above the dtype's resolution; the first "
-                               "version of this measurement ran at float32, where a linear "
-                               "model's real separation rounded to zero and read as the tree "
-                               "ensemble's structural blindness."}
+                               "differing only in an unseen monomer, reported so a tie can "
+                               "be read as a tie rather than as a margin the dtype could not "
+                               "hold. A gap near the dtype's resolution is round-off, not a "
+                               "margin: an earlier revision read gaps of about 1e-15 on the "
+                               "one-hot arms as a real linear separation and scored a "
+                               "concordance on them."}
 
 
 def transfer(landscape="thrombin_cyclic", held_count=6, seed=20261021, budget=128,

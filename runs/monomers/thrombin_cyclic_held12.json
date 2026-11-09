@@ -48,7 +48,7 @@
       "columns": 78,
       "representation": "one-hot token index",
       "constant_columns": 0,
-      "held_out_spearman": 0.3097,
+      "held_out_spearman": 0.308,
       "seen_spearman": 0.8072,
       "selection": {
         "labels": 128,
@@ -67,7 +67,9 @@
         "tied_predictions": 3983,
         "tied_rate": 1.0,
         "compared": 0,
-        "concordance": null
+        "concordance": null,
+        "smallest_separation": null,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer. A tie is only a tie if this is comfortably above the dtype's resolution; the first version of this measurement ran at float32, where a linear model's real separation rounded to zero and read as the tree ensemble's structural blindness."
       }
     },
     {
@@ -92,10 +94,12 @@
       },
       "paired": {
         "pairs": 3983,
-        "tied_predictions": 3981,
-        "tied_rate": 0.9995,
-        "compared": 2,
-        "concordance": 0.5
+        "tied_predictions": 3983,
+        "tied_rate": 1.0,
+        "compared": 0,
+        "concordance": null,
+        "smallest_separation": null,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer. A tie is only a tie if this is comfortably above the dtype's resolution; the first version of this measurement ran at float32, where a linear model's real separation rounded to zero and read as the tree ensemble's structural blindness."
       }
     },
     {
@@ -104,14 +108,14 @@
       "columns": 66,
       "representation": "10 RDKit descriptors plus an absence indicator per position",
       "constant_columns": 20,
-      "held_out_spearman": 0.2561,
-      "seen_spearman": 0.8448,
+      "held_out_spearman": 0.2536,
+      "seen_spearman": 0.8447,
       "selection": {
         "labels": 128,
         "best_score": 90.0,
         "top_fraction": 0.05,
-        "top_hits": 61,
-        "top_recall": 0.23552123552123552,
+        "top_hits": 60,
+        "top_recall": 0.23166023166023167,
         "hits_in_pool": 259,
         "pool_candidates": 5112,
         "threshold": 37.69230769230769,
@@ -123,7 +127,9 @@
         "tied_predictions": 211,
         "tied_rate": 0.053,
         "compared": 3772,
-        "concordance": 0.5273
+        "concordance": 0.5212,
+        "smallest_separation": 0.0002232142857074848,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer. A tie is only a tie if this is comfortably above the dtype's resolution; the first version of this measurement ran at float32, where a linear model's real separation rounded to zero and read as the tree ensemble's structural blindness."
       }
     },
     {
@@ -148,10 +154,12 @@
       },
       "paired": {
         "pairs": 3983,
-        "tied_predictions": 210,
-        "tied_rate": 0.0527,
-        "compared": 3773,
-        "concordance": 0.5144
+        "tied_predictions": 211,
+        "tied_rate": 0.053,
+        "compared": 3772,
+        "concordance": 0.5143,
+        "smallest_separation": 0.03243981187534928,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer. A tie is only a tie if this is comfortably above the dtype's resolution; the first version of this measurement ran at float32, where a linear model's real separation rounded to zero and read as the tree ensemble's structural blindness."
       }
     },
     {
@@ -160,8 +168,8 @@
       "columns": 144,
       "representation": "one-hot token index concatenated with 10 RDKit descriptors plus an absence indicator per position",
       "constant_columns": 20,
-      "held_out_spearman": 0.2589,
-      "seen_spearman": 0.8788,
+      "held_out_spearman": 0.2598,
+      "seen_spearman": 0.8791,
       "selection": {
         "labels": 128,
         "best_score": 90.0,
@@ -179,7 +187,9 @@
         "tied_predictions": 211,
         "tied_rate": 0.053,
         "compared": 3772,
-        "concordance": 0.5199
+        "concordance": 0.5183,
+        "smallest_separation": 0.0013936584249165662,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer. A tie is only a tie if this is comfortably above the dtype's resolution; the first version of this measurement ran at float32, where a linear model's real separation rounded to zero and read as the tree ensemble's structural blindness."
       }
     },
     {
@@ -204,10 +214,12 @@
       },
       "paired": {
         "pairs": 3983,
-        "tied_predictions": 210,
-        "tied_rate": 0.0527,
-        "compared": 3773,
-        "concordance": 0.5144
+        "tied_predictions": 211,
+        "tied_rate": 0.053,
+        "compared": 3772,
+        "concordance": 0.5143,
+        "smallest_separation": 0.04267038966202108,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer. A tie is only a tie if this is comfortably above the dtype's resolution; the first version of this measurement ran at float32, where a linear model's real separation rounded to zero and read as the tree ensemble's structural blindness."
       }
     },
     {
@@ -216,14 +228,14 @@
       "columns": 66,
       "representation": "10 RDKit descriptors plus an absence indicator per position",
       "constant_columns": 20,
-      "held_out_spearman": 0.0351,
-      "seen_spearman": 0.8612,
+      "held_out_spearman": 0.0385,
+      "seen_spearman": 0.8616,
       "selection": {
         "labels": 128,
         "best_score": 75.46153846153847,
         "top_fraction": 0.05,
-        "top_hits": 8,
-        "top_recall": 0.03088803088803089,
+        "top_hits": 9,
+        "top_recall": 0.03474903474903475,
         "hits_in_pool": 259,
         "pool_candidates": 5112,
         "threshold": 37.69230769230769,
@@ -232,10 +244,12 @@
       },
       "paired": {
         "pairs": 3983,
-        "tied_predictions": 524,
-        "tied_rate": 0.1316,
-        "compared": 3459,
-        "concordance": 0.486
+        "tied_predictions": 522,
+        "tied_rate": 0.1311,
+        "compared": 3461,
+        "concordance": 0.4822,
+        "smallest_separation": 0.002871451465189523,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer. A tie is only a tie if this is comfortably above the dtype's resolution; the first version of this measurement ran at float32, where a linear model's real separation rounded to zero and read as the tree ensemble's structural blindness."
       }
     },
     {
@@ -263,21 +277,23 @@
         "tied_predictions": 0,
         "tied_rate": 0.0,
         "compared": 3983,
-        "concordance": 0.481
+        "concordance": 0.481,
+        "smallest_separation": 0.4049034974932155,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer. A tie is only a tie if this is comfortably above the dtype's resolution; the first version of this measurement ran at float32, where a linear model's real separation rounded to zero and read as the tree ensemble's structural blindness."
       }
     }
   ],
   "dataset_content_sha256": "a1592846ce664d9b1cd86f9a550f491c996f34fb7b9d2a034cfa76d2267f1b78",
   "display_config_sha256": "d3efd21b3f3ebe73af7fde036c2d55b81adaac83fe5da44f9164348d0aaae763",
   "provenance": {
-    "host": "WilliamsMBP236",
-    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "9aae34156e467600e9f09a2ec53238942f78b036",
+    "git_commit": "70387cb6f9b975d8fe07064be9709a6f21163f29",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-10-21T16:52:24.595252+00:00"
+    "recorded_at_utc": "2026-11-09T10:00:41.576225+00:00"
   },
   "endpoint_warning": "Enrichment is not affinity, functional inhibition or antiviral activity. Do not pool metrics across landscapes with different endpoints or geometries.",
   "interpretation": "A monomer-wise split measures whether a surrogate can rank a library member built from a building block it has never seen measured. The tied-prediction rate is structural for a one-hot encoding, not an empirical finding. No binding, affinity, inhibition or antiviral property is predicted for any member.",

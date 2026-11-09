@@ -893,22 +893,18 @@ def test_a_vocabulary_encoding_cannot_tell_two_unseen_monomers_apart():
     # is why a surrogate over token indices cannot rank a library built from a new block.
     result = transfer("thrombin_cyclic", held_count=6)
     by_cell = {(r["encoder"], r["model"]): r for r in result["results"]}
-    # The tree ensemble is blind structurally, at any precision.
-    paired = by_cell[("vocabulary", "forest")]["paired"]
-    assert paired["pairs"] > 500, "too few discriminating pairs to pin the claim"
-    assert paired["tied_rate"] == 1.0
-    assert paired["tied_predictions"] == paired["pairs"]
-    assert paired["concordance"] is None, "an all-tied arm has nothing to be concordant on"
-    # The linear model on the same features is NOT structurally blind, and the first version
-    # of this test asserted it was. Regularisation alone fixes the unseen column's coefficient
-    # at something small and non-zero, so the predictions differ -- and at the float32 the
-    # design matrix used to be built in, that difference rounded to zero and read as the tree
-    # ensemble's blindness. At float64 the linear arm separates nearly every pair, by about
-    # 1e-15: real arithmetic, no usable signal, and its concordance sits at chance.
-    linear = by_cell[("vocabulary", "ridge")]["paired"]
-    assert linear["tied_rate"] < 0.01, linear["tied_rate"]
-    assert linear["smallest_separation"] < 1e-9, linear["smallest_separation"]
-    assert abs(linear["concordance"] - 0.5) < 0.12, linear["concordance"]
+    # Both model classes are blind structurally, at any precision, and for the same reason.
+    # A revision of this test between the two asserted the linear arm was not: it was read as
+    # separating nearly every pair by about 1e-15 and scored a concordance of 0.551 on those
+    # gaps. The gaps were solver round-off, and the reading was not reproducible -- the same
+    # code, seed and machine gave a tied rate of 1.0 on re-run.
+    for model in MODELS:
+        paired = by_cell[("vocabulary", model)]["paired"]
+        assert paired["pairs"] > 500, f"too few discriminating pairs to pin the claim ({model})"
+        assert paired["tied_rate"] == 1.0, (model, paired["tied_rate"])
+        assert paired["tied_predictions"] == paired["pairs"], model
+        assert paired["concordance"] is None, "an all-tied arm has nothing to be concordant on"
+        assert paired["smallest_separation"] is None, (model, paired["smallest_separation"])
     # Grounding the position in measured structure removes the blindness: every descriptor
     # arm separates the pairs it could not separate before.
     for encoder in ("descriptor", "both", "descriptor_shuffled"):
@@ -1732,9 +1728,10 @@ def test_the_unseen_monomer_result_is_pinned_on_resampled_holdout_sets():
 
     for run in draws:
         by_cell = {(r["encoder"], r["model"]): r for r in run["results"]}
-        # Structural for the tree ensemble, and so exact in every draw rather than on
-        # average: no split can use a column with zero training variance.
-        assert by_cell[("vocabulary", "forest")]["paired"]["tied_rate"] == 1.0
+        # Structural for both model classes, and so exact in every draw rather than on
+        # average: a column with zero training variance carries no split and no coefficient.
+        for model in MODELS:
+            assert by_cell[("vocabulary", model)]["paired"]["tied_rate"] == 1.0, model
         # Empirical, and so a null: the real descriptors must not beat their own shuffle,
         # and both sit at chance. A reversal here is the positive result and must be read as
         # one rather than patched away.
