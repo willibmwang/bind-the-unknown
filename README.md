@@ -57,6 +57,14 @@ flowchart TB
     S6 -. "measured members would return as round 1<br/>232 of 232 registry cells are empty" .-> S5
 ```
 
+**The same flowchart is committed as an image**, for a reader who is not looking at this on
+GitHub and so never sees the block above render:
+[output/fig_pipeline_own_reference.png](output/fig_pipeline_own_reference.png) and
+[output/fig_pipeline_holdout.png](output/fig_pipeline_holdout.png), one per reference, with PDF
+and SVG beside each. `python3 output/build_pipeline_figure.py` redraws both from
+`runs/onset_chain.json` through the same function §0.1 of the notebook calls, so the image, the
+notebook page and the record cannot drift apart.
+
 **The two dashed arrows are the point of drawing this.** `chemistry.library_spec` takes an
 initiator, a length range and a set of elongator classes. It takes no patch area, no accession
 and no residue range, so the library it defines is the same library whatever stage 3 measured:
