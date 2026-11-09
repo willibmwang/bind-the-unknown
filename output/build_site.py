@@ -146,10 +146,148 @@ FOOT = """
 """
 
 
+# --------------------------------------------------------------------- the toolkit
+# Each tool's plain-English name and the services it actually reaches, read off the import
+# URLs in its own module. The order is the order the chips are shown in.
+TOOLKIT = [
+    ("intake_rank_targets",       "intake.rank_targets",       "Find proteins in a genome",  "NCBI E-utilities \u00b7 UniProt \u00b7 InterPro",  True),
+    ("literature_search",         "literature.search",         "Search the literature",      "Europe PMC",                                        False),
+    ("similarity_homologs",       "similarity.homologs",       "Find relatives",             "EBI HMMER \u00b7 NCBI E-utilities \u00b7 UniProt", False),
+    ("families_entries",          "families.entries",          "Look up protein families",   "InterPro \u00b7 UniProt",                          False),
+    ("structures_evidence",       "structures.evidence",       "Check known structures",     "PDBe \u00b7 UniProt",                              True),
+    ("structures_predicted",      "structures.predicted",      "Check predicted structures", "AlphaFold DB \u00b7 3D-Beacons",                   False),
+    ("structures_folded",         "structures.folded",         "Fold a sequence",            "ESM Atlas (ESMFold v1)",                            True),
+    ("geometry_surface_markers",  "geometry.surface_markers",  "Measure a surface",          "PDBe \u00b7 RCSB \u00b7 UniProt",                 True),
+    ("bioactivity_prior_binders", "bioactivity.prior_binders", "Find known binders",         "ChEMBL \u00b7 IEDB \u00b7 MaveDB",                False),
+    ("chemistry_library_spec",    "chemistry.library_spec",    "Define a library",           "local tables, no network",                          True),
+]
+
+
+def _args_summary(call):
+    """One line per recorded call: what it was asked, and what came back.
+
+    Arguments are a stranger-free dict written by our own exercise grid, but they can be a
+    306-residue sequence, so long values are replaced by their length rather than printed.
+    """
+    bits = []
+    for k, v in (call.get("arguments") or {}).items():
+        v = str(v)
+        bits.append(f"{esc(k)}: " + (f"<i>{len(v)} characters</i>" if len(v) > 28 else esc(v)))
+    return ", ".join(bits) or "<i>no arguments</i>"
+
+
+def build_toolkit():
+    """Chips for all ten tools, then a card for each one the chain does not call.
+
+    Every number here is read from `runs/toolcalls/<tool>.json`, which is why this is
+    generated rather than written into `site/body.html` by hand: the page claims that no
+    number on it was retyped, and the toolkit counts are numbers like any other.
+    """
+    records = {}
+    for stem, tool, label, dbs, on_chain in TOOLKIT:
+        path = RUNS / "toolcalls" / f"{stem}.json"
+        if path.exists():
+            records[stem] = json.loads(path.read_text())
+
+    chips, total = [], 0
+    for stem, tool, label, dbs, on_chain in TOOLKIT:
+        rec = records.get(stem)
+        if not rec:
+            continue
+        total += rec.get("calls") or 0
+        chips.append(f'<span class="chip">{esc(label)} <b>{num(rec.get("calls"))}</b></span>')
+
+    cards = []
+    for stem, tool, label, dbs, on_chain in TOOLKIT:
+        rec = records.get(stem)
+        if not rec or on_chain:
+            continue                      # the chain's own tools are detailed in section 04
+        dec, mea = rec.get("declared") or {}, rec.get("measured") or {}
+        status = rec.get("by_status") or {}
+        cells = [
+            ("Calls recorded", rec.get("calls")),
+            ("Declared cost", f'{num(dec.get("cost_seconds"))} s \u00b7 '
+                              f'{num(dec.get("cost_network_calls"))} requests'),
+            ("Measured, median", f'{num(round(mea.get("seconds_median") or 0, 1))} s \u00b7 '
+                                 f'{num(mea.get("network_calls_median"))} requests'),
+            ("Slowest call", f'{num(round(mea.get("seconds_max") or 0, 1))} s'),
+        ] + [(k.title(), v) for k, v in sorted(status.items())]
+        ret = "".join(f"<div><dt>{esc(k)}</dt><dd>{num(v) if not isinstance(v, str) else v}</dd></div>"
+                      for k, v in cells)
+
+        # The grid repeats a call to separate a cold request from warm ones, so identical
+        # (arguments, status) pairs are collapsed with a count rather than listed twice.
+        # The note is dropped when it only restates the status, which is the common case.
+        seen = {}
+        for c in (rec.get("trace") or []):
+            note = (c.get("result") or "")
+            status = c.get("tool_status") or ""
+            if note.startswith(status + ":"):
+                note = note[len(status) + 1:].strip()
+            if note == "call returned with no note":
+                note = ""
+            # Some notes are a dict repr written by the exercise grid. Prefer its own
+            # explanation field over printing Python at the reader; literal_eval is safe
+            # here because the value is a literal we wrote, and it cannot execute code.
+            if note.startswith("{"):
+                try:
+                    import ast
+                    parsed = ast.literal_eval(note)
+                    note = str(parsed.get("means") or parsed.get("note") or "")
+                except Exception:
+                    note = ""
+            if len(note) > 170:
+                note = note[:168].rstrip() + "\u2026"
+            key = (_args_summary(c), status, note)
+            seen[key] = seen.get(key, 0) + 1
+        calls = "".join(
+            f'<div class="pdbrow{"" if st == "ok" else " none"}">'
+            f'<span class="who">{args}{f" <i>&#215;{n}</i>" if n > 1 else ""}</span>'
+            f'<span class="ids">{esc(st)}{" \u00b7 " + esc(note) if note else ""}</span></div>'
+            for (args, st, note), n in seen.items())
+
+        mis = rec.get("mispredictions") or []
+        mis_html = ""
+        if mis:
+            rows = "".join(
+                f'<div class="pdbrow none"><span class="who">{_args_summary(m)}</span>'
+                f'<span class="ids">expected {esc(m.get("expected"))}, observed '
+                f'{esc(m.get("observed"))}</span></div>' for m in mis)
+            mis_html = (f'<div class="accs"><span class="lead">Where the tool\u2019s own declared '
+                        f'spec was wrong \u2014 {len(mis)} of {rec.get("calls")} calls. These are '
+                        f'kept rather than corrected away:</span>{rows}</div>')
+
+        cards.append(f"""
+  <div class="tool-card" id="t-{esc(tool.split('.')[1]).replace('_', '-')}">
+    <div class="tc-head"><span class="tn">{esc(tool)}</span>
+      <span class="plain">{esc(label)}</span>
+      <span class="db">{dbs}</span></div>
+    <div class="tc-body">
+      <dl class="ret">{ret}</dl>
+      <div class="accs"><span class="lead">Every call on record, including the deliberately
+        bad ones:</span>{calls}</div>
+      {mis_html}
+    </div>
+  </div>""")
+
+    return (f'<div class="chips">{"".join(chips)}</div>\n'
+            f'<p class="after">Databases reached: NCBI E-utilities, UniProt, Europe PMC, '
+            f'EBI HMMER, InterPro, PDBe, RCSB, 3D-Beacons, AlphaFold DB, ESM Atlas and '
+            f'ChEMBL.</p>\n'
+            f'<p class="cap" style="margin-top:34px">The five the chain never calls are below. '
+            f'They were exercised on their own to record what they cost and how they fail, so '
+            f'the failure modes are measured rather than assumed. Nothing here ran on the '
+            f'SARS-CoV-2 result above.</p>'
+            + "".join(cards)), total
+
+
 # --------------------------------------------------------------------- the landing page
 def build_index():
     """Wrap the hand-written body in a real document. The prose is not generated."""
     body = (ROOT / "site" / "body.html").read_text()
+    toolkit, calls = build_toolkit()
+    body = body.replace("<!--TOOLKIT-->", toolkit)
+    body = body.replace("<!--TOOLCALLS-->", f"{len(TOOLKIT)} tools \u00b7 {calls} calls")
     out = (head(f"{SITE} · one genome in, every step out",
                 "What came back when the system was given one SARS-CoV-2 genome accession "
                 "and nothing else.", current="index")

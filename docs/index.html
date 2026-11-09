@@ -494,19 +494,65 @@
 <section id="toolkit">
   <div class="sec-head"><h2>The toolkit</h2><span class="tag">10 tools · 91 calls</span></div>
   <p class="cap">Ten tools in all, each calling live public biology databases. The five detailed above run inside the chain; the other five are reachable from the same four facts step 1 produces, and were exercised separately to record what they cost and how they fail. Deliberately bad inputs are included, so each failure mode is on record rather than assumed.</p>
-  <div class="chips">
-    <span class="chip">Find proteins in a genome <b>2</b></span>
-    <span class="chip">Search the literature <b>7</b></span>
-    <span class="chip">Find relatives <b>5</b></span>
-    <span class="chip">Look up protein families <b>5</b></span>
-    <span class="chip">Check known structures <b>21</b></span>
-    <span class="chip">Check predicted structures <b>9</b></span>
-    <span class="chip">Fold a sequence <b>6</b></span>
-    <span class="chip">Measure a surface <b>9</b></span>
-    <span class="chip">Find known binders <b>4</b></span>
-    <span class="chip">Define a library <b>23</b></span>
+  <div class="chips"><span class="chip">Find proteins in a genome <b>2</b></span><span class="chip">Search the literature <b>7</b></span><span class="chip">Find relatives <b>5</b></span><span class="chip">Look up protein families <b>5</b></span><span class="chip">Check known structures <b>21</b></span><span class="chip">Check predicted structures <b>9</b></span><span class="chip">Fold a sequence <b>6</b></span><span class="chip">Measure a surface <b>9</b></span><span class="chip">Find known binders <b>4</b></span><span class="chip">Define a library <b>23</b></span></div>
+<p class="after">Databases reached: NCBI E-utilities, UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, RCSB, 3D-Beacons, AlphaFold DB, ESM Atlas and ChEMBL.</p>
+<p class="cap" style="margin-top:34px">The five the chain never calls are below. They were exercised on their own to record what they cost and how they fail, so the failure modes are measured rather than assumed. Nothing here ran on the SARS-CoV-2 result above.</p>
+  <div class="tool-card" id="t-search">
+    <div class="tc-head"><span class="tn">literature.search</span>
+      <span class="plain">Search the literature</span>
+      <span class="db">Europe PMC</span></div>
+    <div class="tc-body">
+      <dl class="ret"><div><dt>Calls recorded</dt><dd>7</dd></div><div><dt>Declared cost</dt><dd>10 s · 8 requests</dd></div><div><dt>Measured, median</dt><dd>5.5 s · 7 requests</dd></div><div><dt>Slowest call</dt><dd>7.8 s</dd></div><div><dt>Empty</dt><dd>1</dd></div><div><dt>Ok</dt><dd>4</dd></div><div><dt>Rejected</dt><dd>2</dd></div></dl>
+      <div class="accs"><span class="lead">Every call on record, including the deliberately
+        bad ones:</span><div class="pdbrow"><span class="who">subject: nsp12 <i>&#215;3</i></span><span class="ids">ok</span></div><div class="pdbrow"><span class="who">subject: RNA-dependent RNA polymerase, subject_kind: query, date_to: 2019-12-31</span><span class="ids">ok</span></div><div class="pdbrow none"><span class="who">subject: nsp5, subject_kind: family</span><span class="ids">rejected · subject_kind=&#x27;family&#x27; is not one of (&#x27;term&#x27;, &#x27;accession&#x27;, &#x27;query&#x27;)</span></div><div class="pdbrow none"><span class="who">subject: nsp5, top: 101</span><span class="ids">rejected · top=101 is above the declared maximum 100</span></div><div class="pdbrow none"><span class="who">subject: Zzqxv-not-a-protein, per_axis: False</span><span class="ids">empty · A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before…</span></div></div>
+      
+    </div>
   </div>
-  <p class="after">Databases reached: NCBI, UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, RCSB, 3D-Beacons, AlphaFold DB, ESMFold and ChEMBL.</p>
+  <div class="tool-card" id="t-homologs">
+    <div class="tc-head"><span class="tn">similarity.homologs</span>
+      <span class="plain">Find relatives</span>
+      <span class="db">EBI HMMER · NCBI E-utilities · UniProt</span></div>
+    <div class="tc-body">
+      <dl class="ret"><div><dt>Calls recorded</dt><dd>5</dd></div><div><dt>Declared cost</dt><dd>9 s · 6 requests</dd></div><div><dt>Measured, median</dt><dd>2.3 s · 3 requests</dd></div><div><dt>Slowest call</dt><dd>7.3 s</dd></div><div><dt>Ok</dt><dd>4</dd></div><div><dt>Rejected</dt><dd>1</dd></div></dl>
+      <div class="accs"><span class="lead">Every call on record, including the deliberately
+        bad ones:</span><div class="pdbrow"><span class="who">query: <i>306 characters</i> <i>&#215;2</i></span><span class="ids">ok</span></div><div class="pdbrow"><span class="who">query: NC_045512.2</span><span class="ids">ok</span></div><div class="pdbrow none"><span class="who">query: <i>306 characters</i>, max_hits: 501</span><span class="ids">rejected · max_hits=501 is above the declared maximum 500</span></div><div class="pdbrow"><span class="who">query: <i>306 characters</i>, max_wait_seconds: 1.0</span><span class="ids">ok</span></div></div>
+      <div class="accs"><span class="lead">Where the tool’s own declared spec was wrong — 1 of 5 calls. These are kept rather than corrected away:</span><div class="pdbrow none"><span class="who">query: <i>306 characters</i>, max_wait_seconds: 1.0</span><span class="ids">expected failed, observed ok</span></div></div>
+    </div>
+  </div>
+  <div class="tool-card" id="t-entries">
+    <div class="tc-head"><span class="tn">families.entries</span>
+      <span class="plain">Look up protein families</span>
+      <span class="db">InterPro · UniProt</span></div>
+    <div class="tc-body">
+      <dl class="ret"><div><dt>Calls recorded</dt><dd>5</dd></div><div><dt>Declared cost</dt><dd>21.2 s · 6 requests</dd></div><div><dt>Measured, median</dt><dd>4.9 s · 7 requests</dd></div><div><dt>Slowest call</dt><dd>11.6 s</dd></div><div><dt>Empty</dt><dd>1</dd></div><div><dt>Failed</dt><dd>1</dd></div><div><dt>Ok</dt><dd>2</dd></div><div><dt>Rejected</dt><dd>1</dd></div></dl>
+      <div class="accs"><span class="lead">Every call on record, including the deliberately
+        bad ones:</span><div class="pdbrow none"><span class="who">accession: P0DTD1</span><span class="ids">failed · TimeoutError: The read operation timed out</span></div><div class="pdbrow"><span class="who">accession: P0DTC2</span><span class="ids">ok</span></div><div class="pdbrow"><span class="who">accession: P03452</span><span class="ids">ok</span></div><div class="pdbrow none"><span class="who">accession: P0DTD1, max_families: 101</span><span class="ids">rejected · max_families=101 is above the declared maximum 100</span></div><div class="pdbrow none"><span class="who">accession: P00000</span><span class="ids">empty · the call succeeded and found nothing</span></div></div>
+      <div class="accs"><span class="lead">Where the tool’s own declared spec was wrong — 2 of 5 calls. These are kept rather than corrected away:</span><div class="pdbrow none"><span class="who">accession: P0DTD1</span><span class="ids">expected ok, observed failed</span></div><div class="pdbrow none"><span class="who">accession: P00000</span><span class="ids">expected failed, observed empty</span></div></div>
+    </div>
+  </div>
+  <div class="tool-card" id="t-predicted">
+    <div class="tc-head"><span class="tn">structures.predicted</span>
+      <span class="plain">Check predicted structures</span>
+      <span class="db">AlphaFold DB · 3D-Beacons</span></div>
+    <div class="tc-body">
+      <dl class="ret"><div><dt>Calls recorded</dt><dd>9</dd></div><div><dt>Declared cost</dt><dd>7 s · 2 requests</dd></div><div><dt>Measured, median</dt><dd>6.3 s · 2 requests</dd></div><div><dt>Slowest call</dt><dd>6.5 s</dd></div><div><dt>Ok</dt><dd>8</dd></div><div><dt>Rejected</dt><dd>1</dd></div></dl>
+      <div class="accs"><span class="lead">Every call on record, including the deliberately
+        bad ones:</span><div class="pdbrow"><span class="who">accession: P0DTD1 <i>&#215;3</i></span><span class="ids">ok</span></div><div class="pdbrow"><span class="who">accession: P0DTC2 <i>&#215;2</i></span><span class="ids">ok</span></div><div class="pdbrow"><span class="who">accession: P0DTD1, confident_plddt: 70.0 <i>&#215;2</i></span><span class="ids">ok</span></div><div class="pdbrow none"><span class="who">accession: P0DTD1, confident_plddt: 101.0</span><span class="ids">rejected · confident_plddt=101.0 is above the declared maximum 100.0</span></div><div class="pdbrow"><span class="who">accession: P00000</span><span class="ids">ok</span></div></div>
+      <div class="accs"><span class="lead">Where the tool’s own declared spec was wrong — 1 of 9 calls. These are kept rather than corrected away:</span><div class="pdbrow none"><span class="who">accession: P00000</span><span class="ids">expected failed, observed ok</span></div></div>
+    </div>
+  </div>
+  <div class="tool-card" id="t-prior-binders">
+    <div class="tc-head"><span class="tn">bioactivity.prior_binders</span>
+      <span class="plain">Find known binders</span>
+      <span class="db">ChEMBL · IEDB · MaveDB</span></div>
+    <div class="tc-body">
+      <dl class="ret"><div><dt>Calls recorded</dt><dd>4</dd></div><div><dt>Declared cost</dt><dd>94 s · 16 requests</dd></div><div><dt>Measured, median</dt><dd>21.9 s · 13 requests</dd></div><div><dt>Slowest call</dt><dd>90.8 s</dd></div><div><dt>Ok</dt><dd>3</dd></div><div><dt>Rejected</dt><dd>1</dd></div></dl>
+      <div class="accs"><span class="lead">Every call on record, including the deliberately
+        bad ones:</span><div class="pdbrow"><span class="who">accession: P0DTD1</span><span class="ids">ok</span></div><div class="pdbrow"><span class="who">accession: P0DTC2</span><span class="ids">ok</span></div><div class="pdbrow none"><span class="who">accession: P0DTD1, max_molecules: 501</span><span class="ids">rejected · max_molecules=501 is above the declared maximum 500</span></div><div class="pdbrow"><span class="who">accession: P00000</span><span class="ids">ok</span></div></div>
+      
+    </div>
+  </div>
+
 </section>
 
 <footer>
