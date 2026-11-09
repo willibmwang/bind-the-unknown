@@ -13,7 +13,7 @@ protein variants, which is why a SynX campaign is its natural next test.
 pathogen genome accession and nothing else, it ranks candidate targets, folds the one it picks,
 measures the surface a macrocyclic peptide would have to bind, and defines a focused
 thioether-macrocycle library for that molecule class. The library definition does not yet read
-the measured surface, which the flowchart below draws as the dashed arrow it is. It runs today
+the measured surface, which the flowchart below names as the missing arrow it is. It runs today
 against public endpoints at NCBI, UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, 3D-Beacons,
 AlphaFold DB, ESMFold, RCSB and ChEMBL, and it has been run across three virus families.
 
@@ -31,41 +31,16 @@ number crosses between them.** Every count below is read from
 runs all five stages on the SARS-CoV-2 reference genome against the live endpoints. §0.1 of the
 notebook draws the same record as a figure.
 
-```mermaid
-flowchart TB
-    G(["<b>one pathogen genome accession</b><br/>NC_045512.2 · 29,903 nt · no target name, no shortlist"])
+![The two arms, stage by stage: what each one takes, what it returns, and what it hands the next](output/fig_pipeline_holdout.png)
 
-    subgraph ARM1 ["ARM 1 · the onset co-scientist · five stages, live against public endpoints"]
-      direction TB
-      S1["<b>1 · intake.rank_targets</b> · NCBI, UniProt<br/>out: 28 ORFs in six frames, 9 identified against 17,529 reviewed entries"]
-      S2["<b>2 · decompose + rank_score</b> · UniProt<br/>out: 21 mature chains, each scored<br/>3·conservation + 2·exposed + 1.5·essential + 0.5·structures + 0.8·druggable"]
-      S3["<b>3 · geometry.surface_markers</b> · PDBe, RCSB<br/>out: 21 rows for 21 chains, 20 measured and 1 refused with the reason<br/>largest exposed hydrophobic patch within the domain, median over 5 structures"]
-      S4["<b>4 · structures.folded</b> · ESM Atlas<br/>out: coordinates and per-residue confidence<br/>21 of 21 chains located in this genome's own translation"]
-      S5["<b>5 · chemistry.library_spec</b> · local tables<br/>out: ClAc-D-Tyr, 4–8 randomised positions over 25 blocks<br/>158,945,703,125 sequences"]
-    end
-
-    subgraph ARM2 ["ARM 2 · will a model fitted on the first round be worth acting on?"]
-      S6["<b>6 · the go / no-go, before any assay</b><br/>out: candidates share the measured positions → +0.173 to +0.321<br/>candidates share none of them → +0.010 to +0.033"]
-    end
-
-    G -->|genome_accession| S1
-    S1 -->|"target_name · protein_accession · residue_ranges · protein_sequence<br/>all four facts the other nine tools are waiting on"| S2
-    S2 -->|"one accession and one residue range per chain"| S3
-    S2 -->|"one amino-acid sequence, located by alignment"| S4
-    S3 -. "nothing: library_spec reads no measured surface" .-> S5
-    S5 -->|"how many positions the library randomises<br/>the only number that crosses between the arms"| S6
-    S6 -. "measured members would return as round 1<br/>232 of 232 registry cells are empty" .-> S5
-```
-
-**The same flowchart is committed as an image**, for a reader who is not looking at this on
-GitHub and so never sees the block above render:
-[output/fig_pipeline_own_reference.png](output/fig_pipeline_own_reference.png) and
-[output/fig_pipeline_holdout.png](output/fig_pipeline_holdout.png), one per reference, with PDF
-and SVG beside each. `python3 output/build_pipeline_figure.py` redraws both from
-`runs/onset_chain.json` through the same function §0.1 of the notebook calls, so the image, the
+**The figure is drawn with SARS-CoV-2 deleted from the reference**, which is the setting every
+validation run below uses. `python3 output/build_pipeline_figure.py` redraws it from
+`runs/onset_chain.json`, and `--case 0` draws the same genome identified through its own curated
+entries instead. It calls the same function §0.1 of the notebook calls, so the image, the
 notebook page and the record cannot drift apart.
 
-**The two dashed arrows are the point of drawing this.** `chemistry.library_spec` takes an
+**The two arrows that are not there are the point of drawing this**, and the figure gives each
+one a panel of its own rather than leaving it to be noticed. `chemistry.library_spec` takes an
 initiator, a length range and a set of elongator classes. It takes no patch area, no accession
 and no residue range, so the library it defines is the same library whatever stage 3 measured:
 "a focused library over that surface" states an intent and not a data path. And the campaign

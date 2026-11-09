@@ -6,19 +6,19 @@ document, in the README for a reader who is not on GitHub and so never sees the 
 render. This script is the entry point for that, and it calls the identical function rather
 than redrawing it, so the standalone image and the notebook page cannot drift apart.
 
-**Both references are rendered, because neither one alone is the system.** The genome
-identified through its own curated entries shows what each stage produces when the residue
-ranges are the pathogen's own; the same genome with SARS-CoV-2 deleted from the reference is
-the setting every validation run uses, and the surface stage there keeps a measurable surface
-for 9 of 20 chains rather than 20 of 21. A single image of either, with no label, would be a
-claim about coverage that the other case contradicts. The subtitle names the case in both.
+**The committed image is the holdout**, the genome with SARS-CoV-2 deleted from the reference,
+because that is the setting every validation run uses: identification has to work through a
+relative, and the surface stage keeps a measurable surface for 9 of 20 chains rather than 20 of
+21. The other reference is a different claim about coverage and is not interchangeable with it,
+so the subtitle names which one is drawn and `--case 0` draws the other on demand rather than
+leaving two unlabelled images to be told apart by opening them.
 
 The two gain ranges are arm 2's and are not in the chain record. They are quoted here from
 the same source the notebook cell quotes, and passed in rather than typed inside the figure.
 
-    python3 output/build_pipeline_figure.py              # both cases, PNG and PDF
-    python3 output/build_pipeline_figure.py --case 1     # the holdout only
-    python3 output/build_pipeline_figure.py --svg        # add SVG
+    python3 output/build_pipeline_figure.py              # the holdout, PNG
+    python3 output/build_pipeline_figure.py --case 0     # the own-reference case instead
+    python3 output/build_pipeline_figure.py --pdf --svg  # add vector formats
 """
 import argparse
 import json
@@ -59,8 +59,9 @@ STEMS = {
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--case", type=int, choices=(0, 1), action="append",
-                    help="which reference to draw; repeatable, default both")
-    ap.add_argument("--svg", action="store_true", help="write SVG beside the PNG and PDF")
+                    help="which reference to draw; repeatable, default the holdout (1)")
+    ap.add_argument("--pdf", action="store_true", help="write PDF beside the PNG")
+    ap.add_argument("--svg", action="store_true", help="write SVG beside the PNG")
     args = ap.parse_args()
 
     if not CHAIN.exists():
@@ -68,7 +69,7 @@ def main():
                  f"`python -m hpc_pilots chain`")
     chain = json.loads(CHAIN.read_text())
 
-    cases = args.case if args.case else sorted(STEMS)
+    cases = args.case if args.case else [1]
     for case in cases:
         if case >= len(chain["cases"]):
             sys.exit(f"the record holds {len(chain['cases'])} case(s); --case {case} is "
@@ -84,7 +85,8 @@ def main():
         fig = panels.workflow_figure(chain, case=case, gain_shared=GAIN_SHARED,
                                      gain_unshared=GAIN_UNSHARED)
         stem = STEMS[case]
-        for ext in ("png", "pdf") + (("svg",) if args.svg else ()):
+        formats = ("png",) + (("pdf",) if args.pdf else ()) + (("svg",) if args.svg else ())
+        for ext in formats:
             path = OUT / f"{stem}.{ext}"
             fig.savefig(path, facecolor=fig.get_facecolor(), bbox_inches="tight")
             print(f"  wrote {path.relative_to(ROOT)}")
