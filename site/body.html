@@ -59,11 +59,9 @@
     <span class="ti">What it picked<span class="ds">The ranked targets and their scores — the top eight of twenty.</span></span>
     <span class="ar" aria-hidden="true">→</span></a>
   <a class="tocrow" href="#toolkit"><span class="n">06</span>
-    <span class="ti">The toolkit<span class="ds">All ten tools, including the five exercised only to record how they fail.</span></span>
+    <span class="ti">The toolkit<span class="ds">All ten tools, including the ones exercised only to record how they fail.</span></span>
     <span class="ar" aria-hidden="true">→</span></a>
-  <a class="tocrow" href="#evidence"><span class="n">07</span>
-    <span class="ti">Evidence on the top targets<span class="ds">The five tools the chain refuses, run on the three it ranked highest.</span></span>
-    <span class="ar" aria-hidden="true">→</span></a>
+  <!--EVIDENCE-TOC-->
 
 </nav>
 
@@ -454,6 +452,8 @@
     </div>
   </div>
 
+  <!--OFFCHAIN-->
+
   <p class="after">The call records in <span class="mono">runs/toolcalls/</span> log each tool's cost, request count and failure modes but deliberately keep no payload. Everything above is read from the run record itself, and from the stored fold.</p>
 </section>
 
@@ -475,7 +475,7 @@
 
 <section id="toolkit">
   <div class="sec-head"><h2>The toolkit</h2><span class="tag"><!--TOOLCALLS--></span></div>
-  <p class="cap">Ten tools in all, each calling live public biology databases. The five detailed above run inside the chain; the other five are reachable from the same four facts step 1 produces, and were exercised separately to record what they cost and how they fail. Deliberately bad inputs are included, so each failure mode is on record rather than assumed.</p>
+  <p class="cap">Ten tools in all, each calling live public biology databases. Four of them are called by the five steps above, and section 04 details every call those steps made — the second step's two, <span class="mono">intake.decompose</span> and <span class="mono">intake.rank_score</span>, are functions in the same module rather than separate registered tools. The rest are reachable from the same four facts step 1 produces, and were exercised separately to record what they cost and how they fail. Deliberately bad inputs are included, so each failure mode is on record rather than assumed.</p>
   <!--TOOLKIT-->
 
 </section>

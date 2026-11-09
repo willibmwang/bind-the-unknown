@@ -154,7 +154,11 @@ TOOLKIT = [
     ("literature_search",         "literature.search",         "Search the literature",      "Europe PMC",                                        False),
     ("similarity_homologs",       "similarity.homologs",       "Find relatives",             "EBI HMMER \u00b7 NCBI E-utilities \u00b7 UniProt", False),
     ("families_entries",          "families.entries",          "Look up protein families",   "InterPro \u00b7 UniProt",                          False),
-    ("structures_evidence",       "structures.evidence",       "Check known structures",     "PDBe \u00b7 UniProt",                              True),
+    # Not on the chain path, despite reading like it: `chain.gate_table` imports the module
+    # for the amenability-gate experiment, which writes its own record and reads its targets
+    # from `configs/structures.json` rather than from the ranked list. None of the five
+    # stages calls the registered tool, so it belongs with the tools that get a card.
+    ("structures_evidence",       "structures.evidence",       "Check known structures",     "PDBe \u00b7 UniProt",                              False),
     ("structures_predicted",      "structures.predicted",      "Check predicted structures", "AlphaFold DB \u00b7 3D-Beacons",                   False),
     ("structures_folded",         "structures.folded",         "Fold a sequence",            "ESM Atlas (ESMFold v1)",                            True),
     ("geometry_surface_markers",  "geometry.surface_markers",  "Measure a surface",          "PDBe \u00b7 RCSB \u00b7 UniProt",                 True),
@@ -272,13 +276,55 @@ def build_toolkit():
 
     return (f'<div class="chips">{"".join(chips)}</div>\n'
             f'<p class="after">Databases reached: NCBI E-utilities, UniProt, Europe PMC, '
-            f'EBI HMMER, InterPro, PDBe, RCSB, 3D-Beacons, AlphaFold DB, ESM Atlas and '
-            f'ChEMBL.</p>\n'
-            f'<p class="cap" style="margin-top:34px">The five the chain never calls are below. '
-            f'They were exercised on their own to record what they cost and how they fail, so '
-            f'the failure modes are measured rather than assumed. Nothing here ran on the '
-            f'SARS-CoV-2 result above.</p>'
+            f'EBI HMMER, InterPro, PDBe, RCSB, 3D-Beacons, AlphaFold DB, ESM Atlas, '
+            f'ChEMBL, IEDB and MaveDB.</p>\n'
+            f'<p class="cap" style="margin-top:34px">The {num(len(cards))} tools the five steps '
+            f'never call are below. They were exercised on their own to record what they cost '
+            f'and how '
+            f'they fail, so the failure modes are measured rather than assumed, and deliberately '
+            f'bad inputs are included. Some of those calls were about this pathogen — the '
+            f'arguments below name this page’s own input accession and two of the targets '
+            f'ranked above — but the grid keeps each call’s cost, status and failure '
+            f'mode and discards the payload, so nothing any of them returned reached the result '
+            f'above.</p>'
             + "".join(cards)), total
+
+
+def build_offchain():
+    """One generated block for section 04: the registered tools the five steps do not call.
+
+    Section 04 details what the chain itself called, so a reader counting tool names there
+    finds four of the ten, and no Europe PMC, InterPro, AlphaFold DB or ChEMBL. That is
+    accurate, and it is also the first question the section raises, so the answer belongs
+    beside it rather than only in section 06. It is generated because it carries counts.
+    """
+    chips, calls, tools = [], 0, 0
+    for stem, tool, label, dbs, on_chain in TOOLKIT:
+        if on_chain:
+            continue
+        path = RUNS / "toolcalls" / f"{stem}.json"
+        if not path.exists():
+            continue
+        rec = json.loads(path.read_text())
+        calls += rec.get("calls") or 0
+        tools += 1
+        chips.append(f'<span class="k">{esc(tool)} · {dbs}</span>')
+    if not chips:
+        return ""
+    return (f'<div class="fields"><span class="lead">The other {num(tools)} registered tools '
+            f'reach further databases, and none of them is on this path. They were exercised '
+            f'on a grid of their own — {num(calls)} calls, each one listed in the toolkit '
+            f'below with the arguments it was given — which records what a call cost and '
+            f'how it failed and keeps no payload, so nothing they returned is in the result '
+            f'above:</span>{"".join(chips)}</div>')
+
+
+# The row section 07 gets in the table of contents, shown only when the record has a
+# stage 6 to point at. It lives here rather than in `site/body.html` for that reason.
+EVIDENCE_TOC = """<a class="tocrow" href="#evidence"><span class="n">07</span>
+    <span class="ti">Evidence on the top targets<span class="ds">The five tools the chain \
+refuses, run on the three it ranked highest.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>"""
 
 
 # --------------------------------------------------------------------- the landing page
@@ -286,7 +332,20 @@ def build_index():
     """Wrap the hand-written body in a real document. The prose is not generated."""
     body = (ROOT / "site" / "body.html").read_text()
     landing = json.loads((RUNS / LANDING_RECORD).read_text())
-    body = body.replace("<!--EVIDENCE-->", evidence_block(landing["cases"][0]))
+    # Stage 6 is absent from any record written before it existed, and `evidence_block`
+    # answers that with an empty string. Its table-of-contents row has to vanish with it,
+    # or the page ships a row pointing at an anchor that is not there.
+    # The landing page is the held-out case throughout: its ranking, its accessions, its
+    # refusals. Its evidence section has to be the same case. `cases[0]` is the one that
+    # identifies through SARS-CoV-2's own curated entries, and annotating the shortlist from
+    # it would put the held-out organism's own InterPro, AlphaFold and ChEMBL records on a
+    # page whose premise is that those entries were deleted before the run.
+    holdout = next((c for c in landing["cases"] if c.get("reference_excluded_organism")),
+                   landing["cases"][0])
+    evidence = evidence_block(holdout)
+    body = body.replace("<!--EVIDENCE-->", evidence)
+    body = body.replace("<!--EVIDENCE-TOC-->", EVIDENCE_TOC if evidence else "")
+    body = body.replace("<!--OFFCHAIN-->", build_offchain())
     toolkit, calls = build_toolkit()
     body = body.replace("<!--TOOLKIT-->", toolkit)
     body = body.replace("<!--TOOLCALLS-->", f"{len(TOOLKIT)} tools \u00b7 {calls} calls")
@@ -442,6 +501,14 @@ def evidence_block(case):
     <div class="tc-body"><div class="accs">{calls}</div></div>
   </div>""")
     cov = case.get("coverage", {})
+    # Under a holdout, every accession in this section belongs to a relative, because that is
+    # the only accession the chain holds. A reader who takes an InterPro assignment or a
+    # ChEMBL binder here for a fact about the virus that went in has been misled by the
+    # layout, so the section says whose records these are before it shows them.
+    held = case.get("reference_excluded_organism")
+    whose = (f' Each accession below is the relative the chain identified that target '
+             f'through, not {esc(held)}, which was deleted from the reference before the run: '
+             f'every annotation here is a record of that relative.') if held else ""
     return f"""
 <section id="evidence">
   <div class="sec-head"><h2>Evidence on the top targets</h2>
@@ -450,7 +517,7 @@ def evidence_block(case):
   after the ranking was already final. They are refused on the chain path because of what
   they declare they can cost \u2014 <span class="mono">bioactivity.prior_binders</span> advertises
   a 600-second worst case \u2014 so they run here, over a few targets, under a larger budget.
-  <b>Nothing they return changes a rank.</b></p>
+  <b>Nothing they return changes a rank.</b>{whose}</p>
   {"".join(cards)}
 </section>"""
 

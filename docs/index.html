@@ -80,7 +80,7 @@
     <span class="ti">What it picked<span class="ds">The ranked targets and their scores — the top eight of twenty.</span></span>
     <span class="ar" aria-hidden="true">→</span></a>
   <a class="tocrow" href="#toolkit"><span class="n">06</span>
-    <span class="ti">The toolkit<span class="ds">All ten tools, including the five exercised only to record how they fail.</span></span>
+    <span class="ti">The toolkit<span class="ds">All ten tools, including the ones exercised only to record how they fail.</span></span>
     <span class="ar" aria-hidden="true">→</span></a>
   <a class="tocrow" href="#evidence"><span class="n">07</span>
     <span class="ti">Evidence on the top targets<span class="ds">The five tools the chain refuses, run on the three it ranked highest.</span></span>
@@ -475,6 +475,8 @@
     </div>
   </div>
 
+  <div class="fields"><span class="lead">The other 6 registered tools reach further databases, and none of them is on this path. They were exercised on a grid of their own — 51 calls, each one listed in the toolkit below with the arguments it was given — which records what a call cost and how it failed and keeps no payload, so nothing they returned is in the result above:</span><span class="k">literature.search · Europe PMC</span><span class="k">similarity.homologs · EBI HMMER · NCBI E-utilities · UniProt</span><span class="k">families.entries · InterPro · UniProt</span><span class="k">structures.evidence · PDBe · UniProt</span><span class="k">structures.predicted · AlphaFold DB · 3D-Beacons</span><span class="k">bioactivity.prior_binders · ChEMBL · IEDB · MaveDB</span></div>
+
   <p class="after">The call records in <span class="mono">runs/toolcalls/</span> log each tool's cost, request count and failure modes but deliberately keep no payload. Everything above is read from the run record itself, and from the stored fold.</p>
 </section>
 
@@ -496,10 +498,10 @@
 
 <section id="toolkit">
   <div class="sec-head"><h2>The toolkit</h2><span class="tag">10 tools · 91 calls</span></div>
-  <p class="cap">Ten tools in all, each calling live public biology databases. The five detailed above run inside the chain; the other five are reachable from the same four facts step 1 produces, and were exercised separately to record what they cost and how they fail. Deliberately bad inputs are included, so each failure mode is on record rather than assumed.</p>
+  <p class="cap">Ten tools in all, each calling live public biology databases. Four of them are called by the five steps above, and section 04 details every call those steps made — the second step's two, <span class="mono">intake.decompose</span> and <span class="mono">intake.rank_score</span>, are functions in the same module rather than separate registered tools. The rest are reachable from the same four facts step 1 produces, and were exercised separately to record what they cost and how they fail. Deliberately bad inputs are included, so each failure mode is on record rather than assumed.</p>
   <div class="chips"><span class="chip">Find proteins in a genome <b>2</b></span><span class="chip">Search the literature <b>7</b></span><span class="chip">Find relatives <b>5</b></span><span class="chip">Look up protein families <b>5</b></span><span class="chip">Check known structures <b>21</b></span><span class="chip">Check predicted structures <b>9</b></span><span class="chip">Fold a sequence <b>6</b></span><span class="chip">Measure a surface <b>9</b></span><span class="chip">Find known binders <b>4</b></span><span class="chip">Define a library <b>23</b></span></div>
-<p class="after">Databases reached: NCBI E-utilities, UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, RCSB, 3D-Beacons, AlphaFold DB, ESM Atlas and ChEMBL.</p>
-<p class="cap" style="margin-top:34px">The five the chain never calls are below. They were exercised on their own to record what they cost and how they fail, so the failure modes are measured rather than assumed. Nothing here ran on the SARS-CoV-2 result above.</p>
+<p class="after">Databases reached: NCBI E-utilities, UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, RCSB, 3D-Beacons, AlphaFold DB, ESM Atlas, ChEMBL, IEDB and MaveDB.</p>
+<p class="cap" style="margin-top:34px">The 6 tools the five steps never call are below. They were exercised on their own to record what they cost and how they fail, so the failure modes are measured rather than assumed, and deliberately bad inputs are included. Some of those calls were about this pathogen — the arguments below name this page’s own input accession and two of the targets ranked above — but the grid keeps each call’s cost, status and failure mode and discards the payload, so nothing any of them returned reached the result above.</p>
   <div class="tool-card" id="t-search">
     <div class="tc-head"><span class="tn">literature.search</span>
       <span class="plain">Search the literature</span>
@@ -531,6 +533,17 @@
       <div class="accs"><span class="lead">Every call on record, including the deliberately
         bad ones:</span><div class="pdbrow none"><span class="who">accession: P0DTD1</span><span class="ids">failed · TimeoutError: The read operation timed out</span></div><div class="pdbrow"><span class="who">accession: P0DTC2</span><span class="ids">ok</span></div><div class="pdbrow"><span class="who">accession: P03452</span><span class="ids">ok</span></div><div class="pdbrow none"><span class="who">accession: P0DTD1, max_families: 101</span><span class="ids">rejected · max_families=101 is above the declared maximum 100</span></div><div class="pdbrow none"><span class="who">accession: P00000</span><span class="ids">empty · the call succeeded and found nothing</span></div></div>
       <div class="accs"><span class="lead">Where the tool’s own declared spec was wrong — 2 of 5 calls. These are kept rather than corrected away:</span><div class="pdbrow none"><span class="who">accession: P0DTD1</span><span class="ids">expected ok, observed failed</span></div><div class="pdbrow none"><span class="who">accession: P00000</span><span class="ids">expected failed, observed empty</span></div></div>
+    </div>
+  </div>
+  <div class="tool-card" id="t-evidence">
+    <div class="tc-head"><span class="tn">structures.evidence</span>
+      <span class="plain">Check known structures</span>
+      <span class="db">PDBe · UniProt</span></div>
+    <div class="tc-body">
+      <dl class="ret"><div><dt>Calls recorded</dt><dd>21</dd></div><div><dt>Declared cost</dt><dd>0 s · — requests</dd></div><div><dt>Measured, median</dt><dd>59.9 s · 36 requests</dd></div><div><dt>Slowest call</dt><dd>103 s</dd></div><div><dt>Ok</dt><dd>20</dd></div><div><dt>Rejected</dt><dd>1</dd></div></dl>
+      <div class="accs"><span class="lead">Every call on record, including the deliberately
+        bad ones:</span><div class="pdbrow"><span class="who"><i>no arguments</i> <i>&#215;10</i></span><span class="ids">ok</span></div><div class="pdbrow"><span class="who">minimum: 0.5 <i>&#215;10</i></span><span class="ids">ok</span></div><div class="pdbrow none"><span class="who">minimum: 5.0</span><span class="ids">rejected · minimum=5.0 is above the declared maximum 1.0</span></div></div>
+      
     </div>
   </div>
   <div class="tool-card" id="t-predicted">
@@ -566,18 +579,18 @@
   after the ranking was already final. They are refused on the chain path because of what
   they declare they can cost — <span class="mono">bioactivity.prior_binders</span> advertises
   a 600-second worst case — so they run here, over a few targets, under a larger budget.
-  <b>Nothing they return changes a rank.</b></p>
+  <b>Nothing they return changes a rank.</b> Each accession below is the relative the chain identified that target through, not severe acute respiratory syndrome coronavirus 2, which was deleted from the reference before the run: every annotation here is a record of that relative.</p>
   
   <div class="tool-card">
     <div class="tc-head"><span class="sn">1</span>
-      <span class="tn">3C-like proteinase nsp5</span>
-      <span class="db">P0DTD1</span></div>
+      <span class="tn">Spike protein S2&#x27;</span>
+      <span class="db">Q3LZX1</span></div>
     <div class="tc-body"><div class="accs">
       <div class="pdbrow none">
         <span class="who">literature.search<em>Europe PMC</em></span>
         <span class="ids">failed
-          · 90.83 s
-          · 4 requests
+          · 84.89 s
+          · 5 requests
           <br>TimeoutError: The read operation timed out
           
         </span>
@@ -585,7 +598,7 @@
       <div class="pdbrow">
         <span class="who">similarity.homologs<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 5.71 s
+          · 4.67 s
           · 3 requests
           
           <br>resolution_attempts_count 1 · database_id swissprot · database_name SwissProt · database_version 2025_01 · database_release_date 2025-01-01 · declared_databases_not_served_count 0 · homologs_count 50 · homolog_count 50 · hits_returned 50 · hits_dropped_by_min_identity 0
@@ -594,41 +607,41 @@
       <div class="pdbrow">
         <span class="who">families.entries<em>InterPro</em></span>
         <span class="ids">ok
-          · 21.74 s
-          · 15 requests
+          · 28.46 s
+          · 14 requests
           
-          <br>protein_name Replicase polyprotein 1ab · organism Severe acute respiratory syndrome coronavirus 2 · sequence_md5 E6608B50FCD6E004708A875615DDF2D9 · sequence_length 7,096 · sequence_source uniprot · assignments_count 128 · predicted_count 124 · sequence_features_count 15 · residue_ranges_count 80 · functional_sites_count 43
+          <br>protein_name Spike glycoprotein · organism Bat coronavirus HKU3 · sequence_md5 C3CE5AE51A7ECBC45DC279845CC93E75 · sequence_length 1,242 · sequence_source uniprot · assignments_count 19 · predicted_count 17 · sequence_features_count 14 · residue_ranges_count 11 · functional_sites_count 9
         </span>
       </div>
       <div class="pdbrow">
         <span class="who">structures.predicted<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 11.12 s
-          · 3 requests
+          · 2.32 s
+          · 2 requests
           
-          <br>sequence_length 7,096 · confident_plddt 70 · plddt_bands_count 4 · residue_detail no · any_prediction_exists yes · predicted_model_count 95 · providers_queried_count 2 · providers_with_models_count 3 · alphafold_host_queried yes · alphafold_host_served_models yes
+          <br>sequence_length 1,242 · confident_plddt 70 · plddt_bands_count 4 · residue_detail no · any_prediction_exists yes · predicted_model_count 4 · providers_queried_count 2 · providers_with_models_count 1 · alphafold_host_queried yes · alphafold_host_served_models no
         </span>
       </div>
       <div class="pdbrow">
         <span class="who">bioactivity.prior_binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 144.4 s
-          · 10 requests
+          · 32.51 s
+          · 4 requests
           
-          <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 1 · earliest_evidence_year 2020 · network_calls 9 · calls_count 9 · sources_count 3 · urls_hit_count 9 · limitations_count 13
+          <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 0 · network_calls 4 · calls_count 4 · sources_count 3 · urls_hit_count 4 · limitations_count 13
         </span>
       </div></div></div>
   </div>
   <div class="tool-card">
     <div class="tc-head"><span class="sn">2</span>
-      <span class="tn">RNA-directed RNA polymerase nsp12</span>
-      <span class="db">P0DTD1</span></div>
+      <span class="tn">3C-like proteinase nsp5</span>
+      <span class="db">P0C6X7</span></div>
     <div class="tc-body"><div class="accs">
       <div class="pdbrow none">
         <span class="who">literature.search<em>Europe PMC</em></span>
         <span class="ids">failed
-          · 30.54 s
-          · 1 requests
+          · 71.77 s
+          · 3 requests
           <br>TimeoutError: The read operation timed out
           
         </span>
@@ -636,59 +649,8 @@
       <div class="pdbrow">
         <span class="who">similarity.homologs<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 13.28 s
+          · 8.91 s
           · 3 requests
-          
-          <br>resolution_attempts_count 1 · database_id swissprot · database_name SwissProt · database_version 2025_01 · database_release_date 2025-01-01 · declared_databases_not_served_count 0 · homologs_count 40 · homolog_count 40 · hits_returned 40 · hits_dropped_by_min_identity 0
-        </span>
-      </div>
-      <div class="pdbrow">
-        <span class="who">families.entries<em>InterPro</em></span>
-        <span class="ids">ok
-          · 31 s
-          · 15 requests
-          
-          <br>protein_name Replicase polyprotein 1ab · organism Severe acute respiratory syndrome coronavirus 2 · sequence_md5 E6608B50FCD6E004708A875615DDF2D9 · sequence_length 7,096 · sequence_source uniprot · assignments_count 128 · predicted_count 124 · sequence_features_count 15 · residue_ranges_count 80 · functional_sites_count 43
-        </span>
-      </div>
-      <div class="pdbrow">
-        <span class="who">structures.predicted<em>AlphaFold DB, 3D-Beacons</em></span>
-        <span class="ids">ok
-          · 17.83 s
-          · 3 requests
-          
-          <br>sequence_length 7,096 · confident_plddt 70 · plddt_bands_count 4 · residue_detail no · any_prediction_exists yes · predicted_model_count 95 · providers_queried_count 2 · providers_with_models_count 3 · alphafold_host_queried yes · alphafold_host_served_models yes
-        </span>
-      </div>
-      <div class="pdbrow">
-        <span class="who">bioactivity.prior_binders<em>ChEMBL, IEDB, MaveDB</em></span>
-        <span class="ids">ok
-          · 96.91 s
-          · 13 requests
-          
-          <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 1 · earliest_evidence_year 2020 · network_calls 12 · calls_count 12 · sources_count 3 · urls_hit_count 12 · limitations_count 13
-        </span>
-      </div></div></div>
-  </div>
-  <div class="tool-card">
-    <div class="tc-head"><span class="sn">3</span>
-      <span class="tn">Papain-like protease nsp3</span>
-      <span class="db">P0DTD1</span></div>
-    <div class="tc-body"><div class="accs">
-      <div class="pdbrow none">
-        <span class="who">literature.search<em>Europe PMC</em></span>
-        <span class="ids">failed
-          · 30.46 s
-          · 1 requests
-          <br>TimeoutError: The read operation timed out
-          
-        </span>
-      </div>
-      <div class="pdbrow">
-        <span class="who">similarity.homologs<em>EBI HMMER</em></span>
-        <span class="ids">ok
-          · 25.87 s
-          · 4 requests
           
           <br>resolution_attempts_count 1 · database_id swissprot · database_name SwissProt · database_version 2025_01 · database_release_date 2025-01-01 · declared_databases_not_served_count 0 · homologs_count 50 · homolog_count 50 · hits_returned 50 · hits_dropped_by_min_identity 0
         </span>
@@ -696,28 +658,79 @@
       <div class="pdbrow">
         <span class="who">families.entries<em>InterPro</em></span>
         <span class="ids">ok
-          · 19.25 s
+          · 35.53 s
           · 15 requests
           
-          <br>protein_name Replicase polyprotein 1ab · organism Severe acute respiratory syndrome coronavirus 2 · sequence_md5 E6608B50FCD6E004708A875615DDF2D9 · sequence_length 7,096 · sequence_source uniprot · assignments_count 128 · predicted_count 124 · sequence_features_count 15 · residue_ranges_count 80 · functional_sites_count 43
+          <br>protein_name Replicase polyprotein 1ab · organism Severe acute respiratory syndrome coronavirus · sequence_md5 A782AF7E1EF470353B6AADB264F15DFE · sequence_length 7,073 · sequence_source uniprot · assignments_count 129 · predicted_count 125 · sequence_features_count 21 · residue_ranges_count 81 · functional_sites_count 43
         </span>
       </div>
       <div class="pdbrow">
         <span class="who">structures.predicted<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 17.38 s
-          · 8 requests
+          · 9.5 s
+          · 3 requests
           
-          <br>sequence_length 7,096 · confident_plddt 70 · plddt_bands_count 4 · residue_detail no · any_prediction_exists yes · predicted_model_count 95 · providers_queried_count 2 · providers_with_models_count 3 · alphafold_host_queried yes · alphafold_host_served_models yes
+          <br>sequence_length 7,073 · confident_plddt 70 · plddt_bands_count 4 · residue_detail no · any_prediction_exists yes · predicted_model_count 50 · providers_queried_count 2 · providers_with_models_count 3 · alphafold_host_queried yes · alphafold_host_served_models yes
         </span>
       </div>
       <div class="pdbrow">
         <span class="who">bioactivity.prior_binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 75.43 s
-          · 9 requests
+          · 82.36 s
+          · 7 requests
           
-          <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 1 · earliest_evidence_year 2020 · network_calls 8 · calls_count 8 · sources_count 3 · urls_hit_count 8 · limitations_count 13
+          <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 1 · earliest_evidence_year 2004 · network_calls 6 · calls_count 6 · sources_count 3 · urls_hit_count 6 · limitations_count 13
+        </span>
+      </div></div></div>
+  </div>
+  <div class="tool-card">
+    <div class="tc-head"><span class="sn">3</span>
+      <span class="tn">Spike protein S2</span>
+      <span class="db">Q3LZX1</span></div>
+    <div class="tc-body"><div class="accs">
+      <div class="pdbrow">
+        <span class="who">literature.search<em>Europe PMC</em></span>
+        <span class="ids">ok
+          · 27.03 s
+          · 7 requests
+          
+          <br>subject_kind term · scope title_abstract · hit_count 39 · returned 10 · hits_with_abstract 9 · preprints_returned 1 · limitations_count 8 · sources_count 7
+        </span>
+      </div>
+      <div class="pdbrow">
+        <span class="who">similarity.homologs<em>EBI HMMER</em></span>
+        <span class="ids">ok
+          · 33.6 s
+          · 3 requests
+          
+          <br>resolution_attempts_count 1 · database_id swissprot · database_name SwissProt · database_version 2025_01 · database_release_date 2025-01-01 · declared_databases_not_served_count 0 · homologs_count 50 · homolog_count 50 · hits_returned 50 · hits_dropped_by_min_identity 0
+        </span>
+      </div>
+      <div class="pdbrow">
+        <span class="who">families.entries<em>InterPro</em></span>
+        <span class="ids">ok
+          · 37.9 s
+          · 14 requests
+          
+          <br>protein_name Spike glycoprotein · organism Bat coronavirus HKU3 · sequence_md5 C3CE5AE51A7ECBC45DC279845CC93E75 · sequence_length 1,242 · sequence_source uniprot · assignments_count 19 · predicted_count 17 · sequence_features_count 14 · residue_ranges_count 11 · functional_sites_count 9
+        </span>
+      </div>
+      <div class="pdbrow">
+        <span class="who">structures.predicted<em>AlphaFold DB, 3D-Beacons</em></span>
+        <span class="ids">ok
+          · 2.07 s
+          · 2 requests
+          
+          <br>sequence_length 1,242 · confident_plddt 70 · plddt_bands_count 4 · residue_detail no · any_prediction_exists yes · predicted_model_count 4 · providers_queried_count 2 · providers_with_models_count 1 · alphafold_host_queried yes · alphafold_host_served_models no
+        </span>
+      </div>
+      <div class="pdbrow">
+        <span class="who">bioactivity.prior_binders<em>ChEMBL, IEDB, MaveDB</em></span>
+        <span class="ids">ok
+          · 8.1 s
+          · 4 requests
+          
+          <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 1 · network_calls 3 · calls_count 3 · sources_count 3 · urls_hit_count 3 · limitations_count 13
         </span>
       </div></div></div>
   </div>
