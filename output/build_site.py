@@ -683,9 +683,12 @@ def evidence_block(case):
   <div class="sec-head"><h2>Evidence on the top targets</h2>
     <span class="tag">{num(cov.get('evidence_calls'))} calls</span></div>
   <p class="cap">Five tools the chain itself never calls, run on the highest-ranked targets
-  after the ranking was already final. They are refused on the chain path because of what
-  they declare they can cost \u2014 <span class="mono">bioactivity.prior_binders</span> advertises
-  a 600-second worst case \u2014 so they run here, over a few targets, under a larger budget.
+  after the ranking was already final. Nothing refuses them: the cost gate admits all five,
+  because it turns a tool away only when its declared worst case is <em>strictly greater</em>
+  than the budget, and the default budget is 600 seconds \u2014 so
+  <span class="mono">bioactivity.prior_binders</span>, declaring exactly 600, is admitted. What
+  keeps them off the path is measured cost rather than declared cost: about 210 seconds for one
+  target across the five, against a chain that finishes in {{{{seconds}}}} seconds.
   <b>Nothing they return changes a rank.</b>{whose}</p>
   {"".join(cards)}
   {build_predicted()}
