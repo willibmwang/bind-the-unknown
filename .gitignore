@@ -3,7 +3,12 @@ __pycache__/
 .pytest_cache/
 data/raw/
 data/processed/
-runs/
+# `runs/*` and not `runs/`: git cannot re-include a file whose parent directory is excluded,
+# and excluding the directory made every negation below a statement of intent that only
+# `git add -f` could carry out. Excluding the entries instead leaves the directory itself
+# visible, so a negation for a file directly inside it works as written. Subdirectories are
+# still excluded as directories, which is what we want -- nothing re-includes through one.
+runs/*
 *.egg-info/
 .env
 
@@ -28,11 +33,11 @@ runs/improve/
 # dossier order rather than closing it -- and a repair that looks right and is not is exactly
 # the thing a later reader would otherwise redo.
 #
-# Note on the three negations in this file: git cannot re-include a file whose parent
-# directory is excluded, and `runs/` on line 6 excludes all three. They were added with
-# `git add -f` and stay tracked because gitignore does not apply to tracked files. The
-# negations are a record of intent, not the mechanism, and a fresh clone that deletes one of
-# these will not get it back by rerunning anything.
+# Note on the negations in this file: they used to be a statement of intent rather than the
+# mechanism. `runs/` excluded the directory, so git could not re-include anything inside it,
+# and every one of these files is tracked only because it was added with `git add -f`. The
+# top of the file now excludes `runs/*` instead, so a negation for a file directly inside
+# `runs/` does what it says and a new matching file is picked up without a force-add.
 !runs/coverage_channel.json
 
 # Genome-to-ranked-targets, validated on three virus families with the pathogen held out of
@@ -92,6 +97,16 @@ runs/improve/
 # finely by strain that the nearest relative of a held-out protein has no structure of its
 # own. Written by `python -m hpc_pilots chain --genomes`.
 !runs/onset_chain_genomes.json
+
+# Every chain record, including the ones strangers ask for through the site. One genome's run
+# is the smallest complete unit of evidence this system produces -- five stages, every score
+# decomposed, one surface row per ranked chain -- and the page published for it is generated
+# from the record rather than the other way round. Tracking them here means the record is the
+# committed thing and `docs/results/` holds a copy, rather than a web output directory being
+# the only home of a scientific result. Written by
+# `python -m hpc_pilots chain --accession <id> --pathogen <name>`, and by the run-chain
+# workflow when a request comes in through the site.
+!runs/onset_chain_*.json
 .venv-pfn/
 
 # The notebook points MPLCONFIGDIR here so a stale user-level matplotlibrc cannot print a

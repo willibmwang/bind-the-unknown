@@ -97,14 +97,17 @@ jobs:
         if: steps.chain.outputs.ok == 'true'
         run: python3 output/build_site.py
 
-      - name: Commit the result page
+      - name: Commit the record and its page
         if: steps.chain.outputs.ok == 'true'
         env:
           STEM: ${{ steps.chain.outputs.stem }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/
+          # The record first: it is the result, and the page is generated from it. `runs/*`
+          # is ignored with `!runs/onset_chain_*.json` negated, so this needs no force-add
+          # and nothing else in runs/ can ride along.
+          git add runs/ docs/
           if git diff --cached --quiet; then
             echo "nothing changed; the site already carries this run"
             exit 0

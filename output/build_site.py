@@ -4,13 +4,13 @@ The site has three parts and this script owns two of them.
 
 * `docs/index.html` is written by hand. It is the SARS-CoV-2 walkthrough, and it is prose, so
   generating it from a template would make it worse. This script only wraps it: it reads
-  `docs/_body.html`, puts a real `<head>` on it and links the shared stylesheet, so the page
+  `site/body.html`, puts a real `<head>` on it and links the shared stylesheet, so the page
   that ships is a complete document rather than a fragment.
 * `docs/results/` is generated, one page per chain record. A visitor's run arrives as a new
   `runs/onset_chain_<stem>.json` written by `python -m hpc_pilots chain --accession ...`, and
-  this script turns it into a page without anyone editing HTML. `runs/` is gitignored, so the
-  record is copied next to its page and served from there; that copy is what the site links as
-  "the raw record", and it is the thing a reader can check the page against.
+  this script turns it into a page without anyone editing HTML. The records are tracked, so
+  `runs/` is the list; each one is copied next to its page so the site can serve it, and that
+  copy is what a page links as "the raw record" for a reader to check it against.
 * `docs/notebook.html` is the walkthrough notebook, rendered by nbconvert with its committed
   outputs, so a visitor sees every number without running anything.
 
@@ -305,15 +305,15 @@ def results_index(entries):
 </div>""" + FOOT)
 
 
-def adopt_new_records():
-    """Copy any record in `runs/` that the site does not already carry.
+def build_results():
+    """One page per chain record. `runs/` is the list; `docs/results/` is a copy of it.
 
-    `runs/` is gitignored, so it is empty on a fresh checkout and holds exactly one record on
-    a CI runner: the one the chain just wrote. Treating it as the list of runs therefore
-    rebuilt the index from that single record and orphaned every page published before it.
-    The copies under `docs/results/` are the durable list, because they are the ones that are
-    committed, and they are what the pages already tell a reader to check them against.
+    The records are tracked, so this directory is complete on a fresh clone and on a CI
+    runner alike, and a run is published by running it rather than by editing HTML. Each
+    record is copied next to its page so the site can serve it: the page says every number on
+    it is read from that record, and a reader should be able to open the record and check.
     """
+    entries = []
     RESULTS.mkdir(parents=True, exist_ok=True)
     # `onset_chain_*.json` with the underscore: it excludes the landing page's own record,
     # `onset_chain.json`, which is a two-reference payload and has its own hand-written page.
@@ -321,45 +321,14 @@ def adopt_new_records():
         if path.name == "onset_chain_genomes.json":
             continue
         case = json.loads(path.read_text())
-        if "cases" in case or not case.get("stages"):
+        if "cases" in case:            # a multi-reference payload, not a single run
             continue
-        stem = re.sub(r"[^A-Za-z0-9]+", "_", path.stem.replace("onset_chain_", "")).strip("_")
-        dest = RESULTS / f"{stem}.json"
-        if not dest.exists() or dest.read_bytes() != path.read_bytes():
-            shutil.copyfile(path, dest)
-            print(f"  adopted {path.name} → docs/results/{stem}.json")
-
-
-def sync_records_back():
-    """Copy published records back into `runs/`, which git does not carry.
-
-    A run requested through the site happens on a GitHub runner. Only `docs/` is committed,
-    so after `git pull` the page and its record are on disk under `docs/results/` and `runs/`
-    still looks untouched — the record exists, in the one directory a reader does not think
-    to open. This walks it back, so a local `runs/` ends up holding every run the site has
-    published, which is what someone looking for one expects to find.
-    """
-    RUNS.mkdir(parents=True, exist_ok=True)
-    brought = 0
-    for path in sorted(RESULTS.glob("*.json")):
-        dest = RUNS / f"onset_chain_{path.stem}.json"
-        if not dest.exists() or dest.read_bytes() != path.read_bytes():
-            shutil.copyfile(path, dest)
-            print(f"  brought back {dest.relative_to(ROOT)}")
-            brought += 1
-    print(f"synced {brought} record(s) into runs/")
-
-
-def build_results():
-    adopt_new_records()
-    entries = []
-    for path in sorted(RESULTS.glob("*.json")):
-        case = json.loads(path.read_text())
         if not case.get("stages"):
             print(f"  skipped {path.name}: no stages recorded")
             continue
-        stem = path.stem
+        stem = re.sub(r"[^A-Za-z0-9]+", "_", path.stem.replace("onset_chain_", "")).strip("_")
         (RESULTS / f"{stem}.html").write_text(result_page(case, stem))
+        shutil.copyfile(path, RESULTS / f"{stem}.json")
         cov = case.get("coverage", {})
         entries.append((stem,
                         case.get("pathogen") or case.get("case") or stem,
@@ -416,8 +385,6 @@ def build_notebook():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--notebook", action="store_true", help="also re-render the notebook")
-    ap.add_argument("--sync", action="store_true",
-                    help="copy published records back into runs/, which git does not carry")
     args = ap.parse_args()
 
     DOCS.mkdir(exist_ok=True)
@@ -425,8 +392,6 @@ def main():
     build_index()
     build_fold_image()
     build_results()
-    if args.sync:
-        sync_records_back()
     if args.notebook:
         build_notebook()
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
