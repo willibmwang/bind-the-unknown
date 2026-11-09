@@ -458,7 +458,7 @@
       "validated_by": "NS1 helicase is the class target"
     },
     {
-      "accession": "NC_004296.1",
+      "accession": "NC_004296.1,NC_004297.1",
       "pathogen": "Lassa virus",
       "holdout": "Lassa virus",
       "targets": [
@@ -466,10 +466,11 @@
         "Glycoprotein",
         "Nucleoprotein"
       ],
-      "validated_by": "ribavirin; LASV GPC is the vaccine target"
+      "validated_by": "ribavirin; LASV GPC is the vaccine target",
+      "segmented": true
     },
     {
-      "accession": "NC_005218.1",
+      "accession": "NC_005218.1,NC_005219.1,NC_005222.1",
       "pathogen": "Hantaan virus",
       "holdout": "Hantaan virus",
       "targets": [
@@ -477,10 +478,11 @@
         "Glycoprotein",
         "Nucleoprotein"
       ],
-      "validated_by": "ribavirin"
+      "validated_by": "ribavirin",
+      "segmented": true
     },
     {
-      "accession": "NC_005300.2",
+      "accession": "NC_005302.1,NC_005300.2,NC_005301.3",
       "pathogen": "Crimean-Congo hemorrhagic fever virus",
       "holdout": "Crimean-Congo hemorrhagic fever virus",
       "targets": [
@@ -488,7 +490,8 @@
         "Glycoprotein",
         "Nucleoprotein"
       ],
-      "validated_by": "ribavirin; favipiravir in trials"
+      "validated_by": "ribavirin; favipiravir in trials",
+      "segmented": true
     },
     {
       "accession": "NC_014397.1",
@@ -525,5 +528,7 @@
       "validated_by": "flavivirus class target"
     }
   ],
-  "holdout_note": "Organism strings are UniProt's OS= spelling, verified against the reference index. A holdout that removes nothing raises rather than running, which is how nine wrong names in the first draft were found. SARS-CoV holds out 'Severe acute respiratory syndrome coronavirus', which also removes SARS-CoV-2: stricter than intended, kept."
+  "holdout_note": "Organism strings are UniProt's OS= spelling, verified against the reference index. A holdout that removes nothing raises rather than running, which is how nine wrong names in the first draft were found. SARS-CoV holds out 'Severe acute respiratory syndrome coronavirus', which also removes SARS-CoV-2: stricter than intended, kept.",
+  "segmented_note": "A segmented genome is supplied as every segment, comma-joined. Three entries named only one segment in the first draft: Hantaan gave S alone and could yield only the nucleoprotein, so two of its three labels were unmatchable by construction; Lassa gave S alone, missing the L-segment polymerase; CCHF gave M alone. A label naming a protein the supplied genome cannot encode marks the ranker wrong for a gene that was never in the input.",
+  "unscoreable_note": "An instance with fewer candidates than labels cannot be informative, and one with no identified candidate cannot be scored at all. Human parvovirus B19 returns 8 ORFs and zero identified chains, so it has no ranking to score; it is a finding about reach, not a panel error, and belongs in its own tier rather than in a recall denominator."
 }

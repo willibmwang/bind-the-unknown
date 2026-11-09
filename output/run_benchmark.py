@@ -38,6 +38,18 @@ PANEL = ROOT / "data/benchmark_panel.json"
 OUT = ROOT / "runs/benchmark"
 
 
+
+def stem_of(accession):
+    """A filename for one genome, segmented or not.
+
+    A segmented genome arrives as comma-joined accessions, so the stem is taken from the
+    first segment with a count appended. Keeping the commas would put them in a filename and
+    in every glob that reads this directory."""
+    parts = [a.strip() for a in accession.split(",") if a.strip()]
+    stem = re.sub(r"[^A-Za-z0-9]+", "_", parts[0]).strip("_")
+    return stem if len(parts) == 1 else f"{stem}_plus{len(parts) - 1}"
+
+
 def rank_one(entry):
     """Stages 1 and 2 for one genome, returning the ranked chains and the hold-out check."""
     from hpc_pilots.intake import decompose, rank_score, run_intake
@@ -160,7 +172,7 @@ def main():
     panel = json.loads(PANEL.read_text())["panel"]
     done = 0
     for i, entry in enumerate(panel, 1):
-        path = OUT / f"{entry['accession'].replace('.', '_')}.json"
+        path = OUT / f"{stem_of(entry['accession'])}.json"
         if path.exists():
             print(f"[{i}/{len(panel)}] {entry['pathogen']}: already on disk", flush=True)
             continue
