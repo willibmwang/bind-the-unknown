@@ -15,9 +15,9 @@
 
 <dl class="strip after-hero">
     <div><dt>Input</dt><dd>NC_045512.2</dd></div>
-    <div><dt>Genome</dt><dd>29,903 letters</dd></div>
+    <div><dt>Genome</dt><dd>{{genome_nt}} letters</dd></div>
     <div><dt>Difficulty</dt><dd>SARS-CoV-2 hidden</dd></div>
-    <div><dt>Time taken</dt><dd>86 seconds</dd></div>
+    <div><dt>Time taken</dt><dd>{{seconds}} seconds</dd></div>
   </dl>
 
 
@@ -242,13 +242,13 @@
             <rect class="ac" x="12" y="24" width="24" height="24" rx="3"/>
             <rect class="ac" x="44" y="24" width="16" height="24" rx="3" opacity=".6"/>
             <rect class="ac" x="68" y="24" width="12" height="24" rx="3" opacity=".38"/>
-          </svg><span class="what">Read the genome, find the proteins</span><span class="secs">13 s</span></div>
+          </svg><span class="what">Read the genome, find the proteins</span><span class="secs">{{stage1_seconds}} s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li>One accession, <b>NC_045512.2</b></li><li>SARS-CoV-2 itself hidden from the reference library</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li><b>28</b> possible proteins found in the raw sequence</li>
-        <li><b>12</b> worth ranking</li>
-        <li><b>9</b> matched to a known relative, <b>3</b> unrecognised and reported as such</li>
+        <li><b>{{orfs_found}}</b> possible proteins found in the raw sequence</li>
+        <li><b>{{orfs_ranked}}</b> worth ranking</li>
+        <li><b>{{identified}}</b> matched to a known relative, <b>{{unidentified}}</b> unrecognised and reported as such</li>
       </ul></div>
     </div>
   </div>
@@ -259,13 +259,13 @@
             <rect class="ac" x="16" y="28" width="54" height="8" rx="4" opacity=".72"/>
             <rect x="16" y="42" width="40" height="8" rx="4" fill="currentColor" opacity=".26"/>
             <rect x="16" y="56" width="26" height="8" rx="4" fill="currentColor" opacity=".26"/>
-          </svg><span class="what">Score and rank them</span><span class="secs">42 s</span></div>
+          </svg><span class="what">Score and rank them</span><span class="secs">{{stage2_seconds}} s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>12</b> candidates</li></ul></div>
+      <div><h3>In</h3><ul><li><b>{{orfs_ranked}}</b> candidates</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li><b>20</b> separate protein chains, each scored</li>
+        <li><b>{{chains}}</b> separate protein chains, each scored</li>
         <li>Five stated ingredients, fixed in advance — nothing is fitted or learned</li>
-        <li>All <b>20</b> scores re-add correctly from their parts</li>
+        <li>All <b>{{chains}}</b> scores re-add correctly from their parts</li>
       </ul></div>
     </div>
   </div>
@@ -276,12 +276,12 @@
             <circle cx="50" cy="36" r="25" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".35"/>
             <path class="ac" d="M50 11 A25 25 0 0 1 71.65 48.5 L50 36 Z" opacity=".85"/>
             <circle cx="60" cy="27" r="2.4" fill="currentColor" opacity=".3"/>
-          </svg><span class="what">Measure the surface a drug would grip</span><span class="secs">30 s</span></div>
+          </svg><span class="what">Measure the surface a drug would grip</span><span class="secs">{{stage3_seconds}} s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>20</b> chains</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li><b>20</b> answers for 20 chains</li>
-        <li><b>9</b> measured, <b>11</b> refused with a stated reason</li>
+        <li><b>{{rows_out}}</b> answers for {{chains}} chains</li>
+        <li><b>{{measured}}</b> measured, <b>{{unmeasured}}</b> refused with a stated reason</li>
         <li><b>0</b> quietly dropped</li>
       </ul></div>
     </div>
@@ -292,14 +292,14 @@
             <path class="acs" d="M16 52 Q27 16 40 46 Q52 70 62 34 Q70 10 84 26" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
             <circle class="ac" cx="16" cy="52" r="4"/>
             <circle class="ac" cx="84" cy="26" r="4"/>
-          </svg><span class="what">Predict a 3-D shape</span><span class="secs">2 s</span></div>
+          </svg><span class="what">Predict a 3-D shape</span><span class="secs">{{stage4_seconds}} s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>20</b> chains</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li>All <b>20</b> had their own sequence located in this genome</li>
+        <li>All <b>{{chains}}</b> had their own sequence located in this genome</li>
         <li><b>11</b> of those are short enough for the folding lane; <b>9</b> are over its <b>400</b>-residue ceiling, including the spike and the copying machine</li>
-        <li>The main protease was folded: <b>306</b> building blocks long</li>
-        <li>The predictor rates its own confidence <b>62.6</b> out of 100 — confidence is not accuracy</li>
+        <li>The main protease was folded: <b>{{fold_residues}}</b> building blocks long</li>
+        <li>The predictor rates its own confidence <b>{{mean_plddt}}</b> out of 100 — confidence is not accuracy</li>
       </ul></div>
     </div>
   </div>
@@ -320,8 +320,8 @@
       <div><h3>In</h3><ul><li>Nothing from the four steps above. The library definition does not read the measured surface — an intention, not yet a connection</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
         <li>A ring-shaped peptide, varying at <b>4–8</b> positions</li>
-        <li><b>25</b> building blocks to choose from at each one</li>
-        <li><b>159 billion</b> possible molecules</li>
+        <li><b>{{alphabet}}</b> building blocks to choose from at each one</li>
+        <li><b>{{diversity_short}}</b> possible molecules</li>
       </ul></div>
     </div>
   </div>
@@ -335,12 +335,12 @@
     <div class="tc-head"><span class="sn">1</span><span class="tn">intake.rank_targets</span><span class="plain">Read the genome, find the proteins</span><span class="db">NCBI · UniProt · 12.7 s · 2 requests</span></div>
     <div class="tc-body">
       <dl class="ret">
-        <div><dt>Genome read</dt><dd>29,903 nt · 1 segment</dd></div>
-        <div><dt>Proteins found in six frames</dt><dd>28</dd></div>
-        <div><dt>Worth ranking</dt><dd>12</dd></div>
-        <div><dt>Reference searched</dt><dd>17,512 entries</dd></div>
-        <div><dt>Matched to a relative</dt><dd>9</dd></div>
-        <div><dt>Unrecognised, reported</dt><dd>3</dd></div>
+        <div><dt>Genome read</dt><dd>{{genome_nt}} nt · {{segments}} segment</dd></div>
+        <div><dt>Proteins found in six frames</dt><dd>{{orfs_found}}</dd></div>
+        <div><dt>Worth ranking</dt><dd>{{orfs_ranked}}</dd></div>
+        <div><dt>Reference searched</dt><dd>{{reference_entries}} entries</dd></div>
+        <div><dt>Matched to a relative</dt><dd>{{identified}}</dd></div>
+        <div><dt>Unrecognised, reported</dt><dd>{{unidentified}}</dd></div>
       </dl>
       <div class="fields"><span class="lead">For each candidate it returns the four facts every later tool needs:</span>
         <span class="k">target_name</span><span class="k">protein_accession</span><span class="k">residue_ranges</span><span class="k">protein_sequence</span>
@@ -352,9 +352,9 @@
     <div class="tc-head"><span class="sn">2</span><span class="tn">intake.decompose → intake.rank_score</span><span class="plain">Cut polyproteins apart, then score</span><span class="db">UniProt · 41.9 s</span></div>
     <div class="tc-body">
       <dl class="ret">
-        <div><dt>Chains out</dt><dd>20</dd></div>
+        <div><dt>Chains out</dt><dd>{{chains}}</dd></div>
         <div><dt>Weights, fixed in advance</dt><dd>3 · 2 · 1.5 · 0.8 · 0.5</dd></div>
-        <div><dt>Scores that re-add from their parts</dt><dd>20 of 20</dd></div>
+        <div><dt>Scores that re-add from their parts</dt><dd>{{chains}} of {{chains}}</dd></div>
         <div><dt>Highest / lowest score</dt><dd>6.906 / 0.913</dd></div>
       </dl>
       <div class="fields"><span class="lead">Per chain:</span>
@@ -382,9 +382,9 @@
     <div class="tc-head"><span class="sn">3</span><span class="tn">geometry.surface_markers</span><span class="plain">Measure the surface a drug would grip</span><span class="db">PDBe · RCSB · UniProt · 29.8 s</span></div>
     <div class="tc-body">
       <dl class="ret">
-        <div><dt>Rows returned</dt><dd>20 for 20 chains</dd></div>
-        <div><dt>Measured</dt><dd>9</dd></div>
-        <div><dt>Refused, with reason</dt><dd>11</dd></div>
+        <div><dt>Rows returned</dt><dd>{{rows_out}} for {{chains}} chains</dd></div>
+        <div><dt>Measured</dt><dd>{{measured}}</dd></div>
+        <div><dt>Refused, with reason</dt><dd>{{unmeasured}}</dd></div>
         <div><dt>Largest patch seen</dt><dd>858 Å²</dd></div>
       </dl>
       <div class="fields"><span class="lead">Per chain, when measured:</span>
@@ -427,7 +427,7 @@
         <div><dt>Folded</dt><dd>Main protease · 306 residues</dd></div>
         <div><dt>Coordinates returned</dt><dd>193,227 bytes</dd></div>
         <div><dt>Confidence mean / median / min</dt><dd>62.6 / 63.0 / 20.0</dd></div>
-        <div><dt>Residues above 70</dt><dd>46.4 %</dd></div>
+        <div><dt>Residues above 70</dt><dd>{{confident_pct}} %</dd></div>
         <div><dt>Sequence matches the genome</dt><dd>verified, 0 mismatches</dd></div>
       </dl>
       <div class="foldimg">
@@ -444,8 +444,8 @@
         <div><dt>Starter unit</dt><dd>ClAc-D-Tyr</dd></div>
         <div><dt>Ring closes on</dt><dd>Cys, spontaneous thioether</dd></div>
         <div><dt>Positions varied</dt><dd>4–8</dd></div>
-        <div><dt>Blocks per position</dt><dd>25</dd></div>
-        <div><dt>Distinct molecules</dt><dd>158,945,703,125</dd></div>
+        <div><dt>Blocks per position</dt><dd>{{alphabet}}</dd></div>
+        <div><dt>Distinct molecules</dt><dd>{{diversity}}</dd></div>
         <div><dt>Reads from steps 1–4</dt><dd>nothing</dd></div>
       </dl>
       <div class="fields"><span class="lead">The 25 blocks: 19 ordinary amino acids, three N-methyl variants and three mirror-image ones. The tool's own return carries the line <em>“a library definition only; no binding, enrichment, inhibition or antiviral property is predicted for any member.”</em></span>

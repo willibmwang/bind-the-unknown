@@ -349,6 +349,9 @@ def build_index():
     toolkit, calls = build_toolkit()
     body = body.replace("<!--TOOLKIT-->", toolkit)
     body = body.replace("<!--TOOLCALLS-->", f"{len(TOOLKIT)} tools \u00b7 {calls} calls")
+    # Last, so a {{token}} introduced by any generated block above is filled too. The
+    # landing page is the held-out case throughout, so its numbers come from that case.
+    body = fill(body, facts(holdout))
     out = (head(f"{SITE} · one genome in, every step out",
                 "What came back when the system was given one SARS-CoV-2 genome accession "
                 "and nothing else.", current="index")
@@ -574,6 +577,68 @@ def build_predicted():
         f'    </div>\n'
         f'  </div>')
 
+
+
+def facts(case):
+    """Every number the hand-written prose states, read out of the record it came from.
+
+    `site/body.html` is prose and stays prose, but the numbers in it were literals typed to
+    match one run. The page's own contract is that every number on it is read from a record
+    and not retyped, and for the hand-written half that was not true: re-running the chain
+    moved the record and left the prose asserting the previous run's values, with nothing
+    to show a reader which half was stale. The literals are now `{{tokens}}` filled from the
+    record at build time, so the prose follows whichever run is current.
+
+    A token that has no value raises rather than rendering empty. A silent blank in a
+    sentence like "<b></b> of 20 measured" is worse than a build that stops.
+    """
+    st = {s["stage"]: s for s in case["stages"]}
+    out1, out2, out3 = st[1]["output"], st[2]["output"], st[3]["output"]
+    out4 = st[4]["output"] if 4 in st else {}
+    out5 = st[5]["output"] if 5 in st else {}
+    plddt = out4.get("mean_plddt")
+    confident = out4.get("at_or_above_70")
+    diversity = out5.get("theoretical_diversity")
+    values = {
+        "genome_nt": f"{out1['genome_length_nt']:,}",
+        "segments": out1.get("segments"),
+        "orfs_found": out1["orfs_found"],
+        "orfs_ranked": out1["orfs_ranked"],
+        "reference_entries": f"{out1['reference_entries']:,}",
+        "identified": out1["identified"],
+        "unidentified": out1["unidentified"],
+        "chains": out2["chains_out"],
+        "rows_out": out3["rows_out"],
+        "measured": out3["measured"],
+        "unmeasured": out3["unmeasured"],
+        "fold_residues": out4.get("residues"),
+        "mean_plddt": round(plddt, 1) if plddt is not None else None,
+        "confident_pct": f"{confident * 100:.1f}" if confident is not None else None,
+        "alphabet": out5.get("alphabet_size"),
+        "diversity": f"{diversity:,}" if diversity else None,
+        "diversity_short": (f"{diversity / 1e9:.0f} billion" if diversity else None),
+        "seconds": round(case.get("seconds") or 0),
+        "stage1_seconds": round(st[1].get("seconds") or 0),
+        "stage2_seconds": round(st[2].get("seconds") or 0),
+        "stage3_seconds": round(st[3].get("seconds") or 0),
+        "stage4_seconds": round(st[4].get("seconds") or 0) if 4 in st else None,
+    }
+    return {k: v for k, v in values.items() if v is not None}
+
+
+def fill(body, values):
+    """Substitute every {{token}}, and refuse to ship one that has no value."""
+    import re as _re
+
+    def one(match):
+        key = match.group(1)
+        if key not in values:
+            raise KeyError(
+                f"site/body.html asks for {{{{{key}}}}} and the record has no value for it. "
+                f"Available: {sorted(values)}")
+        return esc(values[key])
+
+    return _re.sub(r"\{\{(\w+)\}\}", one, body)
 
 def evidence_block(case):
     """The five off-chain tools, per target, as they came back.
