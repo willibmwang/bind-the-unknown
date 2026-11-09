@@ -38,7 +38,7 @@
     <div><dt>Input</dt><dd>NC_045512.2</dd></div>
     <div><dt>Genome</dt><dd>29,903 letters</dd></div>
     <div><dt>Difficulty</dt><dd>SARS-CoV-2 hidden</dd></div>
-    <div><dt>Time taken</dt><dd>86 seconds</dd></div>
+    <div><dt>Time taken</dt><dd>363 seconds</dd></div>
   </dl>
 
 
@@ -265,7 +265,7 @@
             <rect class="ac" x="12" y="24" width="24" height="24" rx="3"/>
             <rect class="ac" x="44" y="24" width="16" height="24" rx="3" opacity=".6"/>
             <rect class="ac" x="68" y="24" width="12" height="24" rx="3" opacity=".38"/>
-          </svg><span class="what">Read the genome, find the proteins</span><span class="secs">13 s</span></div>
+          </svg><span class="what">Read the genome, find the proteins</span><span class="secs">14 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li>One accession, <b>NC_045512.2</b></li><li>SARS-CoV-2 itself hidden from the reference library</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
@@ -282,7 +282,7 @@
             <rect class="ac" x="16" y="28" width="54" height="8" rx="4" opacity=".72"/>
             <rect x="16" y="42" width="40" height="8" rx="4" fill="currentColor" opacity=".26"/>
             <rect x="16" y="56" width="26" height="8" rx="4" fill="currentColor" opacity=".26"/>
-          </svg><span class="what">Score and rank them</span><span class="secs">42 s</span></div>
+          </svg><span class="what">Score and rank them</span><span class="secs">75 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>12</b> candidates</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
@@ -299,7 +299,7 @@
             <circle cx="50" cy="36" r="25" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".35"/>
             <path class="ac" d="M50 11 A25 25 0 0 1 71.65 48.5 L50 36 Z" opacity=".85"/>
             <circle cx="60" cy="27" r="2.4" fill="currentColor" opacity=".3"/>
-          </svg><span class="what">Measure the surface a drug would grip</span><span class="secs">30 s</span></div>
+          </svg><span class="what">Measure the surface a drug would grip</span><span class="secs">50 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>20</b> chains</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
@@ -315,7 +315,7 @@
             <path class="acs" d="M16 52 Q27 16 40 46 Q52 70 62 34 Q70 10 84 26" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
             <circle class="ac" cx="16" cy="52" r="4"/>
             <circle class="ac" cx="84" cy="26" r="4"/>
-          </svg><span class="what">Predict a 3-D shape</span><span class="secs">2 s</span></div>
+          </svg><span class="what">Predict a 3-D shape</span><span class="secs">3 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>20</b> chains</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
@@ -582,7 +582,7 @@
   than the budget, and the default budget is 600 seconds — so
   <span class="mono">bioactivity.prior_binders</span>, declaring exactly 600, is admitted. What
   keeps them off the path is measured cost rather than declared cost: about 210 seconds for one
-  target across the five, against a chain that finishes in 86 seconds.
+  target across the five, against a chain that finishes in 363 seconds.
   <b>Nothing they return changes a rank.</b> Each accession below is the relative the chain identified that target through, not severe acute respiratory syndrome coronavirus 2, which was deleted from the reference before the run: every annotation here is a record of that relative.</p>
   
   <div class="tool-card">
@@ -590,19 +590,19 @@
       <span class="tn">Spike protein S2&#x27;</span>
       <span class="db">Q3LZX1</span></div>
     <div class="tc-body"><div class="accs">
-      <div class="pdbrow none">
+      <div class="pdbrow">
         <span class="who">literature.search<em>Europe PMC</em></span>
-        <span class="ids">failed
-          · 84.89 s
-          · 5 requests
-          <br>TimeoutError: The read operation timed out
+        <span class="ids">ok
+          · 10.96 s
+          · 7 requests
           
+          <br>subject_kind term · scope title_abstract · hit_count 39 · returned 10 · hits_with_abstract 9 · preprints_returned 1 · limitations_count 8 · sources_count 7
         </span>
       </div>
       <div class="pdbrow">
         <span class="who">similarity.homologs<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 4.67 s
+          · 9.62 s
           · 3 requests
           
           <br>resolution_attempts_count 1 · database_id swissprot · database_name SwissProt · database_version 2025_01 · database_release_date 2025-01-01 · declared_databases_not_served_count 0 · homologs_count 50 · homolog_count 50 · hits_returned 50 · hits_dropped_by_min_identity 0
@@ -611,7 +611,7 @@
       <div class="pdbrow">
         <span class="who">families.entries<em>InterPro</em></span>
         <span class="ids">ok
-          · 28.46 s
+          · 18.73 s
           · 14 requests
           
           <br>protein_name Spike glycoprotein · organism Bat coronavirus HKU3 · sequence_md5 C3CE5AE51A7ECBC45DC279845CC93E75 · sequence_length 1,242 · sequence_source uniprot · assignments_count 19 · predicted_count 17 · sequence_features_count 14 · residue_ranges_count 11 · functional_sites_count 9
@@ -620,7 +620,7 @@
       <div class="pdbrow">
         <span class="who">structures.predicted<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 2.32 s
+          · 1.9 s
           · 2 requests
           
           <br>sequence_length 1,242 · confident_plddt 70 · plddt_bands_count 4 · residue_detail no · any_prediction_exists yes · predicted_model_count 4 · providers_queried_count 2 · providers_with_models_count 1 · alphafold_host_queried yes · alphafold_host_served_models no
@@ -629,10 +629,10 @@
       <div class="pdbrow">
         <span class="who">bioactivity.prior_binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 32.51 s
+          · 7.38 s
           · 4 requests
           
-          <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 0 · network_calls 4 · calls_count 4 · sources_count 3 · urls_hit_count 4 · limitations_count 13
+          <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 1 · network_calls 3 · calls_count 3 · sources_count 3 · urls_hit_count 3 · limitations_count 13
         </span>
       </div></div></div>
   </div>
@@ -641,19 +641,19 @@
       <span class="tn">3C-like proteinase nsp5</span>
       <span class="db">P0C6X7</span></div>
     <div class="tc-body"><div class="accs">
-      <div class="pdbrow none">
+      <div class="pdbrow">
         <span class="who">literature.search<em>Europe PMC</em></span>
-        <span class="ids">failed
-          · 71.77 s
-          · 3 requests
-          <br>TimeoutError: The read operation timed out
+        <span class="ids">ok
+          · 38.89 s
+          · 7 requests
           
+          <br>subject_kind term · scope title_abstract · hit_count 1 · returned 1 · hits_with_abstract 1 · preprints_returned 1 · limitations_count 8 · sources_count 7
         </span>
       </div>
       <div class="pdbrow">
         <span class="who">similarity.homologs<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 8.91 s
+          · 6.56 s
           · 3 requests
           
           <br>resolution_attempts_count 1 · database_id swissprot · database_name SwissProt · database_version 2025_01 · database_release_date 2025-01-01 · declared_databases_not_served_count 0 · homologs_count 50 · homolog_count 50 · hits_returned 50 · hits_dropped_by_min_identity 0
@@ -662,7 +662,7 @@
       <div class="pdbrow">
         <span class="who">families.entries<em>InterPro</em></span>
         <span class="ids">ok
-          · 35.53 s
+          · 18.01 s
           · 15 requests
           
           <br>protein_name Replicase polyprotein 1ab · organism Severe acute respiratory syndrome coronavirus · sequence_md5 A782AF7E1EF470353B6AADB264F15DFE · sequence_length 7,073 · sequence_source uniprot · assignments_count 129 · predicted_count 125 · sequence_features_count 21 · residue_ranges_count 81 · functional_sites_count 43
@@ -671,7 +671,7 @@
       <div class="pdbrow">
         <span class="who">structures.predicted<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 9.5 s
+          · 3.84 s
           · 3 requests
           
           <br>sequence_length 7,073 · confident_plddt 70 · plddt_bands_count 4 · residue_detail no · any_prediction_exists yes · predicted_model_count 50 · providers_queried_count 2 · providers_with_models_count 3 · alphafold_host_queried yes · alphafold_host_served_models yes
@@ -680,7 +680,7 @@
       <div class="pdbrow">
         <span class="who">bioactivity.prior_binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 82.36 s
+          · 33.2 s
           · 7 requests
           
           <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 1 · earliest_evidence_year 2004 · network_calls 6 · calls_count 6 · sources_count 3 · urls_hit_count 6 · limitations_count 13
@@ -695,7 +695,7 @@
       <div class="pdbrow">
         <span class="who">literature.search<em>Europe PMC</em></span>
         <span class="ids">ok
-          · 27.03 s
+          · 33.77 s
           · 7 requests
           
           <br>subject_kind term · scope title_abstract · hit_count 39 · returned 10 · hits_with_abstract 9 · preprints_returned 1 · limitations_count 8 · sources_count 7
@@ -704,7 +704,7 @@
       <div class="pdbrow">
         <span class="who">similarity.homologs<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 33.6 s
+          · 3.61 s
           · 3 requests
           
           <br>resolution_attempts_count 1 · database_id swissprot · database_name SwissProt · database_version 2025_01 · database_release_date 2025-01-01 · declared_databases_not_served_count 0 · homologs_count 50 · homolog_count 50 · hits_returned 50 · hits_dropped_by_min_identity 0
@@ -713,7 +713,7 @@
       <div class="pdbrow">
         <span class="who">families.entries<em>InterPro</em></span>
         <span class="ids">ok
-          · 37.9 s
+          · 25.36 s
           · 14 requests
           
           <br>protein_name Spike glycoprotein · organism Bat coronavirus HKU3 · sequence_md5 C3CE5AE51A7ECBC45DC279845CC93E75 · sequence_length 1,242 · sequence_source uniprot · assignments_count 19 · predicted_count 17 · sequence_features_count 14 · residue_ranges_count 11 · functional_sites_count 9
@@ -722,7 +722,7 @@
       <div class="pdbrow">
         <span class="who">structures.predicted<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 2.07 s
+          · 2.02 s
           · 2 requests
           
           <br>sequence_length 1,242 · confident_plddt 70 · plddt_bands_count 4 · residue_detail no · any_prediction_exists yes · predicted_model_count 4 · providers_queried_count 2 · providers_with_models_count 1 · alphafold_host_queried yes · alphafold_host_served_models no
@@ -731,7 +731,7 @@
       <div class="pdbrow">
         <span class="who">bioactivity.prior_binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 8.1 s
+          · 7.68 s
           · 4 requests
           
           <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 1 · network_calls 3 · calls_count 3 · sources_count 3 · urls_hit_count 3 · limitations_count 13

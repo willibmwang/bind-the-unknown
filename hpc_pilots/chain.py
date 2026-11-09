@@ -931,6 +931,39 @@ GENOMES = (
 )
 
 
+def _predicted_inventory(payload, stem=None):
+    """Write the predicted-model inventory for the case the landing page renders.
+
+    The evidence stage records `structures.predicted` as scalars, because
+    `_evidence_summary` reduces any list to a count so a chain record does not become a copy
+    of five external databases. One distinction does not survive that: the tool reports the
+    host that served a model apart from the tool that computed it, and for these accessions
+    the two disagree -- every model the AlphaFold host serves here was computed by ColabFold
+    v1.5.2. A reader of `predicted_model_count 50` beside the label "AlphaFold DB" concludes
+    the opposite.
+
+    So the inventory is written beside the chain record rather than inside it. It runs here,
+    as part of the run, because it reads the accessions back out of the case: regenerating
+    it by hand against a record that has since been overwritten is how the page comes to
+    cite an inventory of accessions the run no longer reaches.
+
+    A failure is reported and swallowed. This is an annotation on a number already recorded,
+    and a chain run that completed five stages must not be thrown away because an external
+    structure aggregator timed out afterwards.
+    """
+    from . import predicted_inventory
+
+    case = next((c for c in payload["cases"] if c.get("reference_excluded_organism")),
+                payload["cases"][0])
+    name = f"predicted_models_{stem}.json" if stem else "predicted_models.json"
+    try:
+        return predicted_inventory.run(case=case, path=ROOT / "runs" / name)
+    except Exception as broke:
+        print(f"predicted-model inventory not written ({type(broke).__name__}: {broke}); "
+              f"the chain record itself is complete")
+        return None
+
+
 def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
         cases=((None, "identified through its own curated entries"),
                (HOLDOUT, "the pathogen deleted from the reference"))):
@@ -1001,6 +1034,7 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
         "provenance": provenance()}
     if record:
         write_json(ROOT / "runs/onset_chain.json", payload)
+        _predicted_inventory(payload)
     return payload
 
 
@@ -1040,6 +1074,9 @@ def one(accession, pathogen=None, holdout=None, top=12, replicates=5,
     if record:
         stem = re.sub(r"[^A-Za-z0-9]+", "_", accession.split(",")[0]).strip("_")
         write_json(ROOT / f"runs/onset_chain_{stem}.json", case)
+        # `one` records a single case rather than the two `run` compares, so it is handed
+        # that case directly instead of being left to pick one out of a `cases` list.
+        _predicted_inventory({"cases": [case]}, stem=stem)
     return case
 
 

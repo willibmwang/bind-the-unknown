@@ -117,6 +117,12 @@ runs/improve/
 # page's claim has to be checkable against it. Written by
 # `python -m hpc_pilots.predicted_inventory`.
 !runs/predicted_models.json
+
+# The same inventory for a pathogen run through `chain.one`, one file per genome beside that
+# genome's own chain record. Tracked for the same reason `runs/onset_chain_*.json` is: the
+# record is the committed thing, and a page generated from it should be checkable against a
+# file in the tree rather than against a run nobody kept.
+!runs/predicted_models_*.json
 .venv-pfn/
 
 # The notebook points MPLCONFIGDIR here so a stale user-level matplotlibrc cannot print a
