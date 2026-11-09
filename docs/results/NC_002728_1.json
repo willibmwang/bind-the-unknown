@@ -1,0 +1,783 @@
+{
+  "case": "Nipah, nothing held out of the reference",
+  "genome_accession": "NC_002728.1",
+  "reference_excluded_organism": null,
+  "stages": [
+    {
+      "stage": 1,
+      "name": "Genome to candidate proteins",
+      "tool": "intake.rank_targets",
+      "endpoints": [
+        "NCBI efetch",
+        "UniProt"
+      ],
+      "input": {
+        "genome_accession": "NC_002728.1",
+        "reference_excluded_organism": null
+      },
+      "output": {
+        "genome_length_nt": 18246,
+        "segments": 1,
+        "orfs_found": 17,
+        "orfs_ranked": 12,
+        "reference_entries": 17541,
+        "reference_entries_removed": null,
+        "identified": 7,
+        "unidentified": 5
+      },
+      "seconds": 20.88,
+      "hands_to_next": "one reviewed accession and one residue range per candidate"
+    },
+    {
+      "stage": 2,
+      "name": "Polyproteins to mature chains, and the score for each",
+      "tool": "intake.decompose + intake.rank_score",
+      "endpoints": [
+        "UniProt"
+      ],
+      "input": {
+        "candidates_in": 12
+      },
+      "output": {
+        "chains_out": 8,
+        "rubric": {
+          "conservation": 3.0,
+          "surface_exposed": 2.0,
+          "essential_class": 1.5,
+          "druggable_class": 0.8,
+          "structures_in_family_capped": 0.5
+        },
+        "all_decompositions_reproduce_the_score": true
+      },
+      "seconds": 14.43,
+      "hands_to_next": "every chain, with the accession and range its surface is measured on"
+    },
+    {
+      "stage": 3,
+      "name": "Every chain to a measured surface, or a stated reason",
+      "tool": "geometry.surface_markers",
+      "endpoints": [
+        "PDBe",
+        "RCSB",
+        "UniProt"
+      ],
+      "input": {
+        "candidates_in": 8
+      },
+      "output": {
+        "rows_out": 8,
+        "measured": 7,
+        "unmeasured": 1,
+        "nothing_dropped": true,
+        "gate_yes": 0,
+        "gate_borderline": 2,
+        "gate_no": 5
+      },
+      "seconds": 33.83,
+      "hands_to_next": "a patch median and range per chain; nothing downstream reads it yet"
+    },
+    {
+      "stage": 4,
+      "name": "A chain to coordinates, the one lane a novel target has",
+      "tool": "structures.folded",
+      "endpoints": [
+        "ESM Atlas"
+      ],
+      "input": {
+        "candidates_in": 8
+      },
+      "output": {
+        "foldable": 8,
+        "not_foldable": 0,
+        "folded_target": "Fusion glycoprotein F2",
+        "residues": 83,
+        "mean_plddt": 48.65,
+        "at_or_above_70": 0.0,
+        "sequence_sha256": "c552d8d7c0572fa8a613185fb526c4ff2f06e900674c4c3a40b2cf9c54356016",
+        "error": null
+      },
+      "seconds": 0.86,
+      "hands_to_next": "coordinates. Nothing downstream reads them yet: the surface stage measures deposited structures, not predicted ones"
+    },
+    {
+      "stage": 5,
+      "name": "A library definition over the randomised region",
+      "tool": "chemistry.library_spec",
+      "endpoints": [
+        "local tables"
+      ],
+      "input": {
+        "reads_from_upstream": []
+      },
+      "output": {
+        "initiator": "ClAc-D-Tyr",
+        "closure_residue": "C",
+        "random_region": [
+          4,
+          8
+        ],
+        "alphabet_size": 25,
+        "theoretical_diversity": 158945703125
+      },
+      "seconds": 0.0,
+      "hands_to_next": "the position count the go/no-go test in arm 2 reads"
+    }
+  ],
+  "scores": [
+    {
+      "rank": 1,
+      "target": "Fusion glycoprotein F2",
+      "parent": "FUS_NIPAV Fusion glycoprotein F0",
+      "tier": "exact",
+      "nearest_homolog": "Q9IH63",
+      "chain_range": [
+        27,
+        109
+      ],
+      "conservation": 1.0,
+      "surface_exposed": true,
+      "essential_class": true,
+      "druggable_class": 2,
+      "structures_in_family": 27,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.27,
+        "druggable_class": 1.6
+      },
+      "score": 8.37,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 2,
+      "target": "Fusion glycoprotein F1",
+      "parent": "FUS_NIPAV Fusion glycoprotein F0",
+      "tier": "exact",
+      "nearest_homolog": "Q9IH63",
+      "chain_range": [
+        110,
+        546
+      ],
+      "conservation": 1.0,
+      "surface_exposed": true,
+      "essential_class": true,
+      "druggable_class": 2,
+      "structures_in_family": 27,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.27,
+        "druggable_class": 1.6
+      },
+      "score": 8.37,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 3,
+      "target": "GLYCP_NIPAV Glycoprotein G",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q9IH62",
+      "chain_range": null,
+      "conservation": 1.0,
+      "surface_exposed": true,
+      "essential_class": true,
+      "druggable_class": 2,
+      "structures_in_family": 14,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.14,
+        "druggable_class": 1.6
+      },
+      "score": 8.24,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 4,
+      "target": "L_NIPAV RNA-directed RNA polymerase L",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q997F0",
+      "chain_range": null,
+      "conservation": 1.0,
+      "surface_exposed": false,
+      "essential_class": true,
+      "druggable_class": 3,
+      "structures_in_family": 20,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.2,
+        "druggable_class": 2.4
+      },
+      "score": 7.1,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 5,
+      "target": "MATRX_NIPAV Matrix protein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q9IK90",
+      "chain_range": null,
+      "conservation": 1.0,
+      "surface_exposed": true,
+      "essential_class": false,
+      "druggable_class": 0,
+      "structures_in_family": 4,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.04,
+        "druggable_class": 0.0
+      },
+      "score": 5.04,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 6,
+      "target": "NCAP_NIPAV Nucleoprotein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q9IK92",
+      "chain_range": null,
+      "conservation": 1.0,
+      "surface_exposed": false,
+      "essential_class": true,
+      "druggable_class": 0,
+      "structures_in_family": 5,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.05,
+        "druggable_class": 0.0
+      },
+      "score": 4.55,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 7,
+      "target": "PHOSP_NIPAV Phosphoprotein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q9IK91",
+      "chain_range": null,
+      "conservation": 1.0,
+      "surface_exposed": false,
+      "essential_class": false,
+      "druggable_class": 0,
+      "structures_in_family": 23,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 0.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.23,
+        "druggable_class": 0.0
+      },
+      "score": 3.23,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 8,
+      "target": "C_NIPAV Protein C",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q997F1",
+      "chain_range": null,
+      "conservation": 1.0,
+      "surface_exposed": false,
+      "essential_class": false,
+      "druggable_class": 0,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 0.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 3.0,
+      "decomposition_reproduces_score": true
+    }
+  ],
+  "surfaces": [
+    {
+      "target": "Fusion glycoprotein F2",
+      "rank": 1,
+      "identified": true,
+      "measured_on_accession": "Q9IH63",
+      "chain_range": [
+        27,
+        109
+      ],
+      "measured": true,
+      "unmeasured_because": null,
+      "seconds": 7.05,
+      "patch_median_a2": 159.8,
+      "patch_range_a2": [
+        157.3,
+        162.8
+      ],
+      "patch_spread_a2": 5.5,
+      "structures_measured": 5,
+      "structures_used": [
+        "9ua9:A",
+        "9ua9:B",
+        "9ua9:C",
+        "9uaa:A",
+        "9uaa:B"
+      ],
+      "surface_score": 1.7635,
+      "patch_fraction_of_surface": 0.05,
+      "structures_clipped_to_domain": 5,
+      "residues_in_range": 78,
+      "exposed_fraction_of_residues": 0.474,
+      "sequons_near_patch": 0,
+      "available_from": "2025-03-31",
+      "locations": [
+        "Virion membrane",
+        "Host cell membrane"
+      ],
+      "location_scope": "entry",
+      "exposed": true,
+      "exposed_fraction_of_locations": 1.0,
+      "gate": "no"
+    },
+    {
+      "target": "Fusion glycoprotein F1",
+      "rank": 2,
+      "identified": true,
+      "measured_on_accession": "Q9IH63",
+      "chain_range": [
+        110,
+        546
+      ],
+      "measured": true,
+      "unmeasured_because": null,
+      "seconds": 2.95,
+      "patch_median_a2": 307.7,
+      "patch_range_a2": [
+        307.0,
+        339.4
+      ],
+      "patch_spread_a2": 32.4,
+      "structures_measured": 5,
+      "structures_used": [
+        "9ua9:A",
+        "9ua9:B",
+        "9ua9:C",
+        "9uaa:A",
+        "9uaa:B"
+      ],
+      "surface_score": 1.773,
+      "patch_fraction_of_surface": 0.021,
+      "structures_clipped_to_domain": 5,
+      "residues_in_range": 365,
+      "exposed_fraction_of_residues": 0.403,
+      "sequons_near_patch": 1,
+      "available_from": "2025-03-31",
+      "locations": [
+        "Virion membrane",
+        "Host cell membrane"
+      ],
+      "location_scope": "entry",
+      "exposed": true,
+      "exposed_fraction_of_locations": 1.0,
+      "gate": "borderline"
+    },
+    {
+      "target": "GLYCP_NIPAV Glycoprotein G",
+      "rank": 3,
+      "identified": true,
+      "measured_on_accession": "Q9IH62",
+      "chain_range": null,
+      "measured": true,
+      "unmeasured_because": null,
+      "seconds": 3.91,
+      "patch_median_a2": 447.4,
+      "patch_range_a2": [
+        364.2,
+        512.1
+      ],
+      "patch_spread_a2": 147.9,
+      "structures_measured": 5,
+      "structures_used": [
+        "2vsm:A",
+        "2vwd:A",
+        "2vwd:B",
+        "3d11:A",
+        "8ja5:A"
+      ],
+      "surface_score": 2.183,
+      "patch_fraction_of_surface": 0.026,
+      "structures_clipped_to_domain": 0,
+      "residues_in_range": 413,
+      "exposed_fraction_of_residues": 0.4,
+      "sequons_near_patch": 1,
+      "available_from": "2008-04-25",
+      "locations": [
+        "Virion membrane",
+        "Host cell membrane"
+      ],
+      "location_scope": "entry",
+      "exposed": true,
+      "exposed_fraction_of_locations": 1.0,
+      "gate": "borderline"
+    },
+    {
+      "target": "L_NIPAV RNA-directed RNA polymerase L",
+      "rank": 4,
+      "identified": true,
+      "measured_on_accession": "Q997F0",
+      "chain_range": null,
+      "measured": true,
+      "unmeasured_because": null,
+      "seconds": 5.49,
+      "patch_median_a2": 743.8,
+      "patch_range_a2": [
+        578.1,
+        839.8
+      ],
+      "patch_spread_a2": 261.7,
+      "structures_measured": 5,
+      "structures_used": [
+        "9ftf:A",
+        "9bdq:A",
+        "9iv9:A",
+        "9fux:A",
+        "9iva:A"
+      ],
+      "surface_score": 3.534,
+      "patch_fraction_of_surface": 0.017,
+      "structures_clipped_to_domain": 0,
+      "residues_in_range": 1286,
+      "exposed_fraction_of_residues": 0.37,
+      "sequons_near_patch": 0,
+      "available_from": "2024-04-12",
+      "locations": [
+        "Virion",
+        "Host cytoplasm"
+      ],
+      "location_scope": "entry",
+      "exposed": false,
+      "exposed_fraction_of_locations": 0.0,
+      "gate": "no"
+    },
+    {
+      "target": "MATRX_NIPAV Matrix protein",
+      "rank": 5,
+      "identified": true,
+      "measured_on_accession": "Q9IK90",
+      "chain_range": null,
+      "measured": true,
+      "unmeasured_because": null,
+      "seconds": 3.98,
+      "patch_median_a2": 568.1,
+      "patch_range_a2": [
+        444.1,
+        6938.8
+      ],
+      "patch_spread_a2": 6494.7,
+      "structures_measured": 5,
+      "structures_used": [
+        "7skt:A",
+        "7skt:B",
+        "7sku:A",
+        "7sku:B",
+        "9nqy:A"
+      ],
+      "surface_score": 3.4975,
+      "patch_fraction_of_surface": 0.043,
+      "structures_clipped_to_domain": 0,
+      "residues_in_range": 299,
+      "exposed_fraction_of_residues": 0.442,
+      "sequons_near_patch": 0,
+      "available_from": "2021-10-21",
+      "locations": [
+        "Virion",
+        "Host cytoplasm",
+        "Host cell membrane",
+        "Host nucleus"
+      ],
+      "location_scope": "entry",
+      "exposed": false,
+      "exposed_fraction_of_locations": 0.25,
+      "gate": "no"
+    },
+    {
+      "target": "NCAP_NIPAV Nucleoprotein",
+      "rank": 6,
+      "identified": true,
+      "measured_on_accession": "Q9IK92",
+      "chain_range": null,
+      "measured": true,
+      "unmeasured_because": null,
+      "seconds": 5.73,
+      "patch_median_a2": 428.9,
+      "patch_range_a2": [
+        280.3,
+        2245.5
+      ],
+      "patch_spread_a2": 1965.2,
+      "structures_measured": 5,
+      "structures_used": [
+        "4co6:A",
+        "4co6:B",
+        "4co6:C",
+        "9nuf:D",
+        "9nuf:E"
+      ],
+      "surface_score": 2.8135,
+      "patch_fraction_of_surface": 0.03,
+      "structures_clipped_to_domain": 0,
+      "residues_in_range": 315,
+      "exposed_fraction_of_residues": 0.476,
+      "sequons_near_patch": 0,
+      "available_from": "2014-01-27",
+      "locations": [
+        "Virion",
+        "Host cytoplasm"
+      ],
+      "location_scope": "entry",
+      "exposed": false,
+      "exposed_fraction_of_locations": 0.0,
+      "gate": "no"
+    },
+    {
+      "target": "PHOSP_NIPAV Phosphoprotein",
+      "rank": 7,
+      "identified": true,
+      "measured_on_accession": "Q9IK91",
+      "chain_range": null,
+      "measured": true,
+      "unmeasured_because": null,
+      "seconds": 3.29,
+      "patch_median_a2": 333.4,
+      "patch_range_a2": [
+        302.7,
+        4480.2
+      ],
+      "patch_spread_a2": 4177.5,
+      "structures_measured": 5,
+      "structures_used": [
+        "6eb9:A",
+        "7pon:A",
+        "9iv9:B",
+        "9iv9:C",
+        "9iv9:D"
+      ],
+      "surface_score": 3.377,
+      "patch_fraction_of_surface": 0.111,
+      "structures_clipped_to_domain": 0,
+      "residues_in_range": 71,
+      "exposed_fraction_of_residues": 0.6,
+      "sequons_near_patch": 0,
+      "available_from": "2018-08-06",
+      "locations": [
+        "Virion",
+        "Host cytoplasm"
+      ],
+      "location_scope": "entry",
+      "exposed": false,
+      "exposed_fraction_of_locations": 0.0,
+      "gate": "no"
+    },
+    {
+      "target": "C_NIPAV Protein C",
+      "rank": 8,
+      "identified": true,
+      "measured_on_accession": "Q997F1",
+      "chain_range": null,
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q997F1 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 1.43,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    }
+  ],
+  "library": {
+    "initiator": "ClAc-D-Tyr",
+    "closure_residue": "C",
+    "random_region": [
+      4,
+      8
+    ],
+    "elongator_classes": [
+      "canonical",
+      "N-methyl",
+      "D-alpha-amino"
+    ],
+    "elongator_alphabet": [
+      "A",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "K",
+      "L",
+      "M",
+      "N",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "V",
+      "W",
+      "Y",
+      "NMe-Gly",
+      "NMe-Ala",
+      "NMe-Phe",
+      "D-Ala",
+      "D-Phe",
+      "D-Ser"
+    ],
+    "cyclisation": "spontaneous thioether between chloroacetyl initiator and downstream Cys",
+    "theoretical_diversity": 158945703125,
+    "endpoint_note": "A library definition only; no binding, enrichment, inhibition or antiviral property is predicted for any member."
+  },
+  "folded": {
+    "target_name": "Fusion glycoprotein F2",
+    "sequence_length": 83,
+    "sequence_sha256": "c552d8d7c0572fa8a613185fb526c4ff2f06e900674c4c3a40b2cf9c54356016",
+    "mean_plddt": 48.65,
+    "confident_fraction": 0.0,
+    "pdb_sha256": "de16b990e6f5ad03db7c9eef79774f97f6a321bf536a9c293ff1762f9509e14e",
+    "absence": null
+  },
+  "foldable": [
+    {
+      "target": "Fusion glycoprotein F2",
+      "rank": 1,
+      "chain_range_on_the_relative": [
+        27,
+        109
+      ],
+      "declared_length_aa": 83,
+      "parent_orf_length_aa": 546,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 83,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        27,
+        109
+      ],
+      "recovered_length_aa": 83,
+      "chain_covered_by_alignment": 1.0,
+      "identity_over_aligned_columns": 1.0,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 100% identity"
+    },
+    {
+      "target": "Fusion glycoprotein F1",
+      "rank": 2,
+      "chain_range_on_the_relative": [
+        110,
+        546
+      ],
+      "declared_length_aa": 437,
+      "parent_orf_length_aa": 546,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 437,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        110,
+        546
+      ],
+      "recovered_length_aa": 437,
+      "chain_covered_by_alignment": 1.0,
+      "identity_over_aligned_columns": 1.0,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 100% identity"
+    },
+    {
+      "target": "GLYCP_NIPAV Glycoprotein G",
+      "rank": 3,
+      "chain_range_on_the_relative": null,
+      "declared_length_aa": null,
+      "parent_orf_length_aa": 602,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "recovered_length_aa": 602,
+      "recovered_by": "the ORF translation is the candidate"
+    },
+    {
+      "target": "L_NIPAV RNA-directed RNA polymerase L",
+      "rank": 4,
+      "chain_range_on_the_relative": null,
+      "declared_length_aa": null,
+      "parent_orf_length_aa": 2244,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "recovered_length_aa": 2244,
+      "recovered_by": "the ORF translation is the candidate"
+    },
+    {
+      "target": "MATRX_NIPAV Matrix protein",
+      "rank": 5,
+      "chain_range_on_the_relative": null,
+      "declared_length_aa": null,
+      "parent_orf_length_aa": 352,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "recovered_length_aa": 352,
+      "recovered_by": "the ORF translation is the candidate"
+    },
+    {
+      "target": "NCAP_NIPAV Nucleoprotein",
+      "rank": 6,
+      "chain_range_on_the_relative": null,
+      "declared_length_aa": null,
+      "parent_orf_length_aa": 532,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "recovered_length_aa": 532,
+      "recovered_by": "the ORF translation is the candidate"
+    },
+    {
+      "target": "PHOSP_NIPAV Phosphoprotein",
+      "rank": 7,
+      "chain_range_on_the_relative": null,
+      "declared_length_aa": null,
+      "parent_orf_length_aa": 709,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "recovered_length_aa": 709,
+      "recovered_by": "the ORF translation is the candidate"
+    },
+    {
+      "target": "C_NIPAV Protein C",
+      "rank": 8,
+      "chain_range_on_the_relative": null,
+      "declared_length_aa": null,
+      "parent_orf_length_aa": 166,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "recovered_length_aa": 166,
+      "recovered_by": "the ORF translation is the candidate"
+    }
+  ],
+  "seconds": 70.0,
+  "coverage": {
+    "chains_ranked": 8,
+    "surface_rows": 8,
+    "surface_measured": 7,
+    "surface_refused": 1,
+    "surface_covers_every_chain": true,
+    "fold_rows": 8,
+    "fold_sequence_recovered": 8,
+    "fold_covers_every_chain": true
+  },
+  "pathogen": "Nipah"
+}
