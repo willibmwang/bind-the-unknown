@@ -1,0 +1,529 @@
+{
+  "what": "Viral genomes with an established antiviral drug target, for a leave-one-organism-out ranking benchmark.",
+  "ground_truth_rule": "A ranked target counts as a hit when its UniProt protein name matches any pattern in `targets` case-insensitively. Patterns name the protein an approved or late-stage antiviral acts on, or the protein the licensed vaccine/antibody binds. `validated_by` names that agent so a reader can check the claim rather than take it.",
+  "panel": [
+    {
+      "accession": "NC_045512.2",
+      "pathogen": "SARS-CoV-2",
+      "holdout": "severe acute respiratory syndrome coronavirus 2",
+      "targets": [
+        "3C-like proteinase",
+        "RNA-directed RNA polymerase",
+        "Spike"
+      ],
+      "validated_by": "nirmatrelvir, remdesivir, mAbs"
+    },
+    {
+      "accession": "NC_004718.3",
+      "pathogen": "SARS-CoV",
+      "holdout": "Severe acute respiratory syndrome coronavirus",
+      "targets": [
+        "3C-like proteinase",
+        "RNA-directed RNA polymerase",
+        "Spike"
+      ],
+      "validated_by": "class effect with SARS-CoV-2"
+    },
+    {
+      "accession": "NC_019843.3",
+      "pathogen": "MERS-CoV",
+      "holdout": "Middle East respiratory syndrome-related coronavirus",
+      "targets": [
+        "3C-like proteinase",
+        "RNA-directed RNA polymerase",
+        "Spike"
+      ],
+      "validated_by": "class effect, mAbs in trials"
+    },
+    {
+      "accession": "NC_002645.1",
+      "pathogen": "HCoV-229E",
+      "holdout": "Human coronavirus 229E",
+      "targets": [
+        "3C-like proteinase",
+        "RNA-directed RNA polymerase",
+        "Spike"
+      ],
+      "validated_by": "class effect"
+    },
+    {
+      "accession": "NC_006213.1",
+      "pathogen": "HCoV-OC43",
+      "holdout": "Human coronavirus OC43",
+      "targets": [
+        "3C-like proteinase",
+        "RNA-directed RNA polymerase",
+        "Spike"
+      ],
+      "validated_by": "class effect"
+    },
+    {
+      "accession": "NC_001802.1",
+      "pathogen": "HIV-1",
+      "holdout": "Human immunodeficiency virus type 1",
+      "targets": [
+        "Reverse transcriptase",
+        "Protease",
+        "Integrase",
+        "Gag-Pol",
+        "Envelope"
+      ],
+      "validated_by": "zidovudine, ritonavir, raltegravir"
+    },
+    {
+      "accession": "NC_001722.1",
+      "pathogen": "HIV-2",
+      "holdout": "Human immunodeficiency virus type 2",
+      "targets": [
+        "Reverse transcriptase",
+        "Protease",
+        "Integrase",
+        "Gag-Pol"
+      ],
+      "validated_by": "class effect with HIV-1"
+    },
+    {
+      "accession": "NC_003977.2",
+      "pathogen": "Hepatitis B virus",
+      "holdout": "Hepatitis B virus",
+      "targets": [
+        "polymerase",
+        "Reverse transcriptase",
+        "Large envelope",
+        "surface antigen"
+      ],
+      "validated_by": "tenofovir, entecavir"
+    },
+    {
+      "accession": "NC_004102.1",
+      "pathogen": "Hepatitis C virus",
+      "holdout": "Hepatitis C virus",
+      "targets": [
+        "Serine protease",
+        "NS3",
+        "NS5A",
+        "NS5B",
+        "RNA-directed RNA polymerase"
+      ],
+      "validated_by": "sofosbuvir, glecaprevir, ledipasvir"
+    },
+    {
+      "accession": "NC_001806.2",
+      "pathogen": "Herpes simplex virus 1",
+      "holdout": "Human herpesvirus 1",
+      "targets": [
+        "DNA polymerase",
+        "Thymidine kinase",
+        "terminase"
+      ],
+      "validated_by": "acyclovir"
+    },
+    {
+      "accession": "NC_001798.2",
+      "pathogen": "Herpes simplex virus 2",
+      "holdout": "Human herpesvirus 2",
+      "targets": [
+        "DNA polymerase",
+        "Thymidine kinase"
+      ],
+      "validated_by": "acyclovir"
+    },
+    {
+      "accession": "NC_001348.1",
+      "pathogen": "Varicella-zoster virus",
+      "holdout": "Varicella-zoster virus",
+      "targets": [
+        "DNA polymerase",
+        "Thymidine kinase"
+      ],
+      "validated_by": "acyclovir, brivudine"
+    },
+    {
+      "accession": "NC_006273.2",
+      "pathogen": "Human cytomegalovirus",
+      "holdout": "Human cytomegalovirus",
+      "targets": [
+        "DNA polymerase",
+        "terminase",
+        "Protein kinase UL97"
+      ],
+      "validated_by": "ganciclovir, letermovir"
+    },
+    {
+      "accession": "NC_007605.1",
+      "pathogen": "Epstein-Barr virus",
+      "holdout": "Human herpesvirus 4",
+      "targets": [
+        "DNA polymerase",
+        "Thymidine kinase"
+      ],
+      "validated_by": "class effect"
+    },
+    {
+      "accession": "NC_012532.1",
+      "pathogen": "Zika virus",
+      "holdout": "Zika virus",
+      "targets": [
+        "NS3",
+        "Serine protease",
+        "NS5",
+        "RNA-directed RNA polymerase",
+        "Envelope"
+      ],
+      "validated_by": "flavivirus class target, vaccines target E"
+    },
+    {
+      "accession": "NC_001474.2",
+      "pathogen": "Dengue virus 2",
+      "holdout": "Dengue virus type 2",
+      "targets": [
+        "NS3",
+        "Serine protease",
+        "NS5",
+        "RNA-directed RNA polymerase",
+        "Envelope"
+      ],
+      "validated_by": "dengue vaccine targets E; NS5 inhibitors in trials"
+    },
+    {
+      "accession": "NC_009942.1",
+      "pathogen": "West Nile virus",
+      "holdout": "West Nile virus",
+      "targets": [
+        "NS3",
+        "Serine protease",
+        "NS5",
+        "Envelope"
+      ],
+      "validated_by": "flavivirus class target"
+    },
+    {
+      "accession": "NC_002031.1",
+      "pathogen": "Yellow fever virus",
+      "holdout": "Yellow fever virus",
+      "targets": [
+        "NS3",
+        "Serine protease",
+        "NS5",
+        "Envelope"
+      ],
+      "validated_by": "17D vaccine targets E"
+    },
+    {
+      "accession": "NC_001437.1",
+      "pathogen": "Japanese encephalitis virus",
+      "holdout": "Japanese encephalitis virus",
+      "targets": [
+        "NS3",
+        "NS5",
+        "Envelope"
+      ],
+      "validated_by": "vaccine targets E"
+    },
+    {
+      "accession": "NC_001672.1",
+      "pathogen": "Tick-borne encephalitis virus",
+      "holdout": "Tick-borne encephalitis virus",
+      "targets": [
+        "NS3",
+        "NS5",
+        "Envelope"
+      ],
+      "validated_by": "vaccine targets E"
+    },
+    {
+      "accession": "NC_002728.1",
+      "pathogen": "Nipah virus",
+      "holdout": "Nipah virus",
+      "targets": [
+        "Fusion glycoprotein",
+        "Glycoprotein G",
+        "RNA-directed RNA polymerase",
+        "Phosphoprotein"
+      ],
+      "validated_by": "m102.4 mAb targets G; remdesivir active"
+    },
+    {
+      "accession": "NC_001906.3",
+      "pathogen": "Hendra virus",
+      "holdout": "Hendra virus",
+      "targets": [
+        "Fusion glycoprotein",
+        "Glycoprotein G",
+        "RNA-directed RNA polymerase"
+      ],
+      "validated_by": "m102.4 mAb"
+    },
+    {
+      "accession": "NC_001498.1",
+      "pathogen": "Measles virus",
+      "holdout": "Measles virus",
+      "targets": [
+        "RNA-directed RNA polymerase",
+        "Fusion glycoprotein",
+        "Hemagglutinin"
+      ],
+      "validated_by": "vaccine targets H and F"
+    },
+    {
+      "accession": "NC_002200.1",
+      "pathogen": "Mumps virus",
+      "holdout": "Mumps virus",
+      "targets": [
+        "RNA-directed RNA polymerase",
+        "Fusion glycoprotein",
+        "Hemagglutinin-neuraminidase"
+      ],
+      "validated_by": "vaccine targets HN and F"
+    },
+    {
+      "accession": "NC_001781.1",
+      "pathogen": "Human respiratory syncytial virus B",
+      "holdout": "Human respiratory syncytial virus",
+      "targets": [
+        "Fusion glycoprotein",
+        "RNA-directed RNA polymerase",
+        "Major surface glycoprotein"
+      ],
+      "validated_by": "nirsevimab and palivizumab target F"
+    },
+    {
+      "accession": "NC_039199.1",
+      "pathogen": "Human metapneumovirus",
+      "holdout": "Human metapneumovirus",
+      "targets": [
+        "Fusion glycoprotein",
+        "RNA-directed RNA polymerase"
+      ],
+      "validated_by": "F is the class target"
+    },
+    {
+      "accession": "NC_002549.1",
+      "pathogen": "Ebola virus Zaire",
+      "holdout": "Zaire ebolavirus",
+      "targets": [
+        "RNA-directed RNA polymerase",
+        "Envelope glycoprotein",
+        "Nucleoprotein"
+      ],
+      "validated_by": "remdesivir targets L; ansuvimab targets GP"
+    },
+    {
+      "accession": "NC_001608.3",
+      "pathogen": "Marburg virus",
+      "holdout": "Lake Victoria marburgvirus",
+      "targets": [
+        "RNA-directed RNA polymerase",
+        "Envelope glycoprotein"
+      ],
+      "validated_by": "class effect with Ebola"
+    },
+    {
+      "accession": "NC_001542.1",
+      "pathogen": "Rabies virus",
+      "holdout": "Rabies virus",
+      "targets": [
+        "RNA-directed RNA polymerase",
+        "Glycoprotein",
+        "Nucleoprotein"
+      ],
+      "validated_by": "rabies immunoglobulin targets G"
+    },
+    {
+      "accession": "NC_004162.2",
+      "pathogen": "Chikungunya virus",
+      "holdout": "Chikungunya virus",
+      "targets": [
+        "nsP2",
+        "Protease nsP2",
+        "nsP4",
+        "RNA-directed RNA polymerase",
+        "E2",
+        "Envelope"
+      ],
+      "validated_by": "IXCHIQ vaccine targets E; nsP2 protease is the class target"
+    },
+    {
+      "accession": "NC_001449.1",
+      "pathogen": "Venezuelan equine encephalitis virus",
+      "holdout": "Venezuelan equine encephalitis virus",
+      "targets": [
+        "nsP2",
+        "nsP4",
+        "Envelope",
+        "E2"
+      ],
+      "validated_by": "alphavirus class target"
+    },
+    {
+      "accession": "NC_002058.3",
+      "pathogen": "Poliovirus",
+      "holdout": "Poliovirus",
+      "targets": [
+        "Protease 3C",
+        "Genome polyprotein",
+        "RNA-directed RNA polymerase",
+        "Capsid protein VP1"
+      ],
+      "validated_by": "pocapavir targets VP1; 3C is the class target"
+    },
+    {
+      "accession": "NC_038306.1",
+      "pathogen": "Enterovirus A71",
+      "holdout": "Human enterovirus 71",
+      "targets": [
+        "Protease 3C",
+        "RNA-directed RNA polymerase",
+        "Capsid protein VP1"
+      ],
+      "validated_by": "picornavirus class target"
+    },
+    {
+      "accession": "NC_038311.1",
+      "pathogen": "Rhinovirus A",
+      "holdout": "Rhinovirus A",
+      "targets": [
+        "Protease 3C",
+        "RNA-directed RNA polymerase",
+        "Capsid protein VP1"
+      ],
+      "validated_by": "rupintrivir targets 3C; pleconaril targets VP1"
+    },
+    {
+      "accession": "NC_039477.1",
+      "pathogen": "Norwalk virus",
+      "holdout": "Norovirus",
+      "targets": [
+        "Protease",
+        "RNA-directed RNA polymerase",
+        "Capsid protein VP1"
+      ],
+      "validated_by": "calicivirus class target"
+    },
+    {
+      "accession": "NC_001405.1",
+      "pathogen": "Human adenovirus 2",
+      "holdout": "Human adenovirus C",
+      "targets": [
+        "DNA polymerase",
+        "Protease",
+        "Hexon"
+      ],
+      "validated_by": "cidofovir targets DNA polymerase"
+    },
+    {
+      "accession": "NC_063383.1",
+      "pathogen": "Monkeypox virus",
+      "holdout": "Monkeypox virus",
+      "targets": [
+        "DNA polymerase",
+        "Thymidine kinase",
+        "Palmitoylated EEV membrane",
+        "p37"
+      ],
+      "validated_by": "tecovirimat targets VP37; cidofovir targets DNA pol"
+    },
+    {
+      "accession": "NC_006998.1",
+      "pathogen": "Vaccinia virus",
+      "holdout": "Vaccinia virus",
+      "targets": [
+        "DNA polymerase",
+        "Thymidine kinase",
+        "Palmitoylated EEV membrane",
+        "p37"
+      ],
+      "validated_by": "tecovirimat, cidofovir"
+    },
+    {
+      "accession": "NC_001526.4",
+      "pathogen": "Human papillomavirus 16",
+      "holdout": "Human papillomavirus type 16",
+      "targets": [
+        "Replication protein E1",
+        "Protein E6",
+        "Protein E7",
+        "Major capsid protein L1"
+      ],
+      "validated_by": "Gardasil targets L1; E6/E7 are the oncoprotein targets"
+    },
+    {
+      "accession": "NC_000883.2",
+      "pathogen": "Human parvovirus B19",
+      "holdout": "Human parvovirus B19",
+      "targets": [
+        "Non-structural protein 1",
+        "Capsid protein VP1"
+      ],
+      "validated_by": "NS1 helicase is the class target"
+    },
+    {
+      "accession": "NC_004296.1",
+      "pathogen": "Lassa virus",
+      "holdout": "Lassa virus",
+      "targets": [
+        "RNA-directed RNA polymerase",
+        "Glycoprotein",
+        "Nucleoprotein"
+      ],
+      "validated_by": "ribavirin; LASV GPC is the vaccine target"
+    },
+    {
+      "accession": "NC_005218.1",
+      "pathogen": "Hantaan virus",
+      "holdout": "Hantaan virus",
+      "targets": [
+        "RNA-directed RNA polymerase",
+        "Glycoprotein",
+        "Nucleoprotein"
+      ],
+      "validated_by": "ribavirin"
+    },
+    {
+      "accession": "NC_005300.2",
+      "pathogen": "Crimean-Congo hemorrhagic fever virus",
+      "holdout": "Crimean-Congo hemorrhagic fever virus",
+      "targets": [
+        "RNA-directed RNA polymerase",
+        "Glycoprotein",
+        "Nucleoprotein"
+      ],
+      "validated_by": "ribavirin; favipiravir in trials"
+    },
+    {
+      "accession": "NC_014397.1",
+      "pathogen": "Rift Valley fever virus",
+      "holdout": "Rift Valley fever virus",
+      "targets": [
+        "RNA-directed RNA polymerase",
+        "Glycoprotein",
+        "Nucleoprotein"
+      ],
+      "validated_by": "favipiravir active in models"
+    },
+    {
+      "accession": "NC_001547.1",
+      "pathogen": "Sindbis virus",
+      "holdout": "Sindbis virus",
+      "targets": [
+        "nsP2",
+        "nsP4",
+        "Envelope",
+        "E2"
+      ],
+      "validated_by": "alphavirus class target"
+    },
+    {
+      "accession": "NC_003687.1",
+      "pathogen": "Powassan virus",
+      "holdout": "Powassan virus",
+      "targets": [
+        "NS3",
+        "NS5",
+        "Envelope"
+      ],
+      "validated_by": "flavivirus class target"
+    }
+  ],
+  "holdout_note": "Organism strings are UniProt's OS= spelling, verified against the reference index. A holdout that removes nothing raises rather than running, which is how nine wrong names in the first draft were found. SARS-CoV holds out 'Severe acute respiratory syndrome coronavirus', which also removes SARS-CoV-2: stricter than intended, kept."
+}

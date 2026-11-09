@@ -1005,7 +1005,7 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
 
 
 def one(accession, pathogen=None, holdout=None, top=12, replicates=5,
-        fold=True, record=False):
+        fold=True, record=False, evidence_top=3):
     """The whole chain on one genome the caller names. The entry point for a new pathogen.
 
     **Everything above this is a worked example; this is the thing itself.** The records in
@@ -1034,7 +1034,8 @@ def one(accession, pathogen=None, holdout=None, top=12, replicates=5,
     label = pathogen or accession
     case = _case(accession, holdout, top, replicates, fold,
                  f"{label}, " + (f"{holdout} held out" if holdout
-                                 else "nothing held out of the reference"))
+                                 else "nothing held out of the reference"),
+                 evidence_top=evidence_top)
     case["pathogen"] = label
     if record:
         stem = re.sub(r"[^A-Za-z0-9]+", "_", accession.split(",")[0]).strip("_")
