@@ -441,10 +441,33 @@
   <span class="n">Arm 2</span>
   <h2>Will a model be worth fitting?</h2>
   <p>A separate question, and not part of the ranked shortlist above. Arm 1 ends at a library
-  definition; this asks whether that design is one a model can learn from at all. The answer
-  depends on how the library was built, not on the target, so it is available before anything
-  is synthesised and costs no assay to get.</p>
+  definition; this asks whether that design is one a model can learn from at all — whether,
+  after the first round of lab measurements comes back, fitting a model to it would beat
+  picking at random. The answer turns on how the library was built rather than on the target,
+  so it is available before anything is synthesised and costs no assay to get.</p>
 </div>
+
+<section>
+  <div class="sec-head"><h2>What crosses from arm 1</h2><span class="tag">one number</span></div>
+  <p class="cap">Arm 2 does not run on arm 1's target, and it never sees the genome arm 1
+  started from. It answers a question about the <em>shape</em> of a library, and arm 1's
+  library has that shape. One number is the whole connection.</p>
+  <div class="fcnote">
+    <div><b>What it takes.</b> How many positions the library varies — and nothing else. Arm 1
+    defines a ring-shaped peptide varying 4 to 8 positions, so that is the number.</div>
+    <div><b>What it does not take.</b> No target, no structure, no measured surface, no
+    sequence. Everything arm 1 worked out about the protein stops at arm 1.</div>
+    <div><b>How the answer was reached.</b> Not by running on this library. The rule was
+    measured on eight published datasets of real binding measurements, split by how each
+    library was built. The four varying more than two positions gain +0.173 to +0.321 over
+    choosing at random; the four varying exactly two gain +0.010 to +0.033. A library varying
+    4 to 8 positions falls in the favourable group.</div>
+    <div><b>What is not automated.</b> No code carries the number across — a person reads it
+    from one arm and applies the rule in the other. Closing that properly needs measured
+    members coming back from a real campaign as the first round a model is fitted on, and no
+    campaign has run.</div>
+  </div>
+</section>
 
 <section>
   <div class="sec-head"><h2>The answer, measured</h2><span class="tag">arm 2</span></div>
