@@ -467,6 +467,41 @@
   <p class="after">Databases reached: NCBI, UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, RCSB, 3D-Beacons, AlphaFold DB, ESMFold and ChEMBL.</p>
 </section>
 
+<div class="armsep two">
+  <span class="n">Arm 2</span>
+  <h2>Will a model be worth fitting?</h2>
+  <p>A separate question, and not part of the ranked shortlist above. Arm 1 ends at a library
+  definition; this asks whether that design is one a model can learn from at all. The answer
+  depends on how the library was built, not on the target, so it is available before anything
+  is synthesised and costs no assay to get.</p>
+</div>
+
+<section>
+  <div class="sec-head"><h2>The answer, measured</h2><span class="tag">arm 2</span></div>
+  <p class="cap">Will a model fitted on the first 128 measurements pick held-out binders better
+  than choosing at random? Measured across eight published datasets at a matched batch size.
+  These are ordinary lab proteins rather than SARS-CoV-2 — the finding is about how a library
+  is designed, which is why it carries over.</p>
+  <div class="two">
+    <div class="card yes">
+      <div class="label">The new candidates vary at the same positions as the ones already
+      measured</div>
+      <div class="big">+0.32</div>
+      <div class="sub">build it — the model earns its place</div>
+    </div>
+    <div class="card no">
+      <div class="label">The new candidates vary somewhere else entirely</div>
+      <div class="big">+0.03</div>
+      <div class="sub">redesign first — no model will help</div>
+    </div>
+  </div>
+  <p class="after">Best case in each group, against picking at random from the same batch. The
+  two groups do not overlap, and the odds of that split arising by chance are 1 in 70. A
+  library varying 4–8 positions, which is what arm 1 defines, is the favourable kind.
+  The per-batch records, the interventions in both directions and the preregistered
+  replication are in <a href="notebook.html">the notebook</a>, sections 2.1 to 2.3.</p>
+</section>
+
 <footer>
   Run record: <code>runs/onset_chain.json</code> · reproduce with <code>python -m hpc_pilots chain</code><br>
   Full technical diagram: <code>output/fig_pipeline_holdout.png</code>
