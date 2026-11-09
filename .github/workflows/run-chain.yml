@@ -11,7 +11,7 @@ name: Run the chain
 
 on:
   issues:
-    types: [opened, labeled]
+    types: [opened, reopened, edited, labeled]
   workflow_dispatch:
     inputs:
       accession:
@@ -31,10 +31,17 @@ concurrency:
 
 jobs:
   run:
-    # Issues only run when they carry the label the template applies. Anything else that
-    # opens an issue is ignored, including an issue that merely mentions an accession.
+    # An issue qualifies when it was written on the run-request form, which is decided by
+    # the form's own field heading rather than by a label. A new repository has no labels,
+    # and GitHub silently drops a label an issue template asks for that does not exist yet,
+    # so gating on one meant the first request anybody ever made was skipped. The label is
+    # still honoured, and the job creates it below, but nothing depends on it being there.
+    #
+    # Reading the body in an `if:` is safe in a way that reading it in a `run:` is not: the
+    # expression is evaluated by Actions and yields a boolean. It never reaches a shell.
     if: >-
       github.event_name == 'workflow_dispatch' ||
+      contains(github.event.issue.body, '### NCBI nucleotide accession') ||
       contains(github.event.issue.labels.*.name, 'run-request')
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -56,6 +63,18 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            // Adding a label that does not exist creates it, which is how the repository
+            // acquires `run-request` without anyone opening the labels page.
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['run-request'],
+              });
+            } catch (error) {
+              core.info(`could not label the issue: ${error.message}`);
+            }
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
