@@ -37,12 +37,22 @@ jobs:
     # so gating on one meant the first request anybody ever made was skipped. The label is
     # still honoured, and the job creates it below, but nothing depends on it being there.
     #
+    # Once the label exists, the form attaches it at creation, so one new issue fires both
+    # `opened` and `labeled`. Gating each event on the body alone ran every request twice: the
+    # second run started from the same stale commit, its push was rejected, and the visitor
+    # was told their run had failed. A form issue is therefore taken on `opened`, `reopened`
+    # and `edited` only; `labeled` is for an issue written by hand, and counts only when the
+    # label being added is this one.
+    #
     # Reading the body in an `if:` is safe in a way that reading it in a `run:` is not: the
     # expression is evaluated by Actions and yields a boolean. It never reaches a shell.
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      contains(github.event.issue.body, '### NCBI nucleotide accession') ||
-      contains(github.event.issue.labels.*.name, 'run-request')
+      (github.event.action != 'labeled' &&
+       contains(github.event.issue.body, '### NCBI nucleotide accession')) ||
+      (github.event.action == 'labeled' &&
+       github.event.label.name == 'run-request' &&
+       !contains(github.event.issue.body, '### NCBI nucleotide accession'))
     runs-on: ubuntu-latest
     # Stage 6 calls five more tools on the top three targets, and those five are the expensive
     # ones: measured live, about 210 seconds per target against a base chain of under two
@@ -110,18 +120,33 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # The record first: it is the result, and the page is generated from it. `runs/*`
-          # is ignored with `!runs/onset_chain_*.json` negated, so this needs no force-add
-          # and nothing else in runs/ can ride along.
-          git add runs/ docs/
-          if git diff --cached --quiet; then
-            echo "nothing changed; the site already carries this run"
-            exit 0
-          fi
+          # The checkout is the commit main pointed at when the issue was filed, and a run
+          # takes a quarter of an hour, so main has often moved by now and a plain push is
+          # rejected. Keep the record, move onto the current main, and rebuild the pages
+          # there instead of rebasing generated HTML that would conflict. Retried, because
+          # main can move again while the site rebuilds.
           # The accession is in an environment variable, quoted. It has already been matched
           # against a narrow pattern, and it is still not pasted into the command.
-          git commit -m "Publish a run requested through the site: ${STEM}"
-          git push
+          record="runs/onset_chain_${STEM}.json"
+          cp "$record" "$RUNNER_TEMP/record.json"
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp "$RUNNER_TEMP/record.json" "$record"
+            python3 output/build_site.py
+            # The record first: it is the result, and the page is generated from it.
+            # `runs/*` is ignored with `!runs/onset_chain_*.json` negated, so this needs no
+            # force-add and nothing else in runs/ can ride along.
+            git add runs/ docs/
+            if git diff --cached --quiet; then
+              echo "nothing changed; the site already carries this run"
+              exit 0
+            fi
+            git commit -m "Publish a run requested through the site: ${STEM}"
+            git push origin HEAD:main && exit 0
+            echo "push rejected (attempt ${attempt}); main moved, rebuilding on it"
+          done
+          exit 1
 
       - name: Report back
         if: always() && github.event_name == 'issues'
@@ -156,7 +181,7 @@ jobs:
               ].join('\n');
             } else if (e.PROBLEM) {
               body = `That request was refused.\n\n> ${e.PROBLEM}\n\n`
-                   + 'Edit the issue and re-apply the `run-request` label to try again.';
+                   + 'Edit the issue to try again.';
             } else {
               body = 'The run failed before it finished. The log is '
                    + `[here](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}).`
