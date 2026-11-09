@@ -101,6 +101,7 @@ def report():
         found = hits(res, entry["targets"])
         best = min((h["rank"] for h in found), default=None)
         row = {"pathogen": res["pathogen"], "chains": len(res["chains"]),
+               "matching": len(found),
                "removed": res["reference_entries_removed"], "best": best,
                "applied": res["holdout_applied"], "seconds": res["seconds"],
                "top": res["chains"][0]["target"] if res["chains"] else None}
@@ -116,9 +117,30 @@ def report():
         print(f"{r['pathogen']:<42}{r['chains']:>7}{r['removed']:>9}"
               f"{str(r['best'] or '-'):>11}  {str(r['top'])[:38]}")
     print()
+    # PROVISIONAL, and never to be quoted on its own. Recall@k against no null is the exact
+    # claim `intake.rank_enrichment` was written to replace: with k matching chains among n
+    # candidates a random ranking already scores most of it, so a number here that looks like
+    # a pass can be chance. The baseline below is the hypergeometric probability that a random
+    # ranking puts at least one matching chain in the top k, averaged over the genomes as they
+    # actually came out. The authoritative scorer is the graded-label one; this is a guard
+    # rail so nobody reads the left column alone.
+    from math import comb
+
+    def null_at(k, group):
+        vals = []
+        for r in group:
+            n, m = r["chains"], r["matching"]
+            if not n or not m:
+                continue
+            miss = comb(n - m, k) / comb(n, k) if n - m >= k else 0.0
+            vals.append(1.0 - miss)
+        return 100.0 * sum(vals) / len(vals) if vals else 0.0
+
+    print(f"  {'':9}{'observed':>10}{'random':>10}{'lift':>9}   (observed alone means nothing)")
     for k in (1, 3, 5, 10):
         hit, total, pct = at(k, rows)
-        print(f"  recall@{k:<3} {hit:>3}/{total:<3} {pct:5.1f}%")
+        base = null_at(k, rows)
+        print(f"  recall@{k:<3}{pct:>9.1f}%{base:>9.1f}%{pct - base:>+8.1f}  {hit}/{total}")
     if leaked:
         print(f"\n  {len(leaked)} genome(s) where the hold-out matched nothing, "
               f"reported separately and NOT counted above:")
@@ -146,17 +168,25 @@ def main():
         try:
             result = rank_one(entry)
         except Exception as broke:
-            # One unreachable endpoint must not cost the other forty-five genomes.
-            result = {"accession": entry["accession"], "pathogen": entry["pathogen"],
-                      "error": f"{type(broke).__name__}: {broke}"[:400],
-                      "traceback": traceback.format_exc()[-1200:]}
-            print(f"      FAILED {result['error'][:130]}", flush=True)
-        else:
-            found = hits(result, entry["targets"])
-            best = min((h["rank"] for h in found), default=None)
-            print(f"      {len(result['chains'])} chains, {result['reference_entries_removed']} "
-                  f"removed, best ground-truth rank {best}, {result['seconds']}s", flush=True)
+            # One unreachable endpoint must not cost the other forty-five genomes -- and must
+            # not cost THIS one either. A failure is written beside the result path, never to
+            # it: `path.exists()` is the resume check, so persisting an error row here made a
+            # transient timeout drop that genome permanently and silently.
+            detail = f"{type(broke).__name__}: {broke}"
+            kind = ("holdout_removed_nothing" if "removed no entries" in str(broke)
+                    else "error")
+            path.with_suffix(".error.json").write_text(json.dumps(
+                {"accession": entry["accession"], "pathogen": entry["pathogen"],
+                 "kind": kind, "error": detail[:400],
+                 "traceback": traceback.format_exc()[-1200:]}, indent=1))
+            print(f"      {kind.upper()} {detail[:120]} (will retry on next run)", flush=True)
+            continue
+        found = hits(result, entry["targets"])
+        best = min((h["rank"] for h in found), default=None)
+        print(f"      {len(result['chains'])} chains, {result['reference_entries_removed']} "
+              f"removed, best ground-truth rank {best}, {result['seconds']}s", flush=True)
         path.write_text(json.dumps(result, indent=1))
+        path.with_suffix(".error.json").unlink(missing_ok=True)
         done += 1
         if args.limit and done >= args.limit:
             break
