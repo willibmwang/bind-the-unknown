@@ -88,6 +88,7 @@ Measured behaviour, so the spec is written from observation rather than from ass
 """
 import hashlib
 import json
+import os
 import math
 import re
 import time
@@ -96,7 +97,8 @@ import urllib.request
 
 from .common import ROOT, content_digest, provenance, write_json
 
-ENDPOINT = "https://api.esmatlas.com/foldSequence/v1/pdb/"
+ENDPOINT = (os.environ.get("ESMFOLD_ENDPOINT")
+            or "https://api.esmatlas.com/foldSequence/v1/pdb/")
 """ESM Atlas's keyless ESMFold v1 endpoint. POST the raw sequence as the body; it is not JSON.
 
 Chosen over the alternatives after checking each one live on 2026-10-27. AlphaFold DB is a
@@ -113,9 +115,23 @@ USER_AGENT = "hpc-pilots/1.0 (research prototype; contact via repository)"
 """Sent on every request. `structures_evidence` sends the default urllib agent to EMBL-EBI
 thirty-six times per call with no contact string, which is the politeness defect not copied."""
 
-MAX_RESIDUES = 400
-"""Measured, not documented: 400 returns 200 and 401 returns HTTP 413 `Sequence is longer than
-400.`. Enforced locally so a deterministic refusal costs no request."""
+MAX_RESIDUES = int(os.environ.get("ESMFOLD_MAX_RESIDUES") or 400)
+"""The ceiling above which a sequence is refused locally, without spending a request.
+
+400 is the PUBLIC HOST's limit, measured rather than documented: 400 returns 200 and 401
+returns HTTP 413 `Sequence is longer than 400.`. Re-checked 2026-11-09 against
+api.esmatlas.com -- 401 and 600 both still 413 -- so raising this number alone does not fold
+a longer chain, it only converts a free local refusal into a wasted request that fails.
+
+It is settable because the limit belongs to that host and not to ESMFold. A local or
+cluster deployment has no such ceiling, and the nine SARS-CoV-2 chains this refuses include
+the top-ranked spike at 458 residues and the copying machine at 823, which is the target an
+approved antiviral already hits. Point `ESMFOLD_ENDPOINT` at a deployment that can take them
+and raise `ESMFOLD_MAX_RESIDUES` to match what it will actually accept; attention is
+quadratic in length, so the practical ceiling is the GPU's memory rather than a constant.
+
+Do not raise it against the public host. The refusal it produces is a recorded absence with
+a stated reason, which is worth more than a 413 with the same meaning and a round trip."""
 
 ACCEPTED = frozenset("ACDEFGHIKLMNPQRSTVWY" "BJXZ")
 """The host's own alphabet, quoted from its 422 body. `U` and `O` are absent from it."""
@@ -145,10 +161,22 @@ RETRY_STATUS = frozenset({429, 500, 502, 503, 504})
 be refused identically however often they are sent."""
 
 MODEL = "ESMFold v1"
+def _served_by():
+    """Who actually answered, not who usually answers.
+
+    The citation named api.esmatlas.com unconditionally. Once ENDPOINT became settable that
+    was a provenance error waiting to happen: a fold produced by a local deployment would
+    have carried a citation crediting a host that never saw the sequence."""
+    host = re.sub(r"^https?://([^/]+).*$", r"\1", ENDPOINT)
+    if host == "api.esmatlas.com":
+        return ("Served by the ESM Metagenomic Atlas (api.esmatlas.com) under CC-BY-4.0, "
+                "(c) Meta Platforms.")
+    return f"Served by {host}, configured through ESMFOLD_ENDPOINT, not by the ESM Atlas."
+
+
 CITATION = ("Lin et al., Evolutionary-scale prediction of atomic-level protein structure with a "
             "language model, Science 379:1123 (2023), doi:10.1126/science.ade2574; preprint "
-            "doi:10.1101/2022.07.20.500902. Served by the ESM Metagenomic Atlas "
-            "(api.esmatlas.com) under CC-BY-4.0, (c) Meta Platforms. A prediction cited without "
+            "doi:10.1101/2022.07.20.500902. " + _served_by() + " A prediction cited without "
             "the model and its version is not a cited claim.")
 
 MODEL_DATE_FALLBACK = "2022-10-18"
