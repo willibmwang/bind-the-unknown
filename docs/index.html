@@ -735,6 +735,15 @@
         </span>
       </div></div></div>
   </div>
+  <div class="tool-card" id="predicted-provenance">
+    <div class="tc-head"><span class="tn">What &#8220;AlphaFold DB&#8221; served</span>
+      <span class="plain">the provenance of the counts above</span>
+      <span class="db">54 models · 0 from AlphaFold</span></div>
+    <div class="tc-body">
+      <p class="cap" style="margin:0 0 18px">Every <span class="mono">structures.predicted</span> row above is labelled <span class="mono">AlphaFold DB · 3D-Beacons</span> and reports a bare <span class="mono">predicted_model_count</span>, which reads as though AlphaFold modelled these proteins. It did not. The tool reports the host that <i>served</i> each model separately from the tool that <i>computed</i> it, and for these accessions the two disagree: of 54 predicted models, 35 were served by the AlphaFold host and <b>0 were computed by AlphaFold</b> — they are ColabFold v1.5.2 models, which run the same weights behind a different alignment pipeline. The chain record cannot carry this, because its summariser reduces the model list to a count on purpose; it is read here from <span class="mono">runs/predicted_models.json</span>.</p>
+      <div class="accs"><span class="lead"><b>Q3LZX1</b> — 1,242 residues, asked about for #1 Spike protein S2&#x27;, #3 Spike protein S2. 4 predicted models, and the AlphaFold host was asked and holds nothing for it — a measured absence, not a request that was skipped.</span><div class="pdbrow"><span class="who">served by</span><span class="ids">SWISS-MODEL 4</span></div><div class="pdbrow"><span class="who">computed by</span><span class="ids">not stated by the host 4</span></div><div class="pdbrow none"><span class="who">785-1242 <i>458 res</i></span><span class="ids">no pLDDT at all · no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply</span></div><div class="pdbrow none"><span class="who">655-1242 <i>588 res</i></span><span class="ids">no pLDDT at all · no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply</span></div></div><div class="accs"><span class="lead"><b>P0C6X7</b> — 7,073 residues, asked about for #2 3C-like proteinase nsp5. 50 predicted models, and the AlphaFold host served 35 of them, every one computed by ColabFold v1.5.2 — <b>0 were computed by AlphaFold</b>.</span><div class="pdbrow"><span class="who">served by</span><span class="ids">AlphaFold DB 35 · SWISS-MODEL 10 · PED 5</span></div><div class="pdbrow"><span class="who">computed by</span><span class="ids">ColabFold v1.5.2 35 · not stated by the host 15</span></div><div class="pdbrow"><span class="who">3241-3546 <i>306 res</i></span><span class="ids">best pLDDT 95.56 median, 39.19 min · AF-0000000365772815 (ColabFold v1.5.2)</span></div></div>
+    </div>
+  </div>
 </section>
 
 <footer>

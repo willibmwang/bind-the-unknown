@@ -107,6 +107,16 @@ runs/improve/
 # `python -m hpc_pilots chain --accession <id> --pathogen <name>`, and by the run-chain
 # workflow when a request comes in through the site.
 !runs/onset_chain_*.json
+
+# What the landing page's `structures.predicted` scalars are actually counting. runs/ is
+# otherwise untracked, but this is the record that the endpoint label "AlphaFold DB" names a
+# host and not a provenance: of the 54 predicted models the held-out run's accessions carry,
+# 35 are served by the AlphaFold host and none was computed by AlphaFold -- every one is
+# ColabFold v1.5.2. The chain record cannot hold this, because `_evidence_summary` reduces
+# any list to a count by design, so the distinction has to be recorded somewhere and the
+# page's claim has to be checkable against it. Written by
+# `python -m hpc_pilots.predicted_inventory`.
+!runs/predicted_models.json
 .venv-pfn/
 
 # The notebook points MPLCONFIGDIR here so a stale user-level matplotlibrc cannot print a

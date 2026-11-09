@@ -471,6 +471,110 @@ def surface_block(case):
 
 
 
+PREDICTED_RECORD = "predicted_models.json"
+
+
+def build_predicted():
+    """What the endpoint label "AlphaFold DB" on the rows above is actually counting.
+
+    Section 07 prints `structures.predicted` as scalars, and `predicted_model_count 50`
+    beside the endpoint "AlphaFold DB, 3D-Beacons" reads as "AlphaFold modelled this
+    protein". It is not what the tool returned. The tool carries `provider` (the host that
+    served a model) apart from `tool_used` (what computed it) precisely because the two
+    disagree here, and `chain._evidence_summary` reduces the model list to a count by
+    design, which is the step that loses the distinction.
+
+    So the number gets its provenance printed next to it, from a record written by
+    `hpc_pilots.predicted_inventory`, which re-asks the same tool for the same accessions.
+    Generated rather than written out because every figure in it is a count.
+    """
+    path = RUNS / PREDICTED_RECORD
+    if not path.exists():
+        return ""
+    rec = json.loads(path.read_text())
+    blocks = rec.get("accessions") or []
+    if not blocks:
+        return ""
+
+    rows = []
+    for b in blocks:
+        served = b.get("alphafold_host_model_count") or 0
+        # Read `tool_used` out loud. A provider breakdown alone still lets a reader assume
+        # the 35 models under "AlphaFold DB" are AlphaFold's.
+        tools = " · ".join(f"{esc(tool)} {num(count)}"
+                               for tool, count in (b.get("models_by_tool_used") or {}).items())
+        providers = " · ".join(f"{esc(name)} {num(count)}"
+                                   for name, count in (b.get("models_by_provider") or {}).items())
+        if served:
+            host = (f"the AlphaFold host served {num(served)} of them, every one computed by "
+                    + " and ".join(esc(t) for t in
+                                   (b.get("alphafold_host_models_by_tool_used") or {}))
+                    + f" — <b>{num(b.get('alphafold_authored_model_count'))} were computed "
+                    f"by AlphaFold</b>")
+        else:
+            # An absence that was measured, not skipped. The tool asks the host
+            # unconditionally for exactly this reason.
+            host = ("the AlphaFold host was asked and holds nothing for it — a measured "
+                    "absence, not a request that was skipped")
+
+        # pLDDT is absent, not zero, when every model is template-based. The page prints
+        # `confident_plddt 70` on these rows and it never applied to this accession.
+        plddt = []
+        for r in b.get("ranges") or []:
+            best = r.get("best_plddt_model")
+            if best:
+                plddt.append(f'<div class="pdbrow"><span class="who">{esc(r.get("range"))} '
+                             f'<i>{num(r.get("width"))} res</i></span><span class="ids">'
+                             f'best pLDDT {num(best.get("median_plddt"))} median, '
+                             f'{num(best.get("min_plddt"))} min · '
+                             f'{esc(best.get("model_identifier"))} '
+                             f'({esc(best.get("tool_used"))})</span></div>')
+            else:
+                plddt.append(f'<div class="pdbrow none"><span class="who">'
+                             f'{esc(r.get("range"))} <i>{num(r.get("width"))} res</i></span>'
+                             f'<span class="ids">no pLDDT at all · '
+                             f'{esc(r.get("no_plddt_because"))}</span></div>')
+
+        targets = ", ".join(f'#{esc(t.get("rank"))} {esc(t.get("target"))}'
+                            for t in (b.get("asked_about") or []))
+        rows.append(
+            f'<div class="accs"><span class="lead"><b>{esc(b.get("accession"))}</b> '
+            f'— {num(b.get("sequence_length"))} residues, asked about for {targets}. '
+            f'{num(b.get("predicted_model_count"))} predicted models, and {host}.</span>'
+            f'<div class="pdbrow"><span class="who">served by</span>'
+            f'<span class="ids">{providers}</span></div>'
+            f'<div class="pdbrow"><span class="who">computed by</span>'
+            f'<span class="ids">{tools}</span></div>'
+            f'{"".join(plddt)}</div>')
+
+    total = rec.get("predicted_model_count")
+    by_host = rec.get("alphafold_host_model_count")
+    authored = rec.get("alphafold_authored_model_count")
+    return (
+        f'<div class="tool-card" id="predicted-provenance">\n'
+        f'    <div class="tc-head"><span class="tn">What &#8220;AlphaFold DB&#8221; '
+        f'served</span>\n'
+        f'      <span class="plain">the provenance of the counts above</span>\n'
+        f'      <span class="db">{num(total)} models · {num(authored)} from '
+        f'AlphaFold</span></div>\n'
+        f'    <div class="tc-body">\n'
+        f'      <p class="cap" style="margin:0 0 18px">Every <span class="mono">'
+        f'structures.predicted</span> row above is labelled <span class="mono">AlphaFold DB '
+        f'· 3D-Beacons</span> and reports a bare <span class="mono">'
+        f'predicted_model_count</span>, which reads as though AlphaFold modelled these '
+        f'proteins. It did not. The tool reports the host that <i>served</i> each model '
+        f'separately from the tool that <i>computed</i> it, and for these accessions the two '
+        f'disagree: of {num(total)} predicted models, {num(by_host)} were served by the '
+        f'AlphaFold host and <b>{num(authored)} were computed by AlphaFold</b> — they '
+        f'are ColabFold v1.5.2 models, which run the same weights behind a different '
+        f'alignment pipeline. The chain record cannot carry this, because its summariser '
+        f'reduces the model list to a count on purpose; it is read here from <span '
+        f'class="mono">runs/predicted_models.json</span>.</p>\n'
+        f'      {"".join(rows)}\n'
+        f'    </div>\n'
+        f'  </div>')
+
+
 def evidence_block(case):
     """The five off-chain tools, per target, as they came back.
 
@@ -519,6 +623,7 @@ def evidence_block(case):
   a 600-second worst case \u2014 so they run here, over a few targets, under a larger budget.
   <b>Nothing they return changes a rank.</b>{whose}</p>
   {"".join(cards)}
+  {build_predicted()}
 </section>"""
 
 def result_page(case, stem):
