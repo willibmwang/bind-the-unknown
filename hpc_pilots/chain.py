@@ -585,7 +585,169 @@ def fold_stage(ranked, ceiling=400, pool=()):
     return folded, rows
 
 
-def _case(accession, exclude_organism, top, replicates, fold, label):
+# ------------------------------------------------------------------ evidence on the top few
+# The five tools the chain itself never calls, and why. Each is reachable from the four facts
+# stage 1 already produces -- a name, a reviewed accession, a residue range and a sequence --
+# so capability was never the obstacle. The obstacle is the declared cost. `chief` compares a
+# tool's declared worst case against the wall budget and refuses it BEFORE dispatch, without
+# making a request: families.entries declares 300s and bioactivity.prior_binders declares
+# 600s, against a chain whose whole run is eighty-six seconds. Measured live, the five cost
+# roughly 210s for one target, so running them over all twenty ranked chains is about seventy
+# minutes and cannot fit the twenty-five minute cap on the workflow that serves a visitor.
+#
+# So they run here, over the top few targets only, after the ranking is already final.
+# NOTHING THEY RETURN CHANGES A RANK. The rubric is five stated weights fixed before the run
+# and none of these is among them; this stage annotates the shortlist and may not reorder it.
+# A tool that refuses still gets a row, for the same reason a chain that cannot be measured
+# still gets one: a step may refuse, it may not silently skip.
+EVIDENCE_TOOLS = (
+    ("literature.search",         "Europe PMC"),
+    ("similarity.homologs",       "EBI HMMER"),
+    ("families.entries",          "InterPro"),
+    ("structures.predicted",      "AlphaFold DB, 3D-Beacons"),
+    ("bioactivity.prior_binders", "ChEMBL, IEDB, MaveDB"),
+)
+
+# Large enough to admit the 600s worst case bioactivity.prior_binders declares. This is the
+# budget the gate checks a DECLARATION against, not a promise about elapsed time.
+EVIDENCE_BUDGET_SECONDS = 700.0
+
+# Keys that are long, repeated per row, or an echo of the request rather than a result.
+_EVIDENCE_NOISE = frozenset((
+    "experiment", "status", "interpretation", "provenance", "query", "sequence",
+    "accession", "subject", "target_name", "requested_ranges", "uniprot_entry_id"))
+
+
+def _evidence_summary(value):
+    """A few headline scalars from a tool return, never the payload.
+
+    Each tool returns a different shape, so this is deliberately generic: scalars are kept as
+    they are and anything list-shaped is reduced to how many of it there were. That is enough
+    to say what came back without this record becoming a copy of five external databases.
+    """
+    if not isinstance(value, dict):
+        return {}
+    out = {}
+    for key, item in value.items():
+        if key in _EVIDENCE_NOISE or key.startswith("_"):
+            continue
+        if isinstance(item, bool) or isinstance(item, (int, float)):
+            out[key] = item
+        elif isinstance(item, str) and len(item) <= 60:
+            out[key] = item
+        elif isinstance(item, (list, tuple)):
+            out[f"{key}_count"] = len(item)
+        if len(out) >= 10:
+            break
+    return out
+
+
+def _evidence_arguments(tool_name, row, sequence):
+    """What each tool is asked, built only from facts the chain already holds."""
+    accession = row.get("nearest_homolog")
+    span = row.get("chain_range")
+    if tool_name == "literature.search":
+        return {"subject": row.get("target")}
+    if tool_name == "similarity.homologs":
+        return {"query": sequence} if sequence else None
+    if tool_name == "families.entries":
+        return {"accession": accession} if accession else None
+    if tool_name == "structures.predicted":
+        if not accession:
+            return None
+        args = {"accession": accession}
+        if span:
+            # A tuple of "start-end" STRINGS. The tool rejects a pair outright -- "this tool
+            # declares one form on purpose; a pair that happens to unpack is a" coincidence
+            # it refuses to rely on -- and passing (start, end) silently cost six AlphaFold
+            # lookups the first time this ran.
+            args["residue_ranges"] = (f"{int(span[0])}-{int(span[1])}",)
+        return args
+    if tool_name == "bioactivity.prior_binders":
+        return {"accession": accession, "target_name": row.get("target")} if accession else None
+    return None
+
+
+def evidence_rows(scored, top=3, budget=EVIDENCE_BUDGET_SECONDS):
+    """Call all five off-chain tools on the highest-ranked targets, and record every call.
+
+    Returns one row per target, each carrying one entry per tool: the status the gate or the
+    endpoint produced, what it cost, and a short summary of what came back. A refusal is a
+    recorded outcome, not an omission.
+    """
+    from . import chief
+    from .tools import tool as tool_spec
+
+    rows, cache = [], {}
+    for row in sorted(scored, key=lambda r: r.get("rank") or 10 ** 6)[:top]:
+        sequence = None
+        if row.get("nearest_homolog") and row.get("chain_range"):
+            try:
+                sequence = _homolog_chain(row["nearest_homolog"], row["chain_range"], cache)
+            except Exception:
+                sequence = None
+        calls = []
+        for tool_name, endpoint in EVIDENCE_TOOLS:
+            arguments = _evidence_arguments(tool_name, row, sequence)
+            if arguments is None:
+                calls.append({"tool": tool_name, "endpoint": endpoint, "status": "not_asked",
+                              "note": "the chain holds no argument this tool requires",
+                              "seconds": None, "network_calls": None, "returned": {}})
+                continue
+            started = time.time()
+            try:
+                with chief.counting_requests() as tally:
+                    spec = tool_spec(tool_name)
+                    chief.schema_conformance(spec, arguments)
+                    envelope = chief.call(spec, arguments, context=chief.context(
+                        None, now=0, wall_budget_seconds=budget))
+                calls.append({
+                    "tool": tool_name, "endpoint": endpoint,
+                    "status": envelope.get("status"),
+                    "note": envelope.get("note") or None,
+                    "seconds": round(time.time() - started, 2),
+                    "network_calls": tally["made"],
+                    "returned": _evidence_summary(envelope.get("value"))})
+            except Exception as broke:
+                # An endpoint failure is already an envelope; this is the unanticipated one,
+                # and it is written down rather than raised so one bad lane cannot lose the
+                # other four.
+                calls.append({"tool": tool_name, "endpoint": endpoint, "status": "error",
+                              "note": f"{type(broke).__name__}: {broke}"[:200],
+                              "seconds": round(time.time() - started, 2),
+                              "network_calls": None, "returned": {}})
+        rows.append({"rank": row.get("rank"), "target": row.get("target"),
+                     "nearest_homolog": row.get("nearest_homolog"),
+                     "chain_range": row.get("chain_range"),
+                     "sequence_available": bool(sequence), "calls": calls})
+    return rows
+
+
+def evidence_stage(scored, top=3, budget=EVIDENCE_BUDGET_SECONDS):
+    """`evidence_rows`, plus the stage entry that goes in the record beside stages 1 to 5."""
+    started = time.time()
+    rows = evidence_rows(scored, top=top, budget=budget)
+    calls = [c for r in rows for c in r["calls"]]
+    ok = [c for c in calls if c["status"] == "ok"]
+    stage = {
+        "stage": 6, "name": "Evidence on the highest-ranked targets",
+        "tool": " + ".join(name for name, _ in EVIDENCE_TOOLS),
+        "endpoints": ["Europe PMC", "EBI HMMER", "InterPro", "AlphaFold DB", "3D-Beacons",
+                      "ChEMBL", "IEDB", "MaveDB"],
+        "input": {"targets_in": len(rows), "ranked_available": len(scored),
+                  "wall_budget_seconds": budget},
+        "output": {"targets_covered": len(rows), "calls_made": len(calls),
+                   "ok": len(ok), "not_ok": len(calls) - len(ok),
+                   "network_calls": sum(c["network_calls"] or 0 for c in calls),
+                   "changes_any_rank": False,
+                   "every_target_has_every_tool":
+                       all(len(r["calls"]) == len(EVIDENCE_TOOLS) for r in rows)},
+        "seconds": round(time.time() - started, 2),
+        "hands_to_next": "nothing. This annotates the shortlist and never reorders it"}
+    return stage, rows
+
+
+def _case(accession, exclude_organism, top, replicates, fold, label, evidence_top=3):
     """Every stage of the onset arm, once, against one reference."""
     from . import chemistry
     from .intake import decompose, rank_score, run_intake
@@ -708,6 +870,11 @@ def _case(accession, exclude_organism, top, replicates, fold, label):
         "seconds": round(time.time() - started, 2),
         "hands_to_next": "the position count the go/no-go test in arm 2 reads"})
 
+    evidence = None
+    if evidence_top:
+        stage, evidence = evidence_stage(scored, top=evidence_top)
+        stages.append(stage)
+
     return {
         "case": label,
         "genome_accession": accession,
@@ -721,6 +888,7 @@ def _case(accession, exclude_organism, top, replicates, fold, label):
                                           "confident_fraction", "pdb_sha256", "absence")
                    if folded and k in folded} if folded else None,
         "foldable": fold_rows if fold else None,
+        "evidence": evidence,
         "seconds": round(time.time() - clock, 2),
         "coverage": {
             # The one table a reader should be able to check without reading any prose: how
@@ -733,7 +901,9 @@ def _case(accession, exclude_organism, top, replicates, fold, label):
             "fold_rows": len(fold_rows) if fold else None,
             "fold_sequence_recovered": (sum(1 for r in fold_rows
                                             if r["sequence_recovered"]) if fold else None),
-            "fold_covers_every_chain": (len(fold_rows) == len(scored)) if fold else None},
+            "fold_covers_every_chain": (len(fold_rows) == len(scored)) if fold else None,
+            "evidence_targets": len(evidence) if evidence else 0,
+            "evidence_calls": sum(len(r["calls"]) for r in evidence) if evidence else 0},
     }
 
 

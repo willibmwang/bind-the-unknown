@@ -44,7 +44,13 @@ jobs:
       contains(github.event.issue.body, '### NCBI nucleotide accession') ||
       contains(github.event.issue.labels.*.name, 'run-request')
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Stage 6 calls five more tools on the top three targets, and those five are the expensive
+    # ones: measured live, about 210 seconds per target against a base chain of under two
+    # minutes. A one-case visitor run is therefore ~15 minutes rather than ~3, and 25 was no
+    # longer a cap with room in it. Raised, not removed: a run that has not finished in forty
+    # minutes has hit a hung endpoint, and should be killed rather than left to block the
+    # queue, since the concurrency group above serialises every request behind this one.
+    timeout-minutes: 40
 
     steps:
       - uses: actions/checkout@v4

@@ -285,6 +285,8 @@ def build_toolkit():
 def build_index():
     """Wrap the hand-written body in a real document. The prose is not generated."""
     body = (ROOT / "site" / "body.html").read_text()
+    landing = json.loads((RUNS / LANDING_RECORD).read_text())
+    body = body.replace("<!--EVIDENCE-->", evidence_block(landing["cases"][0]))
     toolkit, calls = build_toolkit()
     body = body.replace("<!--TOOLKIT-->", toolkit)
     body = body.replace("<!--TOOLCALLS-->", f"{len(TOOLKIT)} tools \u00b7 {calls} calls")
@@ -409,6 +411,49 @@ def surface_block(case):
   {why_block}"""
 
 
+
+def evidence_block(case):
+    """The five off-chain tools, per target, as they came back.
+
+    A refusal is rendered as loudly as a result. The whole point of the stage is that a tool
+    the chain's budget turns away is recorded rather than omitted, and a page that only
+    showed the successes would undo that.
+    """
+    rows = case.get("evidence") or []
+    if not rows:
+        return ""
+    cards = []
+    for row in rows:
+        calls = "".join(f"""
+      <div class="pdbrow{'' if c.get('status') == 'ok' else ' none'}">
+        <span class="who">{esc(c.get('tool'))}<em>{esc(c.get('endpoint'))}</em></span>
+        <span class="ids">{esc(c.get('status'))}
+          {('\u00b7 ' + num(c.get('seconds')) + ' s') if c.get('seconds') is not None else ''}
+          {('\u00b7 ' + num(c.get('network_calls')) + ' requests') if c.get('network_calls') else ''}
+          {('<br>' + esc(c.get('note'))) if c.get('note') and c.get('status') != 'ok' else ''}
+          {('<br>' + ' \u00b7 '.join(esc(k) + ' ' + num(v) for k, v in (c.get('returned') or {}).items())) if c.get('returned') else ''}
+        </span>
+      </div>""" for c in row.get("calls", []))
+        cards.append(f"""
+  <div class="tool-card">
+    <div class="tc-head"><span class="sn">{esc(row.get('rank'))}</span>
+      <span class="tn">{esc(row.get('target'))}</span>
+      <span class="db">{esc(row.get('nearest_homolog'))}</span></div>
+    <div class="tc-body"><div class="accs">{calls}</div></div>
+  </div>""")
+    cov = case.get("coverage", {})
+    return f"""
+<section id="evidence">
+  <div class="sec-head"><h2>Evidence on the top targets</h2>
+    <span class="tag">{num(cov.get('evidence_calls'))} calls</span></div>
+  <p class="cap">Five tools the chain itself never calls, run on the highest-ranked targets
+  after the ranking was already final. They are refused on the chain path because of what
+  they declare they can cost \u2014 <span class="mono">bioactivity.prior_binders</span> advertises
+  a 600-second worst case \u2014 so they run here, over a few targets, under a larger budget.
+  <b>Nothing they return changes a rank.</b></p>
+  {"".join(cards)}
+</section>"""
+
 def result_page(case, stem):
     label = case.get("pathogen") or case.get("case") or case.get("genome_accession")
     acc = case.get("genome_accession")
@@ -471,6 +516,8 @@ def result_page(case, stem):
   {surface_block(case)}
 </section>
 {fold_html}
+
+{evidence_block(case)}
 
 <section>
   <div class="sec-head"><h2>What is still missing</h2><span class="tag">on every run</span></div>
