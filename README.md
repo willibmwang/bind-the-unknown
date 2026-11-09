@@ -78,8 +78,9 @@ property of the pathogen rather than of the code.
 genome nothing here had looked at: 19 chains ranked, 19 surface rows for them, 19 of 19 located
 in the genome's own translation, and the main protease it folded hashes to something that is
 not SARS-CoV-2's — it found MERS's own, through a coronavirus relative, which is what the
-system claims to do. A genome too large to be viral is refused rather than ranked: this is
-antiviral work, and the reference it identifies against is reviewed viral proteins.
+system claims to do. A genome with a segment larger than this pipeline's heuristics are
+calibrated for is refused rather than ranked — a limit on the code and not a claim about what
+is viral, since Mimivirus is 1.2 Mb and is a virus.
 
 ---
 
@@ -286,9 +287,11 @@ return when the cell executes.
 **§0.2 takes a pathogen of your own, and it is near the top for that reason.** One NCBI
 nucleotide accession goes in — several separated by commas for a segmented genome — and the
 same five stages run against the same endpoints, printing the same ledger, for a pathogen
-nothing here has looked at. No target list, no structure, no name. A genome too large to be
-viral is refused rather than ranked: nothing would identify against a reviewed viral reference,
-and a confident wrong shortlist is the one output worse than none.
+nothing here has looked at. No target list, no structure, no name. A genome with a segment
+larger than this pipeline's heuristics are calibrated for is refused rather than ranked:
+nothing would identify against a reviewed viral reference, and a confident wrong shortlist is
+the one output worse than none. The limit is measured on the longest segment and not on the
+sum, so an assembly delivered as contigs is not refused for arriving in pieces.
 
 **Budget the cold number, not the cached one.** Registered costs run from 0.7 seconds for a fold
 to 94 seconds for the bioactivity lookup, but that 0.7 seconds is a cached result.

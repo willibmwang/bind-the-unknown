@@ -494,11 +494,23 @@ def fold_stage(ranked, ceiling=400, pool=()):
 
     aligner, rows, pick, parents = None, [], None, {}
     for row in ranked:
-        if not row.get("identified"):
-            continue
+        # Unidentified candidates are folded too, and used to be skipped here. The folding
+        # endpoint takes an amino-acid sequence and nothing else -- no accession, no relative,
+        # no annotation -- so it is the one stage of this chain that works perfectly well on a
+        # protein nothing recognises, and it was the stage refusing to look at one. `intake`
+        # carries the six-frame translation on every candidate for exactly this reason, so the
+        # sequence was already on the row; the `continue` meant the only lane open to a
+        # genuinely novel target was closed by the stage that needed least from it.
+        #
+        # They cannot reach the pick ahead of an identified chain: the pick runs in two passes
+        # below, identified first. So every recorded run folds what it folded before.
+        identified = bool(row.get("identified"))
         span, orf = row.get("chain_range"), (row.get("orf") or {}).get("protein") or ""
         declared = row.get("length_aa")
-        entry = {"target": row.get("name"), "rank": row.get("rank"),
+        entry = {"target": row.get("name") or "unidentified ORF",
+                 "rank": row.get("rank"),
+                 "identified": identified,
+                 "identification_route": row.get("identification_route"),
                  "chain_range_on_the_relative": list(span) if span else None,
                  "declared_length_aa": declared,
                  "parent_orf_length_aa": len(orf) or None,
@@ -564,10 +576,19 @@ def fold_stage(ranked, ceiling=400, pool=()):
                 f"it points at is not that chain in this genome.")
         rows.append(entry)
 
-    for entry in rows:
-        if pick is None and entry["sequence_recovered"] \
-                and 0 < entry["recovered_length_aa"] <= ceiling:
-            pick = (entry["target"], entry["recovered_sequence"])
+    # Two passes, identified first. An unidentified ORF is foldable and must be reachable,
+    # but it must never displace a named chain: the committed main-protease fold is what the
+    # repository reproduces byte for byte, and a one-pass loop would hand the pick to whatever
+    # happened to sort first. Explicit, so the ordering is a decision and not an accident of
+    # how `ranked` was sorted.
+    for want_identified in (True, False):
+        if pick is not None:
+            break
+        for entry in rows:
+            if pick is None and entry["identified"] is want_identified \
+                    and entry["sequence_recovered"] \
+                    and 0 < entry["recovered_length_aa"] <= ceiling:
+                pick = (entry["target"], entry["recovered_sequence"])
     # Carried only to choose and fold; a row holding a whole protein sequence would multiply
     # the record's size by the number of candidates for no reader's benefit.
     for entry in rows:
@@ -843,10 +864,23 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
         stages.append({
             "stage": 4, "name": "A chain to coordinates, the one lane a novel target has",
             "tool": "structures.folded", "endpoints": ["ESM Atlas"],
-            "input": {"candidates_in": len(handed)},
-            "output": {"foldable": sum(1 for r in fold_rows if r["sequence_recovered"]),
+            # This stage is handed every candidate, not only the identified ones, because
+            # folding needs a sequence and nothing else. Both counts are stated so the
+            # denominator is visible: `candidates_in` is what it was given, and
+            # `identified_in` is the subset the earlier stages could name.
+            "input": {"candidates_in": len(ranked),
+                      "identified_in": len(handed)},
+            "output": {"foldable": sum(1 for r in fold_rows
+                                       if r["sequence_recovered"] and r["identified"]),
                        "not_foldable": sum(1 for r in fold_rows
-                                           if not r["sequence_recovered"]),
+                                           if not r["sequence_recovered"]
+                                           and r["identified"]),
+                       # The novel lane, reported separately rather than summed in: an
+                       # unidentified ORF has no name to fold "for", and counting it beside a
+                       # located mature chain would make the two look like the same result.
+                       "unidentified_foldable": sum(1 for r in fold_rows
+                                                    if r["sequence_recovered"]
+                                                    and not r["identified"]),
                        "folded_target": (folded or {}).get("target_name"),
                        "residues": (folded or {}).get("sequence_length"),
                        "mean_plddt": (folded or {}).get("mean_plddt"),
@@ -898,10 +932,24 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
             "surface_measured": len(measured),
             "surface_refused": len(rows) - len(measured),
             "surface_covers_every_chain": len(rows) == len(scored),
-            "fold_rows": len(fold_rows) if fold else None,
+            # `fold_rows` counts the identified chains, so it stays comparable with
+            # `chains_ranked` and with every record already on disk. The unidentified ORFs the
+            # fold stage now also emits a row for are counted beside it rather than folded
+            # into it: adding them to this total would report the no-dropped-rows invariant as
+            # broken when what actually happened is that the stage covers more than it did.
+            "fold_rows": (sum(1 for r in fold_rows if r["identified"])
+                          if fold else None),
+            "fold_rows_unidentified": (sum(1 for r in fold_rows
+                                           if not r["identified"]) if fold else None),
             "fold_sequence_recovered": (sum(1 for r in fold_rows
-                                            if r["sequence_recovered"]) if fold else None),
-            "fold_covers_every_chain": (len(fold_rows) == len(scored)) if fold else None,
+                                            if r["sequence_recovered"]
+                                            and r["identified"]) if fold else None),
+            "fold_sequence_recovered_unidentified": (
+                sum(1 for r in fold_rows
+                    if r["sequence_recovered"] and not r["identified"]) if fold else None),
+            "fold_covers_every_chain": (
+                sum(1 for r in fold_rows if r["identified"]) == len(scored)
+                if fold else None),
             "evidence_targets": len(evidence) if evidence else 0,
             "evidence_calls": sum(len(r["calls"]) for r in evidence) if evidence else 0},
     }

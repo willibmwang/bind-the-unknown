@@ -876,27 +876,39 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
     species holdout cannot speak to.
     """
     segments = genome_records(accession)
-    # A genome too large to be viral is refused here rather than ranked wrongly. This is
-    # antiviral work: the reference is reviewed viral proteins, `orfs` returns every stretch
-    # between stops, and the selection below keeps the longest. All three are right for a 30 kb
-    # virus and all three fail silently on anything larger -- nothing identifies against a
-    # viral reference, and length ranking on a chromosome returns a confident shortlist of
-    # whichever long reading frames happened to be longest. Refusing is the only honest
+    # A genome larger than this pipeline's heuristics are calibrated for is refused here
+    # rather than ranked wrongly. The reference is reviewed viral proteins, `orfs` returns
+    # every stretch between stops, and the selection below keeps the longest. All three are
+    # right for a 30 kb virus and all three fail silently on a chromosome -- nothing
+    # identifies against a viral reference, and length ranking returns a confident shortlist
+    # of whichever long reading frames happened to be longest. Refusing is the only honest
     # answer, because a confident wrong ranking is the one output worse than none.
+    #
+    # **Measured on the longest segment, not the sum.** The motivating case in this module's
+    # own docstring is a novel pathogen off a metagenomic assembly, and an assembly arrives
+    # as contigs. Summing them refused a perfectly viral-scale genome for having been
+    # delivered in pieces -- sixty 20 kb contigs sum past any viral limit while no single
+    # contig is near it -- which rejected exactly the input the module exists to serve.
+    # Influenza's eight segments sum to 13.5 kb and passed either way, so nothing recorded
+    # moves; the contig case is the one this changes.
+    longest_nt = max(len(part) for _, part in segments)
     total_nt = sum(len(part) for _, part in segments)
-    if total_nt > VIRAL_GENOME_LIMIT_NT:
+    if longest_nt > VIRAL_GENOME_LIMIT_NT:
         raise ValueError(
-            f"{accession} is {total_nt:,} nt, over the {VIRAL_GENOME_LIMIT_NT:,} nt limit "
-            f"this function treats as viral. The reference here is reviewed viral proteins "
-            f"and the gene calling is six-frame, so a genome this size would identify "
-            f"nothing and then be ranked by length anyway. This project is antiviral work "
-            f"and does not cover it.")
+            f"{accession} has a {longest_nt:,} nt segment, over the "
+            f"{VIRAL_GENOME_LIMIT_NT:,} nt limit this pipeline's heuristics are calibrated "
+            f"for. This is not a claim that the input is not viral -- Mimivirus is 1.2 Mb and "
+            f"Pandoravirus 2.5 Mb, and both are viruses. It is a statement about this code: "
+            f"six-frame calling, length ranking and a reviewed-viral reference are all unsafe "
+            f"at that size, so the honest answer is to refuse rather than to rank.")
     found = []
     for index, (segment_header, segment) in enumerate(segments):
         for orf in orfs(segment, minimum_aa):
             found.append({**orf, "segment": index,
                           "segment_header": segment_header})
     found.sort(key=lambda o: -o["length_aa"])
+    for position, orf in enumerate(found):
+        orf["_found_rank"] = position
     # Per segment when the genome is segmented, because the longest ORFs of influenza all sit
     # on the three polymerase segments and a flat top-N would rank those and never reach
     # haemagglutinin or neuraminidase, which are the targets.
@@ -911,6 +923,28 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
         searched = kept[:top] if top else kept
     else:
         searched = found[:top]
+
+    # Length is a proxy for importance, and it is a proxy biased toward the proteins already
+    # known. Truncating to the longest `top` ORFs before anything has looked at them drops a
+    # short novel surface protein on a criterion that has nothing to do with whether it is a
+    # target -- replicases and polymerases are long, and accessory and surface proteins are
+    # often not. So every ORF the cut discarded is tested on its own sequence, and one that
+    # reads as a probable surface protein is admitted even though it is short.
+    #
+    # Affordable because `membrane_topology` is arithmetic over the sequence: no network, no
+    # reference, no index. The homology search these rescued ORFs then go through is the
+    # expensive part, which is why the rescue is capped at `top` of them, longest first.
+    rescued = []
+    if top:
+        taken = {orf["_found_rank"] for orf in searched}
+        for orf in found:
+            if len(rescued) >= top:
+                break
+            if orf["_found_rank"] in taken:
+                continue
+            if membrane_topology(orf["protein"])["likely_surface"]:
+                rescued.append(orf)
+        searched = list(searched) + rescued
 
     header = segments[0][0] if len(segments) == 1 else \
         f"{len(segments)} segments: " + "; ".join(h.split()[0] for h, _ in segments)
@@ -984,18 +1018,39 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
                 # with no identifiable relative is still the protein antibodies would be
                 # raised against, and returning nothing for it loses the target the system
                 # exists to find. Scored below any homology hit so it never outranks one.
+                # `conservation` is 0.0 because there is no relative to measure it against,
+                # which is not the same fact as a relative that turned out to conserve
+                # nothing -- and the rubric's heaviest term, weight 3.0, reads the two
+                # identically. The score stays where it is, deliberately: a class must not
+                # outrank a name. What changes is that the record now says the term was
+                # never measured, so a reader comparing this row's score with a homology
+                # row's can see that the gap is mostly an absence of evidence rather than
+                # evidence of a worse target.
                 features = {"conservation": 0.0, "surface_exposed": True,
                             "structures_in_family": 0, "druggable_class": 2,
                             "essential_class": False, "keywords_matched": [],
                             "locations": ["predicted surface, from hydropathy"],
-                            "from_topology": True}
+                            "from_topology": True,
+                            "conservation_is_measured": False,
+                            "conservation_absent_because":
+                                "no identifiable relative, so the term has no reference to "
+                                "be measured against and scores zero by default"}
                 ranked.append({**candidate, "identified": True,
+                               "identification_route": "topology",
+                               "surface_route": topology.get("surface_route"),
                                "name": "unidentified probable surface antigen",
                                "nearest_homolog": None, "nearest_organism": None,
                                "features": features, "score": rank_score(features),
                                "conservation": features["conservation"]})
                 continue
-            ranked.append({**candidate, "identified": False, "features": None,
+            ranked.append({**candidate, "identified": False,
+                           "identification_route": None,
+                           # Named, because this row is the one the pipeline loses and the
+                           # reason it loses it is the operating envelope: no relative at any
+                           # sensitivity, and no surface signal in its own sequence either.
+                           "unidentified_because":
+                               "no homolog at either tier and neither topology route fired",
+                           "features": None,
                            "score": None, "conservation": None})
             continue
         features = score_candidate(candidate["hits"], records)
@@ -1008,6 +1063,10 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
         # conservation carries the assignment, one rank further out there is no assignment at
         # all, and the two cases must not present as the same kind of answer.
         ranked.append({**candidate, "identified": True,
+                       # "exact" or "remote": which tier found it, carried beside the score
+                       # so the three routes into this list are distinguishable in the record
+                       # rather than only in the tier field the cascade artifact reads.
+                       "identification_route": candidate.get("tier"),
                        "name": candidate["hits"][0]["name"],
                        "nearest_homolog": candidate["hits"][0]["accession"],
                        "nearest_organism": candidate["hits"][0]["organism"],
@@ -1029,6 +1088,10 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
         "reference_scope": scope,
         "orfs_found": len(found), "orfs_ranked": len(searched),
         "orfs_dropped_by_top": len(found) - len(searched),
+        # How many of the ranked ORFs are there because they read as surface proteins rather
+        # than because they were long. Zero on a genome whose targets are all long anyway,
+        # which is most of the recorded ones; non-zero is the case the length cut was losing.
+        "orfs_rescued_by_topology": len(rescued),
         "unidentified": sum(1 for r in ranked if not r["identified"]),
         "rubric": {"conservation": 3.0, "surface_exposed": 2.0, "essential_class": 1.5,
                    "druggable_class": 0.8, "structures_in_family_capped": 0.5},
@@ -1514,21 +1577,47 @@ def membrane_topology(protein, window=19, threshold=1.6):
     # before the de-novo path is reached, but the function is also called directly and should
     # not return an answer it cannot support.
     plausible_length = 100 <= len(protein) <= 2000
+
+    # Two routes, because requiring glycosylation made this lane narrower than the paragraph
+    # above it claims. `sequons >= 2` describes an enveloped virus's glycoprotein, and that
+    # was the only way through: a novel surface protein that is anchored but not glycosylated
+    # failed the gate and left the pipeline with no target at all -- the same loss the
+    # docstring calls "losing the thing the system is for", reintroduced one condition lower
+    # down. The second route asks for a signal peptide *and* a membrane segment, which is
+    # stronger evidence of a surface protein than either alone and does not depend on
+    # glycosylation. Recorded by name, because the two routes are not equally strong and a
+    # reader has to be able to see which one fired.
+    route = None
+    if plausible_length and (signal or segments >= 1) and sequons >= 2:
+        route = "anchored_and_glycosylated"
+    elif plausible_length and signal and segments >= 1:
+        route = "signal_peptide_with_membrane_anchor"
+
     return {"signal_peptide": signal, "transmembrane_segments": segments,
             "sequons": sequons, "plausible_antigen_length": plausible_length,
-            # A membrane anchor and glycosylation together: either alone is common in proteins
-            # that are not surface antigens.
-            "likely_surface": plausible_length and (signal or segments >= 1) and sequons >= 2}
+            "surface_route": route,
+            # What neither route reaches, stated here rather than left to be discovered: a
+            # non-enveloped virus's capsid has no signal peptide and no membrane anchor, so
+            # it is recovered by neither. That needs a fold-and-search method, not a
+            # hydropathy threshold.
+            "likely_surface": route is not None}
 
 
 # ---------------------------------------------------------------------------
-# The size beyond which this is not a viral genome.
+# The size beyond which this pipeline's heuristics stop being safe.
 
-# The largest genome in the families this project models is around 200 kb. Above this a genome
-# is something else, and every heuristic here -- six-frame calling, ranking by length, a
-# reviewed viral reference -- stops being safe at once. `run_intake` refuses rather than
-# ranking, because all three fail silently and a confident wrong shortlist is the one output
-# worse than none.
+# The largest genome in the families this project models is around 200 kb. Above this, every
+# heuristic here -- six-frame calling, ranking by length, a reviewed viral reference -- stops
+# being safe at once, so `run_intake` refuses rather than ranking: all three fail silently and
+# a confident wrong shortlist is the one output worse than none.
+#
+# **This is a limit on the code, not a definition of a virus.** The name and the comment here
+# previously said a genome over this size "is something else", which is false: Mimivirus is
+# ~1.18 Mb, Pandoravirus ~2.47 Mb and Pithovirus ~610 kb, and all of them are viruses. The
+# gate therefore does not reject non-viral input, it rejects *viruses this pipeline was never
+# calibrated on* -- and a comment claiming virology was hiding that behind a fact. Covering
+# them is real work (gene calling that is not six-frame, a reference that includes them), not
+# a larger constant, which is why the number stays and the justification changes.
 VIRAL_GENOME_LIMIT_NT = 500_000
 
 

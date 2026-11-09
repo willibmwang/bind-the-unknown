@@ -1189,13 +1189,19 @@ def test_the_cascade_recovers_enzymes_by_homology_and_antigens_by_topology():
     assert all(row["ev"] < 1e-9 for row in remote), remote
     assert all("eplicase" in row["name"] for row in remote), remote
 
-    # The spike, by topology, with no homolog at all.
+    # The spike, by topology, with no homolog at all. Asserted as "the spike is among them"
+    # rather than "exactly one thing is": `membrane_topology` now admits an anchored surface
+    # protein that carries no glycosylation sequons, so this tier can legitimately hold more
+    # than one row, and pinning the count would fail on a regenerated artifact for the reason
+    # the second route was added.
     topology = by_tier.get("topology") or []
-    assert len(topology) == 1, topology
-    assert topology[0]["len"] == 1282, topology
-    assert "surface antigen" in topology[0]["name"]
-    # Scored below every homology hit, so a class never outranks a name.
-    assert topology[0]["score"] < min(row["score"] for row in remote)
+    assert topology, topology
+    spike = next((row for row in topology if row["len"] == 1282), None)
+    assert spike is not None, topology
+    assert "surface antigen" in spike["name"]
+    # Scored below every homology hit, so a class never outranks a name. Over every row in
+    # the tier, since the tier may now hold more than the one.
+    assert max(row["score"] for row in topology) < min(row["score"] for row in remote)
 
 
 def test_identification_falls_off_a_cliff_one_rank_out():
@@ -4806,7 +4812,15 @@ def test_every_ranked_chain_is_located_in_the_genome_it_came_from():
 
     for case in payload["cases"]:
         rows = case["foldable"]
-        assert len(rows) == len(case["scores"]) == case["coverage"]["fold_rows"], case["case"]
+        # Counted over the identified rows. The fold stage also emits a row per unidentified
+        # ORF -- folding needs a sequence and nothing else, so a protein nothing recognises is
+        # exactly what this stage can still serve -- and those rows are extra coverage, not a
+        # break in the no-dropped-chains invariant this asserts. `.get("identified", True)`
+        # reads an artifact recorded before that field existed as all-identified, so this
+        # holds on the committed record and on a fresh one.
+        identified = [r for r in rows if r.get("identified", True)]
+        assert len(identified) == len(case["scores"]) == case["coverage"]["fold_rows"], \
+            case["case"]
         assert case["coverage"]["fold_covers_every_chain"] is True, case["case"]
         for row in rows:
             assert row["sequence_recovered"] or row["not_recovered_because"], row["target"]
@@ -4965,3 +4979,104 @@ def test_a_mature_chain_is_located_by_alignment_and_not_by_coordinates():
     # confident wrong span.
     stray = locate_chain(orf, "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
     assert stray is None or stray["covered"] < 0.5, stray
+
+
+def test_the_intake_gates_do_not_reject_the_case_the_module_exists_for(monkeypatch):
+    """Four input-side gates that filtered novelty, each pinned at the behaviour it had.
+
+    These are one finding, not four: every gate here was a reasonable rule for a 30 kb
+    genome with curated relatives, and every one of them fired hardest on the input the
+    module's own docstring names as the motivating case -- a novel pathogen off a
+    metagenomic assembly. A pipeline whose intake rejects novelty cannot be measured on
+    novelty, so each gate is tested at the edge it used to fail on.
+    """
+    from hpc_pilots import intake
+    from hpc_pilots.intake import VIRAL_GENOME_LIMIT_NT, membrane_topology
+
+    # 1. The size gate reads the longest segment, not the sum. An assembly delivered as
+    # contigs used to be refused on aggregate size while no single contig was near the
+    # limit, which rejected a viral-scale genome for the way it arrived.
+    contigs = [(f"contig {i}", "A" * 20_000) for i in range(60)]
+    assert sum(len(part) for _, part in contigs) > VIRAL_GENOME_LIMIT_NT
+    assert max(len(part) for _, part in contigs) < VIRAL_GENOME_LIMIT_NT
+    monkeypatch.setattr(intake, "genome_records", lambda accession: contigs)
+    monkeypatch.setattr(intake, "fetch_reference", lambda scope="viral": "")
+    monkeypatch.setattr(intake, "read_fasta", lambda text: [])
+    try:
+        intake.run_intake("CONTIGS", record=False, remote=False)
+    except ValueError as error:
+        assert "nt segment, over the" not in str(error), \
+            f"a contig assembly was refused on summed length: {error}"
+    except Exception:                                     # noqa: BLE001
+        pass   # Anything past the gate is this stub's problem, not the gate's.
+
+    # And a genome with one truly oversized segment is still refused, on a reason that does
+    # not claim the input is non-viral. Mimivirus is 1.2 Mb and is a virus; the limit is a
+    # statement about six-frame calling and a reviewed-viral reference, not about virology.
+    monkeypatch.setattr(intake, "genome_records",
+                        lambda accession: [("giant", "A" * (VIRAL_GENOME_LIMIT_NT + 1))])
+    with pytest.raises(ValueError) as refusal:
+        intake.run_intake("GIANT", record=False, remote=False)
+    assert "calibrated" in str(refusal.value)
+    assert "not a claim that the input is not viral" in str(refusal.value)
+
+    # 2. The de-novo lane no longer requires glycosylation. An anchored surface protein with
+    # no sequons is the antibody target of a non-glycosylated pathogen, and it used to fail
+    # the gate and leave the pipeline with no target at all.
+    anchored = "M" + "LVILVILVIL" * 3 + "A" * 50 + "LVILVILVIL" * 3 + "K" * 60
+    assert membrane_topology(anchored)["sequons"] == 0
+    assert membrane_topology(anchored)["likely_surface"] is True
+    assert membrane_topology(anchored)["surface_route"] == \
+        "signal_peptide_with_membrane_anchor"
+
+    # The glycosylated route still fires and is still named, so the two are distinguishable.
+    glyco = "M" + "LVILVILVIL" * 3 + "A" * 50 + "NAT" + "G" * 20 + "NST" + "K" * 60
+    assert membrane_topology(glyco)["surface_route"] == "anchored_and_glycosylated"
+
+    # 3. And the guards the routes must not loosen: a soluble protein is not a surface
+    # antigen, and a polyprotein is not one however many membrane segments it carries.
+    assert membrane_topology("M" + "KDEKDEKDEK" * 20)["likely_surface"] is False
+    assert membrane_topology("M" + "LVILVILVIL" * 250)["likely_surface"] is False
+
+
+def test_folding_is_offered_to_candidates_nothing_identified():
+    """The one stage that needs no relative used to refuse to look at a protein without one.
+
+    `structures.folded` takes an amino-acid sequence and nothing else, so it is the only
+    structural lane open to a genuinely novel target -- which is why `intake` carries the
+    six-frame translation on every candidate. `fold_stage` then skipped every unidentified
+    row, so the lane existed and was closed at the only stage that could have used it.
+
+    Pinned with the ordering, because opening the lane must not change what a recorded run
+    folded: an unidentified ORF is reachable only when no identified chain yields a sequence.
+    """
+    from hpc_pilots.chain import fold_stage
+
+    named = "M" + "AGVKLSTEDY" * 12
+    novel = "M" + "LVILVILVIL" * 3 + "A" * 40 + "QWERTYIPAS" * 6
+
+    ranked = [
+        {"identified": True, "name": "a named chain", "rank": 1,
+         "identification_route": "exact", "orf": {"protein": named}},
+        {"identified": False, "rank": None, "orf": {"protein": novel}},
+    ]
+    folded, rows = fold_stage(ranked, ceiling=400, pool=())
+
+    # A row for each, so the unidentified candidate is covered rather than skipped.
+    assert len(rows) == 2, rows
+    by_name = {row["target"]: row for row in rows}
+    assert "unidentified ORF" in by_name, list(by_name)
+    assert by_name["unidentified ORF"]["identified"] is False
+    assert by_name["unidentified ORF"]["sequence_recovered"] is True
+    assert by_name["a named chain"]["identified"] is True
+
+    # The identified chain took the pick, with an unidentified one available. This is the
+    # ordering that keeps every committed fold reproducible.
+    assert (folded or {}).get("target_name") == "a named chain" \
+        or "absence" in (folded or {}), folded
+
+    # With nothing identified, the novel ORF is now foldable where it previously was not.
+    only_novel = [{"identified": False, "rank": None, "orf": {"protein": novel}}]
+    _folded, novel_rows = fold_stage(only_novel, ceiling=400, pool=())
+    assert len(novel_rows) == 1
+    assert novel_rows[0]["sequence_recovered"] is True
