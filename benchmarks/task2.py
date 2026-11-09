@@ -98,8 +98,16 @@ def reached(goal, state):
 # The oracle: shortest legal path, by breadth-first search
 # ---------------------------------------------------------------------------
 
+_DISTANCE_CACHE = {}
+
+
 def distances(goal, seed, limit=None):
     """Distance from every state reachable from the seed to the nearest goal state.
+
+    Memoised on the goal and the seed's facts. The sweep is pure -- it reads only
+    `selector.REQUIREMENTS`, which does not change inside a process -- and every random draw
+    re-derives the same table, so without the cache a twenty-draw run recomputed one 527-state
+    relaxation several hundred times and took minutes instead of seconds.
 
     Computed backwards from a forward sweep: the forward pass enumerates what is reachable, and
     the distance is then relaxed until it stops changing. The graph is a DAG in `facts` -- a call
@@ -107,6 +115,10 @@ def distances(goal, seed, limit=None):
     advances `called`. That is why the relaxation is iterated rather than read off a topological
     order.
     """
+    cache_key = (goal, seed.facts, seed.called)
+    if cache_key in _DISTANCE_CACHE:
+        return _DISTANCE_CACHE[cache_key]
+
     seen, frontier = {seed.key(): seed}, [seed]
     while frontier:
         nxt = []
@@ -133,6 +145,7 @@ def distances(goal, seed, limit=None):
                        default=math.inf)
             if best + 1 < dist[key]:
                 dist[key], changed = best + 1, True
+    _DISTANCE_CACHE[cache_key] = (dist, seen)
     return dist, seen
 
 
@@ -178,14 +191,24 @@ SEEDS = {
 # ---------------------------------------------------------------------------
 
 class Arm:
-    """A policy. Given a state and a goal, name the next tool to call."""
+    """A policy. Given a state and a goal, name the next tool to call.
+
+    `mask` is the set of tools the harness will not accept, which is how "do not call the same
+    tool twice" is enforced *identically for every arm*. It is a parameter and not each arm's own
+    bookkeeping for a reason that cost a wrong result to find: the first version of this file let
+    the similarity arms skip their own repeats and left the repo's selector to call `first()`
+    statelessly, which returns the same tool for ever once the facts stop changing. That one
+    asymmetry put the selector last and a lexical retriever first. Memory of what has been called
+    is a property of the agent loop, not of a ranking rule, so the harness owns it and hands every
+    arm the same thing.
+    """
 
     name = "arm"
 
     def reset(self, goal, seed):
         """Called once per episode. Stateless arms need not override."""
 
-    def choose(self, state, goal):  # pragma: no cover - interface
+    def choose(self, state, goal, mask=frozenset()):  # pragma: no cover - interface
         raise NotImplementedError
 
 
@@ -200,8 +223,8 @@ class Oracle(Arm):
     def reset(self, goal, seed):
         self._dist, _ = distances(goal, State(facts=seed))
 
-    def choose(self, state, goal):
-        moves = optimal_moves(goal, state, self._dist)
+    def choose(self, state, goal, mask=frozenset()):
+        moves = optimal_moves(goal, state, self._dist) - set(mask)
         return min(moves) if moves else None
 
 
@@ -220,9 +243,10 @@ class RepoSelector(Arm):
     def reset(self, goal, seed):
         self._unresolved = tuple(GATEABLE) if goal == "gate_all" else ()
 
-    def choose(self, state, goal):
+    def choose(self, state, goal, mask=frozenset()):
         situation = selector.Situation(known=state.facts, unresolved=self._unresolved)
-        proposal = selector.first(situation)
+        names = [t for t in TOOL_NAMES if t not in mask]
+        proposal = selector.first(situation, names=names) if names else None
         return proposal.tool if proposal else None
 
 
@@ -234,8 +258,9 @@ class RandomAny(Arm):
     def __init__(self, seed=0):
         self._rng = _random.Random(seed)
 
-    def choose(self, state, goal):
-        return self._rng.choice(TOOL_NAMES)
+    def choose(self, state, goal, mask=frozenset()):
+        pool = [t for t in TOOL_NAMES if t not in mask]
+        return self._rng.choice(pool) if pool else None
 
 
 class RandomLegal(Arm):
@@ -250,8 +275,8 @@ class RandomLegal(Arm):
     def __init__(self, seed=0):
         self._rng = _random.Random(seed)
 
-    def choose(self, state, goal):
-        allowed = [t for t in TOOL_NAMES if legal(t, state)]
+    def choose(self, state, goal, mask=frozenset()):
+        allowed = [t for t in TOOL_NAMES if legal(t, state) and t not in mask]
         return self._rng.choice(allowed) if allowed else None
 
 
@@ -284,9 +309,8 @@ class Similarity(Arm):
     no key and no model download; `embed=` takes a real encoder for anyone who wants the stronger
     version, and the ranking is otherwise identical.
 
-    It never repeats a call inside an episode. That is a concession in its favour -- a pure
-    retriever would return the same top hit for ever, and scoring that would flatter the
-    comparison rather than inform it.
+    Repeats are suppressed by the harness's `mask`, the same way they are for every other arm,
+    so this arm gets no advantage the selector does not also get.
     """
 
     name = "similarity"
@@ -300,10 +324,6 @@ class Similarity(Arm):
             counts.update(set(_tokens(text)))
         n = len(self._docs)
         self._idf = {w: math.log((n + 1) / (c + 1)) + 1 for w, c in counts.items()}
-        self._used = set()
-
-    def reset(self, goal, seed):
-        self._used = set()
 
     def _score(self, tool, goal):
         if self._embed is not None:
@@ -317,11 +337,11 @@ class Similarity(Arm):
         nh = math.sqrt(sum((c * self._idf.get(w, 1.0)) ** 2 for w, c in have.items()))
         return dot / (nw * nh) if nw and nh else 0.0
 
-    def choose(self, state, goal):
-        pool = [t for t in TOOL_NAMES if t not in self._used] or list(TOOL_NAMES)
-        pick = max(pool, key=lambda t: (self._score(t, goal), t))
-        self._used.add(pick)
-        return pick
+    def choose(self, state, goal, mask=frozenset()):
+        pool = [t for t in TOOL_NAMES if t not in mask]
+        if not pool:
+            return None
+        return max(pool, key=lambda t: (self._score(t, goal), t))
 
 
 class PreconditionAwareSimilarity(Similarity):
@@ -334,14 +354,11 @@ class PreconditionAwareSimilarity(Similarity):
 
     name = "similarity_legal"
 
-    def choose(self, state, goal):
-        allowed = [t for t in TOOL_NAMES if legal(t, state)]
-        if not allowed:
+    def choose(self, state, goal, mask=frozenset()):
+        pool = [t for t in TOOL_NAMES if legal(t, state) and t not in mask]
+        if not pool:
             return None
-        pool = [t for t in allowed if t not in self._used] or allowed
-        pick = max(pool, key=lambda t: (self._score(t, goal), t))
-        self._used.add(pick)
-        return pick
+        return max(pool, key=lambda t: (self._score(t, goal), t))
 
 
 class Scripted(Arm):
@@ -362,7 +379,7 @@ class Scripted(Arm):
     def reset(self, goal, seed):
         self._queue = list(self._moves.get(goal, []))
 
-    def choose(self, state, goal):
+    def choose(self, state, goal, mask=frozenset()):
         return self._queue.pop(0) if self._queue else None
 
 
@@ -407,7 +424,7 @@ class Episode:
         }
 
 
-def episode(arm, goal, seed_name, budget=None, strict=False):
+def episode(arm, goal, seed_name, budget=None, strict=False, no_repeat=True):
     """Run one arm to the goal or to the budget.
 
     An illegal call costs a turn and changes nothing, which is what a real dispatcher does when
@@ -416,6 +433,13 @@ def episode(arm, goal, seed_name, budget=None, strict=False):
     impossible call has produced an unusable plan. Both are reported because they answer
     different questions, and an arm that looks fine under one can look very different under the
     other.
+
+    `no_repeat` masks tools that have already been called, uniformly for every arm. Turning it
+    off measures something real and separate -- whether a policy has any memory of its own
+    episode -- and `selector.first` does not, by construction: it is a function of the facts
+    alone, so with the mask off it repeats its top choice until the budget runs out. That is
+    worth recording as a limitation of the interface and is not a ranking defect, which is why
+    the default is on.
     """
     seed = SEEDS[seed_name]
     state = State(facts=seed)
@@ -431,11 +455,20 @@ def episode(arm, goal, seed_name, budget=None, strict=False):
         run.reached = True
         return run
 
+    # Everything the arm has already tried, successfully or not. Attempted rather than merely
+    # called, because an arm with no precondition model picks the same illegal tool every turn
+    # and would burn the whole budget on one call -- which no agent loop does, since the
+    # dispatcher hands back an error. Masking failures too is what makes the gap between
+    # `similarity` and `similarity_legal` the value of the precondition model rather than the
+    # cost of an infinite retry.
+    attempted = set()
     while len(run.calls) + len(run.illegal) < budget:
         best = optimal_moves(goal, state, dist)
-        pick = arm.choose(state, goal)
+        mask = frozenset(attempted) if no_repeat else frozenset()
+        pick = arm.choose(state, goal, mask)
         if pick is None:
             break
+        attempted.add(pick)
         run.decisions += 1
         if pick in best:
             run.on_path += 1
@@ -462,7 +495,8 @@ def arms():
             RandomLegal(seed=0), RandomAny(seed=0)]
 
 
-def run(goals=GOALS, seeds=tuple(SEEDS), built=None, strict=False, repeats=20):
+def run(goals=GOALS, seeds=tuple(SEEDS), built=None, strict=False, repeats=20,
+        no_repeat=True):
     """Every arm on every goal and seed.
 
     The two random arms are averaged over `repeats` seeds and the deterministic arms are run
@@ -477,15 +511,18 @@ def run(goals=GOALS, seeds=tuple(SEEDS), built=None, strict=False, repeats=20):
                     draws = []
                     for i in range(repeats):
                         twin = type(arm)(seed=i)
-                        draws.append(episode(twin, goal, seed_name, strict=strict).record())
+                        draws.append(episode(twin, goal, seed_name, strict=strict,
+                                             no_repeat=no_repeat).record())
                     rows.append(_mean(draws, arm.name, repeats))
                 else:
-                    rows.append(episode(arm, goal, seed_name, strict=strict).record())
+                    rows.append(episode(arm, goal, seed_name, strict=strict,
+                                        no_repeat=no_repeat).record())
     return {"benchmark": "task2-tool-selection",
             "environment": {"tools": len(TOOL_NAMES), "facts": len(selector.FACTS),
                             "gateable_axes": list(GATEABLE),
                             "spec_digest": tools.spec_set_digest()},
-            "strict": strict, "random_draws": repeats, "rows": rows}
+            "strict": strict, "no_repeat": no_repeat,
+            "random_draws": repeats, "rows": rows}
 
 
 def _mean(draws, name, repeats):
@@ -546,7 +583,7 @@ def score_states(arm, goal, seed_name, points=None):
     for point in points:
         state = State(facts=frozenset(point["facts"]), called=frozenset(point["called"]))
         arm.reset(goal, SEEDS[seed_name])  # each state judged cold, so order cannot help
-        pick = arm.choose(state, goal)
+        pick = arm.choose(state, goal, frozenset(point["called"]))
         if pick in point["optimal"]:
             optimal_hits += 1
         if pick in point["legal"]:
@@ -567,7 +604,86 @@ def run_states(goals=GOALS, seeds=tuple(SEEDS), built=None):
                 continue
             for arm in (arms() if built is None else built):
                 rows.append(score_states(arm, goal, seed_name, points))
-    return {"benchmark": "task2-tool-selection-per-state", "rows": rows}
+    return {"benchmark": "task2-tool-selection-per-state", "rows": rows,
+            "discrimination": discrimination(rows),
+            "reachability": reachability(goals, seeds)}
+
+
+# Arms that are handed the precondition check for free. If these tie the oracle, the instance
+# set is not testing ordering at all -- it is testing whether an arm knows what a tool needs,
+# and the ordering rules are riding along unmeasured.
+INFORMED = ("oracle", "selector", "similarity_legal", "random_legal")
+
+
+def discrimination(rows):
+    """Whether the instance set separates the arms, reported per goal and seed.
+
+    **The diagnostic this benchmark most needs, and the reason it is computed rather than left
+    to the reader.** A benchmark on which every informed arm scores 1.000 has measured nothing
+    about ordering, however good the numbers look, and reporting those numbers as a win would be
+    the most comfortable mistake available here. So saturation is detected and named.
+
+    `saturated` means every arm that is given legality for free reached the ceiling, so the gap
+    between the system's ranking rules and a lexical retriever's is zero *on this instance* --
+    not because the rules are wrong but because the instance cannot tell them apart.
+    """
+    out = []
+    for goal in sorted({r["goal"] for r in rows}):
+        for seed_name in sorted({r["seed"] for r in rows if r["goal"] == goal}):
+            here = [r for r in rows if r["goal"] == goal and r["seed"] == seed_name]
+            scored = {r["arm"]: r["optimal_move_rate"] for r in here}
+            informed = [scored[a] for a in INFORMED if scored.get(a) is not None]
+            ceiling = scored.get("oracle")
+            uninformed = scored.get("random_any")
+            out.append({
+                "goal": goal, "seed": seed_name,
+                "states": here[0]["states"],
+                "oracle": ceiling,
+                "selector": scored.get("selector"),
+                "similarity_legal": scored.get("similarity_legal"),
+                "random_legal": scored.get("random_legal"),
+                "random_any": uninformed,
+                # The two gaps that matter, named so neither can be read as the other.
+                "gap_ordering": (None if ceiling is None or scored.get("similarity_legal") is None
+                                 else round(ceiling - scored["similarity_legal"], 4)),
+                "gap_legality": (None if ceiling is None or uninformed is None
+                                 else round(ceiling - uninformed, 4)),
+                "saturated": bool(informed) and all(abs(v - 1.0) < 1e-9 for v in informed),
+                "spread": (round(max(informed) - min(informed), 4) if informed else None),
+            })
+    return out
+
+
+def reachability(goals=GOALS, seeds=tuple(SEEDS)):
+    """Which goals are reachable from which seeds at all, and in how few calls.
+
+    A result about the registry rather than about any policy, and the one worth reading first.
+    `unlock_all` is unreachable from `novel_sequence` because no registered tool turns an
+    amino-acid sequence into a reviewed protein accession -- only `intake.rank_targets` provides
+    one, and it needs a genome. So for a protein nothing has catalogued, which is the case this
+    project is named for, five of the ten tools can never be reached. That is a gap in the
+    registry, it is what the benchmark found first, and no ordering rule can repair it.
+    """
+    out = []
+    for goal in goals:
+        for seed_name in seeds:
+            seed = State(facts=SEEDS[seed_name])
+            dist, seen = distances(goal, seed)
+            optimal = dist[seed.key()]
+            situation = selector.Situation(known=SEEDS[seed_name], unresolved=())
+            out.append({
+                "goal": goal, "seed": seed_name,
+                "seed_facts": tuple(sorted(SEEDS[seed_name])),
+                "states_reachable": len(seen),
+                "optimal_calls": None if optimal == math.inf else optimal,
+                "reachable": optimal != math.inf,
+                "tools_callable_at_seed": sum(1 for t in TOOL_NAMES
+                                              if not selector.blocked_on(t, situation)),
+                "tools_never_callable": sorted(
+                    t for t in TOOL_NAMES
+                    if not any(legal(t, s) for s in seen.values())),
+            })
+    return out
 
 
 # ---------------------------------------------------------------------------
