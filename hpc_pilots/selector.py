@@ -83,6 +83,35 @@ FACTS = (
     # never heard of this pathogen: nothing is published about an unknown target, and a great
     # deal is published about its family, which is the whole premise of a prototype-pathogen
     # argument.
+    #
+    # -- Below here the facts are *payloads* rather than identities, which is a different kind
+    # of claim and the reason the distinction is drawn in the tuple rather than left implicit.
+    #
+    # Every fact above says "something is named", so a tool needing one is waiting on an
+    # identifier. A tool needing one of these is waiting on a *measurement* -- it cannot run
+    # until another tool has computed something, not merely until something has been named. That
+    # is what gives the dependency graph depth, and its absence is why the graph was flat: all
+    # seven identity facts arrive from one call, so after identification everything was callable
+    # at once and no ordering remained to get right. A benchmark measured that flatness and
+    # found the selector's ranking rules unmeasurable against a lexical retriever -- not because
+    # the rules are wrong, but because nothing in the registry consumed another tool's output.
+    #
+    # The discipline that goes with them: a payload fact is added only together with the tool
+    # that consumes it. A declared fact nobody needs is an enumeration with no decision behind
+    # it, which is the defect `FACTS` exists to prevent, one level up.
+    "pdb_chain",
+    # One deposited chain, as a PDB id and a chain identifier, chosen from the entries mapped to
+    # an accession. Distinct from `protein_accession` for the same reason `homolog_accession` is:
+    # an accession is what a curated database calls a protein, a deposited chain is one
+    # experimental model of part of it, and a surface measured on the wrong chain of a
+    # polyprotein is the defect `representative_structure`'s own docstring records paying for --
+    # four mature chains of SARS-CoV-2 all received the replicase's patch of 381 square
+    # angstroms, which belonged to none of them.
+    "surface_markers",
+    # A computed surface measurement for one chain: patch area, exposed fraction, patch share of
+    # surface, sequons within glycan reach. The first fact here that no database holds -- it is
+    # produced by a calculation over coordinates, so nothing can be looked up to get it and
+    # nothing downstream of it can run until the calculation has been done.
 )
 
 # Which dossier axis a tool's return can legitimately speak to. Deliberately narrow, and
@@ -171,6 +200,47 @@ REQUIREMENTS = {
         scope="Measures deposited conformations, so it is silent on a target with no usable "
               "deposited chain -- the ordinary case for a novel pathogen, and the case a "
               "sequence-based prediction would have to cover instead.",
+    ),
+    "structures.picks": Requirement(
+        needs=("protein_accession",),
+        provides=("pdb_chain",),
+        # Gates nothing. Choosing which deposited chain to measure is a decision about what to
+        # do next, not a claim about the target -- and `accessibility` is what a measurement
+        # answers, not what selecting a structure answers. The temptation is real: an accession
+        # with several high-resolution chains plainly *is* better served than one with none, and
+        # that is a statement about how much structural work the target's relatives have had,
+        # which `structures.evidence`'s own warning says must never be pooled with a surface
+        # measurement.
+        gates=(),
+        scope="Ranks on resolution, so it is silent on whether the sharpest chain covers the "
+              "target: without an interval a mature chain of a polyprotein resolves to its "
+              "parent's structure.",
+    ),
+    "geometry.markers_for_chain": Requirement(
+        needs=("pdb_chain",),
+        # The first requirement in this table that cannot be satisfied by anything a database
+        # names. A chain has to have been chosen, by a call, before this can run at all -- which
+        # is what makes the structural lane three deep where every other lane is one.
+        provides=("surface_markers",),
+        # Gates nothing, and this is the conservative half of a split the fused tool does not
+        # have to make. `geometry.surface_markers` gates `accessibility` because it resolves
+        # deposition dates for the structures it measured and can therefore say when its claim
+        # became knowable. Handed a chain, this one never asks, so its measurement is real and
+        # undated -- and an undated claim enters a dossier at any clock.
+        gates=(),
+        scope="One conformation with no spread, so it reports this crystal's surface rather "
+              "than the chain's; the spread across structures of one domain reached a factor "
+              "of six on haemagglutinin.",
+    ),
+    "geometry.macrocycle_score": Requirement(
+        needs=("surface_markers",),
+        provides=(),
+        # Gates nothing, for the reason above and one more: this is a weighting of a
+        # measurement, so whatever axis the measurement can speak to, it speaks to through the
+        # tool that dated it. A re-weighting cannot substantiate more than its input.
+        gates=(),
+        scope="Reads a marker dict it is handed and checks nothing about where the numbers came "
+              "from, so it will score invented input as confidently as measured input.",
     ),
     "intake.rank_targets": Requirement(
         needs=("genome_accession",),

@@ -158,6 +158,20 @@ BENIGN = frozenset({
     # bare `TGT` from inside every code arrived 9415 times.
     "HMMER", "BLAST", "PMC", "IEDB", "DB", "ESM", "SWISS", "MODEL", "FASTA", "ISO", "MED",
     "HTTP", "pLDDT",
+    # From the split structural lane -- `structures.picks`, `geometry.markers_for_chain` and
+    # `geometry.macrocycle_score`. All three fall in classes already here: `RCSB` is a database
+    # host like `PDB` and `EBI`; `SIFTS` is the PDBe residue-mapping resource, named the way
+    # `best_structures` names an endpoint; `mmCIF` is a coordinate format like `FASTA` and
+    # `SMILES`, and it appears only inside a failure's cause explaining why a recent
+    # high-resolution entry answers 404 as a legacy PDB file.
+    #
+    # Same standard as the two blocks above, and worth restating because this list only works
+    # while it is held to one: none of the three is a target identifier, which is what the
+    # report exists to surface. Three more standing false positives would not be free -- the
+    # report already lost a real leak among noise once, when a bare `TGT` from inside every
+    # code arrived 9415 times -- so each is listed with the class it belongs to rather than
+    # added to make a test green.
+    "RCSB", "SIFTS", "mmCIF",
 })
 
 

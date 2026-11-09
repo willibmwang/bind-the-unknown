@@ -327,10 +327,24 @@ POLICIES = ()
 # writes. Registering it without an entry here was the first thing default-deny caught, which
 # is the behaviour working: the call came back `rejected` with "no policy covers" rather than
 # succeeding because nobody had thought about it.
+#
+# The three tools of the split structural lane are here for the same reasons, stated rather
+# than inherited from the fused tool they were cut out of. `structures.picks` reads PDBe and
+# returns a choice. `geometry.markers_for_chain` downloads one entry's coordinates through the
+# same `fetch_structure` cache the note above covers, and computes. `geometry.macrocycle_score`
+# touches nothing at all -- no network, no disk, arithmetic over a dict it was handed.
+#
+# Default-deny caught all three before they ever ran, which is the second time it has caught
+# exactly this: registering a tool and wiring a dispatcher is not the same as deciding it is
+# safe to call, and the gap between those two is invisible until something tries. A tool that
+# is registered, dispatched and denied is a capability a reader of the registry would report
+# as present and no caller can reach.
 NO_SIDE_EFFECT = ("chemistry.library_spec", "intake.rank_targets", "structures.evidence",
                   "geometry.surface_markers", "literature.search", "families.entries",
                   "similarity.homologs", "structures.predicted", "structures.folded",
-                  "bioactivity.prior_binders")
+                  "bioactivity.prior_binders",
+                  "structures.picks", "geometry.markers_for_chain",
+                  "geometry.macrocycle_score")
 
 
 def check_policy(spec, arguments, context):
@@ -519,6 +533,80 @@ def _structures_evidence(spec, arguments, context, wrap):
                 available_from=None)
 
 
+def _structure_picks(spec, arguments, context, wrap):
+    """Deposited chain picks for one accession.
+
+    `None` and an empty list mean different things and both are successful calls that found
+    nothing, so both are `empty` and the note says which. `None` is "chains were mapped and all
+    were too short to carry the target's surface"; an empty list is "PDBe maps no chain to this
+    accession at all". Collapsing them would make an accession nobody has deposited read the
+    same as one whose only entries are co-crystallised fragments, and only the first is a
+    statement about how much structural work the target's relatives have had.
+
+    `source_kind` is `external_record`: unlike the markers, a chain pick reports what PDBe says
+    and computes nothing but a sort order.
+    """
+    picks = spec.resolve()(**arguments)
+    source = "PDBe SIFTS best_structures and the entry's UniProt-to-author mapping"
+    if picks is None:
+        return wrap(status="empty", value=None, source_kind="external_record", source=source,
+                    note=f"chains map to {arguments.get('accession')!r} but none maps at least "
+                         f"{arguments.get('minimum_residues', 50)} residues, so none can carry "
+                         f"the target's surface")
+    if not picks:
+        return wrap(status="empty", value=None, source_kind="external_record", source=source,
+                    note=f"PDBe maps no deposited chain to {arguments.get('accession')!r} at "
+                         f"all")
+    return wrap(status="ok", value={"picks": tuple(picks)}, source_kind="external_record",
+                source=source)
+
+
+def _markers_for_chain(spec, arguments, context, wrap):
+    """Surface markers for one named chain.
+
+    The same three-way split `_surface_markers` draws, minus one case: there is no "no chain was
+    long enough" here, because the caller chose the chain. What remains is a measurement, or a
+    payload carrying `error` because the coordinates could not be fetched or parsed -- a
+    successful call that measured nothing, so `empty` and not `failed`.
+
+    `source_kind` is `computed` for the reason the fused tool gives: the coordinates are an
+    external record, the patch area is a calculation over them with a stated cut-off, and
+    reporting it as a record would let a computed number inherit a deposition's standing.
+    """
+    value = spec.resolve()(**arguments)
+    source = "RCSB coordinates for the named entry, measured with freesasa"
+    if value is None or value.get("error"):
+        detail = (value or {}).get("error")
+        return wrap(status="empty", value=None, source_kind="computed", source=source,
+                    note=f"{arguments.get('pdb_id')!r} chain {arguments.get('chain')!r} could "
+                         f"not be measured"
+                         + (f": {detail}" if detail else ""))
+    return wrap(status="ok", value=value, source_kind="computed", source=source)
+
+
+def _macrocycle_score(spec, arguments, context, wrap):
+    """One weighting of a marker set already in hand.
+
+    Reaches no network and reads no record, so `source_kind` is `computed` and the source names
+    the weights rather than an endpoint. `None` comes back for markers carrying `error`, which
+    is `empty`: scoring a failed measurement would turn it into a low number, and a low score
+    and an absent one lead to opposite decisions.
+
+    What this adapter cannot do is check where the markers came from. The signature takes a
+    dict, so a caller passing numbers nothing measured gets a confident score over invented
+    input. That is declared in the spec's warning rather than guarded here, because the guard
+    would have to live in the caller that holds the provenance and this adapter does not.
+    """
+    value = spec.resolve()(**arguments)
+    source = ("hpc_pilots.geometry, the stated macrocycle weights over a supplied marker set")
+    if value is None:
+        return wrap(status="empty", value=None, source_kind="computed", source=source,
+                    note="the supplied markers carry an error rather than a measurement, so "
+                         "there is nothing to weight")
+    return wrap(status="ok", value={"surface_score": value}, source_kind="computed",
+                source=source)
+
+
 def _surface_markers(spec, arguments, context, wrap):
     """Macrocycle surface markers for one accession.
 
@@ -666,6 +754,9 @@ DISPATCH = {
     "structures.evidence": _structures_evidence,
     "intake.rank_targets": _rank_targets,
     "geometry.surface_markers": _surface_markers,
+    "structures.picks": _structure_picks,
+    "geometry.markers_for_chain": _markers_for_chain,
+    "geometry.macrocycle_score": _macrocycle_score,
     "literature.search": _passthrough,
     "families.entries": _passthrough,
     "similarity.homologs": _passthrough,

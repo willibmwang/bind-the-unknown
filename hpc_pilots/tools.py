@@ -61,7 +61,7 @@ from .common import content_digest
 
 # Bumped by hand when a snapshot is cut. Deliberately not derived from the specs: a digest
 # answers whether two spec sets differ, a version answers which file a reader should open.
-TOOL_SET_VERSION = 7
+TOOL_SET_VERSION = 8
 
 # The declared types a parameter may take. Short on purpose, and not a coercion table: a
 # string where an integer is declared is a contract violation and not an input to parse.
@@ -624,6 +624,208 @@ TOOLS = {
                 "conformations: the spread across structures of one domain reached a factor "
                 "of six on haemagglutinin, so a single number from a single crystal is the "
                 "error this tool is built to avoid reporting."),
+    # ------------------------------------------------------------------------------------
+    # The structural chain. Three tools that consume each other's output rather than a shared
+    # identifier, which is the one shape the registry did not have.
+    #
+    # **Why they are separate tools and not one pipeline.** `geometry.surface_markers` above
+    # already does all three steps behind one accession argument, and it stays. These split the
+    # same work at its real joints because the joints are where the decisions are: which
+    # deposited chain to measure is a choice with consequences -- the wrong chain of a
+    # polyprotein gives the parent's surface and not the target's -- and it is invisible when
+    # the pipeline makes it silently. Splitting also means a caller holding a chain already
+    # need not re-resolve one, and a caller that wants the markers without the macrocycle
+    # weighting can stop before it.
+    #
+    # **What this changed, measured rather than asserted.** With only the fused tool the
+    # dependency graph was one bottleneck followed by a flat fan-out: every tool took an
+    # identifier, identification produced every identifier, so after one call everything was
+    # callable and no ordering remained. `benchmarks/task2` measured that and found the
+    # selector's ranking rules indistinguishable from a lexical retriever handed the same
+    # legality filter. The flatness was the finding, and this is the repair it pointed at.
+    #
+    # **None of the three produces evidence**, which is the same conservative call the onset
+    # lanes below make and for the same reason: a marker computed from coordinates carries no
+    # date of its own. The fused accession-keyed tool can date its claim because it resolves
+    # deposition dates for the structures it measured; a chain-keyed call is handed the chain
+    # and never asks. So these are artifacts that provide facts, and `accessibility` stays
+    # gated by the one tool that can date what it says.
+    "structures.picks": Tool(
+        name="structures.picks", version=1,
+        summary="Best-resolution deposited chains for one protein accession, as PDB id and "
+                "chain.",
+        description="Groups every SIFTS-mapped row for a UniProt accession by chain, drops "
+                    "chains mapping fewer residues than the floor, optionally keeps only "
+                    "chains covering a residue interval, and ranks what survives on "
+                    "resolution. Each pick carries the author-numbering range answering to the "
+                    "interval, read from the entry's own UniProt-to-author mapping rather than "
+                    "assumed from the construct. Returns several picks and not one, because "
+                    "the best-resolution entry is often the newest and recent depositions are "
+                    "frequently mmCIF-only, so the sharpest structure is also the one most "
+                    "likely to 404 as a legacy PDB file. It chooses a chain and measures "
+                    "nothing.",
+        entry="hpc_pilots.geometry:representative_structure",
+        parameters=(
+            Parameter("accession", "str",
+                      "Reviewed UniProt accession whose deposited chains are ranked.",
+                      required=True),
+            Parameter("minimum_residues", "int",
+                      "Floor on residues a chain must map to the accession before it is "
+                      "considered.",
+                      required=False, default=50, minimum=1),
+            Parameter("interval", "dict",
+                      "Residue interval a chain must cover at least half of, or absent to "
+                      "consider every mapped chain.",
+                      required=False, default=None),
+        ),
+        returns=(("picks", "tuple",
+                  "Chain picks, best resolution first, each with pdb_id, chain, resolution and "
+                  "the author-numbering range to keep."),),
+        return_kind="artifact",
+        # One PDBe request for the chain list, plus one author-numbering request per entry that
+        # will actually be measured -- capped at eight, which is why the count is not the 7,227
+        # chains the SARS-CoV-2 replicase maps.
+        cost_seconds=2.0, worst_case_seconds=90.0, cost_network_calls=3,
+        reaches_network=True, cost_actions=1,
+        failures=(
+            Failure("None for an accession whose only mapped chains are short fragments",
+                    "The residue floor drops them: a peptide co-crystallised with something "
+                    "else has a surface, but not the target's. Returned rather than raised, "
+                    "because a target with no usable deposited chain is the ordinary case for "
+                    "a novel pathogen.",
+                    ""),
+            Failure("an empty list where PDBe maps no chain to the accession at all",
+                    "`structures_evidence.chains` answers 404 with an empty list rather than "
+                    "raising, so an accession nothing has deposited is reported and not an "
+                    "error.",
+                    ""),
+        ),
+        produces_evidence=False,
+        citation="The accession queried and the PDBe release. A chain pick is a choice about "
+                 "what to measure and substantiates nothing on its own.",
+        warning="Ranks on resolution and not on coverage, so the sharpest chain may cover less "
+                "of the target than a blunter one. The interval filter is what keeps a mature "
+                "chain of a polyprotein from resolving to its parent's structure, and omitting "
+                "it on a polyprotein accession is how four different chains come back with one "
+                "surface between them."),
+    "geometry.markers_for_chain": Tool(
+        name="geometry.markers_for_chain", version=1,
+        summary="Surface markers computed on one named deposited chain.",
+        description="Computes per-residue solvent accessibility with freesasa on a single PDB "
+                    "chain and reports the largest contiguous exposed hydrophobic patch, the "
+                    "exposed fraction, the patch as a share of total surface, how many patches "
+                    "were found, and the count of N-linked sequons within glycan reach of the "
+                    "patch. Takes the chain it is told to take and resolves nothing: no "
+                    "accession lookup, no structure choice, no median over replicates. One "
+                    "structure is one sample of a conformational ensemble, and this reports "
+                    "that one sample without the spread that would say how much it moves.",
+        entry="hpc_pilots.geometry:surface_markers",
+        parameters=(
+            Parameter("pdb_id", "str", "PDB identifier of the entry to measure.",
+                      required=True),
+            Parameter("chain", "str",
+                      "Chain identifier within the entry, or absent to measure every chain "
+                      "together.",
+                      required=False, default=None),
+            Parameter("keep", "tuple",
+                      "Author-numbering residue range to restrict the measurement to, or "
+                      "absent for the whole chain.",
+                      required=False, default=None),
+        ),
+        returns=(("hydrophobic_patch_area", "float",
+                  "Largest contiguous exposed hydrophobic patch, square angstroms. A "
+                  "macrocyclic peptide buries roughly 400 to 800 on binding."),
+                 ("patch_fraction_of_surface", "float",
+                  "The patch as a share of total surface, which separates one large "
+                  "contiguous site from a large protein carrying many small ones."),
+                 ("exposed_fraction", "float",
+                  "Share of residues at or above the exposure cut."),
+                 ("sequons_near_patch", "int",
+                  "N-linked sequons within glycan reach of the patch."),
+                 ("patches_found", "int", "How many distinct patches were found at all."),
+                 ("numbering_agreement", "float",
+                  "How well author numbering agreed with the sequence, so a bad offset is "
+                  "visible rather than silently measured in the wrong frame."),
+                 ("total_sasa", "float", "Total solvent-accessible surface area."),
+                 ("residues_in_range", "int", "Residues actually measured after any clipping.")),
+        return_kind="artifact",
+        # The warm per-chain cost, measured in the same process that measured the fused tool:
+        # this is one structure where that one is a median over five, and it pays no accession
+        # lookup. The worst case is the cold path, where the freesasa import and one download
+        # both land on the first call.
+        cost_seconds=0.6, worst_case_seconds=60.0, cost_network_calls=1,
+        reaches_network=True, cost_actions=1,
+        requires=("freesasa",),
+        failures=(
+            Failure("a return carrying `error` rather than markers",
+                    "A chain whose coordinates cannot be fetched or parsed reports the reason "
+                    "in the payload instead of raising, so an unmeasurable chain can be told "
+                    "apart from a chain measured as featureless.",
+                    ""),
+            Failure("404 on a recent high-resolution entry",
+                    "RCSB stopped emitting legacy PDB files for recent depositions, and "
+                    "ranking on resolution selects for exactly those entries. The caller holds "
+                    "several picks for this reason.",
+                    ""),
+        ),
+        produces_evidence=False,
+        citation="The pdb_id and chain measured, and the freesasa version. A patch area with "
+                 "no structure named is not a cited claim.",
+        warning="One conformation, no spread, and therefore not a measurement of the target's "
+                "surface so much as of this crystal's. The spread across structures of one "
+                "domain reached a factor of six on haemagglutinin, so a single number here "
+                "must not be quoted as the chain's patch area. Use the accession-keyed tool "
+                "where a median and a deposition date are wanted; this one exists for a caller "
+                "that has already chosen its chain."),
+    "geometry.macrocycle_score": Tool(
+        name="geometry.macrocycle_score", version=1,
+        summary="One stated, unfitted macrocycle weighting of a surface-marker measurement.",
+        description="Collapses a marker set into a single number weighted for a macrocycle "
+                    "rather than a small molecule: it rewards a large contiguous hydrophobic "
+                    "patch, saturating at one macrocycle footprint because twice the footprint "
+                    "is not twice as good, and it penalises glycan shielding on that patch. "
+                    "That is the opposite emphasis to a small-molecule druggability score, "
+                    "which is calibrated on deep enclosed cavities -- on pocket depth the main "
+                    "protease outscores the spike receptor-binding domain, correct for a small "
+                    "molecule and backwards here. The weights are stated and not fitted, "
+                    "because there is no labelled set of macrocycle-amenable targets to fit "
+                    "against and building one from the targets under test would be circular. "
+                    "It reads markers and measures nothing itself.",
+        entry="hpc_pilots.geometry:macrocycle_surface_score",
+        parameters=(
+            Parameter("markers", "dict",
+                      "A surface-marker measurement, as the marker tools return it.",
+                      required=True),
+        ),
+        returns=(("surface_score", "float",
+                  "The weighted score, or absent where the markers carry an error rather than "
+                  "a measurement."),),
+        return_kind="artifact",
+        # Arithmetic over a dict already in hand. No network, so the count is a known zero
+        # rather than an unmeasured None, which `register` checks.
+        cost_seconds=0.0, worst_case_seconds=None, cost_network_calls=0,
+        reaches_network=False, cost_actions=1,
+        failures=(
+            Failure("None rather than a score",
+                    "Returned for markers carrying `error`: a chain that could not be measured "
+                    "and a chain measured as featureless are different statements, and scoring "
+                    "the first would turn a failed measurement into a low number.",
+                    ""),
+            Failure("KeyError on a marker set missing a field",
+                    "The weighting reads four fields by name and does not default them. A "
+                    "partial marker set is a contract violation rather than a value to guess "
+                    "at, because a missing shielding count would read as no shielding.",
+                    "KeyError"),
+        ),
+        produces_evidence=False,
+        citation="The marker set scored, by the structure it was measured on, and these "
+                 "weights. The score is uninterpretable without the measurement under it.",
+        warning="Not an affinity, not a druggability score, and not a prediction that any "
+                "macrocycle binds. It also inherits every limitation of the markers it is "
+                "handed and adds none of its own checking: this takes a marker dict as an "
+                "argument, so a caller that passes numbers no tool measured gets a confident "
+                "score over invented input. The score is only as real as its provenance, and "
+                "nothing in this signature can establish that."),
     # ------------------------------------------------------------------------------------
     # The onset lanes. Six capabilities, surveyed live against the alternatives and built as
     # their own modules, then registered here so an action can reach them. Three were declared

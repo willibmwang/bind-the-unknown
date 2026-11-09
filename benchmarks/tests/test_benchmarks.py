@@ -101,36 +101,84 @@ def test_unreachable_from_a_bare_sequence():
     assert "structures.folded" not in never  # folding is the one lane a novel sequence keeps
 
 
-def test_ordering_rules_are_not_yet_discriminated():
-    """Records the benchmark's own main negative result, so a regression would be visible.
+def test_the_ordering_rules_now_cut_both_ways():
+    """The benchmark's main result, and it reverses sign between goals.
 
-    Every arm handed the legality filter ties the oracle, so `gap_ordering` is zero everywhere:
-    on a ten-tool registry with a single bottleneck, the precondition model carries the result
-    and the ranking rules ride along unmeasured. This is pinned as a fact about the instance set
-    rather than as an achievement. If a deeper registry ever makes some gap non-zero, this test
-    fails and the claim in the docstring has to be rewritten -- which is the point of pinning it.
+    **This test replaces one that pinned the opposite.** Until the structural chain was
+    registered, `gap_ordering` was 0.000 on every instance: every tool took an identifier,
+    identification produced every identifier, so after one call everything was callable and no
+    ordering remained to get right. A lexical retriever handed the legality filter tied an
+    optimal planner everywhere, and the honest reading was that the precondition model carried
+    the whole result while the ranking rules rode along unmeasured.
+
+    `structures.picks` -> `geometry.markers_for_chain` -> `geometry.macrocycle_score` gives the
+    graph a lane three deep, and the rules become measurable in both directions at once:
+
+    * On `unlock_all`, where the goal is to widen the action set, the selector's
+      unblocking-first rule is worth about +0.7 in optimal-move rate over the same retriever.
+      That is the claim `selector.rank` makes for `score[1]`, measured for the first time.
+    * On `gate_all`, where the goal is axis coverage, the identical rule *costs* it roughly
+      half. More unlocking calls exist to be distracted by, and every one of them is a detour
+      from the two calls that actually gate the axes.
+
+    So the rule is not right or wrong, it is a bet on option value, and this is its price. The
+    docstring of `selector.rank` already names `score[1]` as "the assumption most likely to be
+    wrong"; what it lacked was a number. Pinned loosely, because the exact values move with the
+    registry and the sign is the finding.
     """
-    rows = task2.run_states()["discrimination"]
+    rows = {(r["goal"], r["seed"]): r for r in task2.run_states()["discrimination"]}
     assert rows, "no instances scored"
-    assert all(row["gap_ordering"] == 0.0 for row in rows), {
-        (r["goal"], r["seed"]): r["gap_ordering"] for r in rows}
-    # And legality is where the value is, on at least the instances that have room to show it.
-    assert any((row["gap_legality"] or 0) > 0.5 for row in rows)
+
+    unlock = rows[("unlock_all", "onset")]
+    assert unlock["selector"] == 1.0, "the selector should still play unlock_all perfectly"
+    assert unlock["gap_ordering"] > 0.5, (
+        f"unblocking-first should beat lexical retrieval on unlock_all; "
+        f"gap_ordering={unlock['gap_ordering']}, similarity_legal={unlock['similarity_legal']}")
+
+    for seed in ("onset", "known_protein"):
+        gate = rows[("gate_all", seed)]
+        assert gate["selector"] < gate["similarity_legal"], (
+            f"gate_all/{seed}: the cost of preferring option value over axis coverage should "
+            f"show up here; selector={gate['selector']}, "
+            f"similarity_legal={gate['similarity_legal']}")
+
+    # `call_all` still measures legality and not ordering: once no-repeat and legality are
+    # given, every legal order is optimal, so a uniform choice among legal calls scores 1.000.
+    # Kept as a reported instance and never quoted as a ranking result.
+    assert rows[("call_all", "onset")]["random_legal"] == 1.0
+    assert rows[("call_all", "onset")]["saturated"] is True
+
+    # Legality remains worth more than ordering on three of the four instances.
+    assert sum(1 for r in rows.values() if (r["gap_legality"] or 0) > 0.5) >= 3
 
 
-def test_selector_pays_one_call_for_preferring_option_value():
-    """The one place an arm separates from the oracle, and it is the documented judgement.
+def test_the_selector_pays_three_calls_for_preferring_option_value():
+    """What the documented judgement costs, as a sequence rather than a rate.
 
-    From a known protein with both axes open, the selector calls `families.entries` first
-    because it unblocks the literature lane, while the shortest path to gating both axes is the
-    surface measurement and the structural lookup. `selector.rank`'s own docstring names
-    `score[1]` -- unblocking before axis coverage -- as the term most likely to be wrong, and
-    this is the number that says what it costs: exactly one call.
+    From a known protein with both axes open, the shortest path is two calls: measure the
+    surface, look up the structural precedent. The selector instead spends three calls on
+    unblocking first -- `families.entries`, then `structures.picks`, then
+    `geometry.markers_for_chain` -- and only then makes the two that gate the axes. Five calls
+    where two would do.
+
+    **The price grew with the graph, which is the point.** On the flat registry this cost
+    exactly one call, because only one unblocking move existed to be distracted by. Adding a
+    three-deep structural lane added two more, and the selector took both. So `score[1]` is not
+    a fixed overhead -- it scales with how much of the graph is reachable, which is precisely
+    when option value is supposed to be worth paying for and precisely when it is not.
     """
     run = task2.episode(task2.RepoSelector(), "gate_all", "known_protein")
     assert run.reached
-    assert len(run.calls) == run.optimal + 1
-    assert run.calls[0] == "families.entries"
+    assert run.optimal == 2
+    assert len(run.calls) == 5
+    # The order is the explanation: every unblocking call comes before either gating call.
+    assert run.calls[:3] == ["families.entries", "structures.picks",
+                             "geometry.markers_for_chain"]
+    assert set(run.calls[3:]) == {"geometry.surface_markers", "structures.evidence"}
+    # And all three detours were legal, so this is a ranking choice and not a precondition bug.
+    assert not run.illegal
+    assert run.suboptimal == ["families.entries", "structures.picks",
+                              "geometry.markers_for_chain"]
 
 
 # ---------------------------------------------------------------------------

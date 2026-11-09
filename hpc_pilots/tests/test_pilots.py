@@ -2847,6 +2847,36 @@ def test_a_tool_with_no_policy_is_denied_rather_than_assumed_safe():
                       chief.Denied)
 
 
+def test_every_dispatched_tool_has_a_policy_that_admits_it():
+    """Default-deny is correct and silent, so the gap it leaves has to be pinned separately.
+
+    Registering a tool, writing its adapter and adding it to `DISPATCH` are three edits, and
+    deciding it is safe to call is a fourth that nothing forces. Miss the fourth and the tool
+    is in the registry, in the dispatch table, described accurately -- and every call comes
+    back `rejected` with "no policy covers". A reader of the registry reports the capability as
+    present; no caller can reach it. That is the reachability-ladder error this project names
+    as its costliest, arriving through the one door nothing watched.
+
+    It is not hypothetical: it happened to `geometry.surface_markers` when it was registered,
+    which the `NO_SIDE_EFFECT` comment records, and it happened again to all three tools of the
+    split structural lane. Twice is a pattern, and the second time cost a live call to find --
+    the dispatcher is reached only by executing something, so no import-time check and no
+    existing test saw it.
+
+    Deliberately asserts admission and not mere coverage. A tool matched by a named policy that
+    denies it on an empty argument set is as unreachable as one nothing covers, and asking only
+    "is it mentioned somewhere" would pass that.
+    """
+    denied = {}
+    for name in sorted(chief.DISPATCH):
+        verdict = chief.check_policy(tools.tool(name), {}, chief.context())
+        if not isinstance(verdict, chief.Allowed):
+            denied[name] = getattr(verdict, "reason", type(verdict).__name__)
+    assert denied == {}, (
+        f"these tools have a dispatcher and cannot be called: {denied}. Either add them to "
+        f"chief.NO_SIDE_EFFECT with a stated reason, or give them a policy in chief.POLICIES.")
+
+
 def test_a_tool_context_is_constructible_with_the_oracle_patched_to_raise(monkeypatch):
     # Structural rather than scored, and it catches a leak no readout could: handing a policy
     # the graded moves does not change what a deterministic policy does, so no number moves
@@ -4170,9 +4200,16 @@ def test_from_a_bare_sequence_identification_leads_because_it_unlocks_the_surfac
     assert callable_now == {"intake.rank_targets", "structures.evidence",
                             "chemistry.library_spec", "literature.search",
                             "similarity.homologs"}
+    #
+    # Six, not five, since the structural lane was split. `structures.picks` needs an accession
+    # too, so identification unlocks it alongside the rest -- and it in turn unlocks a tool that
+    # needs no identity at all, only the chain it returns. That is the first edge in this
+    # registry between two tools rather than between an identity and a tool, and the comment
+    # above generalises to it: a flat graph was the argument for building something that consumes
+    # what another tool produced, and a payload is the stronger version of that than an identity.
     assert by_name["intake.rank_targets"].unlocks == (
         "bioactivity.prior_binders", "families.entries", "geometry.surface_markers",
-        "structures.folded", "structures.predicted")
+        "structures.folded", "structures.picks", "structures.predicted")
     assert selector.first(situation).tool == "intake.rank_targets"
     # What blocks the rest, which is the shape of the dependency graph. The two structural lanes
     # wait on different facts -- one on an accession, one on a sequence -- and that split is the
@@ -4666,14 +4703,33 @@ def test_a_structural_lane_stays_open_for_a_target_identification_cannot_name():
     assert "geometry.surface_markers" not in open_now
     assert "structures.predicted" not in open_now
 
-    # Identification succeeded, so everything opens and the macrocycle surface leads -- the one
-    # instrument written for the molecule class this project exists to design.
+    # Identification succeeded, so every *identity-keyed* lane opens. It no longer opens every
+    # lane, and that is a deliberate change rather than a regression: two tools now wait on a
+    # payload -- a chosen deposited chain, and a surface measured on one -- which no amount of
+    # identification can supply. A benchmark over this graph found that while every tool took an
+    # identifier and identification produced every identifier, the selector's ranking rules were
+    # indistinguishable from text retrieval handed the same legality filter. There was nothing
+    # left to order. Splitting the structural lane is what gives the ordering something to be
+    # about, so "everything opens" was the symptom, not the invariant.
     named = selector.Situation(
         known=frozenset({"genome_accession", "target_name", "protein_accession",
                          "residue_ranges", "protein_sequence"}),
         unresolved=selector.AXES)
-    assert all(p.callable_now for p in selector.rank(named))
-    assert selector.first(named).tool == "geometry.surface_markers"
+    ranked = selector.rank(named)
+    still_blocked = {p.tool: p.blocked_on for p in ranked if not p.callable_now}
+    assert still_blocked == {"geometry.markers_for_chain": ("pdb_chain",),
+                             "geometry.macrocycle_score": ("surface_markers",)}, still_blocked
+
+    # And the lead changes with it, to the call that opens that lane. `structures.picks` unlocks
+    # two tools where measuring the surface unlocks none, so `score[1]` puts it first -- the
+    # selector choosing to open the split lane over using the fused tool that needs no pick.
+    # Whether that is the right call is exactly the judgement `selector.rank` flags as its most
+    # doubtful, and `benchmarks/task2` now prices it in both directions: worth +0.71 in
+    # optimal-move rate when the goal is to widen the action set, and a cost of three calls out
+    # of five when the goal is to gate an axis.
+    assert selector.first(named).tool == "structures.picks"
+    assert [p.tool for p in ranked][:3] == ["structures.picks", "geometry.surface_markers",
+                                            "structures.evidence"]
 
     # The fact itself has to come from identification, or none of the above is reachable.
     assert "protein_sequence" in selector.REQUIREMENTS["intake.rank_targets"].provides
