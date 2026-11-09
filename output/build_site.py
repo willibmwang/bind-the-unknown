@@ -246,8 +246,10 @@ def result_page(case, stem):
   <div class="eyebrow"><a href="index.html">runs</a> · generated from the record</div>
   <h1>{esc(label)}</h1>
   <p class="standfirst">One genome accession went in. This is what each stage of the chain
-  handed the next, read from <a href="{esc(stem)}.json">the record</a> of that run.</p>
+  handed the next.</p>
   {coverage_strip(case)}
+  <p class="reclink"><a href="{esc(stem)}.json">Download the raw record · JSON</a>
+  <span>Every number on this page is read from it. Nothing here is retyped.</span></p>
 </header>
 
 <section>
@@ -328,6 +330,26 @@ def adopt_new_records():
             print(f"  adopted {path.name} → docs/results/{stem}.json")
 
 
+def sync_records_back():
+    """Copy published records back into `runs/`, which git does not carry.
+
+    A run requested through the site happens on a GitHub runner. Only `docs/` is committed,
+    so after `git pull` the page and its record are on disk under `docs/results/` and `runs/`
+    still looks untouched — the record exists, in the one directory a reader does not think
+    to open. This walks it back, so a local `runs/` ends up holding every run the site has
+    published, which is what someone looking for one expects to find.
+    """
+    RUNS.mkdir(parents=True, exist_ok=True)
+    brought = 0
+    for path in sorted(RESULTS.glob("*.json")):
+        dest = RUNS / f"onset_chain_{path.stem}.json"
+        if not dest.exists() or dest.read_bytes() != path.read_bytes():
+            shutil.copyfile(path, dest)
+            print(f"  brought back {dest.relative_to(ROOT)}")
+            brought += 1
+    print(f"synced {brought} record(s) into runs/")
+
+
 def build_results():
     adopt_new_records()
     entries = []
@@ -394,6 +416,8 @@ def build_notebook():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--notebook", action="store_true", help="also re-render the notebook")
+    ap.add_argument("--sync", action="store_true",
+                    help="copy published records back into runs/, which git does not carry")
     args = ap.parse_args()
 
     DOCS.mkdir(exist_ok=True)
@@ -401,6 +425,8 @@ def main():
     build_index()
     build_fold_image()
     build_results()
+    if args.sync:
+        sync_records_back()
     if args.notebook:
         build_notebook()
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
