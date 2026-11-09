@@ -346,6 +346,17 @@ a{color:var(--accent)}
 .fc .t{fill:var(--fg);font-family:var(--body);font-size:14px;font-weight:500}
 .fc .sub{fill:var(--fg-3);font-family:var(--mono);font-size:10.5px}
 .fc .side{fill:var(--fg-3);font-family:var(--mono);font-size:10.5px}
+/* Every box links to the tool card that shows what it returned. An <a> inside SVG takes a
+   focus ring from the UA inconsistently, so the hover and focus states are drawn on the
+   box itself. */
+.fc a{cursor:pointer}
+.fc a .box,.fc a .io,.fc a .t{transition:fill .15s,stroke .15s}
+.fc a:hover .box,.fc a:focus-visible .box{stroke:var(--brand);fill:var(--accent-soft)}
+.fc a:hover .io,.fc a:focus-visible .io{stroke:var(--brand)}
+.fc a:hover .t,.fc a:focus-visible .t{fill:var(--accent)}
+.fc a:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px}
+.fc a:focus{outline:none}
+
 /* The step icons. Colour comes from these three classes only, so both themes are covered. */
 .fc .ik{fill:none;stroke:var(--brand);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .fc .ikf{fill:var(--brand);stroke:none}
