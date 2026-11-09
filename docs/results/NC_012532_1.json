@@ -1,0 +1,954 @@
+{
+  "case": "Zika virus, Zika virus held out",
+  "genome_accession": "NC_012532.1",
+  "reference_excluded_organism": "Zika virus",
+  "reference_scope": "viral",
+  "stages": [
+    {
+      "stage": 1,
+      "name": "Genome to candidate proteins",
+      "tool": "intake.rank_targets",
+      "endpoints": [
+        "NCBI efetch",
+        "UniProt"
+      ],
+      "input": {
+        "genome_accession": "NC_012532.1",
+        "reference_excluded_organism": "Zika virus",
+        "reference_scope": "viral"
+      },
+      "output": {
+        "genome_length_nt": 10794,
+        "segments": 1,
+        "orfs_found": 26,
+        "orfs_ranked": 12,
+        "reference_entries": 17521,
+        "reference_entries_removed": 8,
+        "identified": 1,
+        "unidentified": 11
+      },
+      "seconds": 14.48,
+      "hands_to_next": "one reviewed accession and one residue range per candidate"
+    },
+    {
+      "stage": 2,
+      "name": "Polyproteins to mature chains, and the score for each",
+      "tool": "intake.decompose + intake.rank_score",
+      "endpoints": [
+        "UniProt"
+      ],
+      "input": {
+        "candidates_in": 12
+      },
+      "output": {
+        "chains_out": 12,
+        "rubric": {
+          "conservation": 3.0,
+          "surface_exposed": 2.0,
+          "essential_class": 1.5,
+          "druggable_class": 0.8,
+          "structures_in_family_capped": 0.5
+        },
+        "all_decompositions_reproduce_the_score": true
+      },
+      "seconds": 17.17,
+      "hands_to_next": "every chain, with the accession and range its surface is measured on"
+    },
+    {
+      "stage": 3,
+      "name": "Every chain to a measured surface, or a stated reason",
+      "tool": "geometry.surface_markers",
+      "endpoints": [
+        "PDBe",
+        "RCSB",
+        "UniProt"
+      ],
+      "input": {
+        "candidates_in": 12
+      },
+      "output": {
+        "rows_out": 12,
+        "measured": 0,
+        "unmeasured": 12,
+        "nothing_dropped": true,
+        "gate_yes": 0,
+        "gate_borderline": 0,
+        "gate_no": 0
+      },
+      "seconds": 9.88,
+      "hands_to_next": "a patch median and range per chain; nothing downstream reads it yet"
+    },
+    {
+      "stage": 4,
+      "name": "A chain to coordinates, the one lane a novel target has",
+      "tool": "structures.folded",
+      "endpoints": [
+        "ESM Atlas"
+      ],
+      "input": {
+        "candidates_in": 12
+      },
+      "output": {
+        "foldable": 12,
+        "not_foldable": 0,
+        "folded_target": "Serine protease subunit NS2B",
+        "residues": 130,
+        "mean_plddt": 46.79,
+        "at_or_above_70": 0.0,
+        "sequence_sha256": "51a2f8d7dbbdf0de3b0f21b1c5a5709e8a05dd38600b39b5990c1befe137de65",
+        "error": null
+      },
+      "seconds": 0.52,
+      "hands_to_next": "coordinates. Nothing downstream reads them yet: the surface stage measures deposited structures, not predicted ones"
+    },
+    {
+      "stage": 5,
+      "name": "A library definition over the randomised region",
+      "tool": "chemistry.library_spec",
+      "endpoints": [
+        "local tables"
+      ],
+      "input": {
+        "reads_from_upstream": []
+      },
+      "output": {
+        "initiator": "ClAc-D-Tyr",
+        "closure_residue": "C",
+        "random_region": [
+          4,
+          8
+        ],
+        "alphabet_size": 25,
+        "theoretical_diversity": 158945703125
+      },
+      "seconds": 0.0,
+      "hands_to_next": "the position count the go/no-go test in arm 2 reads"
+    }
+  ],
+  "scores": [
+    {
+      "rank": 1,
+      "target": "Serine protease NS3",
+      "parent": "POLG_BUSV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "Q32ZE0",
+      "chain_range": [
+        1504,
+        2121
+      ],
+      "conservation": 0.1519,
+      "surface_exposed": true,
+      "essential_class": true,
+      "druggable_class": 3,
+      "structures_in_family": 3,
+      "score_terms": {
+        "conservation": 0.4557,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.03,
+        "druggable_class": 2.4
+      },
+      "score": 6.3857,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 2,
+      "target": "Serine protease subunit NS2B",
+      "parent": "POLG_BUSV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "Q32ZE0",
+      "chain_range": [
+        1373,
+        1503
+      ],
+      "conservation": 0.1519,
+      "surface_exposed": true,
+      "essential_class": true,
+      "druggable_class": 3,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.4557,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "score": 6.3557,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 3,
+      "target": "RNA-directed RNA polymerase/Methyltransferase NS5",
+      "parent": "POLG_BUSV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "Q32ZE0",
+      "chain_range": [
+        2525,
+        3429
+      ],
+      "conservation": 0.1519,
+      "surface_exposed": true,
+      "essential_class": true,
+      "druggable_class": 3,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.4557,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "score": 6.3557,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 4,
+      "target": "Capsid protein C",
+      "parent": "POLG_BUSV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "Q32ZE0",
+      "chain_range": [
+        1,
+        107
+      ],
+      "conservation": 0.1519,
+      "surface_exposed": true,
+      "essential_class": true,
+      "druggable_class": 0,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.4557,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 3.9557,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 5,
+      "target": "Protein prM",
+      "parent": "POLG_BUSV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "Q32ZE0",
+      "chain_range": [
+        126,
+        292
+      ],
+      "conservation": 0.1519,
+      "surface_exposed": true,
+      "essential_class": false,
+      "druggable_class": 0,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.4557,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 2.4557,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 6,
+      "target": "Peptide pr",
+      "parent": "POLG_BUSV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "Q32ZE0",
+      "chain_range": [
+        126,
+        217
+      ],
+      "conservation": 0.1519,
+      "surface_exposed": true,
+      "essential_class": false,
+      "druggable_class": 0,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.4557,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 2.4557,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 7,
+      "target": "Small envelope protein M",
+      "parent": "POLG_BUSV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "Q32ZE0",
+      "chain_range": [
+        218,
+        292
+      ],
+      "conservation": 0.1519,
+      "surface_exposed": true,
+      "essential_class": false,
+      "druggable_class": 0,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.4557,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 2.4557,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 8,
+      "target": "Envelope protein E",
+      "parent": "POLG_BUSV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "Q32ZE0",
+      "chain_range": [
+        293,
+        793
+      ],
+      "conservation": 0.1519,
+      "surface_exposed": true,
+      "essential_class": false,
+      "druggable_class": 0,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.4557,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 2.4557,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 9,
+      "target": "Non-structural protein 1",
+      "parent": "POLG_BUSV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "Q32ZE0",
+      "chain_range": [
+        794,
+        1145
+      ],
+      "conservation": 0.1519,
+      "surface_exposed": true,
+      "essential_class": false,
+      "druggable_class": 0,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.4557,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 2.4557,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 10,
+      "target": "Non-structural protein 2A",
+      "parent": "POLG_BUSV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "Q32ZE0",
+      "chain_range": [
+        1146,
+        1372
+      ],
+      "conservation": 0.1519,
+      "surface_exposed": true,
+      "essential_class": false,
+      "druggable_class": 0,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.4557,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 2.4557,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 11,
+      "target": "Non-structural protein 4A",
+      "parent": "POLG_BUSV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "Q32ZE0",
+      "chain_range": [
+        2122,
+        2248
+      ],
+      "conservation": 0.1519,
+      "surface_exposed": true,
+      "essential_class": false,
+      "druggable_class": 0,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.4557,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 2.4557,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 12,
+      "target": "Non-structural protein 4B",
+      "parent": "POLG_BUSV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "Q32ZE0",
+      "chain_range": [
+        2272,
+        2524
+      ],
+      "conservation": 0.1519,
+      "surface_exposed": true,
+      "essential_class": false,
+      "druggable_class": 0,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.4557,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 2.4557,
+      "decomposition_reproduces_score": true
+    }
+  ],
+  "surfaces": [
+    {
+      "target": "Serine protease NS3",
+      "rank": 1,
+      "identified": true,
+      "measured_on_accession": "Q32ZE0",
+      "chain_range": [
+        1504,
+        2121
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 0.81,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    },
+    {
+      "target": "Serine protease subunit NS2B",
+      "rank": 2,
+      "identified": true,
+      "measured_on_accession": "Q32ZE0",
+      "chain_range": [
+        1373,
+        1503
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 0.83,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    },
+    {
+      "target": "RNA-directed RNA polymerase/Methyltransferase NS5",
+      "rank": 3,
+      "identified": true,
+      "measured_on_accession": "Q32ZE0",
+      "chain_range": [
+        2525,
+        3429
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 0.81,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    },
+    {
+      "target": "Capsid protein C",
+      "rank": 4,
+      "identified": true,
+      "measured_on_accession": "Q32ZE0",
+      "chain_range": [
+        1,
+        107
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 0.82,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    },
+    {
+      "target": "Protein prM",
+      "rank": 5,
+      "identified": true,
+      "measured_on_accession": "Q32ZE0",
+      "chain_range": [
+        126,
+        292
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 0.8,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    },
+    {
+      "target": "Peptide pr",
+      "rank": 6,
+      "identified": true,
+      "measured_on_accession": "Q32ZE0",
+      "chain_range": [
+        126,
+        217
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 0.82,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    },
+    {
+      "target": "Small envelope protein M",
+      "rank": 7,
+      "identified": true,
+      "measured_on_accession": "Q32ZE0",
+      "chain_range": [
+        218,
+        292
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 0.82,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    },
+    {
+      "target": "Envelope protein E",
+      "rank": 8,
+      "identified": true,
+      "measured_on_accession": "Q32ZE0",
+      "chain_range": [
+        293,
+        793
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 0.82,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    },
+    {
+      "target": "Non-structural protein 1",
+      "rank": 9,
+      "identified": true,
+      "measured_on_accession": "Q32ZE0",
+      "chain_range": [
+        794,
+        1145
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 0.82,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    },
+    {
+      "target": "Non-structural protein 2A",
+      "rank": 10,
+      "identified": true,
+      "measured_on_accession": "Q32ZE0",
+      "chain_range": [
+        1146,
+        1372
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 0.89,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    },
+    {
+      "target": "Non-structural protein 4A",
+      "rank": 11,
+      "identified": true,
+      "measured_on_accession": "Q32ZE0",
+      "chain_range": [
+        2122,
+        2248
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 0.81,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    },
+    {
+      "target": "Non-structural protein 4B",
+      "rank": 12,
+      "identified": true,
+      "measured_on_accession": "Q32ZE0",
+      "chain_range": [
+        2272,
+        2524
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.",
+      "seconds": 0.82,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0
+    }
+  ],
+  "library": {
+    "initiator": "ClAc-D-Tyr",
+    "closure_residue": "C",
+    "random_region": [
+      4,
+      8
+    ],
+    "elongator_classes": [
+      "canonical",
+      "N-methyl",
+      "D-alpha-amino"
+    ],
+    "elongator_alphabet": [
+      "A",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "K",
+      "L",
+      "M",
+      "N",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "V",
+      "W",
+      "Y",
+      "NMe-Gly",
+      "NMe-Ala",
+      "NMe-Phe",
+      "D-Ala",
+      "D-Phe",
+      "D-Ser"
+    ],
+    "cyclisation": "spontaneous thioether between chloroacetyl initiator and downstream Cys",
+    "theoretical_diversity": 158945703125,
+    "endpoint_note": "A library definition only; no binding, enrichment, inhibition or antiviral property is predicted for any member."
+  },
+  "folded": {
+    "target_name": "Serine protease subunit NS2B",
+    "sequence_length": 130,
+    "sequence_sha256": "51a2f8d7dbbdf0de3b0f21b1c5a5709e8a05dd38600b39b5990c1befe137de65",
+    "mean_plddt": 46.79,
+    "confident_fraction": 0.0,
+    "pdb_sha256": "0b2af481f299585512895a6b7a4eebdc6ac3e22b29989940f9d91ce75c72c637",
+    "absence": null
+  },
+  "foldable": [
+    {
+      "target": "Serine protease NS3",
+      "rank": 1,
+      "chain_range_on_the_relative": [
+        1504,
+        2121
+      ],
+      "declared_length_aa": 618,
+      "parent_orf_length_aa": 3419,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 618,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        1499,
+        2115
+      ],
+      "recovered_length_aa": 617,
+      "chain_covered_by_alignment": 0.9935,
+      "identity_over_aligned_columns": 0.684,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 99% of it at 68% identity"
+    },
+    {
+      "target": "Serine protease subunit NS2B",
+      "rank": 2,
+      "chain_range_on_the_relative": [
+        1373,
+        1503
+      ],
+      "declared_length_aa": 131,
+      "parent_orf_length_aa": 3419,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 131,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        1369,
+        1498
+      ],
+      "recovered_length_aa": 130,
+      "chain_covered_by_alignment": 0.9924,
+      "identity_over_aligned_columns": 0.5769,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 99% of it at 58% identity"
+    },
+    {
+      "target": "RNA-directed RNA polymerase/Methyltransferase NS5",
+      "rank": 3,
+      "chain_range_on_the_relative": [
+        2525,
+        3429
+      ],
+      "declared_length_aa": 905,
+      "parent_orf_length_aa": 3419,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 905,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        2517,
+        3408
+      ],
+      "recovered_length_aa": 892,
+      "chain_covered_by_alignment": 0.979,
+      "identity_over_aligned_columns": 0.6964,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 98% of it at 70% identity"
+    },
+    {
+      "target": "Capsid protein C",
+      "rank": 4,
+      "chain_range_on_the_relative": [
+        1,
+        107
+      ],
+      "declared_length_aa": 107,
+      "parent_orf_length_aa": 3419,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 107,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        12,
+        105
+      ],
+      "recovered_length_aa": 94,
+      "chain_covered_by_alignment": 0.8692,
+      "identity_over_aligned_columns": 0.4946,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 87% of it at 49% identity"
+    },
+    {
+      "target": "Protein prM",
+      "rank": 5,
+      "chain_range_on_the_relative": [
+        126,
+        292
+      ],
+      "declared_length_aa": 167,
+      "parent_orf_length_aa": 3419,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 167,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        134,
+        290
+      ],
+      "recovered_length_aa": 157,
+      "chain_covered_by_alignment": 0.9341,
+      "identity_over_aligned_columns": 0.4872,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 93% of it at 49% identity"
+    },
+    {
+      "target": "Peptide pr",
+      "rank": 6,
+      "chain_range_on_the_relative": [
+        126,
+        217
+      ],
+      "declared_length_aa": 92,
+      "parent_orf_length_aa": 3419,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 92,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        134,
+        215
+      ],
+      "recovered_length_aa": 82,
+      "chain_covered_by_alignment": 0.8804,
+      "identity_over_aligned_columns": 0.4691,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 88% of it at 47% identity"
+    },
+    {
+      "target": "Small envelope protein M",
+      "rank": 7,
+      "chain_range_on_the_relative": [
+        218,
+        292
+      ],
+      "declared_length_aa": 75,
+      "parent_orf_length_aa": 3419,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 75,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        220,
+        290
+      ],
+      "recovered_length_aa": 71,
+      "chain_covered_by_alignment": 0.9467,
+      "identity_over_aligned_columns": 0.5352,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 95% of it at 54% identity"
+    },
+    {
+      "target": "Envelope protein E",
+      "rank": 8,
+      "chain_range_on_the_relative": [
+        293,
+        793
+      ],
+      "declared_length_aa": 501,
+      "parent_orf_length_aa": 3419,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 501,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        291,
+        790
+      ],
+      "recovered_length_aa": 500,
+      "chain_covered_by_alignment": 0.988,
+      "identity_over_aligned_columns": 0.5455,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 99% of it at 55% identity"
+    },
+    {
+      "target": "Non-structural protein 1",
+      "rank": 9,
+      "chain_range_on_the_relative": [
+        794,
+        1145
+      ],
+      "declared_length_aa": 352,
+      "parent_orf_length_aa": 3419,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 352,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        791,
+        1142
+      ],
+      "recovered_length_aa": 352,
+      "chain_covered_by_alignment": 1.0,
+      "identity_over_aligned_columns": 0.5795,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 58% identity"
+    },
+    {
+      "target": "Non-structural protein 2A",
+      "rank": 10,
+      "chain_range_on_the_relative": [
+        1146,
+        1372
+      ],
+      "declared_length_aa": 227,
+      "parent_orf_length_aa": 3419,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 227,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        1143,
+        1368
+      ],
+      "recovered_length_aa": 226,
+      "chain_covered_by_alignment": 0.9956,
+      "identity_over_aligned_columns": 0.4159,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 42% identity"
+    },
+    {
+      "target": "Non-structural protein 4A",
+      "rank": 11,
+      "chain_range_on_the_relative": [
+        2122,
+        2248
+      ],
+      "declared_length_aa": 127,
+      "parent_orf_length_aa": 3419,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 127,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        2120,
+        2242
+      ],
+      "recovered_length_aa": 123,
+      "chain_covered_by_alignment": 0.9685,
+      "identity_over_aligned_columns": 0.4634,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 97% of it at 46% identity"
+    },
+    {
+      "target": "Non-structural protein 4B",
+      "rank": 12,
+      "chain_range_on_the_relative": [
+        2272,
+        2524
+      ],
+      "declared_length_aa": 253,
+      "parent_orf_length_aa": 3419,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 253,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        2266,
+        2516
+      ],
+      "recovered_length_aa": 251,
+      "chain_covered_by_alignment": 0.9921,
+      "identity_over_aligned_columns": 0.5777,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 99% of it at 58% identity"
+    }
+  ],
+  "seconds": 42.05,
+  "coverage": {
+    "chains_ranked": 12,
+    "surface_rows": 12,
+    "surface_measured": 0,
+    "surface_refused": 12,
+    "surface_covers_every_chain": true,
+    "fold_rows": 12,
+    "fold_sequence_recovered": 12,
+    "fold_covers_every_chain": true
+  },
+  "pathogen": "Zika virus"
+}

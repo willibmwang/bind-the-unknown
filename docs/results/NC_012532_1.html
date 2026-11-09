@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zika virus · NC_012532.1 · bind-the-unknown</title>
+<meta name="description" content="Every stage of the chain run on NC_012532.1.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<nav class="sitenav"><div class="sitenav-in">
+  <a class="brand" href="../index.html">bind-the-unknown</a>
+  <a href="../results/index.html">Runs</a>
+  <a href="../notebook.html">Notebook</a>
+  <a href="https://github.com/willibmwang/bind-the-unknown">Code</a>
+</div></nav>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow"><a href="index.html">runs</a> · generated from the record</div>
+  <h1>Zika virus</h1>
+  <p class="standfirst">One genome accession went in. This is what each stage of the chain
+  handed the next, read from <a href="NC_012532_1.json">the record</a> of that run.</p>
+  <dl class="strip"><div><dt>Accession</dt><dd>NC_012532.1</dd></div><div><dt>Chains ranked</dt><dd>12</dd></div><div><dt>Surfaces measured</dt><dd>0 of 12</dd></div><div><dt>Nothing dropped</dt><dd>yes</dd></div><div><dt>Seconds</dt><dd>42</dd></div></dl>
+</header>
+
+<section>
+  <div class="sec-head"><h2>Every stage, in and out</h2><span class="tag">as recorded</span></div>
+  
+  <div class="stage">
+    <div class="stage-head"><span class="sn">1</span>
+      <span class="what">Genome to candidate proteins</span>
+      <span class="secs">intake.rank_targets · 14.48 s</span></div>
+    <div class="io">
+      <div><h3>In</h3><ul><li><span class="k">genome_accession</span> NC_012532.1</li><li><span class="k">reference_excluded_organism</span> Zika virus</li><li><span class="k">reference_scope</span> viral</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><span class="k">genome_length_nt</span> 10,794</li><li><span class="k">segments</span> 1</li><li><span class="k">orfs_found</span> 26</li><li><span class="k">orfs_ranked</span> 12</li><li><span class="k">reference_entries</span> 17,521</li><li><span class="k">reference_entries_removed</span> 8</li><li><span class="k">identified</span> 1</li><li><span class="k">unidentified</span> 11</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;one reviewed accession and one residue range per candidate</div>
+  </div>
+
+  <div class="stage">
+    <div class="stage-head"><span class="sn">2</span>
+      <span class="what">Polyproteins to mature chains, and the score for each</span>
+      <span class="secs">intake.decompose + intake.rank_score · 17.17 s</span></div>
+    <div class="io">
+      <div><h3>In</h3><ul><li><span class="k">candidates_in</span> 12</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><span class="k">chains_out</span> 12</li><li><span class="k">all_decompositions_reproduce_the_score</span> yes</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;every chain, with the accession and range its surface is measured on</div>
+  </div>
+
+  <div class="stage">
+    <div class="stage-head"><span class="sn">3</span>
+      <span class="what">Every chain to a measured surface, or a stated reason</span>
+      <span class="secs">geometry.surface_markers · 9.88 s</span></div>
+    <div class="io">
+      <div><h3>In</h3><ul><li><span class="k">candidates_in</span> 12</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><span class="k">rows_out</span> 12</li><li><span class="k">measured</span> 0</li><li><span class="k">unmeasured</span> 12</li><li><span class="k">nothing_dropped</span> yes</li><li><span class="k">gate_yes</span> 0</li><li><span class="k">gate_borderline</span> 0</li><li><span class="k">gate_no</span> 0</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;a patch median and range per chain; nothing downstream reads it yet</div>
+  </div>
+
+  <div class="stage">
+    <div class="stage-head"><span class="sn">4</span>
+      <span class="what">A chain to coordinates, the one lane a novel target has</span>
+      <span class="secs">structures.folded · 0.52 s</span></div>
+    <div class="io">
+      <div><h3>In</h3><ul><li><span class="k">candidates_in</span> 12</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><span class="k">foldable</span> 12</li><li><span class="k">not_foldable</span> 0</li><li><span class="k">folded_target</span> Serine protease subunit NS2B</li><li><span class="k">residues</span> 130</li><li><span class="k">mean_plddt</span> 46.79</li><li><span class="k">at_or_above_70</span> 0</li><li><span class="k">sequence_sha256</span> 51a2f8d7dbbdf0de3b0f21b1c5a5709e8a05dd38600b39b5990c1befe137de65</li><li><span class="k">error</span> —</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;coordinates. Nothing downstream reads them yet: the surface stage measures deposited structures, not predicted ones</div>
+  </div>
+
+  <div class="stage">
+    <div class="stage-head"><span class="sn">5</span>
+      <span class="what">A library definition over the randomised region</span>
+      <span class="secs">chemistry.library_spec · 0 s</span></div>
+    <div class="io">
+      <div><h3>In</h3><ul><li>nothing from upstream</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><span class="k">initiator</span> ClAc-D-Tyr</li><li><span class="k">closure_residue</span> C</li><li><span class="k">alphabet_size</span> 25</li><li><span class="k">theoretical_diversity</span> 158,945,703,125</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;the position count the go/no-go test in arm 2 reads</div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>What it picked</h2><span class="tag">top 8</span></div>
+  <div class="bars">
+    <div class="bi"><div class="bi-top">
+      <span class="nm">1 · Serine protease NS3</span>
+      <span class="vl">6.39</span></div>
+      <div class="track"><div class="fill" style="width:100.0%"></div></div></div>
+    <div class="bi"><div class="bi-top">
+      <span class="nm">2 · Serine protease subunit NS2B</span>
+      <span class="vl">6.36</span></div>
+      <div class="track"><div class="fill" style="width:99.5%"></div></div></div>
+    <div class="bi"><div class="bi-top">
+      <span class="nm">3 · RNA-directed RNA polymerase/Methyltransferase NS5</span>
+      <span class="vl">6.36</span></div>
+      <div class="track"><div class="fill" style="width:99.5%"></div></div></div>
+    <div class="bi"><div class="bi-top">
+      <span class="nm">4 · Capsid protein C</span>
+      <span class="vl">3.96</span></div>
+      <div class="track"><div class="fill" style="width:61.9%"></div></div></div>
+    <div class="bi"><div class="bi-top">
+      <span class="nm">5 · Protein prM</span>
+      <span class="vl">2.46</span></div>
+      <div class="track"><div class="fill" style="width:38.5%"></div></div></div>
+    <div class="bi"><div class="bi-top">
+      <span class="nm">6 · Peptide pr</span>
+      <span class="vl">2.46</span></div>
+      <div class="track"><div class="fill" style="width:38.5%"></div></div></div>
+    <div class="bi"><div class="bi-top">
+      <span class="nm">7 · Small envelope protein M</span>
+      <span class="vl">2.46</span></div>
+      <div class="track"><div class="fill" style="width:38.5%"></div></div></div>
+    <div class="bi"><div class="bi-top">
+      <span class="nm">8 · Envelope protein E</span>
+      <span class="vl">2.46</span></div>
+      <div class="track"><div class="fill" style="width:38.5%"></div></div></div></div><p class="after">4 further chains were ranked and scored; the full list is in the record.</p>
+</section>
+
+<section>
+  <div class="sec-head"><h2>Surfaces</h2><span class="tag">one row per ranked chain</span></div>
+  <div class="good"><p><b>12 answers for
+  12 chains.</b> A chain can be refused. It cannot disappear.</p></div>
+  
+  <div class="tiles"><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span></div>
+  <div class="legend">
+    <span><span class="key m"></span> 0 measured</span>
+    <span><span class="key r"></span> 12 refused, each with a reason</span>
+  </div>
+  
+  <div class="accs"><span class="lead">Why each of the 12 was refused:</span>
+    <div class="pdbrow none"><span class="who">Serine protease NS3</span>
+      <span class="ids">PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.</span></div>
+    <div class="pdbrow none"><span class="who">Serine protease subunit NS2B</span>
+      <span class="ids">PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.</span></div>
+    <div class="pdbrow none"><span class="who">RNA-directed RNA polymerase/Methyltransferase NS5</span>
+      <span class="ids">PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.</span></div>
+    <div class="pdbrow none"><span class="who">Capsid protein C</span>
+      <span class="ids">PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.</span></div>
+    <div class="pdbrow none"><span class="who">Protein prM</span>
+      <span class="ids">PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.</span></div>
+    <div class="pdbrow none"><span class="who">Peptide pr</span>
+      <span class="ids">PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.</span></div>
+    <div class="pdbrow none"><span class="who">Small envelope protein M</span>
+      <span class="ids">PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.</span></div>
+    <div class="pdbrow none"><span class="who">Envelope protein E</span>
+      <span class="ids">PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.</span></div>
+    <div class="pdbrow none"><span class="who">Non-structural protein 1</span>
+      <span class="ids">PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.</span></div>
+    <div class="pdbrow none"><span class="who">Non-structural protein 2A</span>
+      <span class="ids">PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.</span></div>
+    <div class="pdbrow none"><span class="who">Non-structural protein 4A</span>
+      <span class="ids">PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.</span></div>
+    <div class="pdbrow none"><span class="who">Non-structural protein 4B</span>
+      <span class="ids">PDBe maps no deposited chain to Q32ZE0 at all. The protein may be well solved under another accession; this entry is not it.</span></div></div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>The structure it folded</h2><span class="tag">step 4</span></div>
+  <div class="two">
+    <div class="card acc">
+      <div class="label">Serine protease subunit NS2B</div>
+      <div class="big">130 res</div>
+      <div class="sub">confidence 46.79 of 100 ·
+        0.0 % at or above 70<br>
+        confidence is not accuracy</div>
+    </div>
+    <div class="card acc">
+      <div class="label">The library defined over the randomised region</div>
+      <div class="big">158,945,703,125</div>
+      <div class="sub">ClAc-D-Tyr initiator ·
+        4–8 positions<br>
+        a definition only — no binding or antiviral property is predicted</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2>What is still missing</h2><span class="tag">on every run</span></div>
+  <div class="note"><p><b>The library ignores the surface.</b> Step 5 reads nothing steps 1 to 4
+  measured, on this genome as on any other.</p></div>
+  <div class="note"><p><b>Nothing comes back from the lab.</b> No screening result feeds the next
+  design yet.</p></div>
+</section>
+</div>
+<footer class="sitefoot"><div class="wrap">
+  Built from the records in <code>runs/</code> by <code>output/build_site.py</code>.
+  Every number on this site is read from a record, not retyped.
+</div></footer>
+</body>
+</html>

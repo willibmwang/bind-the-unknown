@@ -1,0 +1,42 @@
+name: Run the chain on a genome
+description: Give one NCBI nucleotide accession and get every stage's output back as a page.
+title: "Run: "
+labels: ["run-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        One accession is the whole input. No target name, no shortlist, no structure.
+
+        A GitHub Action will run all five stages against NCBI, UniProt, PDBe, RCSB and
+        ESMFold, then comment here with a link to your result page. It takes a few minutes.
+
+        This is antiviral work. A genome too large to be viral is refused rather than
+        ranked, and the reference it identifies against is reviewed viral proteins.
+  - type: input
+    id: accession
+    attributes:
+      label: NCBI nucleotide accession
+      description: >-
+        For example NC_002728.1 (Nipah virus). For a genome split across segments, separate
+        the accessions with commas.
+      placeholder: NC_002728.1
+    validations:
+      required: true
+  - type: input
+    id: pathogen
+    attributes:
+      label: What to call it
+      description: The name that appears as the title of your result page.
+      placeholder: Nipah virus
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Anything else (optional)
+      description: >-
+        Not read by the pipeline. Useful if the result looks wrong and you want to say what
+        you expected.
+    validations:
+      required: false
