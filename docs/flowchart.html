@@ -5,18 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>From an accession to ranked targets · bind-the-unknown</title>
 <meta name="description" content="The shape of the pipeline for any virus: one accession in, ranked targets out, with nothing fitted anywhere on the path.">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400;1,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<nav class="sitenav"><div class="sitenav-in">
+<a class="skip" href="#main">Skip to the content</a>
+<nav class="sitenav" aria-label="Site"><div class="sitenav-in">
   <a class="brand" href="index.html">bind-the-unknown</a>
-  <a href="flowchart.html">Flowchart</a>
+  <a href="flowchart.html" aria-current="page">Diagram</a>
   <a href="results/index.html">Runs</a>
   <a href="notebook.html">Notebook</a>
   <a href="https://github.com/willibmwang/bind-the-unknown">Code</a>
+  <button class="themer" id="themer" type="button">Dark</button>
 </div></nav>
-<div class="wrap">
+<main class="wrap" id="main">
 
 <header class="top">
   <div class="eyebrow">arm 1 · the whole path</div>
@@ -110,11 +113,37 @@
   ranking.</p>
 </section>
 
-</div>
+</main>
 
 <footer class="sitefoot"><div class="wrap">
   Built from the records in <code>runs/</code> by <code>output/build_site.py</code>.
   Every number on this site is read from a record, not retyped.
 </div></footer>
+
+<script>
+(function () {
+  var root = document.documentElement, btn = document.getElementById("themer");
+  function stored() { try { return localStorage.getItem("theme"); } catch (e) { return null; } }
+  function system() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark" : "light";
+  }
+  function show(mode) {
+    // The button names the theme it switches to, which is the opposite of the current one.
+    var next = mode === "dark" ? "light" : "dark";
+    btn.textContent = next === "dark" ? "Dark" : "Light";
+    btn.setAttribute("aria-label", "Switch to the " + next + " theme");
+  }
+  var mode = stored() || system();
+  root.setAttribute("data-theme", mode);
+  show(mode);
+  btn.addEventListener("click", function () {
+    mode = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", mode);
+    try { localStorage.setItem("theme", mode); } catch (e) {}
+    show(mode);
+  });
+})();
+</script>
 </body>
 </html>

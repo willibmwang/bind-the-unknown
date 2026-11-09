@@ -1,8 +1,8 @@
-<div class="wrap">
+<main class="wrap" id="main">
 
 <header class="top">
   <div class="eyebrow">bind-the-unknown</div>
-  <h1>One SARS-CoV-2 genome in, every step out</h1>
+  <h1>One <span class="nb">SARS-CoV-2</span> genome in, every step out</h1>
   <p class="standfirst">The system is given a genome accession and nothing else — no target name, no shortlist, no structure. This is what came back.</p>
   <dl class="strip">
     <div><dt>Input</dt><dd>NC_045512.2</dd></div>
@@ -10,9 +10,63 @@
     <div><dt>Difficulty</dt><dd>SARS-CoV-2 hidden</dd></div>
     <div><dt>Time taken</dt><dd>86 seconds</dd></div>
   </dl>
+  <div class="acts">
+    <a class="btn" href="#picked">See what it picked <span aria-hidden="true">→</span></a>
+    <a class="btn ghost" href="#run">Run it on your own pathogen <span aria-hidden="true">→</span></a>
+  </div>
 </header>
 
-<section>
+<div class="opener">
+  <div class="lbl">In plain terms</div>
+  <p><b>The question.</b> A new virus turns up. Which of its proteins should a drug aim at?
+  Picking that target is normally expert judgement — reading the literature, and comparing the
+  new virus to ones that are already understood.</p>
+  <p><b>What this does.</b> It takes one accession number — the public database ID for a
+  genome — and nothing else. From that it works out which proteins the virus makes, ranks them
+  by how promising a drug target each one looks, checks whether a drug would have anywhere to
+  grip, and predicts one protein's 3-D shape. Five steps, about a minute and a half, with no
+  person naming the target.</p>
+  <p><b>The test below.</b> It was given SARS-CoV-2 — with SARS-CoV-2 itself removed from
+  everything it was allowed to look up, so it could not simply recognise the answer. It still
+  put the real drug targets at the top, including the one an approved antiviral already
+  hits.</p>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <h2>What is on this page</h2>
+
+  <div class="grp">Start here</div>
+  <a class="tocrow" href="#how"><span class="n">01</span>
+    <span class="ti">How it works<span class="ds">The whole pipeline as one diagram, with the real numbers on it.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>
+  <a class="tocrow" href="#run"><span class="n">02</span>
+    <span class="ti">Run it on your own pathogen<span class="ds">Give it an accession and a page like this one gets written for your genome.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>
+
+  <div class="grp">Arm 1 · from a genome to a ranked shortlist</div>
+  <a class="tocrow" href="#steps"><span class="n">03</span>
+    <span class="ti">The five steps<span class="ds">What went into each step, and what came out of it.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>
+  <a class="tocrow" href="#tools"><span class="n">04</span>
+    <span class="ti">The tools each step called<span class="ds">The six calls, the databases they reached, and what each one returned.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>
+  <a class="tocrow" href="#picked"><span class="n">05</span>
+    <span class="ti">What it picked<span class="ds">The ranked targets and their scores — the top eight of twenty.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>
+  <a class="tocrow" href="#toolkit"><span class="n">06</span>
+    <span class="ti">The toolkit<span class="ds">All ten tools, including the five exercised only to record how they fail.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>
+
+  <div class="grp two">Arm 2 · will a model be worth fitting?</div>
+  <a class="tocrow" href="#crosses"><span class="n">07</span>
+    <span class="ti">What crosses from arm 1<span class="ds">One number — and everything that does not cross.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>
+  <a class="tocrow" href="#answer"><span class="n">08</span>
+    <span class="ti">The answer, measured<span class="ds">When a model fitted on the first batch beats picking at random.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>
+</nav>
+
+<section id="how">
   <div class="sec-head"><h2>How it works</h2><span class="tag">fig. 1</span></div>
   <figure>
     <div class="armband a1">
@@ -129,7 +183,7 @@
       </div>
     </div>
     <a class="go" id="submit" href="#run" role="button">Open the request form</a>
-    <div class="err" id="err"></div>
+    <div class="err" id="err" role="status" aria-live="polite"></div>
     <p class="hint">For a genome split across segments, separate the accessions with commas. A genome too large to be viral is refused rather than ranked: this is antiviral work, and the reference it identifies against is reviewed viral proteins.</p>
     <div class="steps3">
       <div><b>1 · you</b> This opens a prefilled issue on GitHub. You need an account there; nothing else is asked of you.</div>
@@ -192,7 +246,7 @@
   surface either measured or refused with a reason.</p>
 </div>
 
-<section>
+<section id="steps">
   <div class="sec-head"><h2>The five steps</h2><span class="tag">what went in, what came out</span></div>
 
   <div class="stage">
@@ -256,7 +310,7 @@
   </div>
 </section>
 
-<section>
+<section id="tools">
   <div class="sec-head"><h2>The tools each step called</h2><span class="tag">name, databases, return</span></div>
   <p class="cap">Six tool calls run the five steps above. Each is a named function with a declared cost and a recorded return — not a prompt, and not a model deciding what to do next. What each one gave back is below.</p>
 
@@ -385,7 +439,7 @@
   <p class="after">The call records in <span class="mono">runs/toolcalls/</span> log each tool's cost, request count and failure modes but deliberately keep no payload. Everything above is read from the run record itself, and from the stored fold.</p>
 </section>
 
-<section>
+<section id="picked">
   <div class="sec-head"><h2>What it picked</h2><span class="tag">top 8 of 20</span></div>
   <p class="cap">The score is five ingredients with weights fixed before the run: how conserved the protein is, whether it sits on the outside, whether the virus needs it, whether its class is usually druggable, and how much structural work already exists. Spike and the main protease come out level at the top.</p>
   <div class="bars">
@@ -401,7 +455,7 @@
   <p class="after">The remaining 12 score from 4.56 down to 0.91. The headline check: with SARS-CoV-2 removed from the reference, the system still surfaced the real countermeasure targets — including the one an approved antiviral already hits.</p>
 </section>
 
-<section>
+<section id="toolkit">
   <div class="sec-head"><h2>The toolkit</h2><span class="tag">10 tools · 91 calls</span></div>
   <p class="cap">Ten tools in all, each calling live public biology databases. The five detailed above run inside the chain; the other five are reachable from the same four facts step 1 produces, and were exercised separately to record what they cost and how they fail. Deliberately bad inputs are included, so each failure mode is on record rather than assumed.</p>
   <div class="chips">
@@ -429,7 +483,7 @@
   so it is available before anything is synthesised and costs no assay to get.</p>
 </div>
 
-<section>
+<section id="crosses">
   <div class="sec-head"><h2>What crosses from arm 1</h2><span class="tag">one number</span></div>
   <p class="cap">Arm 2 does not run on arm 1's target, and it never sees the genome arm 1
   started from. It answers a question about the <em>shape</em> of a library, and arm 1's
@@ -451,7 +505,7 @@
   </div>
 </section>
 
-<section>
+<section id="answer">
   <div class="sec-head"><h2>The answer, measured</h2><span class="tag">arm 2</span></div>
   <p class="cap">Will a model fitted on the first 128 measurements pick held-out binders better
   than choosing at random? Measured across eight published datasets at a matched batch size.
@@ -482,4 +536,4 @@
   Full technical diagram: <code>output/fig_pipeline_holdout.png</code>
 </footer>
 
-</div>
+</main>

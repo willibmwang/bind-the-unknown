@@ -66,9 +66,23 @@ def num(value):
     return esc(value)
 
 
-def head(title, description, depth=0):
-    """A complete document head. `depth` is how many directories deep the page sits."""
+def head(title, description, depth=0, current=""):
+    """A complete document head. `depth` is how many directories deep the page sits.
+
+    `current` is the nav key for the page being written, so that link is marked
+    `aria-current="page"` and a screen reader says which page this is rather than reading
+    five indistinguishable links.
+    """
     up = "../" * depth
+    nav = [("flowchart", f"{up}flowchart.html", "Diagram"),
+           ("runs", f"{up}results/index.html", "Runs"),
+           ("notebook", f"{up}notebook.html", "Notebook"),
+           ("code", f"https://github.com/{REPO}", "Code")]
+    CUR = ' aria-current="page"'
+    links = "\n  ".join(
+        f'<a href="{href}"{CUR if key == current else ""}>{label}</a>'
+        for key, href, label in nav)
+    brand_cur = CUR if current == "index" else ""
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -76,17 +90,49 @@ def head(title, description, depth=0):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(description)}">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400;1,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="{up}style.css">
 </head>
 <body>
-<nav class="sitenav"><div class="sitenav-in">
-  <a class="brand" href="{up}index.html">bind-the-unknown</a>
-  <a href="{up}flowchart.html">Flowchart</a>
-  <a href="{up}results/index.html">Runs</a>
-  <a href="{up}notebook.html">Notebook</a>
-  <a href="https://github.com/{REPO}">Code</a>
+<a class="skip" href="#main">Skip to the content</a>
+<nav class="sitenav" aria-label="Site"><div class="sitenav-in">
+  <a class="brand" href="{up}index.html"{brand_cur}>bind-the-unknown</a>
+  {links}
+  <button class="themer" id="themer" type="button">Dark</button>
 </div></nav>
+"""
+
+
+# The theme the reader picked, remembered per browser. Everything here is wrapped in
+# try/catch: localStorage throws outright in a private window with site data blocked, and a
+# page that cannot remember a preference must still render in the one the OS asks for.
+THEME_JS = """
+<script>
+(function () {
+  var root = document.documentElement, btn = document.getElementById("themer");
+  function stored() { try { return localStorage.getItem("theme"); } catch (e) { return null; } }
+  function system() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark" : "light";
+  }
+  function show(mode) {
+    // The button names the theme it switches to, which is the opposite of the current one.
+    var next = mode === "dark" ? "light" : "dark";
+    btn.textContent = next === "dark" ? "Dark" : "Light";
+    btn.setAttribute("aria-label", "Switch to the " + next + " theme");
+  }
+  var mode = stored() || system();
+  root.setAttribute("data-theme", mode);
+  show(mode);
+  btn.addEventListener("click", function () {
+    mode = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", mode);
+    try { localStorage.setItem("theme", mode); } catch (e) {}
+    show(mode);
+  });
+})();
+</script>
 """
 
 
@@ -95,7 +141,7 @@ FOOT = """
   Built from the records in <code>runs/</code> by <code>output/build_site.py</code>.
   Every number on this site is read from a record, not retyped.
 </div></footer>
-</body>
+""" + THEME_JS + """</body>
 </html>
 """
 
@@ -106,7 +152,7 @@ def build_index():
     body = (ROOT / "site" / "body.html").read_text()
     out = (head(f"{SITE} · one genome in, every step out",
                 "What came back when the system was given one SARS-CoV-2 genome accession "
-                "and nothing else.")
+                "and nothing else.", current="index")
            + body + FOOT)
     (DOCS / "index.html").write_text(out)
     print(f"wrote docs/index.html  ({len(out):,} bytes)")
@@ -122,7 +168,7 @@ def build_flowchart():
     body = (ROOT / "site" / "flowchart.html").read_text()
     out = (head(f"From an accession to ranked targets · {SITE}",
                 "The shape of the pipeline for any virus: one accession in, ranked targets "
-                "out, with nothing fitted anywhere on the path.")
+                "out, with nothing fitted anywhere on the path.", current="flowchart")
            + body + FOOT)
     (DOCS / "flowchart.html").write_text(out)
     print(f"wrote docs/flowchart.html  ({len(out):,} bytes)")
@@ -216,7 +262,7 @@ def surface_block(case):
     why_block = (f'<div class="accs"><span class="lead">Why each of the '
                  f'{len(refused)} was refused:</span>{why}</div>') if refused else ""
     return f"""
-  <div class="tiles">{tiles}</div>
+  <div class="tiles" aria-hidden="true">{tiles}</div>
   <div class="legend">
     <span><span class="key m"></span> {len(measured)} measured</span>
     <span><span class="key r"></span> {len(refused)} refused, each with a reason</span>
@@ -257,8 +303,9 @@ def result_page(case, stem):
 </section>"""
 
     return (head(f"{title} · {SITE}",
-                 f"Every stage of the chain run on {acc}.", depth=1) + f"""
-<div class="wrap">
+                 f"Every stage of the chain run on {acc}.", depth=1,
+                 current="runs") + f"""
+<main class="wrap" id="main">
 <header class="top">
   <div class="eyebrow"><a href="index.html">runs</a> · generated from the record</div>
   <h1>{esc(label)}</h1>
@@ -294,7 +341,7 @@ def result_page(case, stem):
   <div class="note"><p><b>Nothing comes back from the lab.</b> No screening result feeds the next
   design yet.</p></div>
 </section>
-</div>""" + FOOT)
+</main>""" + FOOT)
 
 
 # --------------------------------------------------------------------- the results index
@@ -310,8 +357,8 @@ def results_index(entries):
         body = ('<div class="good"><p>No runs have been submitted yet. Yours would be the '
                 'first — the form is on the front page.</p></div>')
     return (head(f"Runs · {SITE}", "Every pathogen genome this system has been run on.",
-                 depth=1) + f"""
-<div class="wrap">
+                 depth=1, current="runs") + f"""
+<main class="wrap" id="main">
 <header class="top">
   <div class="eyebrow">generated · one page per record</div>
   <h1>Every genome this has been run on</h1>
@@ -319,7 +366,7 @@ def results_index(entries):
   accession on the <a href="../index.html">front page</a> and yours joins the list.</p>
 </header>
 <section>{body}</section>
-</div>""" + FOOT)
+</main>""" + FOOT)
 
 
 def build_results():
