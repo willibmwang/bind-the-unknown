@@ -7,34 +7,47 @@
      contents block on the landing page has to be renumbered by hand to match.
    * --fg-3 is the lightest text allowed anywhere. It is chosen to clear 4.5:1 against
      --bg in both themes; lightening it fails contrast for small text. */
+/* Palette and type taken from synx-tx.com: the page grey #f6f7f7, near-black ink, and the
+   violet out of the SynX mark. Two violets, deliberately:
+     --brand  #ac31ff is the mark's own colour, and it is 4.22:1 on the page grey. That is
+              fine for a bar, a fill or an icon, and NOT enough for text.
+     --accent is the same hue darkened to clear 4.5:1, and is what text and links use.
+   Never swap one for the other. Their site also asks for "Oak Sans" on headings, which is
+   not a Google font and silently falls back to Arial there; headings use the display face. */
 :root{
-  --bg:#faf8f5; --surface:#ffffff; --surface-2:#f3f0ea;
-  --fg:#17181a; --fg-2:#52555c; --fg-3:#63676e;
-  --rule:#e4dfd6; --rule-2:#efebe3;
-  --accent:#15607d; --accent-soft:#eaf2f6;
+  --bg:#f6f7f7; --surface:#ffffff; --surface-2:#eceeef;
+  --fg:#1d1d1f; --fg-2:#444444; --fg-3:#636368;
+  --rule:#dfe1e2; --rule-2:#eceeef;
+  --brand:#ac31ff;
+  --accent:#8f1ad8; --accent-soft:#f4e9fd;
   --warn:#8a5410; --warn-soft:#faf2e4;
   --ok:#1b6b4d;
-  --display:"Spectral",Georgia,"Times New Roman",serif;
-  --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --band:#2a2a2e; --band-fg:#f6f7f7; --on-accent:#ffffff;
+  --display:"Plus Jakarta Sans","Helvetica Neue",Arial,sans-serif;
+  --body:"Manrope","Helvetica Neue",Arial,sans-serif;
   --mono:"IBM Plex Mono","SF Mono",Menlo,Consolas,monospace;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#121110; --surface:#1a1917; --surface-2:#232220;
-  --fg:#ece8e1; --fg-2:#aeaaa3; --fg-3:#8e9298;
-  --rule:#302e2a; --rule-2:#262421;
-  --accent:#74bcd9; --accent-soft:#15262e;
+  --bg:#111113; --surface:#1a1a1d; --surface-2:#232327;
+  --fg:#f0f0f2; --fg-2:#b2b2b8; --fg-3:#8e8e96;
+  --rule:#2e2e33; --rule-2:#242428;
+  --brand:#c66bff;
+  --accent:#c47cff; --accent-soft:#241132;
   --warn:#d79c53; --warn-soft:#251c10;
   --ok:#62c198;
+  --band:#000000; --band-fg:#f0f0f2; --on-accent:#111113;
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --bg:#121110; --surface:#1a1917; --surface-2:#232220;
-  --fg:#ece8e1; --fg-2:#aeaaa3; --fg-3:#8e9298;
-  --rule:#302e2a; --rule-2:#262421;
-  --accent:#74bcd9; --accent-soft:#15262e;
+  --bg:#111113; --surface:#1a1a1d; --surface-2:#232327;
+  --fg:#f0f0f2; --fg-2:#b2b2b8; --fg-3:#8e8e96;
+  --rule:#2e2e33; --rule-2:#242428;
+  --brand:#c66bff;
+  --accent:#c47cff; --accent-soft:#241132;
   --warn:#d79c53; --warn-soft:#251c10;
   --ok:#62c198;
+  --band:#000000; --band-fg:#f0f0f2; --on-accent:#111113;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -68,29 +81,29 @@ a:focus-visible,button:focus-visible,input:focus-visible,[role="button"]:focus-v
 /* masthead */
 header.top{padding-block:76px 34px;border-bottom:1px solid var(--rule)}
 .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--fg-3)}
-h1{font-family:var(--display);font-weight:600;font-size:clamp(30px,6.2vw,56px);line-height:1.04;letter-spacing:-.02em;margin-top:16px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,4.8vw,50px);line-height:1.12;letter-spacing:-.03em;margin-top:18px}
 /* A hyphen is a break opportunity, so "SARS-CoV-2" splits across lines on a phone.
    Wrap such a token in <span class="nb"> to keep it whole. */
 .nb{white-space:nowrap}
-.standfirst{color:var(--fg-2);font-size:20px;line-height:1.5;max-width:50ch;margin-top:18px}
-.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:7px;overflow:hidden;margin-top:32px}
+.standfirst{color:var(--fg-2);font-size:21px;font-weight:300;line-height:1.5;max-width:52ch;margin-top:20px}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:14px;overflow:hidden;margin-top:32px}
 .strip div{background:var(--surface);padding:15px 17px;min-width:0}
 .strip dt{font-size:13px;color:var(--fg-3);line-height:1.3}
 .strip dd{margin:6px 0 0;font-family:var(--mono);font-size:16px;font-weight:500;overflow-wrap:break-word;font-variant-numeric:tabular-nums}
 
 /* buttons, for the two things a visitor can actually do from the top of the page */
 .acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
-.btn{display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:var(--surface);
-  border:1px solid var(--accent);border-radius:6px;padding:13px 21px;font-size:16px;font-weight:500;
-  text-decoration:none;transition:opacity .15s}
-.btn:hover{opacity:.86}
+.btn{display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:var(--on-accent);
+  border:1px solid var(--accent);border-radius:8px;padding:14px 26px;font-size:16px;font-weight:600;
+  text-decoration:none;transition:filter .3s ease}
+.btn:hover{filter:brightness(1.12)}
 .btn.ghost{background:transparent;color:var(--accent);border-color:var(--rule)}
 .btn.ghost:hover{border-color:var(--accent);opacity:1}
 
 /* The plain-English opener. `.plain` was taken — it is the gloss in a tool-card head — so
    this is `.opener`, and the two must not be merged. */
-.opener{margin-top:40px;padding:26px 28px;background:var(--surface);border:1px solid var(--rule);
-  border-left:3px solid var(--accent);border-radius:8px}
+.opener{margin-top:40px;padding:28px 30px;background:var(--surface);border:1px solid var(--rule);
+  border-left:3px solid var(--brand);border-radius:14px}
 .opener .lbl{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--fg-3);margin-bottom:12px}
 .opener p{margin:0 0 13px;font-size:18px;line-height:1.6;max-width:66ch}
 .opener p:last-child{margin-bottom:0}
@@ -98,7 +111,7 @@ h1{font-family:var(--display);font-weight:600;font-size:clamp(30px,6.2vw,56px);l
 
 /* contents: the same pattern as a research-group index — number, title, one plain line */
 .toc{margin-top:44px}
-.toc h2{font-family:var(--display);font-weight:600;font-size:26px;letter-spacing:-.015em}
+.toc h2{font-family:var(--display);font-weight:700;font-size:25px;letter-spacing:-.025em}
 .toc .grp{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;
   color:var(--accent);margin:28px 0 4px;padding-top:14px;border-top:1px solid var(--rule)}
 .toc .grp:first-of-type{margin-top:20px}
@@ -123,7 +136,7 @@ section{padding-block:62px 0;counter-increment:sec}
   align-items:baseline;border-bottom:1px solid var(--rule);padding-bottom:13px;margin-bottom:26px}
 .sec-head::before{content:counter(sec,decimal-leading-zero);font-family:var(--mono);font-size:13px;
   font-weight:500;color:var(--accent);letter-spacing:.06em;font-variant-numeric:tabular-nums}
-.sec-head h2{font-family:var(--display);font-weight:600;font-size:clamp(25px,3.6vw,33px);line-height:1.14;letter-spacing:-.018em}
+.sec-head h2{font-family:var(--display);font-weight:700;font-size:clamp(23px,3vw,30px);line-height:1.18;letter-spacing:-.025em}
 .sec-head .tag{justify-self:end;font-size:13.5px;color:var(--fg-3)}
 @media(max-width:620px){
   .sec-head{grid-template-columns:auto minmax(0,1fr)}
@@ -143,8 +156,8 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .flow.one{grid-template-columns:1fr;max-width:252px}
 .step{position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:17px 10px 15px;text-align:center;min-width:0}
 .step .ic{display:block;width:100%;max-width:90px;height:auto;margin:0 auto 12px}
-.step .ic .ac{fill:var(--accent)}
-.step .ic .acs{stroke:var(--accent)}
+.step .ic .ac{fill:var(--brand)}
+.step .ic .acs{stroke:var(--brand)}
 .armband.a2 .ic .ac{fill:var(--ok)}
 .step .lbl{font-size:14.5px;font-weight:500;line-height:1.3}
 .step .val{font-family:var(--mono);font-size:22px;font-weight:500;letter-spacing:-.02em;margin-top:10px;line-height:1.1;font-variant-numeric:tabular-nums}
@@ -159,9 +172,9 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .cross span.t{font-size:14.5px;color:var(--fg-2)}
 
 /* steps */
-.stage{background:var(--surface);border:1px solid var(--rule);border-radius:7px;margin-bottom:13px;overflow:hidden}
+.stage{background:var(--surface);border:1px solid var(--rule);border-radius:14px;margin-bottom:13px;overflow:hidden}
 .stage-head{display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding:15px 17px;background:var(--surface-2);border-bottom:1px solid var(--rule)}
-.sn{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--surface);background:var(--accent);width:26px;height:26px;display:grid;place-items:center;border-radius:4px;flex:none}
+.sn{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--on-accent);background:var(--accent);width:26px;height:26px;display:grid;place-items:center;border-radius:7px;flex:none}
 .stage-head .what{font-size:17px;font-weight:500;min-width:0}
 .stage-head .secs{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--fg-3);flex:none}
 .io{display:grid;grid-template-columns:1fr 1.25fr;gap:1px;background:var(--rule-2)}
@@ -176,31 +189,31 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 @media(max-width:620px){.io{grid-template-columns:1fr}}
 
 /* bar lists */
-.bars{border:1px solid var(--rule);border-radius:7px;background:var(--surface);padding:8px 18px}
+.bars{border:1px solid var(--rule);border-radius:14px;background:var(--surface);padding:8px 18px}
 .bi{padding:12px 0;border-bottom:1px solid var(--rule-2)}
 .bi:last-child{border-bottom:0}
 .bi-top{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:7px}
 .bi-top .nm{font-size:15.5px;min-width:0;overflow-wrap:anywhere}
 .bi-top .vl{font-family:var(--mono);font-size:14.5px;font-weight:500;flex:none;font-variant-numeric:tabular-nums}
 .track{height:8px;background:var(--surface-2);border-radius:5px;overflow:hidden}
-.fill{height:100%;background:var(--accent);border-radius:5px}
+.fill{height:100%;background:var(--brand);border-radius:5px}
 .bi.mark .nm{font-weight:600}
 .bi.mark .vl{color:var(--accent)}
 
 /* tiles */
 .tiles{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
 .tile{width:28px;height:28px;border-radius:6px;flex:none}
-.tile.m{background:var(--accent)}
+.tile.m{background:var(--brand)}
 .tile.r{border:1.6px dashed var(--warn);opacity:.8}
 .legend{display:flex;gap:20px;flex-wrap:wrap;font-size:15px;color:var(--fg-2);margin-bottom:24px}
 .legend span{display:flex;align-items:center;gap:8px}
 .key{width:15px;height:15px;border-radius:4px;flex:none}
-.key.m{background:var(--accent)} .key.r{border:1.6px dashed var(--warn)}
+.key.m{background:var(--brand)} .key.r{border:1.6px dashed var(--warn)}
 
 /* two-up */
 .two{display:grid;grid-template-columns:1fr 1fr;gap:15px}
 @media(max-width:620px){.two{grid-template-columns:1fr}}
-.card{background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:20px}
+.card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:22px}
 .card.acc{border-left:3px solid var(--accent)}
 .card.yes{border-left:3px solid var(--ok)}
 .card.no{border-left:3px solid var(--warn)}
@@ -210,7 +223,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .card .sub{font-size:14px;color:var(--fg-3);margin-top:8px;line-height:1.55}
 
 /* tool cards */
-.tool-card{background:var(--surface);border:1px solid var(--rule);border-radius:7px;margin-bottom:14px;overflow:hidden}
+.tool-card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;margin-bottom:14px;overflow:hidden}
 .tc-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 17px;background:var(--surface-2);border-bottom:1px solid var(--rule)}
 .tc-head .tn{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--accent);min-width:0;overflow-wrap:anywhere}
 .tc-head .plain{font-size:15px;color:var(--fg-2);min-width:0}
@@ -239,7 +252,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .pdbrow.none .ids{color:var(--warn)}
 @media(max-width:560px){.pdbrow{grid-template-columns:1fr;gap:4px}}
 .foldimg{margin-top:17px}
-.foldimg img{display:block;width:100%;border:1px solid var(--rule);border-radius:6px;background:#fff}
+.foldimg img{display:block;width:100%;border:1px solid var(--rule);border-radius:14px;background:#fff}
 .foldimg .cc{font-size:14px;color:var(--fg-3);margin-top:11px;line-height:1.6}
 
 /* chips */
@@ -272,13 +285,14 @@ footer code{font-family:var(--mono);font-size:13px;background:var(--surface-2);p
 .themer{background:none;border:1px solid var(--rule);border-radius:6px;color:var(--fg-2);
   font-family:var(--body);font-size:13.5px;padding:6px 12px;cursor:pointer;line-height:1.3}
 .themer:hover{border-color:var(--accent);color:var(--accent)}
-.sitefoot{border-top:1px solid var(--rule);margin-top:64px;padding-block:26px;color:var(--fg-3);font-size:14px;line-height:1.7}
-.sitefoot code{font-family:var(--mono);font-size:13px;background:var(--surface-2);padding:2px 6px;border-radius:4px}
+.sitefoot{background:var(--band);color:var(--band-fg);margin:72px calc(-1 * max(16px,env(safe-area-inset-left,0px))) -72px;
+  padding:30px max(16px,env(safe-area-inset-left,0px));font-size:14px;line-height:1.7}
+.sitefoot code{font-family:var(--mono);font-size:13px;background:rgba(255,255,255,.12);padding:2px 6px;border-radius:5px}
 a{color:var(--accent)}
 
 /* ---- run list ---- */
 .runlist{display:grid;gap:11px}
-.runrow{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:17px 19px;text-decoration:none;color:inherit}
+.runrow{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:17px 19px;text-decoration:none;color:inherit}
 .runrow:hover{border-color:var(--accent)}
 .runrow .who{font-size:17px;font-weight:500;min-width:0;overflow-wrap:anywhere}
 .runrow:hover .who{color:var(--accent)}
@@ -286,14 +300,14 @@ a{color:var(--accent)}
 .runrow .stat{font-family:var(--mono);font-size:13.5px;color:var(--fg-3);flex:none}
 
 /* ---- the submit form ---- */
-.submit{background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:8px;padding:24px}
+.submit{background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--brand);border-radius:14px;padding:26px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
 @media(max-width:620px){.frow{grid-template-columns:1fr}}
 .frow label{display:block;font-size:14.5px;color:var(--fg-2);margin-bottom:7px}
 .frow input{width:100%;font-family:var(--mono);font-size:16px;padding:12px 14px;border:1px solid var(--rule);border-radius:6px;background:var(--bg);color:var(--fg)}
 .frow input:focus{outline:2.5px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
-.go{display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:var(--surface);border:0;border-radius:6px;padding:13px 22px;font-family:var(--body);font-size:16px;font-weight:500;cursor:pointer;text-decoration:none}
-.go:hover{opacity:.86}
+.go{display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:var(--on-accent);border:0;border-radius:8px;padding:14px 26px;font-family:var(--body);font-size:16px;font-weight:600;cursor:pointer;text-decoration:none}
+.go:hover{filter:brightness(1.12)}
 .go:disabled{opacity:.45;cursor:not-allowed}
 .hint{font-size:14.5px;color:var(--fg-3);margin-top:13px;line-height:1.6}
 .err{font-size:14.5px;color:var(--warn);margin-top:11px;min-height:1.2em}
@@ -309,21 +323,32 @@ a{color:var(--accent)}
 .reclink span{font-size:14px;color:var(--fg-3);min-width:0}
 
 /* ---- arm separators ---- */
-.armsep{margin:72px 0 0;padding:24px 26px;border-radius:8px;background:var(--surface-2);border-left:3px solid var(--accent)}
+.armsep{margin:72px 0 0;padding:26px 28px;border-radius:14px;background:var(--surface-2);border-left:3px solid var(--brand)}
 .armsep.two{border-left-color:var(--ok)}
 .armsep .n{font-family:var(--mono);font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent)}
 .armsep.two .n{color:var(--ok)}
-.armsep h2{font-family:var(--display);font-weight:600;font-size:clamp(27px,4vw,36px);line-height:1.1;letter-spacing:-.02em;margin-top:9px}
+.armsep h2{font-family:var(--display);font-weight:700;font-size:clamp(25px,3.4vw,34px);line-height:1.14;letter-spacing:-.03em;margin-top:10px}
 .armsep p{margin:14px 0 0;color:var(--fg-2);font-size:17px;line-height:1.6;max-width:62ch}
 .armsep + section{padding-top:40px}
 
-/* ---- the flowchart page ---- */
-.fc{display:block;width:100%;max-width:560px;height:auto;margin:0 auto}
+/* ---- the flowchart page ----
+   SVG text neither wraps nor clips at the viewBox edge, so the right-hand annotations have to
+   fit inside the viewBox by construction: widen the viewBox when a line of side text grows,
+   rather than trusting it to be cut off tidily. `min-width` stops the whole figure scaling
+   down to illegibility on a phone — below that it scrolls sideways instead, which is why the
+   figure is wrapped in .fcscroll. */
+.fcscroll{overflow-x:auto;overscroll-behavior-x:contain}
+.fcscroll:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:4px}
+.fc{display:block;width:100%;min-width:470px;max-width:700px;height:auto;margin:0 auto}
 .fc .box{fill:var(--surface);stroke:var(--rule);stroke-width:1.5}
 .fc .io{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.8}
 .fc .t{fill:var(--fg);font-family:var(--body);font-size:14px;font-weight:500}
 .fc .sub{fill:var(--fg-3);font-family:var(--mono);font-size:10.5px}
 .fc .side{fill:var(--fg-3);font-family:var(--mono);font-size:10.5px}
+/* The step icons. Colour comes from these three classes only, so both themes are covered. */
+.fc .ik{fill:none;stroke:var(--brand);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.fc .ikf{fill:var(--brand);stroke:none}
+.fc .ikm{fill:none;stroke:var(--fg-3);stroke-width:1.4;opacity:.55;stroke-linecap:round;stroke-linejoin:round}
 .fc .ln{stroke:var(--fg-3);stroke-width:1.6;opacity:.55;fill:none}
 .fc .arrow{fill:var(--fg-3);opacity:.55}
 .fcnote{display:grid;gap:12px;margin-top:30px}
