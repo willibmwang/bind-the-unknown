@@ -1,350 +1,640 @@
-"""Which viral protein each antiviral actually binds, as labels for a retrieval benchmark.
+"""Which viral protein each antiviral actually binds, graded, as labels for a retrieval benchmark.
 
-**The label is the protein, never the drug.** A drug that works by binding a *host* factor says
-nothing about whether a viral protein was worth ranking, so bulevirtide (NTCP), maraviroc (CCR5)
-and the interferons are deliberately absent, and so is every broad-spectrum repurposing hit whose
-mechanism runs through host biology. This is also why `DrugVirus.info` is not the source: it
-catalogues compounds with broad antiviral activity, and a large share of those act on the host.
+**This is an overlay, not a copy.** `data/benchmark_panel.json` is the raw curation and stays
+read-only: 46 genomes and 154 target patterns, each with the `validated_by` prose that justifies
+it. This module adds the two things the panel deliberately does not carry -- a graded `status` per
+target, and an alias set precise enough to match without a substring -- and it names the rows that
+have to be dropped. Keeping them apart is what stops a weak label being silently upgraded: the
+panel says what was curated, this says what each row is worth.
 
-**Two tiers, and the distinction is load-bearing.** `verified=True` rows are the eleven already
-recorded in `runs/target_ranks.csv`, carried over unchanged so the benchmark and the existing
-experiment speak about the same labels. `verified=False` rows are drafted from standard antiviral
-pharmacology and have *not* been checked against a primary source in this repository. They are
-kept separate, excluded by default from any headline number, and `--include-draft` is the only
-way to score them.
+A pattern in the panel with no entry here raises rather than defaulting. A default status would be
+a judgement nobody made, applied to the row least likely to deserve it.
 
-That split is not bureaucracy. A benchmark whose labels were written from recollection and
-reported as curated would be a fabrication channel pointed at the result, which is the failure
-this project names explicitly. Each draft row carries the check that would promote it.
+**Four tiers, and the gap between the third and fourth is the one that matters.**
 
-**Status is graded, not binary.** An approved drug and a research-grade chemical probe are
-different evidence that a protein is worth binding, and collapsing them would let a weak label
-carry a strong claim. `STATUS_WEIGHT` is supplied for anyone who wants a graded metric; the
-default metric uses the unweighted rank-sum, because weighting is a modelling choice and the
-unweighted test is the one `intake.rank_enrichment` already implements and powers.
+`approved` and `approved (EUA)` are the strong tier: an approved drug binds this protein in this
+virus. Everything else is reported separately and never pooled into a headline.
+
+`class_effect` and `vaccine_antigen` are weak but real -- a homologous protein is drugged in a
+relative, or the protein is what a licensed vaccine or immunoglobulin binds. Real evidence of the
+wrong kind, and `status` handles them.
+
+`investigational` and `research target` are weaker still, and graded for the same reason.
+
+**Mislabels are not a tier, they are a drop.** A row that is simply wrong grades to whatever tier
+it is assigned and keeps scoring, so grading cannot catch it. `DROPPED` carries each one with its
+reason, which makes the correction auditable and stops a later re-key quietly reinstating it.
+
+**The label is the protein, never the drug.** A drug acting on a host factor says nothing about
+whether a viral protein was worth ranking, so bulevirtide (NTCP), maraviroc (CCR5) and the
+interferons are absent by construction -- and so is `DrugVirus.info` as a source, since a large
+share of broad-spectrum antivirals act on the host.
 """
 
 from __future__ import annotations
 
+import json
+import os
+
+PANEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                          "data", "benchmark_panel.json")
+
 # How much a status says about "this protein is worth binding". Supplied for a graded metric and
-# used by no default, so the headline number stays a plain rank-sum.
+# used by no default, so the headline stays a plain rank-sum over the strong tier.
 STATUS_WEIGHT = {
     "approved": 1.0,
     "approved (EUA)": 0.9,
     "investigational (compassionate use)": 0.6,
     "investigational": 0.5,
+    "vaccine_antigen": 0.4,
+    "class_effect": 0.3,
     "research target": 0.25,
 }
 
-# A note on genome size, because it changes what the metric means rather than merely how long a
-# run takes. Six-frame ORF calling on a 236 kb herpesvirus proposes far more candidates than on a
-# 3.2 kb hepadnavirus, so placing three targets highly is a much harder test on the former. The
-# denominator rule in `intake.rank_enrichment` -- candidates the pipeline identified and ranked --
-# is applied identically at every size, which is what keeps the per-pathogen p-values comparable.
-PATHOGENS = (
-    # -- verified: carried over from runs/target_ranks.csv, unchanged ----------------------
-    {
-        "pathogen": "SARS-CoV-2",
-        "family": "Coronaviridae",
-        "accession": "NC_045512.2",
-        "holdout": "severe acute respiratory syndrome coronavirus 2",
-        "genome_nt": 29903,
-        "targets": (
-            {"name": "Spike glycoprotein",
-             "aliases": ("spike", "surface glycoprotein", "s protein", "spike protein"),
-             "drug": "sotrovimab / tixagevimab-cilgavimab", "status": "approved (EUA)",
-             "verified": True, "source": "runs/target_ranks.csv"},
-            {"name": "Mpro / 3CLpro (nsp5)",
-             "aliases": ("3c-like proteinase", "3clpro", "mpro", "main protease", "nsp5",
-                         "replicase polyprotein 1ab"),
-             "drug": "nirmatrelvir (Paxlovid)", "status": "approved",
-             "verified": True, "source": "runs/target_ranks.csv"},
-            {"name": "RdRp (nsp12)",
-             "aliases": ("rna-directed rna polymerase", "rdrp", "nsp12",
-                         "replicase polyprotein 1ab"),
-             "drug": "remdesivir", "status": "approved",
-             "verified": True, "source": "runs/target_ranks.csv"},
-            {"name": "PLpro (nsp3)",
-             "aliases": ("papain-like protease", "plpro", "nsp3",
-                         "replicase polyprotein 1ab"),
-             "drug": "none approved", "status": "research target",
-             "verified": True, "source": "runs/target_ranks.csv"},
-            {"name": "nsp13 helicase",
-             "aliases": ("helicase", "nsp13", "replicase polyprotein 1ab"),
-             "drug": "none approved", "status": "research target",
-             "verified": True, "source": "runs/target_ranks.csv"},
-        ),
-    },
-    {
-        "pathogen": "Nipah virus",
-        "family": "Paramyxoviridae",
-        "accession": "NC_002728.1",
-        "holdout": "Nipah virus",
-        "genome_nt": 18246,
-        "targets": (
-            {"name": "F fusion glycoprotein",
-             "aliases": ("fusion glycoprotein f0", "fusion protein", "f protein"),
-             "drug": "none approved", "status": "research target",
-             "verified": True, "source": "runs/target_ranks.csv"},
-            {"name": "G attachment glycoprotein",
-             "aliases": ("glycoprotein g", "attachment glycoprotein", "g protein",
-                         "hemagglutinin-neuraminidase"),
-             "drug": "m102.4 monoclonal antibody",
-             "status": "investigational (compassionate use)",
-             "verified": True, "source": "runs/target_ranks.csv"},
-            {"name": "L polymerase",
-             "aliases": ("rna-directed rna polymerase l", "large structural protein",
-                         "l protein", "polymerase"),
-             "drug": "remdesivir / favipiravir", "status": "investigational",
-             "verified": True, "source": "runs/target_ranks.csv"},
-        ),
-    },
+# The tier a status belongs to. `strong` is the only one a default run scores.
+STRONG = ("approved", "approved (EUA)")
+WEAK = ("investigational (compassionate use)", "investigational", "vaccine_antigen",
+        "class_effect", "research target")
+
+
+# ---------------------------------------------------------------------------
+# Aliases: what a pattern must match, as whole words
+# ---------------------------------------------------------------------------
+
+# Matching is on a contiguous run of whole tokens, not a substring, and these are the runs each
+# pattern is allowed to match. Two shapes in the pipeline's own chain names force this:
+#
+#   * an affix the pattern does not carry -- `3C-like proteinase nsp5`, `NCAP_SEOUS Nucleoprotein`,
+#     `RNA-directed RNA polymerase nsp12` -- so strict equality misses nearly everything;
+#   * a longer name that merely starts the same -- `NS5A` and `NS5B` against `NS5`.
+#
+# Token-run matching handles both, and the second is the case substring matching gets wrong: `ns5`
+# is inside the string `ns5a` but is not one of its tokens, so HCV's NS5A and NS5B stay distinct
+# from a bare NS5 while a `3C-like proteinase` still finds its `nsp5` chain.
+#
+# A pattern absent here matches on its own words alone, which is right for anything already
+# specific. Entries exist only where the panel's wording and UniProt's differ.
+ALIASES = {
+    "Spike": ("spike", "spike protein", "spike glycoprotein"),
+    "3C-like proteinase": ("3c like proteinase", "3c like protease", "3cl protease", "mpro"),
+    "RNA-directed RNA polymerase": ("rna directed rna polymerase", "rna dependent rna polymerase",
+                                    "rdrp"),
+    "Reverse transcriptase": ("reverse transcriptase", "rt"),
+    "Integrase": ("integrase",),
+    "Protease": ("protease", "proteinase"),
+    "Serine protease": ("serine protease", "serine proteinase"),
+    "DNA polymerase": ("dna polymerase", "dna directed dna polymerase"),
+    "Thymidine kinase": ("thymidine kinase",),
+    "terminase": ("terminase", "terminase large subunit", "tripartite terminase subunit"),
+    "Protein kinase UL97": ("protein kinase ul97", "ul97", "serine threonine protein kinase ul97"),
+    "Envelope": ("envelope", "envelope protein", "envelope glycoprotein"),
+    "Envelope glycoprotein": ("envelope glycoprotein", "glycoprotein", "spike glycoprotein"),
+    "Glycoprotein": ("glycoprotein", "glycoprotein precursor", "envelope glycoprotein"),
+    "Glycoprotein G": ("glycoprotein g", "attachment glycoprotein g", "g glycoprotein"),
+    "Fusion glycoprotein": ("fusion glycoprotein", "fusion protein", "fusion glycoprotein f0"),
+    "Nucleoprotein": ("nucleoprotein", "nucleocapsid protein"),
+    "Phosphoprotein": ("phosphoprotein",),
+    "Hemagglutinin": ("hemagglutinin", "haemagglutinin"),
+    "Hemagglutinin-neuraminidase": ("hemagglutinin neuraminidase", "haemagglutinin neuraminidase"),
+    "Major surface glycoprotein": ("major surface glycoprotein", "attachment glycoprotein"),
+    "Capsid protein VP1": ("capsid protein vp1", "vp1"),
+    "Protease 3C": ("protease 3c", "3c protease", "protease 3c like"),
+    "Hexon": ("hexon", "hexon protein"),
+    "p37": ("p37", "palmitoylated eev membrane glycoprotein", "f13", "vp37"),
+    "Replication protein E1": ("replication protein e1", "e1"),
+    "Protein E6": ("protein e6", "e6"),
+    "Protein E7": ("protein e7", "e7"),
+    "Major capsid protein L1": ("major capsid protein l1", "l1"),
+    "Non-structural protein 1": ("non structural protein 1", "nonstructural protein 1", "ns1"),
+    "nsP2": ("nsp2", "protease nsp2", "non structural protein 2"),
+    "nsP4": ("nsp4", "non structural protein 4"),
+    "E2": ("e2", "e2 envelope glycoprotein", "spike glycoprotein e2"),
+    "NS3": ("ns3", "serine protease ns3", "protease ns3"),
+    "NS5": ("ns5",),
+    "NS5A": ("ns5a",),
+    "NS5B": ("ns5b",),
+}
+
+
+# Aliases for one pathogen only, where a shared pattern would otherwise need a name that is
+# meaningless or wrong in the other viruses using it.
+#
+# **Every entry here was found by running the matcher against the records and reading what the
+# ranker actually named, not by guessing at synonyms.** That matters, because the alternative
+# failure mode is the one being guarded against: a missing alias and a protein the candidate
+# stage genuinely never proposed are indistinguishable in the output, both arriving as an
+# unmatched label. Four of the eight strong-tier misses on the first pass were this -- a name
+# gap, not an absence -- and four were real. Widening an alias until a label matches is how the
+# second kind gets quietly converted into the first, so each of these names a chain present in a
+# committed record.
+ALIAS_OVERRIDE = {
+    # The ranker names HIV's envelope by its two mature products, which is what UniProt calls
+    # them. `gp120` and `gp41` would be meaningless in the flaviviruses and alphaviruses that
+    # share the bare `Envelope` pattern, so they are scoped here.
+    ("HIV-1", "Envelope"): ("surface protein gp120", "transmembrane protein gp41",
+                            "gp120", "gp41", "envelope glycoprotein gp160"),
+    # HBV's reverse transcriptase is a domain of protein P, and the record names the whole
+    # entry. This is also why the panel's bare `polymerase` pattern had to go: the same protein
+    # was named twice, once ambiguously.
+    ("Hepatitis B virus", "Reverse transcriptase"): ("protein p", "reverse transcriptase",
+                                                     "dna polymerase"),
+    # UniProt spells HCV's NS5A out in full.
+    ("Hepatitis C virus", "NS5A"): ("ns5a", "non structural protein 5a"),
+    # And names NS5B by its function, which is the chain the dropped duplicate pattern was
+    # pointing at.
+    ("Hepatitis C virus", "NS5B"): ("ns5b", "non structural protein 5b",
+                                    "rna directed rna polymerase"),
+}
+
+
+def aliases_for(pathogen, pattern):
+    """The alias set for one panel row, per-pathogen override first."""
+    if (pathogen, pattern) in ALIAS_OVERRIDE:
+        return ALIAS_OVERRIDE[(pathogen, pattern)]
+    return ALIASES.get(pattern, (pattern.lower(),))
+
+
+# ---------------------------------------------------------------------------
+# Status, per (pathogen, pattern)
+# ---------------------------------------------------------------------------
+
+# Derived by reading each pathogen's `validated_by` prose against its own target list, which is
+# the only place the panel records which drug answers for which protein. The derivation is
+# recorded per row rather than applied as a rule, because the prose does not say which target it
+# refers to and a rule would have to guess: "pocapavir targets VP1; 3C is the class target" grades
+# two of a pathogen's three patterns differently in one sentence.
+#
+# Read the second element as the justification, not as a restatement. Where it disagrees with
+# `validated_by` it says so -- several rows name an approved drug the panel's prose omitted.
+OVERLAY = {
+    # -- Coronaviridae. One pathogen carries the drugs; the other four are class effect, which
+    # is exactly the non-independence the family grouping exists to handle.
+    ("SARS-CoV-2", "3C-like proteinase"): ("approved", "nirmatrelvir binds Mpro"),
+    ("SARS-CoV-2", "RNA-directed RNA polymerase"): ("approved", "remdesivir binds nsp12"),
+    ("SARS-CoV-2", "Spike"): ("approved (EUA)",
+                              "sotrovimab and tixagevimab-cilgavimab bind spike under EUA"),
+    ("SARS-CoV", "3C-like proteinase"): ("class_effect", "panel: class effect with SARS-CoV-2"),
+    ("SARS-CoV", "RNA-directed RNA polymerase"): ("class_effect", "panel: class effect"),
+    ("SARS-CoV", "Spike"): ("class_effect", "panel: class effect"),
+    ("MERS-CoV", "3C-like proteinase"): ("class_effect", "panel: class effect"),
+    ("MERS-CoV", "RNA-directed RNA polymerase"): ("class_effect", "panel: class effect"),
+    ("MERS-CoV", "Spike"): ("investigational", "panel: mAbs in trials, none approved"),
+    ("HCoV-229E", "3C-like proteinase"): ("class_effect", "panel: class effect"),
+    ("HCoV-229E", "RNA-directed RNA polymerase"): ("class_effect", "panel: class effect"),
+    ("HCoV-229E", "Spike"): ("class_effect", "panel: class effect"),
+    ("HCoV-OC43", "3C-like proteinase"): ("class_effect", "panel: class effect"),
+    ("HCoV-OC43", "RNA-directed RNA polymerase"): ("class_effect", "panel: class effect"),
+    ("HCoV-OC43", "Spike"): ("class_effect", "panel: class effect"),
+
+    # -- Retroviridae.
+    ("HIV-1", "Reverse transcriptase"): ("approved", "zidovudine and tenofovir bind RT"),
+    ("HIV-1", "Protease"): ("approved", "ritonavir and darunavir bind the protease"),
+    ("HIV-1", "Integrase"): ("approved", "raltegravir and dolutegravir bind integrase"),
+    ("HIV-1", "Envelope"): ("approved",
+                            "enfuvirtide binds gp41 and fostemsavir binds gp120; both approved "
+                            "and both omitted by validated_by. Not maraviroc, which binds host "
+                            "CCR5 and is correctly absent from this panel"),
+    ("HIV-2", "Reverse transcriptase"): ("class_effect", "panel: class effect with HIV-1"),
+    ("HIV-2", "Protease"): ("class_effect", "panel: class effect"),
+    ("HIV-2", "Integrase"): ("class_effect", "panel: class effect"),
+
+    # -- Hepadnaviridae.
+    ("Hepatitis B virus", "Reverse transcriptase"): (
+        "approved", "tenofovir and entecavir bind the RT domain of protein P. Bulevirtide binds "
+                    "host NTCP and is correctly absent"),
+
+    # -- Flaviviridae, Hepacivirus.
+    ("Hepatitis C virus", "NS3"): ("approved", "glecaprevir and grazoprevir bind NS3/4A"),
+    ("Hepatitis C virus", "NS5A"): ("approved", "ledipasvir and velpatasvir bind NS5A"),
+    ("Hepatitis C virus", "NS5B"): ("approved", "sofosbuvir and dasabuvir bind NS5B"),
+
+    # -- Herpesviridae. Thymidine kinase is the interesting row: acyclovir depends on it but does
+    # not inhibit it, so it is an activating enzyme and not a target.
+    ("Herpes simplex virus 1", "DNA polymerase"): ("approved",
+                                                   "acyclovir and foscarnet bind UL30"),
+    ("Herpes simplex virus 1", "Thymidine kinase"): (
+        "research target", "UL23 phosphorylates acyclovir and is not inhibited by it. An "
+                           "activating enzyme is not a binding target, so this is the weakest "
+                           "tier rather than approved"),
+    ("Herpes simplex virus 2", "DNA polymerase"): ("approved", "acyclovir binds the DNA pol"),
+    ("Herpes simplex virus 2", "Thymidine kinase"): ("research target",
+                                                     "activating enzyme, not inhibited"),
+    ("Varicella-zoster virus", "DNA polymerase"): ("approved",
+                                                   "acyclovir and brivudine bind ORF28"),
+    ("Varicella-zoster virus", "Thymidine kinase"): ("research target",
+                                                     "activating enzyme, not inhibited"),
+    ("Human cytomegalovirus", "DNA polymerase"): ("approved",
+                                                  "ganciclovir and foscarnet bind UL54"),
+    ("Human cytomegalovirus", "terminase"): ("approved", "letermovir binds the UL56 subunit"),
+    ("Human cytomegalovirus", "Protein kinase UL97"): (
+        "approved", "maribavir binds UL97; approved and omitted by validated_by"),
+    ("Epstein-Barr virus", "DNA polymerase"): ("class_effect", "panel: class effect"),
+    ("Epstein-Barr virus", "Thymidine kinase"): ("class_effect", "panel: class effect"),
+
+    # -- Flaviviridae, Orthoflavivirus. Seven genomes, no approved antiviral among them: every
+    # row is a class target or a vaccine antigen, which is why pooling them with the HCV rows
+    # would be the single most misleading thing this overlay could do.
+    ("Zika virus", "NS3"): ("class_effect", "panel: flavivirus class target"),
+    ("Zika virus", "NS5"): ("class_effect", "panel: flavivirus class target"),
+    ("Zika virus", "Envelope"): ("vaccine_antigen", "panel: vaccines target E"),
+    ("Dengue virus 2", "NS3"): ("class_effect", "panel: flavivirus class target"),
+    ("Dengue virus 2", "NS5"): ("investigational", "panel: NS5 inhibitors in trials"),
+    ("Dengue virus 2", "Envelope"): ("vaccine_antigen", "panel: dengue vaccine targets E"),
+    ("West Nile virus", "NS3"): ("class_effect", "panel: flavivirus class target"),
+    ("West Nile virus", "NS5"): ("class_effect", "panel: flavivirus class target"),
+    ("West Nile virus", "Envelope"): ("class_effect", "panel: class target, no vaccine named"),
+    ("Yellow fever virus", "NS3"): ("class_effect", "panel: flavivirus class target"),
+    ("Yellow fever virus", "NS5"): ("class_effect", "panel: flavivirus class target"),
+    ("Yellow fever virus", "Envelope"): ("vaccine_antigen", "panel: 17D vaccine targets E"),
+    ("Japanese encephalitis virus", "NS3"): ("class_effect", "panel: flavivirus class target"),
+    ("Japanese encephalitis virus", "NS5"): ("class_effect", "panel: flavivirus class target"),
+    ("Japanese encephalitis virus", "Envelope"): ("vaccine_antigen", "panel: vaccine targets E"),
+    ("Tick-borne encephalitis virus", "NS3"): ("class_effect", "panel: class target"),
+    ("Tick-borne encephalitis virus", "NS5"): ("class_effect", "panel: class target"),
+    ("Tick-borne encephalitis virus", "Envelope"): ("vaccine_antigen",
+                                                    "panel: vaccine targets E"),
+    ("Powassan virus", "NS3"): ("class_effect", "panel: flavivirus class target"),
+    ("Powassan virus", "NS5"): ("class_effect", "panel: flavivirus class target"),
+    ("Powassan virus", "Envelope"): ("class_effect", "panel: class target, no vaccine named"),
+
+    # -- Paramyxoviridae.
+    ("Nipah virus", "Fusion glycoprotein"): ("research target",
+                                             "no clinical agent binds F; the mAb targets G"),
+    ("Nipah virus", "Glycoprotein G"): ("investigational (compassionate use)",
+                                        "panel: m102.4 mAb targets G"),
+    ("Nipah virus", "RNA-directed RNA polymerase"): ("investigational",
+                                                     "panel: remdesivir active, not approved "
+                                                     "for Nipah"),
+    ("Nipah virus", "Phosphoprotein"): ("research target", "no agent named for P"),
+    ("Hendra virus", "Fusion glycoprotein"): ("research target", "no agent binds F"),
+    ("Hendra virus", "Glycoprotein G"): ("investigational (compassionate use)",
+                                         "panel: m102.4 mAb"),
+    ("Hendra virus", "RNA-directed RNA polymerase"): ("class_effect",
+                                                      "class effect with Nipah"),
+    ("Measles virus", "RNA-directed RNA polymerase"): ("class_effect", "paramyxovirus L class"),
+    ("Measles virus", "Fusion glycoprotein"): ("vaccine_antigen", "panel: vaccine targets F"),
+    ("Measles virus", "Hemagglutinin"): ("vaccine_antigen", "panel: vaccine targets H"),
+    ("Mumps virus", "RNA-directed RNA polymerase"): ("class_effect", "paramyxovirus L class"),
+    ("Mumps virus", "Fusion glycoprotein"): ("vaccine_antigen", "panel: vaccine targets F"),
+    ("Mumps virus", "Hemagglutinin-neuraminidase"): ("vaccine_antigen",
+                                                     "panel: vaccine targets HN"),
+
+    # -- Pneumoviridae.
+    ("Human respiratory syncytial virus B", "Fusion glycoprotein"): (
+        "approved", "nirsevimab and palivizumab are approved anti-F monoclonals"),
+    ("Human respiratory syncytial virus B", "RNA-directed RNA polymerase"): (
+        "investigational", "RSV polymerase inhibitors have reached trials; none approved"),
+    ("Human respiratory syncytial virus B", "Major surface glycoprotein"): (
+        "research target", "no clinical agent binds G"),
+    ("Human metapneumovirus", "Fusion glycoprotein"): ("class_effect",
+                                                       "panel: F is the class target"),
+    ("Human metapneumovirus", "RNA-directed RNA polymerase"): ("class_effect",
+                                                               "pneumovirus L class"),
+
+    # -- Filoviridae.
+    ("Ebola virus Zaire", "RNA-directed RNA polymerase"): (
+        "investigational", "panel: remdesivir targets L. Approved for COVID-19 and not for "
+                           "Ebola, so this must not be upgraded"),
+    ("Ebola virus Zaire", "Envelope glycoprotein"): (
+        "approved", "ansuvimab and the atoltivimab-maftivimab-odesivimab combination are "
+                    "approved anti-GP monoclonals"),
+    ("Ebola virus Zaire", "Nucleoprotein"): ("research target", "no agent binds NP"),
+    ("Marburg virus", "RNA-directed RNA polymerase"): ("class_effect",
+                                                       "panel: class effect with Ebola"),
+    ("Marburg virus", "Envelope glycoprotein"): ("class_effect", "panel: class effect"),
+
+    # -- The cross-family RdRp / Glycoprotein / Nucleoprotein group. Five unrelated viruses with
+    # one pattern list between them, and three of the five justified by ribavirin, whose protein
+    # target in these viruses is not established.
+    ("Rabies virus", "RNA-directed RNA polymerase"): ("research target", "no agent binds L"),
+    ("Rabies virus", "Glycoprotein"): ("vaccine_antigen",
+                                       "panel: rabies immunoglobulin targets G"),
+    ("Rabies virus", "Nucleoprotein"): ("research target", "no agent binds N"),
+    ("Lassa virus", "Glycoprotein"): ("vaccine_antigen", "panel: LASV GPC is the vaccine target"),
+    ("Lassa virus", "Nucleoprotein"): ("research target",
+                                       "ribavirin has no established protein target in LASV"),
+    ("Hantaan virus", "Nucleoprotein"): ("research target",
+                                         "ribavirin has no established protein target"),
+    ("Crimean-Congo hemorrhagic fever virus", "RNA-directed RNA polymerase"): (
+        "investigational", "panel: favipiravir in trials"),
+    ("Rift Valley fever virus", "RNA-directed RNA polymerase"): (
+        "investigational", "panel: favipiravir active in models -- preclinical only"),
+    ("Rift Valley fever virus", "Glycoprotein"): ("research target", "no agent named"),
+    ("Rift Valley fever virus", "Nucleoprotein"): ("research target", "no agent named"),
+
+    # -- Togaviridae.
+    ("Chikungunya virus", "nsP2"): ("class_effect",
+                                    "panel: nsP2 protease is the class target"),
+    ("Chikungunya virus", "nsP4"): ("class_effect", "alphavirus polymerase class target"),
+    ("Chikungunya virus", "Envelope"): ("vaccine_antigen", "panel: IXCHIQ vaccine targets E"),
+    ("Venezuelan equine encephalitis virus", "nsP2"): ("class_effect",
+                                                       "panel: alphavirus class target"),
+    ("Venezuelan equine encephalitis virus", "nsP4"): ("class_effect", "panel: class target"),
+    ("Venezuelan equine encephalitis virus", "Envelope"): ("class_effect",
+                                                           "panel: class target"),
+    ("Sindbis virus", "nsP2"): ("class_effect", "panel: alphavirus class target"),
+    ("Sindbis virus", "nsP4"): ("class_effect", "panel: class target"),
+    ("Sindbis virus", "Envelope"): ("class_effect", "panel: class target"),
+
+    # -- Picornaviridae. Rhinovirus is the one row where two real binders both failed to be
+    # approved, which is a different claim from a class effect and is graded as such.
+    ("Poliovirus", "Protease 3C"): ("class_effect", "panel: 3C is the class target"),
+    ("Poliovirus", "RNA-directed RNA polymerase"): ("class_effect", "picornavirus 3D class"),
+    ("Poliovirus", "Capsid protein VP1"): ("investigational",
+                                           "panel: pocapavir targets VP1; never approved"),
+    ("Enterovirus A71", "Protease 3C"): ("class_effect", "panel: picornavirus class target"),
+    ("Enterovirus A71", "RNA-directed RNA polymerase"): ("class_effect", "panel: class target"),
+    ("Enterovirus A71", "Capsid protein VP1"): ("class_effect", "panel: class target"),
+    ("Rhinovirus A", "Protease 3C"): ("investigational",
+                                      "panel: rupintrivir targets 3C; never approved"),
+    ("Rhinovirus A", "RNA-directed RNA polymerase"): ("class_effect", "picornavirus 3D class"),
+    ("Rhinovirus A", "Capsid protein VP1"): ("investigational",
+                                             "panel: pleconaril targets VP1; never approved"),
+
+    # -- Caliciviridae.
+    ("Norwalk virus", "Protease"): ("class_effect", "panel: calicivirus class target"),
+    ("Norwalk virus", "RNA-directed RNA polymerase"): ("class_effect", "panel: class target"),
+    ("Norwalk virus", "Capsid protein VP1"): ("class_effect", "panel: class target"),
+
+    # -- Adenoviridae.
+    ("Human adenovirus 2", "DNA polymerase"): ("approved",
+                                               "panel: cidofovir targets the DNA polymerase"),
+    ("Human adenovirus 2", "Protease"): ("research target", "no agent binds adenain"),
+    ("Human adenovirus 2", "Hexon"): ("research target", "no agent binds hexon"),
+
+    # -- Poxviridae.
+    ("Monkeypox virus", "DNA polymerase"): ("approved", "panel: cidofovir targets DNA pol"),
+    ("Monkeypox virus", "Thymidine kinase"): ("research target",
+                                              "no agent binds the poxvirus TK"),
+    ("Monkeypox virus", "p37"): ("approved", "panel: tecovirimat targets VP37/F13"),
+    ("Vaccinia virus", "DNA polymerase"): ("approved", "panel: cidofovir"),
+    ("Vaccinia virus", "Thymidine kinase"): ("research target", "no agent binds TK"),
+    ("Vaccinia virus", "p37"): ("approved", "panel: tecovirimat"),
+
+    # -- Papillomaviridae. No antiviral binds any of these; L1 is a vaccine antigen and E6/E7 are
+    # oncoproteins studied as targets.
+    ("Human papillomavirus 16", "Replication protein E1"): ("research target",
+                                                            "no clinical agent binds E1"),
+    ("Human papillomavirus 16", "Protein E6"): ("research target",
+                                                "panel: E6/E7 are the oncoprotein targets"),
+    ("Human papillomavirus 16", "Protein E7"): ("research target", "panel: oncoprotein target"),
+    ("Human papillomavirus 16", "Major capsid protein L1"): ("vaccine_antigen",
+                                                             "panel: Gardasil targets L1"),
+
+    # -- Parvoviridae.
+    ("Human parvovirus B19", "Non-structural protein 1"): ("class_effect",
+                                                           "panel: NS1 helicase is the class "
+                                                           "target"),
+    ("Human parvovirus B19", "Capsid protein VP1"): ("research target", "no agent binds VP1"),
+}
+
+
+# ---------------------------------------------------------------------------
+# Dropped rows
+# ---------------------------------------------------------------------------
+
+# Three kinds, and the first is the one grading could never have caught.
+#
+#   `mislabel`  -- wrong, full stop. Would score at whatever tier it was given.
+#   `duplicate` -- a second pattern for a protein another pattern already names, so one protein
+#                  is counted twice. This is the same defect as chain-level counting, arriving
+#                  through the label list instead of through `decompose`.
+#   `parent`    -- the polyprotein containing targets already named individually, which would
+#                  credit a hit three times over.
+#
+# Every drop is recorded rather than deleted, so a later re-key cannot silently reinstate it and
+# a reader can disagree with a specific decision instead of with the whole set.
+DROPPED = {
+    ("Herpes simplex virus 1", "terminase"): (
+        "mislabel", "letermovir binds the HCMV UL56 terminase and HSV-1 has no approved "
+                    "terminase inhibitor. Pattern-matched across from this panel's own HCMV row"),
+    ("Hepatitis B virus", "Large envelope"): (
+        "mislabel", "a vaccine antigen in a row whose validated_by names tenofovir and "
+                    "entecavir, neither of which binds it"),
+    ("Hepatitis B virus", "surface antigen"): (
+        "mislabel", "HBsAg is a vaccine antigen, not a target of the drugs this row cites"),
+    ("Hepatitis B virus", "polymerase"): (
+        "duplicate", "the same protein P that `Reverse transcriptase` already names, and a bare "
+                     "token that would also match `RNA-directed RNA polymerase` in any virus"),
+    ("Hepatitis C virus", "Serine protease"): (
+        "duplicate", "NS3 is the serine protease; both patterns name one protein"),
+    ("Hepatitis C virus", "RNA-directed RNA polymerase"): (
+        "duplicate", "NS5B is the polymerase; both patterns name one protein"),
+    ("HIV-1", "Gag-Pol"): (
+        "parent", "the polyprotein containing RT, protease and integrase, all named separately. "
+                  "Counting it as well credits one hit three times"),
+    ("HIV-2", "Gag-Pol"): ("parent", "as HIV-1"),
+    ("Zika virus", "Serine protease"): ("duplicate", "NS3 is the serine protease"),
+    ("Zika virus", "RNA-directed RNA polymerase"): ("duplicate", "NS5 is the polymerase"),
+    ("Dengue virus 2", "Serine protease"): ("duplicate", "NS3 is the serine protease"),
+    ("Dengue virus 2", "RNA-directed RNA polymerase"): ("duplicate", "NS5 is the polymerase"),
+    ("West Nile virus", "Serine protease"): ("duplicate", "NS3 is the serine protease"),
+    ("Yellow fever virus", "Serine protease"): ("duplicate", "NS3 is the serine protease"),
+    ("Chikungunya virus", "Protease nsP2"): ("duplicate", "nsP2 is the protease"),
+    ("Chikungunya virus", "RNA-directed RNA polymerase"): ("duplicate", "nsP4 is the polymerase"),
+    ("Chikungunya virus", "E2"): (
+        "duplicate", "E2 is part of the envelope glycoprotein `Envelope` already names"),
+    ("Venezuelan equine encephalitis virus", "E2"): ("duplicate", "part of Envelope"),
+    ("Sindbis virus", "E2"): ("duplicate", "part of Envelope"),
+    ("Poliovirus", "Genome polyprotein"): (
+        "parent", "the polyprotein containing 3C, 3D and VP1, all named separately"),
+    ("Monkeypox virus", "Palmitoylated EEV membrane"): ("duplicate", "the same protein as p37"),
+    ("Vaccinia virus", "Palmitoylated EEV membrane"): ("duplicate", "the same protein as p37"),
+    ("Lassa virus", "RNA-directed RNA polymerase"): (
+        "absent_from_genome", "the L polymerase is encoded on the L segment and the panel's "
+                              "accession NC_004296.1 is the S segment, so this protein is not "
+                              "in the genome handed to the ranker"),
+    ("Hantaan virus", "RNA-directed RNA polymerase"): (
+        "absent_from_genome", "L segment product; NC_005218.1 is the S segment"),
+    ("Hantaan virus", "Glycoprotein"): (
+        "absent_from_genome", "M segment product; NC_005218.1 is the S segment"),
+    ("Crimean-Congo hemorrhagic fever virus", "Glycoprotein"): (
+        "absent_from_genome", "a different segment from NC_005300.2, whose identified chains are "
+                              "all polymerase-complex products"),
+    ("Crimean-Congo hemorrhagic fever virus", "Nucleoprotein"): (
+        "absent_from_genome", "a different segment from NC_005300.2"),
+}
+
+
+# Instances that cannot be scored, with the reason, kept out of every aggregate. An instance with
+# fewer candidates than labels cannot be informative and one with no candidates has no score
+# defined at all, so counting either as a miss would make the ranker answer for the panel's
+# accession choice.
+UNSCOREABLE = {
+    "Human parvovirus B19": "the ranker identified zero candidate chains from NC_000883.2, so "
+                            "there is no ranking to score",
+    "Hantaan virus": "NC_005218.1 is one segment of three and yields a single candidate chain "
+                     "against a single surviving label, so rank 1 of 1 is guaranteed whatever "
+                     "the ranker does",
+}
+
+# Pathogens whose panel accession is one segment of a multi-segment genome. Recorded because it
+# explains the `absent_from_genome` drops above and because supplying every segment accession,
+# comma-joined, turns these back into real instances -- `fetch_genome` already accepts that form
+# and returns the segments separately rather than concatenating them, which is correct: joining
+# would create reading frames across junctions that exist in no molecule.
+SEGMENTED = {
+    "Lassa virus": "bi-segmented; NC_004296.1 is S, the L polymerase is on L",
+    "Hantaan virus": "tri-segmented; NC_005218.1 is S, with G on M and L on L",
+    "Crimean-Congo hemorrhagic fever virus": "tri-segmented; NC_005300.2 carries the "
+                                             "polymerase-complex products only",
+    "Rift Valley fever virus": "tri-segmented; verify NC_014397.1 covers the labelled proteins",
+}
+
+
+# Viral families, for aggregating over independent instances rather than over genomes. 26 of the
+# 46 genomes share a pattern list with at least one sibling, so a p-value combined across 46 as
+# though they were independent is inflated. Combined within family first, then across families.
+FAMILY = {
+    "SARS-CoV-2": "Coronaviridae", "SARS-CoV": "Coronaviridae", "MERS-CoV": "Coronaviridae",
+    "HCoV-229E": "Coronaviridae", "HCoV-OC43": "Coronaviridae",
+    "HIV-1": "Retroviridae", "HIV-2": "Retroviridae",
+    "Hepatitis B virus": "Hepadnaviridae",
+    "Hepatitis C virus": "Flaviviridae/Hepacivirus",
+    "Herpes simplex virus 1": "Herpesviridae", "Herpes simplex virus 2": "Herpesviridae",
+    "Varicella-zoster virus": "Herpesviridae", "Human cytomegalovirus": "Herpesviridae",
+    "Epstein-Barr virus": "Herpesviridae",
+    "Zika virus": "Flaviviridae/Orthoflavivirus",
+    "Dengue virus 2": "Flaviviridae/Orthoflavivirus",
+    "West Nile virus": "Flaviviridae/Orthoflavivirus",
+    "Yellow fever virus": "Flaviviridae/Orthoflavivirus",
+    "Japanese encephalitis virus": "Flaviviridae/Orthoflavivirus",
+    "Tick-borne encephalitis virus": "Flaviviridae/Orthoflavivirus",
+    "Powassan virus": "Flaviviridae/Orthoflavivirus",
+    "Nipah virus": "Paramyxoviridae", "Hendra virus": "Paramyxoviridae",
+    "Measles virus": "Paramyxoviridae", "Mumps virus": "Paramyxoviridae",
+    "Human respiratory syncytial virus B": "Pneumoviridae",
+    "Human metapneumovirus": "Pneumoviridae",
+    "Ebola virus Zaire": "Filoviridae", "Marburg virus": "Filoviridae",
+    "Rabies virus": "Rhabdoviridae", "Lassa virus": "Arenaviridae",
+    "Hantaan virus": "Hantaviridae",
+    "Crimean-Congo hemorrhagic fever virus": "Nairoviridae",
+    "Rift Valley fever virus": "Phenuiviridae",
+    "Chikungunya virus": "Togaviridae",
+    "Venezuelan equine encephalitis virus": "Togaviridae", "Sindbis virus": "Togaviridae",
+    "Poliovirus": "Picornaviridae", "Enterovirus A71": "Picornaviridae",
+    "Rhinovirus A": "Picornaviridae",
+    "Norwalk virus": "Caliciviridae", "Human adenovirus 2": "Adenoviridae",
+    "Monkeypox virus": "Poxviridae", "Vaccinia virus": "Poxviridae",
+    "Human papillomavirus 16": "Papillomaviridae",
+    "Human parvovirus B19": "Parvoviridae",
+    "Influenza A PR8": "Orthomyxoviridae",
+}
+
+
+# One pathogen the panel does not carry, kept because the recorded experiment in
+# `runs/target_ranks.csv` includes it and because it is the only segmented genome here supplied
+# as every one of its segments -- which is the form the three broken rows above need.
+EXTRA = (
     {
         "pathogen": "Influenza A PR8",
-        "family": "Orthomyxoviridae",
         "accession": ("NC_002016.1,NC_002017.1,NC_002018.1,NC_002019.1,NC_002020.1,"
                       "NC_002021.1,NC_002022.1,NC_002023.1"),
         "holdout": "Influenza A virus (strain A/Puerto Rico/8/1934 H1N1)",
-        "genome_nt": 13588,
         "targets": (
-            {"name": "Neuraminidase (NA)",
-             "aliases": ("neuraminidase", "na", "sialidase"),
-             "drug": "oseltamivir / zanamivir", "status": "approved",
-             "verified": True, "source": "runs/target_ranks.csv"},
-            {"name": "Haemagglutinin (HA)",
-             "aliases": ("hemagglutinin", "haemagglutinin", "ha"),
-             "drug": "broadly neutralising antibodies", "status": "investigational",
-             "verified": True, "source": "runs/target_ranks.csv"},
+            {"name": "Neuraminidase (NA)", "aliases": ("neuraminidase", "sialidase"),
+             "status": "approved", "why": "oseltamivir and zanamivir bind NA",
+             "source": "runs/target_ranks.csv"},
             {"name": "PA endonuclease",
-             "aliases": ("polymerase acidic protein", "pa", "pa endonuclease",
-                         "cap-snatching endonuclease"),
-             "drug": "baloxavir marboxil", "status": "approved",
-             "verified": True, "source": "runs/target_ranks.csv"},
-        ),
-    },
-
-    # -- draft: NOT verified in this repository ---------------------------------------------
-    # Every row below needs the same check: confirm the drug is approved or in trials for this
-    # virus, and confirm the molecular target is the viral protein named and not a host factor.
-    # ChEMBL mechanism-of-action records and DrugBank targets are the intended primary sources,
-    # and ChEMBL is already reached by `bioactivity.prior_binders`, so the check is a lookup and
-    # not a literature project.
-    {
-        "pathogen": "HIV-1",
-        "family": "Retroviridae",
-        "accession": "NC_001802.1",
-        "holdout": "Human immunodeficiency virus type 1",
-        "genome_nt": 9181,
-        "targets": (
-            {"name": "Reverse transcriptase",
-             "aliases": ("reverse transcriptase", "rt", "gag-pol polyprotein", "pol polyprotein",
-                         "p66 rt"),
-             "drug": "tenofovir / efavirenz / dolutegravir-class partners",
-             "status": "approved", "verified": False,
-             "source": "draft; check ChEMBL mechanism records for NNRTI/NRTI targets"},
-            {"name": "Protease",
-             "aliases": ("protease", "retropepsin", "gag-pol polyprotein", "pol polyprotein"),
-             "drug": "darunavir / ritonavir", "status": "approved", "verified": False,
-             "source": "draft; check ChEMBL mechanism records for PI targets"},
-            {"name": "Integrase",
-             "aliases": ("integrase", "gag-pol polyprotein", "pol polyprotein"),
-             "drug": "dolutegravir / raltegravir", "status": "approved", "verified": False,
-             "source": "draft; check ChEMBL mechanism records for INSTI targets"},
-            {"name": "gp41 transmembrane glycoprotein",
-             "aliases": ("transmembrane protein gp41", "gp41", "envelope glycoprotein gp160",
-                         "env polyprotein"),
-             "drug": "enfuvirtide", "status": "approved", "verified": False,
-             "source": "draft; confirm the binding site is gp41 HR1 and not a host receptor"},
-            {"name": "gp120 surface glycoprotein",
-             "aliases": ("surface protein gp120", "gp120", "envelope glycoprotein gp160",
-                         "env polyprotein"),
-             "drug": "fostemsavir", "status": "approved", "verified": False,
-             "source": "draft; fostemsavir binds gp120 -- distinguish from maraviroc, which "
-                       "binds host CCR5 and must stay excluded"},
-        ),
-    },
-    {
-        "pathogen": "Hepatitis C virus",
-        "family": "Flaviviridae",
-        "accession": "NC_004102.1",
-        "holdout": "Hepatitis C virus",
-        "genome_nt": 9646,
-        "targets": (
-            {"name": "NS3/4A protease",
-             "aliases": ("ns3", "ns3 protease", "serine protease ns3", "ns4a",
-                         "genome polyprotein"),
-             "drug": "glecaprevir / grazoprevir", "status": "approved", "verified": False,
-             "source": "draft; check ChEMBL mechanism records"},
-            {"name": "NS5B RNA polymerase",
-             "aliases": ("ns5b", "rna-directed rna polymerase", "genome polyprotein"),
-             "drug": "sofosbuvir / dasabuvir", "status": "approved", "verified": False,
-             "source": "draft; check ChEMBL mechanism records"},
-            {"name": "NS5A",
-             "aliases": ("ns5a", "non-structural protein 5a", "genome polyprotein"),
-             "drug": "velpatasvir / ledipasvir", "status": "approved", "verified": False,
-             "source": "draft; check ChEMBL mechanism records"},
-        ),
-    },
-    {
-        "pathogen": "Hepatitis B virus",
-        "family": "Hepadnaviridae",
-        "accession": "NC_003977.2",
-        "holdout": "Hepatitis B virus",
-        "genome_nt": 3215,
-        "targets": (
-            {"name": "Polymerase / reverse transcriptase",
-             "aliases": ("protein p", "polymerase", "reverse transcriptase", "dna polymerase"),
-             "drug": "tenofovir / entecavir", "status": "approved", "verified": False,
-             "source": "draft; check ChEMBL mechanism records. Note bulevirtide targets host "
-                       "NTCP and is correctly absent"},
-            {"name": "Core protein",
-             "aliases": ("core protein", "capsid protein", "hbcag", "external core antigen"),
-             "drug": "capsid assembly modulators", "status": "investigational",
-             "verified": False,
-             "source": "draft; confirm at least one CAM reached trials for HBV"},
-        ),
-    },
-    {
-        "pathogen": "Human cytomegalovirus",
-        "family": "Herpesviridae",
-        "accession": "NC_006273.2",
-        "holdout": "Human cytomegalovirus",
-        "genome_nt": 235646,
-        "targets": (
-            {"name": "DNA polymerase UL54",
-             "aliases": ("dna polymerase", "ul54", "dna polymerase catalytic subunit"),
-             "drug": "ganciclovir / foscarnet", "status": "approved", "verified": False,
-             "source": "draft; check ChEMBL mechanism records"},
-            {"name": "Terminase subunit UL56",
-             "aliases": ("ul56", "terminase", "tripartite terminase subunit"),
-             "drug": "letermovir", "status": "approved", "verified": False,
-             "source": "draft; confirm letermovir's target subunit is UL56"},
-            {"name": "UL97 kinase",
-             "aliases": ("ul97", "protein kinase ul97", "serine/threonine protein kinase"),
-             "drug": "maribavir", "status": "approved", "verified": False,
-             "source": "draft; check ChEMBL mechanism records"},
-        ),
-    },
-    {
-        "pathogen": "Herpes simplex virus 1",
-        "family": "Herpesviridae",
-        "accession": "NC_001806.2",
-        "holdout": "Human herpesvirus 1",
-        "genome_nt": 152222,
-        "targets": (
-            {"name": "DNA polymerase UL30",
-             "aliases": ("dna polymerase", "ul30", "dna polymerase catalytic subunit"),
-             "drug": "acyclovir / foscarnet", "status": "approved", "verified": False,
-             "source": "draft; acyclovir inhibits the viral DNA polymerase after activation by "
-                       "viral thymidine kinase -- both are viral, so both may be labels, but "
-                       "the inhibited target is the polymerase"},
-            {"name": "Thymidine kinase UL23",
-             "aliases": ("thymidine kinase", "ul23"),
-             "drug": "acyclovir (activating enzyme)", "status": "research target",
-             "verified": False,
-             "source": "draft; decide whether an activating enzyme counts as a target at all. "
-                       "It is not inhibited, so the conservative choice is to drop this row"},
-            {"name": "Helicase-primase complex",
-             "aliases": ("helicase-primase", "ul5", "ul52", "dna helicase", "dna primase"),
-             "drug": "pritelivir", "status": "investigational", "verified": False,
-             "source": "draft; confirm trial stage"},
-        ),
-    },
-    {
-        "pathogen": "Respiratory syncytial virus",
-        "family": "Pneumoviridae",
-        "accession": "NC_001781.1",
-        "holdout": "Human respiratory syncytial virus",
-        "genome_nt": 15225,
-        "targets": (
-            {"name": "F fusion glycoprotein",
-             "aliases": ("fusion glycoprotein f0", "fusion protein", "f protein"),
-             "drug": "nirsevimab / palivizumab", "status": "approved", "verified": False,
-             "source": "draft; both are anti-F monoclonals -- confirm the epitope is on F"},
-            {"name": "L polymerase",
-             "aliases": ("rna-directed rna polymerase l", "large polymerase", "l protein"),
-             "drug": "ziresovir / RSV polymerase inhibitors", "status": "investigational",
-             "verified": False,
-             "source": "draft; confirm ziresovir's target -- some RSV inhibitors bind F, not L, "
-                       "and this row is wrong if so"},
-        ),
-    },
-    {
-        "pathogen": "Zaire ebolavirus",
-        "family": "Filoviridae",
-        "accession": "NC_002549.1",
-        "holdout": "Zaire ebolavirus",
-        "genome_nt": 18959,
-        "targets": (
-            {"name": "GP glycoprotein",
-             "aliases": ("envelope glycoprotein", "spike glycoprotein", "gp1,2",
-                         "glycoprotein"),
-             "drug": "ansuvimab / atoltivimab-maftivimab-odesivimab",
-             "status": "approved", "verified": False,
-             "source": "draft; both approved products are anti-GP monoclonals"},
-            {"name": "L polymerase",
-             "aliases": ("rna-directed rna polymerase l", "l protein", "polymerase"),
-             "drug": "remdesivir", "status": "investigational", "verified": False,
-             "source": "draft; remdesivir is approved for COVID-19, not for Ebola -- status "
-                       "here is investigational and must not be upgraded"},
-        ),
-    },
-    {
-        "pathogen": "Monkeypox virus",
-        "family": "Poxviridae",
-        "accession": "NC_063383.1",
-        "holdout": "Monkeypox virus",
-        "genome_nt": 197209,
-        "targets": (
-            {"name": "F13 phospholipase",
-             "aliases": ("f13", "palmitoylated egf-like protein", "phospholipase f13",
-                         "envelope phospholipase"),
-             "drug": "tecovirimat", "status": "approved", "verified": False,
-             "source": "draft; tecovirimat targets the VP37/F13 envelope protein -- confirm "
-                       "the ortholog name in the MPXV reference annotation"},
-            {"name": "DNA polymerase E9",
-             "aliases": ("dna polymerase", "e9", "dna-directed dna polymerase"),
-             "drug": "brincidofovir / cidofovir", "status": "approved", "verified": False,
-             "source": "draft; confirm approval is for smallpox rather than for MPXV, and "
-                       "downgrade the status if so"},
-        ),
-    },
-    {
-        "pathogen": "Varicella-zoster virus",
-        "family": "Herpesviridae",
-        "accession": "NC_001348.1",
-        "holdout": "Human herpesvirus 3",
-        "genome_nt": 124884,
-        "targets": (
-            {"name": "DNA polymerase ORF28",
-             "aliases": ("dna polymerase", "orf28", "dna polymerase catalytic subunit"),
-             "drug": "acyclovir / brivudine", "status": "approved", "verified": False,
-             "source": "draft; check ChEMBL mechanism records"},
+             "aliases": ("polymerase acidic protein", "pa endonuclease",
+                         "cap snatching endonuclease"),
+             "status": "approved", "why": "baloxavir marboxil binds the PA endonuclease",
+             "source": "runs/target_ranks.csv"},
+            {"name": "Haemagglutinin (HA)", "aliases": ("hemagglutinin", "haemagglutinin"),
+             "status": "investigational",
+             "why": "broadly neutralising antibodies have reached trials; none approved",
+             "source": "runs/target_ranks.csv"},
         ),
     },
 )
 
 
-def pathogens(include_draft=False):
-    """The label set, verified rows only unless asked for otherwise.
+# ---------------------------------------------------------------------------
+# Loading
+# ---------------------------------------------------------------------------
 
-    A pathogen whose every target is draft disappears entirely rather than appearing with an
-    empty target list, because a pathogen with no labels contributes no ranks and would only
-    dilute the aggregate with a row that cannot be scored.
+def _panel():
+    with open(PANEL_PATH) as handle:
+        return json.load(handle)["panel"]
+
+
+def pathogens(tier="strong", include_unscoreable=False, panel=None):
+    """The label set, one row per pathogen, graded and with the dropped rows removed.
+
+    `tier` is `"strong"` (approved only, the default and the only one a headline may quote),
+    `"weak"` (everything else), or `"all"`. A pathogen left with no target in the requested tier
+    disappears rather than appearing empty, because it contributes no ranks and would only add a
+    row that cannot be scored.
+
+    Raises on a panel pattern this module has not graded. That is deliberate: the panel is
+    curated elsewhere and may gain a row, and a new row defaulting to some status would be a
+    judgement nobody made applied to the row least likely to deserve it.
     """
+    wanted = {"strong": set(STRONG), "weak": set(WEAK),
+              "all": set(STRONG) | set(WEAK)}[tier]
     out = []
-    for entry in PATHOGENS:
-        kept = tuple(t for t in entry["targets"] if include_draft or t.get("verified"))
-        if kept:
-            out.append({**entry, "targets": kept})
+    for entry in (panel if panel is not None else _panel()):
+        name = entry["pathogen"]
+        if name in UNSCOREABLE and not include_unscoreable:
+            continue
+        targets = []
+        for pattern in entry["targets"]:
+            key = (name, pattern)
+            if key in DROPPED:
+                continue
+            if key not in OVERLAY:
+                raise ValueError(
+                    f"panel row ({name!r}, {pattern!r}) has no status in task1_labels.OVERLAY "
+                    f"and no entry in DROPPED. Grade it or drop it; it must not default.")
+            status, why = OVERLAY[key]
+            if status not in wanted:
+                continue
+            targets.append({
+                "name": pattern,
+                "aliases": aliases_for(name, pattern),
+                "status": status, "why": why, "verified": True,
+                "source": f"data/benchmark_panel.json, validated_by="
+                          f"{entry.get('validated_by')!r}",
+            })
+        if targets:
+            out.append({"pathogen": name, "family": FAMILY.get(name, "unassigned"),
+                        "accession": entry["accession"], "holdout": entry["holdout"],
+                        "targets": tuple(targets),
+                        "segmented": SEGMENTED.get(name),
+                        "unscoreable": UNSCOREABLE.get(name)})
+
+    for entry in EXTRA:
+        targets = tuple(t for t in entry["targets"] if t["status"] in wanted)
+        if targets:
+            out.append({**entry, "family": FAMILY.get(entry["pathogen"], "unassigned"),
+                        "targets": targets, "segmented": None, "unscoreable": None})
     return tuple(out)
 
 
-def counts():
-    """How much of the label set is verified, which is the first thing to report."""
-    verified = sum(1 for e in PATHOGENS for t in e["targets"] if t.get("verified"))
-    draft = sum(1 for e in PATHOGENS for t in e["targets"] if not t.get("verified"))
-    return {"pathogens_total": len(PATHOGENS),
-            "pathogens_verified": len(pathogens(include_draft=False)),
-            "targets_verified": verified, "targets_draft": draft,
-            "statuses": sorted(STATUS_WEIGHT)}
+def counts(panel=None):
+    """What the overlay says about the panel, which is the first thing to report."""
+    rows = panel if panel is not None else _panel()
+    graded = {}
+    for entry in rows:
+        for pattern in entry["targets"]:
+            key = (entry["pathogen"], pattern)
+            if key in DROPPED:
+                graded.setdefault("dropped", []).append(DROPPED[key][0])
+            elif key in OVERLAY:
+                graded.setdefault(OVERLAY[key][0], []).append(key)
+    by_status = {k: len(v) for k, v in sorted(graded.items()) if k != "dropped"}
+    drops = {}
+    for kind in graded.get("dropped", []):
+        drops[kind] = drops.get(kind, 0) + 1
+    strong = pathogens(tier="strong", panel=rows)
+    return {
+        "panel_genomes": len(rows),
+        "panel_patterns": sum(len(e["targets"]) for e in rows),
+        "graded_by_status": by_status,
+        "dropped_by_kind": drops,
+        "strong_labels": sum(len(e["targets"]) for e in strong),
+        "strong_pathogens": len(strong),
+        "families": len({e["family"] for e in strong}),
+        "unscoreable": sorted(UNSCOREABLE),
+        "segmented": sorted(SEGMENTED),
+    }

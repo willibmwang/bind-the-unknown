@@ -50,20 +50,40 @@ def normalise(text):
 
 
 def matches(label, row):
-    """Whether this candidate row is the labelled target.
+    """Whether this candidate row is the labelled target, by whole-token run.
 
-    Exact normalised equality against the label's own name and its declared aliases, plus the
-    row's parent entry, and nothing cleverer. Substring matching was tried and removed: "f
-    protein" is inside "transmembrane protein", and a fuzzy matcher that silently credits the
-    wrong chain inflates every number in this file in the direction the author wants. A label
-    that fails to match is reported as unmatched rather than matched approximately.
+    An alias matches when its tokens appear as a *contiguous run of whole tokens* in the
+    candidate's name. Two shapes in the pipeline's own output force something between strict
+    equality and substring containment:
+
+    * the candidate carries an affix the label does not -- `3C-like proteinase nsp5`,
+      `RNA-directed RNA polymerase nsp12`, `NCAP_SEOUS Nucleoprotein` -- so strict equality
+      misses nearly every real chain;
+    * a longer name merely starts the same -- `NS5A` and `NS5B` against `NS5`.
+
+    Substring matching gets the second one wrong in the flattering direction: `"ns5" in "ns5a"`
+    is true, so a bare NS5 label would claim HCV's NS5A and NS5B as two hits. Token-run matching
+    rejects it, because `ns5` is not one of `ns5a`'s tokens. It also still refuses the trap that
+    retired the substring version: `f protein` is inside the string `transmembrane protein gp41`
+    but is not a token run in it.
+
+    A label that matches nothing is reported as unmatched rather than matched approximately. The
+    inflation runs one way -- a looser matcher finds every label somewhere -- so the bias of
+    being too strict is the one worth having.
     """
-    names = {normalise(label["name"])} | {normalise(a) for a in label.get("aliases", ())}
-    names.discard("")
+    aliases = {normalise(label["name"])} | {normalise(a) for a in label.get("aliases", ())}
+    aliases = {a for a in aliases if a}
     for field_name in ("name", "parent", "target", "chain"):
-        value = normalise(row.get(field_name))
-        if value and value in names:
-            return True
+        tokens = normalise(row.get(field_name)).split()
+        if not tokens:
+            continue
+        for alias in aliases:
+            want = alias.split()
+            if not want or len(want) > len(tokens):
+                continue
+            if any(tokens[i:i + len(want)] == want
+                   for i in range(len(tokens) - len(want) + 1)):
+                return True
     return False
 
 
@@ -425,6 +445,163 @@ def _mean_pathogen(draws, n):
                                            / max(1, sum(len(d["ranks"]) for d in draws)))
                                for k in TOP_K}})
     return first
+
+
+# ---------------------------------------------------------------------------
+# Scoring the 46-genome panel from the records the runner already wrote
+# ---------------------------------------------------------------------------
+
+PANEL_RUNS = os.path.join(RUNS, "benchmark")
+
+
+def panel_records(directory=PANEL_RUNS):
+    """Every clean per-genome record the panel runner has written, by pathogen.
+
+    Error rows live beside the results under `<accession>.error.json` and are skipped here by
+    extension rather than by inspecting a field, so a genome that failed is absent from the
+    denominator instead of counted as a ranking that found nothing. The two are different
+    claims and only one of them is about the ranker.
+    """
+    out = {}
+    if not os.path.isdir(directory):
+        return out
+    for name in sorted(os.listdir(directory)):
+        if not name.endswith(".json") or name.endswith(".error.json"):
+            continue
+        with open(os.path.join(directory, name)) as handle:
+            record = json.load(handle)
+        if record.get("error"):
+            continue
+        out[record["pathogen"]] = record
+    return out
+
+
+def hypergeometric_at_k(candidates, labels, k):
+    """Chance that a random ranking puts at least one label in the top k.
+
+    The number without which a recall@k is unreadable. With 20 candidates and 5 matching
+    chains, random ranking already scores 80.6% at k=5 -- so a reported 100% is worth about
+    nineteen points, not a hundred. Computed per genome because the panel's candidate sets run
+    from 0 to 22 and a single headline null would be wrong for nearly all of them.
+    """
+    if not candidates or not labels:
+        return None
+    k = min(k, candidates)
+    miss = 1.0
+    for i in range(k):
+        remaining = candidates - i
+        if remaining <= 0:
+            break
+        miss *= (remaining - labels) / remaining if remaining > labels else 0.0
+    return round(100 * (1 - miss), 1)
+
+
+def score_panel_row(entry, record):
+    """One pathogen: where each label landed among the candidates the ranker proposed.
+
+    **One label contributes one rank, its best.** `rank_of` returns the first match, so a label
+    matching several mature chains of one protein -- Spike as S1, S2 and S2' -- is counted once
+    at the best of them. That is the whole fix for chain-level counting: the inflation came from
+    counting matching *chains* rather than matching *labels*, which turned three views of one
+    protein into three hits and raised the null along with the numerator.
+    """
+    from hpc_pilots.intake import rank_enrichment
+
+    ordering = sorted(record.get("chains") or [], key=lambda r: r["rank"])
+    total = len(ordering)
+    ranks, rows, unmatched = [], [], []
+    for label in entry["targets"]:
+        position = rank_of(label, ordering)
+        if position is None:
+            unmatched.append(label["name"])
+        else:
+            ranks.append(position)
+        rows.append({"target": label["name"], "status": label["status"],
+                     "why": label.get("why"), "rank": position,
+                     "percentile": round(100 * position / total, 1) if position and total
+                                   else None})
+
+    enrichment = rank_enrichment(ranks, total) if ranks and total else {}
+    return {
+        "pathogen": entry["pathogen"], "family": entry["family"],
+        "accession": entry["accession"],
+        "candidates": total, "labels": len(entry["targets"]),
+        "matched": len(ranks), "unmatched": unmatched, "ranks": sorted(ranks),
+        "targets": rows,
+        "best_rank": min(ranks) if ranks else None,
+        "holdout_removed": record.get("reference_entries_removed"),
+        "segmented": entry.get("segmented"),
+        "mean_percentile": enrichment.get("mean_percentile"),
+        "p_vs_random": enrichment.get("p"),
+        "best_attainable_p": enrichment.get("best_attainable_p"),
+        "adequately_powered": enrichment.get("adequately_powered"),
+        "verdict": enrichment.get("verdict"),
+        # Recall@k never alone. The chance value travels with it or the number is unreadable.
+        "recall_at_k": {f"top{k}": (1.0 if ranks and min(ranks) <= k else 0.0) for k in TOP_K},
+        "chance_at_k": {f"top{k}": hypergeometric_at_k(total, len(ranks), k) for k in TOP_K},
+    }
+
+
+def run_panel(tier="strong", directory=PANEL_RUNS):
+    """Score the panel, combining within family before combining across families.
+
+    **Why the family step is not optional.** 26 of the 46 genomes share a target pattern list
+    with at least one sibling -- five coronaviruses carry one list between them, and five
+    biologically unrelated viruses share `RdRp / Glycoprotein / Nucleoprotein`. Stouffer's
+    method needs independent instances, and five coronaviruses ranked against each other's
+    relatives are not five independent tests of anything. Combining within family first and
+    then across families gives roughly the number of instances the panel actually contains.
+    """
+    from . import task1_labels
+
+    records = panel_records(directory)
+    rows, missing = [], []
+    for entry in task1_labels.pathogens(tier=tier):
+        record = records.get(entry["pathogen"])
+        if record is None:
+            missing.append(entry["pathogen"])
+            continue
+        rows.append(score_panel_row(entry, record))
+
+    families = {}
+    for row in rows:
+        families.setdefault(row["family"], []).append(row)
+    per_family = []
+    for family, group in sorted(families.items()):
+        combined = stouffer([r["p_vs_random"] for r in group])
+        per_family.append({
+            "family": family, "genomes": len(group),
+            "pathogens": [r["pathogen"] for r in group],
+            "labels": sum(r["labels"] for r in group),
+            "matched": sum(r["matched"] for r in group),
+            "combined_p": combined,
+        })
+
+    across = stouffer([f["combined_p"]["p"] for f in per_family])
+    all_ranks = [r for row in rows for r in row["ranks"]]
+    return {
+        "benchmark": "task1-drugged-target-retrieval",
+        "tier": tier,
+        "labels": task1_labels.counts(),
+        "genomes_scored": len(rows), "genomes_without_a_record": missing,
+        "independent_instances": len(per_family),
+        "labels_total": sum(r["labels"] for r in rows),
+        "labels_matched": sum(r["matched"] for r in rows),
+        "unmatched": [(r["pathogen"], u) for r in rows for u in r["unmatched"]],
+        "mrr": round(sum(1 / r for r in all_ranks) / len(all_ranks), 4) if all_ranks else None,
+        "recall_at_k": {f"top{k}": round(
+            100 * sum(1 for r in rows if r["best_rank"] and r["best_rank"] <= k) / len(rows), 1)
+            if rows else None for k in TOP_K},
+        "chance_at_k": {f"top{k}": round(
+            sum(r["chance_at_k"][f"top{k}"] for r in rows if r["chance_at_k"][f"top{k}"]
+                is not None) / max(1, sum(1 for r in rows
+                                          if r["chance_at_k"][f"top{k}"] is not None)), 1)
+            for k in TOP_K},
+        "combined_p_across_families": across,
+        "per_family": per_family,
+        "rows": rows,
+        "unscoreable": task1_labels.UNSCOREABLE,
+    }
 
 
 def main(argv=None):

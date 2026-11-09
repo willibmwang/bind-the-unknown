@@ -182,117 +182,306 @@ def test_the_selector_pays_three_calls_for_preferring_option_value():
 
 
 # ---------------------------------------------------------------------------
-# Task 1: labels and scoring
+# Task 1: labels, matching, and scoring the panel
 # ---------------------------------------------------------------------------
 
-def test_verified_labels_match_the_recorded_experiment():
-    """The eleven verified rows are the ones in `runs/target_ranks.csv`, name for name."""
+def test_every_panel_pattern_is_graded_or_dropped():
+    """No panel row may default to a status, because a default is a judgement nobody made.
+
+    `data/benchmark_panel.json` is curated elsewhere and may gain a row. If an ungraded row fell
+    through to some default, the row least likely to deserve a status would silently receive one
+    -- and it would be a *new* row, which is exactly the one nobody has read yet. So the loader
+    raises, and this pins that the overlay currently covers the panel exactly.
+    """
+    panel = task1_labels._panel()
+    patterns = {(e["pathogen"], p) for e in panel for p in e["targets"]}
+    covered = set(task1_labels.OVERLAY) | set(task1_labels.DROPPED)
+    assert patterns - covered == set(), f"ungraded panel rows: {sorted(patterns - covered)}"
+    # And nothing in the overlay names a row the panel does not have, or the two have drifted.
+    assert covered - patterns == set(), f"overlay names absent rows: {sorted(covered - patterns)}"
+    assert len(patterns) == 154
+
+
+def test_an_ungraded_pattern_raises_rather_than_defaulting():
+    panel = [{"pathogen": "Testvirus", "accession": "NC_000000.1", "holdout": "Testvirus",
+              "targets": ["Some protein nobody graded"], "validated_by": "n/a"}]
+    with pytest.raises(ValueError, match="no status"):
+        task1_labels.pathogens(tier="all", panel=panel)
+
+
+def test_the_strong_tier_is_what_a_headline_may_quote():
+    """Only an approved drug binding this protein in this virus reaches the default tier."""
+    counts = task1_labels.counts()
+    assert counts["panel_genomes"] == 46
+    assert counts["strong_labels"] == 26
+    assert counts["strong_pathogens"] == 14
+    strong = task1_labels.pathogens(tier="strong")
+    assert all(t["status"] in task1_labels.STRONG for e in strong for t in e["targets"])
+    # The weak tier is far larger, which is the fact that makes the split matter: scoring the
+    # panel as one set would let a class effect carry an approved drug's claim.
+    weak = sum(v for k, v in counts["graded_by_status"].items()
+               if k not in task1_labels.STRONG)
+    assert weak > 3 * counts["strong_labels"] - len(task1_labels.EXTRA[0]["targets"])
+
+
+def test_every_graded_status_is_one_the_weights_know():
+    for key, (status, why) in task1_labels.OVERLAY.items():
+        assert status in task1_labels.STATUS_WEIGHT, (key, status)
+        assert why, f"{key} has no justification"
+    for entry in task1_labels.EXTRA:
+        for target in entry["targets"]:
+            assert target["status"] in task1_labels.STATUS_WEIGHT
+
+
+def test_mislabels_are_dropped_and_not_merely_downgraded():
+    """The distinction grading cannot make, so it has to be made here.
+
+    A class effect is real evidence of the wrong kind and `status` handles it. A row that is
+    simply wrong scores at whatever tier it is given and keeps scoring, so it has to leave the
+    set -- and leave a record, or a later re-key reinstates it.
+    """
+    kinds = {k: v[0] for k, v in task1_labels.DROPPED.items()}
+    assert kinds[("Herpes simplex virus 1", "terminase")] == "mislabel"
+    assert kinds[("Hepatitis B virus", "surface antigen")] == "mislabel"
+    assert kinds[("Hepatitis B virus", "Large envelope")] == "mislabel"
+    # Every drop carries a reason, and none of them is in the graded set.
+    assert all(reason for _, reason in task1_labels.DROPPED.values())
+    assert not set(task1_labels.DROPPED) & set(task1_labels.OVERLAY)
+    # A duplicate is not a mislabel: HBV's bare "polymerase" names the same protein P that
+    # "Reverse transcriptase" names, and would also match any RdRp in any virus.
+    assert kinds[("Hepatitis B virus", "polymerase")] == "duplicate"
+    assert kinds[("HIV-1", "Gag-Pol")] == "parent"
+
+
+def test_a_label_on_a_segment_the_genome_does_not_carry_is_dropped_as_absent():
+    """The ranker must not answer for the panel's accession choice.
+
+    Three segmented viruses are supplied as one segment, so some labelled proteins are not in
+    the genome handed to the ranker at all. Verified against the records: Hantaan's NC_005218.1
+    yields only a nucleoprotein, and CCHF's NC_005300.2 yields only polymerase-complex
+    products. Counting those labels as misses would mark the ranking wrong for a gene that was
+    never in its input.
+    """
+    kinds = {k: v[0] for k, v in task1_labels.DROPPED.items()}
+    assert kinds[("Hantaan virus", "RNA-directed RNA polymerase")] == "absent_from_genome"
+    assert kinds[("Hantaan virus", "Glycoprotein")] == "absent_from_genome"
+    assert kinds[("Lassa virus", "RNA-directed RNA polymerase")] == "absent_from_genome"
+    assert set(task1_labels.SEGMENTED) >= {"Hantaan virus", "Lassa virus",
+                                           "Crimean-Congo hemorrhagic fever virus"}
+
+
+def test_an_instance_that_cannot_discriminate_is_excluded_rather_than_scored():
+    """Zero candidates has no score; one candidate against one label is a guaranteed hit."""
+    scored = {e["pathogen"] for e in task1_labels.pathogens(tier="all")}
+    assert "Human parvovirus B19" not in scored
+    assert "Hantaan virus" not in scored
+    assert set(task1_labels.UNSCOREABLE) == {"Human parvovirus B19", "Hantaan virus"}
+    assert all(task1_labels.UNSCOREABLE.values())
+    widened = {e["pathogen"] for e in task1_labels.pathogens(tier="all",
+                                                             include_unscoreable=True)}
+    assert "Human parvovirus B19" in widened
+
+
+# ---------------------------------------------------------------------------
+# Matching
+
+def test_token_run_matching_refuses_the_substring_traps():
+    """Both traps, in both directions, because loosening the matcher only ever inflates.
+
+    `NS5` inside `NS5A` is the one substring matching gets wrong in the flattering direction: a
+    bare NS5 label would claim HCV's NS5A and NS5B as two separate hits. `f protein` inside
+    `transmembrane protein gp41` is the trap that retired the first version.
+    """
+    ns5 = {"name": "NS5", "aliases": ("ns5",)}
+    assert not task1.matches(ns5, {"name": "NS5A"})
+    assert not task1.matches(ns5, {"name": "NS5B"})
+    assert task1.matches(ns5, {"name": "Serine protease NS5"})
+    assert task1.matches({"name": "NS5A", "aliases": ("ns5a",)}, {"name": "NS5A"})
+
+    fusion = {"name": "F fusion glycoprotein", "aliases": ("f protein", "fusion protein")}
+    assert task1.matches(fusion, {"name": "F protein"})
+    assert not task1.matches(fusion, {"name": "Transmembrane protein gp41"})
+    assert not task1.matches(fusion, {"name": "Nucleoprotein"})
+
+    # HBV's bare "polymerase" is why that pattern is dropped rather than aliased: as a token run
+    # it matches every RdRp in the panel.
+    bare = {"name": "polymerase", "aliases": ("polymerase",)}
+    assert task1.matches(bare, {"name": "RNA-directed RNA polymerase nsp12"})
+
+
+def test_matching_survives_the_affixes_the_ranker_actually_emits():
+    """Strict equality missed nearly every real chain, which is why the rule is a token run."""
+    aliases = task1_labels.aliases_for
+    assert task1.matches({"name": "3C-like proteinase",
+                          "aliases": aliases("SARS-CoV-2", "3C-like proteinase")},
+                         {"name": "3C-like proteinase nsp5"})
+    assert task1.matches({"name": "Nucleoprotein",
+                          "aliases": aliases("Rabies virus", "Nucleoprotein")},
+                         {"name": "NCAP_SEOUS Nucleoprotein"})
+    assert task1.matches({"name": "DNA polymerase",
+                          "aliases": aliases("Human cytomegalovirus", "DNA polymerase")},
+                         {"name": "DPOL_RHCM6 DNA polymerase catalytic subunit"})
+
+
+def test_a_per_pathogen_alias_is_scoped_to_that_pathogen():
+    """`gp120` must not become a name every bare `Envelope` pattern can claim."""
+    assert "gp120" in task1_labels.aliases_for("HIV-1", "Envelope")
+    assert "gp120" not in task1_labels.aliases_for("Zika virus", "Envelope")
+
+
+# ---------------------------------------------------------------------------
+# The null, and scoring the panel
+
+@pytest.mark.parametrize("k,expected", [(1, 25.0), (3, 60.1), (5, 80.6), (10, 98.4)])
+def test_the_hypergeometric_null_is_high_enough_to_change_the_reading(k, expected):
+    """The number without which a recall@k is unreadable.
+
+    With 20 candidates and 5 matching chains, random ranking already scores 80.6% at k=5. A
+    harness reporting 100% there is reporting about nineteen points, not a hundred. These four
+    values were recomputed independently by the panel's author before being accepted.
+    """
+    assert task1.hypergeometric_at_k(20, 5, k) == pytest.approx(expected, abs=0.1)
+
+
+def test_the_null_is_computed_per_genome_and_not_quoted_once():
+    """Candidate sets run from 0 to 22, so one headline null would be wrong for nearly all."""
+    assert task1.hypergeometric_at_k(4, 1, 5) == pytest.approx(100.0, abs=0.1)
+    assert task1.hypergeometric_at_k(22, 1, 5) < task1.hypergeometric_at_k(11, 1, 5)
+    assert task1.hypergeometric_at_k(0, 0, 5) is None
+
+
+def _record(chains, pathogen="SARS-CoV-2"):
+    return {"pathogen": pathogen,
+            "chains": [{"rank": i, "target": name} for i, name in enumerate(chains, 1)]}
+
+
+def test_one_label_contributes_one_rank_at_its_best():
+    """The whole fix for chain-level counting, and it needs no collapse step.
+
+    `decompose` splits spike into S1, S2 and S2', and counting matching *chains* turned one
+    protein into three hits -- inflating the numerator and the null together. Scoring per label
+    and taking the first match counts spike once, at rank 1.
+    """
+    entry = next(e for e in task1_labels.pathogens(tier="strong")
+                 if e["pathogen"] == "SARS-CoV-2")
+    record = _record(["Spike protein S2'", "3C-like proteinase nsp5", "Spike protein S2",
+                      "Spike protein S1", "RNA-directed RNA polymerase nsp12"])
+    row = task1.score_panel_row(entry, record)
+    assert row["labels"] == 3, "the panel gives SARS-CoV-2 three targets, not five chains"
+    assert row["matched"] == 3
+    assert row["ranks"] == [1, 2, 5]
+
+
+def test_the_recorded_sars_cov_2_result_is_reproduced_from_the_committed_record():
+    """Pins the live number, so a change to matching or grading cannot move it unnoticed."""
+    result = task1.run_panel(tier="strong")
+    row = next((r for r in result["rows"] if r["pathogen"] == "SARS-CoV-2"), None)
+    if row is None:
+        pytest.skip("the panel runner has not written a SARS-CoV-2 record yet")
+    assert row["candidates"] == 20
+    assert row["ranks"] == [1, 2, 5]
+    assert row["p_vs_random"] == pytest.approx(0.00351, rel=1e-2)
+    assert row["verdict"] == "beats chance"
+
+
+def test_underpowered_is_never_reported_as_a_failure():
+    """Most genomes carry one strong label, so most cannot beat chance however good the rank.
+
+    Hepatitis B has four identified candidates and one approved target. The best attainable p
+    at that size is 0.25, so even a perfect ranking is weak evidence and the verdict has to say
+    so rather than reading as a miss. This is the distinction `rank_enrichment` exists for and
+    the reason a per-genome p-value cannot be the headline here.
+    """
+    entry = next(e for e in task1_labels.pathogens(tier="strong")
+                 if e["pathogen"] == "Hepatitis B virus")
+    record = _record(["HBSAG_GSHV Large envelope protein", "DPOL_GSHV Protein P",
+                      "External core antigen", "X_GSHV Protein X"],
+                     pathogen="Hepatitis B virus")
+    row = task1.score_panel_row(entry, record)
+    assert row["ranks"] == [2]
+    assert row["adequately_powered"] is False
+    assert row["verdict"] == "not established (underpowered)"
+
+
+def test_an_unmatched_label_is_reported_and_not_dropped():
+    """A protein the candidate stage never proposed is a finding, not an absence.
+
+    Four strong labels go unmatched against the committed records, and all four were checked
+    against the chain names rather than assumed: HCMV's terminase and UL97 kinase, and the
+    poxvirus p37 in both monkeypox and vaccinia. The ranker proposed none of them. Widening an
+    alias until they matched would convert a real candidate-stage gap into a label fix, which
+    is the one edit this test exists to make visible.
+    """
+    result = task1.run_panel(tier="strong")
+    if not result["rows"]:
+        pytest.skip("the panel runner has written no records yet")
+    unmatched = set(result["unmatched"])
+    assert ("Human cytomegalovirus", "terminase") in unmatched
+    assert ("Monkeypox virus", "p37") in unmatched
+    assert result["labels_matched"] < result["labels_total"]
+
+
+def test_the_aggregate_combines_families_and_not_genomes():
+    """26 of 46 genomes share a pattern list with a sibling, so genomes are not instances.
+
+    Five coronaviruses carry one target list between them and five unrelated viruses share
+    `RdRp / Glycoprotein / Nucleoprotein`. Stouffer needs independence, and the family step is
+    what supplies it -- the instance count has to be the families, never the genome count.
+    """
+    result = task1.run_panel(tier="strong")
+    if not result["rows"]:
+        pytest.skip("the panel runner has written no records yet")
+    assert result["independent_instances"] == len(result["per_family"])
+    assert result["independent_instances"] < result["genomes_scored"]
+    assert result["combined_p_across_families"]["k"] == result["independent_instances"]
+    assert result["combined_p_across_families"]["method"] == "Stouffer, equal weights"
+    # Herpesviridae is the family that makes the point: four genomes, one combined p.
+    herpes = next(f for f in result["per_family"] if f["family"] == "Herpesviridae")
+    assert herpes["genomes"] == 4
+
+
+def test_recall_at_k_never_travels_without_its_chance_value():
+    result = task1.run_panel(tier="strong")
+    if not result["rows"]:
+        pytest.skip("the panel runner has written no records yet")
+    for key in result["recall_at_k"]:
+        assert result["chance_at_k"][key] is not None, f"{key} has no null beside it"
+    for row in result["rows"]:
+        assert set(row["recall_at_k"]) == set(row["chance_at_k"])
+
+
+def test_influenza_carries_the_recorded_experiments_labels():
+    """The one pathogen the panel lacks, kept because the recorded run includes it.
+
+    It is also the only segmented genome here supplied as every one of its segments, which is
+    the form the three broken panel rows need.
+    """
+    entry = next(e for e in task1_labels.EXTRA if e["pathogen"] == "Influenza A PR8")
+    assert entry["accession"].count(",") == 7, "all eight segments, comma-joined"
     path = os.path.join(ROOT, "runs", "target_ranks.csv")
     with open(path) as handle:
-        recorded = {(r["pathogen"], r["target_protein"]) for r in csv.DictReader(handle)}
-    declared = {(e["pathogen"], t["name"])
-                for e in task1_labels.pathogens(include_draft=False)
-                for t in e["targets"]}
-    assert declared == recorded
-
-
-def test_draft_labels_are_excluded_by_default():
-    """A drafted label must never reach a headline number without being asked for."""
-    default = task1_labels.pathogens()
-    assert all(t.get("verified") for e in default for t in e["targets"])
-    widened = task1_labels.pathogens(include_draft=True)
-    assert sum(len(e["targets"]) for e in widened) > sum(len(e["targets"]) for e in default)
-    # And every draft row has to say what would promote it, so the check is never a guess.
-    assert all(t.get("source") for e in widened for t in e["targets"] if not t.get("verified"))
-
-
-def test_every_label_has_a_status_the_weights_know():
-    for entry in task1_labels.PATHOGENS:
-        for target in entry["targets"]:
-            assert target["status"] in task1_labels.STATUS_WEIGHT, target
-
-
-def test_matcher_is_exact_and_refuses_a_substring():
-    """"f protein" sits inside "transmembrane protein" -- a fuzzy matcher credits the wrong chain.
-
-    Pinned because the failure is silent and flattering: a loose matcher finds every label
-    somewhere in a candidate list and inflates every rank in the benchmark.
-    """
-    label = {"name": "F fusion glycoprotein", "aliases": ("f protein", "fusion protein")}
-    assert task1.matches(label, {"name": "F protein"})
-    assert task1.matches(label, {"name": "Fusion protein"})
-    assert not task1.matches(label, {"name": "Transmembrane protein gp41"})
-    assert not task1.matches(label, {"name": "Nucleoprotein"})
-
-
-def _synthetic(ranks, total, label_names):
-    """A candidate set with the labelled targets planted at the given ranks."""
-    at = dict(zip(ranks, label_names))
-    return {"candidates": [{"rank": i, "name": at.get(i, f"filler protein {i}"),
-                            "parent": None, "length_aa": 100}
-                           for i in range(1, total + 1)]}
-
-
-@pytest.mark.parametrize("pathogen,ranks,total,expected_p", [
-    ("SARS-CoV-2", [1, 2, 5, 6, 7], 23, 8.62e-04),
-    ("Nipah virus", [1, 3, 4], 8, 7.14e-02),
-    ("Influenza A PR8", [1, 2, 4], 11, 1.21e-02),
-])
-def test_scoring_reproduces_the_recorded_p_values(pathogen, ranks, total, expected_p):
-    """This harness and the recorded experiment must agree on the same ranks.
-
-    The ranks and the expected p-values are read off `runs/target_ranks.csv`. The point is not
-    that `rank_enrichment` works -- it has its own tests -- but that this benchmark feeds it the
-    same ranks and the same denominator, so a number produced here is comparable with one
-    already published in the repository.
-    """
-    entry = next(e for e in task1_labels.pathogens() if e["pathogen"] == pathogen)
-    names = [t["name"] for t in entry["targets"]]
-    assert len(names) == len(ranks), "label count drifted from the recorded experiment"
-    payload = _synthetic(ranks, total, names)
-
-    row = task1.score_pathogen(task1.Pipeline(), entry, payload)
-    assert row["matched"] == len(ranks)
-    assert row["ranks"] == sorted(ranks)
-    assert row["p_vs_random"] == pytest.approx(expected_p, rel=1e-2)
-
-
-def test_underpowered_is_not_reported_as_a_failure():
-    """Nipah's p of 0.071 must read as underpowered, never as "does not beat chance"."""
-    entry = next(e for e in task1_labels.pathogens() if e["pathogen"] == "Nipah virus")
-    names = [t["name"] for t in entry["targets"]]
-    row = task1.score_pathogen(task1.Pipeline(), entry, _synthetic([1, 3, 4], 8, names))
-    assert row["verdict"] == "not established (underpowered)"
-    assert row["adequately_powered"] is False
-
-
-def test_an_unmatched_label_is_reported_not_dropped():
-    """A label the candidate stage never proposed is a miss on the record, not a silent absence."""
-    entry = next(e for e in task1_labels.pathogens() if e["pathogen"] == "Nipah virus")
-    payload = _synthetic([1], 8, [entry["targets"][0]["name"]])
-    row = task1.score_pathogen(task1.Pipeline(), entry, payload)
-    assert row["matched"] == 1
-    assert len(row["unmatched"]) == len(entry["targets"]) - 1
-    assert all(t["rank"] is None for t in row["targets"] if t["target"] in row["unmatched"])
+        recorded = {r["target_protein"] for r in csv.DictReader(handle)
+                    if r["pathogen"] == "Influenza A PR8"}
+    assert {t["name"] for t in entry["targets"]} == recorded
 
 
 def test_blinded_prompt_names_neither_virus_nor_protein():
-    """The control the LLM arms rest on. If the pathogen leaks, the blinded arm is not blinded."""
-    entry = next(e for e in task1_labels.pathogens() if e["pathogen"] == "SARS-CoV-2")
-    payload = _synthetic([1, 2, 5, 6, 7], 23, [t["name"] for t in entry["targets"]])
-    for row in payload["candidates"]:
-        row["sequence"] = "MFVFLVLLPLVSSQ"
-    text = task1.prompt(entry, payload["candidates"], blinded=True)
+    """The control the external arms rest on. If the pathogen leaks, the arm is not blinded."""
+    entry = next(e for e in task1_labels.pathogens(tier="strong")
+                 if e["pathogen"] == "SARS-CoV-2")
+    candidates = [{"rank": i, "name": n, "parent": None, "length_aa": 300,
+                   "sequence": "MFVFLVLLPLVSSQ"}
+                  for i, n in enumerate(["Spike protein S1", "3C-like proteinase nsp5"], 1)]
+    text = task1.prompt(entry, candidates, blinded=True)
     assert "SARS" not in text and "NC_045512" not in text
     assert "Spike" not in text and "nsp5" not in text
-    named = task1.prompt(entry, payload["candidates"], blinded=False)
-    assert "SARS-CoV-2" in named and "Spike glycoprotein" in named
+    named = task1.prompt(entry, candidates, blinded=False)
+    assert "SARS-CoV-2" in named and "Spike protein S1" in named
 
 
 def test_stouffer_combines_and_reports_what_it_dropped():
     assert task1.stouffer([0.5, 0.5, 0.5])["p"] == pytest.approx(0.5, abs=1e-3)
-    small = task1.stouffer([0.01, 0.01, 0.01])["p"]
-    assert small < 0.01, "combining three independent small p-values must strengthen them"
+    assert task1.stouffer([0.01, 0.01, 0.01])["p"] < 0.01
     dropped = task1.stouffer([0.05, None, 1.0])
     assert dropped["k"] == 1 and dropped["dropped"] == 2
     assert task1.stouffer([])["p"] is None

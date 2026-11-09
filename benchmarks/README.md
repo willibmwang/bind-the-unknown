@@ -127,6 +127,62 @@ Three tiers, and the distinction between the second and third is the one that ma
 - **Mislabelled** — simply wrong, and **grading does not catch these**. They score at whatever
   tier they are assigned and keep scoring. They have to be dropped, with the drop recorded.
 
+`benchmarks/task1_labels.py` is an **overlay** on the panel, not a copy. It adds the graded
+`status` and a precise alias set, and names the rows to drop. A panel pattern with no entry
+**raises** rather than defaulting, because a new row defaulting to some status would be a
+judgement nobody made applied to the row nobody has read yet.
+
+Of the panel's 154 patterns: **127 graded, 27 dropped**. The graded split is 24 strong
+(`approved` / `approved (EUA)`) against 103 weak — 56 class-effect, 22 research-only, 13
+vaccine-antigen, 12 investigational. So **81% of graded labels are weak**, and 13 of 46 genomes
+carry any strong label at all. The 27 drops are 16 duplicates (one protein named twice, e.g. HCV
+`Serine protease` and `NS3`), 5 absent-from-genome, 3 parents (`Gag-Pol` over RT/PR/IN), and 3
+mislabels.
+
+### Matching is a token run, not a substring and not strict equality
+
+Both extremes fail on real output. Strict equality misses nearly every chain, because the ranker
+emits affixes the label does not carry — `3C-like proteinase nsp5`, `NCAP_SEOUS Nucleoprotein`,
+`DPOL_RHCM6 DNA polymerase catalytic subunit`. Substring matching fails in the flattering
+direction: `"ns5" in "ns5a"` is true, so a bare `NS5` label would claim HCV's NS5A **and** NS5B as
+two hits.
+
+An alias matches when its tokens appear as a contiguous run of **whole tokens**. That handles the
+affixes and refuses `NS5` → `NS5A`, while still refusing the trap that retired the first version
+(`f protein` is inside `transmembrane protein gp41`).
+
+**Chain-level counting needs no separate collapse step.** Scoring per *label* and taking its best
+match counts spike once at rank 1, where counting matching *chains* made S1/S2/S2′ three hits.
+
+### What it found
+
+Scored over the 13 genomes carrying a strong label, 9 families, 24 strong labels:
+
+| | observed | chance | lift |
+|---|---|---|---|
+| recall@1 | 46.2% | 13.1% | **+33.1** |
+| recall@3 | 84.6% | 36.5% | **+48.1** |
+| recall@5 | 100.0% | 55.3% | **+44.7** |
+| recall@10 | 100.0% | 88.2% | +11.8 |
+
+Combined across families by Stouffer: **p = 2.1 × 10⁻⁴**, MRR 0.52, 20 of 24 labels matched.
+
+**But the aggregate rests on three genomes.** Only SARS-CoV-2 (p = 0.0035), HIV-1 (0.039) and RSV
+(0.046) individually beat chance. Nine are **underpowered** — most carry a single strong label, and
+with one label among eleven candidates the best attainable p is 0.09, so even a perfect ranking is
+weak evidence. One genome **does not** beat chance: HCV at p = 0.36, with NS5A — an approved
+ledipasvir target — ranked 12th of 12. That is the kind of specific failure a bare recall figure
+hides.
+
+**Four strong labels go unmatched, and all four are real candidate-stage gaps rather than alias
+bugs.** HCMV's terminase and UL97 kinase, and the poxvirus p37, in both monkeypox and vaccinia:
+the ranker proposed none of them. The distinction was checked chain name by chain name, because a
+missing alias and a protein never proposed arrive identically in the output — four of the eight
+first-pass misses were name gaps and four were absences, and widening aliases until everything
+matches is how the second kind gets quietly converted into the first.
+
+### Status: reconciliation with `output/run_benchmark.py`, agreed with its author
+
 ### Status: reconciliation with `output/run_benchmark.py`, agreed with its author
 
 A second harness for this same task was written independently and in parallel:
@@ -137,8 +193,8 @@ scoring; and the panel is read-only here** — it stays the raw curation with it
 this schema is the graded derivative, so a weak label stays visible as a tier instead of being
 silently upgraded.
 
-Six defects had to be settled first. All six are confirmed by the panel's author, who
-independently recomputed the null values.
+Eight defects had to be settled. All are confirmed by the panel's author, who independently
+recomputed the null values; the last two were found by reading the records this scoring produced.
 
 1. **recall@k has no null, and the null is high.** Under the hypergeometric null at n=20
    candidates and k=5 matching chains, random ranking already scores 25.0% @1, 60.1% @3,
@@ -164,6 +220,23 @@ independently recomputed the null values.
    `<accession>.error.json` so a transient timeout no longer drops a genome permanently, and
    holdout failures carry `kind: "holdout_removed_nothing"` so the previously-unreachable `leaked`
    branch has something real to report.
+
+7. **Three segmented viruses are represented by a single segment**, so some labels name proteins
+   the supplied genome cannot encode. Verified against the records: Hantaan's `NC_005218.1` is
+   1696 nt and yields one chain, a nucleoprotein, against targets naming RdRp (L segment) and
+   Glycoprotein (M) — 2 of 3 unreachable by construction. Lassa's `NC_004296.1` is the S segment,
+   so RdRp is absent. CCHF's `NC_005300.2` yields only polymerase-complex products, so
+   Glycoprotein and Nucleoprotein are absent. Dropped as `absent_from_genome`, because marking
+   the ranker wrong for a gene that was never in its input measures the accession choice, not the
+   ranking. The fix is the form influenza already uses here: every segment accession,
+   comma-joined — `fetch_genome` accepts it and returns the segments separately rather than
+   concatenating, which is right, since joining would create reading frames across junctions that
+   exist in no molecule.
+8. **Two instances cannot discriminate and are excluded rather than scored.** Human parvovirus
+   B19 yields zero identified chains from `NC_000883.2`, so no score is defined. Hantaan as
+   supplied yields one candidate against one surviving label, so rank 1 of 1 is guaranteed
+   whatever the ranker does. Both are reported with their reason; Hantaan becomes a real instance
+   once all three segments are supplied.
 
 Three rows are mislabels rather than weak labels and are dropped on re-key with the reason
 recorded: HSV-1's `terminase` (letermovir is HCMV-only — pattern-matched in from the panel's own
