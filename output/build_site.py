@@ -303,21 +303,41 @@ def results_index(entries):
 </div>""" + FOOT)
 
 
-def build_results():
-    entries = []
+def adopt_new_records():
+    """Copy any record in `runs/` that the site does not already carry.
+
+    `runs/` is gitignored, so it is empty on a fresh checkout and holds exactly one record on
+    a CI runner: the one the chain just wrote. Treating it as the list of runs therefore
+    rebuilt the index from that single record and orphaned every page published before it.
+    The copies under `docs/results/` are the durable list, because they are the ones that are
+    committed, and they are what the pages already tell a reader to check them against.
+    """
     RESULTS.mkdir(parents=True, exist_ok=True)
-    for path in sorted(RUNS.glob("onset_chain*.json")):
-        if path.name in (LANDING_RECORD, "onset_chain_genomes.json"):
+    # `onset_chain_*.json` with the underscore: it excludes the landing page's own record,
+    # `onset_chain.json`, which is a two-reference payload and has its own hand-written page.
+    for path in sorted(RUNS.glob("onset_chain_*.json")):
+        if path.name == "onset_chain_genomes.json":
             continue
         case = json.loads(path.read_text())
-        if "cases" in case:            # a multi-reference payload, not a single run
+        if "cases" in case or not case.get("stages"):
             continue
+        stem = re.sub(r"[^A-Za-z0-9]+", "_", path.stem.replace("onset_chain_", "")).strip("_")
+        dest = RESULTS / f"{stem}.json"
+        if not dest.exists() or dest.read_bytes() != path.read_bytes():
+            shutil.copyfile(path, dest)
+            print(f"  adopted {path.name} → docs/results/{stem}.json")
+
+
+def build_results():
+    adopt_new_records()
+    entries = []
+    for path in sorted(RESULTS.glob("*.json")):
+        case = json.loads(path.read_text())
         if not case.get("stages"):
             print(f"  skipped {path.name}: no stages recorded")
             continue
-        stem = re.sub(r"[^A-Za-z0-9]+", "_", path.stem.replace("onset_chain_", "")).strip("_")
+        stem = path.stem
         (RESULTS / f"{stem}.html").write_text(result_page(case, stem))
-        shutil.copyfile(path, RESULTS / f"{stem}.json")
         cov = case.get("coverage", {})
         entries.append((stem,
                         case.get("pathogen") or case.get("case") or stem,
