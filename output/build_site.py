@@ -82,6 +82,7 @@ def head(title, description, depth=0):
 <body>
 <nav class="sitenav"><div class="sitenav-in">
   <a class="brand" href="{up}index.html">bind-the-unknown</a>
+  <a href="{up}flowchart.html">Flowchart</a>
   <a href="{up}results/index.html">Runs</a>
   <a href="{up}notebook.html">Notebook</a>
   <a href="https://github.com/{REPO}">Code</a>
@@ -109,6 +110,22 @@ def build_index():
            + body + FOOT)
     (DOCS / "index.html").write_text(out)
     print(f"wrote docs/index.html  ({len(out):,} bytes)")
+
+
+def build_flowchart():
+    """The pipeline as a diagram, for a reader who wants the shape before the detail.
+
+    Hand-written for the same reason the landing page is: it is one figure making one claim,
+    and generating it from the records would make it specific to a genome when the point of
+    it is that it is not.
+    """
+    body = (ROOT / "site" / "flowchart.html").read_text()
+    out = (head(f"From an accession to ranked targets · {SITE}",
+                "The shape of the pipeline for any virus: one accession in, ranked targets "
+                "out, with nothing fitted anywhere on the path.")
+           + body + FOOT)
+    (DOCS / "flowchart.html").write_text(out)
+    print(f"wrote docs/flowchart.html  ({len(out):,} bytes)")
 
 
 # --------------------------------------------------------------------- one result page
@@ -390,6 +407,7 @@ def main():
     DOCS.mkdir(exist_ok=True)
     (DOCS / ".nojekyll").write_text("")      # serve the tree as files, no Jekyll pass
     build_index()
+    build_flowchart()
     build_fold_image()
     build_results()
     if args.notebook:

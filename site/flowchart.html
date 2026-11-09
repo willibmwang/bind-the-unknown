@@ -1,0 +1,95 @@
+<div class="wrap">
+
+<header class="top">
+  <div class="eyebrow">arm 1 · the whole path</div>
+  <h1>From an accession to ranked targets</h1>
+  <p class="standfirst">What happens between one line of input and the deliverable. This is the
+  shape of the pipeline for any virus, with nothing specific to one genome in it.</p>
+</header>
+
+<section>
+  <figure>
+    <svg class="fc" viewBox="0 0 460 648" role="img"
+         aria-label="A vertical flowchart. One NCBI accession goes in. The genome is fetched from NCBI, translated in all six frames, matched against reviewed viral proteins at UniProt, cut into mature chains, and every chain is scored on five fixed weights. Ranked targets come out, one row per chain and none dropped.">
+      <defs>
+        <marker id="fcarrow" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
+          <path d="M0 0 L10 5 L0 10 z" class="arrow"/>
+        </marker>
+      </defs>
+
+      <rect class="io" x="36" y="16" width="248" height="56" rx="7"/>
+      <text class="t"   x="160" y="40" text-anchor="middle">One NCBI accession</text>
+      <text class="sub" x="160" y="58" text-anchor="middle">no target name, no shortlist</text>
+      <text class="side" x="300" y="46">the whole input</text>
+
+      <line class="ln" x1="160" y1="72" x2="160" y2="105" marker-end="url(#fcarrow)"/>
+
+      <rect class="box" x="36" y="108" width="248" height="50" rx="7"/>
+      <text class="t" x="160" y="138" text-anchor="middle">Fetch the genome</text>
+      <text class="side" x="300" y="130">NCBI efetch</text>
+      <text class="side" x="300" y="144">nucleotides, and nothing else</text>
+
+      <line class="ln" x1="160" y1="158" x2="160" y2="189" marker-end="url(#fcarrow)"/>
+
+      <rect class="box" x="36" y="192" width="248" height="50" rx="7"/>
+      <text class="t" x="160" y="222" text-anchor="middle">Translate all six frames</text>
+      <text class="side" x="300" y="214">every protein the genome</text>
+      <text class="side" x="300" y="228">could encode, read both ways</text>
+
+      <line class="ln" x1="160" y1="242" x2="160" y2="273" marker-end="url(#fcarrow)"/>
+
+      <rect class="box" x="36" y="276" width="248" height="62" rx="7"/>
+      <text class="t"   x="160" y="302" text-anchor="middle">Match reviewed viral proteins</text>
+      <text class="sub" x="160" y="320" text-anchor="middle">identify through a relative</text>
+      <text class="side" x="300" y="294">UniProt</text>
+      <text class="side" x="300" y="308">what it cannot name is kept,</text>
+      <text class="side" x="300" y="322">carrying its own sequence</text>
+
+      <line class="ln" x1="160" y1="338" x2="160" y2="369" marker-end="url(#fcarrow)"/>
+
+      <rect class="box" x="36" y="372" width="248" height="50" rx="7"/>
+      <text class="t" x="160" y="402" text-anchor="middle">Cut polyproteins into chains</text>
+      <text class="side" x="300" y="394">one accession and one</text>
+      <text class="side" x="300" y="408">residue range per chain</text>
+
+      <line class="ln" x1="160" y1="422" x2="160" y2="453" marker-end="url(#fcarrow)"/>
+
+      <rect class="box" x="36" y="456" width="248" height="62" rx="7"/>
+      <text class="t"   x="160" y="482" text-anchor="middle">Score every chain</text>
+      <text class="sub" x="160" y="500" text-anchor="middle">five weights, fixed in advance</text>
+      <text class="side" x="300" y="474">conservation · exposure</text>
+      <text class="side" x="300" y="488">essential · druggable</text>
+      <text class="side" x="300" y="502">structures in the family</text>
+
+      <line class="ln" x1="160" y1="518" x2="160" y2="549" marker-end="url(#fcarrow)"/>
+
+      <rect class="io" x="36" y="552" width="248" height="62" rx="7"/>
+      <text class="t"   x="160" y="578" text-anchor="middle">Ranked targets</text>
+      <text class="sub" x="160" y="596" text-anchor="middle">the deliverable</text>
+      <text class="side" x="300" y="570">one row per chain,</text>
+      <text class="side" x="300" y="584">every score decomposed,</text>
+      <text class="side" x="300" y="598">none dropped</text>
+    </svg>
+    <figcaption>Nothing is fitted or learned anywhere on this path. Every weight is stated
+    before the run, and every score re-adds from its parts.</figcaption>
+  </figure>
+
+  <div class="fcnote">
+    <div><b>Identification needs a relative.</b> A protein is named by matching it against
+    reviewed viral entries. Delete the close relatives and the pipeline does not quietly get
+    worse — it stops, which is the behaviour you want from it.</div>
+    <div><b>What it cannot name, it keeps.</b> An unidentified protein stays in the list
+    carrying its own sequence, so a genuinely novel target is not lost between steps.</div>
+    <div><b>The count never shrinks.</b> Every chain that is ranked gets a row at every later
+    step, measured or refused with a stated reason. A step may refuse a candidate; it may not
+    drop one.</div>
+  </div>
+
+  <p class="after">Two further steps hang off the ranked list and are shown on the
+  <a href="index.html">front page</a>: each chain's surface is measured where a deposited
+  structure covers it, and a chain can be folded from its own sequence. Neither changes the
+  ranking.</p>
+</section>
+
+</div>

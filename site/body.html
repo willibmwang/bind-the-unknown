@@ -16,7 +16,7 @@
   <div class="sec-head"><h2>How it works</h2><span class="tag">fig. 1</span></div>
   <figure>
     <div class="armband a1">
-      <div class="armlbl">A genome goes in, a library comes out</div>
+      <div class="armlbl">Arm 1 · a genome goes in, a ranked shortlist comes out</div>
       <div class="flow">
 
         <div class="step">
@@ -95,7 +95,7 @@
     <div class="cross"><span class="bar"></span><span class="t">one number crosses over: how many positions the library varies</span></div>
 
     <div class="armband a2">
-      <div class="armlbl">One question about that library</div>
+      <div class="armlbl">Arm 2 · a separate question, answered elsewhere</div>
       <div class="flow one">
         <div class="step">
           <svg class="ic" viewBox="0 0 100 72" role="img" aria-label="A tall bar beside a short bar: a large gain against a negligible one">
@@ -184,6 +184,14 @@
 })();
 </script>
 
+<div class="armsep">
+  <span class="n">Arm 1</span>
+  <h2>From a genome to a ranked shortlist</h2>
+  <p>Five steps, run live against public databases. Everything below this line is the path to
+  the deliverable: a list of candidate targets, ranked, with every score decomposed and every
+  surface either measured or refused with a reason.</p>
+</div>
+
 <section>
   <div class="sec-head"><h2>The five steps</h2><span class="tag">what went in, what came out</span></div>
 
@@ -238,7 +246,7 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">5</span><span class="what">Define a library to screen</span><span class="secs">instant</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li>Nothing from the four steps above — see the last section</li></ul></div>
+      <div><h3>In</h3><ul><li>Nothing from the four steps above. The library definition does not read the measured surface — an intention, not yet a connection</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
         <li>A ring-shaped peptide, varying at <b>4–8</b> positions</li>
         <li><b>25</b> building blocks to choose from at each one</li>
@@ -424,24 +432,6 @@
 </section>
 
 <section>
-  <div class="sec-head"><h2>Worth building?</h2><span class="tag">the decision</span></div>
-  <p class="cap">One question, answerable before anything is made: will a model trained on the first round of lab results be good enough to pick the next round? Measured across eight published datasets. These are ordinary lab proteins, not SARS-CoV-2 — the finding is about library design, so it transfers.</p>
-  <div class="two">
-    <div class="card yes">
-      <div class="label">The new candidates vary at the same positions as the ones already measured</div>
-      <div class="big">+0.32</div>
-      <div class="sub">build it — the model earns its place</div>
-    </div>
-    <div class="card no">
-      <div class="label">The new candidates vary somewhere else entirely</div>
-      <div class="big">+0.03</div>
-      <div class="sub">redesign first — no model will help</div>
-    </div>
-  </div>
-  <p class="after">Best case in each group, against picking at random from the same batch. The two groups do not overlap, and the odds of that split happening by chance are 1 in 70. A library varying 4–8 positions, as step 5 defines, is the favourable kind.</p>
-</section>
-
-<section>
   <div class="sec-head"><h2>The toolkit</h2><span class="tag">10 tools · 91 calls</span></div>
   <p class="cap">Ten tools in all, each calling live public biology databases. The five detailed above run inside the chain; the other five are reachable from the same four facts step 1 produces, and were exercised separately to record what they cost and how they fail. Deliberately bad inputs are included, so each failure mode is on record rather than assumed.</p>
   <div class="chips">
@@ -457,22 +447,6 @@
     <span class="chip">Define a library <b>23</b></span>
   </div>
   <p class="after">Databases reached: NCBI, UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, RCSB, 3D-Beacons, AlphaFold DB, ESMFold and ChEMBL.</p>
-</section>
-
-<section>
-  <div class="sec-head"><h2>What is still missing</h2><span class="tag">stated, not hidden</span></div>
-  <div class="note">
-    <svg class="dash" width="30" height="10" role="img" aria-label="dashed line"><line x1="1" y1="5" x2="29" y2="5" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4" opacity=".5"/></svg>
-    <p><b>The library ignores the surface.</b> Step 5 does not read anything steps 1 to 4 measured. It would define the same library whatever was found, so "a library aimed at that surface" is an intention, not yet a connection.</p>
-  </div>
-  <div class="note">
-    <svg class="dash" width="30" height="10" role="img" aria-label="dashed line"><line x1="1" y1="5" x2="29" y2="5" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4" opacity=".5"/></svg>
-    <p><b>Nothing comes back from the lab.</b> Real screening results would feed the next design. That interface exists and is named, and every slot in it is empty.</p>
-  </div>
-  <div class="note">
-    <svg class="dash" width="30" height="10" role="img" aria-label="dashed line"><line x1="1" y1="5" x2="29" y2="5" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4" opacity=".5"/></svg>
-    <p><b>A relative is required.</b> Here SARS-CoV-2 was hidden and the run still worked, through SARS and bat coronaviruses. Hide the close relatives too and the system does not quietly get worse — it stops, which is the behaviour you want.</p>
-  </div>
 </section>
 
 <footer>
