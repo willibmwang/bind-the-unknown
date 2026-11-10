@@ -1,7 +1,7 @@
 """Which viral protein each antiviral actually binds, graded, as labels for a retrieval benchmark.
 
 **This is an overlay, not a copy.** `data/benchmark_panel.json` is the raw curation and stays
-read-only: 46 genomes and 154 target patterns, each with the `validated_by` prose that justifies
+read-only: 47 genomes and 157 target patterns, each with the `validated_by` prose that justifies
 it. This module adds the two things the panel deliberately does not carry -- a graded `status` per
 target, and an alias set precise enough to match without a substring -- and it names the rows that
 have to be dropped. Keeping them apart is what stops a weak label being silently upgraded: the
@@ -113,6 +113,19 @@ ALIASES = {
     "NS5": ("ns5",),
     "NS5A": ("ns5a",),
     "NS5B": ("ns5b",),
+    # Influenza. These two sets are not new: they are the ones `EXTRA` already carried for PR8,
+    # whose source field names `runs/target_ranks.csv` -- so they were read off what the ranker
+    # actually named, which is the standard the override table below insists on. Moving them
+    # here is what lets PR8 come through the panel like every other pathogen.
+    "Neuraminidase": ("neuraminidase", "sialidase"),
+    "Polymerase acidic": ("polymerase acidic protein", "pa endonuclease",
+                          "cap snatching endonuclease", "polymerase acidic"),
+    # `Matrix protein 2` is deliberately absent and falls back to its own lowercased name.
+    # `EXTRA` never carried an M2 row, so there is no record of what the ranker names it, and
+    # inventing `m2 protein` or `proton channel` here is precisely the move the override table
+    # warns against: it would convert a protein the candidate stage may genuinely never propose
+    # into a label that matches something. If M2 reports unmatched, that is the honest result
+    # and the fix is to read a record and add the name it really uses.
 }
 
 
@@ -386,6 +399,26 @@ OVERLAY = {
                                                            "panel: NS1 helicase is the class "
                                                            "target"),
     ("Human parvovirus B19", "Capsid protein VP1"): ("research target", "no agent binds VP1"),
+
+    # -- Orthomyxoviridae. These three rows are why `pathogens()` raised rather than ran: the
+    # panel gained an `Influenza A PR8` entry while PR8 was already being supplied through
+    # `EXTRA`, and nothing reconciled the two. Grading them here rather than dropping them is
+    # the right half of the fix because the panel's own `validated_by` names a drug for each of
+    # the three, which is exactly the evidence this table is derived from. The other half is in
+    # `EXTRA` and in `pathogens()`, which previously appended PR8 a second time.
+    ("Influenza A PR8", "Neuraminidase"): ("approved",
+                                           "oseltamivir and zanamivir bind neuraminidase"),
+    # Amantadine and rimantadine are approved and bind the M2 proton channel, which is what
+    # this status asserts. They are no longer recommended against circulating strains, because
+    # S31N is near-universal in H3N2 and H1N1pdm09 -- but PR8 is a 1934 laboratory strain
+    # without it, so the drug does bind this protein in this virus. The caveat is recorded
+    # because a reader checking the status against current treatment guidance will not find it.
+    ("Influenza A PR8", "Matrix protein 2"): ("approved",
+                                              "amantadine binds the M2 ion channel; resistance "
+                                              "is near-universal in circulating strains but not "
+                                              "in PR8"),
+    ("Influenza A PR8", "Polymerase acidic"): ("approved",
+                                               "baloxavir marboxil binds the PA endonuclease"),
 }
 
 
@@ -483,8 +516,12 @@ SEGMENTED = {
 
 
 # Viral families, for aggregating over independent instances rather than over genomes. 26 of the
-# 46 genomes share a pattern list with at least one sibling, so a p-value combined across 46 as
+# 47 genomes share a pattern list with at least one sibling, so a p-value combined across 47 as
 # though they were independent is inflated. Combined within family first, then across families.
+#
+# The denominator was 46 until the panel gained its `Influenza A PR8` row. PR8's pattern list is
+# unique, so the 26 is unchanged and only the total moved -- recounted rather than assumed, since
+# a new genome sharing a list with a sibling would have moved both.
 FAMILY = {
     "SARS-CoV-2": "Coronaviridae", "SARS-CoV": "Coronaviridae", "MERS-CoV": "Coronaviridae",
     "HCoV-229E": "Coronaviridae", "HCoV-OC43": "Coronaviridae",
@@ -522,9 +559,23 @@ FAMILY = {
 }
 
 
-# One pathogen the panel does not carry, kept because the recorded experiment in
-# `runs/target_ranks.csv` includes it and because it is the only segmented genome here supplied
-# as every one of its segments -- which is the form the three broken rows above need.
+# Targets the panel does not carry, merged into the panel's own row for that pathogen.
+#
+# **This used to be a whole second PR8 and that was a double count.** The comment here read
+# "one pathogen the panel does not carry", which stopped being true when the panel gained an
+# `Influenza A PR8` entry of its own. Nothing reconciled them: `pathogens()` appended this
+# block after walking the panel, so PR8 came back twice -- once ungraded from the panel, which
+# is the raise, and once from here. Two of the three targets were the same proteins under
+# different names (`Neuraminidase` / `Neuraminidase (NA)`, `Polymerase acidic` /
+# `PA endonuclease`), so every rank PR8 contributed was counted twice, which is the same defect
+# `DROPPED` records as `duplicate` arriving through a different door. It matters beyond a
+# headline count because the families are combined across pathogens as independent instances,
+# and one pathogen entered as two is not independent of itself.
+#
+# What is left is the single target the panel genuinely lacks. HA is kept rather than dropped
+# because it is real evidence of the weak kind -- the panel's PR8 row names neither it nor any
+# antibody programme -- and because losing it would quietly shrink the weak tier while this
+# change was advertised as a de-duplication.
 EXTRA = (
     {
         "pathogen": "Influenza A PR8",
@@ -532,14 +583,6 @@ EXTRA = (
                       "NC_002021.1,NC_002022.1,NC_002023.1"),
         "holdout": "Influenza A virus (strain A/Puerto Rico/8/1934 H1N1)",
         "targets": (
-            {"name": "Neuraminidase (NA)", "aliases": ("neuraminidase", "sialidase"),
-             "status": "approved", "why": "oseltamivir and zanamivir bind NA",
-             "source": "runs/target_ranks.csv"},
-            {"name": "PA endonuclease",
-             "aliases": ("polymerase acidic protein", "pa endonuclease",
-                         "cap snatching endonuclease"),
-             "status": "approved", "why": "baloxavir marboxil binds the PA endonuclease",
-             "source": "runs/target_ranks.csv"},
             {"name": "Haemagglutinin (HA)", "aliases": ("hemagglutinin", "haemagglutinin"),
              "status": "investigational",
              "why": "broadly neutralising antibodies have reached trials; none approved",
@@ -603,11 +646,33 @@ def pathogens(tier="strong", include_unscoreable=False, panel=None):
                         "segmented": SEGMENTED.get(name),
                         "unscoreable": UNSCOREABLE.get(name)})
 
+    # Merged into the panel's row for the same pathogen, never appended beside it. Appending is
+    # what produced two `Influenza A PR8` rows and counted its ranks twice; see the comment on
+    # `EXTRA`. A collision raises instead of resolving itself, for the same reason an ungraded
+    # pattern raises above: the two candidate resolutions -- keep the panel's label or keep this
+    # one -- are a judgement about which curation is better, and this module's rule is that such
+    # a judgement is written down by hand or not made at all.
+    by_name = {row["pathogen"]: row for row in out}
     for entry in EXTRA:
         targets = tuple(t for t in entry["targets"] if t["status"] in wanted)
-        if targets:
-            out.append({**entry, "family": FAMILY.get(entry["pathogen"], "unassigned"),
-                        "targets": targets, "segmented": None, "unscoreable": None})
+        if not targets:
+            continue
+        existing = by_name.get(entry["pathogen"])
+        if existing is None:
+            row = {**entry, "family": FAMILY.get(entry["pathogen"], "unassigned"),
+                   "targets": targets, "segmented": None, "unscoreable": None}
+            out.append(row)
+            by_name[entry["pathogen"]] = row
+            continue
+        taken = {alias for target in existing["targets"] for alias in target["aliases"]}
+        for target in targets:
+            clash = sorted(set(target["aliases"]) & taken)
+            if clash:
+                raise ValueError(
+                    f"EXTRA target {target['name']!r} for {entry['pathogen']!r} shares the "
+                    f"alias(es) {clash} with a graded panel target, so merging it would count "
+                    f"one protein twice. Drop it from EXTRA or narrow its aliases.")
+        existing["targets"] = existing["targets"] + targets
     return tuple(out)
 
 

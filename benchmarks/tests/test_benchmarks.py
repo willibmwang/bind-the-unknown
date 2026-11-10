@@ -199,7 +199,11 @@ def test_every_panel_pattern_is_graded_or_dropped():
     assert patterns - covered == set(), f"ungraded panel rows: {sorted(patterns - covered)}"
     # And nothing in the overlay names a row the panel does not have, or the two have drifted.
     assert covered - patterns == set(), f"overlay names absent rows: {sorted(covered - patterns)}"
-    assert len(patterns) == 154
+    # 157 since the panel gained its `Influenza A PR8` row -- three patterns on one genome. The
+    # pin moved with the curation rather than being relaxed: this assertion is the only thing
+    # that would have told anyone the panel had grown, and for a while it was the only thing
+    # that did, because `pathogens()` raised on the ungraded rows long before a reader got here.
+    assert len(patterns) == 157
 
 
 def test_an_ungraded_pattern_raises_rather_than_defaulting():
@@ -212,8 +216,12 @@ def test_an_ungraded_pattern_raises_rather_than_defaulting():
 def test_the_strong_tier_is_what_a_headline_may_quote():
     """Only an approved drug binding this protein in this virus reaches the default tier."""
     counts = task1_labels.counts()
-    assert counts["panel_genomes"] == 46
-    assert counts["strong_labels"] == 26
+    # 47 genomes and 27 strong labels since the panel's `Influenza A PR8` row was graded. The
+    # pathogen count is unchanged at 14: PR8 was already reaching the strong tier through
+    # `EXTRA`, so what the grading added is one more approved label (M2) on a pathogen that was
+    # already there, not a new pathogen.
+    assert counts["panel_genomes"] == 47
+    assert counts["strong_labels"] == 27
     assert counts["strong_pathogens"] == 14
     strong = task1_labels.pathogens(tier="strong")
     assert all(t["status"] in task1_labels.STRONG for e in strong for t in e["targets"])
@@ -422,7 +430,7 @@ def test_an_unmatched_label_is_reported_and_not_dropped():
 
 
 def test_the_aggregate_combines_families_and_not_genomes():
-    """26 of 46 genomes share a pattern list with a sibling, so genomes are not instances.
+    """26 of 47 genomes share a pattern list with a sibling, so genomes are not instances.
 
     Five coronaviruses carry one target list between them and five unrelated viruses share
     `RdRp / Glycoprotein / Nucleoprotein`. Stouffer needs independence, and the family step is
@@ -451,18 +459,37 @@ def test_recall_at_k_never_travels_without_its_chance_value():
 
 
 def test_influenza_carries_the_recorded_experiments_labels():
-    """The one pathogen the panel lacks, kept because the recorded run includes it.
+    """Every protein the recorded PR8 run scored is still covered by exactly one label.
 
-    It is also the only segmented genome here supplied as every one of its segments, which is
-    the form the three broken panel rows need.
+    **PR8 used to arrive twice and this test could not see it.** The panel gained an
+    `Influenza A PR8` row while PR8 was also supplied through `EXTRA`, and `pathogens()`
+    appended rather than merged, so the pathogen came back as two rows -- with `Neuraminidase`
+    and `Polymerase acidic` from one and `Neuraminidase (NA)` and `PA endonuclease` from the
+    other naming the same two proteins. Asserting against `EXTRA` alone, as this test did, was
+    blind to the half of the problem that lived in the panel.
+
+    So the assertion is now the invariant rather than a name list: whatever the two curations
+    call them, each protein the recorded experiment scored must be matched by one label and not
+    by two. It is checked through `task1.matches`, the matcher the benchmark itself scores with,
+    because the names deliberately differ between the panel and the recorded run and a string
+    comparison is what hid the duplicate in the first place.
     """
-    entry = next(e for e in task1_labels.EXTRA if e["pathogen"] == "Influenza A PR8")
+    rows = [e for e in task1_labels.pathogens(tier="all")
+            if e["pathogen"] == "Influenza A PR8"]
+    assert len(rows) == 1, f"PR8 appears {len(rows)} times; the panel and EXTRA have diverged"
+    entry = rows[0]
     assert entry["accession"].count(",") == 7, "all eight segments, comma-joined"
+    assert entry["holdout"] == "Influenza A virus (strain A/Puerto Rico/8/1934 H1N1)"
+
     path = os.path.join(ROOT, "runs", "target_ranks.csv")
     with open(path) as handle:
         recorded = {r["target_protein"] for r in csv.DictReader(handle)
                     if r["pathogen"] == "Influenza A PR8"}
-    assert {t["name"] for t in entry["targets"]} == recorded
+    assert recorded, "the recorded run has no PR8 rows to check against"
+    for protein in sorted(recorded):
+        hits = [t["name"] for t in entry["targets"]
+                if task1.matches(t, {"name": protein})]
+        assert len(hits) == 1, f"{protein!r} is matched by {hits}, expected exactly one label"
 
 
 def test_blinded_prompt_names_neither_virus_nor_protein():

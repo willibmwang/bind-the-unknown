@@ -545,7 +545,7 @@ def score_panel_row(entry, record):
 def run_panel(tier="strong", directory=PANEL_RUNS):
     """Score the panel, combining within family before combining across families.
 
-    **Why the family step is not optional.** 26 of the 46 genomes share a target pattern list
+    **Why the family step is not optional.** 26 of the 47 genomes share a target pattern list
     with at least one sibling -- five coronaviruses carry one list between them, and five
     biologically unrelated viruses share `RdRp / Glycoprotein / Nucleoprotein`. Stouffer's
     method needs independent instances, and five coronaviruses ranked against each other's
