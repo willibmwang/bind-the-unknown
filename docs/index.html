@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>bind-the-unknown · one genome in, every step out</title>
-<meta name="description" content="What came back when the system was given one SARS-CoV-2 genome accession and nothing else.">
+<title>bind-the-unknown · one pathogen genome in, every next step out</title>
+<meta name="description" content="Deciding which of a new virus&#x27;s proteins a drug should aim at, from the genome accession alone, with every step on the record. This is the walkthrough on SARS-CoV-2, held out of its own reference.">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Manrope:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css">
@@ -24,8 +24,8 @@
 <header class="top hero">
   <div class="hero-text">
     <div class="eyebrow">bind-the-unknown</div>
-    <h1>One <span class="nb">SARS-CoV-2</span> genome in, every step out</h1>
-    <p class="standfirst">The system is given a genome accession and nothing else — no target name, no shortlist, no structure. This is what came back.</p>
+    <h1>One pathogen genome in, <span class="nb">every next step out</span></h1>
+    <p class="standfirst">When a new virus appears, someone has to decide which of its proteins a drug should aim at. That is expert judgement, and the evidence it rests on is thinnest exactly when the pathogen is new. This works it out from the accession alone, and shows what it did at every step — so an expert can check it rather than take its word.</p>
     <div class="acts">
       <a class="btn" href="#picked">See what it picked <span aria-hidden="true">→</span></a>
       <a class="btn ghost" href="#run">Run it on your own pathogen <span aria-hidden="true">→</span></a>
@@ -275,6 +275,136 @@
         <li><b>9</b> matched to a known relative, <b>3</b> unrecognised and reported as such</li>
       </ul></div>
     </div>
+  </div>
+
+  <div class="substep">
+    <h3>The 12 it ranked, and why each one scored what it did</h3>
+    <p class="cap">Those counts are what this step reports. Below is what it actually
+    returned. Nothing is fetched from an existing annotation of this genome: the sequence is
+    translated in all six reading frames, every stretch between stop codons of at least
+    60 residues is kept — overlaps in different frames included, because
+    discarding one of two overlapping frames here would let length decide what homology
+    should — and the 12 longest are searched against
+    17,512 reviewed viral proteins with SARS-CoV-2 itself deleted from that
+    reference. Identification is tried in three tiers, cheapest first: exact 5-mer identity,
+    then reduced-alphabet seeding with Smith–Waterman where that finds nothing, then
+    hydropathy, which returns a class rather than a name and is scored so it cannot outrank a
+    real homology hit.</p>
+    
+  <div class="cmxscroll" tabindex="0" role="region" aria-label="The ranked ORFs and their scores">
+  <table class="cmx">
+    <caption>Every ORF stage 1 ranked, highest composite score first. Each cell is the points
+      that weight paid, with the measurement it was computed from underneath; the shading is
+      the share of that column's maximum. Nothing here is fitted — the five weights were
+      fixed before the run.</caption>
+    <thead>
+      <tr>
+        <th scope="col" class="rk">#</th>
+        <th scope="col" class="nm">ORF, and what it matched</th>
+        <th scope="col" title="Share of 5-mers the ORF has in common with its nearest curated relative. 1.0 would be the same sequence; anything under 0.12 is not kept as a match at all."><span class="cl">Match to a known relative</span><span class="ck">conservation</span><span class="cw">× 3 → max 3</span></th><th scope="col" title="Whether most of the compartments its relatives are annotated in are places a binder can reach without crossing a membrane. All or nothing."><span class="cl">On the outside</span><span class="ck">surface_exposed</span><span class="cw">× 2 → max 2</span></th><th scope="col" title="Whether the protein&#x27;s name or keywords name a class the virus cannot replicate without — a polymerase, a protease, a capsid, an entry protein. All or nothing."><span class="cl">The virus needs it</span><span class="ck">essential_class</span><span class="cw">× 1.5 → max 1.5</span></th><th scope="col" title="A 0–3 class from the words in its annotations: proteases and polymerases score 3, surface glycoproteins and helicases 2. The historical record for approved antivirals."><span class="cl">Class that gets drugged</span><span class="ck">druggable_class</span><span class="cw">× 0.8 → max 2.4</span></th><th scope="col" title="Deposited structures across its relatives, capped at 50. The smallest weight, because a structure count measures research attention as much as tractability."><span class="cl">Structures already solved</span><span class="ck">structures_in_family</span><span class="cw">× 0.5 → max 0.5</span></th>
+        <th scope="col" class="sc">Composite<span class="cw">of 9.4</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="rk">1</td>
+        <td class="nm"><span class="t">SPIKE_BCHK3 Spike glycoprotein</span><span class="w">Bat coronavirus HKU3 · exact</span>
+          <span class="w">+1 · nt 21,535 · 1,282 aa</span></td>
+        <td class="h h3"><span class="pt">1.34</span><span class="rw">0.448</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h5"><span class="pt">0.50</span><span class="rw">84 in PDB</span></td>
+        <td class="sc"><span class="v">6.94</span>
+          <span class="tr"><i style="width:100.0%"></i></span></td>
+      </tr>
+      <tr>
+        <td class="rk">2</td>
+        <td class="nm"><span class="t">R1AB_SARS Replicase polyprotein 1ab</span><span class="w">Severe acute respiratory syndrome coronavirus · exact</span>
+          <span class="w">+0 · nt 13,767 · 2,595 aa</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">2.40</span><span class="rw">class 3</span></td><td class="h h5"><span class="pt">0.50</span><span class="rw">105 in PDB</span></td>
+        <td class="sc"><span class="v">6.90</span>
+          <span class="tr"><i style="width:99.4%"></i></span></td>
+      </tr>
+      <tr>
+        <td class="rk">3</td>
+        <td class="nm"><span class="t">R1A_BCHK3 Replicase polyprotein 1a</span><span class="w">Bat coronavirus HKU3 · exact</span>
+          <span class="w">+1 · nt 265 · 4,405 aa</span></td>
+        <td class="h h3"><span class="pt">1.33</span><span class="rw">0.444</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">2.40</span><span class="rw">class 3</span></td><td class="h h5"><span class="pt">0.50</span><span class="rw">105 in PDB</span></td>
+        <td class="sc"><span class="v">5.73</span>
+          <span class="tr"><i style="width:82.5%"></i></span></td>
+      </tr>
+      <tr>
+        <td class="rk">4</td>
+        <td class="nm"><span class="t">VME1_BC279 Membrane protein</span><span class="w">Bat coronavirus 279/2005 · exact</span>
+          <span class="w">+2 · nt 26,522 · 222 aa</span></td>
+        <td class="h h4"><span class="pt">1.87</span><span class="rw">0.624</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h1"><span class="pt">0.04</span><span class="rw">4 in PDB</span></td>
+        <td class="sc"><span class="v">5.51</span>
+          <span class="tr"><i style="width:79.4%"></i></span></td>
+      </tr>
+      <tr>
+        <td class="rk">5</td>
+        <td class="nm"><span class="t">NCAP_BCRP3 Nucleoprotein</span><span class="w">Bat coronavirus Rp3/2004 · exact</span>
+          <span class="w">+1 · nt 28,273 · 419 aa</span></td>
+        <td class="h h4"><span class="pt">1.90</span><span class="rw">0.634</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h2"><span class="pt">0.10</span><span class="rw">10 in PDB</span></td>
+        <td class="sc"><span class="v">3.50</span>
+          <span class="tr"><i style="width:50.4%"></i></span></td>
+      </tr>
+      <tr>
+        <td class="rk">6</td>
+        <td class="nm"><span class="t">AP3A_BC279 Protein 3</span><span class="w">Bat coronavirus 279/2005 · exact</span>
+          <span class="w">+0 · nt 25,392 · 275 aa</span></td>
+        <td class="h h2"><span class="pt">0.95</span><span class="rw">0.317</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
+        <td class="sc"><span class="v">2.55</span>
+          <span class="tr"><i style="width:36.8%"></i></span></td>
+      </tr>
+      <tr>
+        <td class="rk">7</td>
+        <td class="nm"><span class="t">NS8_BC279 Non-structural protein 8</span><span class="w">Bat coronavirus 279/2005 · remote</span>
+          <span class="w">+2 · nt 27,893 · 121 aa</span></td>
+        <td class="h h5"><span class="pt">2.49</span><span class="rw">0.830</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
+        <td class="sc"><span class="v">2.49</span>
+          <span class="tr"><i style="width:35.9%"></i></span></td>
+      </tr>
+      <tr>
+        <td class="rk">8</td>
+        <td class="nm"><span class="t">NS7A_BCRP3 Protein 7a</span><span class="w">Bat coronavirus Rp3/2004 · exact</span>
+          <span class="w">+0 · nt 27,393 · 121 aa</span></td>
+        <td class="h h3"><span class="pt">1.62</span><span class="rw">0.538</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.02</span><span class="rw">2 in PDB</span></td>
+        <td class="sc"><span class="v">1.64</span>
+          <span class="tr"><i style="width:23.6%"></i></span></td>
+      </tr>
+      <tr>
+        <td class="rk">9</td>
+        <td class="nm"><span class="t">ORF9B_SARS ORF9b protein</span><span class="w">Severe acute respiratory syndrome coronavirus · exact</span>
+          <span class="w">+2 · nt 28,283 · 97 aa</span></td>
+        <td class="h h2"><span class="pt">0.90</span><span class="rw">0.301</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.01</span><span class="rw">1 in PDB</span></td>
+        <td class="sc"><span class="v">0.91</span>
+          <span class="tr"><i style="width:13.2%"></i></span></td>
+      </tr>
+      <tr class="unid">
+        <td class="rk">10</td>
+        <td class="nm"><span class="t">Not identified</span><span class="w">-2 · nt 23,414 · 100 aa</span></td>
+        <td class="why" colspan="5">no homolog at either tier and neither topology route fired</td>
+        <td class="sc">&mdash;</td>
+      </tr>
+      <tr class="unid">
+        <td class="rk">11</td>
+        <td class="nm"><span class="t">Not identified</span><span class="w">+2 · nt 21,935 · 87 aa</span></td>
+        <td class="why" colspan="5">no homolog at either tier and neither topology route fired</td>
+        <td class="sc">&mdash;</td>
+      </tr>
+      <tr class="unid">
+        <td class="rk">12</td>
+        <td class="nm"><span class="t">Not identified</span><span class="w">+2 · nt 2,957 · 82 aa</span></td>
+        <td class="why" colspan="5">no homolog at either tier and neither topology route fired</td>
+        <td class="sc">&mdash;</td>
+      </tr></tbody>
+  </table>
+  </div><p class="after">The five weights and every number in this table are read from <span class="mono">runs/intake_candidates.json</span>, which is this same stage run on its own — the chain record keeps stage 1 as counts, and the build refuses to ship this table unless those counts match. The later sections are from <span class="mono">runs/onset_chain.json</span>.</p>
+    <p class="after">Two things worth reading off the columns rather than the scores. The
+    spike and the replicase finish within a few hundredths of each other and get there by
+    opposite routes — the spike earns the full exposure term and little conservation, the
+    replicase the reverse — so they are a near-tie between an antibody target and a target
+    only a cell-permeable drug reaches. And the conservation column is the only one measured
+    against this genome; the other four are read off whichever relative was matched, which is
+    why holding the pathogen out lowers the scores instead of emptying the list.</p>
   </div>
 
   <div class="stage">

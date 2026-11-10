@@ -3,8 +3,8 @@
 <header class="top hero">
   <div class="hero-text">
     <div class="eyebrow">bind-the-unknown</div>
-    <h1>One <span class="nb">SARS-CoV-2</span> genome in, every step out</h1>
-    <p class="standfirst">The system is given a genome accession and nothing else — no target name, no shortlist, no structure. This is what came back.</p>
+    <h1>One pathogen genome in, <span class="nb">every next step out</span></h1>
+    <p class="standfirst">When a new virus appears, someone has to decide which of its proteins a drug should aim at. That is expert judgement, and the evidence it rests on is thinnest exactly when the pathogen is new. This works it out from the accession alone, and shows what it did at every step — so an expert can check it rather than take its word.</p>
     <div class="acts">
       <a class="btn" href="#picked">See what it picked <span aria-hidden="true">→</span></a>
       <a class="btn ghost" href="#run">Run it on your own pathogen <span aria-hidden="true">→</span></a>
@@ -252,6 +252,29 @@
         <li><b>{{identified}}</b> matched to a known relative, <b>{{unidentified}}</b> unrecognised and reported as such</li>
       </ul></div>
     </div>
+  </div>
+
+  <div class="substep">
+    <h3>The {{orfs_ranked}} it ranked, and why each one scored what it did</h3>
+    <p class="cap">Those counts are what this step reports. Below is what it actually
+    returned. Nothing is fetched from an existing annotation of this genome: the sequence is
+    translated in all six reading frames, every stretch between stop codons of at least
+    {{minimum_orf_aa}} residues is kept — overlaps in different frames included, because
+    discarding one of two overlapping frames here would let length decide what homology
+    should — and the {{orfs_ranked}} longest are searched against
+    {{reference_entries}} reviewed viral proteins with SARS-CoV-2 itself deleted from that
+    reference. Identification is tried in three tiers, cheapest first: exact 5-mer identity,
+    then reduced-alphabet seeding with Smith–Waterman where that finds nothing, then
+    hydropathy, which returns a class rather than a name and is scored so it cannot outrank a
+    real homology hit.</p>
+    <!--CANDIDATES-->
+    <p class="after">Two things worth reading off the columns rather than the scores. The
+    spike and the replicase finish within a few hundredths of each other and get there by
+    opposite routes — the spike earns the full exposure term and little conservation, the
+    replicase the reverse — so they are a near-tie between an antibody target and a target
+    only a cell-permeable drug reaches. And the conservation column is the only one measured
+    against this genome; the other four are read off whichever relative was matched, which is
+    why holding the pathogen out lowers the scores instead of emptying the list.</p>
   </div>
 
   <div class="stage">

@@ -47,6 +47,49 @@ REPO = "willibmwang/bind-the-unknown"
 # disagree the moment one of them is edited.
 LANDING_RECORD = "onset_chain.json"
 
+# Stage 1's own rows. The chain record keeps that stage as five counts, and records written
+# before `chain._case` carried `candidates` have nothing else; this is where the twelve rows
+# behind the counts come from for those. Written by `python -m hpc_pilots candidates`.
+CANDIDATES_RECORD = "intake_candidates.json"
+
+# The five terms in the order the rubric is argued in, which is heaviest first, and in plain
+# words beside their keys. The weight is NOT written here -- it is read from the record's own
+# `rubric` block, so the page cannot assert a weight the run did not use.
+#
+# `ceiling` is the key in the record's `term_ceiling` whose value this column is a fraction of.
+# Four of the five ceilings are the weight itself; `druggable_class` is a 0-3 integer class, so
+# its column tops out at 2.4 and shading it against 0.8 would put three cells past full.
+TERM_COLUMNS = (
+    ("conservation", "Match to a known relative",
+     "Share of 5-mers the ORF has in common with its nearest curated relative. "
+     "1.0 would be the same sequence; anything under 0.12 is not kept as a match at all."),
+    ("surface_exposed", "On the outside",
+     "Whether most of the compartments its relatives are annotated in are places a binder "
+     "can reach without crossing a membrane. All or nothing."),
+    ("essential_class", "The virus needs it",
+     "Whether the protein's name or keywords name a class the virus cannot replicate "
+     "without — a polymerase, a protease, a capsid, an entry protein. All or nothing."),
+    ("druggable_class", "Class that gets drugged",
+     "A 0–3 class from the words in its annotations: proteases and polymerases score 3, "
+     "surface glycoproteins and helicases 2. The historical record for approved antivirals."),
+    ("structures_in_family", "Structures already solved",
+     "Deposited structures across its relatives, capped at 50. The smallest weight, because "
+     "a structure count measures research attention as much as tractability."),
+)
+
+
+def heat(earned, ceiling):
+    """Which of six shades a term's cell gets: none earned, then five bands up to the cap.
+
+    Banded rather than a continuous alpha so the contrast of the text on top is decided here
+    and once. The two darkest bands carry light text; a continuous ramp would put mid-grey
+    text on mid-violet somewhere in the middle of the scale and fail contrast quietly.
+    """
+    if not ceiling or earned <= 0:
+        return 0
+    share = min(1.0, earned / ceiling)
+    return min(5, int(share * 5) + 1)
+
 
 def esc(value):
     """Every string that reaches the page goes through here. See the module docstring."""
@@ -342,6 +385,7 @@ def build_index():
     # page whose premise is that those entries were deleted before the run.
     holdout = next((c for c in landing["cases"] if c.get("reference_excluded_organism")),
                    landing["cases"][0])
+    body = body.replace("<!--CANDIDATES-->", candidate_matrix(holdout))
     evidence = evidence_block(holdout)
     body = body.replace("<!--EVIDENCE-->", evidence)
     body = body.replace("<!--EVIDENCE-TOC-->", EVIDENCE_TOC if evidence else "")
@@ -351,10 +395,12 @@ def build_index():
     body = body.replace("<!--TOOLCALLS-->", f"{len(TOOLKIT)} tools \u00b7 {calls} calls")
     # Last, so a {{token}} introduced by any generated block above is filled too. The
     # landing page is the held-out case throughout, so its numbers come from that case.
-    body = fill(body, facts(holdout))
-    out = (head(f"{SITE} · one genome in, every step out",
-                "What came back when the system was given one SARS-CoV-2 genome accession "
-                "and nothing else.", current="index")
+    body = fill(body, facts(holdout) | candidate_facts(holdout))
+    out = (head(f"{SITE} · one pathogen genome in, every next step out",
+                "Deciding which of a new virus's proteins a drug should aim at, from the "
+                "genome accession alone, with every step on the record. This is the "
+                "walkthrough on SARS-CoV-2, held out of its own reference.",
+                current="index")
            + body + FOOT)
     (DOCS / "index.html").write_text(out)
     print(f"wrote docs/index.html  ({len(out):,} bytes)")
@@ -435,6 +481,177 @@ def score_bars(case, limit=8):
     tail = (f'<p class="after">{rest} further chains were ranked and scored; '
             f'the full list is in the record.</p>' if rest > 0 else "")
     return f'<div class="bars">{"".join(bars)}</div>{tail}'
+
+
+def candidate_rows(case):
+    """Stage 1's rows, and the record they came from, with the counts cross-checked.
+
+    Prefers the chain record's own `candidates`, so a page built from a run that carried them
+    is reading one record throughout. Falls back to the stage-1 record for the runs written
+    before that key existed, which includes the landing page's own 35-minute run.
+
+    The fallback is only honest if the two are the same stage of the same genome under the
+    same reference, so the four counts the chain record does keep are checked against the
+    stage-1 record's. They are the whole point of the cross-check: if the ORF caller found a
+    different number of ORFs, or identified a different number of them, the table is not the
+    one the rest of the page is describing and a reader has no way to see that from the page.
+    Mismatches stop the build rather than shipping, for the same reason an unfilled {{token}}
+    does.
+    """
+    st1 = {s["tool"]: s for s in case["stages"]}["intake.rank_targets"]
+    counts = st1["output"]
+    if case.get("candidates"):
+        return case["candidates"], None
+    path = RUNS / CANDIDATES_RECORD
+    if not path.exists():
+        raise SystemExit(
+            f"The landing record keeps stage 1 as counts only, and {path} is not there to "
+            f"supply the rows. Run `python -m hpc_pilots candidates` (about 17 s against a "
+            f"warm reference cache).")
+    record = json.loads(path.read_text())
+    checked = ("orfs_found", "orfs_ranked", "identified", "unidentified")
+    drift = {k: (counts.get(k), record.get(k)) for k in checked
+             if counts.get(k) != record.get(k)}
+    if drift or record.get("genome_accession") != case.get("genome_accession"):
+        raise SystemExit(
+            f"{CANDIDATES_RECORD} is not the same stage 1 as the landing record: "
+            f"{drift or 'different genome accession'} (chain, stage-1 record). Re-run "
+            f"`python -m hpc_pilots candidates` so the table matches the run on the page.")
+    return record["candidates"], record
+
+
+def candidate_facts(case):
+    """The stage-1 thresholds the prose quotes, which the chain record does not keep.
+
+    The gene caller's length cutoff and the identity floor are arguments to the stage, not
+    outputs of it, so the chain record's five counts do not carry them and the prose beside
+    the table was the only place on the page they appeared. Read from the record that does
+    carry them, for the same reason every other number on the page is: a cutoff typed into a
+    sentence is a cutoff that stays at 60 after someone changes it.
+    """
+    rows, record = candidate_rows(case)
+    source = record or case
+    out = {"minimum_orf_aa": source.get("minimum_orf_aa"),
+           "minimum_hit_score": source.get("minimum_hit_score")}
+    return {k: v for k, v in out.items() if v is not None}
+
+
+def candidate_matrix(case):
+    """Every ORF stage 1 ranked, with the score split into what each weight paid it.
+
+    The table this replaces was five integers. A reader could learn that twelve ORFs were
+    ranked and nine identified, and had no way to ask which nine, what any of them scored, or
+    which of the five weights put the spike at the top -- which is the one question the
+    ranking exists to answer and the one a reader is most entitled to disagree with.
+
+    Three things it is built to make visible, each of which a sorted list of scores hides:
+
+    * The top of the list is a near-tie reached by opposite routes. The spike and the
+      replicase finish a few hundredths apart; the spike earns a full 2.0 for sitting on the
+      outside and under half the conservation term, the replicase earns nothing for exposure
+      and most of the conservation term. Read down the columns and those are different
+      proteins. Read down the scores and they are the same.
+    * Conservation is the only one of the five read from this genome's relationship to the
+      reference. The other four are read off whichever homolog was matched and do not move as
+      that homolog gets more distant, which is why a held-out run's scores fall by about three
+      points rather than collapsing, and why the conservation column is the one that says how
+      far the evidence actually reached.
+    * Three of the twelve score nothing at all. They are in the table with their reason,
+      because they are the operating envelope rather than a gap: no relative at either
+      homology tier and no surface signal in their own sequence either. A table of the nine
+      that worked would be the pipeline grading its own coverage.
+    """
+    rows, record = candidate_rows(case)
+    if not rows:
+        return ""
+    source = record or case
+    rubric, ceiling = source["rubric"], source["term_ceiling"]
+    scored = [r for r in rows if r.get("score") is not None]
+    top = max((r["score"] for r in scored), default=0) or 1
+    total_ceiling = round(sum(ceiling[key] for key, _, _ in TERM_COLUMNS), 2)
+
+    head_cells = []
+    for key, label, note in TERM_COLUMNS:
+        weight = rubric["structures_in_family_capped" if key == "structures_in_family"
+                        else key]
+        head_cells.append(
+            f'<th scope="col" title="{esc(note)}"><span class="cl">{esc(label)}</span>'
+            f'<span class="ck">{esc(key)}</span>'
+            f'<span class="cw">× {num(weight)} → max {num(ceiling[key])}</span></th>')
+
+    body = []
+    for row in rows:
+        where = (f'{esc(row["strand"])}{esc(row["frame"])} · nt {row["nt_start"]:,} '
+                 f'· {row["length_aa"]:,} aa')
+        if row.get("score") is None:
+            # One cell across the five terms. Writing five zeroes here would read as five
+            # measurements that came back zero, and nothing was measured: the ranker never
+            # reached the features because nothing identified the protein.
+            body.append(f"""
+      <tr class="unid">
+        <td class="rk">{esc(row['rank'])}</td>
+        <td class="nm"><span class="t">Not identified</span><span class="w">{where}</span></td>
+        <td class="why" colspan="5">{esc(row.get('unidentified_because'))}</td>
+        <td class="sc">&mdash;</td>
+      </tr>""")
+            continue
+        features, terms = row["features"], row["terms"]
+        cells = []
+        for key, label, _ in TERM_COLUMNS:
+            earned, raw = terms[key], features[key]
+            if isinstance(raw, bool):
+                shown = "yes" if raw else "no"
+            elif key == "conservation":
+                shown = f"{raw:.3f}"
+            elif key == "druggable_class":
+                shown = f"class {raw}"
+            else:
+                shown = f"{raw:,} in PDB"
+            cells.append(f'<td class="h h{heat(earned, ceiling[key])}">'
+                         f'<span class="pt">{earned:.2f}</span>'
+                         f'<span class="rw">{esc(shown)}</span></td>')
+        route = row.get("identification_route")
+        homolog = row.get("nearest_organism") or row.get("nearest_homolog")
+        via = (f'<span class="w">{esc(homolog)}'
+               f'{" · " + esc(route) if route else ""}</span>' if homolog else
+               f'<span class="w">{esc(route or "")}</span>')
+        body.append(f"""
+      <tr>
+        <td class="rk">{esc(row['rank'])}</td>
+        <td class="nm"><span class="t">{esc(row['name'])}</span>{via}
+          <span class="w">{where}</span></td>
+        {"".join(cells)}
+        <td class="sc"><span class="v">{row['score']:.2f}</span>
+          <span class="tr"><i style="width:{max(2, row['score'] / top * 100):.1f}%"></i></span></td>
+      </tr>""")
+
+    note = ""
+    if record is not None:
+        note = (f'<p class="after">The five weights and every number in this table are read '
+                f'from <span class="mono">runs/{esc(CANDIDATES_RECORD)}</span>, which is '
+                f'this same stage run on its own — the chain record keeps stage 1 as '
+                f'counts, and the build refuses to ship this table unless those counts '
+                f'match. The later sections are from '
+                f'<span class="mono">runs/{esc(LANDING_RECORD)}</span>.</p>')
+
+    return f"""
+  <div class="cmxscroll" tabindex="0" role="region" aria-label="The ranked ORFs and their scores">
+  <table class="cmx">
+    <caption>Every ORF stage 1 ranked, highest composite score first. Each cell is the points
+      that weight paid, with the measurement it was computed from underneath; the shading is
+      the share of that column's maximum. Nothing here is fitted — the five weights were
+      fixed before the run.</caption>
+    <thead>
+      <tr>
+        <th scope="col" class="rk">#</th>
+        <th scope="col" class="nm">ORF, and what it matched</th>
+        {"".join(head_cells)}
+        <th scope="col" class="sc">Composite<span class="cw">of {num(total_ceiling)}</span></th>
+      </tr>
+    </thead>
+    <tbody>{"".join(body)}</tbody>
+  </table>
+  </div>{note}"""
 
 
 def surface_block(case):
