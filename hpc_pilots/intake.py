@@ -452,10 +452,16 @@ def identify_local(protein, index, kept, k=KMER, top=3):
 
 UNIPROT_SEARCH = "https://rest.uniprot.org/uniprotkb/search"
 
-# Subcellular locations that put a protein where a binder can reach it without crossing a
-# membrane. Matched as substrings against UniProt's own location values.
-EXPOSED = ("virion membrane", "host cell membrane", "virion surface", "secreted",
-           "cell surface", "host extracellular")
+# The subcellular locations that put a protein where a binder can reach it without crossing a
+# membrane live in `geometry.EXPOSED_LOCATIONS`, and this module reads them only through
+# `exposed_from_locations`.
+#
+# There used to be a second copy here, named `EXPOSED`, byte-identical to that one and matched
+# with `any()` instead of a majority. Two copies of a vocabulary is a trap rather than a
+# duplication: whichever one a later reader edits, half the module keeps the old answer, and the
+# half that kept the old answer here was the half worth 2.0 points in the rubric. Removed rather
+# than left unused, because an unreferenced constant that looks authoritative is the same trap
+# with an extra step.
 
 # Keyword families with an established record of being druggable, and the record is the point:
 # these are not a judgement about this pathogen but about what has historically yielded
@@ -568,7 +574,17 @@ def score_candidate(hits, records):
         locations.update(l.lower() for l in record["locations"])
         structures = max(structures, record["pdb"])
 
-    exposed = any(any(e in location for e in EXPOSED) for location in locations)
+    # One rule for this verdict, in both places it is reached. This read used to be its own
+    # `any()` over its own copy of the vocabulary, while `exposed_from_locations` -- written
+    # later, for the gate -- used a majority over a vocabulary byte-identical to it. So the same
+    # quantity was computed two ways in one module, and the weaker way was the one worth 2.0
+    # points: `any()` makes a protein annotated in four compartments surface-exposed on the
+    # strength of one, which is the exact case that function's docstring was written about
+    # (SARS-CoV-2's main protease, annotated in four, one of them `Host extracellular space`,
+    # reached by a cell-permeable drug). `decompose` now scopes this per chain, and if the
+    # entry-level read kept `any()` the two would differ by rule as well as by scope.
+    verdict = exposed_from_locations(sorted(locations))
+    exposed = verdict["exposed"]
     druggable = max([weight for term, weight in DRUGGABLE.items()
                      if any(term in k for k in keywords)] or [0])
     essential = any(any(term in k for k in keywords) for term in ESSENTIAL)
@@ -583,7 +599,18 @@ def score_candidate(hits, records):
         "keywords_matched": sorted(k for k in keywords
                                    if any(t in k for t in DRUGGABLE) or
                                    any(t in k for t in ESSENTIAL))[:8],
-        "locations": sorted(locations)[:4]}
+        # Not truncated any more, and the fraction is carried beside it. `sorted(...)[:4]` made
+        # the 2.0-point verdict unauditable from its own record in the worst possible way: the
+        # verdict is now a fraction over this list, so a reader recomputing it from four of six
+        # compartments gets a different number from the one scored. It was also biased against
+        # the evidence that earned the term -- `secreted`, `virion membrane` and `virion
+        # surface` all sort after every `host ...` value, so the compartment responsible for a
+        # `true` was the one most likely to be cut, leaving rows that read as four
+        # intracellular locations beside `surface_exposed: true`. Locations are a handful of
+        # short strings; the truncation never bought much.
+        "locations": sorted(locations),
+        "locations_scored": verdict["n"],
+        "exposed_fraction_of_locations": verdict["fraction"]}
 
 
 def chain_locations(accession, description=None):
@@ -1287,6 +1314,35 @@ def decompose(ranked, limit=12):
             # per-chain.
             features = dict(row["features"])
             features["structures_in_family"] = structures
+            # Localisation resolved for this chain, on the same argument the structure count
+            # above already won. `score_candidate` reads SUBCELLULAR LOCATION off the whole
+            # entry, because at that point there is no chain to scope to -- but a polyprotein's
+            # comments are scoped per molecule, so the entry-wide read is a union over products
+            # in different compartments and `any()` over it makes every chain of one parent
+            # surface-exposed together. On a flavivirus that is the entire job of the term:
+            # envelope E, the target of every neutralising antibody, scores the same 2.0 as
+            # cytosolic NS3. The right answer was already being computed one stage later and
+            # used only for the amenability gate, so the two verdicts sat in the same published
+            # record disagreeing.
+            #
+            # Guarded on the scope, following the one existing precedent for this call. An
+            # entry with no `molecule`-scoped comments returns its union, and overwriting a
+            # union with itself under a fraction rule would silently restate the entry read as
+            # a chain read. Where the scope is not "chain" the parent value stands and the
+            # record says so.
+            #
+            # Free in network terms: `_entry(accession)` is already warm from `parent_length`
+            # two lines above, and `chain_locations` reads that same cached payload.
+            scoped = chain_locations(accession, chain["description"])
+            features["location_scope"] = scoped["scope"]
+            if scoped["scope"] == "chain":
+                verdict = exposed_from_locations(scoped["locations"])
+                features["surface_exposed_from_parent_entry"] = row["features"].get(
+                    "surface_exposed")
+                features["surface_exposed"] = verdict["exposed"]
+                features["exposed_fraction_of_locations"] = verdict["fraction"]
+                features["locations"] = sorted(scoped["locations"])
+                features["locations_scored"] = len(scoped["locations"])
             described = chain["description"].lower()
             from_description = max(
                 [weight for term, weight in DRUGGABLE.items() if term in described] or [0])

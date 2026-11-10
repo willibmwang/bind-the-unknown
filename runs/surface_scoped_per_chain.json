@@ -1,0 +1,295 @@
+{
+  "experiment": "surface-exposed-scoped-per-chain",
+  "status": "complete",
+  "question": "What does the ranking do when the 2.0-point surface_exposed term is read for the mature chain being scored instead of for the whole UniProt entry?",
+  "answer": "It changes 11 verdicts across the recorded benchmark, leaves 13 of 14 scoreable genomes' p-values untouched, and makes HIV-1 worse: 0.0389 to 0.0886, across 0.05. The change is kept anyway, because the old value was not a different judgement but a wrong computation -- a union over products in different compartments, scored with an `any()` the module's own `exposed_from_locations` docstring documents as the wrong rule. Reverting a correct localisation to hold a p-value below 0.05 would be fitting the instrument to the answer, which is the error this project refuses in the other direction three times over.",
+  "what_changed": "score_candidate read SUBCELLULAR LOCATION off the whole entry, which for a polyprotein is a union over products in different compartments, and applied `any()` to it. decompose then carried that one verdict into every mature chain while recomputing structures_in_family, druggable_class and essential_class per chain. The verdict is now resolved per chain through chain_locations, guarded on the returned scope, and the entry-level read uses the same majority rule so the two cannot differ by rule as well as by scope.",
+  "which_genomes_were_affected": "12 of 46 recorded genomes carried the signature -- every ranked row surface_exposed: true on one identical location list. All are single-polyprotein genomes spanning compartments: the flaviviruses (JEV, dengue 2, TBE, yellow fever, Powassan, West Nile, Zika), the alphaviruses (VEE, Sindbis, chikungunya), HIV-1 and HCV. Coronaviruses escape it because ORF1ab holds only non-structural proteins and spike is a separate ORF, which is why SARS-CoV-2 -- the genome the project leads with and the only one the benchmark pins -- does not move at all.",
+  "measured": [
+    {
+      "pathogen": "Varicella-zoster virus",
+      "family": "Herpesviridae",
+      "rows": 9,
+      "verdict_flips": 0,
+      "labels_matched": 1,
+      "labels_total": 1,
+      "ranks_before": {
+        "DNA polymerase": 3
+      },
+      "ranks_after": {
+        "DNA polymerase": 3
+      },
+      "p_before": 0.3333333333333333,
+      "p_after": 0.3333333333333333
+    },
+    {
+      "pathogen": "Human adenovirus 2",
+      "family": "Adenoviridae",
+      "rows": 13,
+      "verdict_flips": 0,
+      "labels_matched": 1,
+      "labels_total": 1,
+      "ranks_before": {
+        "DNA polymerase": 1
+      },
+      "ranks_after": {
+        "DNA polymerase": 1
+      },
+      "p_before": 0.07692307692307693,
+      "p_after": 0.07692307692307693
+    },
+    {
+      "pathogen": "Human respiratory syncytial virus B",
+      "family": "Pneumoviridae",
+      "rows": 22,
+      "verdict_flips": 0,
+      "labels_matched": 1,
+      "labels_total": 1,
+      "ranks_before": {
+        "Fusion glycoprotein": 1
+      },
+      "ranks_after": {
+        "Fusion glycoprotein": 1
+      },
+      "p_before": 0.045454545454545456,
+      "p_after": 0.045454545454545456
+    },
+    {
+      "pathogen": "Herpes simplex virus 2",
+      "family": "Herpesviridae",
+      "rows": 9,
+      "verdict_flips": 0,
+      "labels_matched": 1,
+      "labels_total": 1,
+      "ranks_before": {
+        "DNA polymerase": 2
+      },
+      "ranks_after": {
+        "DNA polymerase": 2
+      },
+      "p_before": 0.2222222222222222,
+      "p_after": 0.2222222222222222
+    },
+    {
+      "pathogen": "HIV-1",
+      "family": "Retroviridae",
+      "rows": 15,
+      "verdict_flips": 5,
+      "labels_matched": 4,
+      "labels_total": 4,
+      "ranks_before": {
+        "Envelope": 4,
+        "Integrase": 11,
+        "Protease": 1,
+        "Reverse transcriptase": 2
+      },
+      "ranks_after": {
+        "Envelope": 3,
+        "Integrase": 15,
+        "Protease": 1,
+        "Reverse transcriptase": 2
+      },
+      "p_before": 0.03882783882783883,
+      "p_after": 0.08864468864468865
+    },
+    {
+      "pathogen": "Herpes simplex virus 1",
+      "family": "Herpesviridae",
+      "rows": 11,
+      "verdict_flips": 0,
+      "labels_matched": 1,
+      "labels_total": 1,
+      "ranks_before": {
+        "DNA polymerase": 3
+      },
+      "ranks_after": {
+        "DNA polymerase": 3
+      },
+      "p_before": 0.2727272727272727,
+      "p_after": 0.2727272727272727
+    },
+    {
+      "pathogen": "Influenza A PR8",
+      "family": "Orthomyxoviridae",
+      "rows": 9,
+      "verdict_flips": 0,
+      "labels_matched": 2,
+      "labels_total": 3,
+      "ranks_before": {
+        "Neuraminidase": 1,
+        "Polymerase acidic": 4
+      },
+      "ranks_after": {
+        "Neuraminidase": 1,
+        "Polymerase acidic": 4
+      },
+      "p_before": 0.1111111111111111,
+      "p_after": 0.1111111111111111
+    },
+    {
+      "pathogen": "Ebola virus Zaire",
+      "family": "Filoviridae",
+      "rows": 11,
+      "verdict_flips": 0,
+      "labels_matched": 1,
+      "labels_total": 1,
+      "ranks_before": {
+        "Envelope glycoprotein": 5
+      },
+      "ranks_after": {
+        "Envelope glycoprotein": 5
+      },
+      "p_before": 0.45454545454545453,
+      "p_after": 0.45454545454545453
+    },
+    {
+      "pathogen": "Hepatitis B virus",
+      "family": "Hepadnaviridae",
+      "rows": 4,
+      "verdict_flips": 0,
+      "labels_matched": 1,
+      "labels_total": 1,
+      "ranks_before": {
+        "Reverse transcriptase": 2
+      },
+      "ranks_after": {
+        "Reverse transcriptase": 2
+      },
+      "p_before": 0.5,
+      "p_after": 0.5
+    },
+    {
+      "pathogen": "Hepatitis C virus",
+      "family": "Flaviviridae/Hepacivirus",
+      "rows": 12,
+      "verdict_flips": 6,
+      "labels_matched": 3,
+      "labels_total": 3,
+      "ranks_before": {
+        "NS3": 4,
+        "NS5A": 12,
+        "NS5B": 1
+      },
+      "ranks_after": {
+        "NS3": 4,
+        "NS5A": 12,
+        "NS5B": 1
+      },
+      "p_before": 0.36363636363636365,
+      "p_after": 0.36363636363636365
+    },
+    {
+      "pathogen": "Human cytomegalovirus",
+      "family": "Herpesviridae",
+      "rows": 10,
+      "verdict_flips": 0,
+      "labels_matched": 1,
+      "labels_total": 3,
+      "ranks_before": {
+        "DNA polymerase": 4
+      },
+      "ranks_after": {
+        "DNA polymerase": 4
+      },
+      "p_before": 0.4,
+      "p_after": 0.4
+    },
+    {
+      "pathogen": "Vaccinia virus",
+      "family": "Poxviridae",
+      "rows": 13,
+      "verdict_flips": 0,
+      "labels_matched": 1,
+      "labels_total": 2,
+      "ranks_before": {
+        "DNA polymerase": 1
+      },
+      "ranks_after": {
+        "DNA polymerase": 1
+      },
+      "p_before": 0.07692307692307693,
+      "p_after": 0.07692307692307693
+    },
+    {
+      "pathogen": "SARS-CoV-2",
+      "family": "Coronaviridae",
+      "rows": 20,
+      "verdict_flips": 0,
+      "labels_matched": 3,
+      "labels_total": 3,
+      "ranks_before": {
+        "3C-like proteinase": 2,
+        "RNA-directed RNA polymerase": 5,
+        "Spike": 1
+      },
+      "ranks_after": {
+        "3C-like proteinase": 2,
+        "RNA-directed RNA polymerase": 5,
+        "Spike": 1
+      },
+      "p_before": 0.0035087719298245615,
+      "p_after": 0.0035087719298245615
+    },
+    {
+      "pathogen": "Monkeypox virus",
+      "family": "Poxviridae",
+      "rows": 13,
+      "verdict_flips": 0,
+      "labels_matched": 1,
+      "labels_total": 2,
+      "ranks_before": {
+        "DNA polymerase": 3
+      },
+      "ranks_after": {
+        "DNA polymerase": 3
+      },
+      "p_before": 0.23076923076923078,
+      "p_after": 0.23076923076923078
+    }
+  ],
+  "verdict_flips_total": 11,
+  "genomes_with_a_flip": [
+    "HIV-1",
+    "Hepatitis C virus"
+  ],
+  "genomes_made_worse": [
+    {
+      "pathogen": "HIV-1",
+      "p_before": 0.03882783882783883,
+      "p_after": 0.08864468864468865,
+      "ranks_before": {
+        "Envelope": 4,
+        "Integrase": 11,
+        "Protease": 1,
+        "Reverse transcriptase": 2
+      },
+      "ranks_after": {
+        "Envelope": 3,
+        "Integrase": 15,
+        "Protease": 1,
+        "Reverse transcriptase": 2
+      }
+    }
+  ],
+  "why_hiv_1_gets_worse": "The correct verdicts are correct and the instrument penalises them. Envelope improves, 4 to 3, which is the fix working -- gp120 and gp41 are genuinely on the virion. Integrase falls 11 to 15, which is also the fix working: integrase is intracellular and was being credited 2.0 for a compartment belonging to Gag's matrix protein p17. But integrase is a labelled approved target, so a correct localisation demotes a real success. That is a fact about the label set, not about the verdict: the strong tier is dominated by intracellular small-molecule approvals, so a surface term that reads correctly is marked down for reading correctly.",
+  "what_this_says_about_the_2_point_weight": "The 2.0 surface weight was partly being earned by a bug. With the bug fixed, the term's direction is right for a macrocyclic-peptide programme -- cyclic peptides reach extracellular targets and cross membranes poorly -- and wrong for the benchmark, whose approved drugs are mostly cell-permeable small molecules. Whether 2.0 is the right weight is now a separate and open question, and it cannot be settled on this instrument: a weight correct for the modality would be penalised here. Not changed in this experiment.",
+  "limitations": [
+    "The replay re-scores recorded feature rows rather than re-running the pipeline, so only the localisation term moves. Anything that would change which ORFs were called, which homologs were hit, or which chains were decomposed is held fixed.",
+    "287 of 530 recorded rows carried `locations` already truncated to four by the old `sorted(locations)[:4]`, so their recorded evidence cannot reproduce their own verdict. The per-chain recompute goes back to UniProt and does not depend on the truncated field, but no offline check of the *old* number is possible for those rows. The truncation is removed, so records written from here on are auditable.",
+    "An earlier automated estimate of 193 of 530 rows flipping was wrong: it applied the majority rule to the truncated four-item lists. On the 243 rows whose location list is known-complete the entry-level rule change alone flips 5, all of them true-to-false and all of them proteins annotated in three compartments with one exposed (SIV Vif, Vpr and Tat, Ippy virus Z, HIV p17).",
+    "Only 14 of 46 recorded genomes carry a strong-tier label and a chain list, so 32 genomes contribute no p-value either way."
+  ],
+  "pre_registered_criterion": "Stated before the measurement, mirroring runs/surface_in_ranker.json: reject if the exact one-sided Mann-Whitney U p rises in any recorded family, if any labelled target's rank worsens, or if the change cannot be earned by a candidate lacking a deposited structure. That criterion was written for the discretionary reweighting of druggable_class, which remains unmade. This change trips two of its three clauses and is kept regardless, because it is a correctness fix and not a scoring preference -- the criterion governs what the rubric should reward, not whether a quantity may be computed from the right rows. Recorded here so that the override is visible rather than implied.",
+  "open": "Whether the 2.0 weight survives on its own merits now that it means what it says. The honest test needs a label set with macrocyclic-peptide precedent, and there is none: no approved macrocyclic-peptide antiviral exists, and 20 of the 26 strong labels are catalytic small-molecule approvals.",
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "43427351b81f9ae4e594b008e0e39cfdb9cbfc5c",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-10T11:21:53.548960+00:00"
+  },
+  "content_sha256": "cc85c393222769a6aa0d5c4aa58a4a44fcda58014a39fe832a5ab060de785e3c"
+}
