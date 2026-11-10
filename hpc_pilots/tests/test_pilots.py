@@ -1199,9 +1199,17 @@ def test_the_cascade_recovers_enzymes_by_homology_and_antigens_by_topology():
     spike = next((row for row in topology if row["len"] == 1282), None)
     assert spike is not None, topology
     assert "surface antigen" in spike["name"]
-    # Scored below every homology hit, so a class never outranks a name. Over every row in
-    # the tier, since the tier may now hold more than the one.
-    assert max(row["score"] for row in topology) < min(row["score"] for row in remote)
+    # A class row's score is fixed at 3.6 and is NOT below every homology row. This assertion
+    # used to claim it was, over the remote tier of this one artifact -- whose two remote rows
+    # both score above 4.8, so it could only ever confirm the favourable case, and run records
+    # are gitignored and regenerated, so it could never be shown wrong on a different genome.
+    # Across the recorded panel the class row outranks at least one identified row in 14 of the
+    # 17 runs that produce one.
+    #
+    # So what is pinned is the arithmetic that is actually invariant -- the feature vector is
+    # hard-coded, so every topology row scores exactly 3.6 -- plus the fact that the overlap is
+    # now counted rather than asserted away.
+    assert all(abs(row["score"] - 3.6) < 5e-4 for row in topology), topology
 
 
 def test_identification_falls_off_a_cliff_one_rank_out():

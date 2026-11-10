@@ -52,7 +52,7 @@ def stem_of(accession):
 
 def rank_one(entry):
     """Stages 1 and 2 for one genome, returning the ranked chains and the hold-out check."""
-    from hpc_pilots.intake import decompose, rank_score, run_intake
+    from hpc_pilots.intake import decompose, rank_score, run_intake, topology_overlap
 
     started = time.time()
     intake = run_intake(entry["accession"], exclude_organism=entry["holdout"],
@@ -75,6 +75,10 @@ def rank_one(entry):
         "holdout": entry["holdout"],
         "genome_length_nt": intake["genome_length_nt"],
         "orfs_found": intake["orfs_found"], "orfs_ranked": intake["orfs_ranked"],
+        # After decomposition, which is where it is large: a polyprotein is one row in the
+        # intake payload and a dozen mature chains here, so the intake payload's own copy of
+        # this number understates it on every single-polyprotein genome.
+        "topology_rows_above_identified": topology_overlap(rows),
         "reference_entries": intake["reference_entries"],
         # Zero here means the hold-out matched nothing and the genome identified itself.
         "reference_entries_removed": intake["reference_entries_removed"],

@@ -1020,6 +1020,30 @@ def rank_score(features):
     return round(base + RUBRIC["druggable_class"] * features["druggable_class"], 4)
 
 
+def topology_overlap(rows):
+    """How many identified rows the hydropathy-class rows outrank, summed over both.
+
+    A topology row carries a hard-coded feature vector and therefore always scores 3.6, which
+    is not commensurable with a score a homology row earned from measured features. The comment
+    on that row used to claim it was "scored below any homology hit so it never outranks one",
+    which was never true and could not be made true by any fixed number: an exact-tier hit only
+    has to clear 3.0 * MINIMUM_SCORE = 0.36, and remote-tier hits are not filtered on that
+    threshold at all.
+
+    Ordering it below every named row instead was measured and refused -- it sends the class row
+    to last place on every genome that produces one, which is the penalty for being understudied
+    that `rank_score` already rejected two surface-term variants for. So the overlap is counted
+    and published per run. It is a cost being accepted knowingly, and this is the number that
+    says how large it is; it is also the before-measurement any later reordering needs.
+    """
+    classes = [r for r in rows
+               if r.get("tier") == "topology" and r.get("score") is not None]
+    named = [r for r in rows
+             if r.get("tier") not in ("topology", None) and r.get("score") is not None]
+    return sum(1 for klass in classes for row in named
+               if row["score"] < klass["score"])
+
+
 def score_terms(features, rubric=None):
     """`rank_score` split into the five terms it is a sum of.
 
@@ -1342,7 +1366,31 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
                 # Named by class, because that is all the evidence supports. A surface antigen
                 # with no identifiable relative is still the protein antibodies would be
                 # raised against, and returning nothing for it loses the target the system
-                # exists to find. Scored below any homology hit so it never outranks one.
+                # exists to find.
+                #
+                # **It is NOT scored below every homology hit, and this comment used to say it
+                # was.** The features here are fixed, so `rank_score` always returns
+                # 3.0*0.0 + 2.0*1 + 1.5*0 + 0.5*0 + 0.8*2 = 3.6, and a homology row clears 3.6
+                # only by earning it. Across the recorded panel this row ranks above at least
+                # one identified row in 14 of the 17 runs that produce one. In
+                # `runs/benchmark/NC_001437_1.json` it sits at rank 5, one place above
+                # `Envelope protein E` -- a ground-truth label in `data/benchmark_panel.json`
+                # -- and above seven further identified rows.
+                #
+                # No fixed score can deliver that invariant, which is why the sentence was
+                # never true rather than merely stale: the floor a homology row has to clear is
+                # 3.0 * MINIMUM_SCORE = 0.36 on the exact tier, and remote-tier hits are not
+                # filtered by MINIMUM_SCORE at all.
+                #
+                # Enforcing it in the ordering instead was measured and refused. Keying either
+                # sort on tier sends this row to last place -- adenovirus 4 to 13, RSV B 10 to
+                # 22, Japanese encephalitis 5 to 13, hMPV 8 to 20, MERS 9 to 19 -- which is "a
+                # penalty for being understudied, aimed at exactly the novel targets this
+                # exists to find", the argument `rank_score` already used to reject two surface
+                # terms, and it re-creates the loss this row exists to prevent. It also moves a
+                # panel verdict across 0.05 (JEV 0.0559 to 0.0385). So the overlap is counted
+                # and published rather than sorted away, and any later reordering has to ship
+                # with that measurement instead of a claim.
                 # `conservation` is 0.0 because there is no relative to measure it against,
                 # which is not the same fact as a relative that turned out to conserve
                 # nothing -- and the rubric's heaviest term, weight 3.0, reads the two
@@ -1424,6 +1472,19 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
         # than because they were long. Zero on a genome whose targets are all long anyway,
         # which is most of the recorded ones; non-zero is the case the length cut was losing.
         "orfs_rescued_by_topology": len(rescued),
+        # How many identified rows each class row outranks, summed. A topology row's 3.6 is a
+        # hard-coded feature vector and is not commensurable with a score a homology row earned
+        # -- its `conservation: 0.0` is an absence of evidence under the heaviest term, and its
+        # `druggable_class: 2` is asserted from the class on a row whose `keywords_matched` is
+        # empty, which is the one term a homology row has to earn. The comment at the topology
+        # row says why that is still the right trade. This counts the cost of it per run, so a
+        # reader sees the overlap instead of the claim that there is none, and so any later
+        # attempt to reorder has a before to measure against.
+        # Counted here before decomposition, where a polyprotein is still one row, so this is
+        # usually 0 or 1 even on the genomes where the overlap is large. The number that
+        # matters is the post-decomposition one, and `output/run_benchmark.py` records it from
+        # the same function for exactly that reason.
+        "topology_rows_above_identified": topology_overlap(ranked),
         "unidentified": sum(1 for r in ranked if not r["identified"]),
         "rubric": dict(RUBRIC),
         "targets": ranked,
@@ -1431,6 +1492,14 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
                     {"name": "UniProt", "url": UNIPROT_SEARCH, "licence": "CC BY 4.0"}],
         "provenance": provenance(),
         "limitations": [
+            "A topology row's score is one hard-coded feature vector, always 3.6, and is not "
+            "commensurable with a score a homology row earned. It is not below every homology "
+            "row and no fixed number could be: the floor an exact-tier hit has to clear is "
+            "3.0 * 0.12 = 0.36, and remote-tier hits are not filtered on that threshold at "
+            "all. `topology_rows_above_identified` counts the overlap for this run. The row is "
+            "kept because a surface antigen with no identifiable relative is still the protein "
+            "antibodies would be raised against, and ordering it below every named row was "
+            "measured and rejected for burying exactly the novel candidates it exists to find.",
             "`conservation` is not comparable between tiers. The exact tier reports shared "
             "5-mers over the query's k-mer count; the remote tier reports a bit score divided "
             "by 200 and capped at 1.0, so it saturates at 200 bits and a hit ten times past "
