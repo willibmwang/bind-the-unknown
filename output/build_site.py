@@ -441,8 +441,12 @@ def surface_block(case):
     rows = case.get("surfaces", [])
     if not rows:
         return ""
-    tiles = "".join(
-        f'<span class="tile {"m" if r.get("measured") else "r"}"></span>' for r in rows)
+    def tile_class(row):
+        if row.get("measured"):
+            return "m"
+        return "p" if (row.get("predicted_surface") or {}).get("measured") else "r"
+
+    tiles = "".join(f'<span class="tile {tile_class(r)}"></span>' for r in rows)
     measured = [r for r in rows if r.get("measured")]
     refused = [r for r in rows if not r.get("measured")]
     bars = ""
@@ -457,17 +461,37 @@ def surface_block(case):
                         for r in measured)
         bars = f'<div class="bars">{bars}</div>'
     # Every refusal keeps its own sentence. Grouping them would hide the distinction the
-    # stage exists to make: "nothing is deposited" and "something is, but not here".
+    # stage exists to make: "nothing is deposited" and "something is, but not here". A chain
+    # whose only surface came from a prediction says so on its own row: it is still refused on
+    # the deposited lane, and reading it as measured would pool the two kinds of evidence this
+    # stage keeps apart.
+    def predicted_note(row):
+        predicted = row.get("predicted_surface") or {}
+        if not predicted.get("measured"):
+            return ""
+        return (f'<br><i class="gl">measured on predicted coordinates instead: '
+                f'{predicted.get("patch_a2")} Å²'
+                + (' — the only surface this chain has'
+                   if predicted.get("only_route_to_a_surface") else '')
+                + '</i>')
+
     why = "".join(f"""
     <div class="pdbrow none"><span class="who">{esc(r.get('target'))}</span>
-      <span class="ids">{esc(r.get('unmeasured_because'))}</span></div>""" for r in refused)
+      <span class="ids">{esc(r.get('unmeasured_because'))}{predicted_note(r)}</span></div>"""
+                  for r in refused)
     why_block = (f'<div class="accs"><span class="lead">Why each of the '
-                 f'{len(refused)} was refused:</span>{why}</div>') if refused else ""
+                 f'{len(refused)} had no deposited structure to measure:</span>{why}</div>'
+                 ) if refused else ""
+    rescued = sum(1 for r in refused
+                  if (r.get("predicted_surface") or {}).get("measured"))
+    rescued_line = (f'<span><span class="key p"></span> {rescued} of those measured on '
+                    f'predicted coordinates instead</span>' if rescued else "")
     return f"""
   <div class="tiles" aria-hidden="true">{tiles}</div>
   <div class="legend">
-    <span><span class="key m"></span> {len(measured)} measured</span>
-    <span><span class="key r"></span> {len(refused)} refused, each with a reason</span>
+    <span><span class="key m"></span> {len(measured)} measured on deposited structures</span>
+    <span><span class="key r"></span> {len(refused)} with none, each with a reason</span>
+    {rescued_line}
   </div>
   {bars}
   {why_block}"""
@@ -722,11 +746,24 @@ def result_page(case, stem):
     cov = case.get("coverage", {})
     title = f"{label} · {acc}"
 
+    # The step number is read from the record, not typed. This page prints "Every number on
+    # this page is read from it. Nothing here is retyped", and a hand-typed `step 4` broke that
+    # the moment folding moved to stage 3: the stage card above it prints the record's own
+    # number, so one page would have carried both.
+    by_tool = {st.get("tool"): st for st in case.get("stages", [])}
+    fold_step = (by_tool.get("structures.folded") or {}).get("stage")
+    surface_step = (by_tool.get("geometry.surface_markers") or {}).get("stage")
+    fold_tag = f"step {fold_step}" if fold_step else "the folding stage"
+
     fold_html = ""
     if folded.get("sequence_length"):
+        also = case.get("folded_also") or []
+        folded_line = (f'<div class="sub">{len(also) + 1} chains folded this run; '
+                       f'this is the one the record reports in full</div>' if also else "")
         fold_html = f"""
 <section>
-  <div class="sec-head"><h2>The structure it folded</h2><span class="tag">step 4</span></div>
+  <div class="sec-head"><h2>The structure it folded</h2><span class="tag">{fold_tag}</span></div>
+  {folded_line}
   <div class="two">
     <div class="card acc">
       <div class="label">{esc(folded.get('target_name'))}</div>
@@ -769,13 +806,14 @@ def result_page(case, stem):
   {score_bars(case)}
 </section>
 
+{fold_html if (fold_step or 99) < (surface_step or 0) else ""}
 <section>
   <div class="sec-head"><h2>Surfaces</h2><span class="tag">one row per ranked chain</span></div>
   <div class="good"><p><b>{num(cov.get('surface_rows'))} answers for
   {num(cov.get('chains_ranked'))} chains.</b> A chain can be refused. It cannot disappear.</p></div>
   {surface_block(case)}
 </section>
-{fold_html}
+{fold_html if (fold_step or 99) >= (surface_step or 0) else ""}
 
 {evidence_block(case)}
 

@@ -5018,6 +5018,50 @@ def test_several_chains_can_get_a_surface_from_their_predicted_shape():
     assert "predicted_surface" not in rows[names[3]]
 
 
+def test_a_damaged_prediction_refuses_instead_of_killing_the_run():
+    """One unreadable coordinate line must cost one row, not the whole record.
+
+    freesasa raises a bare `Exception` for a file it cannot read, and the fold stage will hand
+    over coordinates in that state: `_parse_pdb` skips an ATOM line whose columns will not
+    parse and still returns the text with `folded` true, so a damaged coordinate column
+    arrives inside an accepted prediction. Unguarded that aborted the run -- and this stage now
+    measures up to twelve predictions rather than one, after four stages have already paid for
+    their answers, so the exposure went up twelvefold with the rescue.
+
+    Both inputs here are the committed fold, damaged: truncated mid-record, and with its x
+    coordinate overwritten. Each must produce a row that says why, and no exception.
+    """
+    import pathlib
+
+    from hpc_pilots.chain import surface_rows
+    from hpc_pilots.common import ROOT
+
+    coordinates = ROOT / "runs/folded_structure/mpro_nsp5.pdb"
+    if not coordinates.exists():
+        pytest.skip("the committed fold is absent on this machine")
+    try:
+        import freesasa                                    # noqa: F401
+    except ImportError:
+        pytest.skip("no SASA backend on this machine")
+
+    text = pathlib.Path(coordinates).read_text()
+    damaged = {
+        "truncated": text[:-40],
+        "unreadable column": text.replace(text.splitlines()[200][30:38], "�" * 8, 1),
+    }
+    for name, broken in damaged.items():
+        folds = [{"target_name": "X", "pdb": broken, "folded": True, "model": "stub",
+                  "mean_plddt": 60.0, "confident_fraction": 0.5}]
+        rows = surface_rows([{"name": "X", "identified": False, "rank": 1}], folds=folds)
+        assert len(rows) == 1, name
+        predicted = rows[0]["predicted_surface"]
+        assert predicted["measured"] is False, name
+        assert predicted["not_measured_because"], name
+        # And it is still marked as what it is, so a refusal cannot be read as a measurement.
+        assert predicted["is_deposited_measurement"] is False, name
+        assert predicted["in_the_ranking"] is False, name
+
+
 def test_the_page_quotes_the_predicted_patch_it_can_recompute():
     """The three figures the site types by hand, checked against the code that produces them.
 
@@ -5354,7 +5398,7 @@ def test_folding_is_offered_to_candidates_nothing_identified():
          "identification_route": "exact", "orf": {"protein": named}},
         {"identified": False, "rank": None, "orf": {"protein": novel}},
     ]
-    folded, rows = fold_stage(ranked, ceiling=400, pool=())
+    folded, rows, folds = fold_stage(ranked, ceiling=400, pool=())
 
     # A row for each, so the unidentified candidate is covered rather than skipped.
     assert len(rows) == 2, rows
@@ -5365,12 +5409,17 @@ def test_folding_is_offered_to_candidates_nothing_identified():
     assert by_name["a named chain"]["identified"] is True
 
     # The identified chain took the pick, with an unidentified one available. This is the
-    # ordering that keeps every committed fold reproducible.
+    # ordering that keeps every committed fold reproducible -- and it still holds now that the
+    # stage folds every chain inside the ceiling rather than the pick alone: the pick is the
+    # FIRST fold, not the only one, so an unidentified ORF is folded too and still cannot
+    # displace a named chain.
     assert (folded or {}).get("target_name") == "a named chain" \
         or "absence" in (folded or {}), folded
+    assert folds[0] is folded
+    assert [f.get("target_name") for f in folds] == ["a named chain", "unidentified ORF"], folds
 
     # With nothing identified, the novel ORF is now foldable where it previously was not.
     only_novel = [{"identified": False, "rank": None, "orf": {"protein": novel}}]
-    _folded, novel_rows = fold_stage(only_novel, ceiling=400, pool=())
+    _folded, novel_rows, _folds = fold_stage(only_novel, ceiling=400, pool=())
     assert len(novel_rows) == 1
     assert novel_rows[0]["sequence_recovered"] is True

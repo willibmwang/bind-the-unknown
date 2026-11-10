@@ -785,10 +785,28 @@ def workflow_figure(chain, case=0, gain_shared="+0.173 to +0.321",
     # the figure draws, and the subtitle names it, so a reader is never looking at a coverage
     # number without the setting that produced it.
     run = chain["cases"][case] if "cases" in chain else chain
-    stages = {s["stage"]: s for s in run["stages"]}
-    out = {n: stages[n]["output"] for n in stages}
-    surf, lib = out[3], out[5]
-    surf = {**surf, **stages[3]['input']}   # the stage's own in and out, one dict
+    # Keyed on the tool each stage ran, not on its position. The pipeline's order is a design
+    # decision and it has already changed once -- folding moved ahead of the surface stage so
+    # that a chain with no deposited structure has coordinates to measure -- and a figure that
+    # reads `stages[3]` draws whichever stage happens to sit third under the previous one's
+    # caption. Keying on the tool also keeps this readable against records written under either
+    # numbering, which matters because every record on disk predates the swap.
+    by_tool = {s["tool"]: s for s in run["stages"]}
+    st1 = by_tool["intake.rank_targets"]
+    st2 = by_tool["intake.decompose + intake.rank_score"]
+    st_surface = by_tool["geometry.surface_markers"]
+    st_fold = by_tool["structures.folded"]
+    st_lib = by_tool["chemistry.library_spec"]
+    out = {1: st1["output"], 2: st2["output"]}
+    fold_out, lib = st_fold["output"], st_lib["output"]
+    # The stage's own in and out in one dict, for the surface row below.
+    surf = {**st_surface["output"], **st_surface["input"]}
+    # Which chains the fold stage covered. `chains_folded` exists only in records written after
+    # the stage began folding every chain inside the ceiling; before that it folded one, so the
+    # older records answer this question with a single target name.
+    folded_count = fold_out.get("chains_folded")
+    if folded_count is None:
+        folded_count = 1 if fold_out.get("folded_target") else 0
 
     fig = plt.figure(figsize=(13.6, height), dpi=100, facecolor=SURFACE)
     ax = fig.add_axes([0.105, 0.008, 0.885, 0.942])
@@ -814,7 +832,7 @@ def workflow_figure(chain, case=0, gain_shared="+0.173 to +0.321",
 
     arm1_top = flow.y + 0.006
     flow.row("1 · intake.rank_targets",
-             f"NCBI · UniProt   ·   {stages[1]['seconds']} s\n"
+             f"NCBI · UniProt   ·   {st1['seconds']} s\n"
              f"in:  the accession, and nothing else",
              f"{out[1]['orfs_found']} ORFs called in six frames, "
              f"{out[1]['orfs_ranked']} ranked\n"
@@ -826,7 +844,7 @@ def workflow_figure(chain, case=0, gain_shared="+0.173 to +0.321",
               "— all four facts the other nine tools are waiting on, from this one call",
               colour=ARM1)
     flow.row("2 · intake.decompose  +  rank_score",
-             f"UniProt   ·   {stages[2]['seconds']} s\n"
+             f"UniProt   ·   {st2['seconds']} s\n"
              f"in:  {out[1]['identified']} identified candidates",
              f"{out[2]['chains_out']} mature chains, each with a score\n"
              "score = 3·conservation + 2·exposed + 1.5·essential\n"
@@ -835,31 +853,54 @@ def workflow_figure(chain, case=0, gain_shared="+0.173 to +0.321",
              ARM1, SURFACE, PALE1)
     flow.edge(f"one accession and one residue range per chain — "
               f"{surf['candidates_in']} of {out[2]['chains_out']} go on,\n"
-              f"and {out[4]['foldable']} of {out[2]['chains_out']} can also supply their own "
-              "sequence to stage 4", colour=ARM1)
-    flow.row("3 · geometry.surface_markers",
-             f"PDBe · RCSB · UniProt   ·   {stages[3]['seconds']} s\n"
-             f"in:  {surf['candidates_in']} chains, each as accession + residue range",
-             f"{surf['rows_out']} rows for {surf['candidates_in']} chains: "
-             f"{surf['measured']} measured, {surf['unmeasured']} refused with a reason\n"
-             "largest exposed hydrophobic patch, median of 5 structures\n"
-             f"gate:  {surf['gate_yes']} yes  ·  {surf['gate_borderline']} borderline  ·  "
-             f"{surf['gate_no']} no",
-             ARM1, SURFACE, PALE1)
-    flow.edge("a patch median and a patch range per chain", colour=ARM1)
-    flow.row("4 · structures.folded",
-             f"ESM Atlas   ·   {stages[4]['seconds']} s\n"
-             "in:  one amino-acid sequence — from stage 2, not stage 3",
-             f"{out[4]['foldable']} of "
-             f"{out[4]['foldable'] + out[4]['not_foldable']} chains could supply their own "
-             f"sequence\nfolded {out[4]['folded_target']}, {out[4]['residues']} residues\n"
-             f"mean pLDDT {out[4]['mean_plddt']}, "
-             f"{round(100 * (out[4]['at_or_above_70'] or 0), 1)}% at or above 70\n"
-             "— the predictor's confidence in itself, not accuracy",
-             ARM1, SURFACE, PALE1)
+              f"and {fold_out['foldable']} of {out[2]['chains_out']} can also supply their own "
+              f"sequence to stage {st_fold['stage']}", colour=ARM1)
+    # The fold row and the surface row, drawn in the order the RECORD ran them and labelled
+    # with the numbers the record gave them. The order is not hardcoded either way: a run from
+    # before the swap measured surfaces third and folded fourth, and drawing that run in
+    # today's order would caption it with a pipeline it did not execute. The edge between them
+    # is the earlier stage's own `hands_to_next`, which is the field that says what it handed
+    # on -- so a record whose fold stage says nothing downstream read it draws exactly that.
+    def fold_row():
+        flow.row(f"{st_fold['stage']} · structures.folded",
+                 f"ESM Atlas   ·   {st_fold['seconds']} s\n"
+                 f"in:  an amino-acid sequence per chain — from stage {st2['stage']}",
+                 f"{fold_out['foldable']} of "
+                 f"{fold_out['foldable'] + fold_out['not_foldable']} chains could supply "
+                 f"their own sequence\nfolded {folded_count}, "
+                 f"{fold_out['folded_target']} shown: {fold_out['residues']} residues\n"
+                 f"mean pLDDT {fold_out['mean_plddt']}, "
+                 f"{round(100 * (fold_out['at_or_above_70'] or 0), 1)}% at or above 70\n"
+                 "— the predictor's confidence in itself, not accuracy",
+                 ARM1, SURFACE, PALE1)
+
+    def surface_row():
+        predicted = surf.get("measured_on_predicted_coordinates")
+        computed = (f"{predicted} measured on predicted coordinates instead, never pooled"
+                    if predicted is not None else
+                    "deposited structures only — this run predates the predicted lane")
+        flow.row(f"{st_surface['stage']} · geometry.surface_markers",
+                 f"PDBe · RCSB · UniProt   ·   {st_surface['seconds']} s\n"
+                 f"in:  {surf['candidates_in']} chains as accession + range"
+                 + (f", and {surf['predicted_coordinates_in']} predicted structures"
+                    if surf.get("predicted_coordinates_in") else ""),
+                 f"{surf['rows_out']} rows for {surf['candidates_in']} chains: "
+                 f"{surf['measured']} measured on depositions, "
+                 f"{surf['unmeasured']} with none\n{computed}\n"
+                 f"gate:  {surf['gate_yes']} yes  ·  {surf['gate_borderline']} borderline  ·  "
+                 f"{surf['gate_no']} no",
+                 ARM1, SURFACE, PALE1)
+
+    first, second = ((st_fold, fold_row), (st_surface, surface_row))
+    if st_surface["stage"] < st_fold["stage"]:
+        first, second = (st_surface, surface_row), (st_fold, fold_row)
+    first[1]()
+    flow.edge(textwrap.fill(first[0].get("hands_to_next") or "", 64), colour=ARM1)
+    second[1]()
+    flow.edge(textwrap.fill(second[0].get("hands_to_next") or "", 64), colour=ARM1)
     flow.edge("", colour=BREAK, dashed=True, pad=0.007)
     flow.node("THE ARROW THAT IS NOT THERE",
-              "Stage 5 reads nothing stages 1 to 4 measured. `library_spec` takes an "
+              "The library stage reads nothing the four before it measured. `library_spec` takes an "
               "initiator, a length\nrange and a set of elongator classes — no patch area, "
               "no accession, no residue range.\nThe library is the same library whatever the "
               "surface stage found, so \"a focused library\nover that surface\" states an "
@@ -867,7 +908,7 @@ def workflow_figure(chain, case=0, gain_shared="+0.173 to +0.321",
               BREAK, PALEB, 0.0, 0.47 * 2 + 0.06, title_size=10)
     flow.edge("", colour=BREAK, dashed=True, pad=0.007)
     flow.row("5 · chemistry.library_spec",
-             f"local tables   ·   {stages[5]['seconds']} s\n"
+             f"local tables   ·   {st_lib['seconds']} s\n"
              "in:  nothing from upstream",
              f"{lib['initiator']} initiator, {lib['random_region'][0]}–"
              f"{lib['random_region'][1]} randomised positions\n"

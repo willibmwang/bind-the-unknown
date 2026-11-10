@@ -42,7 +42,7 @@ notebook page and the record cannot drift apart.
 **The two arrows that are not there are the point of drawing this**, and the figure gives each
 one a panel of its own rather than leaving it to be noticed. `chemistry.library_spec` takes an
 initiator, a length range and a set of elongator classes. It takes no patch area, no accession
-and no residue range, so the library it defines is the same library whatever stage 3 measured:
+and no residue range, so the library it defines is the same library whatever the surface stage measured:
 "a focused library over that surface" states an intent and not a data path. And the campaign
 data that would feed arm 2's answer back into the next design does not exist yet.
 

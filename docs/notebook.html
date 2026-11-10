@@ -7980,7 +7980,7 @@ stages on two more pathogens, so that second number can be read as a property of
 studied a family is rather than of the code.</p>
 <p><strong>Neither case alone is the system</strong>, and recording one of them and calling it the chain is how
 a coverage number comes to be quoted outside the setting that produced it.</p>
-<p><strong>What is true in both: no chain is dropped between stages.</strong> Stage 3 emits one row per chain
+<p><strong>What is true in both: no chain is dropped between stages.</strong> The surface stage emits one row per chain
 stage 2 produced, and a chain with no measurable surface carries the reason on its row. That
 was not true before this run. <code>intake.enrich_with_surface</code> had no caller anywhere in the
 package, so the only surfaces ever measured were six named by hand in a script, and
@@ -10915,7 +10915,10 @@ too small for a macrocycle" is a fact about the protein. Only the second is abou
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Which case's surfaces to table. The default follows the figure in §0.1, so a reader</span>
 <span class="c1"># changing CASE there sees the same run here.</span>
 <span class="n">surfrun</span> <span class="o">=</span> <span class="n">CHAIN</span><span class="p">[</span><span class="s2">"cases"</span><span class="p">][</span><span class="n">CASE</span><span class="p">]</span>
-<span class="n">sstage3</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">[</span><span class="s2">"stage"</span><span class="p">]:</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">surfrun</span><span class="p">[</span><span class="s2">"stages"</span><span class="p">]}[</span><span class="mi">3</span><span class="p">]</span>
+<span class="c1"># Keyed on the tool, not the position. Folding now runs before the surface stage, so</span>
+<span class="c1"># `[3]` reads whichever stage happens to sit third -- and every record on disk</span>
+<span class="c1"># predates the swap, so only the tool name is stable across both.</span>
+<span class="n">sstage3</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">[</span><span class="s2">"tool"</span><span class="p">]:</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">surfrun</span><span class="p">[</span><span class="s2">"stages"</span><span class="p">]}[</span><span class="s2">"geometry.surface_markers"</span><span class="p">]</span>
 
 <span class="n">surf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([{</span>
     <span class="s2">"rank"</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">"rank"</span><span class="p">],</span>

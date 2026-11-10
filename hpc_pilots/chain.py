@@ -52,19 +52,15 @@ def _decomposed_score(features, rubric):
     arrive there by opposite routes: the spike earns 2.0 for being on the outside of the virion
     and 1.386 for conservation, the main protease earns 0.0 and 2.504. A single score hides
     that. The sum is asserted against the recorded score rather than assumed.
+
+    The arithmetic itself lives in `intake.score_terms`, beside the `rank_score` it is a
+    reading of. It was duplicated here, which made the assertion weaker than it looks: two
+    copies of one sum agree with each other until someone edits one, and the copy a reader
+    checks is the published one.
     """
-    terms = {
-        "conservation": round(rubric["conservation"] * features["conservation"], 4),
-        "surface_exposed": round(rubric["surface_exposed"]
-                                 * float(features["surface_exposed"]), 4),
-        "essential_class": round(rubric["essential_class"]
-                                 * float(features["essential_class"]), 4),
-        "structures_in_family": round(rubric["structures_in_family_capped"]
-                                      * min(1.0, features["structures_in_family"] / 50.0), 4),
-        "druggable_class": round(rubric["druggable_class"]
-                                 * features["druggable_class"], 4),
-    }
-    return {"terms": terms, "total": round(sum(terms.values()), 4)}
+    from .intake import score_terms
+
+    return score_terms(features, rubric)
 
 
 def surface_rows(ranked, replicates=5, folds=()):
@@ -206,6 +202,15 @@ def _predicted_surface(coordinates, folded, entry):
         return {"measured": False,
                 "not_measured_because": f"no SASA backend on this machine: {missing}. "
                                         "A property of the environment, not of the target.",
+                "is_deposited_measurement": False, "in_the_ranking": False,
+                "only_route_to_a_surface": not entry["measured"]}
+    except Exception as failure:                          # noqa: BLE001
+        # Belt and braces behind the guard inside `markers_from_coordinates`. This stage runs
+        # after four stages have already paid for their answers, and it now measures up to
+        # twelve predictions rather than one, so the cost of letting any single one raise is
+        # the whole record. A refusal here is a row that says why, like every other refusal.
+        return {"measured": False,
+                "not_measured_because": f"{type(failure).__name__}: {str(failure)[:160]}",
                 "is_deposited_measurement": False, "in_the_ranking": False,
                 "only_route_to_a_surface": not entry["measured"]}
     if markers.get("error"):
@@ -913,7 +918,7 @@ def evidence_stage(scored, top=3, budget=EVIDENCE_BUDGET_SECONDS):
 def _case(accession, exclude_organism, top, replicates, fold, label, evidence_top=3):
     """Every stage of the onset arm, once, against one reference."""
     from . import chemistry
-    from .intake import decompose, rank_score, run_intake
+    from .intake import candidate_table, decompose, rank_score, run_intake
 
     stages, clock = [], time.time()
 
@@ -934,6 +939,12 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                    "unidentified": intake["unidentified"]},
         "seconds": round(time.time() - started, 2),
         "hands_to_next": "one reviewed accession and one residue range per candidate"})
+    # The rows behind those counts, kept rather than discarded. This stage used to publish
+    # five integers, so a reader could learn that nine of twelve ORFs were identified and had
+    # no way to ask which nine, what any of them scored, or what the other three were. The
+    # table is the same rows `candidates` flattens for `intake.candidate_record`, so the page
+    # renders one shape whichever record it is reading.
+    candidates = candidate_table(intake)
 
     started = time.time()
     ranked = decompose(intake["targets"])
@@ -953,6 +964,12 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
             "nearest_homolog": row.get("nearest_homolog"),
             "chain_range": row.get("chain_range"),
             "conservation": row["features"]["conservation"],
+            # Beside the number, because this is where the term is published as points. The
+            # two tiers report different quantities into it and this record carries `tier`
+            # already; without the scale a reader cannot tell a saturated remote bit score
+            # from a measured k-mer fraction.
+            "conservation_scale": row["features"].get("conservation_scale"),
+            "conservation_at_ceiling": row["features"].get("conservation_at_ceiling"),
             "surface_exposed": row["features"]["surface_exposed"],
             "essential_class": row["features"]["essential_class"],
             "druggable_class": row["features"]["druggable_class"],
@@ -1104,6 +1121,13 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
         "genome_accession": accession,
         "reference_excluded_organism": exclude_organism,
         "stages": stages,
+        # Stage 1's rows and stage 2's rows, and they are different lists on purpose.
+        # `candidates` is whole ORFs, one row per thing the gene caller found; `scores` is
+        # what stage 2 cut those into, so a polyprotein is one candidate and fourteen chains.
+        # Collapsing them to one table would have to pick which of the two the page means by
+        # "the ranking", and the honest answer is that the shortlist comes from the second and
+        # the coverage claim comes from the first.
+        "candidates": candidates,
         "scores": scored,
         "surfaces": rows,
         "library": spec,
@@ -1232,10 +1256,17 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
     **Why two cases and not one.** Which reference the genome is identified against changes
     what every later stage receives, and the two settings fail in opposite directions.
 
-    Identified through its own entries, conservation is 1.0 for every candidate -- it is
-    identity to the nearest curated relative and the nearest relative is the protein itself
-    -- so the term carrying the most weight separates nothing and the top of the ranking
-    ties. The later stages, though, work: the chain ranges are the pathogen's own, so the
+    Identified through its own entries, conservation is 1.0 for every candidate -- it is the
+    fraction of the query's 5-mers found in the nearest curated relative, and the nearest
+    relative is the protein itself -- so the term carrying the most weight separates nothing
+    and the top of the ranking ties.
+
+    That description used to read "identity to the nearest curated relative", which was the
+    repo's only written definition of its heaviest term and was wrong for both tiers: the
+    exact tier computes a shared-5-mer fraction and the remote tier a bit score capped at 200,
+    and neither is an identity. The rows now carry `conservation_scale` so which one produced
+    a given number is readable, and the term is at its ceiling here whichever scale applies,
+    which is what `conservation_at_ceiling` records. The later stages, though, work: the chain ranges are the pathogen's own, so the
     surface stage resolves structures for nearly every chain and the folding stage cuts the
     main protease out of the genome's own translation exactly, reproducing the fold already
     committed at `runs/folded_structure/`.
@@ -1272,18 +1303,19 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
         "cases": out,
         "seconds_total": round(sum(c["seconds"] for c in out), 2),
         "limitations": [
-            "Stage 5 reads nothing from stages 1 to 4. The library definition is the same "
-            "whatever the surface stage found, and the arrow a flowchart would draw there "
-            "does not exist yet.",
-            "The gate in stage 3 is advisory: the patch spread across structures of one "
-            "domain is comparable to the footprint it is thresholded against, so most rows "
-            "that are not refused on localisation read borderline rather than yes or no.",
+            "The library stage reads nothing the four stages before it produced. The library "
+            "definition is the same whatever the surface stage found, and the arrow a "
+            "flowchart would draw there does not exist yet.",
+            "The gate in the surface stage is advisory: the patch spread across structures of "
+            "one domain is comparable to the footprint it is thresholded against, so most "
+            "rows that are not refused on localisation read borderline rather than yes or "
+            "no.",
             "The gate has a lower bound on patch area and no upper one, so a surface far "
             "larger than one footprint passes the area test although it is a region rather "
             "than a site. Nothing here turns on it, because every oversized patch in this "
             "record is refused on localisation first.",
-            "Stage 4 refuses a chain whose annotated range does not transfer rather than "
-            "aligning it. An alignment would recover the window, and `intake` already "
+            "The folding stage refuses a chain whose annotated range does not transfer rather "
+            "than aligning it. An alignment would recover the window, and `intake` already "
             "carries the aligner; until it is wired, a holdout costs this stage most of its "
             "input.",
             "One genome. The chain has been run on four pathogens and this record is one of "

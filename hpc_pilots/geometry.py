@@ -279,7 +279,25 @@ def markers_from_coordinates(text, label="predicted coordinates"):
     with tempfile.TemporaryDirectory() as scratch:
         path = pathlib.Path(scratch) / "predicted.pdb"
         path.write_text(text)
-        residues = _residues(path)
+        # freesasa raises a bare `Exception` for a file it cannot read, and the fold stage will
+        # hand over coordinates that reach that state: `_parse_pdb` skips an ATOM line whose
+        # columns will not parse and still returns the text with `folded` true, so a damaged
+        # coordinate column arrives here inside an accepted prediction. Unguarded, that killed
+        # the whole run -- one bad line in one chain of twelve aborting a fifteen-minute chain
+        # after every other stage had already paid for its answers. A prediction that cannot be
+        # read is a refusal like any other: recorded on the row, and the run continues.
+        try:
+            residues = _residues(path)
+        except ImportError:
+            # The one failure that is about this machine and not about the coordinates. Raised
+            # on, because the caller distinguishes it: a missing SASA backend is not a fact
+            # about the target and must not be recorded as one.
+            raise
+        except Exception as failure:                       # noqa: BLE001
+            return {"pdb_id": label, "chain": None, "residues": 0,
+                    "error": f"the predicted coordinates could not be read: "
+                             f"{type(failure).__name__}: {str(failure)[:160]}",
+                    "on_predicted_coordinates": True, "is_deposited_measurement": False}
         if not residues:
             return {"pdb_id": label, "chain": None, "residues": 0,
                     "error": "no residues read from the predicted coordinates",

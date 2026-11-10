@@ -210,10 +210,15 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .tile{width:28px;height:28px;border-radius:6px;flex:none}
 .tile.m{background:var(--brand)}
 .tile.r{border:1.6px dashed var(--warn);opacity:.8}
+/* A chain with no deposited structure whose surface came from a predicted one. Drawn as its
+   own state rather than as `m`: a prediction measured is not a structure solved, and the
+   strip is the first thing a reader counts. */
+.tile.p{border:1.6px solid var(--brand);background:color-mix(in srgb,var(--brand) 22%,transparent)}
 .legend{display:flex;gap:20px;flex-wrap:wrap;font-size:15px;color:var(--fg-2);margin-bottom:24px}
 .legend span{display:flex;align-items:center;gap:8px}
 .key{width:15px;height:15px;border-radius:4px;flex:none}
 .key.m{background:var(--brand)} .key.r{border:1.6px dashed var(--warn)}
+.key.p{border:1.6px solid var(--brand);background:color-mix(in srgb,var(--brand) 22%,transparent)}
 
 /* two-up */
 .two{display:grid;grid-template-columns:1fr 1fr;gap:15px}
