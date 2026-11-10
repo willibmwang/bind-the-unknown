@@ -297,7 +297,7 @@
       <div><h3>In</h3><ul><li><b>20</b> chains</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
         <li>All <b>{{chains}}</b> had their own sequence located in this genome</li>
-        <li><b>11</b> of those are short enough for the folding lane; <b>9</b> are over its <b>400</b>-residue ceiling, including the spike and the copying machine</li>
+        <li><b>11</b> of those are short enough for the folding lane; <b>9</b> are over its <b>400</b>-residue ceiling, including the three spike chains and the polymerase nsp12</li>
         <li>The main protease was folded: <b>{{fold_residues}}</b> building blocks long</li>
         <li>The predictor rates its own confidence <b>{{mean_plddt}}</b> out of 100 — confidence is not accuracy</li>
       </ul></div>
@@ -391,30 +391,30 @@
         <span class="k">patch_median_a2</span><span class="k">patch_range_a2</span><span class="k">structures_measured</span><span class="k">structures_used</span><span class="k">surface_score</span><span class="k">patch_fraction_of_surface</span><span class="k">exposed</span><span class="k">locations</span><span class="k">gate</span><span class="k">available_from</span>
         <span class="lead" style="margin-top:8px">and when not:</span><span class="k">measured: false</span><span class="k">unmeasured_because</span>
       </div>
-      <div class="rowex"><div class="h">one row as returned — the copying machine</div>
+      <div class="rowex"><div class="h">one row as returned — <span class="mono">RNA-directed RNA polymerase nsp12</span></div>
         <div class="v">patch_median: 733.1 Å² · range 665.5–800.8 · 2.5 % of the domain's surface<br>
         measured on 2 deposited structures: 6nur:A, 6nus:A · available since 2019-02-01<br>
         locations: host cytoplasm, endosome, membrane → exposed: false<br>
         gate: no — measured, then set aside because it sits inside the cell</div>
       </div>
-      <div class="accs"><span class="lead">The deposited structures it actually measured on, returned per chain as <span class="k">structures_used</span> — every one a real PDB entry and chain, none of them SARS-CoV-2's:</span>
-        <div class="pdbrow"><span class="who">Main protease <em>P0C6X7 · 3241–3546</em></span><span class="ids">6w79:A · 6wco:A · 5c5o:A · 5c5o:B · 3tnt:A</span></div>
-        <div class="pdbrow"><span class="who">Copying machine (RdRp) <em>P0C6X7 · 4370–5301</em></span><span class="ids">6nur:A · 6nus:A</span></div>
-        <div class="pdbrow"><span class="who">Unwinding motor <em>P0C6X7 · 5302–5902</em></span><span class="ids">6jyt:A · 6jyt:B</span></div>
-        <div class="pdbrow"><span class="who">Helper protein 10 <em>P0C6X7 · 4231–4369</em></span><span class="ids">8c0g:B · 2xyq:B · 2xyv:B · 2xyr:B · 5c8t:A</span></div>
-        <div class="pdbrow"><span class="who">Helper protein 7 <em>P0C6X7 · 3837–3919</em></span><span class="ids">2ahm:A · 2ahm:B · 2ahm:C · 2ahm:D · 6nur:C</span></div>
-        <div class="pdbrow"><span class="who">Helper protein 8 <em>P0C6X7 · 3920–4117</em></span><span class="ids">5f22:B · 2ahm:E · 2ahm:F · 2ahm:G · 2ahm:H</span></div>
-        <div class="pdbrow"><span class="who">Helper protein 9 <em>P0C6X7 · 4118–4230</em></span><span class="ids">1qz8:A · 1qz8:B · 1uw7:A</span></div>
-        <div class="pdbrow"><span class="who">Helper protein 2 <em>P0C6X7 · 181–818</em></span><span class="ids">7fac:A</span></div>
-        <div class="pdbrow"><span class="who">ORF9b <em>P59636</em></span><span class="ids">2cme:A · 2cme:B · 2cme:C · 2cme:D · 2cme:E</span></div>
+      <div class="accs"><span class="lead">The deposited structures it actually measured on, returned per chain as <span class="k">structures_used</span> — every one a real PDB entry and chain, none of them SARS-CoV-2's. Each chain is named as the record names it, so a row here can be found in the raw JSON by searching for it:</span>
+        <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">the main protease</i> <em>P0C6X7 · 3241–3546</em></span><span class="ids">6w79:A · 6wco:A · 5c5o:A · 5c5o:B · 3tnt:A</span></div>
+        <div class="pdbrow"><span class="who">RNA-directed RNA polymerase nsp12 <i class="gl">copies the genome</i> <em>P0C6X7 · 4370–5301</em></span><span class="ids">6nur:A · 6nus:A</span></div>
+        <div class="pdbrow"><span class="who">Helicase nsp13 <i class="gl">unwinds RNA</i> <em>P0C6X7 · 5302–5902</em></span><span class="ids">6jyt:A · 6jyt:B</span></div>
+        <div class="pdbrow"><span class="who">Non-structural protein 10 <em>P0C6X7 · 4231–4369</em></span><span class="ids">8c0g:B · 2xyq:B · 2xyv:B · 2xyr:B · 5c8t:A</span></div>
+        <div class="pdbrow"><span class="who">Non-structural protein 7 <em>P0C6X7 · 3837–3919</em></span><span class="ids">2ahm:A · 2ahm:B · 2ahm:C · 2ahm:D · 6nur:C</span></div>
+        <div class="pdbrow"><span class="who">Non-structural protein 8 <em>P0C6X7 · 3920–4117</em></span><span class="ids">5f22:B · 2ahm:E · 2ahm:F · 2ahm:G · 2ahm:H</span></div>
+        <div class="pdbrow"><span class="who">Viral protein genome-linked nsp9 <em>P0C6X7 · 4118–4230</em></span><span class="ids">1qz8:A · 1qz8:B · 1uw7:A</span></div>
+        <div class="pdbrow"><span class="who">Non-structural protein 2 <em>P0C6X7 · 181–818</em></span><span class="ids">7fac:A</span></div>
+        <div class="pdbrow"><span class="who">ORF9B_SARS ORF9b protein <em>P59636</em></span><span class="ids">2cme:A · 2cme:B · 2cme:C · 2cme:D · 2cme:E</span></div>
       </div>
       <div class="accs"><span class="lead">And the 11 it could not measure, each naming the accession that came back empty:</span>
-        <div class="pdbrow none"><span class="who">Spike — outer segment, stem, head <em>3 chains</em></span><span class="ids">Q3LZX1 — no deposited chain maps to it at all</span></div>
-        <div class="pdbrow none"><span class="who">Membrane protein <em>1</em></span><span class="ids">Q0Q472 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">Protein 3 <em>1</em></span><span class="ids">Q0Q474 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">Nucleoprotein <em>1</em></span><span class="ids">Q3I5I7 — none at all</span></div>
+        <div class="pdbrow none"><span class="who">Spike protein S1 · S2 · S2' <em>3 chains</em></span><span class="ids">Q3LZX1 — no deposited chain maps to it at all</span></div>
+        <div class="pdbrow none"><span class="who">VME1_BC279 Membrane protein <em>1</em></span><span class="ids">Q0Q472 — none at all</span></div>
+        <div class="pdbrow none"><span class="who">AP3A_BC279 Protein 3 <em>1</em></span><span class="ids">Q0Q474 — none at all</span></div>
+        <div class="pdbrow none"><span class="who">NCAP_BCRP3 Nucleoprotein <em>1</em></span><span class="ids">Q3I5I7 — none at all</span></div>
         <div class="pdbrow none"><span class="who">Protein 7a <em>1</em></span><span class="ids">Q3I5J0 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">Second protease, nsp1, nsp4, nsp6 <em>4 chains</em></span><span class="ids">P0C6X7 — 180 chains map to it, none covering those stretches</span></div>
+        <div class="pdbrow none"><span class="who">Papain-like protease nsp3 · Host translation inhibitor nsp1 · Non-structural protein 4 · Non-structural protein 6 <em>4 chains</em></span><span class="ids">P0C6X7 — 180 chains map to it, none covering those stretches</span></div>
       </div>
     </div>
   </div>
