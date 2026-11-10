@@ -110,6 +110,17 @@ the main protease's 415.2. **That ordering is the reverse of a conventional smal
 druggability score, and the right way round for macrocycles**, which bury a few hundred square
 angstroms flat rather than reaching into a pocket.
 
+The surface stage runs **after** the folding stage, and the order is the answer to the case this
+project is about. For a pathogen nothing has solved there is no deposition to measure — PDBe maps
+no chain to it — so the only coordinates that will ever exist are the ones the fold emits, and
+measuring before folding made that case unanswerable by construction. The same patch arithmetic
+runs on predicted coordinates, under its own key and never added to the count of chains measured
+on depositions. On the one SARS-CoV-2 chain that has both, the prediction reads 2012.6 square
+angstroms against a deposited median of 562.4 over five structures: **3.6 times larger**, on a
+fold whose mean confidence is 62.6. A monomer modelled alone has no partner to bury a face
+against and the predictor's error is not separable from that here, so the record states the ratio
+and attributes nothing. Neither number is in the ranking.
+
 **A focused library definition for that molecule class.** `chemistry.library_spec` returns a
 chloroacetyl initiator, `ClAc-D-Tyr`, a randomised region of 4 to 8 positions drawn from 25
 building blocks, and a cysteine that closes the ring through a spontaneous thioether. The

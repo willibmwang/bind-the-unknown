@@ -4770,12 +4770,18 @@ def test_no_ranked_candidate_loses_its_surface_row():
 
     assert payload["cases"], "the chain records at least one reference"
     for case in payload["cases"]:
-        stages = {s["stage"]: s for s in case["stages"]}
-        handed = stages[3]["input"]["candidates_in"]
+        # Keyed on the tool and not on the stage number. The number is a position in a
+        # pipeline whose order is a design decision -- folding now runs before the surface
+        # stage, so that a target with no deposited structure has coordinates to measure --
+        # and a test that reads `stages[3]` asserts the invariant about whichever stage
+        # happens to sit third. The tool name is what does not move.
+        stages = {s["tool"]: s for s in case["stages"]}
+        surface = stages["geometry.surface_markers"]
+        handed = surface["input"]["candidates_in"]
         rows = case["surfaces"]
         assert len(rows) == handed == len(case["scores"]), (
             case["case"], len(rows), handed, len(case["scores"]))
-        assert stages[3]["output"]["nothing_dropped"] is True, case["case"]
+        assert surface["output"]["nothing_dropped"] is True, case["case"]
         assert case["coverage"]["surface_covers_every_chain"] is True, case["case"]
         for row in rows:
             if not row["measured"]:
@@ -4785,6 +4791,166 @@ def test_no_ranked_candidate_loses_its_surface_row():
     first = payload["cases"][0]
     named = {row["target"] for row in first["surfaces"]}
     assert any("RNA-directed RNA polymerase" in name for name in named), sorted(named)
+
+
+def test_a_surface_can_be_measured_on_predicted_coordinates():
+    """The lane a novel target arrives on, run on the prediction this repository committed.
+
+    For a pathogen nothing has solved there is no deposition to measure, so the surface stage
+    either reads the fold stage's coordinates or returns nothing for every chain. This is that
+    path, end to end, offline: the committed ESMFold model of the main protease measured by
+    the same `_markers` body a deposited file goes through.
+
+    The assertion that matters is not the patch area, it is the ratio. The same chain has five
+    deposited structures whose patches median at 562.4 square angstroms, and the prediction
+    yields 2012.6 -- 3.6 times larger, on coordinates whose mean pLDDT is 62.6. A monomer
+    prediction has no partner to bury an interface against and the model's error is not
+    separable from that here, so the record states the ratio and attributes nothing. What the
+    number settles is the design question: these two quantities cannot be pooled, which is why
+    `predicted_surface` is a separate key and `measured` still counts depositions only.
+    """
+    import json
+    import pathlib
+
+    from hpc_pilots.chain import _predicted_surface
+    from hpc_pilots.common import ROOT
+
+    coordinates = ROOT / "runs/folded_structure/mpro_nsp5.pdb"
+    model = ROOT / "runs/folded_structure/mpro_nsp5.json"
+    if not coordinates.exists() or not model.exists():
+        pytest.skip("the committed fold is absent on this machine")
+    try:
+        import freesasa                                    # noqa: F401
+    except ImportError:
+        pytest.skip("no SASA backend on this machine")
+
+    fold = json.loads(model.read_text())
+    folded = {"model": fold["model"], "target_name": "3C-like proteinase nsp5",
+              "pdb": pathlib.Path(coordinates).read_text(),
+              "mean_plddt": fold["mean_plddt"],
+              "confident_fraction": fold["confident_fraction"]}
+    deposited = {"target": folded["target_name"], "measured": True,
+                 "patch_median_a2": 562.4}
+
+    out = _predicted_surface(folded["pdb"], folded, deposited)
+    assert out["measured"] is True
+    assert out["residues"] == fold["sequence_length"] == 306
+    assert out["patch_a2"] > 0
+    # Never a measurement, never in the ranking, and the record says both rather than
+    # leaving a reader to infer them from where the number sits.
+    assert out["is_deposited_measurement"] is False
+    assert out["in_the_ranking"] is False
+    assert out["only_route_to_a_surface"] is False, "this chain does have depositions"
+    assert out["ratio_to_deposited_median"] > 2, (
+        "the predicted patch ran far above the deposited median when this was written; a "
+        "ratio near 1 means the two have converged and the caveat needs re-reading")
+
+    # And the case the reordering exists for: the same call on a chain with no deposition at
+    # all is the only surface that chain will ever have, and says so.
+    novel = {"target": folded["target_name"], "measured": False,
+             "patch_median_a2": None}
+    alone = _predicted_surface(folded["pdb"], folded, novel)
+    assert alone["only_route_to_a_surface"] is True
+    assert alone["ratio_to_deposited_median"] is None
+    assert alone["patch_a2"] == out["patch_a2"]
+
+
+def test_the_novel_lane_gets_a_surface_from_the_fold():
+    """The row that has no relative at all, which is the case the reordering is for.
+
+    A candidate with no reviewed homolog has no accession, so PDBe has nothing to resolve and
+    the deposited route returns before it begins -- and under the old order that was the end of
+    it: the stage that could have produced coordinates ran afterwards. This is the same row
+    now, with the fold stage's coordinates in hand: it still reports `measured` false with the
+    deposited reason intact, and it carries a patch anyway, marked as the only route there was.
+
+    No network: the row refuses before any lookup, and the coordinates are the committed fold.
+    """
+    import json
+    import pathlib
+
+    from hpc_pilots.chain import surface_rows
+    from hpc_pilots.common import ROOT
+
+    coordinates = ROOT / "runs/folded_structure/mpro_nsp5.pdb"
+    model = ROOT / "runs/folded_structure/mpro_nsp5.json"
+    if not coordinates.exists() or not model.exists():
+        pytest.skip("the committed fold is absent on this machine")
+    try:
+        import freesasa                                    # noqa: F401
+    except ImportError:
+        pytest.skip("no SASA backend on this machine")
+
+    fold = json.loads(model.read_text())
+    folded = {"model": fold["model"], "target_name": "unidentified ORF",
+              "pdb": pathlib.Path(coordinates).read_text(),
+              "mean_plddt": fold["mean_plddt"],
+              "confident_fraction": fold["confident_fraction"]}
+    rows = surface_rows([{"name": "unidentified ORF", "identified": False, "rank": 7}],
+                        folded=folded)
+
+    assert len(rows) == 1, "a row is never absent"
+    row = rows[0]
+    assert row["measured"] is False
+    assert "no reviewed homolog accession" in row["unmeasured_because"]
+    predicted = row["predicted_surface"]
+    assert predicted["measured"] is True
+    assert predicted["patch_a2"] > 0
+    assert predicted["only_route_to_a_surface"] is True
+    assert predicted["is_deposited_measurement"] is False
+
+    # And with no coordinates to hand, the row is exactly what it was before any of this: the
+    # fallback adds a key, it does not change the deposited answer or invent one.
+    bare = surface_rows([{"name": "unidentified ORF", "identified": False, "rank": 7}])
+    assert "predicted_surface" not in bare[0]
+    assert bare[0]["unmeasured_because"] == row["unmeasured_because"]
+
+
+def test_the_page_quotes_the_predicted_patch_it_can_recompute():
+    """The three figures the site types by hand, checked against the code that produces them.
+
+    `site/body.html` is prose and the build fills its `{{tokens}}` from the chain record, so
+    every number on the page follows whichever run is current. These three cannot: the
+    predicted patch is computed from a committed PDB rather than carried in the record, so it
+    was typed. A typed number is one re-fold away from being wrong with nothing to catch it,
+    and the claim it supports -- that a predicted surface and a measured one are far enough
+    apart to be worth keeping separate -- is the reason the two stages were reordered.
+
+    So the page's figures are asserted against a live recomputation. If the fold is replaced
+    or the patch arithmetic changes, this fails and names what to retype.
+    """
+    import json
+    import pathlib
+
+    from hpc_pilots.common import ROOT
+    from hpc_pilots.geometry import markers_from_coordinates
+
+    page = ROOT / "site/body.html"
+    coordinates = ROOT / "runs/folded_structure/mpro_nsp5.pdb"
+    record = ROOT / "runs/onset_chain.json"
+    if not (page.exists() and coordinates.exists() and record.exists()):
+        pytest.skip("page, committed fold or chain record absent on this machine")
+    try:
+        import freesasa                                    # noqa: F401
+    except ImportError:
+        pytest.skip("no SASA backend on this machine")
+
+    body = page.read_text()
+    markers = markers_from_coordinates(pathlib.Path(coordinates).read_text())
+    predicted = markers["hydrophobic_patch_area"]
+    quoted = (f"{predicted:,.1f} Å² · "
+              f"{markers['patch_fraction_of_surface'] * 100:.1f} % of the surface")
+    assert quoted in body, f"the page should quote the predicted patch as {quoted!r}"
+
+    cases = json.loads(record.read_text())["cases"]
+    case = next(c for c in cases if c.get("reference_excluded_organism"))
+    row = next(r for r in case["surfaces"] if "nsp5" in r["target"])
+    deposited = (f"{row['patch_median_a2']:,.1f} Å² · "
+                 f"{row['patch_fraction_of_surface'] * 100:.1f} % of the surface")
+    assert deposited in body, f"the page should quote the deposited patch as {deposited!r}"
+
+    ratio = predicted / row["patch_median_a2"]
+    assert f"{ratio:.1f}×" in body, f"the page should quote the ratio as {ratio:.1f}×"
 
 
 def test_every_ranked_chain_is_located_in_the_genome_it_came_from():

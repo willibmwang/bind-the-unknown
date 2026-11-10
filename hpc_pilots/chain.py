@@ -67,7 +67,7 @@ def _decomposed_score(features, rubric):
     return {"terms": terms, "total": round(sum(terms.values()), 4)}
 
 
-def surface_rows(ranked, replicates=5):
+def surface_rows(ranked, replicates=5, folded=None):
     """One surface row per ranked candidate, measured or refused with the reason.
 
     Exhaustive over `ranked` on purpose, and the `top=12` cap that `enrich_with_surface`
@@ -80,9 +80,24 @@ def surface_rows(ranked, replicates=5):
     three situations obtained, because "this protein has no surface a macrocycle could lie
     across" and "no deposited structure covers this chain" and "this machine has no freesasa"
     are three different statements and only the first is about the target.
+
+    `folded` is the fold stage's payload, and carrying it here is what makes the stage before
+    this one a stage this one reads. Where the fold produced coordinates for a chain, the same
+    patch arithmetic is run on them and reported as `predicted_surface`, under its own keys and
+    never merged into `measured`: for a chain no deposition covers it is the only surface that
+    will ever exist, and for a chain a deposition does cover it is a second number from a
+    different kind of evidence. Where both exist the ratio between them is recorded, because
+    that is the one place this pipeline can say how far a predicted surface sits from a
+    measured one instead of hoping they agree.
     """
     from .geometry import surface_for_accession
     from .intake import amenable, chain_locations, exposed_from_locations
+
+    # The fold stage folds one chain per run, so this matches by name and the match either
+    # fires once or not at all. Compared on the target name because that is what both stages
+    # key a row by; a chain is not re-folded here and no coordinates are fetched.
+    coordinates = (folded or {}).get("pdb")
+    folded_target = (folded or {}).get("target_name")
 
     rows = []
     for row in ranked:
@@ -152,7 +167,79 @@ def surface_rows(ranked, replicates=5):
                          "surface_exposed": verdict["exposed"]})
         entry["gate"] = amenable(features)
         rows.append(entry)
+
+    # After every deposited attempt, not during them. A row reaches this loop by one of four
+    # routes -- measured, no accession, no backend, no covering chain -- and the predicted
+    # surface has something different to say on each of them. Attaching it here is what lets
+    # it say which: `only_route_to_a_surface` is read off the finished row rather than guessed
+    # at from where in the loop the row happened to be.
+    if coordinates and folded_target:
+        for entry in rows:
+            if entry["target"] == folded_target:
+                entry["predicted_surface"] = _predicted_surface(coordinates, folded, entry)
+                break
     return rows
+
+
+def _predicted_surface(coordinates, folded, entry):
+    """The patch on predicted coordinates, with its standing attached to it.
+
+    Everything here is flagged twice over -- `is_deposited_measurement` false, `in_the_ranking`
+    false -- because the number is arithmetic on a model's assertion and the two ways it could
+    be misused are being counted as a solved structure and being fed to the rubric. The rubric
+    takes five weights fixed before the run and no surface term is among them, so the second
+    cannot happen by accident; the first is a reader's error and the flags exist for them.
+
+    `ratio_to_deposited_median` is the honest part. On a chain that has both, this is the only
+    number in the pipeline that says how far a predicted surface sits from a measured one. It
+    is reported without an explanation attached: a monomer prediction has no partner to bury
+    an interface against, and prediction error is not separable from that here, so stating a
+    cause would be inventing one.
+    """
+    from .geometry import markers_from_coordinates
+
+    started = time.time()
+    try:
+        markers = markers_from_coordinates(
+            coordinates, label=f"{folded.get('model') or 'predicted'} · {entry['target']}")
+    except ImportError as missing:
+        return {"measured": False,
+                "not_measured_because": f"no SASA backend on this machine: {missing}. "
+                                        "A property of the environment, not of the target.",
+                "is_deposited_measurement": False, "in_the_ranking": False,
+                "only_route_to_a_surface": not entry["measured"]}
+    if markers.get("error"):
+        return {"measured": False, "not_measured_because": markers["error"],
+                "is_deposited_measurement": False, "in_the_ranking": False,
+                "only_route_to_a_surface": not entry["measured"]}
+
+    deposited = entry.get("patch_median_a2")
+    patch = markers["hydrophobic_patch_area"]
+    return {
+        "measured": True,
+        "measured_on": "coordinates from the fold stage, not a deposition",
+        "model": folded.get("model"),
+        "mean_plddt": folded.get("mean_plddt"),
+        "confident_fraction": folded.get("confident_fraction"),
+        "residues": markers["residues"],
+        "patch_a2": patch,
+        "patch_fraction_of_surface": markers["patch_fraction_of_surface"],
+        "exposed_fraction_of_residues": markers["exposed_fraction"],
+        "sequons_near_patch": markers["sequons_near_patch"],
+        "seconds": round(time.time() - started, 2),
+        # True exactly when no deposited chain covered this target, which is the case the
+        # reordering exists for: the novel target whose only coordinates are predicted ones.
+        "only_route_to_a_surface": not entry["measured"],
+        "deposited_patch_median_a2": deposited,
+        "ratio_to_deposited_median": (round(patch / deposited, 2)
+                                      if deposited else None),
+        "is_deposited_measurement": False,
+        "in_the_ranking": False,
+        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's "
+                  "error, a monomer's surface is not necessarily exposed in an oligomer, and "
+                  "over a low-confidence stretch it describes a fold the model did not commit "
+                  "to. Reported beside a deposited measurement and never pooled with one.",
+    }
 
 
 def _refusal_sentence(measured):
@@ -829,30 +916,23 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
         "seconds": round(time.time() - started, 2),
         "hands_to_next": "every chain, with the accession and range its surface is measured on"})
 
-    started = time.time()
+    # Folding runs BEFORE the surface stage, and the order is the pipeline's answer to the
+    # case it exists for. A deposited structure is what the surface stage would rather
+    # measure, and for a genuinely novel pathogen there is none: PDBe maps nothing to the
+    # chain, so the only coordinates that will ever exist for it are the ones a model emits
+    # here. Measuring first and folding afterwards made the novel case unanswerable by
+    # construction -- the stage that could have produced a surface ran after the stage that
+    # needed one, and `hands_to_next` said in as many words that nothing downstream read it.
+    #
+    # The two are still different quantities and the record keeps them apart: a deposition is
+    # an experiment someone performed, a prediction is a model's assertion, and the ratio
+    # between the patches they yield is measured on this run rather than assumed (see
+    # `surface_rows`). Neither is in the ranking.
     # Counted from the input list and not from the output, so `candidates_in` is a fact about
-    # what this stage was handed rather than a restatement of what it returned. A stage that
-    # reports its own output as its input can never be caught covering less than it was given.
+    # what these stages were handed rather than a restatement of what they returned. A stage
+    # that reports its own output as its input can never be caught covering less than it was
+    # given.
     handed = [r for r in ranked if r.get("identified")]
-    rows = surface_rows(handed, replicates=replicates)
-    measured = [r for r in rows if r["measured"]]
-    stages.append({
-        "stage": 3, "name": "Every chain to a measured surface, or a stated reason",
-        "tool": "geometry.surface_markers",
-        "endpoints": ["PDBe", "RCSB", "UniProt"],
-        "input": {"candidates_in": len(handed)},
-        "output": {"rows_out": len(rows), "measured": len(measured),
-                   "unmeasured": len(rows) - len(measured),
-                   # The check Marta's review asked for, as an assertion in the record
-                   # rather than as a claim in prose: the surface stage emits exactly as
-                   # many rows as the stage before it emitted chains.
-                   "nothing_dropped": len(rows) == len(scored),
-                   "gate_yes": sum(1 for r in measured if r.get("gate") == "yes"),
-                   "gate_borderline": sum(1 for r in measured
-                                          if r.get("gate") == "borderline"),
-                   "gate_no": sum(1 for r in measured if r.get("gate") == "no")},
-        "seconds": round(time.time() - started, 2),
-        "hands_to_next": "a patch median and range per chain; nothing downstream reads it yet"})
 
     folded, fold_rows = None, None
     if fold:
@@ -862,7 +942,7 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                 if (t.get("orf") or {}).get("protein")]
         folded, fold_rows = fold_stage(ranked, pool=pool)
         stages.append({
-            "stage": 4, "name": "A chain to coordinates, the one lane a novel target has",
+            "stage": 3, "name": "A chain to coordinates, the one lane a novel target has",
             "tool": "structures.folded", "endpoints": ["ESM Atlas"],
             # This stage is handed every candidate, not only the identified ones, because
             # folding needs a sequence and nothing else. Both counts are stated so the
@@ -888,8 +968,49 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                        "sequence_sha256": (folded or {}).get("sequence_sha256"),
                        "error": (folded or {}).get("absence")},
             "seconds": round(time.time() - started, 2),
-            "hands_to_next": "coordinates. Nothing downstream reads them yet: the surface "
-                             "stage measures deposited structures, not predicted ones"})
+            "hands_to_next": "coordinates. The surface stage measures them with the same "
+                             "arithmetic it uses on a deposition, and reports the two apart"})
+
+    started = time.time()
+    rows = surface_rows(handed, replicates=replicates, folded=folded)
+    measured = [r for r in rows if r["measured"]]
+    # Attempted and succeeded are different counts, and only the second may be reported as a
+    # measurement. A predicted surface can fail for the same reason a deposited one can -- no
+    # SASA backend, nothing readable in the coordinates -- and counting the attempt would put
+    # a refusal in the column that says how many chains got an answer.
+    attempted = [r for r in rows if r.get("predicted_surface")]
+    predicted = [r for r in attempted if r["predicted_surface"]["measured"]]
+    stages.append({
+        "stage": 4, "name": "Every chain to a measured surface, or a stated reason",
+        "tool": "geometry.surface_markers",
+        "endpoints": ["PDBe", "RCSB", "UniProt"],
+        # Two inputs now, and the second is the arrow this stage used not to have. The
+        # coordinate count is stated even when it is zero, so a run where the fold produced
+        # nothing is distinguishable from a run where the surface stage ignored what it was
+        # handed.
+        "input": {"candidates_in": len(handed),
+                  "predicted_coordinates_in": 1 if (folded or {}).get("pdb") else 0},
+        "output": {"rows_out": len(rows), "measured": len(measured),
+                   "unmeasured": len(rows) - len(measured),
+                   # The check Marta's review asked for, as an assertion in the record
+                   # rather than as a claim in prose: the surface stage emits exactly as
+                   # many rows as the stage before it emitted chains.
+                   "nothing_dropped": len(rows) == len(scored),
+                   # Counted apart from `measured`, which stays a count of depositions. A
+                   # prediction measured is not a structure solved, and a single total would
+                   # make the two indistinguishable at exactly the point a reader is deciding
+                   # how much the number is worth.
+                   "predicted_coordinates_offered": len(attempted),
+                   "measured_on_predicted_coordinates": len(predicted),
+                   "predicted_was_the_only_route": sum(
+                       1 for r in predicted
+                       if r["predicted_surface"]["only_route_to_a_surface"]),
+                   "gate_yes": sum(1 for r in measured if r.get("gate") == "yes"),
+                   "gate_borderline": sum(1 for r in measured
+                                          if r.get("gate") == "borderline"),
+                   "gate_no": sum(1 for r in measured if r.get("gate") == "no")},
+        "seconds": round(time.time() - started, 2),
+        "hands_to_next": "a patch median and range per chain; nothing downstream reads it yet"})
 
     started = time.time()
     spec = chemistry.library_spec()
@@ -932,6 +1053,12 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
             "surface_measured": len(measured),
             "surface_refused": len(rows) - len(measured),
             "surface_covers_every_chain": len(rows) == len(scored),
+            # Kept out of `surface_measured` deliberately. These are patches computed on the
+            # fold stage's coordinates, and the count that matters most is the second one:
+            # how many chains got a surface they could not have had from any deposition.
+            "surface_on_predicted_coordinates": len(predicted),
+            "surface_predicted_was_the_only_route": sum(
+                1 for r in predicted if r["predicted_surface"]["only_route_to_a_surface"]),
             # `fold_rows` counts the identified chains, so it stays comparable with
             # `chains_ranked` and with every record already on disk. The unidentified ORFs the
             # fold stage now also emits a row for are counted beside it rather than folded

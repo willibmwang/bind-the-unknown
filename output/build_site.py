@@ -592,10 +592,22 @@ def facts(case):
     A token that has no value raises rather than rendering empty. A silent blank in a
     sentence like "<b></b> of 20 measured" is worse than a build that stops.
     """
-    st = {s["stage"]: s for s in case["stages"]}
-    out1, out2, out3 = st[1]["output"], st[2]["output"], st[3]["output"]
-    out4 = st[4]["output"] if 4 in st else {}
-    out5 = st[5]["output"] if 5 in st else {}
+    # Keyed on the tool each stage ran, not on its position. The pipeline's order is a design
+    # decision and it has already changed once -- folding moved ahead of the surface stage so
+    # that a chain with no deposited structure has coordinates to measure -- and a token table
+    # written against `st[3]` silently re-points every number on the page when that happens.
+    # It also keeps the page buildable from records written under the previous numbering,
+    # because the tool names did not move.
+    by_tool = {s["tool"]: s for s in case["stages"]}
+    st1 = by_tool["intake.rank_targets"]
+    st2 = by_tool["intake.decompose + intake.rank_score"]
+    surface = by_tool.get("geometry.surface_markers") or {}
+    folded = by_tool.get("structures.folded") or {}
+    library = by_tool.get("chemistry.library_spec") or {}
+    out1, out2 = st1["output"], st2["output"]
+    out3 = surface.get("output") or {}
+    out4 = folded.get("output") or {}
+    out5 = library.get("output") or {}
     plddt = out4.get("mean_plddt")
     confident = out4.get("at_or_above_70")
     diversity = out5.get("theoretical_diversity")
@@ -618,16 +630,18 @@ def facts(case):
         "diversity": f"{diversity:,}" if diversity else None,
         "diversity_short": (f"{diversity / 1e9:.0f} billion" if diversity else None),
         "seconds": round(case.get("seconds") or 0),
-        "stage1_seconds": round(st[1].get("seconds") or 0),
-        "stage2_seconds": round(st[2].get("seconds") or 0),
-        "stage3_seconds": round(st[3].get("seconds") or 0),
-        "stage4_seconds": round(st[4].get("seconds") or 0) if 4 in st else None,
+        # Named after the stage's job rather than its position, for the same reason the
+        # lookup above is.
+        "intake_seconds": round(st1.get("seconds") or 0),
+        "score_seconds": round(st2.get("seconds") or 0),
+        "surface_seconds": round(surface.get("seconds") or 0) if surface else None,
+        "fold_seconds": round(folded.get("seconds") or 0) if folded else None,
         # The tool cards quote the wall clock to one decimal, which is the only place the
         # page reports a timing precisely enough for rounding to lose information.
-        "s1_exact": f"{st[1].get('seconds', 0):.1f}",
-        "s2_exact": f"{st[2].get('seconds', 0):.1f}",
-        "s3_exact": f"{st[3].get('seconds', 0):.1f}",
-        "s4_exact": f"{st[4].get('seconds', 0):.1f}" if 4 in st else None,
+        "intake_exact": f"{st1.get('seconds', 0):.1f}",
+        "score_exact": f"{st2.get('seconds', 0):.1f}",
+        "surface_exact": f"{surface.get('seconds', 0):.1f}" if surface else None,
+        "fold_exact": f"{folded.get('seconds', 0):.1f}" if folded else None,
     }
     return {k: v for k, v in values.items() if v is not None}
 

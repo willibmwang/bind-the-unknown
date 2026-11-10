@@ -49,9 +49,10 @@
   new virus to ones that are already understood.</p>
   <p><b>What this does.</b> It takes one accession number — the public database ID for a
   genome — and nothing else. From that it works out which proteins the virus makes, ranks them
-  by how promising a drug target each one looks, checks whether a drug would have anywhere to
-  grip, and predicts one protein's 3-D shape. Five steps, about a minute and a half, with no
-  person naming the target.</p>
+  by how promising a drug target each one looks, predicts one protein's 3-D shape, and checks
+  whether a drug would have anywhere on it to grip. Shape first, because for a virus nobody
+  has studied there is no solved structure to look at, and a predicted one is the only thing
+  left to measure. Five steps, about a minute and a half, with no person naming the target.</p>
   <p><b>The test below.</b> It was given SARS-CoV-2 — with SARS-CoV-2 itself removed from
   everything it was allowed to look up, so it could not simply recognise the answer. It still
   put the real drug targets at the top, including the one an approved antiviral already
@@ -125,6 +126,17 @@
         </div>
 
         <div class="step">
+          <svg class="ic" viewBox="0 0 100 72" role="img" aria-label="A folded protein chain">
+            <path class="acs" d="M16 52 Q27 16 40 46 Q52 70 62 34 Q70 10 84 26" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle class="ac" cx="16" cy="52" r="4"/>
+            <circle class="ac" cx="84" cy="26" r="4"/>
+          </svg>
+          <div class="lbl">Fold the target</div>
+          <div class="val">306</div>
+          <div class="unit">building blocks</div>
+        </div>
+
+        <div class="step">
           <svg class="ic" viewBox="0 0 100 72" role="img" aria-label="A protein surface with one patch highlighted">
             <circle cx="50" cy="36" r="25" fill="currentColor" opacity=".1"/>
             <circle cx="50" cy="36" r="25" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".35"/>
@@ -134,17 +146,6 @@
           <div class="lbl">Measure the surface</div>
           <div class="val">9 / 20</div>
           <div class="unit">measured</div>
-        </div>
-
-        <div class="step">
-          <svg class="ic" viewBox="0 0 100 72" role="img" aria-label="A folded protein chain">
-            <path class="acs" d="M16 52 Q27 16 40 46 Q52 70 62 34 Q70 10 84 26" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle class="ac" cx="16" cy="52" r="4"/>
-            <circle class="ac" cx="84" cy="26" r="4"/>
-          </svg>
-          <div class="lbl">Fold the target</div>
-          <div class="val">306</div>
-          <div class="unit">building blocks</div>
         </div>
 
         <div class="step">
@@ -247,7 +248,7 @@
   <h2>From a genome to a ranked shortlist</h2>
   <p>Five steps, run live against public databases. Everything below this line is the path to
   the deliverable: a list of candidate targets, ranked, with every score decomposed and every
-  surface either measured or refused with a reason.</p>
+  surface either measured on a deposited structure, computed on a predicted one, or refused with a reason.</p>
 </div>
 
 <section id="steps">
@@ -295,23 +296,6 @@
 
   <div class="stage">
     <div class="stage-head"><span class="sn">3</span><svg class="ic" aria-hidden="true" viewBox="0 0 100 72">
-            <circle cx="50" cy="36" r="25" fill="currentColor" opacity=".1"/>
-            <circle cx="50" cy="36" r="25" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".35"/>
-            <path class="ac" d="M50 11 A25 25 0 0 1 71.65 48.5 L50 36 Z" opacity=".85"/>
-            <circle cx="60" cy="27" r="2.4" fill="currentColor" opacity=".3"/>
-          </svg><span class="what">Measure the surface a drug would grip</span><span class="secs">50 s</span></div>
-    <div class="io">
-      <div><h3>In</h3><ul><li><b>20</b> chains</li></ul></div>
-      <div class="out"><h3>Out</h3><ul>
-        <li><b>20</b> answers for 20 chains</li>
-        <li><b>9</b> measured, <b>11</b> refused with a stated reason</li>
-        <li><b>0</b> quietly dropped</li>
-      </ul></div>
-    </div>
-  </div>
-
-  <div class="stage">
-    <div class="stage-head"><span class="sn">4</span><svg class="ic" aria-hidden="true" viewBox="0 0 100 72">
             <path class="acs" d="M16 52 Q27 16 40 46 Q52 70 62 34 Q70 10 84 26" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
             <circle class="ac" cx="16" cy="52" r="4"/>
             <circle class="ac" cx="84" cy="26" r="4"/>
@@ -323,6 +307,24 @@
         <li><b>11</b> of those are short enough for the folding lane; <b>9</b> are over its <b>400</b>-residue ceiling, including the three spike chains and the polymerase nsp12</li>
         <li>The main protease was folded: <b>306</b> building blocks long</li>
         <li>The predictor rates its own confidence <b>62.6</b> out of 100 — confidence is not accuracy</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="stage-head"><span class="sn">4</span><svg class="ic" aria-hidden="true" viewBox="0 0 100 72">
+            <circle cx="50" cy="36" r="25" fill="currentColor" opacity=".1"/>
+            <circle cx="50" cy="36" r="25" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".35"/>
+            <path class="ac" d="M50 11 A25 25 0 0 1 71.65 48.5 L50 36 Z" opacity=".85"/>
+            <circle cx="60" cy="27" r="2.4" fill="currentColor" opacity=".3"/>
+          </svg><span class="what">Measure the surface a drug would grip</span><span class="secs">50 s</span></div>
+    <div class="io">
+      <div><h3>In</h3><ul><li><b>20</b> chains</li><li>And the coordinates step 3 predicted, which is the only thing there is to measure when nothing has been solved</li></ul></div>
+      <div class="out"><h3>Out</h3><ul>
+        <li><b>20</b> answers for 20 chains</li>
+        <li><b>9</b> measured on real deposited structures, <b>11</b> refused with a stated reason</li>
+        <li>Where step 3 folded a chain, the same measurement on the predicted shape — kept apart from the deposited one, never added to it</li>
+        <li><b>0</b> quietly dropped</li>
       </ul></div>
     </div>
   </div>
@@ -401,8 +403,26 @@
     </div>
   </div>
 
+  <div class="tool-card" id="t-fold">
+    <div class="tc-head"><span class="sn">3</span><span class="tn">hpc_pilots/folded_structure.py<i>:</i>fold</span><span class="reg">structures.folded</span><span class="plain">Predict a 3-D shape from sequence alone</span><span class="db">ESM Atlas · 2.7 s · 1 request</span></div>
+    <div class="tc-body">
+      <dl class="ret">
+        <div><dt>Model</dt><dd>ESMFold v1 (2022-10-18)</dd></div>
+        <div><dt>Folded</dt><dd>Main protease · 306 residues</dd></div>
+        <div><dt>Coordinates returned</dt><dd>193,227 bytes</dd></div>
+        <div><dt>Confidence mean / median / min</dt><dd>62.6 / 63.0 / 20.0</dd></div>
+        <div><dt>Residues above 70</dt><dd>46.4 %</dd></div>
+        <div><dt>Sequence matches the genome</dt><dd>verified, 0 mismatches</dd></div>
+      </dl>
+      <div class="foldimg">
+        <img src="fold.png" alt="Left: the folded backbone of the main protease, 306 alpha-carbons drawn on its two principal axes and coloured by per-residue confidence — one compact well-predicted domain in blue beside a sprawling orange one. Right: confidence against residue position, with the stretches that never clear the threshold marked along the bottom.">
+        <div class="cc">Drawn from the stored coordinates in <span class="mono">runs/folded_structure/mpro_nsp5.pdb</span>. The blue domain is predicted confidently; the orange half is not, and the marked stretches — residues 1–11, 45–64, 166–170 and <b>183–306</b> — never clear the threshold. That last run is 124 residues, 40 % of the chain. The tool's own payload states that a predicted structure is not an experimental one and must never be pooled with deposited-structure counts.</div>
+      </div>
+    </div>
+  </div>
+
   <div class="tool-card" id="t-surface">
-    <div class="tc-head"><span class="sn">3</span><span class="tn">hpc_pilots/geometry.py<i>:</i>surface_for_accession</span><span class="reg">geometry.surface_markers</span><span class="plain">Measure the surface a drug would grip</span><span class="db">PDBe · RCSB · UniProt · 50.0 s</span></div>
+    <div class="tc-head"><span class="sn">4</span><span class="tn">hpc_pilots/geometry.py<i>:</i>surface_for_accession</span><span class="reg">geometry.surface_markers</span><span class="plain">Measure the surface a drug would grip</span><span class="db">PDBe · RCSB · UniProt · 50.0 s</span></div>
     <div class="tc-body">
       <dl class="ret">
         <div><dt>Rows returned</dt><dd>20 for 20 chains</dd></div>
@@ -413,6 +433,7 @@
       <div class="fields"><span class="lead">Per chain, when measured:</span>
         <span class="k">patch_median_a2</span><span class="k">patch_range_a2</span><span class="k">structures_measured</span><span class="k">structures_used</span><span class="k">surface_score</span><span class="k">patch_fraction_of_surface</span><span class="k">exposed</span><span class="k">locations</span><span class="k">gate</span><span class="k">available_from</span>
         <span class="lead" style="margin-top:8px">and when not:</span><span class="k">measured: false</span><span class="k">unmeasured_because</span>
+        <span class="lead" style="margin-top:8px">and on a chain step 3 folded, under its own key so it can never be mistaken for a measurement:</span><span class="k">predicted_surface.patch_a2</span><span class="k">ratio_to_deposited_median</span><span class="k">only_route_to_a_surface</span><span class="k">is_deposited_measurement: false</span><span class="k">in_the_ranking: false</span>
       </div>
       <div class="rowex"><div class="h">one row as returned — <span class="mono">RNA-directed RNA polymerase nsp12</span></div>
         <div class="v">patch_median: 733.1 Å² · range 665.5–800.8 · 2.5 % of the domain's surface<br>
@@ -439,24 +460,11 @@
         <div class="pdbrow none"><span class="who">Protein 7a <em>1</em></span><span class="ids">Q3I5J0 — none at all</span></div>
         <div class="pdbrow none"><span class="who">Papain-like protease nsp3 · Host translation inhibitor nsp1 · Non-structural protein 4 · Non-structural protein 6 <em>4 chains</em></span><span class="ids">P0C6X7 — 180 chains map to it, none covering those stretches</span></div>
       </div>
-    </div>
-  </div>
-
-  <div class="tool-card" id="t-fold">
-    <div class="tc-head"><span class="sn">4</span><span class="tn">hpc_pilots/folded_structure.py<i>:</i>fold</span><span class="reg">structures.folded</span><span class="plain">Predict a 3-D shape from sequence alone</span><span class="db">ESM Atlas · 2.7 s · 1 request</span></div>
-    <div class="tc-body">
-      <dl class="ret">
-        <div><dt>Model</dt><dd>ESMFold v1 (2022-10-18)</dd></div>
-        <div><dt>Folded</dt><dd>Main protease · 306 residues</dd></div>
-        <div><dt>Coordinates returned</dt><dd>193,227 bytes</dd></div>
-        <div><dt>Confidence mean / median / min</dt><dd>62.6 / 63.0 / 20.0</dd></div>
-        <div><dt>Residues above 70</dt><dd>46.4 %</dd></div>
-        <div><dt>Sequence matches the genome</dt><dd>verified, 0 mismatches</dd></div>
-      </dl>
-      <div class="foldimg">
-        <img src="fold.png" alt="Left: the folded backbone of the main protease, 306 alpha-carbons drawn on its two principal axes and coloured by per-residue confidence — one compact well-predicted domain in blue beside a sprawling orange one. Right: confidence against residue position, with the stretches that never clear the threshold marked along the bottom.">
-        <div class="cc">Drawn from the stored coordinates in <span class="mono">runs/folded_structure/mpro_nsp5.pdb</span>. The blue domain is predicted confidently; the orange half is not, and the marked stretches — residues 1–11, 45–64, 166–170 and <b>183–306</b> — never clear the threshold. That last run is 124 residues, 40 % of the chain. The tool's own payload states that a predicted structure is not an experimental one and must never be pooled with deposited-structure counts.</div>
+      <div class="accs"><span class="lead">Those 11 are the reason step 3 now runs first. Where it folded a chain, this step measures the predicted coordinates with the same arithmetic — the only surface a target nothing has solved will ever have. On the one chain here that has both, the two answers are far apart:</span>
+        <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">5 deposited structures</i> <em>median of 5 · a real measurement</em></span><span class="ids">562.4 Å² · 4.4 % of the surface</span></div>
+        <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">the predicted shape</i> <em>ESMFold v1 · mean confidence 62.6</em></span><span class="ids">2,012.6 Å² · 11.0 % of the surface</span></div>
       </div>
+      <p class="cap" style="margin-top:14px">The prediction reads <b>3.6×</b> larger. A predicted shape inherits the predictor's error, and a single chain modelled alone has no partner to bury a face against that a real structure would — so the record states the ratio and attributes nothing. Both numbers stay out of the ranking, and the predicted one is never added to the count of chains measured on deposited structures: it is a different kind of evidence, kept under its own key.</p>
     </div>
   </div>
 

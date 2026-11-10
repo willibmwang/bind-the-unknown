@@ -249,7 +249,54 @@ def surface_markers(pdb_id, chain=None, keep=None, verify=None):
     residues = _residues(fetch_structure(pdb_id), chain)
     if not residues:
         return {"pdb_id": pdb_id, "chain": chain, "residues": 0, "error": "no residues read"}
+    return _markers(residues, pdb_id, chain, keep, verify)
 
+
+def markers_from_coordinates(text, label="predicted coordinates"):
+    """The same measurement, on coordinates a model emitted rather than a deposited file.
+
+    This is the only route to a surface for a target nothing has solved, and it is the lane a
+    genuinely novel pathogen arrives on: no deposition covers the chain, so either the surface
+    is measured on a prediction or it is not measured at all. The arithmetic is identical --
+    the same freesasa accessibility, the same contact-linked hydrophobic patch, the same
+    footprint comparison -- because the quantity is a property of coordinates and does not ask
+    where they came from.
+
+    What differs is its standing, and the return says so rather than leaving a reader to infer
+    it. `on_predicted_coordinates` and `is_deposited_measurement` travel with the numbers, and
+    the caller must keep them out of any total that counts depositions: a patch computed on a
+    prediction inherits every error of the prediction, and over a low-confidence stretch it
+    describes a fold the model never committed to. It is reported beside a deposited
+    measurement, never pooled with one, and it is not in the ranking -- the rubric's five
+    weights were fixed before the run and no surface term is among them.
+
+    `keep` is not offered. A deposited file is a construct that may carry much more than the
+    target, which is what `keep` exists to confine the patch search to; these coordinates are
+    the folded chain itself, numbered from one, so there is nothing to clip.
+    """
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as scratch:
+        path = pathlib.Path(scratch) / "predicted.pdb"
+        path.write_text(text)
+        residues = _residues(path)
+        if not residues:
+            return {"pdb_id": label, "chain": None, "residues": 0,
+                    "error": "no residues read from the predicted coordinates",
+                    "on_predicted_coordinates": True, "is_deposited_measurement": False}
+        markers = _markers(residues, label, None, None, None)
+    markers["on_predicted_coordinates"] = True
+    markers["is_deposited_measurement"] = False
+    return markers
+
+
+def _markers(residues, pdb_id, chain=None, keep=None, verify=None):
+    """The measurement itself, over residues already read from a file.
+
+    Separated from `surface_markers` so a prediction and a deposition go through one body of
+    arithmetic instead of two. The `chain` and `keep` semantics are documented on
+    `surface_markers`, which is the registered tool; this function is the shared half.
+    """
     # No author numbering from the mapping endpoint, but a reference sequence to locate the
     # chain in: infer the shift from the residues themselves and clip at it.
     agreement, offset = None, None
