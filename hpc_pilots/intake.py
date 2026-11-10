@@ -436,14 +436,39 @@ def identify_local(protein, index, kept, k=KMER, top=3):
         for position in index.get(kmer, ()):
             counts[position] += 1
 
+    # Totally ordered, and the truncation is the half that matters. `counts.most_common(50)` is
+    # `heapq.nlargest`, stable on first-touch insertion order -- and insertion order here is the
+    # order `for kmer in query` walks a set of strings, which Python randomises per process. So
+    # *which fifty* entries reached the scoring below was a function of PYTHONHASHSEED, and the
+    # boundary is crowded: influenza's nuclear export protein cuts at 77 shared k-mers with
+    # twelve positions tied there, PB1-F2 at 7 with seven tied.
+    #
+    # That was not cosmetic, because the score is not monotone in the count the cut ranks by.
+    # Replaying PB1-F2 across seeds, A8C8X2 -- an 11-residue fragment -- misses the cut at seeds
+    # 0, 1 and 2 and survives at 11 and 42, and when it survives it takes `hits[0]` outright.
+    # The recorded run was the second kind, so `conservation`, `nearest_homolog` and
+    # `nearest_organism` on a published row, and the rank it sorted to, all depended on the
+    # interpreter's hash seed. Tie-breaking only the final sort leaves that untouched: an entry
+    # that never entered the candidate set cannot be reordered back into it.
+    #
+    # `common.content_digest` hashes the whole payload bar the timestamps, and the standard it
+    # was written to is stated in its own docstring: "A provenance record that cannot be
+    # recomputed is a label, not a record." `hits`, `nearest_homolog` and `nearest_organism` all
+    # participate in that digest, so this is the same requirement reaching one function later.
+    #
+    # Cost, measured on the real reference: influenza PA counts 2,860 candidate positions, and
+    # `sorted` over them takes 1.70 ms against `most_common`'s 1.33 ms. Against an index build
+    # of seconds, free.
+    ordered = sorted(counts.items(),
+                     key=lambda item: (-item[1], kept[item[0]]["accession"]))[:50]
     scored = []
-    for position, shared in counts.most_common(50):
+    for position, shared in ordered:
         entry = kept[position]
         denominator = max(1, min(len(query), len(entry["sequence"]) - k + 1))
         scored.append({"accession": entry["accession"], "name": entry["name"],
                        "organism": entry["organism"],
                        "score": round(shared / denominator, 4), "shared_kmers": shared})
-    scored.sort(key=lambda hit: -hit["score"])
+    scored.sort(key=lambda hit: (-hit["score"], hit["accession"]))
     return scored[:top]
 
 
@@ -1639,8 +1664,16 @@ def identify_remote(protein, index, kept, aligner=None, k=KMER, prefilter=120, t
         for position in index.get(seed, ()):
             counts[position] += 1
 
+    # Totally ordered for the same reason as `identify_local`, and with the same half mattering
+    # most: the prefilter decides which `prefilter` entries get an alignment at all, and seeds
+    # tying at the boundary were resolved by set iteration order. Measured across seeds, two
+    # entries tied at 28 reduced-alphabet seeds swapped prefilter places and moved Q0Q469
+    # between indices 29, 28 and 23, which decides `hits[0]` whenever their E-values also tie --
+    # and the recorded NS8 hit list holds two hits at an identical E-value of 1.027e-41.
+    ordered = sorted(counts.items(),
+                     key=lambda item: (-item[1], kept[item[0]]["accession"]))[:prefilter]
     scored = []
-    for position, _shared in counts.most_common(prefilter):
+    for position, _shared in ordered:
         entry = kept[position]
         raw = aligner.score(protein, entry["sequence"])
         evalue = expectation(raw, len(protein), database_residues)
@@ -1650,7 +1683,9 @@ def identify_remote(protein, index, kept, aligner=None, k=KMER, prefilter=120, t
                        "organism": entry["organism"],
                        "bits": round(bit_score(raw), 1), "evalue": evalue,
                        "score": round(min(1.0, bit_score(raw) / 200.0), 4)})
-    scored.sort(key=lambda hit: hit["evalue"])
+    # Equal E-value implies equal raw score implies equal bits, so the accession is the only
+    # further key this needs.
+    scored.sort(key=lambda hit: (hit["evalue"], hit["accession"]))
     return scored[:top]
 
 
