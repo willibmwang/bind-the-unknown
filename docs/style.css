@@ -221,24 +221,33 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .substep h3{font-family:var(--display);font-size:19.5px;font-weight:650;letter-spacing:-.015em;margin:0 0 10px}
 .cmxscroll{overflow-x:auto;overscroll-behavior-x:contain;border:1px solid var(--rule);border-radius:14px;background:var(--surface)}
 .cmxscroll:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px}
-.cmx{border-collapse:collapse;width:100%;min-width:860px;font-size:14.5px}
-.cmx caption{caption-side:bottom;text-align:left;padding:14px 17px 15px;font-size:14px;line-height:1.55;color:var(--fg-3);border-top:1px solid var(--rule-2)}
-.cmx th,.cmx td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--rule-2)}
+/* Eight columns do not fit the 920px prose column, so above 1040px the table breaks out of it
+   and centres on the wider width: `50% - w/2` is measured against the parent, so the negative
+   margin is whatever it takes to centre `w` on the text column. Below that it stays exactly
+   the column width and scrolls sideways instead, which keeps it on the page's grid on a phone
+   rather than inset by a few stray pixels. The breakout is capped against the viewport too,
+   or the 1040-1260px band overflows the window instead of the column. */
+@media (min-width:1040px){
+  .cmxscroll{--cmx-w:min(1260px,calc(100vw - 52px));width:var(--cmx-w);margin-left:calc(50% - var(--cmx-w) / 2)}
+}
+.cmx{border-collapse:collapse;width:100%;min-width:1020px;font-size:15px}
+.cmx caption{caption-side:bottom;text-align:left;padding:15px 18px 16px;font-size:14.5px;line-height:1.55;color:var(--fg-3);border-top:1px solid var(--rule-2)}
+.cmx th,.cmx td{padding:11px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--rule-2)}
 .cmx thead th{background:var(--surface-2);border-bottom:1px solid var(--rule);font-weight:600;line-height:1.3;vertical-align:bottom}
-.cmx thead th .cl{display:block;font-size:13.5px;max-width:14ch}
+.cmx thead th .cl{display:block;font-size:14px;max-width:15ch}
 .cmx thead th .ck{display:block;font-family:var(--mono);font-size:10.5px;color:var(--fg-3);font-weight:400;margin-top:3px;overflow-wrap:anywhere}
 .cmx thead th .cw{display:block;font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:500;margin-top:4px;white-space:nowrap}
 .cmx .rk{width:1%;font-family:var(--mono);font-size:13px;color:var(--fg-3);text-align:right;font-variant-numeric:tabular-nums}
-.cmx .nm{min-width:21ch}
+.cmx .nm{min-width:25ch}
 .cmx .nm .t{display:block;font-weight:600;overflow-wrap:anywhere}
 .cmx .nm .w{display:block;font-size:12.5px;color:var(--fg-3);font-family:var(--mono);margin-top:2px;overflow-wrap:anywhere}
 .cmx td.h{text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
-.cmx td.h .pt{display:block;font-family:var(--mono);font-size:14.5px;font-weight:500}
-.cmx td.h .rw{display:block;font-size:11.5px;opacity:.78;margin-top:2px}
+.cmx td.h .pt{display:block;font-family:var(--mono);font-size:15.5px;font-weight:500}
+.cmx td.h .rw{display:block;font-size:12px;opacity:.78;margin-top:3px}
 .cmx td.h0{color:var(--fg-3)}
 .cmx td.h0 .pt{font-weight:400}
 /* Four tints carrying the page's own ink, then one saturated band carrying white. Checked
-   against 11.5px text, which is the smallest thing sitting on them: #c48ff0 is 6.8:1 with
+   against 12px text, which is the smallest thing sitting on them: #c48ff0 is 6.8:1 with
    --fg and #8f1ad8 is 6.3:1 with white, where a band between the two is under 4.5:1 with
    either. Hence the jump at the top of the scale rather than an even ramp. */
 .cmx td.h1{background:#f7f0fd}
