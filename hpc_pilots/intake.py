@@ -1154,6 +1154,13 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
 # either side of them are not.
 MINIMUM_CHAIN_AA = 70
 
+# How close to the top hit a homolog has to score before its annotation may be preferred over
+# the top hit's. `decompose` chooses the best-annotated of the top three hits, which is right
+# -- the closest sequence is often not the one carrying mature-chain boundaries -- but only
+# among homologs that are near-equivalent identifications. The cases that fixed this number,
+# and the reason it is a near-tie rather than a tolerance, are recorded at the point of use.
+NEAR_EQUIVALENT_RATIO = 0.9
+
 
 def mature_chains(accession):
     """Mature chains of one UniProt entry, or an empty list if it is not a polyprotein.
@@ -1273,20 +1280,64 @@ def decompose(ranked, limit=12):
         # So the hit used for decomposition is the best-annotated of the top hits rather than
         # the highest-scoring one. Identity picks the homolog; annotation picks which of the
         # near-equivalent homologs can actually be taken apart.
-        candidates_by_chain = []
-        for hit in row.get("hits", [])[:3]:
+        #
+        # **And near-equivalence is now enforced, because it was only ever asserted.** The
+        # sentence above was the rule; the code took `max` on chain count with no reference to
+        # score at all, so the worst hit in the top three won outright by being the most
+        # annotated. Measured on the recorded benchmark, where it emitted another family's
+        # protein inventory as the pathogen's targets:
+        #
+        #   CCHFV   Dugbe virus Q02004 at 1.000 and 1012 bits, 0 chains, lost to White bream
+        #           virus Q008X6 at 0.231 and 46 bits with 12 -- a fish nidovirus supplying all
+        #           twelve of a tick-borne bunyavirus's top candidates, with CCHFV's own L
+        #           protein pushed to rank 13.
+        #   HCV     GB virus B Q69422 at 1.000 and 1142 bits, 9 chains -- the closest known
+        #           relative of HCV -- lost to bovine viral diarrhea virus Q96662 at 0.514 and
+        #           103 bits with 12, so an `E(rns) glycoprotein` was returned for a virus that
+        #           has no Erns.
+        #
+        # The ratio only has to say "the annotation may break a near-tie and nothing more",
+        # which is what the sentence above always claimed. The two swaps worth keeping sit far
+        # from the two worth refusing -- HIV-1 reaches a second SIV entry at 0.929 for one more
+        # chain, and an un-held-out HCV reaches a second genotype 1a entry at 0.934 -- so the
+        # line is not delicately placed. It is stated rather than fitted, and deliberately not
+        # chosen by what it does to any target's rank.
+        #
+        # It is tight, and that is the intended direction. HIV-1's benign swap clears it by
+        # 0.029, so a future one could fall below and keep the top hit's annotation instead:
+        # one fewer mature chain from the right organism, against twelve from the wrong one.
+        hits = row.get("hits", [])
+        best_score = (hits[0].get("score") or 0.0) if hits else 0.0
+        floor = best_score * NEAR_EQUIVALENT_RATIO
+        candidates_by_chain, refused = [], []
+        for hit in hits[:3]:
             try:
-                candidates_by_chain.append((len(mature_chains(hit["accession"])), hit))
+                count_for_hit = len(mature_chains(hit["accession"]))
             except Exception:                             # noqa: BLE001
                 continue
+            if (hit.get("score") or 0.0) < floor:
+                refused.append({"accession": hit["accession"], "score": hit.get("score"),
+                                "organism": hit.get("organism"), "chains": count_for_hit})
+                continue
+            candidates_by_chain.append((count_for_hit, hit))
         if not candidates_by_chain:
             expanded.append({**row, "decompose_error": "no hit could be read for chains"})
             continue
         count, best_hit = max(candidates_by_chain, key=lambda pair: pair[0])
         accession = best_hit["accession"]
         if accession != row["nearest_homolog"]:
+            # The organism moves with the accession. It did not, and the mismatch was the one
+            # visible symptom of the swap going wrong: the CCHFV rows above named Dugbe virus
+            # while carrying a White bream virus accession, so the row read as a sound
+            # same-genus identification and a reader had no way to see otherwise.
             row = {**row, "decomposed_via": accession,
-                   "decomposed_via_reason": "better annotated than the top hit"}
+                   "decomposed_via_organism": best_hit.get("organism"),
+                   "decomposed_via_score": best_hit.get("score"),
+                   "decomposed_via_reason": "better annotated, and within "
+                                            f"{NEAR_EQUIVALENT_RATIO:.0%} of the top hit",
+                   "decomposed_displaced": row["nearest_homolog"]}
+        if refused:
+            row = {**row, "decompose_refused_hits": refused}
         try:
             chains = mature_chains(accession)
         except Exception as error:                        # noqa: BLE001
@@ -1363,7 +1414,24 @@ def decompose(ranked, limit=12):
                 "orf": row["orf"], "identified": True,
                 "name": chain["description"] or row["name"],
                 "nearest_homolog": accession,
-                "nearest_organism": row["nearest_organism"],
+                # The organism of the accession this chain was actually read from, which is not
+                # always the ranked hit's. These two disagreed on 32 recorded rows, and the
+                # disagreement was silent: every CCHFV candidate named Dugbe virus while
+                # carrying a White bream virus accession, so the rows read as a sound
+                # same-genus identification. The swap is now floored at a near-tie, which stops
+                # the bad cases, and reporting the organism that goes with the accession is
+                # what makes a surviving swap visible rather than merely permitted.
+                "nearest_organism": best_hit.get("organism") or row["nearest_organism"],
+                "decomposed_via": row.get("decomposed_via"),
+                "decomposed_displaced": row.get("decomposed_displaced"),
+                # Carried onto the chain rows, because the parent row they replace is the only
+                # thing that held it. The first version of this fix recorded the refused hits on
+                # the parent and then built chain rows from an explicit key list that omitted
+                # them, so a run whose swap had been correctly refused reported no refusals at
+                # all -- the same way `decomposed_via` was being written onto a dict that was
+                # discarded. A guard that leaves no trace when it fires is indistinguishable
+                # from one that never fired.
+                "decompose_refused_hits": row.get("decompose_refused_hits"),
                 "parent": row["name"], "chain_range": [chain["start"], chain["end"]],
                 "length_aa": chain["length"],
                 "hits": row["hits"], "features": features,
