@@ -125,8 +125,20 @@ def ranges(spec, record):
     return out
 
 
-def chains(accession):
+def chains(accession, cache={}):
     """Every deposited chain mapped to this accession, with the range each one covers.
+
+    Memoized per accession, following `residue_mapping` two functions below. This was the one
+    uncached fetch on the decomposition path, and the shape of that path makes the omission
+    expensive: `identify_local` returns at most three hits, so taking one polyprotein apart
+    needs at most three distinct SIFTS payloads, while `family_chain_structures` asked for one
+    per hit *per mature chain* -- up to three times sixteen for a coronavirus replicase, all but
+    three of them identical. The cap on how many chains were scored at all existed because of
+    that cost.
+
+    A 404 is cached as the empty list it returns, which is correct: "no structure maps to this
+    accession" is a fact about the accession. Other HTTP errors still raise and are not cached,
+    so a transient failure is not frozen into the process.
 
     A 404 means no structure maps to the accession, and is returned as an empty list rather
     than raised. The distinction matters and was found the hard way: P03470, the neuraminidase
@@ -136,13 +148,17 @@ def chains(accession):
     a finding about the target, and one the packet's `reagent_tractability` assessment of
     `strong` does not obviously anticipate.
     """
+    if accession in cache:
+        return cache[accession]
     try:
         payload = _get(f"{SIFTS}{urllib.parse.quote(accession)}")
     except urllib.error.HTTPError as error:
         if error.code == 404:
-            return []
+            cache[accession] = []
+            return cache[accession]
         raise
-    return (payload or {}).get(accession, [])
+    cache[accession] = (payload or {}).get(accession, [])
+    return cache[accession]
 
 
 def residue_mapping(pdb_id, accession, cache={}):
