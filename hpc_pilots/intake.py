@@ -1054,11 +1054,13 @@ def score_terms(features, rubric=None):
     per row, on every recorded run.
 
     Worth the two lines because the top of the list is routinely a near-tie reached by
-    opposite routes. On the held-out SARS-CoV-2 run the spike and the replicase finish 0.08
-    apart, and the spike gets there on 2.0 points for sitting on the outside of the virion
-    with conservation of 0.46, while the replicase scores 0.0 for exposure and 2.50 for
-    conservation. A single number says they are equally good and hides that one is an
-    antibody target and the other is reached by a cell-permeable drug.
+    opposite routes. On the held-out SARS-CoV-2 run the spike and the replicase finish within
+    a tenth of a point of each other, and the spike gets there on a full 2.0 for sitting on
+    the outside of the virion and under half the conservation term, while the replicase scores
+    nothing for exposure and most of the conservation term. A single number says they are
+    equally good and hides that one is an antibody target and the other is reached by a
+    cell-permeable drug. The exact decimals move between runs, because four of the five
+    features are read off live UniProt annotations on whichever homolog was matched.
     """
     rubric = rubric or RUBRIC
     terms = {
@@ -1132,7 +1134,15 @@ def candidate_table(payload):
                     "keywords_matched": features.get("keywords_matched"),
                     "locations": features.get("locations"),
                     "exposed_fraction_of_locations":
-                        features.get("exposed_fraction_of_locations")}
+                        features.get("exposed_fraction_of_locations"),
+                    # Which quantity the heaviest term is carrying on this row. The two
+                    # identification tiers do not report the same one -- exact returns a
+                    # shared-5-mer fraction of the query, remote returns min(1, bits/200) --
+                    # and a column of bare decimals that mixes the two invites a reader to
+                    # compare numbers that are not on one scale. Carried per row rather than
+                    # per run because one run's table can hold both.
+                    "conservation_scale": features.get("conservation_scale"),
+                    "conservation_at_ceiling": features.get("conservation_at_ceiling")}
         rows.append(out)
     return rows
 
@@ -1635,7 +1645,7 @@ def chain_structures(accession, start, end, minimum=0.5):
     return len(entries)
 
 
-def decompose(ranked, limit=12):
+def decompose(ranked, limit=None):
     """Expand polyprotein hits into their mature chains and re-rank.
 
     Conservation is inherited from the parent ORF, because that is what was measured: the
@@ -1729,7 +1739,33 @@ def decompose(ranked, limit=12):
         parent_length = _entry(accession)["sequence"]["length"]
         inherited_druggable = row["features"]["druggable_class"]
         inherited_essential = row["features"]["essential_class"]
-        for chain in chains[:limit]:
+        # Every mature chain, not the first twelve. `limit` defaulted to 12 and sliced
+        # `chains` in UniProt feature order, which is N-to-C position on the polyprotein, so
+        # what it dropped was whatever the virus encodes last -- and the cut was nowhere
+        # documented. Poliovirus P22055 has 14 chains over MINIMUM_CHAIN_AA, so 3C (the
+        # protease rupintrivir targets) and 3D (the polymerase) were cut from Poliovirus,
+        # Enterovirus A71 and Rhinovirus A: not demoted, never evaluated. On the project's own
+        # lead genome the replicase kept nsp1-nsp10, nsp12 and nsp13 and lost nsp14, nsp15 and
+        # nsp16 -- all three in DRUGGABLE.
+        #
+        # Ordering the chains before slicing was the obvious alternative and both candidate
+        # orderings are refuted by this module's own prose. Longest-first is the proxy the ORF
+        # rescue argues against ("length is a proxy for importance, and it is a proxy biased
+        # toward the proteins already known"), and it would drop nsp7 at 83, nsp9 at 113 and
+        # nsp10 at 139 -- nsp10 being half of a target this project declares. Ordering by the
+        # best DRUGGABLE weight in the description pre-selects the candidate set with the
+        # keyword table documented three times as a known weak point, which turns that blind
+        # spot from a demotion into an erasure and makes it self-confirming: nsp14 and nsp15
+        # match no term in it, so they would be first to go.
+        #
+        # So the cap is removed rather than reordered, and what paid for it was caching. The
+        # only per-chain cost is `family_chain_structures`, whose SIFTS fetch was the one
+        # uncached call on this path; memoized per accession, a parent needs three payloads
+        # rather than three per chain, and scoring every chain costs about what scoring twelve
+        # cost. `limit` stays as a parameter for a caller that wants a cap, and defaults to
+        # none; no caller ever passed it.
+        considered = chains if limit is None else chains[:limit]
+        for chain in considered:
             try:
                 structures = family_chain_structures(
                     [h["accession"] for h in row["hits"]], chain["description"])
@@ -1811,6 +1847,12 @@ def decompose(ranked, limit=12):
                 # discarded. A guard that leaves no trace when it fires is indistinguishable
                 # from one that never fired.
                 "decompose_refused_hits": row.get("decompose_refused_hits"),
+                # So a cap, if a caller sets one, is visible in the record instead of looking
+                # like a parent with no further products. That is how the old default read for
+                # three picornaviruses and for SARS-CoV-2.
+                "chains_in_parent": len(chains),
+                "chains_scored": len(considered),
+                "chains_dropped": [c["description"] for c in chains[len(considered):]],
                 "parent": row["name"], "chain_range": [chain["start"], chain["end"]],
                 "length_aa": chain["length"],
                 "hits": row["hits"], "features": features,

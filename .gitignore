@@ -97,6 +97,16 @@ runs/improve/
 # all drawn from. Written by `python -m hpc_pilots chain`.
 !runs/onset_chain.json
 
+# The twelve ORFs stage 1 ranked on the held-out SARS-CoV-2 genome, each with its score split
+# into the five stated weights. runs/ is otherwise untracked, but the chain record above keeps
+# this stage as five counts, so without this one the published page can say that nine of
+# twelve ORFs were identified and cannot say which nine, what they scored, or what the other
+# three were. It is the landing page's Part 1 table. Separate from the chain record because it
+# is the cheap end of the pipeline -- about seventeen seconds against a warm reference cache,
+# where the whole chain is thirty-five minutes -- so the table can be refreshed without
+# re-running six stages to do it. Written by `python -m hpc_pilots candidates`.
+!runs/intake_candidates.json
+
 # The same five stages on three pathogens from three viral families, each held out from its
 # own reference. runs/ is otherwise untracked, but this is the record that the no-dropped-rows
 # invariant holds on every genome while the coverage behind it does not -- influenza keeps a

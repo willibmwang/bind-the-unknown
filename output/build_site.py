@@ -61,8 +61,9 @@ CANDIDATES_RECORD = "intake_candidates.json"
 # its column tops out at 2.4 and shading it against 0.8 would put three cells past full.
 TERM_COLUMNS = (
     ("conservation", "Match to a known relative",
-     "Share of 5-mers the ORF has in common with its nearest curated relative. "
-     "1.0 would be the same sequence; anything under 0.12 is not kept as a match at all."),
+     "Share of the ORF's own 5-mers that its nearest curated relative also has. 1.0 would be "
+     "the same sequence; under 0.12 is not kept as a match at all. Rows found by the remote "
+     "tier report a bit score instead, and say so, because the two are not one scale."),
     ("surface_exposed", "On the outside",
      "Whether most of the compartments its relatives are annotated in are places a binder "
      "can reach without crossing a membrane. All or nothing."),
@@ -602,7 +603,17 @@ def candidate_matrix(case):
             if isinstance(raw, bool):
                 shown = "yes" if raw else "no"
             elif key == "conservation":
+                # The scale, not just the number. The exact tier reports a shared-5-mer
+                # fraction of the query and the remote tier reports min(1, bits/200), so a
+                # column of bare decimals mixing the two would invite a reader to compare
+                # 0.83 on one scale with 0.54 on the other -- which is the inversion the
+                # record's `conservation_scale` field exists to make visible. Named where it
+                # is not the k-mer fraction, and left bare where it is, so the common case
+                # stays readable.
+                scale = row.get("conservation_scale")
                 shown = f"{raw:.3f}"
+                if scale and scale != "shared_kmer_fraction_of_query":
+                    shown = f"{shown} · {scale.replace('_', ' ')}"
             elif key == "druggable_class":
                 shown = f"class {raw}"
             else:

@@ -205,6 +205,69 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .bi.mark .nm{font-weight:600}
 .bi.mark .vl{color:var(--accent)}
 
+/* The score matrix: one row per ORF, one column per weight, each cell shaded by the share of
+   that column's maximum it earned.
+
+   Three rules worth keeping if you edit this.
+   * The shading is six discrete bands (.h0 to .h5), not a computed alpha, so the text colour
+     on top can be decided per band. .h4 and .h5 carry --on-accent; a continuous ramp puts
+     dark text on mid-violet somewhere in the middle and fails contrast silently.
+   * The bands are a light violet tint, NOT --brand at low opacity: --brand is 4.22:1 on the
+     page and text sits on top of these.
+   * Eight columns do not fit a phone and shrinking them to fit makes the numbers unreadable,
+     so .cmxscroll scrolls sideways instead. It is focusable, or the table is unreachable for
+     anyone scrolling by keyboard. */
+.substep{margin:30px 0 13px}
+.substep h3{font-family:var(--display);font-size:19.5px;font-weight:650;letter-spacing:-.015em;margin:0 0 10px}
+.cmxscroll{overflow-x:auto;overscroll-behavior-x:contain;border:1px solid var(--rule);border-radius:14px;background:var(--surface)}
+.cmxscroll:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px}
+.cmx{border-collapse:collapse;width:100%;min-width:860px;font-size:14.5px}
+.cmx caption{caption-side:bottom;text-align:left;padding:14px 17px 15px;font-size:14px;line-height:1.55;color:var(--fg-3);border-top:1px solid var(--rule-2)}
+.cmx th,.cmx td{padding:10px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--rule-2)}
+.cmx thead th{background:var(--surface-2);border-bottom:1px solid var(--rule);font-weight:600;line-height:1.3;vertical-align:bottom}
+.cmx thead th .cl{display:block;font-size:13.5px;max-width:14ch}
+.cmx thead th .ck{display:block;font-family:var(--mono);font-size:10.5px;color:var(--fg-3);font-weight:400;margin-top:3px;overflow-wrap:anywhere}
+.cmx thead th .cw{display:block;font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:500;margin-top:4px;white-space:nowrap}
+.cmx .rk{width:1%;font-family:var(--mono);font-size:13px;color:var(--fg-3);text-align:right;font-variant-numeric:tabular-nums}
+.cmx .nm{min-width:21ch}
+.cmx .nm .t{display:block;font-weight:600;overflow-wrap:anywhere}
+.cmx .nm .w{display:block;font-size:12.5px;color:var(--fg-3);font-family:var(--mono);margin-top:2px;overflow-wrap:anywhere}
+.cmx td.h{text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cmx td.h .pt{display:block;font-family:var(--mono);font-size:14.5px;font-weight:500}
+.cmx td.h .rw{display:block;font-size:11.5px;opacity:.78;margin-top:2px}
+.cmx td.h0{color:var(--fg-3)}
+.cmx td.h0 .pt{font-weight:400}
+/* Four tints carrying the page's own ink, then one saturated band carrying white. Checked
+   against 11.5px text, which is the smallest thing sitting on them: #c48ff0 is 6.8:1 with
+   --fg and #8f1ad8 is 6.3:1 with white, where a band between the two is under 4.5:1 with
+   either. Hence the jump at the top of the scale rather than an even ramp. */
+.cmx td.h1{background:#f7f0fd}
+.cmx td.h2{background:#eedcfb}
+.cmx td.h3{background:#ddbdf7}
+.cmx td.h4{background:#c48ff0}
+.cmx td.h5{background:#8f1ad8;color:#fff}
+.cmx .sc{width:1%;white-space:nowrap}
+.cmx .sc .v{display:block;font-family:var(--mono);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.cmx .sc .tr{display:block;height:5px;width:62px;background:var(--surface-2);border-radius:4px;overflow:hidden;margin-top:5px}
+.cmx .sc .tr i{display:block;height:100%;background:var(--brand);border-radius:4px}
+.cmx thead .sc{text-align:left}
+.cmx tr.unid td{color:var(--fg-3)}
+.cmx tr.unid .nm .t{font-weight:500;font-style:italic}
+.cmx .why{font-size:13.5px;line-height:1.5;background:var(--warn-soft);color:var(--warn)}
+.cmx tbody tr:last-child td{border-bottom:0}
+/* Dark mode runs the ramp the other way: every band is dark enough to carry --fg, so the
+   white on .h5 has to be taken back off or it is white on mid-violet at 3.2:1. */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cmx td.h1{background:#241138}
+  :root:not([data-theme="light"]) .cmx td.h2{background:#351a50}
+  :root:not([data-theme="light"]) .cmx td.h3{background:#4a2370}
+  :root:not([data-theme="light"]) .cmx td.h4{background:#6f37a3}
+  :root:not([data-theme="light"]) .cmx td.h5{background:#8742c4;color:var(--fg)}}
+:root[data-theme="dark"] .cmx td.h1{background:#241138}
+:root[data-theme="dark"] .cmx td.h2{background:#351a50}
+:root[data-theme="dark"] .cmx td.h3{background:#4a2370}
+:root[data-theme="dark"] .cmx td.h4{background:#6f37a3}
+:root[data-theme="dark"] .cmx td.h5{background:#8742c4;color:var(--fg)}
+
 /* tiles */
 .tiles{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
 .tile{width:28px;height:28px;border-radius:6px;flex:none}

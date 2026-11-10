@@ -103,6 +103,17 @@ def main(argv=None):
     p.add_argument("--top", type=int, default=12, help="Longest ORFs to identify")
     p.add_argument("--no-decompose", action="store_true",
                    help="Rank whole ORFs without expanding polyproteins into mature chains")
+    p = sub.add_parser("candidates",
+                       help="Stage 1 alone, recorded as the table behind its counts: every "
+                            "ORF it ranked, with its score split into the five weights")
+    p.add_argument("--accession", default="NC_045512.2",
+                   help="NCBI nucleotide accession for the genome")
+    p.add_argument("--exclude-organism", dest="exclude_organism",
+                   default="severe acute respiratory syndrome coronavirus 2",
+                   help="Remove this organism from the reference before identifying. The "
+                        "default holds SARS-CoV-2 out, which is the case the landing page "
+                        "shows; pass an empty string to identify against the full reference")
+    p.add_argument("--top", type=int, default=12, help="Longest ORFs to identify")
     p = sub.add_parser("chain",
                        help="Run every stage of the onset arm on one genome and record "
                             "what each stage handed the next")
@@ -267,6 +278,24 @@ def main(argv=None):
              "nearest_homolog": r.get("nearest_homolog"),
              "features": r.get("features")}
             for i, r in enumerate(rows[:args.top], 1) if r.get("identified")], indent=2))
+    elif args.command == "candidates":
+        from .intake import candidate_record
+        import json as _json
+        payload = candidate_record(args.accession, top=args.top,
+                                   exclude_organism=args.exclude_organism or None)
+        # The table itself goes to the record; what prints is the shape of the answer, so a
+        # run that identified nothing is visible in the terminal without opening the file.
+        print(_json.dumps({k: payload[k] for k in
+                           ("genome_accession", "reference_excluded_organism", "orfs_found",
+                            "orfs_ranked", "identified", "unidentified",
+                            "every_score_re_adds_from_its_terms", "seconds")}, indent=2))
+        for row in payload["candidates"]:
+            where = f"{row['strand']}{row['frame']} @{row['nt_start']} {row['length_aa']}aa"
+            if row["identified"]:
+                print(f"{row['rank']:>3}  {row['score']:>6.3f}  {where:<22} {row['name']}")
+            else:
+                print(f"{row['rank']:>3}       -  {where:<22} "
+                      f"unidentified: {row['unidentified_because']}")
     elif args.command == "chain":
         from .chain import run as run_chain, sweep as sweep_chain
         import json as _json

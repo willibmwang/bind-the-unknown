@@ -1,0 +1,585 @@
+{
+  "experiment": "intake-candidate-table",
+  "status": "complete",
+  "question": "Which ORFs did stage 1 rank, what did each of the five stated weights pay each of them, and which ORFs did it fail to identify at all?",
+  "genome_accession": "NC_045512.2",
+  "genome_header": "NC_045512.2 Severe acute respiratory syndrome coronavirus 2 isolate Wuhan-Hu-1, complete genome",
+  "genome_length_nt": 29903,
+  "segments": 1,
+  "reference_excluded_organism": "severe acute respiratory syndrome coronavirus 2",
+  "reference_entries": 17512,
+  "reference_entries_removed": 17,
+  "reference_scope": "viral",
+  "orfs_found": 28,
+  "orfs_ranked": 12,
+  "orfs_dropped_by_top": 16,
+  "orfs_rescued_by_topology": 0,
+  "identified": 9,
+  "unidentified": 3,
+  "minimum_orf_aa": 60,
+  "minimum_hit_score": 0.12,
+  "rubric": {
+    "conservation": 3.0,
+    "surface_exposed": 2.0,
+    "essential_class": 1.5,
+    "druggable_class": 0.8,
+    "structures_in_family_capped": 0.5
+  },
+  "term_ceiling": {
+    "conservation": 3.0,
+    "surface_exposed": 2.0,
+    "essential_class": 1.5,
+    "druggable_class": 2.4,
+    "structures_in_family": 0.5
+  },
+  "vocabulary": {
+    "druggable_class": {
+      "3": [
+        "neuraminidase",
+        "nucleotidyltransferase",
+        "peptidase",
+        "polymerase",
+        "protease",
+        "proteinase",
+        "reductase",
+        "topoisomerase"
+      ],
+      "2": [
+        "attachment",
+        "dehydrogenase",
+        "endonuclease",
+        "exonuclease",
+        "fusion glycoprotein",
+        "fusion protein",
+        "glycoprotein",
+        "haemagglutinin",
+        "helicase",
+        "hemagglutinin",
+        "hydrolase",
+        "kinase",
+        "ligase",
+        "methyltransferase",
+        "spike",
+        "synthase",
+        "synthetase",
+        "viral envelope protein"
+      ],
+      "1": [
+        "carboxylase",
+        "isomerase",
+        "lyase",
+        "oxidase",
+        "transferase"
+      ]
+    },
+    "essential_class": [
+      "attachment",
+      "capsid",
+      "dna polymerase",
+      "entry into host",
+      "fusion",
+      "haemagglutinin",
+      "helicase",
+      "hemagglutinin",
+      "neuraminidase",
+      "nucleoprotein",
+      "peptidase",
+      "polymerase",
+      "protease",
+      "proteinase",
+      "replication initiator",
+      "rna polymerase",
+      "spike",
+      "topoisomerase"
+    ]
+  },
+  "candidates": [
+    {
+      "rank": 1,
+      "identified": true,
+      "name": "SPIKE_BCHK3 Spike glycoprotein",
+      "identification_route": "exact",
+      "nearest_homolog": "Q3LZX1",
+      "nearest_organism": "Bat coronavirus HKU3",
+      "strand": "+",
+      "frame": 1,
+      "nt_start": 21535,
+      "length_aa": 1282,
+      "segment": 0,
+      "features": {
+        "conservation": 0.4479,
+        "surface_exposed": true,
+        "essential_class": true,
+        "druggable_class": 2,
+        "structures_in_family": 84
+      },
+      "terms": {
+        "conservation": 1.3437,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.5,
+        "druggable_class": 1.6
+      },
+      "score": 6.9437,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "fusion of virus membrane with host endosomal membrane",
+        "fusion of virus membrane with host membrane",
+        "glycoprotein",
+        "spike_bc279 spike glycoprotein",
+        "spike_bchk3 spike glycoprotein",
+        "spike_sars spike glycoprotein",
+        "viral attachment to host cell",
+        "viral envelope protein"
+      ],
+      "locations": [
+        "host cell membrane",
+        "host endoplasmic reticulum-golgi intermediate compartment membrane",
+        "virion membrane"
+      ],
+      "exposed_fraction_of_locations": 0.667,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 2,
+      "identified": true,
+      "name": "R1AB_SARS Replicase polyprotein 1ab",
+      "identification_route": "exact",
+      "nearest_homolog": "P0C6X7",
+      "nearest_organism": "Severe acute respiratory syndrome coronavirus",
+      "strand": "+",
+      "frame": 0,
+      "nt_start": 13767,
+      "length_aa": 2595,
+      "segment": 0,
+      "features": {
+        "conservation": 0.8348,
+        "surface_exposed": false,
+        "essential_class": true,
+        "druggable_class": 3,
+        "structures_in_family": 105
+      },
+      "terms": {
+        "conservation": 2.5044,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.5,
+        "druggable_class": 2.4
+      },
+      "score": 6.9044,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "endonuclease",
+        "exonuclease",
+        "helicase",
+        "hydrolase",
+        "lyase",
+        "methyltransferase",
+        "nucleotidyltransferase",
+        "protease"
+      ],
+      "locations": [
+        "host cytoplasm",
+        "host cytoplasm, host perinuclear region",
+        "host endoplasmic reticulum",
+        "host endoplasmic reticulum-golgi intermediate compartment",
+        "host endosome",
+        "host golgi apparatus",
+        "host membrane"
+      ],
+      "exposed_fraction_of_locations": 0.0,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 3,
+      "identified": true,
+      "name": "R1A_BCHK3 Replicase polyprotein 1a",
+      "identification_route": "exact",
+      "nearest_homolog": "P0C6F8",
+      "nearest_organism": "Bat coronavirus HKU3",
+      "strand": "+",
+      "frame": 1,
+      "nt_start": 265,
+      "length_aa": 4405,
+      "segment": 0,
+      "features": {
+        "conservation": 0.4436,
+        "surface_exposed": false,
+        "essential_class": true,
+        "druggable_class": 3,
+        "structures_in_family": 105
+      },
+      "terms": {
+        "conservation": 1.3308,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.5,
+        "druggable_class": 2.4
+      },
+      "score": 5.7308,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "endonuclease",
+        "exonuclease",
+        "helicase",
+        "hydrolase",
+        "lyase",
+        "methyltransferase",
+        "nucleotidyltransferase",
+        "protease"
+      ],
+      "locations": [
+        "host cytoplasm",
+        "host cytoplasm, host perinuclear region",
+        "host endoplasmic reticulum",
+        "host endoplasmic reticulum-golgi intermediate compartment",
+        "host endosome",
+        "host golgi apparatus",
+        "host membrane"
+      ],
+      "exposed_fraction_of_locations": 0.0,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 4,
+      "identified": true,
+      "name": "VME1_BC279 Membrane protein",
+      "identification_route": "exact",
+      "nearest_homolog": "Q0Q472",
+      "nearest_organism": "Bat coronavirus 279/2005",
+      "strand": "+",
+      "frame": 2,
+      "nt_start": 26522,
+      "length_aa": 222,
+      "segment": 0,
+      "features": {
+        "conservation": 0.6239,
+        "surface_exposed": true,
+        "essential_class": false,
+        "druggable_class": 2,
+        "structures_in_family": 4
+      },
+      "terms": {
+        "conservation": 1.8717,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.04,
+        "druggable_class": 1.6
+      },
+      "score": 5.5117,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "glycoprotein",
+        "viral envelope protein"
+      ],
+      "locations": [
+        "host golgi apparatus membrane",
+        "virion membrane"
+      ],
+      "exposed_fraction_of_locations": 0.5,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 5,
+      "identified": true,
+      "name": "NCAP_BCRP3 Nucleoprotein",
+      "identification_route": "exact",
+      "nearest_homolog": "Q3I5I7",
+      "nearest_organism": "Bat coronavirus Rp3/2004",
+      "strand": "+",
+      "frame": 1,
+      "nt_start": 28273,
+      "length_aa": 419,
+      "segment": 0,
+      "features": {
+        "conservation": 0.6337,
+        "surface_exposed": false,
+        "essential_class": true,
+        "druggable_class": 0,
+        "structures_in_family": 10
+      },
+      "terms": {
+        "conservation": 1.9011,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.1,
+        "druggable_class": 0.0
+      },
+      "score": 3.5011,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "ncap_bc279 nucleoprotein",
+        "ncap_bcrp3 nucleoprotein",
+        "ncap_sars nucleoprotein",
+        "ribonucleoprotein",
+        "viral nucleoprotein"
+      ],
+      "locations": [
+        "host cytoplasm, host perinuclear region",
+        "host endoplasmic reticulum-golgi intermediate compartment",
+        "host golgi apparatus",
+        "host nucleus",
+        "virion"
+      ],
+      "exposed_fraction_of_locations": 0.0,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 6,
+      "identified": true,
+      "name": "AP3A_BC279 Protein 3",
+      "identification_route": "exact",
+      "nearest_homolog": "Q0Q474",
+      "nearest_organism": "Bat coronavirus 279/2005",
+      "strand": "+",
+      "frame": 0,
+      "nt_start": 25392,
+      "length_aa": 275,
+      "segment": 0,
+      "features": {
+        "conservation": 0.3173,
+        "surface_exposed": false,
+        "essential_class": false,
+        "druggable_class": 2,
+        "structures_in_family": 0
+      },
+      "terms": {
+        "conservation": 0.9519,
+        "surface_exposed": 0.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "score": 2.5519,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "glycoprotein"
+      ],
+      "locations": [
+        "host cell membrane",
+        "host cytoplasm",
+        "host golgi apparatus membrane",
+        "secreted",
+        "virion"
+      ],
+      "exposed_fraction_of_locations": 0.4,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 7,
+      "identified": true,
+      "name": "NS8_BC279 Non-structural protein 8",
+      "identification_route": "remote",
+      "nearest_homolog": "Q0Q469",
+      "nearest_organism": "Bat coronavirus 279/2005",
+      "strand": "+",
+      "frame": 2,
+      "nt_start": 27893,
+      "length_aa": 121,
+      "segment": 0,
+      "features": {
+        "conservation": 0.83,
+        "surface_exposed": false,
+        "essential_class": false,
+        "druggable_class": 0,
+        "structures_in_family": 0
+      },
+      "terms": {
+        "conservation": 2.49,
+        "surface_exposed": 0.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 2.49,
+      "terms_sum_to_score": true,
+      "keywords_matched": [],
+      "locations": [],
+      "exposed_fraction_of_locations": 0.0,
+      "conservation_scale": "bits_over_200",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 8,
+      "identified": true,
+      "name": "NS7A_BCRP3 Protein 7a",
+      "identification_route": "exact",
+      "nearest_homolog": "Q3I5J0",
+      "nearest_organism": "Bat coronavirus Rp3/2004",
+      "strand": "+",
+      "frame": 0,
+      "nt_start": 27393,
+      "length_aa": 121,
+      "segment": 0,
+      "features": {
+        "conservation": 0.5385,
+        "surface_exposed": false,
+        "essential_class": false,
+        "druggable_class": 0,
+        "structures_in_family": 2
+      },
+      "terms": {
+        "conservation": 1.6155,
+        "surface_exposed": 0.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.02,
+        "druggable_class": 0.0
+      },
+      "score": 1.6355,
+      "terms_sum_to_score": true,
+      "keywords_matched": [],
+      "locations": [
+        "host endoplasmic reticulum membrane",
+        "host endoplasmic reticulum-golgi intermediate compartment membrane",
+        "host golgi apparatus membrane",
+        "virion"
+      ],
+      "exposed_fraction_of_locations": 0.0,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 9,
+      "identified": true,
+      "name": "ORF9B_SARS ORF9b protein",
+      "identification_route": "exact",
+      "nearest_homolog": "P59636",
+      "nearest_organism": "Severe acute respiratory syndrome coronavirus",
+      "strand": "+",
+      "frame": 2,
+      "nt_start": 28283,
+      "length_aa": 97,
+      "segment": 0,
+      "features": {
+        "conservation": 0.3011,
+        "surface_exposed": false,
+        "essential_class": false,
+        "druggable_class": 0,
+        "structures_in_family": 1
+      },
+      "terms": {
+        "conservation": 0.9033,
+        "surface_exposed": 0.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.01,
+        "druggable_class": 0.0
+      },
+      "score": 0.9133,
+      "terms_sum_to_score": true,
+      "keywords_matched": [],
+      "locations": [
+        "host cytoplasm",
+        "host cytoplasmic vesicle membrane",
+        "host endoplasmic reticulum",
+        "host mitochondrion",
+        "host nucleus",
+        "virion"
+      ],
+      "exposed_fraction_of_locations": 0.0,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 10,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 2,
+      "nt_start": 23414,
+      "length_aa": 100,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 3,
+        "sequons": 0,
+        "plausible_antigen_length": true,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 11,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "+",
+      "frame": 2,
+      "nt_start": 21935,
+      "length_aa": 87,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 4,
+        "sequons": 1,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 12,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "+",
+      "frame": 2,
+      "nt_start": 2957,
+      "length_aa": 82,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": true,
+        "transmembrane_segments": 1,
+        "sequons": 1,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    }
+  ],
+  "every_score_re_adds_from_its_terms": true,
+  "seconds": 18.61,
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "ccc10035d017314df897852802d66bad471d4c22",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-10T12:32:27.695188+00:00"
+  },
+  "limitations": [
+    "The ranking is a stated rubric, not a fitted model. No labelled set of correct target rankings exists to fit against.",
+    "`druggable_class` and `essential_class` are read from a hand-written keyword table against UniProt annotations on homologs. A term the table does not list reads as 'not druggable' rather than as 'not in my vocabulary'.",
+    "`structures_in_family` is a count of deposited structures and is therefore a record of research attention as much as of tractability. It carries the smallest weight for that reason and is capped at 50.",
+    "Six-frame calling misses frameshifted products: SARS-CoV-2's replicase is one 7,096-residue polyprotein and is ranked here as two fragments, because no ORF caller reading stop codons can see a ribosomal frameshift.",
+    "These are whole ORFs. A polyprotein is one row here and is cut into its mature chains by the stage after this one, so the scores below are not the per-chain scores the shortlist is drawn from."
+  ],
+  "interpretation": "The candidate proteins stage 1 proposes for one genome, ranked by a stated rubric. No binding, affinity, inhibition or antiviral property is predicted for any of them.",
+  "content_sha256": "3584d172c7d272422dd2249a9a499c34fbc2f93179f068f870ff7d791b3ae02e"
+}
