@@ -1342,8 +1342,22 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
         if not hits and remote:
             hits = identify_remote(orf["protein"], reduced, kept, aligner)
             tier = "remote" if hits else None
-        topology = None if hits else membrane_topology(orf["protein"])
-        if topology and topology["likely_surface"]:
+        # Computed for every ORF, not only for the ones homology failed on. It used to read
+        # `None if hits else membrane_topology(...)`, so any hit at all consumed the ORF's
+        # class-level answer -- including a hit that was wrong. RSV B's attachment glycoprotein
+        # G and human metapneumovirus's G both pass `membrane_topology` as likely surface on
+        # their own sequence, by the anchored-and-glycosylated route, which is the correct
+        # biology for a type II membrane mucin carrying thirty to forty O-glycans, and "Major
+        # surface glycoprotein" is RSV B's ground-truth label in `data/benchmark_panel.json`.
+        # That answer was computed, discarded, and replaced by a fish nidovirus.
+        #
+        # It is carried beside the homology result rather than substituted for it. Which of the
+        # two should be published when they disagree is a ranking change and needs the
+        # measurement this module requires of ranking changes; the evidence is recorded first so
+        # that measurement is possible at all. `membrane_topology` is arithmetic over the
+        # sequence -- no network, no reference -- so computing it always costs nothing.
+        topology = membrane_topology(orf["protein"])
+        if not hits and topology and topology["likely_surface"]:
             tier = "topology"
         # `protein` is carried now, and the omission it replaces was the single break in the
         # onset chain. `orfs` translates every reading frame and this dict then kept the
@@ -1765,6 +1779,38 @@ def decompose(ranked, limit=None):
         # cost. `limit` stays as a parameter for a caller that wants a cap, and defaults to
         # none; no caller ever passed it.
         considered = chains if limit is None else chains[:limit]
+        # A hit that aligned to one region of a polyprotein licenses the chains in that region
+        # and no others. Where the hit carries an `entry_span`, chains it does not overlap are
+        # dropped -- `overlap > 0` between two intervals the pipeline already holds, with no
+        # constant to choose and nothing to calibrate.
+        #
+        # Measured on `runs/benchmark/NC_001781_1.json`, the worst case: RSV B's attachment
+        # glycoprotein G reaches the remote tier, because G is hypervariable enough that exact
+        # 5-mers miss it, and lands a 228-column, 22.4%-identity alignment against the White
+        # bream virus replicase -- the pneumovirus mucin-like O-glycosylated stalk against a
+        # Ser/Thr/Pro/Glu-rich linker, two intrinsically disordered regions sharing no fold and
+        # no ancestry. One ORF, one marginal alignment, and `decompose` published twelve mature
+        # chains of a fish nidovirus as RSV B's top candidates, with the RdRp row among them
+        # being credited as a ground-truth hit for RSV's L target. The alignment covers
+        # residues 962-1185, so on span overlap eleven of those twelve rows go.
+        #
+        # It is also a correctness gain on the capability this tier exists for, which is the
+        # part worth stating: the flagship cross-family case in this module's own docstring is
+        # SARS-CoV-2 ORF1b against that same accession at E = 8.9e-68, and its span 4645-6800
+        # licenses exactly the six ORF1b products and drops the seven ORF1a ones. An ORF1b
+        # query cannot contain 3CLpro or nsp2, and those rows were being emitted. Nothing
+        # genuine is lost elsewhere: HCV keeps 9 of 9, VEEV 4 of 4, CCHFV 5 of 5, VZV gB 1 of 1.
+        #
+        # Exact-tier hits carry no span and are unaffected, which is correct -- a k-mer hit is
+        # a whole-sequence statement and has no region to scope to.
+        span = best_hit.get("entry_span")
+        if span:
+            licensed = [c for c in considered
+                        if c["start"] <= span[1] and c["end"] >= span[0]]
+            unlicensed = [c["description"] for c in considered if c not in licensed]
+            considered = licensed
+        else:
+            unlicensed = []
         for chain in considered:
             try:
                 structures = family_chain_structures(
@@ -1852,7 +1898,12 @@ def decompose(ranked, limit=None):
                 # three picornaviruses and for SARS-CoV-2.
                 "chains_in_parent": len(chains),
                 "chains_scored": len(considered),
-                "chains_dropped": [c["description"] for c in chains[len(considered):]],
+                # Which chains the hit's aligned region did not reach, and the span that
+                # decided it. Recorded rather than silently absent, because "this hit covers
+                # residues 962-1185 of a 6,872-residue entry" is the fact that made eleven of
+                # RSV B's twelve published candidates wrong, and no artifact carried it.
+                "chains_outside_aligned_span": unlicensed,
+                "aligned_span_on_homolog": span,
                 "parent": row["name"], "chain_range": [chain["start"], chain["end"]],
                 "length_aa": chain["length"],
                 "hits": row["hits"], "features": features,
@@ -1873,6 +1924,16 @@ def decompose(ranked, limit=None):
         # coronavirus HKU3 and again via SARS-CoV -- and those are one target, assigned twice
         # with different confidence, not two candidates to rank against each other.
         key = (row.get("name") or "").lower()
+        # Class rows key on their ORF as well as their name, because every one of them is
+        # called "unidentified probable surface antigen". Keyed on the name alone they all
+        # collapsed into one: three rescued surface antigens at three positions in a genome
+        # published as a single candidate, and because they all score exactly 3.6 the survivor
+        # was whichever the iteration reached first. The name-only key is right for the case it
+        # was written for -- one mature product reached through several relatives is one target
+        # assigned twice -- and wrong here, where the name carries no identity at all.
+        if not row.get("identified") or row.get("tier") == "topology":
+            orf = row.get("orf") or {}
+            key = (key, orf.get("segment"), orf.get("strand"), orf.get("nt_start"))
         if key not in best or (row["score"] or 0) > (best[key]["score"] or 0):
             best[key] = row
     expanded = sorted(best.values(), key=lambda r: r["score"] or 0, reverse=True)
@@ -2024,6 +2085,36 @@ def _aligner():
     return aligner
 
 
+def aligned_span(aligner, query, subject):
+    """Which residues of `subject` the local alignment actually covers, 1-based inclusive.
+
+    Recovered only for the handful of hits that already passed the E-value gate, never for the
+    whole prefilter: `aligner.score` is what the gate needs and is three times cheaper than
+    `aligner.align`, so scoring 120 subjects and then aligning the two or three survivors costs
+    essentially what scoring alone cost.
+
+    The span is what makes a remote hit's *scope* legible. Without it a 223-residue alignment
+    against one stretch of a 6,872-residue polyprotein was indistinguishable, downstream, from
+    an identification of the whole entry -- and `decompose` then emitted every mature chain of
+    that entry as a separate candidate for the query. Returns None if no alignment can be
+    recovered, and callers must treat that as "scope unknown" rather than as "covers
+    everything".
+    """
+    try:
+        alignment = aligner.align(query, subject)[0]
+    except Exception:                                      # noqa: BLE001
+        return None
+    # `alignment.aligned` is a numpy array, so every test here is on a length rather than on
+    # truthiness: `not blocks` raises "truth value of an array with more than one element is
+    # ambiguous" on exactly the alignments that have something to report.
+    blocks = getattr(alignment, "aligned", None)
+    if blocks is None or len(blocks) < 2 or len(blocks[1]) == 0:
+        return None
+    starts = [int(start) for start, _end in blocks[1]]
+    ends = [int(end) for _start, end in blocks[1]]
+    return [min(starts) + 1, max(ends)]
+
+
 def build_reduced_index(entries, k=KMER):
     index = {}
     for position, entry in enumerate(entries):
@@ -2047,6 +2138,30 @@ def identify_remote(protein, index, kept, aligner=None, k=KMER, prefilter=120, t
     are genuinely homologous across families. It finds nothing for the spike, because the
     spike has no homolog outside the family. That is biology and not a tuning failure, and no
     sensitivity setting changes it.
+
+    **The torovirus in that sentence is also this tier's worst false positive, and the
+    coincidence is exact rather than illustrative.** The entry is Q008X6, the White bream virus
+    replicase 1ab. Against SARS-CoV-2's ORF1b it is the celebrated hit, at E = 8.9e-68. Against
+    the attachment glycoprotein G of RSV B and of human metapneumovirus it is a 22.4%-identity
+    alignment of one disordered mucin stalk against another, clearing `MAX_EVALUE` by 0.86 bits
+    -- less than a fifth of a single BLOSUM62 match -- and it supplied twelve mature chains of a
+    fish nidovirus as each pathogen's top candidates. One reference entry, both roles, 64 orders
+    of magnitude apart in E.
+
+    So a gate on hit quality could not have told them apart, and the measurement in
+    `runs/remote_span_licensing.json` says nothing else could either: of thirteen quantities
+    tried none separates the two populations, and the one that appeared to is
+    entry-length-over-query-length in disguise. What separates them is *scope* -- the celebrated
+    hit covers residues 4645-6800 of the entry and the artifact covers 962-1185 -- which is why
+    `entry_span` is recorded here and why `decompose` licenses only the chains a span reaches.
+
+    The sharper finding in that record is not fixed and is worth reading before trusting this
+    tier: RSV G's correct identification, bovine RSV G at E = 3.11e-31, was in the reference the
+    whole time at reduced-alphabet seed rank 962, outside `prefilter`. Seed count scales with
+    entry length, so the selection step prefers long polyproteins -- median selected entry 4,060
+    residues against a database median of 289 -- and discarded a same-genus homolog in favour of
+    a cross-order artifact. The tier's specificity problem is a symptom; its sensitivity problem
+    is the disease.
     """
     import collections
 
@@ -2082,7 +2197,13 @@ def identify_remote(protein, index, kept, aligner=None, k=KMER, prefilter=120, t
                        # scale is recorded rather than reconciled. See the note on
                        # `conservation_scale` in `score_candidate` for why rescaling is refused.
                        "score": round(min(1.0, bit_score(raw) / 200.0), 4),
-                       "score_scale": "bits_over_200"})
+                       "score_scale": "bits_over_200",
+                       # Which residues of the entry the alignment covers. Recorded because a
+                       # remote hit against a polyprotein is a claim about a region, and
+                       # nothing downstream could previously tell a 223-residue local
+                       # alignment from an identification of all 6,872 residues.
+                       "entry_span": aligned_span(aligner, protein, entry["sequence"]),
+                       "entry_length": len(entry["sequence"])})
     # Equal E-value implies equal raw score implies equal bits, so the accession is the only
     # further key this needs.
     scored.sort(key=lambda hit: (hit["evalue"], hit["accession"]))
