@@ -305,7 +305,8 @@
       <div class="out"><h3>Out</h3><ul>
         <li>All <b>20</b> had their own sequence located in this genome</li>
         <li><b>11</b> of those are short enough for the folding lane; <b>9</b> are over its <b>400</b>-residue ceiling, including the three spike chains and the polymerase nsp12</li>
-        <li>The main protease was folded: <b>306</b> building blocks long</li>
+        <li>All <b>11</b> are folded, not only the best-ranked one — a chain with no coordinates is a chain the next step cannot measure</li>
+        <li>The one drawn further down is the main protease: <b>306</b> building blocks long</li>
         <li>The predictor rates its own confidence <b>62.6</b> out of 100 — confidence is not accuracy</li>
       </ul></div>
     </div>
@@ -323,7 +324,8 @@
       <div class="out"><h3>Out</h3><ul>
         <li><b>20</b> answers for 20 chains</li>
         <li><b>9</b> measured on real deposited structures, <b>11</b> refused with a stated reason</li>
-        <li>Where step 3 folded a chain, the same measurement on the predicted shape — kept apart from the deposited one, never added to it</li>
+        <li><b>5</b> of the <b>11</b> with nothing deposited are inside the folding ceiling, so they are measured on their predicted shape instead — kept apart from the deposited numbers, never added to them</li>
+        <li><b>14</b> of <b>20</b> chains end with a surface of some kind, where <b>9</b> did before</li>
         <li><b>0</b> quietly dropped</li>
       </ul></div>
     </div>
@@ -408,7 +410,8 @@
     <div class="tc-body">
       <dl class="ret">
         <div><dt>Model</dt><dd>ESMFold v1 (2022-10-18)</dd></div>
-        <div><dt>Folded</dt><dd>Main protease · 306 residues</dd></div>
+        <div><dt>Chains folded</dt><dd>all 11 inside the 400-residue ceiling</dd></div>
+        <div><dt>Drawn below</dt><dd>Main protease · 306 residues</dd></div>
         <div><dt>Coordinates returned</dt><dd>193,227 bytes</dd></div>
         <div><dt>Confidence mean / median / min</dt><dd>62.6 / 63.0 / 20.0</dd></div>
         <div><dt>Residues above 70</dt><dd>46.4 %</dd></div>
@@ -452,15 +455,15 @@
         <div class="pdbrow"><span class="who">Non-structural protein 2 <em>P0C6X7 · 181–818</em></span><span class="ids">7fac:A</span></div>
         <div class="pdbrow"><span class="who">ORF9B_SARS ORF9b protein <em>P59636</em></span><span class="ids">2cme:A · 2cme:B · 2cme:C · 2cme:D · 2cme:E</span></div>
       </div>
-      <div class="accs"><span class="lead">And the 11 it could not measure, each naming the accession that came back empty:</span>
+      <div class="accs"><span class="lead">And the 11 with no deposited structure to measure, each naming the accession that came back empty. <b>5</b> of them are inside the folding ceiling, so step 3 gave them coordinates and this step measured those instead — marked below:</span>
         <div class="pdbrow none"><span class="who">Spike protein S1 · S2 · S2' <em>3 chains</em></span><span class="ids">Q3LZX1 — no deposited chain maps to it at all</span></div>
-        <div class="pdbrow none"><span class="who">VME1_BC279 Membrane protein <em>1</em></span><span class="ids">Q0Q472 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">AP3A_BC279 Protein 3 <em>1</em></span><span class="ids">Q0Q474 — none at all</span></div>
+        <div class="pdbrow none"><span class="who">VME1_BC279 Membrane protein <i class="gl">folded instead</i> <em>1</em></span><span class="ids">Q0Q472 — none at all</span></div>
+        <div class="pdbrow none"><span class="who">AP3A_BC279 Protein 3 <i class="gl">folded instead</i> <em>1</em></span><span class="ids">Q0Q474 — none at all</span></div>
         <div class="pdbrow none"><span class="who">NCAP_BCRP3 Nucleoprotein <em>1</em></span><span class="ids">Q3I5I7 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">Protein 7a <em>1</em></span><span class="ids">Q3I5J0 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">Papain-like protease nsp3 · Host translation inhibitor nsp1 · Non-structural protein 4 · Non-structural protein 6 <em>4 chains</em></span><span class="ids">P0C6X7 — 180 chains map to it, none covering those stretches</span></div>
+        <div class="pdbrow none"><span class="who">Protein 7a <i class="gl">folded instead</i> <em>1</em></span><span class="ids">Q3I5J0 — none at all</span></div>
+        <div class="pdbrow none"><span class="who">Papain-like protease nsp3 · Host translation inhibitor nsp1 · Non-structural protein 4 · Non-structural protein 6 <i class="gl">nsp1 and nsp6 folded instead; nsp3 and nsp4 are over the ceiling</i> <em>4 chains</em></span><span class="ids">P0C6X7 — 180 chains map to it, none covering those stretches</span></div>
       </div>
-      <div class="accs"><span class="lead">Those 11 are the reason step 3 now runs first. Where it folded a chain, this step measures the predicted coordinates with the same arithmetic — the only surface a target nothing has solved will ever have. On the one chain here that has both, the two answers are far apart:</span>
+      <div class="accs"><span class="lead">Those 11 are the reason step 3 now runs first, and folds every chain it can rather than only the best-ranked one. Where coordinates exist, this step measures them with the same arithmetic — for 5 chains above that is the only surface they will ever have. On a chain that has both, the two answers are far apart:</span>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">5 deposited structures</i> <em>median of 5 · a real measurement</em></span><span class="ids">562.4 Å² · 4.4 % of the surface</span></div>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">the predicted shape</i> <em>ESMFold v1 · mean confidence 62.6</em></span><span class="ids">2,012.6 Å² · 11.0 % of the surface</span></div>
       </div>

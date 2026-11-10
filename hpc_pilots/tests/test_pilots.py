@@ -4887,7 +4887,7 @@ def test_the_novel_lane_gets_a_surface_from_the_fold():
               "mean_plddt": fold["mean_plddt"],
               "confident_fraction": fold["confident_fraction"]}
     rows = surface_rows([{"name": "unidentified ORF", "identified": False, "rank": 7}],
-                        folded=folded)
+                        folds=[folded])
 
     assert len(rows) == 1, "a row is never absent"
     row = rows[0]
@@ -4904,6 +4904,118 @@ def test_the_novel_lane_gets_a_surface_from_the_fold():
     bare = surface_rows([{"name": "unidentified ORF", "identified": False, "rank": 7}])
     assert "predicted_surface" not in bare[0]
     assert bare[0]["unmeasured_because"] == row["unmeasured_because"]
+
+
+def test_every_chain_inside_the_ceiling_is_folded_and_the_pick_is_unchanged():
+    """The fold stage folds all of them now, and still folds the same one first.
+
+    Folding only the highest-ranked chain inside the ceiling meant the predicted-surface lane
+    fired on whichever chain ranked highest -- on every genome recorded here a well-studied
+    enzyme that already had deposited structures, so the lane produced a comparison and never
+    a rescue. The stage cannot know which chains the surface stage will fail on, so it folds
+    every chain inside the ceiling.
+
+    The first fold must still be the old pick, because the committed main-protease fold is what
+    this repository reproduces byte for byte. That is the invariant this test exists for: the
+    order is identified chains in rank order, then unidentified ones, and `folds[0]` is the
+    chain a run before this change would have folded alone.
+
+    Offline: a row with no `chain_range` is its own ORF translation, so no homolog is read and
+    no sequence is aligned, and the folding call itself is stubbed.
+    """
+    from hpc_pilots import chain as chain_module
+    from hpc_pilots import folded_structure
+
+    def fake_fold(sequence, target_name="", record=True, **kw):
+        return {"target_name": target_name, "folded": True, "pdb": "ATOM\n",
+                "sequence_length": len(sequence), "mean_plddt": 70.0,
+                "model": "stub", "confident_fraction": 1.0}
+
+    def row(name, length, identified=True):
+        return {"name": name, "identified": identified, "rank": length,
+                "orf": {"protein": "M" + "A" * (length - 1)}}
+
+    ranked = [row("over the ceiling", 500), row("first inside", 300),
+              row("second inside", 200), row("unnamed", 150, identified=False)]
+
+    original = folded_structure.fold
+    folded_structure.fold = fake_fold
+    try:
+        primary, rows, folds = chain_module.fold_stage(ranked, ceiling=400)
+        names = [f["target_name"] for f in folds]
+        # Every chain inside the ceiling, and only those.
+        assert names == ["first inside", "second inside", "unnamed"], names
+        assert "over the ceiling" not in names
+        # The pick is unchanged: identified first, in the order `ranked` arrived in.
+        assert primary is folds[0]
+        assert primary["target_name"] == "first inside"
+        # The row carries whether it was folded, so `foldable` is readable on its own.
+        assert {r["target"]: r.get("folded") for r in rows} == {
+            "over the ceiling": None, "first inside": True,
+            "second inside": True, "unnamed": True}
+        # And neither bound is silent: each dropped count travels in the record.
+        _, _, capped = chain_module.fold_stage(ranked, ceiling=400, limit=2)
+        assert [f["target_name"] for f in capped] == ["first inside", "second inside"]
+        assert capped[0]["chains_not_folded_by_limit"] == 1
+        # A zero wall budget still folds the pick -- that one is the committed artifact and is
+        # not optional -- and drops the rest under its own, separate count.
+        primary, _, starved = chain_module.fold_stage(ranked, ceiling=400, budget=0.0)
+        assert [f["target_name"] for f in starved] == ["first inside"]
+        assert primary["chains_not_folded_by_budget"] == 2
+        assert primary["folding_budget_seconds"] == 0.0
+        assert "chains_not_folded_by_limit" not in primary
+    finally:
+        folded_structure.fold = original
+
+
+def test_several_chains_can_get_a_surface_from_their_predicted_shape():
+    """The rescue, which is the whole point of folding more than one chain.
+
+    Three rows: one with a deposited answer already, two with none. All three were folded. The
+    first gets a second number to compare against, the other two get the only surface they will
+    ever have -- and the record says which is which through `only_route_to_a_surface`, so the
+    two can never be read as the same kind of evidence.
+
+    A fold that returned an absence instead of coordinates must add nothing at all.
+    """
+    import json
+    import pathlib
+
+    from hpc_pilots.chain import surface_rows
+    from hpc_pilots.common import ROOT
+
+    coordinates = ROOT / "runs/folded_structure/mpro_nsp5.pdb"
+    model = ROOT / "runs/folded_structure/mpro_nsp5.json"
+    if not coordinates.exists() or not model.exists():
+        pytest.skip("the committed fold is absent on this machine")
+    try:
+        import freesasa                                    # noqa: F401
+    except ImportError:
+        pytest.skip("no SASA backend on this machine")
+
+    fold = json.loads(model.read_text())
+    text = pathlib.Path(coordinates).read_text()
+    names = ["has a deposition", "no deposition", "also no deposition", "fold refused"]
+    folds = [{"target_name": n, "pdb": text, "folded": True, "model": fold["model"],
+              "mean_plddt": fold["mean_plddt"],
+              "confident_fraction": fold["confident_fraction"]} for n in names[:3]]
+    # The fourth was attempted and came back without coordinates.
+    folds.append({"target_name": names[3], "folded": False,
+                  "absence": {"reason": "sequence_too_long"}})
+
+    ranked = [{"name": n, "identified": False, "rank": i + 1} for i, n in enumerate(names)]
+    rows = {r["target"]: r for r in surface_rows(ranked, folds=folds)}
+
+    assert len(rows) == 4, "a row is never absent"
+    for name in names[:3]:
+        assert rows[name]["predicted_surface"]["measured"] is True, name
+        assert rows[name]["predicted_surface"]["patch_a2"] > 0, name
+    # Every one of these rows is unmeasured on a deposition in this fixture, so the prediction
+    # is the only route for all three -- the flag is read off the row, not assumed.
+    assert all(rows[n]["predicted_surface"]["only_route_to_a_surface"] for n in names[:3])
+    # And the refused fold adds nothing: no key, so a chain with no usable prediction cannot
+    # be told apart from one that was never folded -- the fold row says which.
+    assert "predicted_surface" not in rows[names[3]]
 
 
 def test_the_page_quotes_the_predicted_patch_it_can_recompute():
@@ -4951,6 +5063,22 @@ def test_the_page_quotes_the_predicted_patch_it_can_recompute():
 
     ratio = predicted / row["patch_median_a2"]
     assert f"{ratio:.1f}×" in body, f"the page should quote the ratio as {ratio:.1f}×"
+
+    # The rescue counts, computed the way the page claims them: of the chains no deposition
+    # covers, how many are inside the folding ceiling and therefore get a predicted surface.
+    # These are typed on the page too, and they are the headline of the reordering, so they are
+    # recomputed here rather than trusted.
+    foldable = {f["target"]: f for f in case["foldable"]}
+    inside = [r for r in case["surfaces"]
+              if not r["measured"]
+              and (foldable.get(r["target"]) or {}).get("sequence_recovered")
+              and 0 < ((foldable.get(r["target"]) or {}).get("recovered_length_aa") or 0) <= 400]
+    deposited = sum(1 for r in case["surfaces"] if r["measured"])
+    assert f"<b>{len(inside)}</b> of the <b>{{{{unmeasured}}}}</b> with nothing deposited" in body, (
+        f"the page should say {len(inside)} chains are rescued by the fold")
+    assert f"<b>{deposited + len(inside)}</b> of <b>{{{{chains}}}}</b> chains end with a surface" in body, (
+        f"the page should say {deposited + len(inside)} chains end with a surface")
+    assert f"for {len(inside)} chains above that is the only surface" in body
 
 
 def test_every_ranked_chain_is_located_in_the_genome_it_came_from():

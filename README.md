@@ -113,9 +113,14 @@ angstroms flat rather than reaching into a pocket.
 The surface stage runs **after** the folding stage, and the order is the answer to the case this
 project is about. For a pathogen nothing has solved there is no deposition to measure — PDBe maps
 no chain to it — so the only coordinates that will ever exist are the ones the fold emits, and
-measuring before folding made that case unanswerable by construction. The same patch arithmetic
-runs on predicted coordinates, under its own key and never added to the count of chains measured
-on depositions. On the one SARS-CoV-2 chain that has both, the prediction reads 2012.6 square
+measuring before folding made that case unanswerable by construction. The fold stage folds every
+chain inside its 400-residue ceiling rather than the best-ranked one alone: it cannot know which
+chains the surface stage will fail on, and folding only the top chain meant the lane fired on a
+well-studied enzyme that already had five deposited structures on every genome recorded here — a
+comparison, never a rescue. On the SARS-CoV-2 holdout, 5 of the 11 chains no deposition covers are
+inside the ceiling, so the run ends with 14 of 20 chains carrying a surface where 9 did before. The
+same patch arithmetic runs on predicted coordinates, under its own key and never added to the count
+of chains measured on depositions. On the one SARS-CoV-2 chain that has both, the prediction reads 2012.6 square
 angstroms against a deposited median of 562.4 over five structures: **3.6 times larger**, on a
 fold whose mean confidence is 62.6. A monomer modelled alone has no partner to bury a face
 against and the predictor's error is not separable from that here, so the record states the ratio

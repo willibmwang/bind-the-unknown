@@ -67,7 +67,7 @@ def _decomposed_score(features, rubric):
     return {"terms": terms, "total": round(sum(terms.values()), 4)}
 
 
-def surface_rows(ranked, replicates=5, folded=None):
+def surface_rows(ranked, replicates=5, folds=()):
     """One surface row per ranked candidate, measured or refused with the reason.
 
     Exhaustive over `ranked` on purpose, and the `top=12` cap that `enrich_with_surface`
@@ -81,23 +81,24 @@ def surface_rows(ranked, replicates=5, folded=None):
     across" and "no deposited structure covers this chain" and "this machine has no freesasa"
     are three different statements and only the first is about the target.
 
-    `folded` is the fold stage's payload, and carrying it here is what makes the stage before
-    this one a stage this one reads. Where the fold produced coordinates for a chain, the same
-    patch arithmetic is run on them and reported as `predicted_surface`, under its own keys and
-    never merged into `measured`: for a chain no deposition covers it is the only surface that
-    will ever exist, and for a chain a deposition does cover it is a second number from a
-    different kind of evidence. Where both exist the ratio between them is recorded, because
-    that is the one place this pipeline can say how far a predicted surface sits from a
-    measured one instead of hoping they agree.
+    `folds` is every fold the stage before this one made, and carrying them here is what makes
+    that stage a stage this one reads. Where a chain has coordinates, the same patch arithmetic
+    is run on them and reported as `predicted_surface`, under its own keys and never merged
+    into `measured`: for a chain no deposition covers it is the only surface that will ever
+    exist, and for a chain a deposition does cover it is a second number from a different kind
+    of evidence. Where both exist the ratio between them is recorded, because that is the one
+    place this pipeline can say how far a predicted surface sits from a measured one instead of
+    hoping they agree.
     """
     from .geometry import surface_for_accession
     from .intake import amenable, chain_locations, exposed_from_locations
 
-    # The fold stage folds one chain per run, so this matches by name and the match either
-    # fires once or not at all. Compared on the target name because that is what both stages
-    # key a row by; a chain is not re-folded here and no coordinates are fetched.
-    coordinates = (folded or {}).get("pdb")
-    folded_target = (folded or {}).get("target_name")
+    # Keyed on the target name, which is what both stages key a row by. A fold that returned an
+    # absence rather than coordinates is dropped here, so a chain with no usable prediction is
+    # indistinguishable from a chain that was never folded -- both simply have no
+    # `predicted_surface`, and the fold row already says which happened and why.
+    coordinates = {f["target_name"]: f for f in (folds or ())
+                   if f and f.get("pdb") and f.get("target_name")}
 
     rows = []
     for row in ranked:
@@ -173,11 +174,10 @@ def surface_rows(ranked, replicates=5, folded=None):
     # surface has something different to say on each of them. Attaching it here is what lets
     # it say which: `only_route_to_a_surface` is read off the finished row rather than guessed
     # at from where in the loop the row happened to be.
-    if coordinates and folded_target:
-        for entry in rows:
-            if entry["target"] == folded_target:
-                entry["predicted_surface"] = _predicted_surface(coordinates, folded, entry)
-                break
+    for entry in rows:
+        folded = coordinates.get(entry["target"])
+        if folded:
+            entry["predicted_surface"] = _predicted_surface(folded["pdb"], folded, entry)
     return rows
 
 
@@ -548,8 +548,13 @@ def locate_chain(orf, chain, aligner=None):
 MINIMUM_CHAIN_COVERAGE = 0.5
 
 
-def fold_stage(ranked, ceiling=400, pool=()):
-    """The first ranked chain whose own sequence the chain can locate, folded.
+def fold_stage(ranked, ceiling=400, pool=(), limit=12, budget=240.0):
+    """Every ranked chain whose own sequence the chain can locate, folded.
+
+    Returns `(primary, rows, folds)`. `primary` is the first fold in pick order and is the
+    one the record and the page report in full; `folds` is every fold this stage made, which
+    the surface stage reads. `limit` caps the number of folding requests one run will spend
+    and a chain it drops is named in the record rather than quietly left out.
 
     **Why this is not simply "fold the top candidate".** The folding endpoint takes an
     amino-acid sequence, and the only pathogen sequence this chain holds is the six-frame
@@ -668,29 +673,79 @@ def fold_stage(ranked, ceiling=400, pool=()):
     # repository reproduces byte for byte, and a one-pass loop would hand the pick to whatever
     # happened to sort first. Explicit, so the ordering is a decision and not an accident of
     # how `ranked` was sorted.
+    foldable = []
     for want_identified in (True, False):
-        if pick is not None:
-            break
         for entry in rows:
-            if pick is None and entry["identified"] is want_identified \
-                    and entry["sequence_recovered"] \
+            if entry["identified"] is want_identified and entry["sequence_recovered"] \
                     and 0 < entry["recovered_length_aa"] <= ceiling:
-                pick = (entry["target"], entry["recovered_sequence"])
+                foldable.append((entry["target"], entry["recovered_sequence"], entry))
+    if foldable:
+        pick = foldable[0][:2]
     # Carried only to choose and fold; a row holding a whole protein sequence would multiply
-    # the record's size by the number of candidates for no reader's benefit.
+    # the record's size by the number of candidates for no reader's benefit. Captured above
+    # first, because every chain inside the ceiling is folded now and not only the pick.
     for entry in rows:
         entry.pop("recovered_sequence", None)
 
     if pick is None:
         return {"absence": "no ranked candidate yielded a sequence within the residue "
-                           f"ceiling of {ceiling}"}, rows
-    name, sequence = pick
-    try:
-        folded = fold(sequence, target_name=name or "", record=False)
-    except Exception as failure:                          # noqa: BLE001
-        folded = {"absence": f"{type(failure).__name__}: {str(failure)[:160]}",
-                  "target_name": name}
-    return folded, rows
+                           f"ceiling of {ceiling}"}, rows, []
+
+    # Every chain inside the ceiling, not just the first one, and the reason is the stage after
+    # this one. The surface stage can measure a prediction, so a chain's coordinates are the
+    # difference between a surface and no surface -- and the chains that need that most are
+    # exactly the ones this stage used to skip. Folding only the pick meant the lane fired on
+    # whichever chain happened to rank highest inside the ceiling, which on every genome
+    # recorded here was a well-studied enzyme that already had five deposited structures: a
+    # comparison, never a rescue. On the SARS-CoV-2 holdout, 5 of the 11 chains no deposition
+    # covers are inside the ceiling, and all 5 were being left without coordinates.
+    #
+    # `structures_in_family` is on the row and is NOT used to choose. It counts structures
+    # across the homolog family while the surface stage resolves one accession, and the two
+    # disagree in the direction that matters: the membrane protein carries 4 in the family and
+    # nothing deposited against the accession this run landed on, so a proxy would have
+    # dropped exactly the chain it was meant to find. This stage cannot know which chains the
+    # next one will fail on, so it stops guessing and folds all of them.
+    #
+    # The first fold is the pick, in the order above, so the committed main-protease fold stays
+    # the fold this repository reproduces byte for byte.
+    # Two bounds, because one folding request is not one bounded cost. `REQUEST_TIMEOUT` is 45
+    # seconds and the lane retries once, so a single chain can spend ninety seconds against a
+    # flaky host -- twelve of those is nineteen minutes, against the twenty-five minute cap on
+    # the workflow that serves a visitor's run. A count alone would have made the slow case a
+    # timeout instead of a record. The wall budget is checked before each fold after the first:
+    # the pick always runs, because it is the fold this repository reproduces.
+    folds, dropped_limit, dropped_budget = [], 0, 0
+    folding_started = time.time()
+    for index, (target, sequence, entry) in enumerate(foldable):
+        if limit is not None and index >= limit:
+            dropped_limit = len(foldable) - index
+            break
+        if index and budget is not None and time.time() - folding_started >= budget:
+            dropped_budget = len(foldable) - index
+            break
+        try:
+            payload = fold(sequence, target_name=target or "", record=False)
+        except Exception as failure:                      # noqa: BLE001
+            payload = {"absence": f"{type(failure).__name__}: {str(failure)[:160]}",
+                       "target_name": target}
+        # Stated on the row as well as in the payload, so a reader of `foldable` can see which
+        # chains have coordinates without holding the fold payloads beside it.
+        entry["folded"] = bool(payload.get("folded"))
+        entry["mean_plddt"] = payload.get("mean_plddt")
+        if payload.get("absence"):
+            entry["fold_absence"] = (payload["absence"].get("reason")
+                                     if isinstance(payload["absence"], dict)
+                                     else payload["absence"])
+        folds.append(payload)
+    # Never silently. A bound that drops a chain is a chain with no coordinates, which is
+    # the defect this whole change exists to remove, so each is named in the record.
+    if dropped_limit:
+        folds[0].setdefault("chains_not_folded_by_limit", dropped_limit)
+    if dropped_budget:
+        folds[0].setdefault("chains_not_folded_by_budget", dropped_budget)
+        folds[0].setdefault("folding_budget_seconds", budget)
+    return folds[0], rows, folds
 
 
 # ------------------------------------------------------------------ evidence on the top few
@@ -934,15 +989,15 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
     # given.
     handed = [r for r in ranked if r.get("identified")]
 
-    folded, fold_rows = None, None
+    folded, fold_rows, folds = None, None, []
     if fold:
         started = time.time()
         pool = [(f"ORF {i} of the ranked set, {len(t['orf']['protein'])} aa", t["orf"]["protein"])
                 for i, t in enumerate(intake["targets"], 1)
                 if (t.get("orf") or {}).get("protein")]
-        folded, fold_rows = fold_stage(ranked, pool=pool)
+        folded, fold_rows, folds = fold_stage(ranked, pool=pool)
         stages.append({
-            "stage": 3, "name": "A chain to coordinates, the one lane a novel target has",
+            "stage": 3, "name": "Every chain inside the ceiling to coordinates, the one lane a novel target has",
             "tool": "structures.folded", "endpoints": ["ESM Atlas"],
             # This stage is handed every candidate, not only the identified ones, because
             # folding needs a sequence and nothing else. Both counts are stated so the
@@ -961,6 +1016,19 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                        "unidentified_foldable": sum(1 for r in fold_rows
                                                     if r["sequence_recovered"]
                                                     and not r["identified"]),
+                       # How many chains actually have coordinates, which is the number
+                       # the surface stage can act on. `folded_target` names the pick
+                       # because the page and the committed artifact report that one in
+                       # full; the others are named in `also_folded`.
+                       "chains_folded": sum(1 for f in folds if f.get("folded")),
+                       "folds_attempted": len(folds),
+                       "folds_refused": sum(1 for f in folds if not f.get("folded")),
+                       "also_folded": [f.get("target_name") for f in folds[1:]
+                                       if f.get("folded")],
+                       "chains_not_folded_by_limit":
+                           (folded or {}).get("chains_not_folded_by_limit", 0),
+                       "chains_not_folded_by_budget":
+                           (folded or {}).get("chains_not_folded_by_budget", 0),
                        "folded_target": (folded or {}).get("target_name"),
                        "residues": (folded or {}).get("sequence_length"),
                        "mean_plddt": (folded or {}).get("mean_plddt"),
@@ -968,11 +1036,12 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                        "sequence_sha256": (folded or {}).get("sequence_sha256"),
                        "error": (folded or {}).get("absence")},
             "seconds": round(time.time() - started, 2),
-            "hands_to_next": "coordinates. The surface stage measures them with the same "
-                             "arithmetic it uses on a deposition, and reports the two apart"})
+            "hands_to_next": "coordinates for every chain inside the ceiling. The surface "
+                             "stage measures them with the same arithmetic it uses on a "
+                             "deposition, and reports the two apart"})
 
     started = time.time()
-    rows = surface_rows(handed, replicates=replicates, folded=folded)
+    rows = surface_rows(handed, replicates=replicates, folds=folds)
     measured = [r for r in rows if r["measured"]]
     # Attempted and succeeded are different counts, and only the second may be reported as a
     # measurement. A predicted surface can fail for the same reason a deposited one can -- no
@@ -989,7 +1058,7 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
         # nothing is distinguishable from a run where the surface stage ignored what it was
         # handed.
         "input": {"candidates_in": len(handed),
-                  "predicted_coordinates_in": 1 if (folded or {}).get("pdb") else 0},
+                  "predicted_coordinates_in": sum(1 for f in folds if f.get("pdb"))},
         "output": {"rows_out": len(rows), "measured": len(measured),
                    "unmeasured": len(rows) - len(measured),
                    # The check Marta's review asked for, as an assertion in the record
@@ -1042,6 +1111,16 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                                           "sequence_sha256", "mean_plddt",
                                           "confident_fraction", "pdb_sha256", "absence")
                    if folded and k in folded} if folded else None,
+        # The other chains folded this run, in the same shape and under a key of their own.
+        # `folded` stays the pick alone because the page, the committed artifact and every
+        # record already on disk report that one, and widening it would have made this change
+        # unreadable against them. The digest is carried per chain so a reader can tell two
+        # predictions apart; the coordinates themselves are not, for the reason the primary's
+        # are not -- 193KB per chain would be most of the record.
+        "folded_also": [{k: f[k] for k in ("target_name", "sequence_length",
+                                           "sequence_sha256", "mean_plddt",
+                                           "confident_fraction", "pdb_sha256", "absence")
+                         if k in f} for f in folds[1:]] or None,
         "foldable": fold_rows if fold else None,
         "evidence": evidence,
         "seconds": round(time.time() - clock, 2),
@@ -1059,6 +1138,12 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
             "surface_on_predicted_coordinates": len(predicted),
             "surface_predicted_was_the_only_route": sum(
                 1 for r in predicted if r["predicted_surface"]["only_route_to_a_surface"]),
+            # The number this change is for: chains with some surface, deposited or predicted,
+            # against chains with none. A chain over the folding ceiling and absent from PDBe
+            # is still in the second group, and stating the total is what keeps that visible.
+            "chains_with_any_surface": sum(
+                1 for r in rows
+                if r["measured"] or (r.get("predicted_surface") or {}).get("measured")),
             # `fold_rows` counts the identified chains, so it stays comparable with
             # `chains_ranked` and with every record already on disk. The unidentified ORFs the
             # fold stage now also emits a row for are counted beside it rather than folded
