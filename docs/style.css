@@ -202,6 +202,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .bi-top .vl{font-family:var(--mono);font-size:14.5px;font-weight:500;flex:none;font-variant-numeric:tabular-nums}
 .track{height:8px;background:var(--surface-2);border-radius:5px;overflow:hidden}
 .fill{height:100%;background:var(--brand);border-radius:5px}
+.bi .nm .cut{display:block;font-family:var(--mono);font-size:12.5px;color:var(--fg-3);margin-top:2px}
 .bi.mark .nm{font-weight:600}
 .bi.mark .vl{color:var(--accent)}
 
@@ -264,6 +265,23 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .cmx tr.unid .nm .t{font-weight:500;font-style:italic}
 .cmx .why{font-size:13.5px;line-height:1.5;background:var(--warn-soft);color:var(--warn)}
 .cmx tbody tr:last-child td{border-bottom:0}
+
+/* The shortlist variant: four columns, not eight, so it needs none of the sideways room the
+   score matrix does and must not inherit its 1020px floor. */
+.cmx.pick{min-width:0}
+.cmx .cut{font-size:14px;min-width:20ch}
+.cmx .cut a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+.cmx .cut .w{display:block;font-family:var(--mono);font-size:12px;color:var(--fg-3);margin-top:2px}
+.cmx .nm .w{display:inline-block;font-family:var(--mono);font-size:12px;color:var(--fg-3);margin-left:6px}
+
+/* Following a "cut out of" link lands on a row of the score matrix, so that row has to say so
+   — a jump that highlights nothing looks like a broken anchor. The accent goes on the rank and
+   name cells only: the five term cells carry the heat shading, and tinting those would read as
+   a different score. `tr` takes the scroll-margin because the sticky nav would otherwise cover
+   the row it just jumped to. */
+.cmx tbody tr[id]{scroll-margin-top:96px}
+.cmx tbody tr:target .rk,.cmx tbody tr:target .nm{background:var(--accent-soft)}
+.cmx tbody tr:target .rk{box-shadow:inset 3px 0 0 var(--accent)}
 /* Dark mode runs the ramp the other way: every band is dark enough to carry --fg, so the
    white on .h5 has to be taken back off or it is white on mid-violet at 3.2:1. */
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cmx td.h1{background:#241138}

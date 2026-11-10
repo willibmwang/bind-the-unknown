@@ -57,7 +57,7 @@
     <span class="ti">The tools each step called<span class="ds">The six calls, the databases they reached, and what each one returned.</span></span>
     <span class="ar" aria-hidden="true">→</span></a>
   <a class="tocrow" href="#picked"><span class="n">05</span>
-    <span class="ti">What it picked<span class="ds">The ranked targets and their scores — the top eight of twenty.</span></span>
+    <span class="ti">The shortlist<span class="ds">Every mature chain, scored, each traced back to the ORF it was cut out of.</span></span>
     <span class="ar" aria-hidden="true">→</span></a>
   <a class="tocrow" href="#toolkit"><span class="n">06</span>
     <span class="ti">The toolkit<span class="ds">All ten tools, including the ones exercised only to record how they fail.</span></span>
@@ -493,19 +493,22 @@
 </section>
 
 <section id="picked">
-  <div class="sec-head"><h2>What it picked</h2><span class="tag">top 8 of 20</span></div>
-  <p class="cap">The score is five ingredients with weights fixed before the run: how conserved the protein is, whether it sits on the outside, whether the virus needs it, whether its class is usually druggable, and how much structural work already exists. Spike and the main protease come out level at the top.</p>
-  <div class="bars">
-    <div class="bi"><div class="bi-top"><span class="nm">1 · Spike, outer segment</span><span class="vl">6.91</span></div><div class="track"><div class="fill" style="width:100%"></div></div></div>
-    <div class="bi"><div class="bi-top"><span class="nm">2 · Main protease</span><span class="vl">6.90</span></div><div class="track"><div class="fill" style="width:99.9%"></div></div></div>
-    <div class="bi"><div class="bi-top"><span class="nm">3 · Spike, stem</span><span class="vl">6.89</span></div><div class="track"><div class="fill" style="width:99.7%"></div></div></div>
-    <div class="bi"><div class="bi-top"><span class="nm">4 · Spike, head</span><span class="vl">6.88</span></div><div class="track"><div class="fill" style="width:99.6%"></div></div></div>
-    <div class="bi mark"><div class="bi-top"><span class="nm">5 · Copying machine (RdRp) — the target of remdesivir</span><span class="vl">6.42</span></div><div class="track"><div class="fill" style="width:93%"></div></div></div>
-    <div class="bi"><div class="bi-top"><span class="nm">6 · Second protease</span><span class="vl">6.40</span></div><div class="track"><div class="fill" style="width:92.7%"></div></div></div>
-    <div class="bi"><div class="bi-top"><span class="nm">7 · Unwinding motor</span><span class="vl">5.61</span></div><div class="track"><div class="fill" style="width:81.3%"></div></div></div>
-    <div class="bi"><div class="bi-top"><span class="nm">8 · Membrane protein</span><span class="vl">5.52</span></div><div class="track"><div class="fill" style="width:79.9%"></div></div></div>
-  </div>
-  <p class="after">The remaining 12 score from 4.56 down to 0.91. The headline check: with SARS-CoV-2 removed from the reference, the system still surfaced the real countermeasure targets — including the one an approved antiviral already hits.</p>
+  <div class="sec-head"><h2>The shortlist</h2><span class="tag">{{orfs_ranked}} ORFs cut into {{chains}} chains</span></div>
+  <p class="cap">This is the deliverable, and it is a different list from the one in step 1 —
+  not a shorter version of it. Step 1 ranks whole stretches of genome; step 2 cuts the
+  polyproteins among them into the mature chains a virus actually folds, and a binder is
+  aimed at a chain. So the {{orfs_ranked}} ORFs become {{chains}} chains, and
+  <b>{{biggest_cut}} of them come out of a single ORF</b> — the replicase, step 1's second
+  row. Every chain below names the ORF it was cut from and links back to it.</p>
+  <!--PICKED-->
+  <p class="after">Why the cut is what makes this section worth reading: the two chains that
+  carry the claim do not exist at the ORF altitude at all. The main protease
+  (<span class="mono">nsp5</span>), which nirmatrelvir inhibits, is rank {{mpro_rank}} here,
+  and the polymerase (<span class="mono">nsp12</span>), which remdesivir inhibits, is
+  rank {{rdrp_rank}}. Both are interior fragments of that one replicase row above, so a
+  pipeline that stopped at step 1 could not have surfaced either of them. With SARS-CoV-2
+  deleted from the reference library, both still land in the top five — scored only against
+  relatives, never against the virus itself.</p>
 </section>
 
 <section id="toolkit">

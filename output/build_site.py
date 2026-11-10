@@ -387,6 +387,7 @@ def build_index():
     holdout = next((c for c in landing["cases"] if c.get("reference_excluded_organism")),
                    landing["cases"][0])
     body = body.replace("<!--CANDIDATES-->", candidate_matrix(holdout))
+    body = body.replace("<!--PICKED-->", picked_table(holdout))
     evidence = evidence_block(holdout)
     body = body.replace("<!--EVIDENCE-->", evidence)
     body = body.replace("<!--EVIDENCE-TOC-->", EVIDENCE_TOC if evidence else "")
@@ -396,7 +397,7 @@ def build_index():
     body = body.replace("<!--TOOLCALLS-->", f"{len(TOOLKIT)} tools \u00b7 {calls} calls")
     # Last, so a {{token}} introduced by any generated block above is filled too. The
     # landing page is the held-out case throughout, so its numbers come from that case.
-    body = fill(body, facts(holdout) | candidate_facts(holdout))
+    body = fill(body, facts(holdout) | candidate_facts(holdout) | picked_facts(holdout))
     out = (head(f"{SITE} · one pathogen genome in, every next step out",
                 "Deciding which of a new virus's proteins a drug should aim at, from the "
                 "genome accession alone, with every step on the record. This is the "
@@ -466,6 +467,13 @@ def stage_cards(case):
 
 
 def score_bars(case, limit=8):
+    """The per-genome pages' shortlist. The landing page uses `picked_table` instead.
+
+    Each bar names the ORF its chain was cut out of, for the same reason the landing page's
+    table does: a reader seeing `nsp12` has no way to know it is an interior fragment of a
+    polyprotein rather than a gene of its own, and on these pages that is most of the list.
+    Named rather than linked, because a result page carries no stage-1 table to link to.
+    """
     rows = sorted(case.get("scores", []), key=lambda r: r.get("rank", 999))[:limit]
     if not rows:
         return ""
@@ -473,9 +481,11 @@ def score_bars(case, limit=8):
     bars = []
     for r in rows:
         score = r.get("score") or 0
+        parent = (f'<span class="cut">cut out of {esc(r["parent"])}</span>'
+                  if r.get("parent") else "")
         bars.append(f"""
     <div class="bi"><div class="bi-top">
-      <span class="nm">{esc(r.get('rank'))} · {esc(r.get('target'))}</span>
+      <span class="nm">{esc(r.get('rank'))} · {esc(r.get('target'))}{parent}</span>
       <span class="vl">{score:.2f}</span></div>
       <div class="track"><div class="fill" style="width:{max(2, score / top * 100):.1f}%"></div></div></div>""")
     rest = len(case.get("scores", [])) - len(rows)
@@ -589,7 +599,7 @@ def candidate_matrix(case):
             # measurements that came back zero, and nothing was measured: the ranker never
             # reached the features because nothing identified the protein.
             body.append(f"""
-      <tr class="unid">
+      <tr class="unid" id="orf-{esc(row['rank'])}">
         <td class="rk">{esc(row['rank'])}</td>
         <td class="nm"><span class="t">Not identified</span><span class="w">{where}</span></td>
         <td class="why" colspan="5">{esc(row.get('unidentified_because'))}</td>
@@ -626,8 +636,12 @@ def candidate_matrix(case):
         via = (f'<span class="w">{esc(homolog)}'
                f'{" · " + esc(route) if route else ""}</span>' if homolog else
                f'<span class="w">{esc(route or "")}</span>')
+        # Anchored per row, so the shortlist two sections down can link a mature chain back
+        # to the ORF it was cut out of. That link is the one relationship the two tables
+        # cannot show on their own: twelve of the twenty chains come from this list's second
+        # row, and without the anchor a reader has to match protein names by eye.
         body.append(f"""
-      <tr>
+      <tr id="orf-{esc(row['rank'])}">
         <td class="rk">{esc(row['rank'])}</td>
         <td class="nm"><span class="t">{esc(row['name'])}</span>{via}
           <span class="w">{where}</span></td>
@@ -663,6 +677,104 @@ def candidate_matrix(case):
     <tbody>{"".join(body)}</tbody>
   </table>
   </div>{note}"""
+
+
+def picked_table(case):
+    """The shortlist stage 2 actually produced, with each chain tied to the ORF it came from.
+
+    This section used to be eight hand-typed bars: literal scores, literal CSS bar widths,
+    and plain-language names invented for the page. Three things were wrong with that, and
+    only one of them was the retyping.
+
+    It was truncated to the top eight of twenty with no way to see the rest. It carried the
+    scores of a run two scoring changes ago, under a headline -- "Spike and the main protease
+    come out level at the top" -- that had stopped being true. And it renamed every chain, so
+    `nsp12` appeared as "Copying machine (RdRp)" with nothing linking it to anything above it
+    on the page; a reader could not tell that this list and the ORF list are different cuts of
+    the same genome rather than two unrelated rankings.
+
+    The last of those is the one worth fixing properly, because the relationship it hides is
+    the point of the stage. Twelve of these twenty chains are cut out of a single ORF, the
+    replicase polyprotein, and the two targets that carry the project's claim -- the main
+    protease and the polymerase, which nirmatrelvir and remdesivir hit -- are among them. They
+    do not exist at the ORF altitude at all: stage 1 can only ever rank the whole polyprotein,
+    which is why a page that stopped at the ORF table could not show that the system found
+    them. So every row here names its parent ORF and links to that ORF's row in the stage-1
+    table, which makes the cut traceable in the one direction a reader needs it.
+    """
+    rows = case.get("scores") or []
+    if not rows:
+        return ""
+    # The stage-1 ranks to link to. A chain's parent is the ORF it was cut from; a chain that
+    # is a whole protein has no parent and matches the stage-1 row by its own name. Where
+    # neither resolves the cell is plain text rather than a link -- a wrong anchor is worse
+    # than no anchor, and the two tables can legitimately come from different runs.
+    candidates, _ = candidate_rows(case)
+    orf_rank = {c["name"]: c["rank"] for c in candidates if c.get("name")}
+    top = max((r.get("score") or 0) for r in rows) or 1
+
+    body = []
+    for r in rows:
+        parent = r.get("parent") or r.get("target")
+        rank = orf_rank.get(parent)
+        cut = (f'<a href="#orf-{esc(rank)}">{esc(parent)}</a>'
+               f'<span class="w">stage&nbsp;1 rank {esc(rank)}</span>'
+               if rank is not None else f'{esc(parent)}')
+        whole = ' <span class="w">not a polyprotein</span>' if not r.get("parent") else ""
+        score = r.get("score") or 0
+        body.append(f"""
+      <tr>
+        <td class="rk">{esc(r.get('rank'))}</td>
+        <td class="nm"><span class="t">{esc(r.get('target'))}</span>{whole}</td>
+        <td class="cut">{cut}</td>
+        <td class="sc"><span class="v">{score:.2f}</span>
+          <span class="tr"><i style="width:{max(2, score / top * 100):.1f}%"></i></span></td>
+      </tr>""")
+
+    return f"""
+  <div class="cmxscroll" tabindex="0" role="region" aria-label="The ranked shortlist of mature chains">
+  <table class="cmx pick">
+    <caption>Every mature chain stage 2 produced, highest score first. &ldquo;Cut out of&rdquo;
+      names the ORF from the stage-1 table above and links to its row there, so a chain can be
+      traced back to the stretch of genome it came from. Scores are on the same five weights.</caption>
+    <thead>
+      <tr>
+        <th scope="col" class="rk">#</th>
+        <th scope="col" class="nm">Mature chain &mdash; what a binder would be aimed at</th>
+        <th scope="col" class="cut">Cut out of</th>
+        <th scope="col" class="sc">Score</th>
+      </tr>
+    </thead>
+    <tbody>{"".join(body)}</tbody>
+  </table>
+  </div>"""
+
+
+def picked_facts(case):
+    """The numbers the shortlist's prose quotes, read from the record it describes.
+
+    The claim this section exists to make is that two of the chains near the top are the
+    targets of approved antivirals, and the ranks in that sentence were typed by hand. They
+    are looked up here instead, by the `nsp` designation in the chain's own name, so the
+    sentence follows the ranking rather than asserting where it used to sit. A designation
+    that no longer matches any chain raises through `fill` rather than printing a blank rank.
+    """
+    rows = case.get("scores") or []
+    out = {}
+    for token, key in (("nsp5", "mpro_rank"), ("nsp12", "rdrp_rank")):
+        hit = next((r for r in rows
+                    if re.search(rf"\b{token}\b", r.get("target") or "")), None)
+        if hit:
+            out[key] = hit["rank"]
+    # How concentrated the cut is: the number of chains taken out of whichever single ORF
+    # yielded the most of them. It is the figure that makes the stage legible -- one row of
+    # the stage-1 table becoming most of this one -- and it is counted, not asserted.
+    parents = [r.get("parent") for r in rows if r.get("parent")]
+    if parents:
+        top_parent = max(set(parents), key=parents.count)
+        out["biggest_cut"] = parents.count(top_parent)
+        out["biggest_cut_orf"] = top_parent
+    return out
 
 
 def surface_block(case):
@@ -946,6 +1058,12 @@ def evidence_block(case):
     # the only accession the chain holds. A reader who takes an InterPro assignment or a
     # ChEMBL binder here for a fact about the virus that went in has been misled by the
     # layout, so the section says whose records these are before it shows them.
+    #
+    # The wall clock is written in here rather than left as a {{seconds}} token for `fill`.
+    # This block is rendered into two different pages and only one of them is filled: the
+    # landing page substitutes tokens after every generated block is in place, while a result
+    # page assembles its HTML and ships it, so the token survived to the published Zika page
+    # as the literal text `{{seconds}}`. The value is the one `facts` would have supplied.
     held = case.get("reference_excluded_organism")
     whose = (f' Each accession below is the relative the chain identified that target '
              f'through, not {esc(held)}, which was deleted from the reference before the run: '
@@ -960,7 +1078,7 @@ def evidence_block(case):
   than the budget, and the default budget is 600 seconds \u2014 so
   <span class="mono">bioactivity.prior_binders</span>, declaring exactly 600, is admitted. What
   keeps them off the path is measured cost rather than declared cost: about 210 seconds for one
-  target across the five, against a chain that finishes in {{{{seconds}}}} seconds.
+  target across the five, against a chain that finishes in {num(round(case.get('seconds') or 0))} seconds.
   <b>Nothing they return changes a rank.</b>{whose}</p>
   {"".join(cards)}
   {build_predicted()}
