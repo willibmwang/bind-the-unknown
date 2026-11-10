@@ -61,8 +61,8 @@ indexing, which is what the system would face for something genuinely new. Held 
 real ORFs still resolve to the right protein by function -- the replicase to bat coronavirus
 HKU3, the spike to HKU3's spike, the nucleoprotein to Rp3/2004 -- with scores falling from
 1.000 to between 0.30 and 0.84. The assignment survives and its confidence visibly does not,
-which is the behaviour wanted. The spurious reverse-strand ORF scores 0.048 against a phage
-protein and is rejected by the same threshold.
+which is the behaviour wanted. The spurious reverse-strand ORF scores 0.0417 against a bat
+coronavirus replicase and is rejected by the same threshold.
 
 **Identification is homology, not naming.** Each ORF is searched against UniProtKB with
 BLAST. The hit supplies an accession, which is the key everything downstream needs: the
@@ -330,9 +330,18 @@ REFERENCE_QUERY = SCOPES["viral"]
 
 KMER = 5
 
-# Below this, a hit is noise. Calibrated on the one spurious ORF in the SARS-CoV-2 six-frame
-# call, which scores 0.048 against an unrelated phage protein, against 0.30 for the weakest
-# real assignment when the pathogen itself is held out of the reference.
+# Below this, a hit is noise. Calibrated on the spurious ORFs in the SARS-CoV-2 six-frame call,
+# the highest of which scores 0.0417, against 0.3011 for the weakest real assignment when the
+# pathogen itself is held out of the reference.
+#
+# The noise figure was 0.048 against an unrelated phage protein while `identify_local` divided
+# by the smaller of the two k-mer sets. Normalising by the query alone moved it down, because
+# that phage entry is 46 residues and was supplying its own 42-k-mer denominator: the same two
+# shared k-mers now read 2/96 rather than 2/42. The weakest real assignment did not move at all,
+# since its query was already the smaller side. So the band this threshold sits in widened from
+# 0.048-0.30 to 0.0417-0.3011 and 0.12 became more conservative without being re-derived --
+# worth stating, because a threshold that survives a change to the quantity it gates should be
+# shown to have survived rather than assumed to have.
 MINIMUM_SCORE = 0.12
 
 
@@ -424,9 +433,34 @@ def build_index(entries, exclude_organism=None, k=KMER, require_removal=True):
 def identify_local(protein, index, kept, k=KMER, top=3):
     """Best reference hits for one ORF, by shared k-mer fraction.
 
-    The score is shared k-mers over the smaller of the two k-mer sets, so a short query against
-    a long polyprotein is not penalised for the length it does not cover -- which matters here,
+    The score is shared k-mers over the query's own k-mer count, so a short query against a
+    long polyprotein is not penalised for the length it does not cover -- which matters here,
     because a frameshifted ORF half is exactly that case.
+
+    **It used to divide by the smaller of the two sets, and the mirror case is what that
+    broke.** Taking the minimum protects a short query inside a long entry, which is the case
+    the paragraph above is about and which this still handles identically -- the query side was
+    already the smaller one there. The case it did not survive is the reverse: a short reference
+    ENTRY inside a long query, where the denominator becomes the entry's length and a fragment
+    can score far higher than the full-length protein it is a fragment of.
+
+    Two recorded instances. `P35985`, `CAPSH_ADECU Hexon protein (Fragment)`, is 18 residues --
+    14 five-mers -- so ten shared k-mers scored 10/14 = 0.7143 and it was recorded as the
+    nearest relative of a human adenovirus 2 hexon ORF, beating four full-length hexons at
+    0.4759 to 0.5037, in `runs/benchmark/NC_001405_1.json`. And `A8C8X2`, 11 residues, scored
+    exactly 1.0 on seven shared k-mers against influenza PB1-F2, over the true ortholog
+    `A4GCJ5` at 0.8675. Because `hits[0]` is also what `decompose` reads mature chains from and
+    what the structural stage fetches, the whole downstream lane for such a candidate pointed at
+    an 18-residue entry.
+
+    The reference holds 485 entries shorter than this pipeline's own `MINIMUM_AA` of 60 and 450
+    named "(Fragment)", so this was not an isolated row.
+
+    Normalising by the query alone needs no threshold, which is why it is preferred to flooring
+    the denominator at some length: a floor would move the cliff rather than remove it -- 382 of
+    those fragments are over 60 residues and could do the same thing -- and it would import
+    `MINIMUM_AA`, a number argued for as a statement about six-frame translation noise in a
+    query genome, into a role its rationale says nothing about.
     """
     import collections
 
@@ -464,10 +498,15 @@ def identify_local(protein, index, kept, k=KMER, top=3):
     scored = []
     for position, shared in ordered:
         entry = kept[position]
-        denominator = max(1, min(len(query), len(entry["sequence"]) - k + 1))
+        denominator = max(1, len(query))
         scored.append({"accession": entry["accession"], "name": entry["name"],
                        "organism": entry["organism"],
-                       "score": round(shared / denominator, 4), "shared_kmers": shared})
+                       "score": round(shared / denominator, 4), "shared_kmers": shared,
+                       # Recorded so the score can be recomputed from the row rather than
+                       # trusted, and so a short entry is visible as one.
+                       "denominator": denominator,
+                       "entry_length": len(entry["sequence"]),
+                       "score_scale": "shared_kmer_fraction_of_query"})
     scored.sort(key=lambda hit: (-hit["score"], hit["accession"]))
     return scored[:top]
 
@@ -614,9 +653,50 @@ def score_candidate(hits, records):
                      if any(term in k for k in keywords)] or [0])
     essential = any(any(term in k for k in keywords) for term in ESSENTIAL)
     conservation = hits[0]["score"] if hits else 0.0
+    # The scale is recorded, not reconciled, and the two tiers do not share one.
+    #
+    # `identify_local` returns shared 5-mers over the query's k-mer count. `identify_remote`
+    # returns min(1, bits/200). Both land in this one variable and are multiplied by the
+    # rubric's heaviest weight, 3.0, and nothing anywhere said so. Across every artifact on
+    # disk the remote tier has median conservation 1.0000 with 43 of 74 rows at exactly 1.0,
+    # against the exact tier's median 0.5397 with 11 of 448 -- so the two are not comparable
+    # and the remote one is mostly saturated.
+    #
+    # It inverts real pairs. In the recorded SARS-CoV-2 holdout, ORF8's homolog is 57.0%
+    # identical over 121 residues and scores 0.8300 on the remote scale, while ORF7a's is 89.3%
+    # identical and scores 0.5385 on the exact scale; every other feature is zero on both rows,
+    # so conservation alone orders them and puts the worse match above the better one. Spike at
+    # 1964.9 bits reads 1.0000, the same credit as a hit at exactly 200.
+    #
+    # Rescaling is refused rather than postponed. A conversion between a k-mer fraction and a
+    # bit score needs a calibration, and `rank_score` states that there is no labelled set of
+    # correct rankings to calibrate against -- so a divisor chosen to make one recorded run read
+    # better is the fitted threshold this module refuses three times elsewhere. The honest
+    # replacement is one quantity on both tiers, alignment identity, which `identify_remote`
+    # already has the alignment for; it belongs in its own field measured against
+    # `runs/surface_in_ranker.json`'s instrument, not smuggled into `score`, because
+    # MINIMUM_SCORE is calibrated on the k-mer scale and redefining `score` would move the
+    # exact/remote tier boundary as a side effect.
+    #
+    # The ceiling flag is on the quantity that matters and not on the tier. A k-mer fraction
+    # reaches 1.0 too -- ten EBV rows do, all exact -- and at the ceiling the heaviest term
+    # stops ordering the list whichever scale produced it.
+    scale = hits[0].get("score_scale") if hits else None
+    if scale is None and hits and hits[0].get("bits") is not None:
+        scale = "bits_over_200"
 
     return {
         "conservation": round(conservation, 4),
+        # Inside `features`, not only in the payload, because that is the one insertion point
+        # that travels: `decompose` copies this dict for every mature chain, and
+        # `runs/benchmark/*.json` carries `features` while dropping `hits` and having no
+        # `limitations` block at all. A bare 1.0 in those artifacts was unannotatable from
+        # anywhere else.
+        "conservation_scale": scale,
+        "conservation_at_ceiling": round(conservation, 4) >= 1.0,
+        "conservation_bits": hits[0].get("bits") if hits else None,
+        "conservation_shared_kmers": hits[0].get("shared_kmers") if hits else None,
+        "conservation_denominator": hits[0].get("denominator") if hits else None,
         "surface_exposed": exposed,
         "structures_in_family": structures,
         "druggable_class": druggable,
@@ -866,6 +946,30 @@ def enrich_with_surface(ranked, top=12):
     return ranked
 
 
+# The five weights, in one place. They were literals here and literals again in the `rubric`
+# block of the record, which is two statements of one rubric: an edit to the weight that
+# actually ranks could leave the published rubric asserting the old one, and the published
+# rubric is what the site renders and what a reader checks the arithmetic against.
+RUBRIC = {"conservation": 3.0, "surface_exposed": 2.0, "essential_class": 1.5,
+          "druggable_class": 0.8, "structures_in_family_capped": 0.5}
+
+# The most each term can pay, which is what lets a term be read as a fraction of what was
+# available rather than as a bare number. Three of the five are their own weight:
+# `conservation` is a 0-1 fraction, and the two booleans earn the weight or nothing. The
+# structure count is divided by its 50 cap first, so it tops out at its weight too.
+# `druggable_class` is the exception and the reason this table exists -- it is an integer
+# class, not a fraction, so its ceiling is the weight times the highest class in DRUGGABLE,
+# and a reader given only the weight would score a 2.4-point term out of 0.8.
+TERM_CEILING = {"conservation": RUBRIC["conservation"],
+                "surface_exposed": RUBRIC["surface_exposed"],
+                "essential_class": RUBRIC["essential_class"],
+                # Rounded, because 0.8 * 3 is 2.4000000000000004 in binary floating point and
+                # this number is published as the denominator a reader divides by.
+                "druggable_class": round(RUBRIC["druggable_class"] * max(DRUGGABLE.values()),
+                                         4),
+                "structures_in_family": RUBRIC["structures_in_family_capped"]}
+
+
 def rank_score(features):
     """One number from the features, with every term visible.
 
@@ -874,10 +978,11 @@ def rank_score(features):
     grades decisions rather than predictions -- so a learned weighting here would be fitted to
     whatever its author already believed. A stated rubric is honest about being one.
     """
-    base = (3.0 * features["conservation"]
-            + 2.0 * float(features["surface_exposed"])
-            + 1.5 * float(features["essential_class"])
-            + 0.5 * min(1.0, features["structures_in_family"] / 50.0))
+    base = (RUBRIC["conservation"] * features["conservation"]
+            + RUBRIC["surface_exposed"] * float(features["surface_exposed"])
+            + RUBRIC["essential_class"] * float(features["essential_class"])
+            + RUBRIC["structures_in_family_capped"]
+            * min(1.0, features["structures_in_family"] / 50.0))
 
     # Where a structure exists, the surface markers carry the druggability term and the
     # keyword class does not. The keyword class scores zero on six of this project's own
@@ -912,7 +1017,175 @@ def rank_score(features):
     # reverse of a small-molecule druggability score, and the direction holds at every contact
     # cutoff tried. That signal is real and is too weak to improve a ranking that already
     # works. Reported as a feature so a reader can see it; not mixed into the score.
-    return round(base + 0.8 * features["druggable_class"], 4)
+    return round(base + RUBRIC["druggable_class"] * features["druggable_class"], 4)
+
+
+def score_terms(features, rubric=None):
+    """`rank_score` split into the five terms it is a sum of.
+
+    One number sorts the list and five numbers explain it, and the explanation is only worth
+    having if it is the same arithmetic rather than a second rubric dressed as a reading of
+    the first: every term here is a weight from `RUBRIC` times a feature already in the row,
+    so the sum recovers the score exactly. `chain._decomposed_score` asserts that it does,
+    per row, on every recorded run.
+
+    Worth the two lines because the top of the list is routinely a near-tie reached by
+    opposite routes. On the held-out SARS-CoV-2 run the spike and the replicase finish 0.08
+    apart, and the spike gets there on 2.0 points for sitting on the outside of the virion
+    with conservation of 0.46, while the replicase scores 0.0 for exposure and 2.50 for
+    conservation. A single number says they are equally good and hides that one is an
+    antibody target and the other is reached by a cell-permeable drug.
+    """
+    rubric = rubric or RUBRIC
+    terms = {
+        "conservation": round(rubric["conservation"] * features["conservation"], 4),
+        "surface_exposed": round(rubric["surface_exposed"]
+                                 * float(features["surface_exposed"]), 4),
+        "essential_class": round(rubric["essential_class"]
+                                 * float(features["essential_class"]), 4),
+        "structures_in_family": round(rubric["structures_in_family_capped"]
+                                      * min(1.0, features["structures_in_family"] / 50.0), 4),
+        "druggable_class": round(rubric["druggable_class"]
+                                 * features["druggable_class"], 4),
+    }
+    return {"terms": terms, "total": round(sum(terms.values()), 4)}
+
+
+def candidate_table(payload):
+    """The ORFs one intake run ranked, one flat row each, with the score split five ways.
+
+    `run_intake` already returns all of this, in the shape the stages downstream need: a full
+    translated sequence per ORF, every homolog hit under it, and the features nested a level
+    down. That is the right shape for a pipeline and an unreadable one for a person, and the
+    only published form of this stage was five counts -- ORFs found, ORFs ranked, how many
+    were identified. So the page could say that nine of twelve ORFs resolved and could not say
+    which nine, what any of them scored, or what the other three were.
+
+    Every ORF the run ranked is here, the unidentified ones included. Those three are the
+    operating envelope rather than a gap in the table: no relative at either homology tier and
+    no surface signal in their own sequence either, which is the state a genuinely novel
+    protein arrives in. A table that listed the nine that worked would be the pipeline marking
+    its own coverage.
+    """
+    rubric = payload.get("rubric") or RUBRIC
+    rows = []
+    for position, row in enumerate(payload["targets"], 1):
+        orf = row["orf"]
+        # The ORF's own coordinates, flattened up beside the score. Which strand and frame a
+        # candidate was read in is the one fact here that comes from the genome rather than
+        # from a relative, and it is what shows that overlapping frames are ranked separately:
+        # ORFs 10 and 11 of the held-out run sit inside the spike's nucleotides on the other
+        # strand and in another frame, and score nothing.
+        out = {"rank": position,
+               "identified": bool(row.get("identified")),
+               "name": row.get("name"),
+               "identification_route": row.get("identification_route") or row.get("tier"),
+               "nearest_homolog": row.get("nearest_homolog"),
+               "nearest_organism": row.get("nearest_organism"),
+               "strand": orf["strand"], "frame": orf["frame"],
+               "nt_start": orf["nt_start"], "length_aa": orf["length_aa"],
+               "segment": orf.get("segment", 0)}
+        features = row.get("features")
+        if features is None:
+            out |= {"features": None, "terms": None, "score": None,
+                    "unidentified_because": row.get("unidentified_because"),
+                    "topology": row.get("topology")}
+        else:
+            split = score_terms(features, rubric)
+            score = row.get("score")
+            out |= {"features": {k: features[k] for k in
+                                 ("conservation", "surface_exposed", "essential_class",
+                                  "druggable_class", "structures_in_family")},
+                    "terms": split["terms"], "score": score,
+                    # Asserted per row rather than trusted, for the same reason the chain
+                    # asserts it: five numbers that do not add to the number the list sorted
+                    # by would be an explanation of a different ranking.
+                    "terms_sum_to_score": (score is not None
+                                           and abs(split["total"] - score) < 5e-4),
+                    # Why the two keyword terms fired, which is the half of the rubric a
+                    # reader is most likely to want to argue with. `locations` is the evidence
+                    # under `surface_exposed`, which is a majority over that list.
+                    "keywords_matched": features.get("keywords_matched"),
+                    "locations": features.get("locations"),
+                    "exposed_fraction_of_locations":
+                        features.get("exposed_fraction_of_locations")}
+        rows.append(out)
+    return rows
+
+
+def candidate_record(accession, exclude_organism=None, top=12, record=True, **kwargs):
+    """Stage 1 on its own, recorded as the table behind its counts.
+
+    Separate from the onset chain's record and not a replacement for it. The chain runs this
+    same call as its first stage, with these same arguments, and keeps the counts; this keeps
+    the rows. It is worth having as its own entry point because it is the cheap end of the
+    pipeline -- about fifteen seconds against a warm reference cache, where the whole chain is
+    thirty-five minutes -- so the published table can be refreshed without re-running six
+    stages of folding and surface measurement to do it.
+
+    The vocabulary that fires the two keyword terms is written into the record beside the
+    weights. `druggable_class` is an integer from a hand-written keyword table that has been
+    wrong three times in the same way, and a reader cannot audit a 1.6-point term without
+    seeing which words earn which class.
+    """
+    started = time.time()
+    payload = run_intake(accession, exclude_organism=exclude_organism, top=top,
+                         record=False, **kwargs)
+    rows = candidate_table(payload)
+    out = {
+        "experiment": "intake-candidate-table", "status": "complete",
+        "question": "Which ORFs did stage 1 rank, what did each of the five stated weights "
+                    "pay each of them, and which ORFs did it fail to identify at all?",
+        "genome_accession": payload["genome_accession"],
+        "genome_header": payload["genome_header"],
+        "genome_length_nt": payload["genome_length_nt"],
+        "segments": payload["segments"],
+        "reference_excluded_organism": payload["reference_excluded_organism"],
+        "reference_entries": payload["reference_entries"],
+        "reference_entries_removed": payload["reference_entries_removed"],
+        "reference_scope": payload["reference_scope"],
+        "orfs_found": payload["orfs_found"],
+        "orfs_ranked": payload["orfs_ranked"],
+        "orfs_dropped_by_top": payload["orfs_dropped_by_top"],
+        "orfs_rescued_by_topology": payload["orfs_rescued_by_topology"],
+        "identified": sum(1 for r in rows if r["identified"]),
+        "unidentified": payload["unidentified"],
+        "minimum_orf_aa": payload["minimum_orf_aa"],
+        "minimum_hit_score": payload["minimum_hit_score"],
+        "rubric": dict(RUBRIC),
+        "term_ceiling": dict(TERM_CEILING),
+        "vocabulary": {
+            "druggable_class": {str(klass): sorted(t for t, k in DRUGGABLE.items()
+                                                   if k == klass)
+                                for klass in sorted(set(DRUGGABLE.values()), reverse=True)},
+            "essential_class": sorted(ESSENTIAL)},
+        "candidates": rows,
+        "every_score_re_adds_from_its_terms":
+            all(r["terms_sum_to_score"] for r in rows if r["identified"]),
+        "seconds": round(time.time() - started, 2),
+        "provenance": provenance(),
+        "limitations": [
+            "The ranking is a stated rubric, not a fitted model. No labelled set of correct "
+            "target rankings exists to fit against.",
+            "`druggable_class` and `essential_class` are read from a hand-written keyword "
+            "table against UniProt annotations on homologs. A term the table does not list "
+            "reads as 'not druggable' rather than as 'not in my vocabulary'.",
+            "`structures_in_family` is a count of deposited structures and is therefore a "
+            "record of research attention as much as of tractability. It carries the smallest "
+            "weight for that reason and is capped at 50.",
+            "Six-frame calling misses frameshifted products: SARS-CoV-2's replicase is one "
+            "7,096-residue polyprotein and is ranked here as two fragments, because no ORF "
+            "caller reading stop codons can see a ribosomal frameshift.",
+            "These are whole ORFs. A polyprotein is one row here and is cut into its mature "
+            "chains by the stage after this one, so the scores below are not the per-chain "
+            "scores the shortlist is drawn from."],
+        "interpretation": "The candidate proteins stage 1 proposes for one genome, ranked by "
+                          "a stated rubric. No binding, affinity, inhibition or antiviral "
+                          "property is predicted for any of them."}
+    out["content_sha256"] = content_digest(out)
+    if record:
+        write_json(ROOT / "runs/intake_candidates.json", out)
+    return out
 
 
 def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
@@ -1084,6 +1357,13 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
                             "locations": ["predicted surface, from hydropathy"],
                             "from_topology": True,
                             "conservation_is_measured": False,
+                            # Explicitly None, not absent. These rows never pass through
+                            # `score_candidate`, so with any consumer that defaults a missing
+                            # scale their 0.0 would read as a measured k-mer fraction -- which
+                            # is the thing `conservation_is_measured: False` exists to prevent,
+                            # arriving through the field added to prevent it.
+                            "conservation_scale": None,
+                            "conservation_at_ceiling": False,
                             "conservation_absent_because":
                                 "no identifiable relative, so the term has no reference to "
                                 "be measured against and scores zero by default"}
@@ -1145,13 +1425,18 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
         # which is most of the recorded ones; non-zero is the case the length cut was losing.
         "orfs_rescued_by_topology": len(rescued),
         "unidentified": sum(1 for r in ranked if not r["identified"]),
-        "rubric": {"conservation": 3.0, "surface_exposed": 2.0, "essential_class": 1.5,
-                   "druggable_class": 0.8, "structures_in_family_capped": 0.5},
+        "rubric": dict(RUBRIC),
         "targets": ranked,
         "sources": [{"name": "NCBI efetch", "url": EFETCH, "licence": "NCBI public domain"},
                     {"name": "UniProt", "url": UNIPROT_SEARCH, "licence": "CC BY 4.0"}],
         "provenance": provenance(),
         "limitations": [
+            "`conservation` is not comparable between tiers. The exact tier reports shared "
+            "5-mers over the query's k-mer count; the remote tier reports a bit score divided "
+            "by 200 and capped at 1.0, so it saturates at 200 bits and a hit ten times past "
+            "that reads the same as one exactly at it. Each row carries `conservation_scale` "
+            "saying which it is, and `conservation_at_ceiling` saying whether the rubric's "
+            "heaviest term is at its ceiling and therefore no longer ordering the list.",
             "The ranking is a stated rubric, not a fitted model. No labelled set of correct "
             "target rankings exists to fit against.",
             "`structures_in_family` is a count of deposited structures and is therefore a "
@@ -1682,7 +1967,11 @@ def identify_remote(protein, index, kept, aligner=None, k=KMER, prefilter=120, t
         scored.append({"accession": entry["accession"], "name": entry["name"],
                        "organism": entry["organism"],
                        "bits": round(bit_score(raw), 1), "evalue": evalue,
-                       "score": round(min(1.0, bit_score(raw) / 200.0), 4)})
+                       # `score` here is NOT the same quantity as `identify_local`'s, and the
+                       # scale is recorded rather than reconciled. See the note on
+                       # `conservation_scale` in `score_candidate` for why rescaling is refused.
+                       "score": round(min(1.0, bit_score(raw) / 200.0), 4),
+                       "score_scale": "bits_over_200"})
     # Equal E-value implies equal raw score implies equal bits, so the accession is the only
     # further key this needs.
     scored.sort(key=lambda hit: (hit["evalue"], hit["accession"]))

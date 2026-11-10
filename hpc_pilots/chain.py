@@ -1259,17 +1259,17 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
     Identified through its own entries, conservation is 1.0 for every candidate -- it is the
     fraction of the query's 5-mers found in the nearest curated relative, and the nearest
     relative is the protein itself -- so the term carrying the most weight separates nothing
-    and the top of the ranking ties.
+    and the top of the ranking ties. The later stages, though, work: the chain ranges are the
+    pathogen's own, so the surface stage resolves structures for nearly every chain and the
+    folding stage cuts the main protease out of the genome's own translation exactly,
+    reproducing the fold already committed at `runs/folded_structure/`.
 
     That description used to read "identity to the nearest curated relative", which was the
     repo's only written definition of its heaviest term and was wrong for both tiers: the
     exact tier computes a shared-5-mer fraction and the remote tier a bit score capped at 200,
     and neither is an identity. The rows now carry `conservation_scale` so which one produced
     a given number is readable, and the term is at its ceiling here whichever scale applies,
-    which is what `conservation_at_ceiling` records. The later stages, though, work: the chain ranges are the pathogen's own, so the
-    surface stage resolves structures for nearly every chain and the folding stage cuts the
-    main protease out of the genome's own translation exactly, reproducing the fold already
-    committed at `runs/folded_structure/`.
+    which is what `conservation_at_ceiling` records.
 
     With the organism deleted, the ranking separates properly and is the configuration every
     validation run in this repository uses. But the accession and the residue ranges now
