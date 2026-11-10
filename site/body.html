@@ -493,13 +493,15 @@
 </section>
 
 <section id="picked">
-  <div class="sec-head"><h2>The shortlist</h2><span class="tag">{{orfs_ranked}} ORFs cut into {{chains}} chains</span></div>
+  <div class="sec-head"><h2>The shortlist</h2><span class="tag">{{identified}} identified ORFs cut into {{chains}} chains</span></div>
   <p class="cap">This is the deliverable, and it is a different list from the one in step 1 —
   not a shorter version of it. Step 1 ranks whole stretches of genome; step 2 cuts the
   polyproteins among them into the mature chains a virus actually folds, and a binder is
-  aimed at a chain. So the {{orfs_ranked}} ORFs become {{chains}} chains, and
-  <b>{{biggest_cut}} of them come out of a single ORF</b> — the replicase, step 1's second
-  row. Every chain below names the ORF it was cut from and links back to it.</p>
+  aimed at a chain. Only the {{identified}} ORFs that matched a relative can be cut, since the
+  boundaries come from that relative — the {{unidentified}} unidentified ones end here. Those
+  {{identified}} become {{chains}} chains, and <b>{{biggest_cut}} of them come out of a single
+  ORF</b> — the replicase, step 1's second row. Every chain below names the ORF it was cut
+  from and links back to it.</p>
   <!--PICKED-->
   <p class="after">Why the cut is what makes this section worth reading: the two chains that
   carry the claim do not exist at the ORF altitude at all. The main protease

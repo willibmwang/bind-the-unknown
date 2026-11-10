@@ -466,15 +466,41 @@ def stage_cards(case):
     return "\n".join(out)
 
 
+def _cut_summary(case):
+    """"N identified ORFs cut into M chains", counted from the record, for a heading tag.
+
+    `identified` and not `orfs_ranked`, because an ORF that reached no relative is cut into
+    nothing: stage 2 needs a homolog's mature-chain boundaries to cut by, so the unidentified
+    rows leave the list here. Against `orfs_ranked` the tag read "12 ORFs cut into 8 chains"
+    on Nipah, which describes cutting twelve things into eight. Against `identified` it reads
+    7 into 8, and Zika -- the genome where only the polyprotein resolves -- reads 1 into 12,
+    which is the clearest statement of what this stage does on the whole site.
+    """
+    by_tool = {s["tool"]: s for s in case.get("stages", [])}
+    orfs = (by_tool.get("intake.rank_targets", {}).get("output") or {}).get("identified")
+    chains = len(case.get("scores") or [])
+    if orfs and chains:
+        return (f"{orfs} identified ORF{'' if orfs == 1 else 's'} "
+                f"cut into {chains} chains")
+    return f"{chains} chains" if chains else "no chains ranked"
+
+
 def score_bars(case, limit=8):
     """The per-genome pages' shortlist. The landing page uses `picked_table` instead.
+
+    `limit=None` shows every chain. The result pages pass it, because truncating to eight hid
+    most of the list on the genomes where the cut matters most -- MERS ranks nineteen chains,
+    so eleven of them were behind a sentence saying the full list is in the record. The record
+    is beside the page and a reader should not have to open it to see the ranking the page is
+    about.
 
     Each bar names the ORF its chain was cut out of, for the same reason the landing page's
     table does: a reader seeing `nsp12` has no way to know it is an interior fragment of a
     polyprotein rather than a gene of its own, and on these pages that is most of the list.
     Named rather than linked, because a result page carries no stage-1 table to link to.
     """
-    rows = sorted(case.get("scores", []), key=lambda r: r.get("rank", 999))[:limit]
+    rows = sorted(case.get("scores", []), key=lambda r: r.get("rank", 999))
+    rows = rows if limit is None else rows[:limit]
     if not rows:
         return ""
     top = max((r.get("score") or 0) for r in rows) or 1
@@ -1148,8 +1174,12 @@ def result_page(case, stem):
 </section>
 
 <section>
-  <div class="sec-head"><h2>What it picked</h2><span class="tag">top {min(8, len(case.get('scores', [])))}</span></div>
-  {score_bars(case)}
+  <div class="sec-head"><h2>The shortlist</h2>
+    <span class="tag">{_cut_summary(case)}</span></div>
+  <p class="cap">A different list from the stage-1 candidates above, not a shorter one. Stage 1
+  ranks whole ORFs; stage 2 cuts the polyproteins among them into the mature chains a virus
+  folds, and a binder is aimed at a chain. Each row names the ORF it was cut out of.</p>
+  {score_bars(case, limit=None)}
 </section>
 
 {fold_html if (fold_step or 99) < (surface_step or 0) else ""}
