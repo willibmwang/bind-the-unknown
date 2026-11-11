@@ -3,9 +3,9 @@
 The site has three parts and this script owns two of them.
 
 * `docs/index.html` is written by hand. It is the SARS-CoV-2 walkthrough, and it is prose, so
-  generating it from a template would make it worse. This script only wraps it: it reads
-  `site/body.html`, puts a real `<head>` on it and links the shared stylesheet, so the page
-  that ships is a complete document rather than a fragment.
+  generating it from a template would make it worse. This script only wraps it. It reads the
+  fragment in `site/body.html`, puts a real `<head>` on it and links the shared stylesheet,
+  so the page that ships is a complete document.
 * `docs/results/` is generated, one page per chain record. A visitor's run arrives as a new
   `runs/onset_chain_<stem>.json` written by `python -m hpc_pilots chain --accession ...`, and
   this script turns it into a page without anyone editing HTML. The records are tracked, so
@@ -15,10 +15,10 @@ The site has three parts and this script owns two of them.
   outputs, so a visitor sees every number without running anything.
 
 **Everything a visitor supplies is escaped on the way in.** `pathogen` is free text typed into
-a GitHub issue form by a stranger, and it reaches this script through the chain record. It is
-written into a public page, so every interpolation here goes through `html.escape`, including
-the ones that look like they came from our own code: the record is not a trusted document once
-a workflow has written a stranger's words into it.
+a GitHub issue form by a stranger, and it reaches this script through the chain record, bound
+for a public page. Every interpolation here goes through `html.escape`, including the ones
+that look like they came from our own code. The record is not a trusted document once a
+workflow has written a stranger's words into it.
 
     python3 output/build_site.py            # wrap the index, build every result page
     python3 output/build_site.py --notebook # also re-render the notebook (slow)
@@ -61,29 +61,33 @@ CANDIDATES_RECORD = "intake_candidates.json"
 # its column tops out at 2.4 and shading it against 0.8 would put three cells past full.
 TERM_COLUMNS = (
     ("conservation", "Match to a known relative",
-     "Share of the ORF's own 5-mers that its nearest curated relative also has. 1.0 would be "
-     "the same sequence; under 0.12 is not kept as a match at all. Rows found by the remote "
-     "tier report a bit score instead, and say so, because the two are not one scale."),
+     "Share of the five-residue runs in the protein it comes from that its nearest curated "
+     "relative also has. 1.0 would be the same sequence, and under 0.12 is not kept as a "
+     "match at all. Rows with only a distant relative carry a different measure, labelled "
+     "in the cell as a bit score, because the two are not one scale."),
     ("surface_exposed", "On the outside",
-     "Whether most of the compartments its relatives are annotated in are places a binder "
-     "can reach without crossing a membrane. All or nothing."),
+     "Whether a binder could reach most of the places its relatives are recorded as sitting "
+     "in without crossing a membrane, scored all or nothing."),
     ("essential_class", "The virus needs it",
-     "Whether the protein's name or keywords name a class the virus cannot replicate "
-     "without — a polymerase, a protease, a capsid, an entry protein. All or nothing."),
+     "Whether the protein's name or keywords put it in a class the virus cannot "
+     "replicate without, such as a polymerase, a protease, a capsid or an entry protein. "
+     "All or nothing."),
     ("druggable_class", "Class that gets drugged",
-     "A 0–3 class from the words in its annotations: proteases and polymerases score 3, "
-     "surface glycoproteins and helicases 2. The historical record for approved antivirals."),
+     "A 0–3 class read off the words in its annotations. Proteases and polymerases score 3, "
+     "surface glycoproteins and helicases 2, because that is where approved antivirals have "
+     "historically landed."),
     ("structures_in_family", "Structures already solved",
-     "Deposited structures across its relatives, capped at 50. The smallest weight, because "
-     "a structure count measures research attention as much as tractability."),
+     "Deposited structures across its relatives, capped at 50. It carries the smallest "
+     "weight, because a count like that measures how much a protein has been studied as "
+     "much as how easy it is to work with."),
 )
 
 
-# `druggable_class` is the one feature that is not already a 0-1 number: it is an integer
-# class from the ranker's keyword table, and the table's top class is 3. The chain record
-# keeps the five weights but not the ceiling they imply, so the ceiling is derived from the
-# weights here -- and cross-checked against the stage-1 record's own `term_ceiling` wherever
-# that record is beside the page, so a change to the class range stops the build instead of
+# `druggable_class` is the one feature that is not already a 0-1 number. It is an integer
+# class from the ranker's keyword table, whose top class is 3. The chain record keeps the
+# five weights but not the ceiling they imply, so the ceiling is derived from the weights
+# here, and cross-checked against the stage-1 record's own `term_ceiling` wherever that
+# record is beside the page. A change to the class range then stops the build instead of
 # shading two of the columns against the wrong maximum.
 DRUGGABLE_CLASS_MAX = 3
 
@@ -310,10 +314,10 @@ def build_offchain():
         return ""
     return (f'<div class="fields"><span class="lead">The other {num(tools)} registered tools '
             f'reach further databases, and none of them is on this path. They were exercised '
-            f'on a grid of their own — {num(calls)} calls, recorded under '
-            f'<span class="mono">runs/toolcalls/</span> with the arguments each was given — '
-            f'which records what a call cost and how it failed and keeps no payload, so '
-            f'nothing they returned is in the result above:</span>{"".join(chips)}</div>')
+            f'on a grid of their own, {num(calls)} calls recorded under '
+            f'<span class="mono">runs/toolcalls/</span> with the arguments each was given. '
+            f'Those records keep what a call cost and how it failed. They hold no payload, '
+            f'so nothing the tools returned is in the result above:</span>{"".join(chips)}</div>')
 
 
 # --------------------------------------------------------------------- the landing page
@@ -339,8 +343,8 @@ def build_index():
                 | picked_facts(holdout) | lane_facts(holdout))
     out = (head(f"{SITE} · one pathogen genome in, every next step out",
                 "Deciding which of a new virus's proteins a drug should aim at, from the "
-                "genome accession alone, with every step on the record. This is the "
-                "walkthrough on SARS-CoV-2, held out of its own reference.",
+                "genome accession alone, with every step on the record. The walkthrough "
+                "runs on SARS-CoV-2, held out of its own reference.",
                 current="index")
            + body + FOOT)
     (DOCS / "index.html").write_text(out)
@@ -562,9 +566,9 @@ def candidate_matrix(case):
     if record is not None:
         note = (f'<p class="after">The five weights and every number in this table are read '
                 f'from <span class="mono">runs/{esc(CANDIDATES_RECORD)}</span>, which is '
-                f'this same stage run on its own — the chain record keeps stage 1 as '
-                f'counts, and the build refuses to ship this table unless those counts '
-                f'match. The later sections are from '
+                f'this same stage run on its own. The chain record keeps stage 1 as counts, '
+                f'and the build refuses to ship this table unless those counts match. '
+                f'The later sections are from '
                 f'<span class="mono">runs/{esc(LANDING_RECORD)}</span>.</p>')
 
     return f"""
@@ -626,8 +630,8 @@ def chain_matrix(case, link_orfs=True):
         if record and record.get("rubric") and record["rubric"] != rubric:
             raise SystemExit(
                 "stage 1 and stage 2 scored on different weights "
-                f"({record['rubric']} vs {rubric}); the two tables cannot be read against "
-                "each other, so the build stops rather than shipping them side by side.")
+                f"({record['rubric']} vs {rubric}). The two tables cannot be read against "
+                "each other. The build stops rather than shipping them side by side.")
         ceiling = term_ceilings(rubric, record)
         orf = {c["name"]: c for c in candidates if c.get("name")}
     top = max((r.get("score") or 0) for r in rows) or 1
@@ -1018,15 +1022,15 @@ def fold_lane(case):
         (inside, f"Folded &middot; {len(inside)}" if recorded
          else f"Inside the ceiling &middot; {len(inside)}",
          f"at or under {ceiling} residues, so the folding endpoint will take them. Every one "
-         f"is folded and not only the best-ranked, because a chain with no coordinates is a "
+         f"is folded, not only the best-ranked, because a chain with no coordinates is a "
          f"chain the next stage can only measure if somebody has already solved it"),
         (novel, f"Unrecognised, folded anyway &middot; {len(novel)}",
          "no accession, no relative, no annotation. Folding asks for a sequence and nothing "
-         "else, which is why this is the one stage a protein nobody can name still reaches"),
+         "else, so it is the one stage a protein nobody can name still reaches"),
         (over, f"No coordinates &middot; {len(over)}",
          f"longer than the {ceiling}-residue ceiling, or never located in this genome at "
          f"all. Nothing can be predicted for these, so the next stage has only a deposited "
-         f"structure to work with &mdash; and where there is none, no surface at all"),
+         f"structure to work with, and where there is none it has no surface at all"),
     ]
     body = []
     for members, title, note in groups:
@@ -1115,8 +1119,8 @@ def surface_lane(case):
         # the only one: ORF9b is annotated `Virion`, which is inside the particle, and
         # UniProt distinguishes that from `Virion membrane` precisely because one is a
         # surface a molecule can arrive at and the other is not.
-        return (f'<br>annotated {esc(where)} &mdash; out of reach, so a macrocycle is '
-                f'refused here whatever the patch measures{borrowed}')
+        return (f'<br>annotated {esc(where)}, which puts it out of reach, so a macrocycle '
+                f'is refused here whatever the patch measures{borrowed}')
 
     def measured_row(row):
         surface = row["surface"]
@@ -1189,32 +1193,30 @@ def surface_lane(case):
         (measured, measured_row,
          f"Measured on a structure someone solved &middot; {len(measured)}",
          "the coordinates came out of a laboratory, so the patch is measured on an "
-         "observation of the protein. Every structure of that domain is measured, not one: "
-         "the dot is the middle answer and the bar is the spread between the smallest and "
-         "the largest, because the same chain solved twice does not give the same number. "
-         "A chip beside a name is the gate&rsquo;s separate verdict on whether a macrocycle "
-         "could bind there at all, and it appears only where that answer is yes or "
-         "uncertain; where it is no, the row says in words what put the chain out of "
-         "reach"),
+         "observation of the protein. Every structure of that domain is measured. The dot "
+         "is the middle answer and the bar is the spread from the smallest to the largest, "
+         "because the same chain solved twice does not give the same number. A chip beside "
+         "a name is the gate&rsquo;s separate verdict on whether a macrocycle could bind "
+         "there at all. It appears only where that answer is yes or uncertain. Where it is "
+         "no, the row says in words what put the chain out of reach"),
         (predicted, predicted_row,
          f"Measured on a shape a model predicted &middot; {len(predicted)}",
          "nobody has ever solved these, so the shape being measured was predicted from the "
-         "sequence by stage 3. The arithmetic is identical and the evidence is not: this is "
-         "a claim about the protein rather than a look at it, so it stays in its own column, "
-         "outside the count above and outside the ranking"),
+         "sequence by stage 3. The arithmetic is identical and the evidence is not, so this "
+         "group stays in its own column, outside the count above and outside the ranking"),
         (waiting, bare_row,
          f"A shape could be predicted for these, and this run did not &middot; {len(waiting)}",
          f"nobody has solved these either, but each is short enough for stage 3 to fold, so "
          f"coordinates can exist for them and the current pipeline measures those. They are "
-         f"blank here for a dull reason: this record was written while the surface stage "
-         f"still ran before the fold, so when it asked for coordinates there were none to "
-         f"ask for. Re-running the chain fills this group in"),
+         f"blank here for a dull reason. This record was written while the surface stage "
+         f"still ran before the fold, so when it asked for coordinates there were none yet. "
+         f"Re-running the chain fills this group in"),
         (none, bare_row,
          f"No surface by either route &middot; {len(none)}",
          f"nothing is deposited for these and they are over the {num(ceiling)}-residue "
-         f"ceiling, so no coordinates exist for them at all &mdash; none solved, none "
-         f"predicted. The pipeline has no surface to offer here, and says so rather than "
-         f"dropping the chain"),
+         f"ceiling, so no coordinates exist for them at all, none solved and none "
+         f"predicted. The pipeline has no surface to offer here. It says so, and the chain "
+         f"keeps its row"),
     ]
     body = []
     for members, render, title, note in groups:
@@ -1234,20 +1236,21 @@ def surface_lane(case):
     verdicts = ""
     if refused:
         verdicts = (f"All {len(refused)} of those verdicts are decided on where the protein "
-                    f"sits, which the gate reads before it reads area at all: every one of "
-                    f"these is annotated somewhere a macrocycle cannot arrive &mdash; inside "
-                    f"the cell, or inside the virion. Several of their patches clear the "
-                    f"footprint line comfortably and are refused anyway, which is the gate "
-                    f"saying something about this class of molecule rather than about the "
-                    f"target."
+                    f"sits, which the gate reads before it reads area at all. Every one of "
+                    f"these is annotated somewhere a macrocycle cannot arrive, inside the "
+                    f"cell or inside the virion, the virus particle itself. Several of their "
+                    f"patches clear the footprint line comfortably and are refused anyway. "
+                    f"That is the gate saying something about this class of molecule, not "
+                    f"about the target."
                     if len(on_location) == len(refused) else
-                    f"{len(on_location)} of {len(refused)} refusals are decided on "
-                    f"localisation; the rest fail on area.")
+                    f"{len(on_location)} of {len(refused)} refusals are decided on where "
+                    f"the protein sits. The rest fail on area.")
     return f"""
   <div class="lane">{"".join(body)}
     <div class="lane-foot"><span>one scale for every bar &middot; longest
       {scale:,.0f} Å²</span>
-      <span>dashed lines: the {footprint:,.0f} Å² macrocycle footprint and half of it</span></div>
+      <span>dashed lines: the {footprint:,.0f} Å² macrocycle footprint, about the area one
+      covers when it binds, and half of that</span></div>
   </div>
   {f'<p class="after">{verdicts}</p>' if verdicts else ''}"""
 
@@ -1331,8 +1334,8 @@ def build_predicted():
         else:
             # An absence that was measured, not skipped. The tool asks the host
             # unconditionally for exactly this reason.
-            host = ("the AlphaFold host was asked and holds nothing for it — a measured "
-                    "absence, not a request that was skipped")
+            host = ("the AlphaFold host was asked and holds nothing for it, an absence "
+                    "the tool measured")
 
         # pLDDT is absent, not zero, when every model is template-based. The page prints
         # `confident_plddt 70` on these rows and it never applied to this accession.
@@ -1371,7 +1374,7 @@ def build_predicted():
         f'<div class="tool-card" id="predicted-provenance">\n'
         f'    <div class="tc-head"><span class="tn">What &#8220;AlphaFold DB&#8221; '
         f'served</span>\n'
-        f'      <span class="plain">the provenance of the counts above</span>\n'
+        f'      <span class="plain">where the counts above came from</span>\n'
         f'      <span class="db">{num(total)} models · {num(authored)} from '
         f'AlphaFold</span></div>\n'
         f'    <div class="tc-body">\n'
@@ -1381,12 +1384,12 @@ def build_predicted():
         f'predicted_model_count</span>, which reads as though AlphaFold modelled these '
         f'proteins. It did not. The tool reports the host that <i>served</i> each model '
         f'separately from the tool that <i>computed</i> it, and for these accessions the two '
-        f'disagree: of {num(total)} predicted models, {num(by_host)} were served by the '
-        f'AlphaFold host and <b>{num(authored)} were computed by AlphaFold</b> — they '
-        f'are ColabFold v1.5.2 models, which run the same weights behind a different '
+        f'disagree. Of {num(total)} predicted models, {num(by_host)} were served by the '
+        f'AlphaFold host and <b>{num(authored)} were computed by AlphaFold</b>. The models '
+        f'it served are ColabFold v1.5.2, which runs the same weights behind a different '
         f'alignment pipeline. The chain record cannot carry this, because its summariser '
-        f'reduces the model list to a count on purpose; it is read here from <span '
-        f'class="mono">runs/predicted_models.json</span>.</p>\n'
+        f'reduces the model list to a count on purpose. The figures here are read from '
+        f'<span class="mono">runs/predicted_models.json</span>.</p>\n'
         f'      {"".join(rows)}\n'
         f'    </div>\n'
         f'  </div>')
@@ -1516,18 +1519,18 @@ def evidence_block(case):
     # as the literal text `{{seconds}}`. The value is the one `facts` would have supplied.
     held = case.get("reference_excluded_organism")
     whose = (f' Each accession below is the relative the chain identified that target '
-             f'through, not {esc(held)}, which was deleted from the reference before the run: '
-             f'every annotation here is a record of that relative.') if held else ""
+             f'through, not {esc(held)}, which was deleted from the reference before the '
+             f'run. Every annotation here is a record of that relative.') if held else ""
     return f"""
 <section id="evidence">
   <div class="sec-head"><h2>Evidence on the top targets</h2>
     <span class="tag">{num(cov.get('evidence_calls'))} calls</span></div>
   <p class="cap">Five tools the chain itself never calls, run on the highest-ranked targets
-  after the ranking was already final. Nothing refuses them: the cost gate admits all five,
+  after the ranking was already final. Nothing refuses them. The cost gate admits all five,
   because it turns a tool away only when its declared worst case is <em>strictly greater</em>
-  than the budget, and the default budget is 600 seconds \u2014 so
+  than the budget, and the default budget is 600 seconds, so
   <span class="mono">bioactivity.prior_binders</span>, declaring exactly 600, is admitted. What
-  keeps them off the path is measured cost rather than declared cost: about 210 seconds for one
+  keeps them off the path is the cost they actually run up, about 210 seconds for one
   target across the five, against a chain that finishes in {num(round(case.get('seconds') or 0))} seconds.
   <b>Nothing they return changes a rank.</b>{whose}</p>
   {"".join(cards)}
@@ -1578,8 +1581,8 @@ def result_page(case, stem):
   </div>
   <p class="cap" style="margin-top:26px">That is the one chain the record reports in full. The
   lane below is every candidate this stage was handed, with how its own sequence was found in
-  this genome and where it fell against the residue ceiling — which is what decides whether
-  the stage after it has coordinates to measure.</p>
+  this genome and where it fell against the residue ceiling, which decides whether the stage
+  after it has coordinates to measure.</p>
   {fold_lane(case)}
 </section>"""
 
@@ -1645,14 +1648,14 @@ def results_index(entries):
         body = f'<div class="runlist">{rows}</div>'
     else:
         body = ('<div class="good"><p>No runs have been submitted yet. Yours would be the '
-                'first — the form is on the front page.</p></div>')
+                'first, and the form is on the front page.</p></div>')
     return (head(f"Runs · {SITE}", "Every pathogen genome this system has been run on.",
                  depth=1, current="runs") + f"""
 <main class="wrap" id="main">
 <header class="top">
   <div class="eyebrow">generated · one page per record</div>
   <h1>Every genome this has been run on</h1>
-  <p class="standfirst">Each page below was written from a chain record, not by hand. Submit an
+  <p class="standfirst">Each page below is generated from a chain record. Submit an
   accession on the <a href="../index.html">front page</a> and yours joins the list.</p>
 </header>
 <section>{body}</section>

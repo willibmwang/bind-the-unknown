@@ -105,7 +105,7 @@
         <th scope="col" class="rk">#</th>
         <th scope="col" class="nm">Mature chain &mdash; what a binder would be aimed at</th>
         <th scope="col" class="cut">Cut out of</th>
-        <th scope="col" title="Share of the ORF&#x27;s own 5-mers that its nearest curated relative also has. 1.0 would be the same sequence; under 0.12 is not kept as a match at all. Rows found by the remote tier report a bit score instead, and say so, because the two are not one scale."><span class="cl">Match to a known relative</span><span class="ck">conservation</span><span class="cw">× 3 → max 3</span></th><th scope="col" title="Whether most of the compartments its relatives are annotated in are places a binder can reach without crossing a membrane. All or nothing."><span class="cl">On the outside</span><span class="ck">surface_exposed</span><span class="cw">× 2 → max 2</span></th><th scope="col" title="Whether the protein&#x27;s name or keywords name a class the virus cannot replicate without — a polymerase, a protease, a capsid, an entry protein. All or nothing."><span class="cl">The virus needs it</span><span class="ck">essential_class</span><span class="cw">× 1.5 → max 1.5</span></th><th scope="col" title="A 0–3 class from the words in its annotations: proteases and polymerases score 3, surface glycoproteins and helicases 2. The historical record for approved antivirals."><span class="cl">Class that gets drugged</span><span class="ck">druggable_class</span><span class="cw">× 0.8 → max 2.4</span></th><th scope="col" title="Deposited structures across its relatives, capped at 50. The smallest weight, because a structure count measures research attention as much as tractability."><span class="cl">Structures already solved</span><span class="ck">structures_in_family</span><span class="cw">× 0.5 → max 0.5</span></th>
+        <th scope="col" title="Share of the five-residue runs in the protein it comes from that its nearest curated relative also has. 1.0 would be the same sequence, and under 0.12 is not kept as a match at all. Rows with only a distant relative carry a different measure, labelled in the cell as a bit score, because the two are not one scale."><span class="cl">Match to a known relative</span><span class="ck">conservation</span><span class="cw">× 3 → max 3</span></th><th scope="col" title="Whether a binder could reach most of the places its relatives are recorded as sitting in without crossing a membrane, scored all or nothing."><span class="cl">On the outside</span><span class="ck">surface_exposed</span><span class="cw">× 2 → max 2</span></th><th scope="col" title="Whether the protein&#x27;s name or keywords put it in a class the virus cannot replicate without, such as a polymerase, a protease, a capsid or an entry protein. All or nothing."><span class="cl">The virus needs it</span><span class="ck">essential_class</span><span class="cw">× 1.5 → max 1.5</span></th><th scope="col" title="A 0–3 class read off the words in its annotations. Proteases and polymerases score 3, surface glycoproteins and helicases 2, because that is where approved antivirals have historically landed."><span class="cl">Class that gets drugged</span><span class="ck">druggable_class</span><span class="cw">× 0.8 → max 2.4</span></th><th scope="col" title="Deposited structures across its relatives, capped at 50. It carries the smallest weight, because a count like that measures how much a protein has been studied as much as how easy it is to work with."><span class="cl">Structures already solved</span><span class="ck">structures_in_family</span><span class="cw">× 0.5 → max 0.5</span></th>
         <th scope="col" class="sc">Composite<span class="cw">of 9.4</span></th>
       </tr>
     </thead>
@@ -317,7 +317,7 @@
     
   </div>
   
-  <div class="lane"><div class="lane-grp"><b>Measured on a structure someone solved &middot; 2</b><span>the coordinates came out of a laboratory, so the patch is measured on an observation of the protein. Every structure of that domain is measured, not one: the dot is the middle answer and the bar is the spread between the smallest and the largest, because the same chain solved twice does not give the same number. A chip beside a name is the gate&rsquo;s separate verdict on whether a macrocycle could bind there at all, and it appears only where that answer is yes or uncertain; where it is no, the row says in words what put the chain out of reach</span></div>
+  <div class="lane"><div class="lane-grp"><b>Measured on a structure someone solved &middot; 2</b><span>the coordinates came out of a laboratory, so the patch is measured on an observation of the protein. Every structure of that domain is measured. The dot is the middle answer and the bar is the spread from the smallest to the largest, because the same chain solved twice does not give the same number. A chip beside a name is the gate&rsquo;s separate verdict on whether a macrocycle could bind there at all. It appears only where that answer is yes or uncertain. Where it is no, the row says in words what put the chain out of reach</span></div>
     <div class="lr">
       <span class="who"><span class="t">VME1_BCHK5 Membrane protein<span class="chip-x g-borderline" title="Can a macrocycle bind here? uncertain: the measurement does not decide">borderline</span></span>
         <span class="w">5 deposited structures
@@ -330,12 +330,12 @@
     <div class="lr">
       <span class="who"><span class="t">3C-like proteinase nsp5</span>
         <span class="w">3 deposited structures
-          of the same domain &middot; 3.9 % of its surface<br>annotated host membrane, host cytoplasm &mdash; out of reach, so a macrocycle is refused here whatever the patch measures &middot; read off the parent entry, not this chain, so it is the weaker kind of verdict</span></span>
+          of the same domain &middot; 3.9 % of its surface<br>annotated host membrane, host cytoplasm, which puts it out of reach, so a macrocycle is refused here whatever the patch measures &middot; read off the parent entry, not this chain, so it is the weaker kind of verdict</span></span>
       <span class="plot"><i class="thr faint" style="left:8.20%"></i><i class="thr" style="left:16.41%"></i>
         <i class="rng" style="left:12.57%;width:2.92%"></i>
         <i class="dot" style="left:14.78%"></i></span>
       <span class="vl">541 Å²<span class="cf">460&ndash;566</span></span>
-    </div><div class="lane-grp"><b>A shape could be predicted for these, and this run did not &middot; 8</b><span>nobody has solved these either, but each is short enough for stage 3 to fold, so coordinates can exist for them and the current pipeline measures those. They are blank here for a dull reason: this record was written while the surface stage still ran before the fold, so when it asked for coordinates there were none to ask for. Re-running the chain fills this group in</span></div>
+    </div><div class="lane-grp"><b>A shape could be predicted for these, and this run did not &middot; 8</b><span>nobody has solved these either, but each is short enough for stage 3 to fold, so coordinates can exist for them and the current pipeline measures those. They are blank here for a dull reason. This record was written while the surface stage still ran before the fold, so when it asked for coordinates there were none yet. Re-running the chain fills this group in</span></div>
     <div class="lr none">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
         <span class="w">no reviewed homolog accession, so there is no deposited structure to resolve. A sequence-only candidate reaches the folding stage and not this one. &middot; <i>160 aa, inside the 400-residue ceiling</i></span></span>
@@ -383,7 +383,7 @@
         <span class="w">3 chains map to P0C6W4 and none covers 4329-4467 &middot; <i>140 aa, inside the 400-residue ceiling</i></span></span>
       <span class="plot"></span>
       <span class="vl">&mdash;</span>
-    </div><div class="lane-grp"><b>No surface by either route &middot; 9</b><span>nothing is deposited for these and they are over the 400-residue ceiling, so no coordinates exist for them at all &mdash; none solved, none predicted. The pipeline has no surface to offer here, and says so rather than dropping the chain</span></div>
+    </div><div class="lane-grp"><b>No surface by either route &middot; 9</b><span>nothing is deposited for these and they are over the 400-residue ceiling, so no coordinates exist for them at all, none solved and none predicted. The pipeline has no surface to offer here. It says so, and the chain keeps its row</span></div>
     <div class="lr none">
       <span class="who"><span class="t">Spike protein S1</span>
         <span class="w">6 chains map to Q0Q4F2 and none covers 13-749 &middot; <i>722 aa, over the ceiling</i></span></span>
@@ -440,9 +440,10 @@
     </div>
     <div class="lane-foot"><span>one scale for every bar &middot; longest
       3,657 Å²</span>
-      <span>dashed lines: the 600 Å² macrocycle footprint and half of it</span></div>
+      <span>dashed lines: the 600 Å² macrocycle footprint, about the area one
+      covers when it binds, and half of that</span></div>
   </div>
-  <p class="after">All 1 of those verdicts are decided on where the protein sits, which the gate reads before it reads area at all: every one of these is annotated somewhere a macrocycle cannot arrive &mdash; inside the cell, or inside the virion. Several of their patches clear the footprint line comfortably and are refused anyway, which is the gate saying something about this class of molecule rather than about the target.</p>
+  <p class="after">All 1 of those verdicts are decided on where the protein sits, which the gate reads before it reads area at all. Every one of these is annotated somewhere a macrocycle cannot arrive, inside the cell or inside the virion, the virus particle itself. Several of their patches clear the footprint line comfortably and are refused anyway. That is the gate saying something about this class of molecule, not about the target.</p>
 </section>
 
 <section>
@@ -466,10 +467,10 @@
   </div>
   <p class="cap" style="margin-top:26px">That is the one chain the record reports in full. The
   lane below is every candidate this stage was handed, with how its own sequence was found in
-  this genome and where it fell against the residue ceiling — which is what decides whether
-  the stage after it has coordinates to measure.</p>
+  this genome and where it fell against the residue ceiling, which decides whether the stage
+  after it has coordinates to measure.</p>
   
-  <div class="lane"><div class="lane-grp"><b>Inside the ceiling &middot; 10</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded and not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
+  <div class="lane"><div class="lane-grp"><b>Inside the ceiling &middot; 10</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
     <div class="lr">
       <span class="who"><span class="t">3C-like proteinase nsp5</span>
         <span class="w">found in ORF 4 of the ranked set, 4391 aa &middot; 100 % of the relative&rsquo;s chain at 83 % identity</span></span>
@@ -539,7 +540,7 @@
       <span class="plot"><i class="thr" style="left:21.21%"></i><i class="b" style="left:0.00%;width:4.40%"></i></span>
       <span class="vl">83 aa
         </span>
-    </div><div class="lane-grp"><b>No coordinates &middot; 9</b><span>longer than the 400-residue ceiling, or never located in this genome at all. Nothing can be predicted for these, so the next stage has only a deposited structure to work with &mdash; and where there is none, no surface at all</span></div>
+    </div><div class="lane-grp"><b>No coordinates &middot; 9</b><span>longer than the 400-residue ceiling, or never located in this genome at all. Nothing can be predicted for these, so the next stage has only a deposited structure to work with, and where there is none it has no surface at all</span></div>
     <div class="lr">
       <span class="who"><span class="t">Papain-like protease nsp3</span>
         <span class="w">found in ORF 4 of the ranked set, 4391 aa &middot; 95 % of the relative&rsquo;s chain at 62 % identity</span></span>

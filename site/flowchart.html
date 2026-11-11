@@ -138,57 +138,57 @@
     </svg>
     </div>
     <figcaption>Nothing is fitted or learned anywhere on this path. Every weight is stated
-    before the run, and every score re-adds from its parts. <b>Every box is a link</b> — it
+    before the run, and every score adds back up from its parts. <b>Every box is a link</b>. It
     opens what that tool actually returned on the SARS-CoV-2 run.</figcaption>
   </figure>
 
   <div class="fcnote">
     <div><b>Identification needs a relative.</b> A protein is named by matching it against
     reviewed viral entries. Delete the close relatives and the pipeline does not quietly get
-    worse — it stops, which is the behaviour you want from it.</div>
+    worse. It stops.</div>
     <div><b>What it cannot name, it keeps.</b> An unidentified protein stays in the list
     carrying its own sequence, so a genuinely novel target is not lost between steps.</div>
     <div><b>The count never shrinks.</b> Every chain that is ranked gets a row at every later
     step, measured or refused with a stated reason. A step may refuse a candidate; it may not
     drop one.</div>
     <div><b>The ranking ends here.</b> The box above is the last one that decides anything.
-    The two steps after it measure the chains this one ordered, and neither has a term in the
-    rubric to move them with.</div>
+    The two steps after it measure the chains this one ordered, and neither feeds the score
+    that set that order.</div>
   </div>
 
   <p class="after">Two further steps hang off the ranked list and are shown on the
-  <a href="index.html">front page</a>, in this order: every chain inside a
+  <a href="index.html">front page</a>, in this order. Every chain inside a
   {{fold_ceiling}}-residue ceiling is <a href="index.html#t-fold">folded from its own
-  sequence</a> by ESMFold, and then each one's
-  <a href="index.html#t-surface">surface is measured</a> — on a deposited structure where one
-  covers the chain, and on those predicted coordinates where none does, which is the only
-  route a target nothing has solved has to a surface at all. The two answers are reported
-  apart and never pooled.</p>
+  sequence</a> by ESMFold. Then each one's
+  <a href="index.html#t-surface">surface is measured</a>, on a deposited structure where one
+  covers the chain, and on those predicted coordinates where none does. For a target nothing
+  has solved, there is no other route to a surface. The two answers are reported apart and
+  never pooled.</p>
 
-  <p class="after"><b>Neither of them selects anything.</b> It is worth saying outright,
-  because a pipeline whose last two steps were swapped invites the reading that the swap
-  changed what gets picked. It did not. The five weights are fixed before the run and none of
-  them is a fold or a surface term, so the order of the list is settled at the box above and
-  nothing downstream can reach it — both steps record that as a <span class="mono">changes_any_rank</span>
-  false in the run, next to what they measured. What the swap changed is what can be measured
-  at all: folding used to run after the measurement that needed it, so the one case this
-  project exists for — a protein nobody has solved a structure of — was unanswerable by
-  construction.</p>
+  <p class="after"><b>Neither of them selects anything.</b> A pipeline whose last two steps
+  were swapped invites the reading that the swap changed what gets picked. It did not. The
+  five weights are fixed before the run and none of them is a fold or a surface term, so the
+  order of the list is settled at the box above and nothing downstream can reach it. Both
+  steps record that in the run as a <span class="mono">changes_any_rank</span> false, next to
+  what they measured. What the swap changed is what can be measured at all. Folding used to
+  run after the measurement that needed it, so the one case this project exists for was
+  unanswerable by construction. That case is a protein nobody has solved a structure of.</p>
 
-  <p class="after">Two gaps in this picture, named here because a diagram is where a reader
-  starts assuming arrows. <b>The ceiling decides who can be rescued.</b> A chain longer than
+  <p class="after"><b>The ceiling decides who can be rescued.</b> A chain longer than
   {{fold_ceiling}} residues is never sent to the folding endpoint, so if nothing deposited
-  covers it either, it finishes the run with no surface by any route — on the SARS-CoV-2
-  walkthrough that is nearly half the chains, all three spike pieces among them, along with
-  the polymerase, the helicase and the papain-like protease. That is a cost control, not a finding about those proteins, and the run
-  record counts them, names them and says per chain which limit closed which route.
-  <b>And the library definition reads nothing any of this measured.</b> It takes an initiator,
-  a randomised-region length and a set of building-block classes, all three properties of the
-  display platform rather than of a target, so the same library comes out whatever the surface
-  step found. There is no stated rule that turns a measured patch into any of those numbers,
-  and putting an arrow there on an invented one would read as a result. So the step that
-  measures the surface is, today, the one step here whose output nothing reads — recorded as
-  an empty list in the run rather than drawn as an edge.</p>
+  covers it either, it finishes the run with no surface by any route. On the SARS-CoV-2
+  walkthrough nearly half the chains sit over that ceiling, all three spike pieces among
+  them, along with the polymerase, the helicase and the papain-like protease. That is a cost
+  control, not a finding about those proteins, and the run record counts them, names them and
+  says per chain which limit closed which route.</p>
+
+  <p class="after"><b>And the library definition reads nothing any of this measured.</b> It
+  takes an initiator, a randomised-region length and a set of building-block classes, all
+  three properties of the display platform rather than of a target, so the same library comes
+  out whatever the surface step found. There is no stated rule that turns a measured patch
+  into any of those numbers, and putting an arrow there on an invented one would read as a
+  result. That leaves the step that measures the surface, today, as the one step here whose
+  output nothing reads, recorded as an empty list in the run rather than drawn as an edge.</p>
 </section>
 
 </main>

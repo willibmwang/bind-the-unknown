@@ -7484,16 +7484,16 @@ a.anchor-link {
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="bind-the-unknown">bind-the-unknown<a class="anchor-link" href="#bind-the-unknown">¶</a></h1><p><strong>This notebook answers one question about a library design.</strong> Will a model fitted on the first
 round of measurements be worth acting on? The answer is a property of how the library was
-designed rather than of the target. So it is available before any assay runs. §2.1 shows it
+designed and not of the target, so it is available before any assay runs. §2.1 shows it
 measured, and §2.2 tests it by intervening in both directions.</p>
 <p><strong>Everything above that is the path to a library worth asking the question about.</strong> §1 starts
 from a pathogen genome accession and nothing else. It ranks candidate targets, folds the one it
 picks, and measures the surface a macrocyclic peptide would have to bind. It then defines a
-focused thioether-macrocycle library for that molecule class — not yet from the measured
-surface, which §0.1 draws as the dashed arrow it is. It gets there by calling NCBI, reviewed
-UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, 3D-Beacons and AlphaFold DB, ESMFold, RCSB and
-ChEMBL. §1.2 makes those calls for real while the notebook is open. Each panel reports what its
-call spent, in seconds and outbound requests.</p>
+focused thioether-macrocycle library for that molecule class. The definition does not yet read
+the measured surface, and §0.1 draws that missing arrow dashed. It gets there by calling NCBI,
+reviewed UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, 3D-Beacons and AlphaFold DB, ESMFold,
+RCSB and ChEMBL. §1.2 makes those calls for real while the notebook is open. Each panel reports
+what its call spent, in seconds and outbound requests.</p>
 <p><strong>To run this on a pathogen of your own, go to §0.2.</strong> One NCBI nucleotide accession goes in
 and the whole of §1 runs on it, live. Nothing else about the pathogen is needed.</p>
 <p>Every number here is computed when the cell runs. It comes out of the records in <code>runs/</code>, or out
@@ -7696,18 +7696,16 @@ cell below reports which ones this machine can see.</p>
 <hr/>
 <h2 id="0.1-%C2%B7-The-whole-workflow-on-one-page">0.1 · The whole workflow on one page<a class="anchor-link" href="#0.1-%C2%B7-The-whole-workflow-on-one-page">¶</a></h2><p><strong>Two arms. The first runs from a pathogen genome accession and nothing else; the second
 answers one question about a library design.</strong> This is the map for everything below it, and
-every count on it is read from one record — <code>runs/onset_chain.json</code>, written by running all
+every count on it is read from one record, <code>runs/onset_chain.json</code>, written by running all
 five stages of arm 1 on the SARS-CoV-2 reference genome against the live endpoints. Both
 references take about 201 seconds end to end.</p>
-<p>Read the figure in three passes.</p>
-<p><strong>Down the left column: what gets called, in what order, and what it cost.</strong> Each stage names
+<p><strong>The left column lists what gets called, in what order, and what it cost.</strong> Each stage names
 the endpoints it reached and the seconds it spent. Stage 1 leads because it is the only tool
-runnable from a bare accession that produces facts other tools need — and it produces all four
+runnable from a bare accession that produces facts other tools need, and it produces all four
 of them, so the whole chain has a single bottleneck.</p>
-<p><strong>Across to the right column: what each stage actually returned for this genome.</strong> Not what it
-could return in principle. These are this run's numbers.</p>
-<p><strong>Then the two orange boxes, which are the arrows that are not there.</strong> A flowchart earns its
-place mostly by showing where a chain <em>fails</em> to connect. Stage 5 reads nothing that stages 1
+<p><strong>The right column holds what each stage returned for this genome</strong>, not what it could return
+in principle. These are this run's numbers.</p>
+<p><strong>The two orange boxes are the arrows that are not there.</strong> Stage 5 reads nothing that stages 1
 to 4 measured, so the library definition is the same library whatever the surface stage found.
 And the campaign data that would feed arm 2's answer back into the next design does not exist.
 Both are drawn dashed rather than left out.</p>
@@ -7980,12 +7978,12 @@ stages on two more pathogens, so that second number can be read as a property of
 studied a family is rather than of the code.</p>
 <p><strong>Neither case alone is the system</strong>, and recording one of them and calling it the chain is how
 a coverage number comes to be quoted outside the setting that produced it.</p>
-<p><strong>What is true in both: no chain is dropped between stages.</strong> The surface stage emits one row per chain
+<p><strong>In both cases no chain is dropped between stages.</strong> The surface stage emits one row per chain
 stage 2 produced, and a chain with no measurable surface carries the reason on its row. That
 was not true before this run. <code>intake.enrich_with_surface</code> had no caller anywhere in the
-package, so the only surfaces ever measured were six named by hand in a script, and
-SARS-CoV-2's RNA-directed RNA polymerase — fifth of the ranked candidates, with an approved
-antiviral against it — was not among them. Nothing excluded it; nobody added it. §1.6a shows
+package, so the only surfaces ever measured were six named by hand in a script. SARS-CoV-2's
+RNA-directed RNA polymerase was not among them, though it is fifth of the ranked candidates
+and has an approved antiviral against it. Nothing excluded it; nobody added it. §1.6a shows
 every chain.</p>
 </div>
 </div>
@@ -8000,12 +7998,12 @@ every chain.</p>
 <hr/>
 <h2 id="0.2-%C2%B7-Run-this-on-a-pathogen-of-your-own">0.2 · Run this on a pathogen of your own<a class="anchor-link" href="#0.2-%C2%B7-Run-this-on-a-pathogen-of-your-own">¶</a></h2><p><strong>One NCBI nucleotide accession is the whole input.</strong> Put it in the cell below, set
 <code>RUN_LIVE = True</code>, and the same five stages you just saw in the flowchart run against the same
-live endpoints — for a pathogen nothing in this repository has looked at. No target list, no
-structure, no name. That is the premise of the system, and this cell is where it is testable
-rather than asserted.</p>
-<p><strong>It is at the top on purpose.</strong> Everything below §1 is a worked example on three genomes this
-project had already validated a ranking against; this is the thing itself, and nobody should
-have to read to the end to find it.</p>
+live endpoints, for a pathogen nothing in this repository has looked at. No named target, no
+structure. That is the premise of the system, and this cell is where it is testable rather than
+asserted.</p>
+<p><strong>Everything below §1 is a worked example on three genomes this project had already validated a
+ranking against.</strong> This cell is the thing itself, and it sits at the top so nobody has to read
+to the end to find it.</p>
 <table>
 <thead>
 <tr>
@@ -8035,11 +8033,12 @@ have to read to the end to find it.</p>
 <p><strong><code>HOLDOUT</code> is the knob to think about.</strong> It is the organism deleted from the reference before
 identifying. Leave it <code>None</code> for a pathogen that genuinely is not curated yet: there is nothing
 of it to delete. Set it when the pathogen <em>is</em> already in UniProt and you want the chain to
-work through a relative instead — which is the only way a result on a known pathogen means
-anything, because every protein of a sequenced pathogen is already curated and identifying its
-own ORFs against the full reference answers a question nobody has. A holdout matching no entry
-raises rather than running, since a control that was never applied reads exactly like one that
-passed, and the cell prints how many entries a working one removed.</p>
+work through a relative instead. That is the only way a result on a known pathogen means
+anything, because every protein of a sequenced pathogen is already curated, and identifying its
+own open reading frames, the stretches of genome that could code for a protein, against the
+full reference answers a question nobody has. A holdout matching no entry raises rather than
+running, since a control that was never applied reads exactly like one that passed, and the
+cell prints how many entries a working one removed.</p>
 <p><strong>The reference is reviewed viral proteins, and only those.</strong> This is antiviral work. A
 genome too large to be viral is refused rather than ranked, because nothing would identify
 against that reference and the result would be a shortlist of whichever reading frames
@@ -8180,26 +8179,27 @@ stage costs seconds per deposited structure it measures.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>Read the refusals as data.</strong> A chain with no measurable surface is telling you what has been
+<p><strong>A refusal here is data.</strong> A chain with no measurable surface is telling you what has been
 deposited for this pathogen's relatives, not that the protein is a poor target. §1.6b shows
 that count running from most of the ranked chains to none of them across three viral families,
 so a low number here is a statement about the pathogen.</p>
 <p><strong>This was run before it was written up, on a pathogen nothing in this repository had looked
 at.</strong> MERS-CoV, <code>NC_019843.3</code>, with <code>Middle East respiratory syndrome-related coronavirus</code> held
-out: 30,119 nt, 40 ORFs called, 8 identified against 17,519 reviewed entries after 10 of its own
-were removed. It ranked 19 mature chains, emitted 19 surface rows for them — 2 measured and 17
-refused with the reason — and located 19 of 19 in the genome's own translation. The protease it
-folded is 306 residues at mean pLDDT 68.33 and hashes to <code>c1ed4cf3c500</code>, which is <em>not</em>
-SARS-CoV-2's: the chain found MERS's own main protease through a coronavirus relative, which is
-the entire claim this system makes. Two of nineteen surfaces measured is the honest number for
-a pathogen at that level of study.</p>
+out: 30,119 nt, 40 open reading frames called, 8 identified against 17,519 reviewed entries
+after 10 of its own were removed. It ranked 19 mature chains and emitted 19 surface rows for
+them, 2 measured and 17 refused with a stated reason, and it located 19 of 19 in the genome's
+own translation. The protease it folded is 306 residues at mean pLDDT 68.33 and hashes to
+<code>c1ed4cf3c500</code>, which is <em>not</em> SARS-CoV-2's. The chain found MERS's own main protease through a
+coronavirus relative, and that is the entire claim this system makes. Two of nineteen surfaces
+measured is the honest number at that level of study.</p>
 <p><strong>And on a second family, to check it is not a coronavirus trick.</strong> Zika virus,
-<code>NC_012532.1</code>, held out from its own 8 entries: 26 ORFs, 1 of them identified — a flavivirus
-is one long polyprotein — decomposed into 12 mature chains, 12 surface rows, 12 of 12 located.
-The three it ranks highest are the NS3 protease, its NS2B cofactor and NS5, which are the
-targets anyone developing against flaviviruses works on, and nothing in this repository told
-it that. Its surfaces come back 0 of 12 measured, the same way influenza's do and for the same
-reason: the nearest curated relative has no deposited structure over those ranges.</p>
+<code>NC_012532.1</code>, held out from its own 8 entries: 26 reading frames, 1 of them identified, since
+a flavivirus genome encodes one long protein. That one was cut into 12 mature chains, 12
+surface rows, 12 of 12 located. The three it ranks highest are the NS3 protease, its NS2B
+cofactor and NS5, which are the targets anyone developing against flaviviruses works on, and
+nothing in this repository told it that. Its surfaces come back 0 of 12 measured, the same way
+influenza's do and for the same reason: the nearest curated relative has no deposited structure
+over those ranges.</p>
 <p><strong>Four more accessions are listed in the cell's comments</strong>, all checked to resolve and to
 match a real organism name: Zika, Ebola, Lassa (two segments) and Chikungunya.</p>
 <p><strong>The same run from a terminal</strong>, if you would rather not hold a kernel open:</p>
@@ -8229,8 +8229,8 @@ accession, a literature search has no protein name to search for. A structure lo
 accession to look up. Those tools are not irrelevant and not expensive. You just cannot run them
 yet. Matching a query against tool summaries never discovers that, because the obstruction is in
 what you know and not in the text.</p>
-<p>So each tool declares what it needs before it can run, and what its return adds. The selector
-then orders all ten:</p>
+<p>Each tool therefore declares what it needs before it can run, and what its return adds. The
+selector then orders all ten:</p>
 <ol>
 <li>Tools you can run now, before tools you cannot.</li>
 <li>Among those, whichever produces facts more other tools need.</li>
@@ -8418,11 +8418,11 @@ it unlocks : bioactivity.prior_binders, families.entries, geometry.surface_marke
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>Read the table top down.</strong> Five tools can run now and five cannot. Each of the five that
-cannot run names the fact it lacks. <code>intake.rank_targets</code> leads because it is the only runnable
-tool that produces facts another tool needs. It produces all five of them, so identification is
-the single bottleneck in the chain. It is also the only tool that enumerates and ranks candidates
-rather than answering about one you have already named.</p>
+<p><strong>Five tools can run now and five cannot.</strong> Each of the five that cannot run names the fact it
+lacks. <code>intake.rank_targets</code> leads because it is the only runnable tool that produces facts
+another tool needs. It produces all five of them, so identification is the single bottleneck in
+the chain. It is also the only tool that enumerates and ranks candidates rather than answering
+about one you have already named.</p>
 <p>Three of the callable tools produce nothing another tool needs and bear on no open question. The
 selector says so rather than quietly ranking them last.</p>
 </div>
@@ -8435,8 +8435,8 @@ selector says so rather than quietly ranking them last.</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="1.2-%C2%B7-Watching-the-tools-run">1.2 · Watching the tools run<a class="anchor-link" href="#1.2-%C2%B7-Watching-the-tools-run">¶</a></h3><p><strong>1.1 decided which tool to call. This section watches all ten run against the real endpoints
-while the notebook is open.</strong> Every panel prints the arguments that went out, the status that
+<h3 id="1.2-%C2%B7-Watching-the-tools-run">1.2 · Watching the tools run<a class="anchor-link" href="#1.2-%C2%B7-Watching-the-tools-run">¶</a></h3><p><strong>1.1 decided which tool to call. Here all ten run against the real endpoints while the
+notebook is open.</strong> Every panel prints the arguments that went out, the status that
 came back, and whatever payload arrived. The ten are grouped by the question each answers, and
 the order runs from a genome to candidate targets, then to what is already known about a target,
 then to what its structure looks like, then to what could bind it.</p>
@@ -8449,18 +8449,18 @@ druggability.</p>
 to Europe PMC for <code>nsp12</code>, to ask whether anyone has published on the target at all.
 <code>similarity.homologs</code> submits a sequence to EBI HMMER, called that way because what a protein
 resembles is answerable from sequence alone when there is no accession to look up.
-<code>families.entries</code> is called on <code>P0DTC2</code>, the spike, for InterPro's residue ranges, since a claim
-about a site rather than a protein is what both a structural lookup and a binder need.</p>
+<code>families.entries</code> is called on <code>P0DTC2</code>, the spike, for InterPro's residue ranges, because both
+a structural lookup and a binder need a site and not a whole protein.</p>
 <p><strong>Group 3 puts a structure on the screen.</strong> <code>structures.evidence</code> resolves PDBe entries covering
-each target's residue ranges, which is how much attention a target has received and not a pocket
-score. <code>structures.predicted</code> is called on <code>P0DTD1</code> to inventory models through 3D-Beacons and
-pull per-residue confidence from AlphaFold DB. <code>structures.folded</code> folds the main protease
-sequence through ESM Atlas, and it is here because it is the only structural lane a genuinely
-unknown target can supply: the other two resolve an accession, and a novel protein has none.</p>
+each target's residue ranges. The result is how much attention a target has received, and it is
+not a pocket score. <code>structures.predicted</code> is called on <code>P0DTD1</code> to inventory models through
+3D-Beacons and pull per-residue confidence from AlphaFold DB. <code>structures.folded</code> folds the main
+protease sequence through ESM Atlas. It is the only structural lane a genuinely unknown target
+can supply, because the other two resolve an accession and a novel protein has none.</p>
 <p><strong>Group 4 asks what could bind it.</strong> <code>geometry.surface_markers</code> measures the largest contiguous
-exposed hydrophobic patch on deposited coordinates for <code>P0DTD1</code>, which is the interface-shaped
-quantity a macrocycle needs rather than the enclosed cavity a small-molecule score is calibrated
-on. <code>bioactivity.prior_binders</code> queries ChEMBL, IEDB and MaveDB for precedent, narrowed to the
+exposed hydrophobic patch on deposited coordinates for <code>P0DTD1</code>. A macrocycle needs that
+interface-shaped quantity, not the enclosed cavity a small-molecule score is calibrated on.
+<code>bioactivity.prior_binders</code> queries ChEMBL, IEDB and MaveDB for precedent, narrowed to the
 molecule class under development. <code>chemistry.library_spec</code> returns the library definition off
 local tables, so it is the same call with a network or without one.</p>
 <p><strong><code>LIVE</code> is the switch, and <code>MODE</code> overrides it one tool at a time.</strong> <code>True</code> dispatches for real;
@@ -8468,8 +8468,8 @@ local tables, so it is the same call with a network or without one.</p>
 network. Two panels replay by default: <code>structures.evidence</code>, which costs more than a room will
 sit through for one lookup, and <code>intake.rank_targets</code>, which declares a biopython install this
 kernel does not carry. Every panel names the mode it is in, and a live call that comes back empty
-or failed falls back to its own recording and says so, which is what an outage looks like here
-rather than a traceback. A replayed retrieval panel can show that the call happened and not the
+or failed falls back to its own recording and says so. That is what an outage looks like here,
+not a traceback. A replayed retrieval panel can show that the call happened and not the
 rows that came back, because a trace row keeps the arguments and the status and drops the
 payload. The fold is the exception: a live ESMFold call on this sequence returns the committed
 file byte for byte, same digest and same mean confidence, and the cell checks that when it runs.</p>
@@ -8595,15 +8595,15 @@ dispatcher charged it.</strong> It counts the tools off the registry, so a tool 
 account unnoticed.</p>
 <p><strong>The structure is drawn twice from the same returned coordinates.</strong> The py3Dmol cartoon is the
 one to spin in the room. It pulls 3Dmol.js from a CDN at render time, and GitHub strips scripts
-out of notebook output. So on GitHub that view is blank, and the matplotlib figure beside it is
+out of notebook output. On GitHub that view is blank, and the matplotlib figure beside it is
 the only thing a reader there sees. Both are coloured per residue by the same four confidence
 bands, from the same normalised vector, so they cannot disagree.</p>
 <p><strong>The file stores pLDDT on a 0 to 1 scale while the bands run 0 to 100.</strong> The cell detects that
 rather than assuming it, and then states which convention it normalised to. Reading the B-factor
-column as it stands would put all 306 residues in the lowest band. That would look like a
-catastrophic prediction instead of a unit error. The threshold the figure draws is read out of
-the tool's own <code>confident_plddt</code> parameter rather than out of the record. So it is the same
-number in a live call on a sequence this machine has never folded.</p>
+column as it stands would put all 306 residues in the lowest band, and a unit error would look
+exactly like a catastrophic prediction. The threshold the figure draws comes out of the tool's own
+<code>confident_plddt</code> parameter and not out of the record, so it is the same number in a live call on
+a sequence this machine has never folded.</p>
 </div>
 </div>
 </div>
@@ -9278,31 +9278,30 @@ run paid, so only the live rows are totalled.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>What is on the screen is a prediction and not a structure.</strong> ESMFold ran single sequence,
-with no alignment and no template. pLDDT is the model's own confidence rather than its accuracy.
-The mean is 62.6, and 46.4 per cent of residues clear 70. Read as one number, that looks like a
-poor result. It is better read as the figure draws it: a confident core, and a long stretch from
-183 to 306 that never clears the threshold at all. That stretch is the model saying where it does
-not know. Nothing here was checked against an experiment. The record's own <code>unverified</code> field
-says exactly that about every coordinate and every pLDDT value in it.</p>
+<p><strong>ESMFold ran single sequence, with no alignment and no template. What is on the screen is a
+prediction and not a structure.</strong> pLDDT is the model's own confidence rather than its accuracy.
+The mean is 62.6, and 46.4 per cent of residues clear 70. As one number it looks like a poor
+result. The figure says more: a confident core, and a long stretch from 183 to 306 that never
+clears the threshold at all. That stretch is the model saying where it does not know. Nothing
+here was checked against an experiment. The record's own <code>unverified</code> field says exactly that
+about every coordinate and every pLDDT value in it.</p>
 <p><strong>The fold panel is fast because it is a cache hit, and a first fold is not.</strong> The ESM Atlas
 caches by sequence. The module's own measurements, quoted above rather than restated, put cold
 wall time at 1.8, 5.0, 12.1 and 25.6 seconds for 50, 200, 300 and 400 residues. They name this
 very sequence: 306 residues, 12.8 seconds cold against 0.64 warm. Every target this project is
 named for is cold on first sight, so the cold number is the one to budget against. The same cache
-is why the byte-for-byte equivalence above is a fact about this lane and this sequence, rather
-than a general promise. And no replay can promise that the endpoint still answers the same way
-today.</p>
+makes the byte-for-byte equivalence above a fact about this lane and this sequence, not a general
+promise. And no replay can promise that the endpoint still answers the same way today.</p>
 <p><strong>Only one of the ten returns coordinates, and the rest return rows with dates on them.</strong> That is
-the shape of the system, and it is what the retrieval panels are there to show. Every figure in
-this paragraph and the next is what an endpoint returned on the run this text was written
-against. The panels above print whatever comes back today. Europe PMC gave 617 indexed records
-for <code>nsp12</code>, and the five narrowed search counts beside them. EBI HMMER gave fifty SwissProt
-entries measured against the folded sequence, the closest at 100 per cent identity. That is
-exactly why the tool carries a standing warning: a homolog is somebody else's accession.
-InterPro placed the spike receptor-binding domain at residues 334 to 527 without being told the
-domain exists. A residue range is the form a target profile can actually use. It also handed back
-24 family names, which is a literature query a bare accession could not have built.
+the shape of the system. Every figure in this paragraph and the next is what an endpoint
+returned on the run this text was written against. The panels above print whatever comes back
+today. Europe PMC gave 617 indexed records for <code>nsp12</code>, and the five narrowed search counts
+beside them. EBI HMMER gave fifty SwissProt entries measured against the folded sequence, the
+closest at 100 per cent identity. The tool carries a standing warning for that reason: a
+homolog is somebody else's accession. InterPro placed the spike receptor-binding domain at
+residues 334 to 527 without being told the domain exists. A residue range is the form a target
+profile can actually use. It also handed back 24 family names, a literature query a bare
+accession could not have built.
 <code>structures.predicted</code> returned the lookup rather than the coordinates. It found 95 predicted
 models across AlphaFold DB, PED and SWISS-MODEL, the earliest created 2020-10-01, and it reported
 both URLs it hit and a <code>citable</code> of True. The model files were left unfetched, and the panel says
@@ -9317,7 +9316,7 @@ the top. A patch measured once is a patch measured on one crystal. §1.6 charts 
 out of the committed <code>surface_markers</code> record.</p>
 <p><strong>The refusal is real and it is the gate working.</strong> <code>bioactivity.prior_binders</code> declines itself,
 because its declared worst case of 600 seconds does not fit a 60 second budget. Declining costs
-nothing and reaches no network. So it is the same panel in a room with no connection, and its
+nothing and reaches no network. It is the same panel in a room with no connection, and its
 header says so rather than claiming an endpoint was touched. The cost record holds <code>None</code> and not
 zero for a call that never ran, because a refusal is not a measurement of work.
 <code>structures.evidence</code> and <code>intake.rank_targets</code> are the two panels that show a cost without a
@@ -9494,9 +9493,9 @@ proteins are deleted from the reference before indexing. Identification then has
 the nearest curated relative. That is the only version of this test that means anything, since
 every protein of these pathogens is already curated in UniProt. Three pathogens ran, from
 three virus families, recorded in <code>intake_validation</code>.</p>
-<p>Each run is scored against a random ranking of the same candidates. <code>p vs random</code> is how unlikely
-that ranking would be if the pipeline carried no information. <code>SHOW</code> picks which pathogen prints
-its per-target rows.</p>
+<p>Each run is scored against a random ranking of the same candidates. <code>p vs random</code> is how
+unlikely the pipeline's own ranking would be if it carried no information. <code>SHOW</code> picks which
+pathogen prints its per-target rows.</p>
 </div>
 </div>
 </div>
@@ -9656,10 +9655,10 @@ underpowered at this size: 1 of 3, carrying a verdict that says not established 
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>Read <code>p vs random</code> against <code>best p</code>.</strong> <code>best p</code> is the smallest p a pathogen could have
-reached if the pipeline had put its targets at the very top. For the three rows that beat chance
-the gap is wide, and the observed value sits well inside it. For Nipah the two print at the same
-order of magnitude, and the record's verdict is not established at that size.</p>
+<p><strong><code>best p</code> is the smallest p a pathogen could have reached, had the pipeline put its targets
+at the very top of the ranking.</strong> For the three rows that beat chance the gap is wide, and the
+observed <code>p vs random</code> sits well inside it. For Nipah the two print at the same order of
+magnitude, and the record's verdict is not established at that size.</p>
 <p><strong>The table establishes that the ranking recovers the right targets given a close curated
 relative.</strong> §1.5 pushes that relative away, and §1.6b runs the whole chain on all three.</p>
 </div>
@@ -9673,10 +9672,10 @@ relative.</strong> §1.5 pushes that relative away, and §1.6b runs the whole ch
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="1.4a-%C2%B7-Every-candidate's-score,-and-where-each-number-in-it-came-from">1.4a · Every candidate's score, and where each number in it came from<a class="anchor-link" href="#1.4a-%C2%B7-Every-candidate's-score,-and-where-each-number-in-it-came-from">¶</a></h3><p><strong>The ranking is one number per protein, and that number is five stated weights times five
-features.</strong> Nothing in it is fitted. There is no labelled set of correct target rankings for a
-novel pathogen to fit against — that absence is why this project grades decisions rather than
-predictions — so a learned weighting would be fitted to whatever its author already believed.
-A stated rubric is at least honest about being one.</p>
+features.</strong> Nothing in it is fitted. For a novel pathogen there is no labelled set of correct
+target rankings to fit against. That absence is why this project grades decisions rather than
+predictions, and why a learned weighting would be fitted to whatever its author already
+believed. A stated rubric is at least honest about being one.</p>
 <table>
 <thead>
 <tr>
@@ -9717,7 +9716,7 @@ A stated rubric is at least honest about being one.</p>
 target has had, which is not how tractable it is, and a ranker leaning on it would be ranking
 the literature.</p>
 <p><strong>The surface measurement is deliberately not in this table.</strong> §1.6 measures it, and §1.6's
-second panel records the two attempts to score on it — both of which made the ranking worse.</p>
+second panel records the two attempts to score on it. Both made the ranking worse.</p>
 </div>
 </div>
 </div>
@@ -10022,17 +10021,16 @@ what the heaviest term in the rubric can tell apart:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>The stacked bar is the point of this section.</strong> Two candidates a thousandth of a point apart
-can arrive there by opposite routes, and one bar per protein hides exactly that. Read across a
-row and you can see which of the five terms a candidate earned and which it did not: the spike
-chains earn 2.0 for sitting on the outside of the virion and lose on conservation, the replicase
-chains do the reverse.</p>
+<p><strong>Two candidates can land a thousandth of a point apart by opposite routes, and one bar per
+protein hides exactly that.</strong> The stacked bar shows which of the five terms each candidate earned
+and which it did not: the spike chains earn 2.0 for sitting on the outside of the virus particle
+and lose on conservation, the replicase chains do the reverse.</p>
 <p><strong>The contrast printed under the chart is what the holdout is for.</strong> Against a reference that
 still holds the pathogen's own entries, conservation takes 2 distinct values across 21 chains,
 the ranking collapses to 14 distinct scores, and the top of the list is a tie. Delete the
-organism first and the same rubric on the same genome separates 20 chains into 16 scores. That
-is not a defect in the rubric — it is the reason every validation run in §1.4 deletes the organism
-before it ranks anything.</p>
+organism first and the same rubric on the same genome separates 20 chains into 16 scores. The
+collapse is not a defect in the rubric. It is the reason every validation run in §1.4 deletes
+the organism before it ranks anything.</p>
 </div>
 </div>
 </div>
@@ -10050,14 +10048,14 @@ and identification is down to zero or one open reading frame.</p>
 <p><strong>Failure comes back empty rather than wrong.</strong> At the SARS-CoV-2 species step the pipeline
 latched onto a <em>Rat coronavirus</em> and still returned 0 of 5 expected targets. With no relative it
 recognises, it returns nothing rather than a confidently wrong list.</p>
-<p><strong>Which step the cliff falls on differs between the two pathogens.</strong> The reason matters more than
-the step. Nipah survives losing its own species, because Hendra is a separate species in the same
-genus. SARS-CoV-2 does not, because SARS-CoV is the same species. Removing it removes every close
-relative at once. The real limit is how much exact short-stretch sequence identity the two share,
-and taxonomic rank is only a proxy for that.</p>
+<p><strong>Which step the cliff falls on differs between the two pathogens, and the reason matters more
+than the step.</strong> Nipah survives losing its own species, because Hendra is a separate species in
+the same genus. SARS-CoV-2 does not, because SARS-CoV is the same species, and removing it
+removes every close relative at once. The real limit is how much exact short-stretch sequence
+identity the two share, and taxonomic rank is only a proxy for that.</p>
 <p><strong>Past the cliff, two mechanisms recover two different kinds of protein.</strong> The fallback runs
-identification again with a whole clade gone. It tries distant relatives first. Then it reads the
-shape of the sequence itself, on whatever the exact-match search could not place. <code>CASCADE</code>
+identification again with a whole clade gone, trying distant relatives first and then reading
+the shape of the sequence itself, on whatever the exact-match search could not place. <code>CASCADE</code>
 switches the lower panel between the family step and the order step.</p>
 </div>
 </div>
@@ -10424,13 +10422,12 @@ family rank, 486 reference entries removed, 29 s
 <p><strong>The proteins this project cares about are the ones with no distant relatives anywhere.</strong>
 Conserved enzymes come back across families, because they genuinely are homologous. With all of
 Coronaviridae removed, both replicase halves are recovered through Tobaniviridae. The spike is
-recovered by neither homology search at any holdout level. The record says that is correct rather
-than a failure, because there is no relative to find outside Coronaviridae. It is recognised from
-its own sequence instead, as a surface protein rather than by name. The signs are the signal
-peptide, the membrane-spanning segments and the sugar-attachment sites it carries.
-Family-specific surface proteins are exactly the antibody targets, and a macrocycle binding a
-viral surface is the same problem. So the step that matters most here is the one that depends
-least on there being a relative at all.</p>
+recovered by neither homology search at any holdout level. The record marks that correct,
+because there is no relative to find outside Coronaviridae. It is recognised from its own
+sequence instead, as a surface protein. The signs are the signal peptide, the membrane-spanning
+segments and the sugar-attachment sites it carries. Family-specific surface proteins are exactly
+the antibody targets, and a macrocycle binding a viral surface is the same problem. The step
+that matters most here is the one that depends least on there being a relative at all.</p>
 <p><strong>Shape alone names a class and not a protein.</strong> This step can say it has found a surface protein
 and cannot say which one. That is why it runs only where homology found nothing.</p>
 </div>
@@ -10444,16 +10441,16 @@ and cannot say which one. That is why it runs only where homology found nothing.
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="1.6-%C2%B7-The-surface-a-macrocycle-would-bind">1.6 · The surface a macrocycle would bind<a class="anchor-link" href="#1.6-%C2%B7-The-surface-a-macrocycle-would-bind">¶</a></h3><p><strong>A macrocycle needs a flat greasy area, not a pocket, so that is what gets measured here.</strong> The
-quantity scored is the largest unbroken exposed hydrophobic patch. It is not pocket depth and not
-enclosure, because a macrocycle lies flat across several hundred square angstroms rather than
-reaching into a cavity. Scoring depth would reproduce an enzyme bias through geometry, so the
+quantity scored is the largest unbroken exposed hydrophobic patch. Pocket depth and enclosure go
+unscored, because a macrocycle lies flat across several hundred square angstroms instead of
+reaching into a cavity. Scoring depth would reproduce an enzyme bias through geometry, and the
 choice of what to measure is the experiment. This choice puts the spike receptor-binding domain
 above the main protease, the reverse of a small-molecule druggability score. The cell checks that
-ordering at every contact cutoff measured, rather than at the one that flatters it.</p>
+ordering at every contact cutoff measured, not only at the one that flatters it.</p>
 <p><strong>The measurement moves with whichever structure you pick.</strong> Measuring the same domain over five
 structures moves the patch by up to 496.2 square angstroms. That is why the chart draws the
 measured range as the bar, and the median as a tick inside it. The gate asks first whether the
-surface is on the outside of the cell at all. It then asks whether the area clears one macrocycle
+surface is on the outside of the cell at all, then whether the area clears one macrocycle
 footprint, 600 square angstroms, across every structure measured.</p>
 </div>
 </div>
@@ -10874,13 +10871,12 @@ open:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>The ordering is the finding, and the length of a bar is not the verdict.</strong> The spike
-receptor-binding domain sits above the main protease, on exactly the quantity a macrocycle cares
-about. That is what this measurement was built to do. The three targets gated <code>no</code> fail on where
-they sit in the cell, which the gate tests before it looks at area at all. Two of them, the main
-protease and nsp13, would gate <code>yes</code> on area alone. Of those two, nsp13 carries the largest
-median patch of the six. Each tick label names which test the target failed, so a long grey bar
-is not read as a near miss.</p>
+<p><strong>The ordering is the finding.</strong> The spike receptor-binding domain sits above the main
+protease, on exactly the quantity a macrocycle cares about. That is what this measurement was
+built to do. The three targets gated <code>no</code> fail on where they sit in the cell, which the gate
+tests before it looks at area at all. Two of them, the main protease and nsp13, would gate <code>yes</code>
+on area alone, and nsp13 carries the largest median patch of the six. Each tick label names
+which test the target failed, so a long grey bar is not read as a near miss.</p>
 </div>
 </div>
 </div>
@@ -10892,12 +10888,12 @@ is not read as a near miss.</p>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="1.6a-%C2%B7-Every-chain-the-ranker-produced,-and-what-the-surface-stage-did-with-it">1.6a · Every chain the ranker produced, and what the surface stage did with it<a class="anchor-link" href="#1.6a-%C2%B7-Every-chain-the-ranker-produced,-and-what-the-surface-stage-did-with-it">¶</a></h3><p><strong>The gate table above has 12 rows because a config declares 12 targets. This one has 21
-because the ranker produced 21 chains.</strong> They answer different questions, and until this run both were answered by the same
-hand-written list of six.</p>
-<p><strong>One row per chain, and no top-N cut.</strong> The surface calculation costs seconds per structure,
-so the pipeline caps it at the twelve highest-ranked candidates — a sensible cost control that
-on a genome of twenty-three candidates is what hid the polymerase. Here every chain gets a row,
-and a chain that cannot be measured carries the reason.</p>
+because the ranker produced 21 chains.</strong> They answer different questions, and until this run
+both were answered by the same hand-written list of six.</p>
+<p><strong>One row per chain, and no cut at the top twelve.</strong> The surface calculation costs seconds per
+structure, so the pipeline caps it at the twelve highest-ranked candidates. That is a sensible
+cost control, and on a genome of twenty-three candidates it is what hid the polymerase. Here
+every chain gets a row, and a chain that cannot be measured carries the reason.</p>
 <p><strong>A refusal is a different statement from a low score, and the column says which.</strong> "No
 deposited chain covers this residue range" is a fact about what has been solved. "The patch is
 too small for a macrocycle" is a fact about the protein. Only the second is about the target.</p>
@@ -11329,32 +11325,32 @@ how far each case got at the folding stage:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>The largest patches in this genome belong to membrane proteins, which is why the gate reads
-localisation before area.</strong> A helix bundle crystallised out of its bilayer presents an enormous
-exposed greasy surface, and it is enormous precisely because it belongs inside a membrane
-rather than on the outside of anything. The gate refuses those on where they sit, before it
-looks at how much area they carry.</p>
-<p><strong>The gate now has an edge on both sides, and the <code>share of surface</code> column is why.</strong> It used
-to have a floor at half a footprint and nothing above, so the larger the patch the more
-confidently it read <code>yes</code>. That is backwards. Patch membership is spatial adjacency at ten
-angstroms, so on a large chain the exposed greasy residues connect into one component that
-wraps the protein — nsp4 reports 7,558 square angstroms this way, which clears a 600
-square-angstrom footprint by an order of magnitude and marks no site at all. A patch covering
-more than 15% of its domain's own surface is now reported uncertain rather than passed.
-It is a fraction and not an area because the failure scales with the chain.</p>
+<p><strong>The largest patches in this genome belong to membrane proteins, and the gate reads where a
+protein sits before it reads area.</strong> A helix bundle crystallised out of its membrane presents
+an enormous exposed greasy surface, enormous precisely because it belongs inside a membrane and
+not on the outside of anything. The gate refuses those on where they sit, before it looks at how
+much area they carry.</p>
+<p><strong>The gate now has an edge on both sides, and the <code>share of surface</code> column carries the new
+one.</strong> It used to have a floor at half a footprint and nothing above, so the larger the patch
+the more confidently it read <code>yes</code>. That is backwards. A residue joins a patch when it comes
+within ten angstroms of one already in it, so on a large chain the exposed greasy residues link
+into a single component that wraps the protein. On nsp4 that component reaches 7,558 square
+angstroms, clearing a 600 square-angstrom footprint by an order of magnitude and marking no site
+at all. A patch covering more than 15% of its domain's own surface is now reported uncertain
+instead of passed. It is a fraction and not an area because the failure scales with the chain.</p>
 <p>None of the 11 measured rows changes verdict. The oversized patches in this set belong to
-proteins the gate refuses on localisation before it reaches area at all — 6 of 11 are annotated
-inside the cell — so the ceiling closes a hole that nothing in this config currently falls
-into. It is not decorative: the chain record's nsp4 reports 7,558 square angstroms over a
-quarter of its own surface, and that row is only refused today because nsp4 is a membrane
-protein.</p>
-<p><strong>The patch search is also confined to the domain now</strong>, which it was not: the residue
-interval chose which structure to measure and then did not restrict the measurement, so the
-quantity was the largest patch anywhere on the deposited chain. Accessibility is still
-computed on the whole file, partners included, because a domain cut out of its chain exposes a
-face that was never solvent-facing — only the search is clipped. The <code>clipped</code> column counts
-how many of each row's five replicate structures the clip actually reached, because a median
-over a mix of clipped and whole-chain measurements is a mix of two quantities.</p>
+proteins the gate refuses on where they sit before it reaches area at all, 6 of 11 of them
+annotated inside the cell, so the ceiling closes a hole that nothing in this config currently
+falls into. The ceiling is not decorative. The chain record's nsp4 reports 7,558 square
+angstroms over a quarter of its own surface, and that row is only refused today because nsp4 is
+a membrane protein.</p>
+<p><strong>The patch search is also confined to the domain now.</strong> It was not before. The residue
+interval chose which structure to measure and then left the measurement unrestricted, so the
+quantity was the largest patch anywhere on the deposited chain. Exposure is still computed on
+the whole file, partners included, because a domain cut out of its chain exposes a face that was
+buried in the intact structure. Only the search is clipped. The <code>clipped</code> column counts how many
+of each row's five replicate structures the clip actually reached, because a median over a mix
+of clipped and whole-chain measurements is a mix of two quantities.</p>
 <p><strong>The folding stage no longer slices, it aligns — and it searches every ORF.</strong> A mature chain
 is cut out of the genome's translation at coordinates annotated on the <em>relative</em>, and between
 species those coordinates move by tens of residues: SARS-CoV's main protease starts at 3241 and
@@ -11383,10 +11379,10 @@ by a few residues would otherwise look exactly like one that worked.</p>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="1.6b-%C2%B7-The-same-five-stages-on-three-pathogens">1.6b · The same five stages on three pathogens<a class="anchor-link" href="#1.6b-%C2%B7-The-same-five-stages-on-three-pathogens">¶</a></h3><p><strong>One genome is an anecdote about a pipeline.</strong> The coverage numbers above — how many ranked
-chains keep a measurable surface, how many can be located well enough to fold — are properties
-of how much structural work a pathogen's relatives have had, as much as of the code. A single
-row cannot show which. Three viral families can.</p>
+<h3 id="1.6b-%C2%B7-The-same-five-stages-on-three-pathogens">1.6b · The same five stages on three pathogens<a class="anchor-link" href="#1.6b-%C2%B7-The-same-five-stages-on-three-pathogens">¶</a></h3><p><strong>One genome is an anecdote about a pipeline.</strong> The coverage numbers above, how many ranked
+chains keep a measurable surface and how many can be located well enough to fold, are
+properties of how much structural work a pathogen's relatives have had, as much as of the code.
+A single row cannot show which. Three viral families can.</p>
 <p><strong>Every row holds its own organism out</strong>, which is the configuration a novel pathogen is
 actually in and the one §1.4 validates the ranking under. So the surfaces here are the nearest
 curated relative's, never the pathogen's own.</p>
@@ -11604,14 +11600,14 @@ chains located by aligning the relative's chain, across all three genomes: 20
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>Read the refusal lines under the table, not just the counts.</strong> A chain with no measurable
-surface is making a claim about what has been deposited for this pathogen's relatives, and the
-claims differ by family. None of them is a claim about the protein being a poor target.</p>
-<p><strong>The last two lines are what the alignment bought.</strong> Every chain the folding stage located is
-a chain the slice would have had to place by the relative's coordinates, and under a holdout
-the relative is always a different species. The count of spans that sit somewhere other than
-those coordinates is the count of windows the previous version would have folded wrong or
-refused outright.</p>
+<p><strong>Each refusal line under the table names what was missing.</strong> A chain with no measurable
+surface states what has been deposited for this pathogen's relatives, and that differs by
+family. None of them says the protein is a poor target.</p>
+<p><strong>The last two lines are what the alignment bought.</strong> Every chain the folding stage located
+is one the old slice would have had to place at the relative's coordinates, and under a
+holdout the relative is always a different species. Count the spans sitting somewhere other
+than those coordinates and you have the windows the previous version would have folded wrong
+or refused outright.</p>
 <p><strong>To run these same five stages on a pathogen of your own, use §0.2.</strong> It takes one accession
 and nothing else, and prints the table above for whatever you give it.</p>
 </div>
@@ -11873,13 +11869,13 @@ own manifest, and a blank one means that manifest is not on this machine.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>The table makes the point on its own.</strong> The four datasets that vary more than two positions
-at a 512-candidate batch gain +0.173 to +0.321, each improving in 14 or more batches. The spike
-receptor-binding domain batch varies only <strong>2</strong> positions. It gains +0.010, and improves in 2
-of the 6 batches. Same budget, same rule for choosing, same batch size. What differs is whether
-the candidates vary at the same positions as the measured ones. The column labelled <code>wilcoxon_p</code>
-is how unlikely that gain would be if the model's ranking carried no information. For all four
-dense datasets it is 0.005 or below.</p>
+<p><strong>The four datasets that vary more than two positions at a 512-candidate batch gain +0.173
+to +0.321</strong>, each improving in 14 or more batches. The spike receptor-binding domain batch
+varies only <strong>2</strong> positions. It gains +0.010, and improves in 2 of the 6 batches. Same budget,
+same rule for choosing, same batch size. What differs is whether the candidates vary at the
+same positions as the measured ones. The column labelled <code>wilcoxon_p</code> is how unlikely that
+gain would be if the model's ranking carried no information. For all four dense datasets it
+is 0.005 or below.</p>
 </div>
 </div>
 </div>
@@ -12252,8 +12248,8 @@ floor was +0.15 and 7 of 10. The cell above computes both gains from the records
 <p><strong>The dataset-level statement survives too.</strong> The four datasets varying more than two positions
 gain +0.173 to +0.321. The four varying two positions gain +0.010 to +0.033. The two ranges do
 not overlap. Of the 70 ways the eight dataset labels could be split four against four, 1 is as
-extreme as the one observed, p = 0.014. That is the floor of a four-against-four design. It is
-also the strongest form these records can carry, because the dataset and not the batch is the
+extreme as the one observed, p = 0.014. That is the floor of a four-against-four design, and
+the strongest form these records can carry, because the dataset and not the batch is the
 independent unit.</p>
 </div>
 </div>
@@ -12276,12 +12272,12 @@ plus the non-canonical classes the ribosome is reported to accept, taken from th
 genetic-code-reprogramming literature. <code>chemistry.library_spec</code> is one of the ten registered
 tools, reached by the <code>invoke_design_tool</code> action. It returns a library definition: a
 chloroacetyl initiator, a randomised region over a fixed set of building blocks, and a cysteine
-that closes the ring through a thioether.</p>
+that closes the ring through a sulphur bond, a thioether.</p>
 <p><strong>One staged dataset is a real macrocycle library.</strong> <code>thrombin_cyclic</code> holds cyclic peptides
-built from named non-canonical monomers against a measured thrombin endpoint, with a structure
-recovered for 47 of them. It carries its own experiment. Hold monomers out of training, then ask
-whether a model fitted on the measured members can rank members built from building blocks it
-has never seen measured.</p>
+built from named non-canonical building blocks against a measured thrombin endpoint, with a
+structure recovered for 47 of them. It carries its own experiment. Hold blocks out of
+training, then ask whether a model fitted on the measured members can rank members built from
+the ones it never saw measured.</p>
 </div>
 </div>
 </div>
@@ -12716,25 +12712,24 @@ concordance, shuffled      : 0.50 and 0.54  (chance is 0.50)
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>Read the null column.</strong> Every field the module fills itself is populated for all 29 building
-blocks. Every field a campaign supplies is empty for all 29, which is 232 cells of 232. Those 8
-fields are the chemical identifier, the CCD code, the SMILES string, the stereochemistry
-descriptor, the molecular weight, the reprogrammed codon, the Rosetta parameters and the
-rotamer library.</p>
-<p><strong>That list is the handshake, and it is already written down.</strong> This side produces the target,
-the folded structure, the measured surface, the library definition and the go/no-go on whether
-modelling will help. Those 8 fields come from a campaign. The definition the tool returns allows
-158,945,703,125 distinct sequences over 25 building blocks. No member of any library it defines
-has been synthesised or measured here.</p>
+<p><strong>Every field the module fills itself is populated for all 29 building blocks.</strong> Every field
+a campaign supplies is empty for all 29, which is 232 cells of 232. Those 8 fields are the
+chemical identifier, the CCD code, the SMILES string, the stereochemistry descriptor, the
+molecular weight, the reprogrammed codon, the Rosetta parameters and the rotamer library.</p>
+<p><strong>That list is the handshake.</strong> This side produces the target, the folded structure, the
+measured surface, the library definition and the go/no-go on whether modelling will help.
+Those 8 fields come from a campaign. The definition the tool returns allows 158,945,703,125
+distinct sequences over 25 building blocks. No member of any library it defines has been
+synthesised or measured here.</p>
 <p><strong><code>thrombin_cyclic</code> shows how far the representation already reaches.</strong> It is 8,448 unique
-cyclic peptides over named non-canonical monomers, measured against a quantitative thrombin
-endpoint. Two cyclisation chemistries are modelled explicitly, and SMILES recovered for 47
-monomers gave each block 10 computed descriptors. The monomer-holdout table underneath reports
-concordance of 0.47 to 0.50 for the encoders that use those descriptors. The shuffled controls
-sit at 0.50 and 0.54, where chance is 0.50.</p>
+cyclic peptides over named non-canonical building blocks, measured against a quantitative
+thrombin endpoint. Two cyclisation chemistries are modelled explicitly, and SMILES recovered
+for 47 of the blocks gave each one 10 computed descriptors. The block-holdout table underneath
+reports concordance of 0.47 to 0.50 for the encoders that use those descriptors. The shuffled
+controls sit at 0.50 and 0.54, where chance is 0.50.</p>
 <p>Two questions about the handoff are open. Which identifier should a reprogrammed building block
 carry on both sides? A block named here and a block in a campaign export have to be provably the
-same. And is a per-monomer descriptor enough to fit the first useful model on, or does that model
+same. And is a per-block descriptor enough to fit the first useful model on, or does that model
 need features of the assembled macrocycle?</p>
 </div>
 </div>
@@ -13235,31 +13230,31 @@ what the descriptors cannot say, from the record's own limitations:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>The hidden blocks are ordinary members of the space, not an exotic corner of it.</strong> Of the 47
-blocks carrying a structure, 40 are hidden in at least one of the 25 draws. The seven never
-hidden are the fixed chemistry: two cyclisation anchors, four linkers and the ender. Those sit at
-positions the holdout does not touch. The hidden ones are spread through the cloud, a median 2.51
-from the centre against 2.23 for all 47. So a weak transfer result here is not explained by the
-experiment having hidden the strangest chemistry. That is the first thing worth checking, and the
-reason the left panel is drawn at all.</p>
-<p><strong>What holds is the separation from the permuted control.</strong> That record hides twelve blocks from
-the same library and shuffles the measurements. It keeps the shape of the experiment and destroys
-the link between a member and its number. All eight of its lines land between -0.007 and +0.025.
-The worst single draw in the panel is +0.039. So every draw sits clear of the control. A model
-does carry real ranking information about members built from blocks it never saw measured.</p>
-<p><strong>Nothing here separates by how many blocks are hidden.</strong> The widest spread within one column is
-0.36 and the widest gap between column medians is 0.21, both printed in the panel. So five draws
-at one holdout size cover more ground than the sizes cover between them. Which blocks are hidden
-matters at least as much as how many.</p>
+<p><strong>The hidden blocks are ordinary members of the space.</strong> Of the 47 blocks carrying a
+structure, 40 are hidden in at least one of the 25 draws. The seven never hidden are the fixed
+chemistry: two cyclisation anchors, four linkers and the ender, all at positions the holdout
+does not touch. The hidden ones are spread through the cloud, a median 2.51 from the centre
+against 2.23 for all 47. A weak transfer result here is not explained by the experiment having
+hidden the strangest chemistry.</p>
+<p><strong>What holds is the separation from the permuted control.</strong> That record hides twelve blocks
+from the same library and shuffles the measurements. It keeps the shape of the experiment and
+destroys the link between a member and its number. All eight of its lines land between -0.007
+and +0.025, and the worst single draw in the panel is +0.039, clear of every one of them. A
+model does carry real ranking information about members built from blocks it never saw
+measured.</p>
+<p><strong>Nothing here separates by how many blocks are hidden.</strong> The widest spread within one column
+is 0.36 and the widest gap between column medians is 0.21, both printed in the panel. Five
+draws at one holdout size cover more ground than the sizes cover between them. Which blocks
+are hidden matters at least as much as how many.</p>
 <p><strong>Measured chemistry does not yet beat plain block identity.</strong> Shuffling the descriptors between
 blocks keeps the feature distribution and breaks the match to the real chemistry. The true
 descriptors beat that control in 17 of 25 paired draws, which a sign test puts at p = 0.1078. The
 line that wins has no chemistry in it at all.</p>
-<p><strong>The reason is the last thing the cell prints, and it is the useful part.</strong> These descriptors
-are per block. They say nothing about the assembled ring, its conformation, or the cyclisation
-that closes it. So a feature set scored on a building block in isolation is being asked to rank a
-macrocycle. What would move this is a representation of the assembled member, not more holdout
-sizes of the same ladder.</p>
+<p><strong>The reason is the last thing the cell prints.</strong> These descriptors are per block. They say
+nothing about the assembled ring, its conformation, or the cyclisation that closes it, so a
+feature set scored on a building block in isolation is being asked to rank a macrocycle. What
+would move this is a representation of the assembled member, not more holdout sizes of the
+same ladder.</p>
 </div>
 </div>
 </div>
@@ -14200,7 +14195,7 @@ Of the four, only the spike is annotated outside the cell. A macrocycle has to r
 without crossing a membrane, so the spike is the only one of the five currently reachable.</p>
 <p><strong>A large patch never promotes a row here.</strong> The helicase carries the largest patch of the six
 proteins measured anywhere in that record. It also sits inside the host cell, on the
-replication machinery. That is why the gate reads localisation before it reads area. The main
+replication machinery, so the gate reads where the protein sits before it reads area. The main
 protease already has an approved inhibitor, which says the site is bindable. It also says a new
 molecule would be competing with a marketed drug.</p>
 <p><strong>So read the table top down and stop at the first reachable row.</strong> For SARS-CoV-2 that is the
@@ -14213,28 +14208,29 @@ chain. Change <code>ACCESSION</code> and <code>HOLDOUT</code> at the top of the 
 back for another pathogen.</p>
 <p><strong>After a target is chosen, one more question is worth asking before anything is ordered.</strong>
 §3.4 keeps what was measured and what is assumed in separate blocks. The measured part is the
-two SARS-CoV-2 datasets §2 staged. Both are single-substitution scans over a whole protein. A
-first round of candidates therefore spreads itself over two hundred positions and more, and a
-model fitted on it wins almost nothing. The calibration printed beside them is the one place
-this project varied that coverage with everything else held fixed. The gain runs with how much
-of a batch speaks to each varying position. A display library sits at the dense end, because
-every member carries a building block at every randomised position.</p>
+two SARS-CoV-2 datasets §2 staged. Both scan a whole protein, each member differing from the
+wild type at one position. A first round of candidates therefore spreads itself over two
+hundred positions and more, and a model fitted on it wins almost nothing. The calibration
+printed beside them is the one place this project varied that coverage with everything else
+held fixed. The gain runs with how much of a batch speaks to each varying position. A display
+library sits at the dense end, because every member carries a building block at every
+randomised position.</p>
 <p><strong>The proposed part is one link the repository does not contain, and it is marked as such.</strong>
 Going from a measured patch to a randomised-region length needs a figure for how much surface
-one macrocycle residue covers. Nothing in <code>runs/</code> measures it. So it sits in an uppercase
+one macrocycle residue covers. Nothing in <code>runs/</code> measures it. It sits in an uppercase
 constant, is swept over three settings rather than shown at one, and prints the band it sits in
-from the record. What that step buys is concrete. The implied region can be compared against
-the 4 to 8 positions <code>chemistry.library_spec</code> admits. On the four measured surfaces the answer
-differs from target to target. That is a design decision a campaign can take, not a reason to
-drop a candidate. Measuring buried area per residue off deposited macrocycle complexes would
-replace the assumption with a number, and that is a small piece of work.</p>
-<p><strong>Two limits travel with the verdict and both are printed beside it.</strong> Dense coverage is
+from the record. The implied region can then be compared against the 4 to 8 positions
+<code>chemistry.library_spec</code> admits, and on the four measured surfaces the answer differs from
+target to target. That is a design decision a campaign can take, not a reason to drop a
+candidate. Measuring buried area per residue off deposited macrocycle complexes would replace
+the assumption with a number, and that is a small piece of work.</p>
+<p><strong>Two limits travel with the verdict, and both are printed beside it.</strong> Dense coverage is
 necessary and not sufficient, which the adjudication record states against the main protease
-itself. And the measured gain decays steeply with batch size at a fixed label budget. So §3.4
-speaks to deconvolution and focused maturation, over hundreds to a few thousand members, rather
-than to one selection round over the whole library. Nothing behind any of it holds a
-macrocycle, a building block outside the twenty canonical residues, or a ring closure. That is
-the gap a SynX campaign is the natural way to close.</p>
+itself. And the measured gain decays steeply with batch size at a fixed label budget. §3.4
+therefore speaks to deconvolution and focused maturation, over hundreds to a few thousand
+members, rather than to one selection round over the whole library. Nothing behind any of it
+holds a macrocycle, a building block outside the twenty canonical residues, or a ring closure.
+That is the gap a SynX campaign is the natural way to close.</p>
 </div>
 </div>
 </div>
