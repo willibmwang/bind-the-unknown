@@ -4997,6 +4997,62 @@ def test_every_chain_inside_the_ceiling_is_folded_and_the_pick_is_unchanged():
         folded_structure.fold = original
 
 
+def test_a_budget_spent_on_refusals_is_distinguishable_from_a_budget_too_tight():
+    """Why the folding budget ran out, not only that it did.
+
+    Both failures produce the same `chains_not_folded_by_budget`: a cap genuinely too tight
+    for the work, and a folding endpoint that is down and burning the wall clock on calls
+    that return nothing. They call for opposite responses, and the record could not tell them
+    apart. On 11 Nov 2026 ESM Atlas returned 504 to five of seven calls on a chain re-run,
+    the refusals alone exhausted the 240-second budget, and the record attributed six dropped
+    chains to the budget -- which reads as a cost control doing its job rather than as an
+    outage.
+
+    So the seconds spent on calls that came back empty are counted apart from the seconds
+    spent folding, and the per-chain reason says so too. Offline, with a stub that refuses
+    every other call slowly.
+    """
+    import time as _time
+
+    from hpc_pilots import chain as chain_module
+    from hpc_pilots import folded_structure
+
+    calls = {"n": 0}
+
+    def flaky(sequence, target_name="", record=True, **kw):
+        calls["n"] += 1
+        if calls["n"] % 2 == 0:
+            _time.sleep(0.25)
+            return {"absence": "endpoint_unavailable", "target_name": target_name}
+        return {"target_name": target_name, "folded": True, "pdb": "ATOM\n",
+                "sequence_length": len(sequence), "mean_plddt": 70.0,
+                "model": "stub", "confident_fraction": 1.0}
+
+    def row(name, length):
+        return {"name": name, "identified": True, "rank": length,
+                "orf": {"protein": "M" + "A" * (length - 1)}}
+
+    ranked = [row(f"chain {i}", 100 + i) for i in range(6)]
+    original = folded_structure.fold
+    folded_structure.fold = flaky
+    try:
+        primary, rows, _ = chain_module.fold_stage(ranked, ceiling=400, pool=(), budget=0.4)
+        assert primary["folds_refused_by_the_endpoint"] == 2
+        assert primary["seconds_spent_on_refused_folds"] > 0
+        assert primary["chains_not_folded_by_budget"] > 0
+        dropped = next(r for r in rows if "budget" in (r.get("not_folded_because") or ""))
+        assert "the folding endpoint refused" in dropped["not_folded_because"]
+
+        # A bound that forbids even the first fold reports an absence. It used to raise an
+        # IndexError off an empty fold list, which is the one failure this stage may not have:
+        # it exists to say why there is nothing, not to crash when there is nothing.
+        absent, _, none_folded = chain_module.fold_stage(ranked, ceiling=400, pool=(), limit=0)
+        assert none_folded == []
+        assert "no fold was attempted" in absent["absence"]
+    finally:
+        folded_structure.fold = original
+
+
 def test_several_chains_can_get_a_surface_from_their_predicted_shape():
     """The rescue, which is the whole point of folding more than one chain.
 

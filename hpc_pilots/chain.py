@@ -803,7 +803,14 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=12, budget=240.0):
     # the workflow that serves a visitor's run. A count alone would have made the slow case a
     # timeout instead of a record. The wall budget is checked before each fold after the first:
     # the pick always runs, because it is the fold this repository reproduces.
+    # Seconds the budget spent on calls that came back with nothing, counted apart from the
+    # seconds it spent folding. The two are indistinguishable to the budget and must not be
+    # indistinguishable in the record: when the endpoint is down, every chain past the first
+    # few is dropped with `chains_not_folded_by_budget`, which reads as "the cap is too
+    # tight" when what happened is "the host refused". Observed on 11 Nov 2026, when ESM
+    # Atlas returned 504 to five of seven calls and the refusals alone exhausted the budget.
     folds, dropped_limit, dropped_budget = [], 0, 0
+    refused_calls, refused_seconds = 0, 0.0
     folding_started = time.time()
     for index, (target, sequence, entry) in enumerate(foldable):
         if limit is not None and index >= limit:
@@ -821,13 +828,20 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=12, budget=240.0):
             for _, _, late in foldable[index:]:
                 late["not_folded_because"] = (
                     f"the {budget:.0f}-second folding budget for one run was spent before "
-                    f"the pick order reached this chain.")
+                    f"the pick order reached this chain"
+                    + (f", {refused_seconds:.0f} s of it on calls the folding endpoint "
+                       f"refused" if refused_calls else "")
+                    + ".")
             break
+        call_started = time.time()
         try:
             payload = fold(sequence, target_name=target or "", record=False)
         except Exception as failure:                      # noqa: BLE001
             payload = {"absence": f"{type(failure).__name__}: {str(failure)[:160]}",
                        "target_name": target}
+        if not payload.get("folded"):
+            refused_calls += 1
+            refused_seconds += time.time() - call_started
         # Stated on the row as well as in the payload, so a reader of `foldable` can see which
         # chains have coordinates without holding the fold payloads beside it.
         entry["folded"] = bool(payload.get("folded"))
@@ -839,11 +853,23 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=12, budget=240.0):
         folds.append(payload)
     # Never silently. A bound that drops a chain is a chain with no coordinates, which is
     # the defect this whole change exists to remove, so each is named in the record.
+    if not folds:
+        # Reachable only with a bound that forbids the first fold, such as `limit=0`. Every
+        # caller here folds at least the pick, but returning `folds[0]` on an empty list would
+        # raise an IndexError in place of the absence this stage is built to report.
+        return {"absence": "no fold was attempted: the bounds on this run forbade the first "
+                           "one"}, rows, []
     if dropped_limit:
         folds[0].setdefault("chains_not_folded_by_limit", dropped_limit)
     if dropped_budget:
         folds[0].setdefault("chains_not_folded_by_budget", dropped_budget)
         folds[0].setdefault("folding_budget_seconds", budget)
+    # Recorded whenever any call came back empty, not only when a bound fired. A run where
+    # the endpoint refused half its calls and still folded everything it was asked to is a
+    # run worth being able to see afterwards.
+    if refused_calls:
+        folds[0].setdefault("folds_refused_by_the_endpoint", refused_calls)
+        folds[0].setdefault("seconds_spent_on_refused_folds", round(refused_seconds, 1))
     return folds[0], rows, folds
 
 
@@ -1150,6 +1176,10 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                            (folded or {}).get("chains_not_folded_by_limit", 0),
                        "chains_not_folded_by_budget":
                            (folded or {}).get("chains_not_folded_by_budget", 0),
+                       # What the budget was spent on, so a reader can tell a cap that is too
+                       # tight from a host that was down. Both produce the same drop count.
+                       "seconds_spent_on_refused_folds":
+                           (folded or {}).get("seconds_spent_on_refused_folds", 0),
                        # The third way a located chain ends without coordinates, and the only
                        # one that had no number. `foldable` counts chains whose own sequence
                        # this stage found, at any length; `chains_folded` counts the ones it
