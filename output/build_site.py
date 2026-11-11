@@ -1066,10 +1066,53 @@ def surface_lane(case):
                 + [footprint]) or 1
 
     def chip(row):
+        """The gate's verdict, with the question it answers attached to it.
+
+        Unlabelled, this column reads as a judgement on the target and is not one. It answers
+        "could a macrocycle bind here at all", which on a viral replicase is usually settled
+        by where the protein sits rather than by how large its patch is -- so a row can carry
+        857 square angstroms against a 600 threshold and still say no, and a reader with no
+        label has been shown a contradiction.
+        """
         gate = row["surface"].get("gate")
         if not gate:
             return ""
-        return f'<span class="chip-x g-{esc(gate)}">{esc(gate)}</span>'
+        asks = {"yes": "a macrocycle could bind here",
+                "borderline": "uncertain: the measurement does not decide",
+                "no": "a macrocycle could not bind here"}.get(gate, gate)
+        return (f'<span class="chip-x g-{esc(gate)}" title="Can a macrocycle bind here? '
+                f'{esc(asks)}">{esc(gate)}</span>')
+
+    def verdict_note(row):
+        """Why this row's verdict reads the way it does, where localisation decided it.
+
+        The gate reads three conditions in order and stops at the first that fails, so a
+        refusal on the first of them never reaches the other two. That order is invisible in
+        a one-word chip, and it is the whole explanation for every refusal in this run: the
+        patch is irrelevant to a protein a macrocycle cannot get to.
+        """
+        surface = row["surface"]
+        if surface.get("exposed") is not False:
+            return ""
+        seen, places = set(), []
+        for place in (surface.get("locations") or []):
+            if place.lower() not in seen:
+                seen.add(place.lower())
+                places.append(place.lower())
+        where = ", ".join(places[:3]) or "inside the cell"
+        # Named when the localisation is not the chain's own. A polyprotein's entry carries
+        # the locations of every chain cut out of it, so a verdict read off the parent is a
+        # weaker claim than one read off the chain, and the record says which this was.
+        scope = surface.get("location_scope")
+        borrowed = ("" if scope == "chain" else
+                    " &middot; read off the parent entry, not this chain, so it is the "
+                    "weaker kind of verdict")
+        # "Out of reach" rather than "inside the cell", which is the commoner case but not
+        # the only one: ORF9b is annotated `Virion`, which is inside the particle, and
+        # UniProt distinguishes that from `Virion membrane` precisely because one is a
+        # surface a molecule can arrive at and the other is not.
+        return (f'<br>annotated {esc(where)} &mdash; out of reach, which is what the verdict '
+                f'turns on{borrowed}')
 
     def measured_row(row):
         surface = row["surface"]
@@ -1086,7 +1129,7 @@ def surface_lane(case):
     <div class="lr">
       <span class="who"><span class="t">{esc(row['target'])}{chip(row)}</span>
         <span class="w">{num(structures)} deposited structure{'' if structures == 1 else 's'}
-          of the same domain{share}</span></span>
+          of the same domain{share}{verdict_note(row)}</span></span>
       <span class="plot">{_tick(footprint / 2, scale, faint=True)}{_tick(footprint, scale)}
         <i class="rng" style="left:{left:.2f}%;width:{max(span, 0.4):.2f}%"></i>
         <i class="dot" style="left:{dot:.2f}%"></i></span>
@@ -1144,7 +1187,9 @@ def surface_lane(case):
          "the coordinates came out of a laboratory, so the patch is measured on an "
          "observation of the protein. Every structure of that domain is measured, not one: "
          "the dot is the middle answer and the bar is the spread between the smallest and "
-         "the largest, because the same chain solved twice does not give the same number"),
+         "the largest, because the same chain solved twice does not give the same number. "
+         "The word beside each name is a separate verdict &mdash; not how good the target "
+         "is, but whether a macrocycle could bind it at all"),
         (predicted, predicted_row,
          f"Measured on a shape a model predicted &middot; {len(predicted)}",
          "nobody has ever solved these, so the shape being measured was predicted from the "
@@ -1182,10 +1227,13 @@ def surface_lane(case):
     on_location = [r for r in refused if r["surface"].get("exposed") is False]
     verdicts = ""
     if refused:
-        verdicts = (f"All {len(refused)} refusals here are decided on localisation, which the "
-                    f"gate reads before area at all: the protein is inside the cell, where a "
-                    f"macrocycle does not go. Several of these patches clear the footprint "
-                    f"line comfortably and are refused anyway."
+        verdicts = (f"All {len(refused)} of those verdicts are decided on where the protein "
+                    f"sits, which the gate reads before it reads area at all: every one of "
+                    f"these is annotated somewhere a macrocycle cannot arrive &mdash; inside "
+                    f"the cell, or inside the virion. Several of their patches clear the "
+                    f"footprint line comfortably and are refused anyway, which is the gate "
+                    f"saying something about this class of molecule rather than about the "
+                    f"target."
                     if len(on_location) == len(refused) else
                     f"{len(on_location)} of {len(refused)} refusals are decided on "
                     f"localisation; the rest fail on area.")
