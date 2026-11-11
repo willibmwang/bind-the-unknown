@@ -17,7 +17,7 @@
     <div><dt>Input</dt><dd>NC_045512.2</dd></div>
     <div><dt>Genome</dt><dd>{{genome_nt}} letters</dd></div>
     <div><dt>Difficulty</dt><dd>SARS-CoV-2 hidden</dd></div>
-    <div><dt>Time taken</dt><dd>{{seconds}} seconds</dd></div>
+    <div><dt>The five steps</dt><dd>{{chain_seconds}} seconds</dd></div>
   </dl>
 
 
@@ -82,7 +82,7 @@
             <rect class="ac" x="68" y="24" width="12" height="24" rx="3" opacity=".38"/>
           </svg>
           <div class="lbl">Read the genome</div>
-          <div class="val">29,903</div>
+          <div class="val">{{genome_nt}}</div>
           <div class="unit">letters in</div>
         </div>
 
@@ -94,8 +94,8 @@
             <rect x="16" y="56" width="26" height="8" rx="4" fill="currentColor" opacity=".26"/>
           </svg>
           <div class="lbl">Rank the proteins</div>
-          <div class="val">20</div>
-          <div class="unit">candidates</div>
+          <div class="val">{{chains}}</div>
+          <div class="unit">chains</div>
         </div>
 
         <div class="step">
@@ -105,7 +105,7 @@
             <circle class="ac" cx="84" cy="26" r="4"/>
           </svg>
           <div class="lbl">Fold the target</div>
-          <div class="val">306</div>
+          <div class="val">{{fold_residues}}</div>
           <div class="unit">building blocks</div>
         </div>
 
@@ -117,7 +117,7 @@
             <circle cx="60" cy="27" r="2.4" fill="currentColor" opacity=".3"/>
           </svg>
           <div class="lbl">Measure the surface</div>
-          <div class="val">9 / 20</div>
+          <div class="val">{{measured}} / {{chains}}</div>
           <div class="unit">measured</div>
         </div>
 
@@ -134,7 +134,7 @@
             <circle class="ac" cx="64.1" cy="50.1" r="4.4" opacity=".8"/>
           </svg>
           <div class="lbl">Design the library</div>
-          <div class="val">159 B</div>
+          <div class="val">{{diversity_tile}}</div>
           <div class="unit">molecules</div>
         </div>
 
@@ -337,9 +337,9 @@
     <dl class="ret">
       <div><dt>Model</dt><dd>ESMFold v1 (2022-10-18)</dd></div>
       <div><dt>Chains folded</dt><dd>all {{fold_inside}} inside the {{fold_ceiling}}-residue ceiling</dd></div>
-      <div><dt>Drawn below</dt><dd>Main protease · 306 residues</dd></div>
+      <div><dt>Drawn below</dt><dd>Main protease · {{fold_residues}} residues</dd></div>
       <div><dt>Coordinates returned</dt><dd>193,227 bytes</dd></div>
-      <div><dt>Confidence mean / median / min</dt><dd>62.6 / 63.0 / 20.0</dd></div>
+      <div><dt>Confidence mean / median / min</dt><dd>{{mean_plddt}} / 63.0 / 20.0</dd></div>
       <div><dt>Residues above 70</dt><dd>{{confident_pct}} %</dd></div>
       <div><dt>Sequence matches the genome</dt><dd>verified, 0 mismatches</dd></div>
     </dl>
@@ -505,7 +505,7 @@
         chain_range: 4370–5301 · conservation: 0.8348 · surface_exposed: false<br>
         score_terms: 2.5044 + 0.0 + 1.5 + 0.02 + 2.4 → score 6.4244</div>
       </div>
-      <div class="accs"><span class="lead">All 20 chains were identified through one of these reviewed entries, returned per chain as <span class="k">nearest_homolog</span>. SARS-CoV-2's own entries were removed before the run, so every entry here belongs to a different virus:</span>
+      <div class="accs"><span class="lead">All {{chains}} chains were identified through one of these reviewed entries, returned per chain as <span class="k">nearest_homolog</span>. SARS-CoV-2's own entries were removed before the run, so every entry here belongs to a different virus:</span>
         <span class="acc"><code>P0C6X7</code><em>R1AB_SARS · 12 chains</em></span>
         <span class="acc"><code>Q3LZX1</code><em>SPIKE_BCHK3 · 3 chains</em></span>
         <span class="acc"><code>Q0Q472</code><em>VME1_BC279 · 1</em></span>
@@ -558,7 +558,7 @@
       <div class="fields"><span class="lead">The other <b>{{unmeasured}}</b> chains had no deposited structure to measure, and each is named in <a href="#surface-out">the lane above</a> with the accession that came back empty, the sentence the tool returned, and where the chain fell against the folding ceiling. That list was retyped here for a while, grouped by accession and annotated by hand, which made it the one place on the page where a chain could be described as rescued without the record saying so.</span></div>
       <div class="accs"><span class="lead">Those <b>{{unmeasured}}</b> are the reason step 3 now runs first and folds every chain it can. Where coordinates exist, this step measures them with the same arithmetic, and for <b>{{surface_predicted}}</b> chains that is the only surface they will ever have. On a chain that has both, the two answers are far apart:</span>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">5 deposited structures</i> <em>median of 5 · a real measurement</em></span><span class="ids">562.4 Å² · 4.4 % of the surface</span></div>
-        <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">the predicted shape</i> <em>ESMFold v1 · mean confidence 62.6</em></span><span class="ids">2,012.6 Å² · 11.0 % of the surface</span></div>
+        <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">the predicted shape</i> <em>ESMFold v1 · mean confidence {{mean_plddt}}</em></span><span class="ids">2,012.6 Å² · 11.0 % of the surface</span></div>
       </div>
       <p class="cap" style="margin-top:14px">The prediction reads <b>3.6×</b> larger. A predicted shape inherits the predictor's error, and a single chain modelled alone has no partner to bury a face against that a real structure would. The record states the ratio and attributes nothing. Both numbers stay out of the ranking, and the predicted one is never added to the count of chains measured on deposited structures. It is a different kind of evidence, kept under its own key.</p>
     </div>
@@ -575,7 +575,7 @@
         <div><dt>Distinct molecules</dt><dd>{{diversity}}</dd></div>
         <div><dt>Reads from steps 1–4</dt><dd>nothing</dd></div>
       </dl>
-      <div class="fields"><span class="lead">The 25 blocks: 19 ordinary amino acids, three N-methyl variants and three mirror-image ones. The tool's own return carries the line <em>“a library definition only; no binding, enrichment, inhibition or antiviral property is predicted for any member.”</em></span>
+      <div class="fields"><span class="lead">The {{alphabet}} blocks: 19 ordinary amino acids, three N-methyl variants and three mirror-image ones. The tool's own return carries the line <em>“a library definition only; no binding, enrichment, inhibition or antiviral property is predicted for any member.”</em></span>
       </div>
     </div>
   </div>

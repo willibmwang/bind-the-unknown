@@ -1446,7 +1446,19 @@ def facts(case):
         "alphabet": out5.get("alphabet_size"),
         "diversity": f"{diversity:,}" if diversity else None,
         "diversity_short": (f"{diversity / 1e9:.0f} billion" if diversity else None),
+        # Same number again, short enough for a stat tile sized for "29,903". The tile sits
+        # under a caption promising every figure in that row comes from the run, so it is
+        # read from the record like the rest rather than typed to match it.
+        "diversity_tile": (f"{diversity / 1e9:.0f} B" if diversity else None),
         "seconds": round(case.get("seconds") or 0),
+        # `seconds` is the whole case, and the case also exercises the five off-path tools on
+        # a grid of their own -- 222 s of the 363 s on the SARS-CoV-2 record. The landing page
+        # is a walkthrough of the five steps, so billing the reader for work the same page
+        # calls "not on this path" overstates them by more than twice. Summed from the five
+        # stages by tool, not by slicing the stage list, for the same reason the lookup above
+        # is keyed that way: the pipeline's order has already changed once.
+        "chain_seconds": round(sum(
+            (s.get("seconds") or 0) for s in (st1, st2, surface, folded, library))),
         # Named after the stage's job rather than its position, for the same reason the
         # lookup above is.
         "intake_seconds": round(st1.get("seconds") or 0),
