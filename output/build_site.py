@@ -1075,11 +1075,15 @@ def surface_lane(case):
         label has been shown a contradiction.
         """
         gate = row["surface"].get("gate")
-        if not gate:
+        # A refusal gets no chip. On this genome the gate says no to every measured chain,
+        # and a column of nine identical greyed words carried no information while reading
+        # as a verdict on the targets -- the one thing it is not. The refusal itself is not
+        # dropped: the row says in words what put the chain out of reach, and the sentence
+        # under the lane counts them. What is dropped is the repetition.
+        if not gate or gate == "no":
             return ""
         asks = {"yes": "a macrocycle could bind here",
-                "borderline": "uncertain: the measurement does not decide",
-                "no": "a macrocycle could not bind here"}.get(gate, gate)
+                "borderline": "uncertain: the measurement does not decide"}.get(gate, gate)
         return (f'<span class="chip-x g-{esc(gate)}" title="Can a macrocycle bind here? '
                 f'{esc(asks)}">{esc(gate)}</span>')
 
@@ -1111,8 +1115,8 @@ def surface_lane(case):
         # the only one: ORF9b is annotated `Virion`, which is inside the particle, and
         # UniProt distinguishes that from `Virion membrane` precisely because one is a
         # surface a molecule can arrive at and the other is not.
-        return (f'<br>annotated {esc(where)} &mdash; out of reach, which is what the verdict '
-                f'turns on{borrowed}')
+        return (f'<br>annotated {esc(where)} &mdash; out of reach, so a macrocycle is '
+                f'refused here whatever the patch measures{borrowed}')
 
     def measured_row(row):
         surface = row["surface"]
@@ -1188,8 +1192,10 @@ def surface_lane(case):
          "observation of the protein. Every structure of that domain is measured, not one: "
          "the dot is the middle answer and the bar is the spread between the smallest and "
          "the largest, because the same chain solved twice does not give the same number. "
-         "The word beside each name is a separate verdict &mdash; not how good the target "
-         "is, but whether a macrocycle could bind it at all"),
+         "A chip beside a name is the gate&rsquo;s separate verdict on whether a macrocycle "
+         "could bind there at all, and it appears only where that answer is yes or "
+         "uncertain; where it is no, the row says in words what put the chain out of "
+         "reach"),
         (predicted, predicted_row,
          f"Measured on a shape a model predicted &middot; {len(predicted)}",
          "nobody has ever solved these, so the shape being measured was predicted from the "
