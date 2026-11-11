@@ -4961,17 +4961,38 @@ def test_every_chain_inside_the_ceiling_is_folded_and_the_pick_is_unchanged():
         assert {r["target"]: r.get("folded") for r in rows} == {
             "over the ceiling": None, "first inside": True,
             "second inside": True, "unnamed": True}
-        # And neither bound is silent: each dropped count travels in the record.
-        _, _, capped = chain_module.fold_stage(ranked, ceiling=400, limit=2)
+        # And the ceiling is on the rows it decides, with a reason on the one it declined.
+        # This is the third way a located chain ends without coordinates and it was the only
+        # one with no name: the fold cap and the wall budget each had a count, and the
+        # ceiling's share was the unexplained gap between `foldable` and `chains_folded`.
+        assert {r["target"]: r.get("inside_the_ceiling") for r in rows} == {
+            "over the ceiling": False, "first inside": True,
+            "second inside": True, "unnamed": True}
+        declined = next(r for r in rows if r["target"] == "over the ceiling")
+        assert "500 residues" in declined["not_folded_because"]
+        assert "400-residue ceiling" in declined["not_folded_because"]
+        # A chain that was folded is not carrying a reason it was not.
+        assert all(r.get("not_folded_because") is None
+                   for r in rows if r["target"] != "over the ceiling")
+
+        # And neither bound is silent: each dropped count travels in the record, and now each
+        # dropped chain says on its own row which bound dropped it, because the stage after
+        # this one reports why a chain has no surface and can only report a written reason.
+        _, capped_rows, capped = chain_module.fold_stage(ranked, ceiling=400, limit=2)
         assert [f["target_name"] for f in capped] == ["first inside", "second inside"]
         assert capped[0]["chains_not_folded_by_limit"] == 1
+        dropped = next(r for r in capped_rows if r["target"] == "unnamed")
+        assert "cap of 2 folds" in dropped["not_folded_because"]
         # A zero wall budget still folds the pick -- that one is the committed artifact and is
         # not optional -- and drops the rest under its own, separate count.
-        primary, _, starved = chain_module.fold_stage(ranked, ceiling=400, budget=0.0)
+        primary, starved_rows, starved = chain_module.fold_stage(ranked, ceiling=400,
+                                                                 budget=0.0)
         assert [f["target_name"] for f in starved] == ["first inside"]
         assert primary["chains_not_folded_by_budget"] == 2
         assert primary["folding_budget_seconds"] == 0.0
         assert "chains_not_folded_by_limit" not in primary
+        starved_out = next(r for r in starved_rows if r["target"] == "second inside")
+        assert "folding budget" in starved_out["not_folded_because"]
     finally:
         folded_structure.fold = original
 
@@ -5116,21 +5137,67 @@ def test_the_page_quotes_the_predicted_patch_it_can_recompute():
     ratio = predicted / row["patch_median_a2"]
     assert f"{ratio:.1f}×" in body, f"the page should quote the ratio as {ratio:.1f}×"
 
-    # The rescue counts, computed the way the page claims them: of the chains no deposition
-    # covers, how many are inside the folding ceiling and therefore get a predicted surface.
-    # These are typed on the page too, and they are the headline of the reordering, so they are
-    # recomputed here rather than trusted.
+
+def test_the_rescue_counts_are_derived_from_the_record_and_not_typed():
+    """The headline of the reordering, recomputed against the builder that now derives it.
+
+    These three counts -- how many chains no deposition covers, how many of those are inside
+    the folding ceiling, and how many chains end with a surface by either route -- were typed
+    into `site/body.html` as literals, and this test asserted the literals were there. That
+    pinned the page to one run: every one of them is a join across two stages, so re-running
+    the chain could move all three without touching a sentence, and the assertion would have
+    gone on passing against the number the page used to be right about.
+
+    So the page asks for `{{tokens}}` and `build_site.lane_facts` fills them from the record.
+    What is checked here is the derivation rather than the text: the counts are recomputed
+    from the two stages' own rows, and the builder has to agree. The ceiling comes from the
+    same constant the fold stage applies, so moving it moves the test with it.
+    """
+    import json
+    import sys
+
+    from hpc_pilots.chain import FOLD_CEILING
+    from hpc_pilots.common import ROOT
+
+    record = ROOT / "runs/onset_chain.json"
+    if not record.exists():
+        pytest.skip("chain record absent on this machine")
+    sys.path.insert(0, str(ROOT / "output"))
+    import build_site                                        # noqa: PLC0415
+
+    cases = json.loads(record.read_text())["cases"]
+    case = next(c for c in cases if c.get("reference_excluded_organism"))
+
     foldable = {f["target"]: f for f in case["foldable"]}
+    measured = [r for r in case["surfaces"] if r["measured"]]
     inside = [r for r in case["surfaces"]
               if not r["measured"]
               and (foldable.get(r["target"]) or {}).get("sequence_recovered")
-              and 0 < ((foldable.get(r["target"]) or {}).get("recovered_length_aa") or 0) <= 400]
-    deposited = sum(1 for r in case["surfaces"] if r["measured"])
-    assert f"<b>{len(inside)}</b> of the <b>{{{{unmeasured}}}}</b> with nothing deposited" in body, (
-        f"the page should say {len(inside)} chains are rescued by the fold")
-    assert f"<b>{deposited + len(inside)}</b> of <b>{{{{chains}}}}</b> chains end with a surface" in body, (
-        f"the page should say {deposited + len(inside)} chains end with a surface")
-    assert f"for {len(inside)} chains above that is the only surface" in body
+              and 0 < ((foldable.get(r["target"]) or {}).get("recovered_length_aa") or 0)
+              <= FOLD_CEILING]
+
+    facts = build_site.lane_facts(case)
+    assert facts["fold_ceiling"] == FOLD_CEILING
+    assert facts["surface_predicted"] == len(inside), facts
+    assert facts["surface_any"] == len(measured) + len(inside), facts
+    assert facts["surface_none"] == len(case["surfaces"]) - len(measured) - len(inside), facts
+    # The invariant the page states as a count rather than as a literal zero, so a run that
+    # did drop a chain would say so on the page instead of claiming it had not.
+    assert facts["surface_dropped"] == len(case["scores"]) - len(case["surfaces"])
+
+    # And the lane draws one row per chain, which is the claim the whole stage rests on. A
+    # chain may be refused; it may not go missing between the record and the page.
+    lane = build_site.surface_lane(case)
+    assert lane.count('class="lr') == len(case["surfaces"]), lane.count('class="lr')
+    # Escaped on the way in, like every other value the page interpolates -- a chain called
+    # `Spike protein S2'` reaches the page as `S2&#x27;`, and a test comparing raw names
+    # would be asserting that the escaping is absent.
+    for row in case["surfaces"]:
+        assert build_site.esc(row["target"]) in lane, row["target"]
+    # Every chain the fold stage reported on reaches the other lane, including any ORF
+    # nothing recognised -- that row is the one the reorder exists for.
+    folds = build_site.fold_lane(case)
+    assert folds.count('class="lr') == len(case["foldable"])
 
 
 def test_every_ranked_chain_is_located_in_the_genome_it_came_from():
@@ -5181,6 +5248,151 @@ def test_every_ranked_chain_is_located_in_the_genome_it_came_from():
             assert held["folded"]["sequence_sha256"] == reference["sequence_sha256"], (
                 "the chain located the main protease through a relative and got a different "
                 "sequence from the one the committed fold was taken on")
+
+
+def test_no_chain_ends_the_run_without_a_reason_it_has_no_surface():
+    """Every chain with nothing, and the stage that closed each route, counted off the record.
+
+    The reorder put folding ahead of the surface stage so that a chain no deposition covers
+    still has coordinates to measure. That makes the residue ceiling the thing deciding who
+    can be rescued, and the ceiling's cost was the one drop in the whole chain with no name:
+    the fold cap and the wall budget each published a count, while the chains declined on
+    length alone were visible only as the gap between `foldable` and `chains_folded`. On the
+    SARS-CoV-2 holdout that gap is nine of twenty chains, the three spike chains and the
+    polymerase among them, and a reader asking why the polymerase has no surface was being
+    asked to find it by subtracting.
+
+    So three things are pinned here. Each chain with no surface by either route carries both
+    halves of the reason. The counts in the stage record and in `coverage` agree with the
+    rows they summarise, rather than being a second opinion about them. And the names of the
+    over-ceiling chains are in the record, because "nine chains" and "nsp3, nsp12, the spike"
+    are different statements to someone deciding whether the ceiling costs them anything.
+    """
+    import json
+
+    from hpc_pilots.common import ROOT
+
+    path = ROOT / "runs/onset_chain.json"
+    if not path.exists():
+        pytest.skip("onset chain artifact absent; rebuild with `python -m hpc_pilots chain`")
+    payload = json.loads(path.read_text())
+
+    for case in payload["cases"]:
+        by_tool = {s["tool"]: s for s in case["stages"]}
+        fold = by_tool.get("structures.folded")
+        surface = by_tool["geometry.surface_markers"]
+        if not fold:
+            continue
+        if "chains_over_the_ceiling" not in fold["output"]:
+            pytest.skip("record predates the over-the-ceiling counts; re-run the chain")
+
+        # The ceiling, read from the record rather than from the constant, because what is
+        # being checked is that the run's own rows agree with the run's own counts.
+        ceiling = fold["input"]["residue_ceiling"]
+        over = [r for r in case["foldable"]
+                if r.get("identified") and r.get("inside_the_ceiling") is False]
+        assert fold["output"]["chains_over_the_ceiling"] == len(over), case["case"]
+        assert fold["output"]["over_the_ceiling"] == [r["target"] for r in over], case["case"]
+        for row in over:
+            assert row["recovered_length_aa"] > ceiling, row["target"]
+            assert str(ceiling) in row["not_folded_because"], row["target"]
+
+        # The gap this closes, as the arithmetic it is. Every chain whose sequence was located
+        # is either inside the ceiling or over it -- no third state, which is what makes the
+        # ceiling's share countable instead of inferred -- and every chain inside the ceiling
+        # either reached the folding endpoint or was declined by a bound with its own number.
+        # A chain that fell out between the two would break one of these.
+        out = fold["output"]
+        for row in case["foldable"]:
+            if row["sequence_recovered"]:
+                assert "inside_the_ceiling" in row, row["target"]
+        inside = [r for r in case["foldable"] if r.get("inside_the_ceiling")]
+        assert len(inside) == (out["folds_attempted"]
+                               + out["chains_not_folded_by_limit"]
+                               + out["chains_not_folded_by_budget"]), case["case"]
+
+        # Every chain with neither surface says why, on both routes.
+        nothing = [r for r in case["surfaces"]
+                   if not r["measured"]
+                   and not (r.get("predicted_surface") or {}).get("measured")]
+        for row in nothing:
+            why = row["no_surface_because"]
+            assert why["deposited"], row["target"]
+            assert why["predicted"], row["target"]
+        assert surface["output"]["no_surface_by_either_route"] == len(nothing), case["case"]
+        assert case["coverage"]["chains_with_no_surface"] == len(nothing), case["case"]
+        # And the two halves of the chain's own coverage claim add up.
+        assert (case["coverage"]["chains_with_any_surface"]
+                + case["coverage"]["chains_with_no_surface"]) == len(case["surfaces"])
+
+        ceiling_closed = [r for r in nothing
+                          if r["no_surface_because"][
+                              "the_folding_ceiling_closed_the_only_route"]]
+        assert (surface["output"]["no_surface_over_the_folding_ceiling"]
+                == case["coverage"]["chains_with_no_surface_over_the_ceiling"]
+                == len(ceiling_closed)), case["case"]
+        # A chain the ceiling closed the route on is a chain the fold stage named, so the two
+        # stages cannot disagree about which chains those were.
+        assert {r["target"] for r in ceiling_closed} <= set(out["over_the_ceiling"]), \
+            case["case"]
+
+
+def test_the_two_measuring_stages_declare_that_they_change_no_rank():
+    """Stages 3 and 4 measure; they do not select. The record says so rather than the prose.
+
+    The rubric is five weights fixed before the run, and no fold or surface term is among
+    them, so the ranking is final at the end of stage 2. That was true before the reorder and
+    is true after it, which is exactly why it has to be stated: a reader meeting a pipeline
+    whose stages were swapped will read the swap as a change to what gets picked unless the
+    record says it is not one. The evidence stage already published this as a recorded false;
+    the two measuring stages now do too.
+
+    The second half is the absence at the other end. Nothing downstream reads a patch median:
+    `library_spec` takes an initiator, a randomised-region length range and elongator classes,
+    all properties of the display platform, so stage 5 defines the same library whatever
+    stage 4 found. The reorder gave stage 3 a consumer and left stage 4 without one, and this
+    asserts the arrow is still missing -- so that connecting it has to come with a test
+    change, and drawing it on a flowchart without connecting it fails here.
+    """
+    import json
+
+    from hpc_pilots.chain import LIBRARY_READS_FROM_SURFACE, SURFACE_READ_BY
+    from hpc_pilots.common import ROOT
+
+    path = ROOT / "runs/onset_chain.json"
+    if not path.exists():
+        pytest.skip("onset chain artifact absent; rebuild with `python -m hpc_pilots chain`")
+    payload = json.loads(path.read_text())
+
+    # The constants first, because the record is only a copy of them.
+    assert SURFACE_READ_BY == (), (
+        "stage 4's output now has a consumer. Say which stage reads it in `hands_to_next`, "
+        "draw the arrow on the flowchart, and update this test.")
+    assert LIBRARY_READS_FROM_SURFACE == (), (
+        "stage 5 now reads something upstream. The library definition was the same whatever "
+        "the surface stage found; if that changed, the flowchart and this test both move.")
+
+    for case in payload["cases"]:
+        by_tool = {s["tool"]: s for s in case["stages"]}
+        surface = by_tool["geometry.surface_markers"]
+        if "changes_any_rank" not in surface["output"]:
+            pytest.skip("record predates the measurement-not-selection fields; re-run")
+
+        for tool in ("structures.folded", "geometry.surface_markers"):
+            stage = by_tool.get(tool)
+            if stage:
+                assert stage["output"]["changes_any_rank"] is False, (case["case"], tool)
+        # The scores a later stage could have moved, and did not: stage 2's own numbers are
+        # still the ones on the rows, each re-adding from its five terms.
+        assert all(r["decomposition_reproduces_score"] for r in case["scores"]), case["case"]
+
+        assert surface["output"]["read_by_later_stages"] == [], case["case"]
+        library = by_tool["chemistry.library_spec"]
+        assert library["input"]["reads_from_upstream"] == [], case["case"]
+        # The gap as a specification rather than a complaint: what stage 5 would read, and
+        # what stands in the way, both in the record a flowchart is drawn from.
+        assert library["input"]["would_read_if_connected"], case["case"]
+        assert library["input"]["not_connected_because"], case["case"]
 
 
 def test_the_gate_covers_every_target_its_config_declares():

@@ -330,11 +330,13 @@ def build_index():
     body = body.replace("<!--CANDIDATES-->", candidate_matrix(holdout))
     body = body.replace("<!--CHAINS-->", chain_matrix(holdout))
     body = body.replace("<!--PICKED-->", picked_table(holdout))
+    body = body.replace("<!--FOLD-LANE-->", fold_lane(holdout))
+    body = body.replace("<!--SURFACE-LANE-->", surface_lane(holdout))
     body = body.replace("<!--OFFCHAIN-->", build_offchain())
     # Last, so a {{token}} introduced by any generated block above is filled too. The
     # landing page is the held-out case throughout, so its numbers come from that case.
     body = fill(body, facts(holdout) | candidate_facts(holdout) | chain_facts(holdout)
-                | picked_facts(holdout))
+                | picked_facts(holdout) | lane_facts(holdout))
     out = (head(f"{SITE} · one pathogen genome in, every next step out",
                 "Deciding which of a new virus's proteins a drug should aim at, from the "
                 "genome accession alone, with every step on the record. This is the "
@@ -818,6 +820,16 @@ def picked_facts(case):
 
 
 def surface_block(case):
+    """One tile per chain and what the three colours mean. The detail is `surface_lane`.
+
+    This used to carry the bars and the refusal sentences as well. `surface_lane` draws both,
+    per chain, against the threshold the gate applies and on a scale shared with the predicted
+    patches -- so keeping them here would have printed every measured chain twice on one page
+    with two different sets of bar widths, which is worse than either.
+
+    The strip stays because it is the one thing the lane cannot do: twenty outcomes in one
+    line, before a reader commits to reading twenty rows.
+    """
     rows = case.get("surfaces", [])
     if not rows:
         return ""
@@ -829,39 +841,6 @@ def surface_block(case):
     tiles = "".join(f'<span class="tile {tile_class(r)}"></span>' for r in rows)
     measured = [r for r in rows if r.get("measured")]
     refused = [r for r in rows if not r.get("measured")]
-    bars = ""
-    if measured:
-        measured = sorted(measured, key=lambda r: -(r.get("patch_median_a2") or 0))
-        top = max((r.get("patch_median_a2") or 0) for r in measured) or 1
-        bars = "".join(f"""
-    <div class="bi"><div class="bi-top">
-      <span class="nm">{esc(r.get('target'))}</span>
-      <span class="vl">{(r.get('patch_median_a2') or 0):.0f} Å²</span></div>
-      <div class="track"><div class="fill" style="width:{max(2, (r.get('patch_median_a2') or 0) / top * 100):.1f}%"></div></div></div>"""
-                        for r in measured)
-        bars = f'<div class="bars">{bars}</div>'
-    # Every refusal keeps its own sentence. Grouping them would hide the distinction the
-    # stage exists to make: "nothing is deposited" and "something is, but not here". A chain
-    # whose only surface came from a prediction says so on its own row: it is still refused on
-    # the deposited lane, and reading it as measured would pool the two kinds of evidence this
-    # stage keeps apart.
-    def predicted_note(row):
-        predicted = row.get("predicted_surface") or {}
-        if not predicted.get("measured"):
-            return ""
-        return (f'<br><i class="gl">measured on predicted coordinates instead: '
-                f'{predicted.get("patch_a2")} Å²'
-                + (' — the only surface this chain has'
-                   if predicted.get("only_route_to_a_surface") else '')
-                + '</i>')
-
-    why = "".join(f"""
-    <div class="pdbrow none"><span class="who">{esc(r.get('target'))}</span>
-      <span class="ids">{esc(r.get('unmeasured_because'))}{predicted_note(r)}</span></div>"""
-                  for r in refused)
-    why_block = (f'<div class="accs"><span class="lead">Why each of the '
-                 f'{len(refused)} had no deposited structure to measure:</span>{why}</div>'
-                 ) if refused else ""
     rescued = sum(1 for r in refused
                   if (r.get("predicted_surface") or {}).get("measured"))
     rescued_line = (f'<span><span class="key p"></span> {rescued} of those measured on '
@@ -872,10 +851,369 @@ def surface_block(case):
     <span><span class="key m"></span> {len(measured)} measured on deposited structures</span>
     <span><span class="key r"></span> {len(refused)} with none, each with a reason</span>
     {rescued_line}
-  </div>
-  {bars}
-  {why_block}"""
+  </div>"""
 
+
+
+# ------------------------------------------------------ the two lanes stages 3 and 4 draw
+# Stages 3 and 4 were five bullets each on the landing page, and the numbers in them were
+# literals: "11 of those are short enough", "5 of the 11 with nothing deposited", "14 of 20".
+# Every one of those is a join between the fold stage's rows and the surface stage's rows --
+# the join the reorder exists to create -- so the page was asserting the pipeline's new
+# behaviour in prose with the record sitting beside it unread. These two functions draw the
+# join: one row per chain in each stage, on a shared scale, with the threshold that stage
+# applies drawn through every row.
+#
+# Both thresholds are imported and neither is typed. The residue ceiling decides which chains
+# reach the folding endpoint and therefore which chains stage 4 can rescue; the macrocycle
+# footprint is what the gate thresholds on. A literal in this file would go on drawing the
+# old line after either one moved, which is the failure the {{token}} rework was for.
+sys.path.insert(0, str(ROOT))
+from hpc_pilots.chain import FOLD_CEILING                                      # noqa: E402
+from hpc_pilots.intake import MACROCYCLE_FOOTPRINT_A2                          # noqa: E402
+
+
+def _ceiling(case):
+    """The residue ceiling stage 3 applied, from the record where the record states it.
+
+    Records written before the stage recorded its own ceiling fall back to the constant the
+    stage still uses, which is the same number those runs applied. The fallback is an import
+    and not a literal, so if the ceiling moves, a page rebuilt from an old record moves with
+    it rather than keeping a line the code no longer draws.
+    """
+    folded = {s["tool"]: s for s in case.get("stages", [])}.get("structures.folded") or {}
+    return (folded.get("input") or {}).get("residue_ceiling") or FOLD_CEILING
+
+
+def _lane_rows(case):
+    """Every ranked chain, with both stages' rows for it joined on the name they share.
+
+    Keyed on the target and not on position. Both lists are in rank order today, but pairing
+    row 7 with row 7 would attribute one chain's coordinates to another the first time one of
+    the two stages emits its rows in a different order, and that is a mistake no reader of the
+    page could see.
+
+    `predicted` is the recorded measurement on stage 3's coordinates. `inside` is the weaker
+    statement that the chain is short enough for stage 3 to have folded it, which is all a
+    record written before the reorder can support -- `_predicted_is_recorded` is what
+    distinguishes them, so the page can say which of the two it is showing instead of
+    presenting a projection as a measurement.
+    """
+    ceiling = _ceiling(case)
+    folds = {f.get("target"): f for f in (case.get("foldable") or [])}
+    rows = []
+    for surface in (case.get("surfaces") or []):
+        fold = folds.get(surface.get("target")) or {}
+        length = fold.get("recovered_length_aa")
+        located = bool(fold.get("sequence_recovered"))
+        predicted = surface.get("predicted_surface") or {}
+        rows.append({
+            "target": surface.get("target"), "rank": surface.get("rank"),
+            "surface": surface, "fold": fold, "length": length, "located": located,
+            "inside": bool(located and length and length <= ceiling),
+            "measured": bool(surface.get("measured")),
+            "predicted": predicted if predicted.get("measured") else None,
+        })
+    return ceiling, rows
+
+
+def _predicted_is_recorded(case):
+    """Whether this run measured any predicted surface at all, rather than how many.
+
+    A run from before folding moved ahead of the surface stage has no `predicted_surface` on
+    any row, and the difference between "no chain was rescued" and "this record cannot say"
+    is the difference between a result and a projection.
+    """
+    return any("predicted_surface" in r for r in (case.get("surfaces") or []))
+
+
+def _bar(width, left=0.0, cls="b"):
+    return (f'<i class="{cls}" style="left:{left:.2f}%;width:{max(width, 0.6):.2f}%"></i>')
+
+
+def _tick(value, scale, faint=False):
+    """The threshold line, at the same fraction of every row's width.
+
+    `faint` is for a line that is a reference rather than the threshold itself -- half the
+    macrocycle footprint, which is where the gate stops saying no rather than where it starts
+    saying yes. Two lines of equal weight would leave a reader unable to tell which one the
+    verdict column is about.
+    """
+    left = min(max(value / scale * 100, 0), 100)
+    return f'<i class="thr{" faint" if faint else ""}" style="left:{left:.2f}%"></i>'
+
+
+def fold_lane(case):
+    """Stage 3's rows: where each chain was found, how long it is, and the ceiling.
+
+    The ceiling is the whole picture. Nine of the twenty chains on the SARS-CoV-2 holdout sit
+    above it -- the three spike chains, the polymerase, the papain-like protease -- and a
+    reader cannot be expected to take that on trust from a sentence when the record carries
+    the length of every one of them. Drawn as one dashed line through twenty bars, the
+    eleven that have coordinates and the nine that never will are a single glance.
+
+    Rows are sorted by length rather than by rank, because length is what this stage sorts on.
+    """
+    rows = list(case.get("foldable") or [])
+    if not rows:
+        return ""
+    ceiling = _ceiling(case)
+    scale = max([r.get("recovered_length_aa") or 0 for r in rows] + [ceiling]) or 1
+    recorded = any("folded" in r for r in rows)
+
+    def plot(row):
+        length = row.get("recovered_length_aa") or 0
+        inside = bool(row.get("sequence_recovered") and 0 < length <= ceiling)
+        bar = (_bar(length / scale * 100, cls="b" if inside else "b over")
+               if length else "")
+        return f'<span class="plot">{_tick(ceiling, scale)}{bar}</span>'
+
+    def where(row):
+        """How the chain was located, which is the only claim this stage makes about it."""
+        if not row.get("sequence_recovered"):
+            return esc(row.get("not_recovered_because") or "not located in this genome")
+        if row.get("found_in"):
+            covered = row.get("chain_covered_by_alignment")
+            identity = row.get("identity_over_aligned_columns")
+            detail = (f" &middot; {covered * 100:.0f} % of the relative&rsquo;s chain at "
+                      f"{identity * 100:.0f} % identity"
+                      if covered is not None and identity is not None else "")
+            return f'found in {esc(row["found_in"])}{detail}'
+        return esc(row.get("recovered_by") or "")
+
+    def row_html(row):
+        length = row.get("recovered_length_aa")
+        plddt = row.get("mean_plddt")
+        confidence = (f'<span class="cf">confidence {plddt:.1f}</span>'
+                      if isinstance(plddt, (int, float)) else "")
+        unnamed = ('<span class="chip-x nv">unrecognised</span>'
+                   if row.get("identified") is False else "")
+        return f"""
+    <div class="lr">
+      <span class="who"><span class="t">{esc(row.get('target'))}{unnamed}</span>
+        <span class="w">{where(row)}</span></span>
+      {plot(row)}
+      <span class="vl">{num(length) if length else '&mdash;'}{' aa' if length else ''}
+        {confidence}</span>
+    </div>"""
+
+    # Three groups, and the middle one is the stage's answer to the case the project exists
+    # for: a chain nothing recognises has no accession, no relative and no annotation, and is
+    # folded anyway, because this is the one stage that needs none of those.
+    inside = [r for r in rows
+              if r.get("sequence_recovered") and r.get("identified") is not False
+              and 0 < (r.get("recovered_length_aa") or 0) <= ceiling]
+    novel = [r for r in rows if r.get("identified") is False]
+    over = [r for r in rows
+            if r.get("identified") is not False and r not in inside and r not in novel]
+    groups = [
+        (inside, f"Folded &middot; {len(inside)}" if recorded
+         else f"Inside the ceiling &middot; {len(inside)}",
+         f"every chain at or under {ceiling} residues, not only the best-ranked one &mdash; "
+         f"a chain with no coordinates is a chain stage 4 cannot measure"),
+        (novel, f"Unrecognised, folded anyway &middot; {len(novel)}",
+         "no accession, no relative, no annotation. Folding needs a sequence and nothing "
+         "else, which is why this is the one stage a novel protein reaches"),
+        (over, f"No coordinates &middot; {len(over)}",
+         f"over the {ceiling}-residue ceiling, or never located in this genome. Stage 4 has "
+         f"only a deposited structure to work with on these"),
+    ]
+    body = []
+    for members, title, note in groups:
+        if not members:
+            continue
+        body.append(f'<div class="lane-grp"><b>{title}</b><span>{note}</span></div>')
+        body.extend(row_html(r) for r in sorted(
+            members, key=lambda r: -(r.get("recovered_length_aa") or 0)))
+    return f"""
+  <div class="lane">{"".join(body)}
+    <div class="lane-foot"><span>bar length is the chain&rsquo;s own residue count &middot;
+      longest {num(scale)} aa</span>
+      <span>the dashed line is the {num(ceiling)}-residue ceiling</span></div>
+  </div>"""
+
+
+def surface_lane(case):
+    """Stage 4's rows: the patch each chain got, by which route, against the gate's threshold.
+
+    One scale in square angstroms for every bar on the page, deposited and predicted
+    together, because the comparison is the point: a predicted patch read beside a deposited
+    one at the same scale is the only place this pipeline says how far the two sit apart.
+
+    The footprint line is what makes the verdict column legible. Several of these patches
+    clear 600 square angstroms comfortably and are still refused, and a reader looking at
+    bars and chips side by side can see that the refusals are not about area -- the gate reads
+    localisation first, and the footer counts how many it decides.
+    """
+    ceiling, rows = _lane_rows(case)
+    if not rows:
+        return ""
+    recorded = _predicted_is_recorded(case)
+    footprint = MACROCYCLE_FOOTPRINT_A2
+    areas = [r["surface"].get("patch_range_a2") or [0, 0] for r in rows if r["measured"]]
+    scale = max([a[1] or 0 for a in areas]
+                + [(r["predicted"] or {}).get("patch_a2") or 0 for r in rows]
+                + [footprint]) or 1
+
+    def chip(row):
+        gate = row["surface"].get("gate")
+        if not gate:
+            return ""
+        return f'<span class="chip-x g-{esc(gate)}">{esc(gate)}</span>'
+
+    def measured_row(row):
+        surface = row["surface"]
+        low, high = surface.get("patch_range_a2") or [0, 0]
+        median = surface.get("patch_median_a2") or 0
+        left = (low or 0) / scale * 100
+        span = ((high or 0) - (low or 0)) / scale * 100
+        dot = median / scale * 100
+        structures = surface.get("structures_measured")
+        fraction = surface.get("patch_fraction_of_surface")
+        share = (f" &middot; {fraction * 100:.1f} % of its surface"
+                 if fraction is not None else "")
+        return f"""
+    <div class="lr">
+      <span class="who"><span class="t">{esc(row['target'])}{chip(row)}</span>
+        <span class="w">{num(structures)} deposited structure{'' if structures == 1 else 's'}
+          of the same domain{share}</span></span>
+      <span class="plot">{_tick(footprint / 2, scale, faint=True)}{_tick(footprint, scale)}
+        <i class="rng" style="left:{left:.2f}%;width:{max(span, 0.4):.2f}%"></i>
+        <i class="dot" style="left:{dot:.2f}%"></i></span>
+      <span class="vl">{median:,.0f} Å²<span class="cf">{low:,.0f}&ndash;{high:,.0f}</span></span>
+    </div>"""
+
+    def predicted_row(row):
+        predicted = row["predicted"]
+        patch = predicted.get("patch_a2") or 0
+        deposited = predicted.get("deposited_patch_median_a2")
+        ratio = predicted.get("ratio_to_deposited_median")
+        plddt = predicted.get("mean_plddt")
+        note = ("the only surface this chain has" if predicted.get("only_route_to_a_surface")
+                else f"a second surface beside its deposited {num(deposited)} Å²"
+                     + (f", {ratio}&times; larger" if ratio else ""))
+        confidence = (f" &middot; fold confidence {plddt:.1f}"
+                      if isinstance(plddt, (int, float)) else "")
+        return f"""
+    <div class="lr">
+      <span class="who"><span class="t">{esc(row['target'])}</span>
+        <span class="w">{note}{confidence}</span></span>
+      <span class="plot">{_tick(footprint / 2, scale, faint=True)}{_tick(footprint, scale)}
+        {_bar(patch / scale * 100, cls="b pred")}</span>
+      <span class="vl">{patch:,.0f} Å²<span class="cf">predicted</span></span>
+    </div>"""
+
+    def bare_row(row):
+        reason = row["surface"].get("unmeasured_because") or ""
+        length = row["length"]
+        # Separated, because the recorded sentence does not always end in a full stop and
+        # "none covers 1-180 180 aa" is two numbers reading as one.
+        tail = (f' &middot; <i>{num(length)} aa, inside the {num(ceiling)}-residue ceiling</i>'
+                if row["inside"] else
+                f' &middot; <i>{num(length)} aa, over the ceiling</i>' if length else "")
+        return f"""
+    <div class="lr none">
+      <span class="who"><span class="t">{esc(row['target'])}{chip(row)}</span>
+        <span class="w">{esc(reason)}{tail}</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>"""
+
+    measured = [r for r in rows if r["measured"]]
+    predicted = [r for r in rows if r["predicted"] and not r["measured"]]
+    # The rescue set, which is the half of the reorder a record can only state once it has
+    # run under it. Where the measurements exist they are shown; where they do not, these are
+    # the chains that get them on the next run, named rather than counted, and the group says
+    # which of the two it is.
+    waiting = [r for r in rows if not r["measured"] and not r["predicted"] and r["inside"]]
+    none = [r for r in rows if not r["measured"] and not r["predicted"] and not r["inside"]]
+
+    groups = [
+        (measured, measured_row,
+         f"Measured on deposited structures &middot; {len(measured)}",
+         "a real experiment someone performed, measured over every structure of the domain "
+         "PDBe maps to the chain &mdash; the dot is the median, the bar its range"),
+        (predicted, predicted_row,
+         f"Measured on stage 3&rsquo;s coordinates &middot; {len(predicted)}",
+         "no deposited structure covers these, so the patch is arithmetic on a prediction. "
+         "Never pooled with the group above, never in the ranking"),
+        (waiting, bare_row,
+         f"Inside the ceiling, no measurement in this record &middot; {len(waiting)}",
+         "stage 3 folds every one of these, so the current pipeline measures them on "
+         "predicted coordinates. This record was written before the two stages were "
+         "swapped, and the measurements land here when the chain is next re-run"),
+        (none, bare_row,
+         f"No surface by either route &middot; {len(none)}",
+         f"nothing deposited covers them and they are over the {num(ceiling)}-residue "
+         f"ceiling, so no coordinates exist for them at all"),
+    ]
+    body = []
+    for members, render, title, note in groups:
+        if not members:
+            continue
+        body.append(f'<div class="lane-grp"><b>{title}</b><span>{note}</span></div>')
+        order = (sorted(members, key=lambda r: -(r["surface"].get("patch_median_a2") or 0))
+                 if render is measured_row else
+                 sorted(members, key=lambda r: r.get("rank") or 99))
+        body.extend(render(r) for r in order)
+
+    # Why the verdicts read the way they do, counted rather than asserted. Every refusal in
+    # this record is decided before area is read, and a column of "no" beside bars that clear
+    # the threshold is unreadable without that sentence.
+    refused = [r for r in measured if r["surface"].get("gate") == "no"]
+    on_location = [r for r in refused if r["surface"].get("exposed") is False]
+    verdicts = ""
+    if refused:
+        verdicts = (f"All {len(refused)} refusals here are decided on localisation, which the "
+                    f"gate reads before area at all: the protein is inside the cell, where a "
+                    f"macrocycle does not go. Several of these patches clear the footprint "
+                    f"line comfortably and are refused anyway."
+                    if len(on_location) == len(refused) else
+                    f"{len(on_location)} of {len(refused)} refusals are decided on "
+                    f"localisation; the rest fail on area.")
+    return f"""
+  <div class="lane">{"".join(body)}
+    <div class="lane-foot"><span>one scale for every bar &middot; longest
+      {scale:,.0f} Å²</span>
+      <span>dashed lines: the {footprint:,.0f} Å² macrocycle footprint and half of it</span></div>
+  </div>
+  {f'<p class="after">{verdicts}</p>' if verdicts else ''}"""
+
+
+def lane_facts(case):
+    """The counts the two stages' prose states, joined from the rows the lanes draw.
+
+    These were the last hand-typed numbers on the page, and they were the ones most likely to
+    go stale: each is a join across two stages, so re-running the chain could change any of
+    them without touching a sentence. `surface_predicted` and `surface_any` follow the
+    record's own measurements where it has them and the ceiling where it does not, which is
+    the same distinction the lane's group headings make.
+    """
+    ceiling, rows = _lane_rows(case)
+    if not rows:
+        return {}
+    recorded = _predicted_is_recorded(case)
+    located = [r for r in rows if r["located"]]
+    inside = [r for r in rows if r["inside"]]
+    measured = [r for r in rows if r["measured"]]
+    rescued = [r for r in rows if not r["measured"]
+               and (r["predicted"] if recorded else r["inside"])]
+    return {
+        "fold_ceiling": ceiling,
+        # The gate's threshold, for the prose beside the lane that draws it. Imported with
+        # the rest of this block rather than typed, for the reason the ceiling is.
+        "footprint": f"{MACROCYCLE_FOOTPRINT_A2:,.0f}",
+        "fold_located": len(located),
+        "fold_inside": len(inside),
+        "fold_over": len(located) - len(inside),
+        "surface_predicted": len(rescued),
+        "surface_any": len(measured) + len(rescued),
+        "surface_none": len(rows) - len(measured) - len(rescued),
+        # The no-dropped-rows invariant as a count rather than as a literal zero. The page
+        # asserted "0 quietly dropped" in a hand-typed `<b>0</b>`, which is the one number on
+        # a page about not dropping rows that could not report a dropped row.
+        "surface_dropped": len(case.get("scores") or []) - len(rows),
+    }
 
 
 PREDICTED_RECORD = "predicted_models.json"
@@ -1166,6 +1504,11 @@ def result_page(case, stem):
         a definition only — no binding or antiviral property is predicted</div>
     </div>
   </div>
+  <p class="cap" style="margin-top:26px">That is the one chain the record reports in full. The
+  lane below is every candidate this stage was handed, with how its own sequence was found in
+  this genome and where it fell against the residue ceiling — which is what decides whether
+  the stage after it has coordinates to measure.</p>
+  {fold_lane(case)}
 </section>"""
 
     return (head(f"{title} · {SITE}",
@@ -1203,6 +1546,7 @@ def result_page(case, stem):
   <div class="good"><p><b>{num(cov.get('surface_rows'))} answers for
   {num(cov.get('chains_ranked'))} chains.</b> A chain can be refused. It cannot disappear.</p></div>
   {surface_block(case)}
+  {surface_lane(case)}
 </section>
 {fold_html if (fold_step or 99) >= (surface_step or 0) else ""}
 

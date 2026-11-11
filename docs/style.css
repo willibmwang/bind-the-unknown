@@ -310,6 +310,71 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .key.m{background:var(--brand)} .key.r{border:1.6px dashed var(--warn)}
 .key.p{border:1.6px solid var(--brand);background:color-mix(in srgb,var(--brand) 22%,transparent)}
 
+/* lanes: one row per chain, every bar on one scale, and the threshold the stage applies
+   drawn through every row — the residue ceiling for the folding stage, the macrocycle
+   footprint for the surface stage. The threshold is a positioned element inside each row
+   rather than one line drawn over the whole lane, because the rows are grouped and a single
+   overlay would have to know where the group headings fall.
+
+   A grouped lane and the `.bars` block above it are not interchangeable: `.bars` scales each
+   list to its own maximum, which is exactly what must not happen when a predicted patch and
+   a deposited one are being compared. */
+.lane{border:1px solid var(--rule);border-radius:14px;background:var(--surface);overflow:hidden}
+/* Block rather than flex, so the note wraps back to the left margin instead of hanging under
+   the heading it follows. */
+.lane-grp{padding:13px 17px;background:var(--surface-2);
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.lane-grp:first-child{border-top:0}
+.lane-grp b{font-size:15px;font-weight:650;margin-right:11px}
+.lane-grp span{font-size:14px;color:var(--fg-2);line-height:1.55}
+.lr{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.3fr) auto;gap:16px;
+  align-items:center;padding:11px 17px;border-bottom:1px solid var(--rule-2)}
+.lr:last-of-type{border-bottom:0}
+.lr .who{min-width:0}
+.lr .who .t{display:block;font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.lr .who .w{display:block;font-family:var(--mono);font-size:12px;color:var(--fg-3);
+  margin-top:3px;line-height:1.5;overflow-wrap:anywhere}
+.lr .who .w i{font-style:normal;color:var(--fg-2)}
+.lr .plot{position:relative;display:block;height:20px;background:var(--surface-2);border-radius:5px}
+.lr .plot i{position:absolute;display:block}
+.lr .plot .thr{top:-1px;bottom:-1px;width:0;border-left:1.5px dashed var(--fg-3);opacity:.7}
+/* The reference line rather than the threshold: half a footprint, where the gate stops
+   saying no. Two lines of one weight leave a reader unable to tell which the verdict is
+   about. */
+.lr .plot .thr.faint{opacity:.3}
+.lr .plot .b{top:6px;height:8px;border-radius:5px;background:var(--brand)}
+/* Over the ceiling, so no coordinates exist for it. Grey rather than violet: the bar still
+   has to show how far over the line the chain is, and colouring it like a result would make
+   the longest chains look like the strongest ones. */
+.lr .plot .b.over{background:color-mix(in srgb,var(--fg-3) 50%,transparent)}
+/* Measured on a prediction. Outlined, never filled, for the same reason `.tile.p` is. */
+.lr .plot .b.pred{background:color-mix(in srgb,var(--brand) 20%,transparent);
+  border:1.5px solid var(--brand);box-sizing:border-box}
+.lr .plot .rng{top:8px;height:4px;border-radius:3px;background:color-mix(in srgb,var(--brand) 32%,transparent)}
+.lr .plot .dot{top:5px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--brand)}
+.lr .vl{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;
+  text-align:right;white-space:nowrap}
+.lr .vl .cf{display:block;font-size:11.5px;color:var(--fg-3);margin-top:2px}
+.lr.none .plot{background:transparent;border:1px dashed var(--rule)}
+.lane-foot{display:flex;flex-wrap:wrap;gap:5px 18px;justify-content:space-between;
+  padding:11px 17px;border-top:1px solid var(--rule);background:var(--surface-2);
+  font-family:var(--mono);font-size:11.5px;color:var(--fg-3)}
+.chip-x{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:20px;
+  font-family:var(--mono);font-size:11px;font-weight:500;vertical-align:1px;
+  border:1px solid var(--rule);color:var(--fg-2);background:var(--surface-2)}
+.chip-x.g-yes{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent);background:transparent}
+.chip-x.g-borderline{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent);
+  background:var(--warn-soft)}
+.chip-x.g-no{color:var(--fg-3)}
+.chip-x.nv{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent);
+  background:var(--accent-soft)}
+@media(max-width:700px){
+  .lr{grid-template-columns:minmax(0,1fr) auto;gap:9px 12px}
+  .lr .who{grid-column:1;grid-row:1}
+  .lr .vl{grid-column:2;grid-row:1}
+  .lr .plot{grid-column:1 / -1;grid-row:2}
+}
+
 /* two-up */
 .two{display:grid;grid-template-columns:1fr 1fr;gap:15px}
 @media(max-width:620px){.two{grid-template-columns:1fr}}

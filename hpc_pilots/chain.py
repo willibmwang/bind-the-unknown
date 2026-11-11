@@ -42,6 +42,28 @@ from .common import ROOT, provenance, write_json
 # would otherwise assume is the arrow that does not exist.
 LIBRARY_READS_FROM_SURFACE = ()
 
+# What stage 5 would have to be handed for that arrow to exist, named so the gap is a
+# specification and not a complaint. Every one of these is a quantity stage 4 already
+# measures and already records per chain, so the missing piece is not a measurement.
+LIBRARY_WOULD_READ = ("patch_median_a2", "patch_fraction_of_surface", "sequons_near_patch")
+
+# And the other end of the same absence, which moving the fold ahead of the surface stage
+# made asymmetric. That swap gave stage 3 a consumer -- stage 4 measures its coordinates with
+# the same arithmetic it uses on a deposition -- and left stage 4 with none: nothing
+# downstream reads a patch median. It is declared here, as an empty tuple beside the one
+# above, for the same reason that one is: a flowchart built from this record then draws the
+# dead end instead of the arrow a reader would assume, and a test can assert the arrow is
+# still missing rather than trusting prose to stay true.
+#
+# Connecting it is not a wiring job. `library_spec` takes an initiator, a randomised-region
+# length range and a set of elongator classes, and all three are properties of the display
+# platform rather than of a target; turning a measured patch area into a randomised-region
+# length is a quantitative claim this project has not established and cannot cite. An arrow
+# drawn on an invented conversion would be worse than no arrow, because it would read as a
+# result. So the absence stays declared until there is a stated rule to put behind it, and
+# stage 4 is described as what it is: a measurement with no consumer.
+SURFACE_READ_BY = ()
+
 
 def _decomposed_score(features, rubric):
     """The rank score split into its five terms, so a number can be read rather than trusted.
@@ -63,7 +85,7 @@ def _decomposed_score(features, rubric):
     return score_terms(features, rubric)
 
 
-def surface_rows(ranked, replicates=5, folds=()):
+def surface_rows(ranked, replicates=5, folds=(), fold_rows=()):
     """One surface row per ranked candidate, measured or refused with the reason.
 
     Exhaustive over `ranked` on purpose, and the `top=12` cap that `enrich_with_surface`
@@ -85,6 +107,14 @@ def surface_rows(ranked, replicates=5, folds=()):
     of evidence. Where both exist the ratio between them is recorded, because that is the one
     place this pipeline can say how far a predicted surface sits from a measured one instead of
     hoping they agree.
+
+    `fold_rows` is the stage-before's row per chain, and it is here for the chains that end
+    with no surface by either route. Such a row could already say why no deposition was
+    measured; what it could not say is why there were no coordinates either, because that
+    reason belongs to the stage before this one. Reading it off the fold row is what lets this
+    stage name the commonest of them -- the residue ceiling, a number this pipeline chose
+    rather than a fact about the target or the endpoint -- instead of leaving it as the
+    difference between two counts.
     """
     from .geometry import surface_for_accession
     from .intake import amenable, chain_locations, exposed_from_locations
@@ -174,6 +204,33 @@ def surface_rows(ranked, replicates=5, folds=()):
         folded = coordinates.get(entry["target"])
         if folded:
             entry["predicted_surface"] = _predicted_surface(folded["pdb"], folded, entry)
+
+    # And for a chain that got neither, both halves of the answer on one row. A reader asking
+    # why a chain ends with no surface at all had to join two stages by hand to find out, and
+    # the join is not symmetric: one reason is about what has been solved, the other about
+    # what this pipeline was willing to fold.
+    attempts = {r.get("target"): r for r in (fold_rows or ())}
+    for entry in rows:
+        if entry["measured"] or (entry.get("predicted_surface") or {}).get("measured"):
+            continue
+        fold = attempts.get(entry["target"]) or {}
+        refused = (entry.get("predicted_surface") or {}).get("not_measured_because")
+        entry["no_surface_because"] = {
+            "deposited": entry["unmeasured_because"],
+            # In order of how far the chain got: a prediction that was measured and failed,
+            # then one that was never attempted and why, then a sequence never located.
+            "predicted": (refused
+                          or fold.get("not_folded_because")
+                          or fold.get("fold_absence")
+                          or fold.get("not_recovered_because")
+                          or "no coordinates were offered to this stage for this chain"),
+            # The one of those a reader should be able to count. It is true exactly when the
+            # chain's own length, against a ceiling this pipeline set, is what closed the only
+            # route it had left -- which makes it the one reason here that is ours and not the
+            # world's.
+            "the_folding_ceiling_closed_the_only_route":
+                fold.get("inside_the_ceiling") is False,
+        }
     return rows
 
 
@@ -552,8 +609,16 @@ def locate_chain(orf, chain, aligner=None):
 # each one fell rather than only which side of the bar it was.
 MINIMUM_CHAIN_COVERAGE = 0.5
 
+# The residue length above which this stage does not send a chain to the folding endpoint.
+# Named rather than left as a default argument because it decides which chains the surface
+# stage can rescue, and that makes it a number the record has to carry and the site has to
+# read: nine of the twenty chains on the SARS-CoV-2 holdout sit above it, including the three
+# spike chains and the polymerase, and a page that drew the line at a hand-typed 400 would
+# keep drawing it there after the ceiling moved.
+FOLD_CEILING = 400
 
-def fold_stage(ranked, ceiling=400, pool=(), limit=12, budget=240.0):
+
+def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=12, budget=240.0):
     """Every ranked chain whose own sequence the chain can locate, folded.
 
     Returns `(primary, rows, folds)`. `primary` is the first fold in pick order and is the
@@ -678,11 +743,29 @@ def fold_stage(ranked, ceiling=400, pool=(), limit=12, budget=240.0):
     # repository reproduces byte for byte, and a one-pass loop would hand the pick to whatever
     # happened to sort first. Explicit, so the ordering is a decision and not an accident of
     # how `ranked` was sorted.
+    # The ceiling, written onto every row it decides, before anything is folded. A chain over
+    # it is never sent to the endpoint, so it is also a chain the surface stage cannot rescue:
+    # no coordinates exist for it, and a deposition is the only surface it will ever have.
+    # That was the one drop in this stage with no name and no count. The fold cap and the wall
+    # budget each got a number in the record; the ceiling's share was visible only as the gap
+    # between `foldable` and `chains_folded`, left for a reader to find by subtracting -- and
+    # it is the largest of the three, nine of twenty on the SARS-CoV-2 holdout, including the
+    # three spike chains and the polymerase.
+    for entry in rows:
+        if not entry["sequence_recovered"]:
+            continue
+        length = entry.get("recovered_length_aa") or 0
+        entry["inside_the_ceiling"] = 0 < length <= ceiling
+        if not entry["inside_the_ceiling"]:
+            entry["not_folded_because"] = (
+                f"{length} residues, over the {ceiling}-residue ceiling this stage sends to "
+                f"the folding endpoint. No coordinates are predicted for it, so a deposited "
+                f"structure covering the chain is the only surface it can have.")
+
     foldable = []
     for want_identified in (True, False):
         for entry in rows:
-            if entry["identified"] is want_identified and entry["sequence_recovered"] \
-                    and 0 < entry["recovered_length_aa"] <= ceiling:
+            if entry["identified"] is want_identified and entry.get("inside_the_ceiling"):
                 foldable.append((entry["target"], entry["recovered_sequence"], entry))
     if foldable:
         pick = foldable[0][:2]
@@ -725,9 +808,20 @@ def fold_stage(ranked, ceiling=400, pool=(), limit=12, budget=240.0):
     for index, (target, sequence, entry) in enumerate(foldable):
         if limit is not None and index >= limit:
             dropped_limit = len(foldable) - index
+            # Named on the row, not only counted in the payload, for the same reason the
+            # ceiling now is: the stage after this one reports why a chain has no surface,
+            # and it can only report a reason that was written down somewhere.
+            for _, _, late in foldable[index:]:
+                late["not_folded_because"] = (
+                    f"the cap of {limit} folds on one run was spent on the chains ahead of "
+                    f"this one in the pick order.")
             break
         if index and budget is not None and time.time() - folding_started >= budget:
             dropped_budget = len(foldable) - index
+            for _, _, late in foldable[index:]:
+                late["not_folded_because"] = (
+                    f"the {budget:.0f}-second folding budget for one run was spent before "
+                    f"the pick order reached this chain.")
             break
         try:
             payload = fold(sequence, target_name=target or "", record=False)
@@ -1006,13 +1100,18 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
     # given.
     handed = [r for r in ranked if r.get("identified")]
 
-    folded, fold_rows, folds = None, None, []
+    folded, fold_rows, folds, over_ceiling = None, None, [], []
     if fold:
         started = time.time()
         pool = [(f"ORF {i} of the ranked set, {len(t['orf']['protein'])} aa", t["orf"]["protein"])
                 for i, t in enumerate(intake["targets"], 1)
                 if (t.get("orf") or {}).get("protein")]
         folded, fold_rows, folds = fold_stage(ranked, pool=pool)
+        # The chains this stage declined on length alone, named once and read three times
+        # below: as a count, as a list, and in what the stage says it hands on. Named here
+        # rather than recomputed at each of those because the three must agree.
+        over_ceiling = [r["target"] for r in fold_rows
+                        if r["identified"] and r.get("inside_the_ceiling") is False]
         stages.append({
             "stage": 3, "name": "Every chain inside the ceiling to coordinates, the one lane a novel target has",
             "tool": "structures.folded", "endpoints": ["ESM Atlas"],
@@ -1020,8 +1119,13 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
             # folding needs a sequence and nothing else. Both counts are stated so the
             # denominator is visible: `candidates_in` is what it was given, and
             # `identified_in` is the subset the earlier stages could name.
+            # The ceiling is an input like the candidate list is, and it was missing. It
+            # decides which chains get coordinates and therefore which chains the stage after
+            # this one can rescue, so a record without it cannot be read for why a chain has
+            # no surface -- and the site drew the line from a literal of its own.
             "input": {"candidates_in": len(ranked),
-                      "identified_in": len(handed)},
+                      "identified_in": len(handed),
+                      "residue_ceiling": FOLD_CEILING},
             "output": {"foldable": sum(1 for r in fold_rows
                                        if r["sequence_recovered"] and r["identified"]),
                        "not_foldable": sum(1 for r in fold_rows
@@ -1046,6 +1150,24 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                            (folded or {}).get("chains_not_folded_by_limit", 0),
                        "chains_not_folded_by_budget":
                            (folded or {}).get("chains_not_folded_by_budget", 0),
+                       # The third way a located chain ends without coordinates, and the only
+                       # one that had no number. `foldable` counts chains whose own sequence
+                       # this stage found, at any length; `chains_folded` counts the ones it
+                       # sent to the endpoint. The difference is this plus the two bounds
+                       # above, and this is the largest share of it. Named as well as counted,
+                       # because "nine chains" and "nsp3, nsp12, the spike" are different
+                       # statements to a reader deciding whether the ceiling is costing them
+                       # anything they care about.
+                       "chains_over_the_ceiling": len(over_ceiling),
+                       "over_the_ceiling": over_ceiling,
+                       # Stage 3 and stage 4 measure; neither selects. The rubric is five
+                       # weights fixed before the run and no fold or surface term is among
+                       # them, so the ranking is final at the end of stage 2 and nothing
+                       # here can move a row. Recorded as a false rather than left to prose,
+                       # the way the evidence stage already records it, because a reader
+                       # meeting a reordered pipeline will otherwise read the swap as a
+                       # change to what gets picked.
+                       "changes_any_rank": False,
                        "folded_target": (folded or {}).get("target_name"),
                        "residues": (folded or {}).get("sequence_length"),
                        "mean_plddt": (folded or {}).get("mean_plddt"),
@@ -1053,13 +1175,25 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                        "sequence_sha256": (folded or {}).get("sequence_sha256"),
                        "error": (folded or {}).get("absence")},
             "seconds": round(time.time() - started, 2),
-            "hands_to_next": "coordinates for every chain inside the ceiling. The surface "
-                             "stage measures them with the same arithmetic it uses on a "
-                             "deposition, and reports the two apart"})
+            "hands_to_next": (
+                f"coordinates for every chain inside the ceiling, and nothing at all for the "
+                f"{len(over_ceiling)} over it. The surface stage measures what it is given "
+                f"with the same arithmetic it uses on a deposition and reports the two apart. "
+                f"It reorders nothing: the ranking was final at the end of stage 2")})
 
     started = time.time()
-    rows = surface_rows(handed, replicates=replicates, folds=folds)
+    rows = surface_rows(handed, replicates=replicates, folds=folds,
+                        fold_rows=fold_rows or ())
     measured = [r for r in rows if r["measured"]]
+    # The chains that end with nothing, and which of them this pipeline's own ceiling is
+    # responsible for. Counted here because this is the first stage that can see both routes
+    # fail on the same chain.
+    no_surface = [r for r in rows
+                  if not r["measured"]
+                  and not (r.get("predicted_surface") or {}).get("measured")]
+    closed_by_ceiling = sum(
+        1 for r in no_surface
+        if r["no_surface_because"]["the_folding_ceiling_closed_the_only_route"])
     # Attempted and succeeded are different counts, and only the second may be reported as a
     # measurement. A predicted surface can fail for the same reason a deposited one can -- no
     # SASA backend, nothing readable in the coordinates -- and counting the attempt would put
@@ -1091,19 +1225,44 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                    "predicted_was_the_only_route": sum(
                        1 for r in predicted
                        if r["predicted_surface"]["only_route_to_a_surface"]),
+                   # The complement, and the share of it the ceiling decided. A chain here
+                   # has no deposition covering it and no coordinates either, and the second
+                   # half of that is a choice this pipeline made about length.
+                   "no_surface_by_either_route": len(no_surface),
+                   "no_surface_over_the_folding_ceiling": closed_by_ceiling,
                    "gate_yes": sum(1 for r in measured if r.get("gate") == "yes"),
                    "gate_borderline": sum(1 for r in measured
                                           if r.get("gate") == "borderline"),
-                   "gate_no": sum(1 for r in measured if r.get("gate") == "no")},
+                   "gate_no": sum(1 for r in measured if r.get("gate") == "no"),
+                   # The same false stage 3 records, for the same reason. The gate on these
+                   # rows is advisory and is read by nothing that ranks.
+                   "changes_any_rank": False,
+                   # And the asymmetry the reorder created, as a field rather than as a
+                   # sentence: stage 3 gained a consumer, this stage has none.
+                   "read_by_later_stages": list(SURFACE_READ_BY)},
         "seconds": round(time.time() - started, 2),
-        "hands_to_next": "a patch median and range per chain; nothing downstream reads it yet"})
+        "hands_to_next": (
+            "a patch median and range per chain, and nothing downstream reads any of it. "
+            "`SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`: stage 5 "
+            "defines the same library whatever this stage found. Moving the fold ahead of "
+            "this stage gave stage 3 a consumer and left this one without any")})
 
     started = time.time()
     spec = chemistry.library_spec()
     stages.append({
         "stage": 5, "name": "A library definition over the randomised region",
         "tool": "chemistry.library_spec", "endpoints": ["local tables"],
-        "input": {"reads_from_upstream": list(LIBRARY_READS_FROM_SURFACE)},
+        # Three fields where there used to be one empty list, because an empty list on its own
+        # reads as an oversight. The gap is a specification: these are the quantities stage 4
+        # measures, and this is what stands between them and this stage.
+        "input": {"reads_from_upstream": list(LIBRARY_READS_FROM_SURFACE),
+                  "would_read_if_connected": list(LIBRARY_WOULD_READ),
+                  "not_connected_because":
+                      "library_spec takes an initiator, a randomised-region length range and "
+                      "a set of elongator classes, all three properties of the display "
+                      "platform rather than of a target. No stated rule turns a measured "
+                      "patch area into any of them, and inventing one would publish a "
+                      "conversion as a result."},
         "output": {"initiator": spec["initiator"], "closure_residue": spec["closure_residue"],
                    "random_region": spec["random_region"],
                    "alphabet_size": len(spec["elongator_alphabet"]),
@@ -1128,6 +1287,13 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
         # "the ranking", and the honest answer is that the shortlist comes from the second and
         # the coverage claim comes from the first.
         "candidates": candidates,
+        # The two stage-1 thresholds, carried because they are arguments to that stage rather
+        # than outputs of it, and the page quotes both. A record that carries its own
+        # candidate rows but not the cutoffs they were produced under sends the page back to
+        # a second record to find them -- and the page reads the rows from here as soon as
+        # they are present, so it would find the rows and lose the thresholds.
+        "minimum_orf_aa": intake.get("minimum_orf_aa"),
+        "minimum_hit_score": intake.get("minimum_hit_score"),
         "scores": scored,
         "surfaces": rows,
         "library": spec,
@@ -1168,6 +1334,13 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
             "chains_with_any_surface": sum(
                 1 for r in rows
                 if r["measured"] or (r.get("predicted_surface") or {}).get("measured")),
+            # Stated as well as implied. The complement of the line above is the number a
+            # reader is actually asking for -- how many chains this pipeline cannot say
+            # anything about -- and leaving it to be subtracted is how the ceiling's cost
+            # stayed invisible for as long as it did.
+            "chains_with_no_surface": len(no_surface),
+            "chains_with_no_surface_over_the_ceiling": closed_by_ceiling,
+            "chains_over_the_folding_ceiling": (len(over_ceiling) if fold else None),
             # `fold_rows` counts the identified chains, so it stays comparable with
             # `chains_ranked` and with every record already on disk. The unidentified ORFs the
             # fold stage now also emits a row for are counted beside it rather than folded
@@ -1289,23 +1462,39 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
         "question": "Put one pathogen genome in. What does each stage of the onset arm hand "
                     "the next, does any stage cover less than the stage before it, and what "
                     "changes when the reference changes?",
-        "answer": "Five stages run, and the record carries the input and output of each, "
+        "answer": "Six stages run, and the record carries the input and output of each, "
                   "under both references. The surface stage is the one that used to cover "
                   "less than its input: it had no caller, so the only surfaces ever measured "
                   "were six named by hand, and SARS-CoV-2's RNA-directed RNA polymerase -- "
                   "fifth of the ranked candidates -- was never asked about. It is exhaustive "
-                  "here, one row per chain, measured or refused with the reason. Two breaks "
-                  "remain and are recorded rather than drawn over: the library definition "
-                  "reads nothing the surface stage measured, and under a holdout the folding "
-                  "stage cannot cut a mature chain out of the genome because the only "
-                  "boundaries it has are the relative's.",
+                  "here, one row per chain, measured or refused with the reason. Folding now "
+                  "runs ahead of it and folds every chain inside the residue ceiling, so a "
+                  "chain no deposition covers can still be measured on predicted "
+                  "coordinates; the two are reported apart and neither is in the ranking, "
+                  "which is final at the end of stage 2. One break remains and is recorded "
+                  "rather than drawn over: the library definition reads nothing the surface "
+                  "stage measured, so stage 4 is a measurement with no consumer.",
         "genome_accession": accession,
         "cases": out,
         "seconds_total": round(sum(c["seconds"] for c in out), 2),
         "limitations": [
             "The library stage reads nothing the four stages before it produced. The library "
             "definition is the same whatever the surface stage found, and the arrow a "
-            "flowchart would draw there does not exist yet.",
+            "flowchart would draw there does not exist yet. The reorder sharpened this "
+            "rather than fixing it: folding gained a consumer in the surface stage, and the "
+            "surface stage still has none, so stage 4 is the one stage here whose output "
+            "nothing reads. `SURFACE_READ_BY` and `LIBRARY_READS_FROM_SURFACE` are both "
+            "empty in the record for that reason.",
+            "Stages 3 and 4 measure and do not select. The rubric is five weights fixed "
+            "before the run and no fold or surface term is among them, so the ranking is "
+            "final at the end of stage 2 and the swap changed what can be measured, not "
+            "what gets picked. Both stages record `changes_any_rank` false.",
+            "The residue ceiling decides who can be rescued. A chain over it is never sent "
+            "to the folding endpoint, so if no deposition covers it, it ends the run with no "
+            "surface by any route -- nine of the twenty chains on the SARS-CoV-2 holdout sit "
+            "above it, including the three spike chains and the polymerase. The count, the "
+            "names and the per-chain reason are in the record; the ceiling is a cost control "
+            "and not a finding about those proteins.",
             "The gate in the surface stage is advisory: the patch spread across structures of "
             "one domain is comparable to the footprint it is thresholded against, so most "
             "rows that are not refused on localisation read borderline rather than yes or "
@@ -1314,10 +1503,12 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
             "larger than one footprint passes the area test although it is a region rather "
             "than a site. Nothing here turns on it, because every oversized patch in this "
             "record is refused on localisation first.",
-            "The folding stage refuses a chain whose annotated range does not transfer rather "
-            "than aligning it. An alignment would recover the window, and `intake` already "
-            "carries the aligner; until it is wired, a holdout costs this stage most of its "
-            "input.",
+            "The folding stage locates a chain by aligning the relative's own residues "
+            "against every ranked ORF, not by slicing this genome at the relative's "
+            "coordinates. That is what makes the stage survive a holdout, and it is also a "
+            "sequence-level correspondence and nothing more: a located window at 50 per cent "
+            "coverage is this stage's claim that the chain is there, not a verified "
+            "boundary.",
             "One genome. The chain has been run on four pathogens and this record is one of "
             "them, chosen because it is the genome the project leads with."],
         "interpretation": "A record of what each stage produced. No binding, affinity, "

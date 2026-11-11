@@ -315,11 +315,11 @@
             <circle class="ac" cx="84" cy="26" r="4"/>
           </svg><span class="what">Predict a 3-D shape</span><span class="secs">{{fold_seconds}} s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>20</b> chains</li></ul></div>
+      <div><h3>In</h3><ul><li><b>{{chains}}</b> chains, and any ORF nothing recognised along with them — this step needs a sequence and nothing else, so it is the one an unknown protein reaches</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li>All <b>{{chains}}</b> had their own sequence located in this genome</li>
-        <li><b>11</b> of those are short enough for the folding lane; <b>9</b> are over its <b>400</b>-residue ceiling, including the three spike chains and the polymerase nsp12</li>
-        <li>All <b>11</b> are folded, not only the best-ranked one — a chain with no coordinates is a chain the next step cannot measure</li>
+        <li>All <b>{{fold_located}}</b> had their own sequence located in this genome, by alignment rather than by trusting the relative's numbering</li>
+        <li><b>{{fold_inside}}</b> of those are short enough for the folding lane; <b>{{fold_over}}</b> are over its <b>{{fold_ceiling}}</b>-residue ceiling, which the lane below draws as one line through every chain</li>
+        <li>Every one inside the ceiling is folded, not only the best-ranked one — a chain with no coordinates is a chain the next step cannot measure</li>
         <li>The one drawn below is the main protease: <b>{{fold_residues}}</b> building blocks long</li>
         <li>The predictor rates its own confidence <b>{{mean_plddt}}</b> out of 100 — confidence is not accuracy</li>
       </ul></div>
@@ -331,7 +331,7 @@
     <p class="cap">Returned by <span class="mono">structures.folded</span>, the ESMFold call listed in <a href="#t-fold">section 04</a>.</p>
     <dl class="ret">
       <div><dt>Model</dt><dd>ESMFold v1 (2022-10-18)</dd></div>
-      <div><dt>Chains folded</dt><dd>all 11 inside the 400-residue ceiling</dd></div>
+      <div><dt>Chains folded</dt><dd>all {{fold_inside}} inside the {{fold_ceiling}}-residue ceiling</dd></div>
       <div><dt>Drawn below</dt><dd>Main protease · 306 residues</dd></div>
       <div><dt>Coordinates returned</dt><dd>193,227 bytes</dd></div>
       <div><dt>Confidence mean / median / min</dt><dd>62.6 / 63.0 / 20.0</dd></div>
@@ -342,6 +342,18 @@
       <img src="fold.png" alt="Left: the folded backbone of the main protease, 306 alpha-carbons drawn on its two principal axes and coloured by per-residue confidence — one compact well-predicted domain in blue beside a sprawling orange one. Right: confidence against residue position, with the stretches that never clear the threshold marked along the bottom.">
       <div class="cc">Drawn from the stored coordinates in <span class="mono">runs/folded_structure/mpro_nsp5.pdb</span>. The blue domain is predicted confidently; the orange half is not, and the marked stretches — residues 1–11, 45–64, 166–170 and <b>183–306</b> — never clear the threshold. That last run is 124 residues, 40 % of the chain. The tool's own payload states that a predicted structure is not an experimental one and must never be pooled with deposited-structure counts.</div>
     </div>
+    <p class="cap" style="margin-top:30px">That is the one chain the record reports in full.
+    Below is every chain this step was handed, with how its own sequence was found in this
+    genome and where it fell against the ceiling — because the ceiling is what decides whether
+    the next step has anything to measure at all. The boundaries of a mature chain are
+    annotated on the relative, not here, and slicing this genome at them is wrong in a way
+    that does not announce itself: SARS-CoV's main protease starts at residue 3241 and
+    SARS-CoV-2's at 3264, so the same cut returns 306 residues — the correct length, 23
+    residues into the wrong window. Each chain is aligned instead, and against every called
+    ORF rather than only the one that matched it: a coronavirus polyprotein is read as two
+    overlapping ORFs through a frameshift, so the polymerase and the helicase sit in a frame
+    their own match does not point at.</p>
+    <!--FOLD-LANE-->
   </div>
 
   <div class="stage">
@@ -352,15 +364,35 @@
             <circle cx="60" cy="27" r="2.4" fill="currentColor" opacity=".3"/>
           </svg><span class="what">Measure the surface a drug would grip</span><span class="secs">{{surface_seconds}} s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>20</b> chains</li><li>And the coordinates step 3 predicted, which is the only thing there is to measure when nothing has been solved</li></ul></div>
+      <div><h3>In</h3><ul><li><b>{{chains}}</b> chains</li><li>And the coordinates step 3 predicted, which is the only thing there is to measure when nothing has been solved</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li><b>{{rows_out}}</b> answers for {{chains}} chains</li>
+        <li><b>{{rows_out}}</b> answers for {{chains}} chains, <b>{{surface_dropped}}</b> quietly dropped</li>
         <li><b>{{measured}}</b> measured on real deposited structures, <b>{{unmeasured}}</b> refused with a stated reason</li>
-        <li><b>5</b> of the <b>{{unmeasured}}</b> with nothing deposited are inside the folding ceiling, so they are measured on their predicted shape instead — kept apart from the deposited numbers, never added to them</li>
-        <li><b>14</b> of <b>{{chains}}</b> chains end with a surface of some kind, where <b>{{measured}}</b> did before</li>
-        <li><b>0</b> quietly dropped</li>
+        <li><b>{{surface_predicted}}</b> of the <b>{{unmeasured}}</b> with nothing deposited are inside the folding ceiling, so step 3's coordinates are the only surface they can have — measured with the same arithmetic, kept apart from the deposited numbers, never added to them</li>
+        <li><b>{{surface_any}}</b> of <b>{{chains}}</b> chains have a surface by one route or the other, where <b>{{measured}}</b> do from depositions alone; <b>{{surface_none}}</b> have neither</li>
+        <li>Every patch is measured against the <b>{{footprint}}</b> Å² a macrocycle buries, and the lane below draws that line through every chain</li>
       </ul></div>
     </div>
+  </div>
+
+  <div class="substep" id="surface-out">
+    <h3>What the measurement returned, chain by chain</h3>
+    <p class="cap">One row per chain, and a row is never absent: a chain can be refused, it
+    cannot disappear. Every bar is on one scale in square angstroms, deposited and predicted
+    together, because the comparison is the point — a patch computed on a predicted shape read
+    beside one measured on five real structures is the only place this pipeline says how far
+    the two sit apart. The dot is the median over every deposited structure of that domain and
+    the bar is its range, which is not decoration: measuring the same chain over several
+    structures instead of one moves the number by hundreds of square angstroms — a spread
+    comparable to the threshold itself — so a range crossing the line is reported as uncertain
+    whatever the median says.</p>
+    <!--SURFACE-LANE-->
+    <p class="after">Read the bars against the verdicts and the gate's order of operations
+    becomes visible. It reads localisation before it reads area, and on a virus's replicase
+    that is usually where the answer comes from: a patch can clear the footprint comfortably
+    and still be refused because the protein it sits on is inside the cell, where this class
+    of molecule does not go. That is a statement about the modality and not about the target,
+    which is why it is a gate and never a term in the ranking.</p>
   </div>
 
   <div class="stage">
@@ -475,15 +507,8 @@
         <div class="pdbrow"><span class="who">Non-structural protein 2 <em>P0C6X7 · 181–818</em></span><span class="ids">7fac:A</span></div>
         <div class="pdbrow"><span class="who">ORF9B_SARS ORF9b protein <em>P59636</em></span><span class="ids">2cme:A · 2cme:B · 2cme:C · 2cme:D · 2cme:E</span></div>
       </div>
-      <div class="accs"><span class="lead">And the 11 with no deposited structure to measure, each naming the accession that came back empty. <b>5</b> of them are inside the folding ceiling, so step 3 gave them coordinates and this step measured those instead — marked below:</span>
-        <div class="pdbrow none"><span class="who">Spike protein S1 · S2 · S2' <em>3 chains</em></span><span class="ids">Q3LZX1 — no deposited chain maps to it at all</span></div>
-        <div class="pdbrow none"><span class="who">VME1_BC279 Membrane protein <i class="gl">folded instead</i> <em>1</em></span><span class="ids">Q0Q472 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">AP3A_BC279 Protein 3 <i class="gl">folded instead</i> <em>1</em></span><span class="ids">Q0Q474 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">NCAP_BCRP3 Nucleoprotein <em>1</em></span><span class="ids">Q3I5I7 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">Protein 7a <i class="gl">folded instead</i> <em>1</em></span><span class="ids">Q3I5J0 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">Papain-like protease nsp3 · Host translation inhibitor nsp1 · Non-structural protein 4 · Non-structural protein 6 <i class="gl">nsp1 and nsp6 folded instead; nsp3 and nsp4 are over the ceiling</i> <em>4 chains</em></span><span class="ids">P0C6X7 — 180 chains map to it, none covering those stretches</span></div>
-      </div>
-      <div class="accs"><span class="lead">Those 11 are the reason step 3 now runs first, and folds every chain it can rather than only the best-ranked one. Where coordinates exist, this step measures them with the same arithmetic — for 5 chains above that is the only surface they will ever have. On a chain that has both, the two answers are far apart:</span>
+      <div class="fields"><span class="lead">The other <b>{{unmeasured}}</b> chains had no deposited structure to measure, and each is named in <a href="#surface-out">the lane above</a> with the accession that came back empty, the sentence the tool returned, and where the chain fell against the folding ceiling. That list was retyped here for a while, grouped by accession and annotated by hand, which made it the one place on the page where a chain could be described as rescued without the record saying so.</span></div>
+      <div class="accs"><span class="lead">Those <b>{{unmeasured}}</b> are the reason step 3 now runs first, and folds every chain it can rather than only the best-ranked one. Where coordinates exist, this step measures them with the same arithmetic — for <b>{{surface_predicted}}</b> chains that is the only surface they will ever have. On a chain that has both, the two answers are far apart:</span>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">5 deposited structures</i> <em>median of 5 · a real measurement</em></span><span class="ids">562.4 Å² · 4.4 % of the surface</span></div>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">the predicted shape</i> <em>ESMFold v1 · mean confidence 62.6</em></span><span class="ids">2,012.6 Å² · 11.0 % of the surface</span></div>
       </div>

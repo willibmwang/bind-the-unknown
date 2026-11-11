@@ -662,11 +662,11 @@
             <circle class="ac" cx="84" cy="26" r="4"/>
           </svg><span class="what">Predict a 3-D shape</span><span class="secs">3 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>20</b> chains</li></ul></div>
+      <div><h3>In</h3><ul><li><b>20</b> chains, and any ORF nothing recognised along with them — this step needs a sequence and nothing else, so it is the one an unknown protein reaches</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li>All <b>20</b> had their own sequence located in this genome</li>
-        <li><b>11</b> of those are short enough for the folding lane; <b>9</b> are over its <b>400</b>-residue ceiling, including the three spike chains and the polymerase nsp12</li>
-        <li>All <b>11</b> are folded, not only the best-ranked one — a chain with no coordinates is a chain the next step cannot measure</li>
+        <li>All <b>20</b> had their own sequence located in this genome, by alignment rather than by trusting the relative's numbering</li>
+        <li><b>11</b> of those are short enough for the folding lane; <b>9</b> are over its <b>400</b>-residue ceiling, which the lane below draws as one line through every chain</li>
+        <li>Every one inside the ceiling is folded, not only the best-ranked one — a chain with no coordinates is a chain the next step cannot measure</li>
         <li>The one drawn below is the main protease: <b>306</b> building blocks long</li>
         <li>The predictor rates its own confidence <b>62.6</b> out of 100 — confidence is not accuracy</li>
       </ul></div>
@@ -689,6 +689,163 @@
       <img src="fold.png" alt="Left: the folded backbone of the main protease, 306 alpha-carbons drawn on its two principal axes and coloured by per-residue confidence — one compact well-predicted domain in blue beside a sprawling orange one. Right: confidence against residue position, with the stretches that never clear the threshold marked along the bottom.">
       <div class="cc">Drawn from the stored coordinates in <span class="mono">runs/folded_structure/mpro_nsp5.pdb</span>. The blue domain is predicted confidently; the orange half is not, and the marked stretches — residues 1–11, 45–64, 166–170 and <b>183–306</b> — never clear the threshold. That last run is 124 residues, 40 % of the chain. The tool's own payload states that a predicted structure is not an experimental one and must never be pooled with deposited-structure counts.</div>
     </div>
+    <p class="cap" style="margin-top:30px">That is the one chain the record reports in full.
+    Below is every chain this step was handed, with how its own sequence was found in this
+    genome and where it fell against the ceiling — because the ceiling is what decides whether
+    the next step has anything to measure at all. The boundaries of a mature chain are
+    annotated on the relative, not here, and slicing this genome at them is wrong in a way
+    that does not announce itself: SARS-CoV's main protease starts at residue 3241 and
+    SARS-CoV-2's at 3264, so the same cut returns 306 residues — the correct length, 23
+    residues into the wrong window. Each chain is aligned instead, and against every called
+    ORF rather than only the one that matched it: a coronavirus polyprotein is read as two
+    overlapping ORFs through a frameshift, so the polymerase and the helicase sit in a frame
+    their own match does not point at.</p>
+    
+  <div class="lane"><div class="lane-grp"><b>Inside the ceiling &middot; 11</b><span>every chain at or under 400 residues, not only the best-ranked one &mdash; a chain with no coordinates is a chain stage 4 cannot measure</span></div>
+    <div class="lr">
+      <span class="who"><span class="t">3C-like proteinase nsp5</span>
+        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 96 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:15.73%"></i></span>
+      <span class="vl">306 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 6</span>
+        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 99 % of the relative&rsquo;s chain at 88 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:14.76%"></i></span>
+      <span class="vl">287 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">AP3A_BC279 Protein 3</span>
+        <span class="w">the ORF translation is the candidate</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:14.14%"></i></span>
+      <span class="vl">275 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">VME1_BC279 Membrane protein</span>
+        <span class="w">the ORF translation is the candidate</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:11.41%"></i></span>
+      <span class="vl">222 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 8</span>
+        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 97 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:10.18%"></i></span>
+      <span class="vl">198 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Host translation inhibitor nsp1</span>
+        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 84 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:9.25%"></i></span>
+      <span class="vl">180 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 10</span>
+        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 97 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:7.15%"></i></span>
+      <span class="vl">139 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Viral protein genome-linked nsp9</span>
+        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 97 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:5.81%"></i></span>
+      <span class="vl">113 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Protein 7a</span>
+        <span class="w">found in the ORF that matched &middot; 99 % of the relative&rsquo;s chain at 91 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:5.45%"></i></span>
+      <span class="vl">106 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">ORF9B_SARS ORF9b protein</span>
+        <span class="w">the ORF translation is the candidate</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:4.99%"></i></span>
+      <span class="vl">97 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 7</span>
+        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 99 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:4.27%"></i></span>
+      <span class="vl">83 aa
+        </span>
+    </div><div class="lane-grp"><b>No coordinates &middot; 9</b><span>over the 400-residue ceiling, or never located in this genome. Stage 4 has only a deposited structure to work with on these</span></div>
+    <div class="lr">
+      <span class="who"><span class="t">Papain-like protease nsp3</span>
+        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 77 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:100.00%"></i></span>
+      <span class="vl">1,945 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">RNA-directed RNA polymerase nsp12</span>
+        <span class="w">found in the ORF that matched &middot; 88 % of the relative&rsquo;s chain at 97 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:42.31%"></i></span>
+      <span class="vl">823 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Spike protein S1</span>
+        <span class="w">found in the ORF that matched &middot; 98 % of the relative&rsquo;s chain at 66 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:34.04%"></i></span>
+      <span class="vl">662 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 2</span>
+        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 68 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:32.80%"></i></span>
+      <span class="vl">638 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Helicase nsp13</span>
+        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 100 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:30.90%"></i></span>
+      <span class="vl">601 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Spike protein S2</span>
+        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 93 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:30.23%"></i></span>
+      <span class="vl">588 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 4</span>
+        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 80 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:25.71%"></i></span>
+      <span class="vl">500 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Spike protein S2&#x27;</span>
+        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 95 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:23.55%"></i></span>
+      <span class="vl">458 aa
+        </span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">NCAP_BCRP3 Nucleoprotein</span>
+        <span class="w">the ORF translation is the candidate</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:21.54%"></i></span>
+      <span class="vl">419 aa
+        </span>
+    </div>
+    <div class="lane-foot"><span>bar length is the chain&rsquo;s own residue count &middot;
+      longest 1,945 aa</span>
+      <span>the dashed line is the 400-residue ceiling</span></div>
+  </div>
   </div>
 
   <div class="stage">
@@ -701,13 +858,186 @@
     <div class="io">
       <div><h3>In</h3><ul><li><b>20</b> chains</li><li>And the coordinates step 3 predicted, which is the only thing there is to measure when nothing has been solved</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li><b>20</b> answers for 20 chains</li>
+        <li><b>20</b> answers for 20 chains, <b>0</b> quietly dropped</li>
         <li><b>9</b> measured on real deposited structures, <b>11</b> refused with a stated reason</li>
-        <li><b>5</b> of the <b>11</b> with nothing deposited are inside the folding ceiling, so they are measured on their predicted shape instead — kept apart from the deposited numbers, never added to them</li>
-        <li><b>14</b> of <b>20</b> chains end with a surface of some kind, where <b>9</b> did before</li>
-        <li><b>0</b> quietly dropped</li>
+        <li><b>5</b> of the <b>11</b> with nothing deposited are inside the folding ceiling, so step 3's coordinates are the only surface they can have — measured with the same arithmetic, kept apart from the deposited numbers, never added to them</li>
+        <li><b>14</b> of <b>20</b> chains have a surface by one route or the other, where <b>9</b> do from depositions alone; <b>6</b> have neither</li>
+        <li>Every patch is measured against the <b>600</b> Å² a macrocycle buries, and the lane below draws that line through every chain</li>
       </ul></div>
     </div>
+  </div>
+
+  <div class="substep" id="surface-out">
+    <h3>What the measurement returned, chain by chain</h3>
+    <p class="cap">One row per chain, and a row is never absent: a chain can be refused, it
+    cannot disappear. Every bar is on one scale in square angstroms, deposited and predicted
+    together, because the comparison is the point — a patch computed on a predicted shape read
+    beside one measured on five real structures is the only place this pipeline says how far
+    the two sit apart. The dot is the median over every deposited structure of that domain and
+    the bar is its range, which is not decoration: measuring the same chain over several
+    structures instead of one moves the number by hundreds of square angstroms — a spread
+    comparable to the threshold itself — so a range crossing the line is reported as uncertain
+    whatever the median says.</p>
+    
+  <div class="lane"><div class="lane-grp"><b>Measured on deposited structures &middot; 9</b><span>a real experiment someone performed, measured over every structure of the domain PDBe maps to the chain &mdash; the dot is the median, the bar its range</span></div>
+    <div class="lr">
+      <span class="who"><span class="t">Helicase nsp13<span class="chip-x g-no">no</span></span>
+        <span class="w">2 deposited structures
+          of the same domain &middot; 3.0 % of its surface</span></span>
+      <span class="plot"><i class="thr faint" style="left:25.30%"></i><i class="thr" style="left:50.59%"></i>
+        <i class="rng" style="left:63.95%;width:16.75%"></i>
+        <i class="dot" style="left:72.34%"></i></span>
+      <span class="vl">858 Å²<span class="cf">758&ndash;957</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">RNA-directed RNA polymerase nsp12<span class="chip-x g-no">no</span></span>
+        <span class="w">2 deposited structures
+          of the same domain &middot; 2.5 % of its surface</span></span>
+      <span class="plot"><i class="thr faint" style="left:25.30%"></i><i class="thr" style="left:50.59%"></i>
+        <i class="rng" style="left:56.11%;width:11.41%"></i>
+        <i class="dot" style="left:61.81%"></i></span>
+      <span class="vl">733 Å²<span class="cf">666&ndash;801</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 8<span class="chip-x g-no">no</span></span>
+        <span class="w">5 deposited structures
+          of the same domain &middot; 6.7 % of its surface</span></span>
+      <span class="plot"><i class="thr faint" style="left:25.30%"></i><i class="thr" style="left:50.59%"></i>
+        <i class="rng" style="left:24.20%;width:75.80%"></i>
+        <i class="dot" style="left:56.00%"></i></span>
+      <span class="vl">664 Å²<span class="cf">287&ndash;1,186</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 10<span class="chip-x g-no">no</span></span>
+        <span class="w">5 deposited structures
+          of the same domain &middot; 10.9 % of its surface</span></span>
+      <span class="plot"><i class="thr faint" style="left:25.30%"></i><i class="thr" style="left:50.59%"></i>
+        <i class="rng" style="left:50.83%;width:5.67%"></i>
+        <i class="dot" style="left:52.16%"></i></span>
+      <span class="vl">619 Å²<span class="cf">603&ndash;670</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">ORF9B_SARS ORF9b protein<span class="chip-x g-no">no</span></span>
+        <span class="w">5 deposited structures
+          of the same domain &middot; 12.8 % of its surface</span></span>
+      <span class="plot"><i class="thr faint" style="left:25.30%"></i><i class="thr" style="left:50.59%"></i>
+        <i class="rng" style="left:35.14%;width:25.57%"></i>
+        <i class="dot" style="left:47.45%"></i></span>
+      <span class="vl">563 Å²<span class="cf">417&ndash;720</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">3C-like proteinase nsp5<span class="chip-x g-no">no</span></span>
+        <span class="w">5 deposited structures
+          of the same domain &middot; 4.4 % of its surface</span></span>
+      <span class="plot"><i class="thr faint" style="left:25.30%"></i><i class="thr" style="left:50.59%"></i>
+        <i class="rng" style="left:28.25%;width:29.96%"></i>
+        <i class="dot" style="left:47.42%"></i></span>
+      <span class="vl">562 Å²<span class="cf">335&ndash;690</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 2<span class="chip-x g-no">no</span></span>
+        <span class="w">1 deposited structure
+          of the same domain &middot; 2.1 % of its surface</span></span>
+      <span class="plot"><i class="thr faint" style="left:25.30%"></i><i class="thr" style="left:50.59%"></i>
+        <i class="rng" style="left:44.06%;width:0.40%"></i>
+        <i class="dot" style="left:44.06%"></i></span>
+      <span class="vl">522 Å²<span class="cf">522&ndash;522</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Viral protein genome-linked nsp9<span class="chip-x g-no">no</span></span>
+        <span class="w">3 deposited structures
+          of the same domain &middot; 5.5 % of its surface</span></span>
+      <span class="plot"><i class="thr faint" style="left:25.30%"></i><i class="thr" style="left:50.59%"></i>
+        <i class="rng" style="left:15.62%;width:47.34%"></i>
+        <i class="dot" style="left:26.89%"></i></span>
+      <span class="vl">319 Å²<span class="cf">185&ndash;747</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 7<span class="chip-x g-no">no</span></span>
+        <span class="w">5 deposited structures
+          of the same domain &middot; 4.2 % of its surface</span></span>
+      <span class="plot"><i class="thr faint" style="left:25.30%"></i><i class="thr" style="left:50.59%"></i>
+        <i class="rng" style="left:8.30%;width:11.10%"></i>
+        <i class="dot" style="left:10.03%"></i></span>
+      <span class="vl">119 Å²<span class="cf">98&ndash;230</span></span>
+    </div><div class="lane-grp"><b>Inside the ceiling, no measurement in this record &middot; 5</b><span>stage 3 folds every one of these, so the current pipeline measures them on predicted coordinates. This record was written before the two stages were swapped, and the measurements land here when the chain is next re-run</span></div>
+    <div class="lr none">
+      <span class="who"><span class="t">VME1_BC279 Membrane protein</span>
+        <span class="w">PDBe maps no deposited chain to Q0Q472 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>222 aa, inside the 400-residue ceiling</i></span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">AP3A_BC279 Protein 3</span>
+        <span class="w">PDBe maps no deposited chain to Q0Q474 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>275 aa, inside the 400-residue ceiling</i></span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Host translation inhibitor nsp1</span>
+        <span class="w">180 chains map to P0C6X7 and none covers 1-180 &middot; <i>180 aa, inside the 400-residue ceiling</i></span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Non-structural protein 6</span>
+        <span class="w">180 chains map to P0C6X7 and none covers 3547-3836 &middot; <i>287 aa, inside the 400-residue ceiling</i></span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Protein 7a</span>
+        <span class="w">PDBe maps no deposited chain to Q3I5J0 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>106 aa, inside the 400-residue ceiling</i></span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div><div class="lane-grp"><b>No surface by either route &middot; 6</b><span>nothing deposited covers them and they are over the 400-residue ceiling, so no coordinates exist for them at all</span></div>
+    <div class="lr none">
+      <span class="who"><span class="t">Spike protein S2&#x27;</span>
+        <span class="w">PDBe maps no deposited chain to Q3LZX1 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>458 aa, over the ceiling</i></span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Spike protein S2</span>
+        <span class="w">PDBe maps no deposited chain to Q3LZX1 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>588 aa, over the ceiling</i></span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Spike protein S1</span>
+        <span class="w">PDBe maps no deposited chain to Q3LZX1 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>662 aa, over the ceiling</i></span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Papain-like protease nsp3</span>
+        <span class="w">180 chains map to P0C6X7 and none covers 819-2740 &middot; <i>1,945 aa, over the ceiling</i></span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">NCAP_BCRP3 Nucleoprotein</span>
+        <span class="w">PDBe maps no deposited chain to Q3I5I7 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>419 aa, over the ceiling</i></span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Non-structural protein 4</span>
+        <span class="w">180 chains map to P0C6X7 and none covers 2741-3240 &middot; <i>500 aa, over the ceiling</i></span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lane-foot"><span>one scale for every bar &middot; longest
+      1,186 Å²</span>
+      <span>dashed lines: the 600 Å² macrocycle footprint and half of it</span></div>
+  </div>
+  <p class="after">All 9 refusals here are decided on localisation, which the gate reads before area at all: the protein is inside the cell, where a macrocycle does not go. Several of these patches clear the footprint line comfortably and are refused anyway.</p>
+    <p class="after">Read the bars against the verdicts and the gate's order of operations
+    becomes visible. It reads localisation before it reads area, and on a virus's replicase
+    that is usually where the answer comes from: a patch can clear the footprint comfortably
+    and still be refused because the protein it sits on is inside the cell, where this class
+    of molecule does not go. That is a statement about the modality and not about the target,
+    which is why it is a gate and never a term in the ranking.</p>
   </div>
 
   <div class="stage">
@@ -822,15 +1152,8 @@
         <div class="pdbrow"><span class="who">Non-structural protein 2 <em>P0C6X7 · 181–818</em></span><span class="ids">7fac:A</span></div>
         <div class="pdbrow"><span class="who">ORF9B_SARS ORF9b protein <em>P59636</em></span><span class="ids">2cme:A · 2cme:B · 2cme:C · 2cme:D · 2cme:E</span></div>
       </div>
-      <div class="accs"><span class="lead">And the 11 with no deposited structure to measure, each naming the accession that came back empty. <b>5</b> of them are inside the folding ceiling, so step 3 gave them coordinates and this step measured those instead — marked below:</span>
-        <div class="pdbrow none"><span class="who">Spike protein S1 · S2 · S2' <em>3 chains</em></span><span class="ids">Q3LZX1 — no deposited chain maps to it at all</span></div>
-        <div class="pdbrow none"><span class="who">VME1_BC279 Membrane protein <i class="gl">folded instead</i> <em>1</em></span><span class="ids">Q0Q472 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">AP3A_BC279 Protein 3 <i class="gl">folded instead</i> <em>1</em></span><span class="ids">Q0Q474 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">NCAP_BCRP3 Nucleoprotein <em>1</em></span><span class="ids">Q3I5I7 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">Protein 7a <i class="gl">folded instead</i> <em>1</em></span><span class="ids">Q3I5J0 — none at all</span></div>
-        <div class="pdbrow none"><span class="who">Papain-like protease nsp3 · Host translation inhibitor nsp1 · Non-structural protein 4 · Non-structural protein 6 <i class="gl">nsp1 and nsp6 folded instead; nsp3 and nsp4 are over the ceiling</i> <em>4 chains</em></span><span class="ids">P0C6X7 — 180 chains map to it, none covering those stretches</span></div>
-      </div>
-      <div class="accs"><span class="lead">Those 11 are the reason step 3 now runs first, and folds every chain it can rather than only the best-ranked one. Where coordinates exist, this step measures them with the same arithmetic — for 5 chains above that is the only surface they will ever have. On a chain that has both, the two answers are far apart:</span>
+      <div class="fields"><span class="lead">The other <b>11</b> chains had no deposited structure to measure, and each is named in <a href="#surface-out">the lane above</a> with the accession that came back empty, the sentence the tool returned, and where the chain fell against the folding ceiling. That list was retyped here for a while, grouped by accession and annotated by hand, which made it the one place on the page where a chain could be described as rescued without the record saying so.</span></div>
+      <div class="accs"><span class="lead">Those <b>11</b> are the reason step 3 now runs first, and folds every chain it can rather than only the best-ranked one. Where coordinates exist, this step measures them with the same arithmetic — for <b>5</b> chains that is the only surface they will ever have. On a chain that has both, the two answers are far apart:</span>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">5 deposited structures</i> <em>median of 5 · a real measurement</em></span><span class="ids">562.4 Å² · 4.4 % of the surface</span></div>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">the predicted shape</i> <em>ESMFold v1 · mean confidence 62.6</em></span><span class="ids">2,012.6 Å² · 11.0 % of the surface</span></div>
       </div>
