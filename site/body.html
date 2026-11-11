@@ -302,9 +302,27 @@
         <li>All <b>{{chains}}</b> had their own sequence located in this genome</li>
         <li><b>11</b> of those are short enough for the folding lane; <b>9</b> are over its <b>400</b>-residue ceiling, including the three spike chains and the polymerase nsp12</li>
         <li>All <b>11</b> are folded, not only the best-ranked one — a chain with no coordinates is a chain the next step cannot measure</li>
-        <li>The one drawn further down is the main protease: <b>{{fold_residues}}</b> building blocks long</li>
+        <li>The one drawn below is the main protease: <b>{{fold_residues}}</b> building blocks long</li>
         <li>The predictor rates its own confidence <b>{{mean_plddt}}</b> out of 100 — confidence is not accuracy</li>
       </ul></div>
+    </div>
+  </div>
+
+  <div class="substep" id="fold-out">
+    <h3>What the fold returned</h3>
+    <p class="cap">Returned by <span class="mono">structures.folded</span>, the ESMFold call listed in <a href="#t-fold">section 04</a>.</p>
+    <dl class="ret">
+      <div><dt>Model</dt><dd>ESMFold v1 (2022-10-18)</dd></div>
+      <div><dt>Chains folded</dt><dd>all 11 inside the 400-residue ceiling</dd></div>
+      <div><dt>Drawn below</dt><dd>Main protease · 306 residues</dd></div>
+      <div><dt>Coordinates returned</dt><dd>193,227 bytes</dd></div>
+      <div><dt>Confidence mean / median / min</dt><dd>62.6 / 63.0 / 20.0</dd></div>
+      <div><dt>Residues above 70</dt><dd>{{confident_pct}} %</dd></div>
+      <div><dt>Sequence matches the genome</dt><dd>verified, 0 mismatches</dd></div>
+    </dl>
+    <div class="foldimg">
+      <img src="fold.png" alt="Left: the folded backbone of the main protease, 306 alpha-carbons drawn on its two principal axes and coloured by per-residue confidence — one compact well-predicted domain in blue beside a sprawling orange one. Right: confidence against residue position, with the stretches that never clear the threshold marked along the bottom.">
+      <div class="cc">Drawn from the stored coordinates in <span class="mono">runs/folded_structure/mpro_nsp5.pdb</span>. The blue domain is predicted confidently; the orange half is not, and the marked stretches — residues 1–11, 45–64, 166–170 and <b>183–306</b> — never clear the threshold. That last run is 124 residues, 40 % of the chain. The tool's own payload states that a predicted structure is not an experimental one and must never be pooled with deposited-structure counts.</div>
     </div>
   </div>
 
@@ -404,19 +422,7 @@
   <div class="tool-card" id="t-fold">
     <div class="tc-head"><span class="sn">3</span><span class="tn">hpc_pilots/folded_structure.py<i>:</i>fold</span><span class="reg">structures.folded</span><span class="plain">Predict a 3-D shape from sequence alone</span><span class="db">ESM Atlas · {{fold_exact}} s · 1 request</span></div>
     <div class="tc-body">
-      <dl class="ret">
-        <div><dt>Model</dt><dd>ESMFold v1 (2022-10-18)</dd></div>
-        <div><dt>Chains folded</dt><dd>all 11 inside the 400-residue ceiling</dd></div>
-        <div><dt>Drawn below</dt><dd>Main protease · 306 residues</dd></div>
-        <div><dt>Coordinates returned</dt><dd>193,227 bytes</dd></div>
-        <div><dt>Confidence mean / median / min</dt><dd>62.6 / 63.0 / 20.0</dd></div>
-        <div><dt>Residues above 70</dt><dd>{{confident_pct}} %</dd></div>
-        <div><dt>Sequence matches the genome</dt><dd>verified, 0 mismatches</dd></div>
-      </dl>
-      <div class="foldimg">
-        <img src="fold.png" alt="Left: the folded backbone of the main protease, 306 alpha-carbons drawn on its two principal axes and coloured by per-residue confidence — one compact well-predicted domain in blue beside a sprawling orange one. Right: confidence against residue position, with the stretches that never clear the threshold marked along the bottom.">
-        <div class="cc">Drawn from the stored coordinates in <span class="mono">runs/folded_structure/mpro_nsp5.pdb</span>. The blue domain is predicted confidently; the orange half is not, and the marked stretches — residues 1–11, 45–64, 166–170 and <b>183–306</b> — never clear the threshold. That last run is 124 residues, 40 % of the chain. The tool's own payload states that a predicted structure is not an experimental one and must never be pooled with deposited-structure counts.</div>
-      </div>
+      <p class="cap" style="margin:0">What this call returned, and the drawing of the fold, are under <a href="#fold-out">step 3 in section 03</a>.</p>
     </div>
   </div>
 
