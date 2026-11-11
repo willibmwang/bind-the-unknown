@@ -377,15 +377,28 @@
 
   <div class="substep" id="surface-out">
     <h3>What the measurement returned, chain by chain</h3>
-    <p class="cap">One row per chain, and a row is never absent: a chain can be refused, it
-    cannot disappear. Every bar is on one scale in square angstroms, deposited and predicted
-    together, because the comparison is the point — a patch computed on a predicted shape read
-    beside one measured on the structures somebody solved is the only place this pipeline says
-    how far the two sit apart. The dot is the median over every deposited structure of that domain and
-    the bar is its range, which is not decoration: measuring the same chain over several
-    structures instead of one moves the number by hundreds of square angstroms — a spread
-    comparable to the threshold itself — so a range crossing the line is reported as uncertain
-    whatever the median says.</p>
+    <p class="cap">One row for every chain on the shortlist, each answering a single
+    question: if you wanted to put a molecule on this protein, is there anywhere on it to put
+    one?</p>
+    <p class="cap">What gets measured is the largest unbroken stretch of water-repelling
+    surface on the chain, because that is the part of a protein this class of molecule grips.
+    It is reported in square angstroms, and a macrocycle covers roughly <b>{{footprint}}</b>
+    of them when it binds. That is the line drawn through every row below. The fainter line
+    is half of it, the width under which there is not enough surface to hold a molecule at
+    all. Every bar sits on that same scale, whether the shape underneath it was solved in a
+    laboratory or predicted from the sequence, so the two can be read against each other
+    rather than taken on trust separately.</p>
+    <p class="cap">A measured chain gets a dot and a bar rather than a single number, and the
+    bar is the honest part. A protein is not a fixed object, and a structure is one moment of
+    it held still, so the same chain solved twice does not give the same answer. Measuring
+    across every structure of that domain instead of picking one moves the figure by hundreds
+    of square angstroms. The dot is the middle of those answers and the bar runs from the
+    smallest to the largest. Where a bar straddles the line, the verdict is uncertain however
+    confident the dot looks, because a measurement that wide does not actually tell the two
+    sides apart.</p>
+    <p class="cap">Nothing is missing from the list. A chain can be refused, and its row says
+    in plain words which reason applies to it — but it cannot quietly drop out between the
+    step and the page.</p>
     <!--SURFACE-LANE-->
     <p class="after"><b>Why the second group is kept apart from the first, when the sum is
     the same arithmetic.</b> A deposited structure is something that happened: a protein was
