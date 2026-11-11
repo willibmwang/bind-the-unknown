@@ -1017,14 +1017,16 @@ def fold_lane(case):
     groups = [
         (inside, f"Folded &middot; {len(inside)}" if recorded
          else f"Inside the ceiling &middot; {len(inside)}",
-         f"every chain at or under {ceiling} residues, not only the best-ranked one &mdash; "
-         f"a chain with no coordinates is a chain stage 4 cannot measure"),
+         f"at or under {ceiling} residues, so the folding endpoint will take them. Every one "
+         f"is folded and not only the best-ranked, because a chain with no coordinates is a "
+         f"chain the next stage can only measure if somebody has already solved it"),
         (novel, f"Unrecognised, folded anyway &middot; {len(novel)}",
-         "no accession, no relative, no annotation. Folding needs a sequence and nothing "
-         "else, which is why this is the one stage a novel protein reaches"),
+         "no accession, no relative, no annotation. Folding asks for a sequence and nothing "
+         "else, which is why this is the one stage a protein nobody can name still reaches"),
         (over, f"No coordinates &middot; {len(over)}",
-         f"over the {ceiling}-residue ceiling, or never located in this genome. Stage 4 has "
-         f"only a deposited structure to work with on these"),
+         f"longer than the {ceiling}-residue ceiling, or never located in this genome at "
+         f"all. Nothing can be predicted for these, so the next stage has only a deposited "
+         f"structure to work with &mdash; and where there is none, no surface at all"),
     ]
     body = []
     for members, title, note in groups:
@@ -1138,22 +1140,30 @@ def surface_lane(case):
 
     groups = [
         (measured, measured_row,
-         f"Measured on deposited structures &middot; {len(measured)}",
-         "a real experiment someone performed, measured over every structure of the domain "
-         "PDBe maps to the chain &mdash; the dot is the median, the bar its range"),
+         f"Measured on a structure someone solved &middot; {len(measured)}",
+         "the coordinates came out of a laboratory, so the patch is measured on an "
+         "observation of the protein. Every structure of that domain is measured, not one: "
+         "the dot is the middle answer and the bar is the spread between the smallest and "
+         "the largest, because the same chain solved twice does not give the same number"),
         (predicted, predicted_row,
-         f"Measured on stage 3&rsquo;s coordinates &middot; {len(predicted)}",
-         "no deposited structure covers these, so the patch is arithmetic on a prediction. "
-         "Never pooled with the group above, never in the ranking"),
+         f"Measured on a shape a model predicted &middot; {len(predicted)}",
+         "nobody has ever solved these, so the shape being measured was predicted from the "
+         "sequence by stage 3. The arithmetic is identical and the evidence is not: this is "
+         "a claim about the protein rather than a look at it, so it stays in its own column, "
+         "outside the count above and outside the ranking"),
         (waiting, bare_row,
-         f"Inside the ceiling, no measurement in this record &middot; {len(waiting)}",
-         "stage 3 folds every one of these, so the current pipeline measures them on "
-         "predicted coordinates. This record was written before the two stages were "
-         "swapped, and the measurements land here when the chain is next re-run"),
+         f"A shape could be predicted for these, and this run did not &middot; {len(waiting)}",
+         f"nobody has solved these either, but each is short enough for stage 3 to fold, so "
+         f"coordinates can exist for them and the current pipeline measures those. They are "
+         f"blank here for a dull reason: this record was written while the surface stage "
+         f"still ran before the fold, so when it asked for coordinates there were none to "
+         f"ask for. Re-running the chain fills this group in"),
         (none, bare_row,
          f"No surface by either route &middot; {len(none)}",
-         f"nothing deposited covers them and they are over the {num(ceiling)}-residue "
-         f"ceiling, so no coordinates exist for them at all"),
+         f"nothing is deposited for these and they are over the {num(ceiling)}-residue "
+         f"ceiling, so no coordinates exist for them at all &mdash; none solved, none "
+         f"predicted. The pipeline has no surface to offer here, and says so rather than "
+         f"dropping the chain"),
     ]
     body = []
     for members, render, title, note in groups:

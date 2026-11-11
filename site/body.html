@@ -380,13 +380,47 @@
     <p class="cap">One row per chain, and a row is never absent: a chain can be refused, it
     cannot disappear. Every bar is on one scale in square angstroms, deposited and predicted
     together, because the comparison is the point — a patch computed on a predicted shape read
-    beside one measured on five real structures is the only place this pipeline says how far
-    the two sit apart. The dot is the median over every deposited structure of that domain and
+    beside one measured on the structures somebody solved is the only place this pipeline says
+    how far the two sit apart. The dot is the median over every deposited structure of that domain and
     the bar is its range, which is not decoration: measuring the same chain over several
     structures instead of one moves the number by hundreds of square angstroms — a spread
     comparable to the threshold itself — so a range crossing the line is reported as uncertain
     whatever the median says.</p>
     <!--SURFACE-LANE-->
+    <p class="after"><b>Why the second group is kept apart from the first, when the sum is
+    the same arithmetic.</b> A deposited structure is something that happened: a protein was
+    purified, persuaded into a crystal or frozen in ice, put in a beam, and coordinates were
+    fitted to what came back. A predicted structure is a claim a model makes after reading
+    the sequence, and no one has ever looked at the molecule. Run the same patch calculation
+    over each and you get two numbers of the same kind and two pieces of evidence that are
+    not.</p>
+    <p class="after">Three differences, and none of them is accuracy in the abstract. The
+    first is what the uncertainty even is. A deposited patch has a spread this page can show
+    you, because the same chain has been solved several times and the structures disagree —
+    that is the bar. A prediction has no such bar: ask the same model for the same sequence
+    and it returns the same coordinates, so the error does not average out, and what the
+    model offers instead is a confidence per residue. The main protease fold is scored
+    <b>{{mean_plddt}}</b> out of 100, and the stretches marked along the bottom of the figure
+    above never clear the threshold at all — the last of them runs to the end of the chain.
+    Measuring a patch across that stretch describes a shape the model declined to commit
+    to.</p>
+    <p class="after">The second is that a predicted chain is alone. It is folded by itself,
+    with no partner, no membrane and no rest-of-the-virion, so every face is out in the open
+    — including the ones that in the real protein are pressed against something else. Greasy
+    surface that is buried in life is exposed in the model, and the patch inflates. That is
+    the likeliest reason the main protease's predicted patch comes out several times larger
+    than its deposited one, as section 04 reports it; it is not separable here from ordinary
+    prediction error, which is why the record states the ratio and names no cause.</p>
+    <p class="after">The third is the one that makes the predicted group worth having at all.
+    A deposited structure exists only where somebody already did the work, and that
+    availability tracks attention rather than importance: the two enzymes approved antivirals
+    already hit are measured here on several structures apiece, while the membrane protein
+    and the small accessory proteins have nothing deposited anywhere. A pipeline that can only measure depositions therefore answers best on
+    exactly the targets that need it least, and goes quiet on a genuinely new pathogen — the
+    case this project exists for. The prediction does not replace a measurement, and the gap
+    between the two numbers below is the reason it cannot. What it does is turn <b>no answer
+    at all</b> into <b>an answer with its provenance attached</b>, for chains that would
+    otherwise leave this step with a blank.</p>
     <p class="after">Read the bars against the verdicts and the gate's order of operations
     becomes visible. It reads localisation before it reads area, and on a virus's replicase
     that is usually where the answer comes from: a patch can clear the footprint comfortably

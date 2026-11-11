@@ -317,7 +317,7 @@
     
   </div>
   
-  <div class="lane"><div class="lane-grp"><b>Measured on deposited structures &middot; 2</b><span>a real experiment someone performed, measured over every structure of the domain PDBe maps to the chain &mdash; the dot is the median, the bar its range</span></div>
+  <div class="lane"><div class="lane-grp"><b>Measured on a structure someone solved &middot; 2</b><span>the coordinates came out of a laboratory, so the patch is measured on an observation of the protein. Every structure of that domain is measured, not one: the dot is the middle answer and the bar is the spread between the smallest and the largest, because the same chain solved twice does not give the same number</span></div>
     <div class="lr">
       <span class="who"><span class="t">VME1_BCHK5 Membrane protein<span class="chip-x g-borderline">borderline</span></span>
         <span class="w">5 deposited structures
@@ -335,7 +335,7 @@
         <i class="rng" style="left:12.57%;width:2.92%"></i>
         <i class="dot" style="left:14.78%"></i></span>
       <span class="vl">541 Å²<span class="cf">460&ndash;566</span></span>
-    </div><div class="lane-grp"><b>Inside the ceiling, no measurement in this record &middot; 8</b><span>stage 3 folds every one of these, so the current pipeline measures them on predicted coordinates. This record was written before the two stages were swapped, and the measurements land here when the chain is next re-run</span></div>
+    </div><div class="lane-grp"><b>A shape could be predicted for these, and this run did not &middot; 8</b><span>nobody has solved these either, but each is short enough for stage 3 to fold, so coordinates can exist for them and the current pipeline measures those. They are blank here for a dull reason: this record was written while the surface stage still ran before the fold, so when it asked for coordinates there were none to ask for. Re-running the chain fills this group in</span></div>
     <div class="lr none">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
         <span class="w">no reviewed homolog accession, so there is no deposited structure to resolve. A sequence-only candidate reaches the folding stage and not this one. &middot; <i>160 aa, inside the 400-residue ceiling</i></span></span>
@@ -383,7 +383,7 @@
         <span class="w">3 chains map to P0C6W4 and none covers 4329-4467 &middot; <i>140 aa, inside the 400-residue ceiling</i></span></span>
       <span class="plot"></span>
       <span class="vl">&mdash;</span>
-    </div><div class="lane-grp"><b>No surface by either route &middot; 9</b><span>nothing deposited covers them and they are over the 400-residue ceiling, so no coordinates exist for them at all</span></div>
+    </div><div class="lane-grp"><b>No surface by either route &middot; 9</b><span>nothing is deposited for these and they are over the 400-residue ceiling, so no coordinates exist for them at all &mdash; none solved, none predicted. The pipeline has no surface to offer here, and says so rather than dropping the chain</span></div>
     <div class="lr none">
       <span class="who"><span class="t">Spike protein S1</span>
         <span class="w">6 chains map to Q0Q4F2 and none covers 13-749 &middot; <i>722 aa, over the ceiling</i></span></span>
@@ -469,7 +469,7 @@
   this genome and where it fell against the residue ceiling — which is what decides whether
   the stage after it has coordinates to measure.</p>
   
-  <div class="lane"><div class="lane-grp"><b>Inside the ceiling &middot; 10</b><span>every chain at or under 400 residues, not only the best-ranked one &mdash; a chain with no coordinates is a chain stage 4 cannot measure</span></div>
+  <div class="lane"><div class="lane-grp"><b>Inside the ceiling &middot; 10</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded and not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
     <div class="lr">
       <span class="who"><span class="t">3C-like proteinase nsp5</span>
         <span class="w">found in ORF 4 of the ranked set, 4391 aa &middot; 100 % of the relative&rsquo;s chain at 83 % identity</span></span>
@@ -539,7 +539,7 @@
       <span class="plot"><i class="thr" style="left:21.21%"></i><i class="b" style="left:0.00%;width:4.40%"></i></span>
       <span class="vl">83 aa
         </span>
-    </div><div class="lane-grp"><b>No coordinates &middot; 9</b><span>over the 400-residue ceiling, or never located in this genome. Stage 4 has only a deposited structure to work with on these</span></div>
+    </div><div class="lane-grp"><b>No coordinates &middot; 9</b><span>longer than the 400-residue ceiling, or never located in this genome at all. Nothing can be predicted for these, so the next stage has only a deposited structure to work with &mdash; and where there is none, no surface at all</span></div>
     <div class="lr">
       <span class="who"><span class="t">Papain-like protease nsp3</span>
         <span class="w">found in ORF 4 of the ranked set, 4391 aa &middot; 95 % of the relative&rsquo;s chain at 62 % identity</span></span>

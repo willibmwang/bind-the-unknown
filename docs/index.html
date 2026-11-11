@@ -701,7 +701,7 @@
     overlapping ORFs through a frameshift, so the polymerase and the helicase sit in a frame
     their own match does not point at.</p>
     
-  <div class="lane"><div class="lane-grp"><b>Inside the ceiling &middot; 11</b><span>every chain at or under 400 residues, not only the best-ranked one &mdash; a chain with no coordinates is a chain stage 4 cannot measure</span></div>
+  <div class="lane"><div class="lane-grp"><b>Inside the ceiling &middot; 11</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded and not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
     <div class="lr">
       <span class="who"><span class="t">3C-like proteinase nsp5</span>
         <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 96 % identity</span></span>
@@ -778,7 +778,7 @@
       <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:4.27%"></i></span>
       <span class="vl">83 aa
         </span>
-    </div><div class="lane-grp"><b>No coordinates &middot; 9</b><span>over the 400-residue ceiling, or never located in this genome. Stage 4 has only a deposited structure to work with on these</span></div>
+    </div><div class="lane-grp"><b>No coordinates &middot; 9</b><span>longer than the 400-residue ceiling, or never located in this genome at all. Nothing can be predicted for these, so the next stage has only a deposited structure to work with &mdash; and where there is none, no surface at all</span></div>
     <div class="lr">
       <span class="who"><span class="t">Papain-like protease nsp3</span>
         <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 77 % identity</span></span>
@@ -872,14 +872,14 @@
     <p class="cap">One row per chain, and a row is never absent: a chain can be refused, it
     cannot disappear. Every bar is on one scale in square angstroms, deposited and predicted
     together, because the comparison is the point — a patch computed on a predicted shape read
-    beside one measured on five real structures is the only place this pipeline says how far
-    the two sit apart. The dot is the median over every deposited structure of that domain and
+    beside one measured on the structures somebody solved is the only place this pipeline says
+    how far the two sit apart. The dot is the median over every deposited structure of that domain and
     the bar is its range, which is not decoration: measuring the same chain over several
     structures instead of one moves the number by hundreds of square angstroms — a spread
     comparable to the threshold itself — so a range crossing the line is reported as uncertain
     whatever the median says.</p>
     
-  <div class="lane"><div class="lane-grp"><b>Measured on deposited structures &middot; 9</b><span>a real experiment someone performed, measured over every structure of the domain PDBe maps to the chain &mdash; the dot is the median, the bar its range</span></div>
+  <div class="lane"><div class="lane-grp"><b>Measured on a structure someone solved &middot; 9</b><span>the coordinates came out of a laboratory, so the patch is measured on an observation of the protein. Every structure of that domain is measured, not one: the dot is the middle answer and the bar is the spread between the smallest and the largest, because the same chain solved twice does not give the same number</span></div>
     <div class="lr">
       <span class="who"><span class="t">Helicase nsp13<span class="chip-x g-no">no</span></span>
         <span class="w">2 deposited structures
@@ -960,7 +960,7 @@
         <i class="rng" style="left:8.30%;width:11.10%"></i>
         <i class="dot" style="left:10.03%"></i></span>
       <span class="vl">119 Å²<span class="cf">98&ndash;230</span></span>
-    </div><div class="lane-grp"><b>Inside the ceiling, no measurement in this record &middot; 5</b><span>stage 3 folds every one of these, so the current pipeline measures them on predicted coordinates. This record was written before the two stages were swapped, and the measurements land here when the chain is next re-run</span></div>
+    </div><div class="lane-grp"><b>A shape could be predicted for these, and this run did not &middot; 5</b><span>nobody has solved these either, but each is short enough for stage 3 to fold, so coordinates can exist for them and the current pipeline measures those. They are blank here for a dull reason: this record was written while the surface stage still ran before the fold, so when it asked for coordinates there were none to ask for. Re-running the chain fills this group in</span></div>
     <div class="lr none">
       <span class="who"><span class="t">VME1_BC279 Membrane protein</span>
         <span class="w">PDBe maps no deposited chain to Q0Q472 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>222 aa, inside the 400-residue ceiling</i></span></span>
@@ -990,7 +990,7 @@
         <span class="w">PDBe maps no deposited chain to Q3I5J0 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>106 aa, inside the 400-residue ceiling</i></span></span>
       <span class="plot"></span>
       <span class="vl">&mdash;</span>
-    </div><div class="lane-grp"><b>No surface by either route &middot; 6</b><span>nothing deposited covers them and they are over the 400-residue ceiling, so no coordinates exist for them at all</span></div>
+    </div><div class="lane-grp"><b>No surface by either route &middot; 6</b><span>nothing is deposited for these and they are over the 400-residue ceiling, so no coordinates exist for them at all &mdash; none solved, none predicted. The pipeline has no surface to offer here, and says so rather than dropping the chain</span></div>
     <div class="lr none">
       <span class="who"><span class="t">Spike protein S2&#x27;</span>
         <span class="w">PDBe maps no deposited chain to Q3LZX1 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>458 aa, over the ceiling</i></span></span>
@@ -1032,6 +1032,40 @@
       <span>dashed lines: the 600 Å² macrocycle footprint and half of it</span></div>
   </div>
   <p class="after">All 9 refusals here are decided on localisation, which the gate reads before area at all: the protein is inside the cell, where a macrocycle does not go. Several of these patches clear the footprint line comfortably and are refused anyway.</p>
+    <p class="after"><b>Why the second group is kept apart from the first, when the sum is
+    the same arithmetic.</b> A deposited structure is something that happened: a protein was
+    purified, persuaded into a crystal or frozen in ice, put in a beam, and coordinates were
+    fitted to what came back. A predicted structure is a claim a model makes after reading
+    the sequence, and no one has ever looked at the molecule. Run the same patch calculation
+    over each and you get two numbers of the same kind and two pieces of evidence that are
+    not.</p>
+    <p class="after">Three differences, and none of them is accuracy in the abstract. The
+    first is what the uncertainty even is. A deposited patch has a spread this page can show
+    you, because the same chain has been solved several times and the structures disagree —
+    that is the bar. A prediction has no such bar: ask the same model for the same sequence
+    and it returns the same coordinates, so the error does not average out, and what the
+    model offers instead is a confidence per residue. The main protease fold is scored
+    <b>62.6</b> out of 100, and the stretches marked along the bottom of the figure
+    above never clear the threshold at all — the last of them runs to the end of the chain.
+    Measuring a patch across that stretch describes a shape the model declined to commit
+    to.</p>
+    <p class="after">The second is that a predicted chain is alone. It is folded by itself,
+    with no partner, no membrane and no rest-of-the-virion, so every face is out in the open
+    — including the ones that in the real protein are pressed against something else. Greasy
+    surface that is buried in life is exposed in the model, and the patch inflates. That is
+    the likeliest reason the main protease's predicted patch comes out several times larger
+    than its deposited one, as section 04 reports it; it is not separable here from ordinary
+    prediction error, which is why the record states the ratio and names no cause.</p>
+    <p class="after">The third is the one that makes the predicted group worth having at all.
+    A deposited structure exists only where somebody already did the work, and that
+    availability tracks attention rather than importance: the two enzymes approved antivirals
+    already hit are measured here on several structures apiece, while the membrane protein
+    and the small accessory proteins have nothing deposited anywhere. A pipeline that can only measure depositions therefore answers best on
+    exactly the targets that need it least, and goes quiet on a genuinely new pathogen — the
+    case this project exists for. The prediction does not replace a measurement, and the gap
+    between the two numbers below is the reason it cannot. What it does is turn <b>no answer
+    at all</b> into <b>an answer with its provenance attached</b>, for chains that would
+    otherwise leave this step with a blank.</p>
     <p class="after">Read the bars against the verdicts and the gate's order of operations
     becomes visible. It reads localisation before it reads area, and on a virus's replicase
     that is usually where the answer comes from: a patch can clear the footprint comfortably
