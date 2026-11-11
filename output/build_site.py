@@ -79,6 +79,72 @@ TERM_COLUMNS = (
 )
 
 
+# `druggable_class` is the one feature that is not already a 0-1 number: it is an integer
+# class from the ranker's keyword table, and the table's top class is 3. The chain record
+# keeps the five weights but not the ceiling they imply, so the ceiling is derived from the
+# weights here -- and cross-checked against the stage-1 record's own `term_ceiling` wherever
+# that record is beside the page, so a change to the class range stops the build instead of
+# shading two of the columns against the wrong maximum.
+DRUGGABLE_CLASS_MAX = 3
+
+
+def term_ceilings(rubric, record=None):
+    """The most each of the five terms can pay, derived from the weights that paid it."""
+    if record and record.get("term_ceiling"):
+        return record["term_ceiling"]
+    return {"conservation": rubric["conservation"],
+            "surface_exposed": rubric["surface_exposed"],
+            "essential_class": rubric["essential_class"],
+            "druggable_class": round(rubric["druggable_class"] * DRUGGABLE_CLASS_MAX, 4),
+            "structures_in_family": rubric["structures_in_family_capped"]}
+
+
+def term_head_cells(rubric, ceiling):
+    """The five column headings, each carrying the weight the record says it used."""
+    cells = []
+    for key, label, note in TERM_COLUMNS:
+        weight = rubric["structures_in_family_capped" if key == "structures_in_family"
+                        else key]
+        cells.append(
+            f'<th scope="col" title="{esc(note)}"><span class="cl">{esc(label)}</span>'
+            f'<span class="ck">{esc(key)}</span>'
+            f'<span class="cw">× {num(weight)} → max {num(ceiling[key])}</span></th>')
+    return "".join(cells)
+
+
+def term_cells(features, terms, ceiling, scale=None):
+    """The five scored cells of one row: points paid, and the measurement underneath.
+
+    Shared by the ORF table and the chain table because the two are the same arithmetic on
+    two altitudes, and a reader comparing a chain's score with its parent ORF's is comparing
+    these cells. Rendering them twice would let the two drift apart in formatting, which on
+    this page would read as a difference in the scoring.
+    """
+    cells = []
+    for key, label, _ in TERM_COLUMNS:
+        earned, raw = terms[key], features[key]
+        if isinstance(raw, bool):
+            shown = "yes" if raw else "no"
+        elif key == "conservation":
+            # The scale, not just the number. The exact tier reports a shared-5-mer fraction
+            # of the query and the remote tier reports min(1, bits/200), so a column of bare
+            # decimals mixing the two would invite a reader to compare 0.83 on one scale with
+            # 0.54 on the other -- which is the inversion the record's `conservation_scale`
+            # field exists to make visible. Named where it is not the k-mer fraction, and left
+            # bare where it is, so the common case stays readable.
+            shown = f"{raw:.3f}"
+            if scale and scale != "shared_kmer_fraction_of_query":
+                shown = f"{shown} · {scale.replace('_', ' ')}"
+        elif key == "druggable_class":
+            shown = f"class {raw}"
+        else:
+            shown = f"{raw:,} in PDB"
+        cells.append(f'<td class="h h{heat(earned, ceiling[key])}">'
+                     f'<span class="pt">{earned:.2f}</span>'
+                     f'<span class="rw">{esc(shown)}</span></td>')
+    return "".join(cells)
+
+
 def heat(earned, ceiling):
     """Which of six shades a term's cell gets: none earned, then five bands up to the cap.
 
@@ -262,11 +328,13 @@ def build_index():
     holdout = next((c for c in landing["cases"] if c.get("reference_excluded_organism")),
                    landing["cases"][0])
     body = body.replace("<!--CANDIDATES-->", candidate_matrix(holdout))
+    body = body.replace("<!--CHAINS-->", chain_matrix(holdout))
     body = body.replace("<!--PICKED-->", picked_table(holdout))
     body = body.replace("<!--OFFCHAIN-->", build_offchain())
     # Last, so a {{token}} introduced by any generated block above is filled too. The
     # landing page is the held-out case throughout, so its numbers come from that case.
-    body = fill(body, facts(holdout) | candidate_facts(holdout) | picked_facts(holdout))
+    body = fill(body, facts(holdout) | candidate_facts(holdout) | chain_facts(holdout)
+                | picked_facts(holdout))
     out = (head(f"{SITE} · one pathogen genome in, every next step out",
                 "Deciding which of a new virus's proteins a drug should aim at, from the "
                 "genome accession alone, with every step on the record. This is the "
@@ -352,41 +420,6 @@ def _cut_summary(case):
         return (f"{orfs} identified ORF{'' if orfs == 1 else 's'} "
                 f"cut into {chains} chains")
     return f"{chains} chains" if chains else "no chains ranked"
-
-
-def score_bars(case, limit=8):
-    """The per-genome pages' shortlist. The landing page uses `picked_table` instead.
-
-    `limit=None` shows every chain. The result pages pass it, because truncating to eight hid
-    most of the list on the genomes where the cut matters most -- MERS ranks nineteen chains,
-    so eleven of them were behind a sentence saying the full list is in the record. The record
-    is beside the page and a reader should not have to open it to see the ranking the page is
-    about.
-
-    Each bar names the ORF its chain was cut out of, for the same reason the landing page's
-    table does: a reader seeing `nsp12` has no way to know it is an interior fragment of a
-    polyprotein rather than a gene of its own, and on these pages that is most of the list.
-    Named rather than linked, because a result page carries no stage-1 table to link to.
-    """
-    rows = sorted(case.get("scores", []), key=lambda r: r.get("rank", 999))
-    rows = rows if limit is None else rows[:limit]
-    if not rows:
-        return ""
-    top = max((r.get("score") or 0) for r in rows) or 1
-    bars = []
-    for r in rows:
-        score = r.get("score") or 0
-        parent = (f'<span class="cut">cut out of {esc(r["parent"])}</span>'
-                  if r.get("parent") else "")
-        bars.append(f"""
-    <div class="bi"><div class="bi-top">
-      <span class="nm">{esc(r.get('rank'))} · {esc(r.get('target'))}{parent}</span>
-      <span class="vl">{score:.2f}</span></div>
-      <div class="track"><div class="fill" style="width:{max(2, score / top * 100):.1f}%"></div></div></div>""")
-    rest = len(case.get("scores", [])) - len(rows)
-    tail = (f'<p class="after">{rest} further chains were ranked and scored; '
-            f'the full list is in the record.</p>' if rest > 0 else "")
-    return f'<div class="bars">{"".join(bars)}</div>{tail}'
 
 
 def candidate_rows(case):
@@ -476,14 +509,7 @@ def candidate_matrix(case):
     top = max((r["score"] for r in scored), default=0) or 1
     total_ceiling = round(sum(ceiling[key] for key, _, _ in TERM_COLUMNS), 2)
 
-    head_cells = []
-    for key, label, note in TERM_COLUMNS:
-        weight = rubric["structures_in_family_capped" if key == "structures_in_family"
-                        else key]
-        head_cells.append(
-            f'<th scope="col" title="{esc(note)}"><span class="cl">{esc(label)}</span>'
-            f'<span class="ck">{esc(key)}</span>'
-            f'<span class="cw">× {num(weight)} → max {num(ceiling[key])}</span></th>')
+    head_cells = term_head_cells(rubric, ceiling)
 
     body = []
     for row in rows:
@@ -501,31 +527,8 @@ def candidate_matrix(case):
         <td class="sc">&mdash;</td>
       </tr>""")
             continue
-        features, terms = row["features"], row["terms"]
-        cells = []
-        for key, label, _ in TERM_COLUMNS:
-            earned, raw = terms[key], features[key]
-            if isinstance(raw, bool):
-                shown = "yes" if raw else "no"
-            elif key == "conservation":
-                # The scale, not just the number. The exact tier reports a shared-5-mer
-                # fraction of the query and the remote tier reports min(1, bits/200), so a
-                # column of bare decimals mixing the two would invite a reader to compare
-                # 0.83 on one scale with 0.54 on the other -- which is the inversion the
-                # record's `conservation_scale` field exists to make visible. Named where it
-                # is not the k-mer fraction, and left bare where it is, so the common case
-                # stays readable.
-                scale = row.get("conservation_scale")
-                shown = f"{raw:.3f}"
-                if scale and scale != "shared_kmer_fraction_of_query":
-                    shown = f"{shown} · {scale.replace('_', ' ')}"
-            elif key == "druggable_class":
-                shown = f"class {raw}"
-            else:
-                shown = f"{raw:,} in PDB"
-            cells.append(f'<td class="h h{heat(earned, ceiling[key])}">'
-                         f'<span class="pt">{earned:.2f}</span>'
-                         f'<span class="rw">{esc(shown)}</span></td>')
+        cells = term_cells(row["features"], row["terms"], ceiling,
+                           row.get("conservation_scale"))
         route = row.get("identification_route")
         homolog = row.get("nearest_organism") or row.get("nearest_homolog")
         via = (f'<span class="w">{esc(homolog)}'
@@ -540,7 +543,7 @@ def candidate_matrix(case):
         <td class="rk">{esc(row['rank'])}</td>
         <td class="nm"><span class="t">{esc(row['name'])}</span>{via}
           <span class="w">{where}</span></td>
-        {"".join(cells)}
+        {cells}
         <td class="sc"><span class="v">{row['score']:.2f}</span>
           <span class="tr"><i style="width:{max(2, row['score'] / top * 100):.1f}%"></i></span></td>
       </tr>""")
@@ -565,13 +568,155 @@ def candidate_matrix(case):
       <tr>
         <th scope="col" class="rk">#</th>
         <th scope="col" class="nm">ORF, and what it matched</th>
-        {"".join(head_cells)}
+        {head_cells}
         <th scope="col" class="sc">Composite<span class="cw">of {num(total_ceiling)}</span></th>
       </tr>
     </thead>
     <tbody>{"".join(body)}</tbody>
   </table>
   </div>{note}"""
+
+
+def _chain_rubric(case):
+    """Stage 2's own five weights, and the ceiling they imply, from the chain record."""
+    st2 = {s["tool"]: s for s in case["stages"]}["intake.decompose + intake.rank_score"]
+    rubric = st2["output"]["rubric"]
+    return rubric, term_ceilings(rubric)
+
+
+def chain_matrix(case, link_orfs=True):
+    """Every mature chain stage 2 scored, with the score split into what each weight paid.
+
+    Stage 2's output block used to be three sentences: how many chains came out, that the
+    weights were fixed in advance, and that every score re-adds from its parts. All three are
+    true and none of them is the stage's result. The result is twenty chains, each with a
+    residue range, a parent and a score, and the one question a reader has at this altitude --
+    why is the main protease 6.90 and the protein next to it in the same polyprotein 2.50 --
+    could not be asked of a count.
+
+    So the arithmetic is the table. Two of the five terms are the reason the cut changes the
+    ranking: `essential_class` and `druggable_class` are read from each chain's own annotation,
+    and `structures_in_family` is counted over each chain's own range, so chains sharing a
+    parent separate on those three while inheriting its conservation and its exposure. The
+    inheritance is visible as a repeated number down the column rather than claimed in prose,
+    which is also the honest way to show it: conservation is measured once per ORF, and twelve
+    chains carrying 0.835 is a limit of the cut, not twelve measurements.
+
+    `link_orfs` is off for the per-genome result pages, which carry no stage-1 table to link
+    to. Those rows name the parent instead -- the same decision `score_bars` made before this
+    table replaced it, for the same reason: a dead anchor is worse than plain text.
+    """
+    rows = case.get("scores") or []
+    if not rows:
+        return ""
+    rubric, ceiling = _chain_rubric(case)
+    orf = {}
+    if link_orfs:
+        candidates, record = candidate_rows(case)
+        if record and record.get("rubric") and record["rubric"] != rubric:
+            raise SystemExit(
+                "stage 1 and stage 2 scored on different weights "
+                f"({record['rubric']} vs {rubric}); the two tables cannot be read against "
+                "each other, so the build stops rather than shipping them side by side.")
+        ceiling = term_ceilings(rubric, record)
+        orf = {c["name"]: c for c in candidates if c.get("name")}
+    top = max((r.get("score") or 0) for r in rows) or 1
+    total_ceiling = round(sum(ceiling[key] for key, _, _ in TERM_COLUMNS), 2)
+
+    body = []
+    for r in rows:
+        # A chain with no `parent` is a protein that was already whole -- the ORF and the
+        # chain are the same object -- so it matches the stage-1 row by its own name.
+        parent = r.get("parent") or r.get("target")
+        row1 = orf.get(parent)
+        if row1 is not None:
+            # The rank, and not the ORF's own score. Stage 1's table is read from a separate
+            # record of the same stage, so the two scores are from two runs and differ in the
+            # third decimal; printed side by side in one row they would read as the cut moving
+            # a score, which is the one thing this table is here to let a reader judge.
+            cut = (f'<a href="#orf-{esc(row1["rank"])}">{esc(parent)}</a>'
+                   f'<span class="w">stage&nbsp;1 rank {esc(row1["rank"])}</span>')
+        else:
+            cut = esc(parent)
+        if not r.get("parent"):
+            cut += '<span class="w">not a polyprotein</span>'
+        start_end = r.get("chain_range") or []
+        where = (f'residues {start_end[0]:,}–{start_end[1]:,} of the parent'
+                 if len(start_end) == 2 else "the whole protein")
+        features = {key: r.get(key) for key, _, _ in TERM_COLUMNS}
+        cells = term_cells(features, r["score_terms"], ceiling,
+                           None if r.get("tier") == "exact" else "bit_score_over_200")
+        score = r.get("score") or 0
+        body.append(f"""
+      <tr id="chain-{esc(r.get('rank'))}">
+        <td class="rk">{esc(r.get('rank'))}</td>
+        <td class="nm"><span class="t">{esc(r.get('target'))}</span>
+          <span class="w">{esc(r.get('nearest_homolog'))}</span>
+          <span class="w">{where}</span></td>
+        <td class="cut">{cut}</td>
+        {cells}
+        <td class="sc"><span class="v">{score:.2f}</span>
+          <span class="tr"><i style="width:{max(2, score / top * 100):.1f}%"></i></span></td>
+      </tr>""")
+
+    linked = (" and links to its row in the table above" if link_orfs else "")
+    return f"""
+  <div class="cmxscroll" tabindex="0" role="region" aria-label="Every mature chain and its score">
+  <table class="cmx">
+    <caption>Every mature chain stage 2 produced, highest composite score first. Each cell is
+      the points that weight paid, with the measurement it was computed from underneath; the
+      shading is the share of that column's maximum. &ldquo;Cut out of&rdquo; names the ORF the
+      chain was taken from{linked}, so a chain's score can be read against its parent's.
+      Same five weights as stage 1, fixed before the run.</caption>
+    <thead>
+      <tr>
+        <th scope="col" class="rk">#</th>
+        <th scope="col" class="nm">Mature chain &mdash; what a binder would be aimed at</th>
+        <th scope="col" class="cut">Cut out of</th>
+        {term_head_cells(rubric, ceiling)}
+        <th scope="col" class="sc">Composite<span class="cw">of {num(total_ceiling)}</span></th>
+      </tr>
+    </thead>
+    <tbody>{"".join(body)}</tbody>
+  </table>
+  </div>"""
+
+
+def chain_facts(case):
+    """What stage 2's output block says, counted from the chains it is describing.
+
+    The two lines this replaces -- five ingredients fixed in advance, twenty scores that
+    re-add from their parts -- described the scorer rather than its result, and both are
+    stated where they are checkable anyway: the weights head the table's own columns, and
+    section 04's card carries the re-add count. These are the facts a reader needs to read
+    the table: how the twenty divide, how far the scores spread, and whether cutting a
+    polyprotein up ever buys one of its pieces a higher score than the whole.
+    """
+    rows = case.get("scores") or []
+    if not rows:
+        return {}
+    _, ceiling = _chain_rubric(case)
+    scores = [r.get("score") or 0 for r in rows]
+    cut = [r for r in rows if r.get("parent")]
+    out = {
+        "cut_chains": len(cut),
+        "whole_chains": len(rows) - len(cut),
+        "score_high": f"{max(scores):.2f}",
+        "score_low": f"{min(scores):.2f}",
+        "score_ceiling": num(round(sum(ceiling[key] for key, _, _ in TERM_COLUMNS), 2)),
+    }
+    # The spread inside one parent, which is what a single score at the ORF altitude hides.
+    # Taken from the ORF that yielded the most chains, which is the row the prose points at.
+    # Both ends are read from this record and not from stage 1's, so the comparison stays
+    # inside one run: the two records are the same stage of the same genome, but they are two
+    # runs, and their scores differ in the third decimal.
+    parents = [r["parent"] for r in cut]
+    if parents:
+        biggest = max(set(parents), key=parents.count)
+        inside = [r.get("score") or 0 for r in cut if r["parent"] == biggest]
+        out["cut_high"] = f"{max(inside):.2f}"
+        out["cut_low"] = f"{min(inside):.2f}"
+    return out
 
 
 def picked_table(case):
@@ -1047,8 +1192,9 @@ def result_page(case, stem):
     <span class="tag">{_cut_summary(case)}</span></div>
   <p class="cap">A different list from the stage-1 candidates above, not a shorter one. Stage 1
   ranks whole ORFs; stage 2 cuts the polyproteins among them into the mature chains a virus
-  folds, and a binder is aimed at a chain. Each row names the ORF it was cut out of.</p>
-  {score_bars(case, limit=None)}
+  folds, and a binder is aimed at a chain. Each row names the ORF it was cut out of, and
+  carries its score split into what each of the five fixed weights paid it.</p>
+  {chain_matrix(case, link_orfs=False)}
 </section>
 
 {fold_html if (fold_step or 99) < (surface_step or 0) else ""}

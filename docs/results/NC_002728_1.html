@@ -90,40 +90,108 @@
     <span class="tag">7 identified ORFs cut into 8 chains</span></div>
   <p class="cap">A different list from the stage-1 candidates above, not a shorter one. Stage 1
   ranks whole ORFs; stage 2 cuts the polyproteins among them into the mature chains a virus
-  folds, and a binder is aimed at a chain. Each row names the ORF it was cut out of.</p>
-  <div class="bars">
-    <div class="bi"><div class="bi-top">
-      <span class="nm">1 · Fusion glycoprotein F2<span class="cut">cut out of FUS_NIPAV Fusion glycoprotein F0</span></span>
-      <span class="vl">8.37</span></div>
-      <div class="track"><div class="fill" style="width:100.0%"></div></div></div>
-    <div class="bi"><div class="bi-top">
-      <span class="nm">2 · Fusion glycoprotein F1<span class="cut">cut out of FUS_NIPAV Fusion glycoprotein F0</span></span>
-      <span class="vl">8.37</span></div>
-      <div class="track"><div class="fill" style="width:100.0%"></div></div></div>
-    <div class="bi"><div class="bi-top">
-      <span class="nm">3 · GLYCP_NIPAV Glycoprotein G</span>
-      <span class="vl">8.24</span></div>
-      <div class="track"><div class="fill" style="width:98.4%"></div></div></div>
-    <div class="bi"><div class="bi-top">
-      <span class="nm">4 · L_NIPAV RNA-directed RNA polymerase L</span>
-      <span class="vl">7.10</span></div>
-      <div class="track"><div class="fill" style="width:84.8%"></div></div></div>
-    <div class="bi"><div class="bi-top">
-      <span class="nm">5 · MATRX_NIPAV Matrix protein</span>
-      <span class="vl">5.04</span></div>
-      <div class="track"><div class="fill" style="width:60.2%"></div></div></div>
-    <div class="bi"><div class="bi-top">
-      <span class="nm">6 · NCAP_NIPAV Nucleoprotein</span>
-      <span class="vl">4.55</span></div>
-      <div class="track"><div class="fill" style="width:54.4%"></div></div></div>
-    <div class="bi"><div class="bi-top">
-      <span class="nm">7 · PHOSP_NIPAV Phosphoprotein</span>
-      <span class="vl">3.23</span></div>
-      <div class="track"><div class="fill" style="width:38.6%"></div></div></div>
-    <div class="bi"><div class="bi-top">
-      <span class="nm">8 · C_NIPAV Protein C</span>
-      <span class="vl">3.00</span></div>
-      <div class="track"><div class="fill" style="width:35.8%"></div></div></div></div>
+  folds, and a binder is aimed at a chain. Each row names the ORF it was cut out of, and
+  carries its score split into what each of the five fixed weights paid it.</p>
+  
+  <div class="cmxscroll" tabindex="0" role="region" aria-label="Every mature chain and its score">
+  <table class="cmx">
+    <caption>Every mature chain stage 2 produced, highest composite score first. Each cell is
+      the points that weight paid, with the measurement it was computed from underneath; the
+      shading is the share of that column's maximum. &ldquo;Cut out of&rdquo; names the ORF the
+      chain was taken from, so a chain's score can be read against its parent's.
+      Same five weights as stage 1, fixed before the run.</caption>
+    <thead>
+      <tr>
+        <th scope="col" class="rk">#</th>
+        <th scope="col" class="nm">Mature chain &mdash; what a binder would be aimed at</th>
+        <th scope="col" class="cut">Cut out of</th>
+        <th scope="col" title="Share of the ORF&#x27;s own 5-mers that its nearest curated relative also has. 1.0 would be the same sequence; under 0.12 is not kept as a match at all. Rows found by the remote tier report a bit score instead, and say so, because the two are not one scale."><span class="cl">Match to a known relative</span><span class="ck">conservation</span><span class="cw">× 3 → max 3</span></th><th scope="col" title="Whether most of the compartments its relatives are annotated in are places a binder can reach without crossing a membrane. All or nothing."><span class="cl">On the outside</span><span class="ck">surface_exposed</span><span class="cw">× 2 → max 2</span></th><th scope="col" title="Whether the protein&#x27;s name or keywords name a class the virus cannot replicate without — a polymerase, a protease, a capsid, an entry protein. All or nothing."><span class="cl">The virus needs it</span><span class="ck">essential_class</span><span class="cw">× 1.5 → max 1.5</span></th><th scope="col" title="A 0–3 class from the words in its annotations: proteases and polymerases score 3, surface glycoproteins and helicases 2. The historical record for approved antivirals."><span class="cl">Class that gets drugged</span><span class="ck">druggable_class</span><span class="cw">× 0.8 → max 2.4</span></th><th scope="col" title="Deposited structures across its relatives, capped at 50. The smallest weight, because a structure count measures research attention as much as tractability."><span class="cl">Structures already solved</span><span class="ck">structures_in_family</span><span class="cw">× 0.5 → max 0.5</span></th>
+        <th scope="col" class="sc">Composite<span class="cw">of 9.4</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="chain-1">
+        <td class="rk">1</td>
+        <td class="nm"><span class="t">Fusion glycoprotein F2</span>
+          <span class="w">Q9IH63</span>
+          <span class="w">residues 27–109 of the parent</span></td>
+        <td class="cut">FUS_NIPAV Fusion glycoprotein F0</td>
+        <td class="h h5"><span class="pt">3.00</span><span class="rw">1.000</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h3"><span class="pt">0.27</span><span class="rw">27 in PDB</span></td>
+        <td class="sc"><span class="v">8.37</span>
+          <span class="tr"><i style="width:100.0%"></i></span></td>
+      </tr>
+      <tr id="chain-2">
+        <td class="rk">2</td>
+        <td class="nm"><span class="t">Fusion glycoprotein F1</span>
+          <span class="w">Q9IH63</span>
+          <span class="w">residues 110–546 of the parent</span></td>
+        <td class="cut">FUS_NIPAV Fusion glycoprotein F0</td>
+        <td class="h h5"><span class="pt">3.00</span><span class="rw">1.000</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h3"><span class="pt">0.27</span><span class="rw">27 in PDB</span></td>
+        <td class="sc"><span class="v">8.37</span>
+          <span class="tr"><i style="width:100.0%"></i></span></td>
+      </tr>
+      <tr id="chain-3">
+        <td class="rk">3</td>
+        <td class="nm"><span class="t">GLYCP_NIPAV Glycoprotein G</span>
+          <span class="w">Q9IH62</span>
+          <span class="w">the whole protein</span></td>
+        <td class="cut">GLYCP_NIPAV Glycoprotein G<span class="w">not a polyprotein</span></td>
+        <td class="h h5"><span class="pt">3.00</span><span class="rw">1.000</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h2"><span class="pt">0.14</span><span class="rw">14 in PDB</span></td>
+        <td class="sc"><span class="v">8.24</span>
+          <span class="tr"><i style="width:98.4%"></i></span></td>
+      </tr>
+      <tr id="chain-4">
+        <td class="rk">4</td>
+        <td class="nm"><span class="t">L_NIPAV RNA-directed RNA polymerase L</span>
+          <span class="w">Q997F0</span>
+          <span class="w">the whole protein</span></td>
+        <td class="cut">L_NIPAV RNA-directed RNA polymerase L<span class="w">not a polyprotein</span></td>
+        <td class="h h5"><span class="pt">3.00</span><span class="rw">1.000</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">2.40</span><span class="rw">class 3</span></td><td class="h h3"><span class="pt">0.20</span><span class="rw">20 in PDB</span></td>
+        <td class="sc"><span class="v">7.10</span>
+          <span class="tr"><i style="width:84.8%"></i></span></td>
+      </tr>
+      <tr id="chain-5">
+        <td class="rk">5</td>
+        <td class="nm"><span class="t">MATRX_NIPAV Matrix protein</span>
+          <span class="w">Q9IK90</span>
+          <span class="w">the whole protein</span></td>
+        <td class="cut">MATRX_NIPAV Matrix protein<span class="w">not a polyprotein</span></td>
+        <td class="h h5"><span class="pt">3.00</span><span class="rw">1.000</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.04</span><span class="rw">4 in PDB</span></td>
+        <td class="sc"><span class="v">5.04</span>
+          <span class="tr"><i style="width:60.2%"></i></span></td>
+      </tr>
+      <tr id="chain-6">
+        <td class="rk">6</td>
+        <td class="nm"><span class="t">NCAP_NIPAV Nucleoprotein</span>
+          <span class="w">Q9IK92</span>
+          <span class="w">the whole protein</span></td>
+        <td class="cut">NCAP_NIPAV Nucleoprotein<span class="w">not a polyprotein</span></td>
+        <td class="h h5"><span class="pt">3.00</span><span class="rw">1.000</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.05</span><span class="rw">5 in PDB</span></td>
+        <td class="sc"><span class="v">4.55</span>
+          <span class="tr"><i style="width:54.4%"></i></span></td>
+      </tr>
+      <tr id="chain-7">
+        <td class="rk">7</td>
+        <td class="nm"><span class="t">PHOSP_NIPAV Phosphoprotein</span>
+          <span class="w">Q9IK91</span>
+          <span class="w">the whole protein</span></td>
+        <td class="cut">PHOSP_NIPAV Phosphoprotein<span class="w">not a polyprotein</span></td>
+        <td class="h h5"><span class="pt">3.00</span><span class="rw">1.000</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h3"><span class="pt">0.23</span><span class="rw">23 in PDB</span></td>
+        <td class="sc"><span class="v">3.23</span>
+          <span class="tr"><i style="width:38.6%"></i></span></td>
+      </tr>
+      <tr id="chain-8">
+        <td class="rk">8</td>
+        <td class="nm"><span class="t">C_NIPAV Protein C</span>
+          <span class="w">Q997F1</span>
+          <span class="w">the whole protein</span></td>
+        <td class="cut">C_NIPAV Protein C<span class="w">not a polyprotein</span></td>
+        <td class="h h5"><span class="pt">3.00</span><span class="rw">1.000</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
+        <td class="sc"><span class="v">3.00</span>
+          <span class="tr"><i style="width:35.8%"></i></span></td>
+      </tr></tbody>
+  </table>
+  </div>
 </section>
 
 

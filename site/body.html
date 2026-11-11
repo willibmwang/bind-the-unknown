@@ -283,11 +283,40 @@
     <div class="io">
       <div><h3>In</h3><ul><li><b>{{orfs_ranked}}</b> candidates</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li><b>{{chains}}</b> separate protein chains, each scored</li>
-        <li>Five stated ingredients, fixed in advance — nothing is fitted or learned</li>
-        <li>All <b>{{chains}}</b> scores re-add correctly from their parts</li>
+        <li><b>{{chains}}</b> separate protein chains out of the <b>{{identified}}</b> identified ORFs, each with the stretch of its parent it occupies — <b>{{cut_chains}}</b> cut out of a larger parent, <b>{{whole_chains}}</b> proteins that were already whole</li>
+        <li>Where a chain starts and stops is taken from the matched relative's own annotation, which is why an ORF that reached no relative is cut into nothing and leaves the list at this step</li>
+        <li>Scored on the same five weights as the ORFs above — <b>{{score_high}}</b> down to <b>{{score_low}}</b> of a possible <b>{{score_ceiling}}</b>, and the <b>{{biggest_cut}}</b> chains taken out of one ORF alone span <b>{{cut_high}}</b> to <b>{{cut_low}}</b>: the spread a single score at the ORF altitude hides</li>
       </ul></div>
     </div>
+  </div>
+
+  <div class="substep">
+    <h3>The {{chains}} chains it produced, and what each one scored</h3>
+    <p class="cap">A mature chain is what the virus actually folds, and what a binder would
+    actually be aimed at: a polyprotein above is cut into pieces by the virus's own proteases,
+    and the boundaries used here are the ones annotated on the curated relative each ORF
+    matched. Every row below names the ORF it came out of and links back to that row in the
+    table above, so the cut is traceable in both directions. The five weights are stage 1's,
+    unchanged — what moves is which of them are re-read for each piece. Conservation is
+    inherited from the parent, measured once over the whole stretch, which is why chains out
+    of one ORF carry one number between them. The structure count is recounted against each
+    chain's own description; the two class terms are re-read from that description, with a
+    chain that is most of its parent allowed to keep the parent's and a small cleavage product
+    not; and where the curated entry annotates compartments per molecule rather than per
+    entry, exposure is resolved for the chain instead of inherited. Those are the terms that
+    separate the pieces of one polyprotein from each other.</p>
+    <!--CHAINS-->
+    <p class="after">The <b>{{biggest_cut}}</b> chains taken out of the replicase are the
+    clearest case: they span <b>{{cut_high}}</b> to <b>{{cut_low}}</b>, and what separates the
+    top of that spread from the bottom is almost entirely whether the chain's own description
+    names a class drugs have historically been found against. The main protease and the
+    polymerase sit at the top; most of their neighbours in the same polyprotein sit at the
+    bottom, earning the inherited conservation term and little else — which is also the honest
+    reading of this stage, since a chain nobody has described in those words is not thereby a
+    bad target. Read the other direction, the three spike chains are identical in four of the
+    five columns and separated by nothing but the count of structures already deposited across
+    their relatives: hundredths of a point, a difference this ranking should not be read as
+    resolving.</p>
   </div>
 
   <div class="stage">
@@ -503,7 +532,8 @@
   boundaries come from that relative — the {{unidentified}} unidentified ones end here. Those
   {{identified}} become {{chains}} chains, and <b>{{biggest_cut}} of them come out of a single
   ORF</b> — the replicase, step 1's second row. Every chain below names the ORF it was cut
-  from and links back to it.</p>
+  from and links back to it. This is the ranking those scores produce; step 2 above carries
+  the same {{chains}} chains with each score split into the five weights that paid it.</p>
   <!--PICKED-->
   <p class="after">Why the cut is what makes this section worth reading: the two chains that
   carry the claim do not exist at the ORF altitude at all. The main protease

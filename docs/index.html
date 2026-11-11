@@ -411,11 +411,259 @@
     <div class="io">
       <div><h3>In</h3><ul><li><b>12</b> candidates</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li><b>20</b> separate protein chains, each scored</li>
-        <li>Five stated ingredients, fixed in advance — nothing is fitted or learned</li>
-        <li>All <b>20</b> scores re-add correctly from their parts</li>
+        <li><b>20</b> separate protein chains out of the <b>9</b> identified ORFs, each with the stretch of its parent it occupies — <b>16</b> cut out of a larger parent, <b>4</b> proteins that were already whole</li>
+        <li>Where a chain starts and stops is taken from the matched relative's own annotation, which is why an ORF that reached no relative is cut into nothing and leaves the list at this step</li>
+        <li>Scored on the same five weights as the ORFs above — <b>6.91</b> down to <b>0.91</b> of a possible <b>9.4</b>, and the <b>12</b> chains taken out of one ORF alone span <b>6.90</b> to <b>2.50</b>: the spread a single score at the ORF altitude hides</li>
       </ul></div>
     </div>
+  </div>
+
+  <div class="substep">
+    <h3>The 20 chains it produced, and what each one scored</h3>
+    <p class="cap">A mature chain is what the virus actually folds, and what a binder would
+    actually be aimed at: a polyprotein above is cut into pieces by the virus's own proteases,
+    and the boundaries used here are the ones annotated on the curated relative each ORF
+    matched. Every row below names the ORF it came out of and links back to that row in the
+    table above, so the cut is traceable in both directions. The five weights are stage 1's,
+    unchanged — what moves is which of them are re-read for each piece. Conservation is
+    inherited from the parent, measured once over the whole stretch, which is why chains out
+    of one ORF carry one number between them. The structure count is recounted against each
+    chain's own description; the two class terms are re-read from that description, with a
+    chain that is most of its parent allowed to keep the parent's and a small cleavage product
+    not; and where the curated entry annotates compartments per molecule rather than per
+    entry, exposure is resolved for the chain instead of inherited. Those are the terms that
+    separate the pieces of one polyprotein from each other.</p>
+    
+  <div class="cmxscroll" tabindex="0" role="region" aria-label="Every mature chain and its score">
+  <table class="cmx">
+    <caption>Every mature chain stage 2 produced, highest composite score first. Each cell is
+      the points that weight paid, with the measurement it was computed from underneath; the
+      shading is the share of that column's maximum. &ldquo;Cut out of&rdquo; names the ORF the
+      chain was taken from and links to its row in the table above, so a chain's score can be read against its parent's.
+      Same five weights as stage 1, fixed before the run.</caption>
+    <thead>
+      <tr>
+        <th scope="col" class="rk">#</th>
+        <th scope="col" class="nm">Mature chain &mdash; what a binder would be aimed at</th>
+        <th scope="col" class="cut">Cut out of</th>
+        <th scope="col" title="Share of the ORF&#x27;s own 5-mers that its nearest curated relative also has. 1.0 would be the same sequence; under 0.12 is not kept as a match at all. Rows found by the remote tier report a bit score instead, and say so, because the two are not one scale."><span class="cl">Match to a known relative</span><span class="ck">conservation</span><span class="cw">× 3 → max 3</span></th><th scope="col" title="Whether most of the compartments its relatives are annotated in are places a binder can reach without crossing a membrane. All or nothing."><span class="cl">On the outside</span><span class="ck">surface_exposed</span><span class="cw">× 2 → max 2</span></th><th scope="col" title="Whether the protein&#x27;s name or keywords name a class the virus cannot replicate without — a polymerase, a protease, a capsid, an entry protein. All or nothing."><span class="cl">The virus needs it</span><span class="ck">essential_class</span><span class="cw">× 1.5 → max 1.5</span></th><th scope="col" title="A 0–3 class from the words in its annotations: proteases and polymerases score 3, surface glycoproteins and helicases 2. The historical record for approved antivirals."><span class="cl">Class that gets drugged</span><span class="ck">druggable_class</span><span class="cw">× 0.8 → max 2.4</span></th><th scope="col" title="Deposited structures across its relatives, capped at 50. The smallest weight, because a structure count measures research attention as much as tractability."><span class="cl">Structures already solved</span><span class="ck">structures_in_family</span><span class="cw">× 0.5 → max 0.5</span></th>
+        <th scope="col" class="sc">Composite<span class="cw">of 9.4</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr id="chain-1">
+        <td class="rk">1</td>
+        <td class="nm"><span class="t">Spike protein S2&#x27;</span>
+          <span class="w">Q3LZX1</span>
+          <span class="w">residues 785–1,242 of the parent</span></td>
+        <td class="cut"><a href="#orf-1">SPIKE_BCHK3 Spike glycoprotein</a><span class="w">stage&nbsp;1 rank 1</span></td>
+        <td class="h h3"><span class="pt">1.39</span><span class="rw">0.462</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h5"><span class="pt">0.42</span><span class="rw">42 in PDB</span></td>
+        <td class="sc"><span class="v">6.91</span>
+          <span class="tr"><i style="width:100.0%"></i></span></td>
+      </tr>
+      <tr id="chain-2">
+        <td class="rk">2</td>
+        <td class="nm"><span class="t">3C-like proteinase nsp5</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 3,241–3,546 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">2.40</span><span class="rw">class 3</span></td><td class="h h5"><span class="pt">0.50</span><span class="rw">58 in PDB</span></td>
+        <td class="sc"><span class="v">6.90</span>
+          <span class="tr"><i style="width:100.0%"></i></span></td>
+      </tr>
+      <tr id="chain-3">
+        <td class="rk">3</td>
+        <td class="nm"><span class="t">Spike protein S2</span>
+          <span class="w">Q3LZX1</span>
+          <span class="w">residues 655–1,242 of the parent</span></td>
+        <td class="cut"><a href="#orf-1">SPIKE_BCHK3 Spike glycoprotein</a><span class="w">stage&nbsp;1 rank 1</span></td>
+        <td class="h h3"><span class="pt">1.39</span><span class="rw">0.462</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h5"><span class="pt">0.40</span><span class="rw">40 in PDB</span></td>
+        <td class="sc"><span class="v">6.89</span>
+          <span class="tr"><i style="width:99.7%"></i></span></td>
+      </tr>
+      <tr id="chain-4">
+        <td class="rk">4</td>
+        <td class="nm"><span class="t">Spike protein S1</span>
+          <span class="w">Q3LZX1</span>
+          <span class="w">residues 14–654 of the parent</span></td>
+        <td class="cut"><a href="#orf-1">SPIKE_BCHK3 Spike glycoprotein</a><span class="w">stage&nbsp;1 rank 1</span></td>
+        <td class="h h3"><span class="pt">1.39</span><span class="rw">0.462</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h4"><span class="pt">0.39</span><span class="rw">39 in PDB</span></td>
+        <td class="sc"><span class="v">6.88</span>
+          <span class="tr"><i style="width:99.6%"></i></span></td>
+      </tr>
+      <tr id="chain-5">
+        <td class="rk">5</td>
+        <td class="nm"><span class="t">RNA-directed RNA polymerase nsp12</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 4,370–5,301 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">2.40</span><span class="rw">class 3</span></td><td class="h h1"><span class="pt">0.02</span><span class="rw">2 in PDB</span></td>
+        <td class="sc"><span class="v">6.42</span>
+          <span class="tr"><i style="width:93.0%"></i></span></td>
+      </tr>
+      <tr id="chain-6">
+        <td class="rk">6</td>
+        <td class="nm"><span class="t">Papain-like protease nsp3</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 819–2,740 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">2.40</span><span class="rw">class 3</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
+        <td class="sc"><span class="v">6.40</span>
+          <span class="tr"><i style="width:92.7%"></i></span></td>
+      </tr>
+      <tr id="chain-7">
+        <td class="rk">7</td>
+        <td class="nm"><span class="t">Helicase nsp13</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 5,302–5,902 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h1"><span class="pt">0.01</span><span class="rw">1 in PDB</span></td>
+        <td class="sc"><span class="v">5.61</span>
+          <span class="tr"><i style="width:81.3%"></i></span></td>
+      </tr>
+      <tr id="chain-8">
+        <td class="rk">8</td>
+        <td class="nm"><span class="t">VME1_BC279 Membrane protein</span>
+          <span class="w">Q0Q472</span>
+          <span class="w">the whole protein</span></td>
+        <td class="cut"><a href="#orf-4">VME1_BC279 Membrane protein</a><span class="w">stage&nbsp;1 rank 4</span><span class="w">not a polyprotein</span></td>
+        <td class="h h4"><span class="pt">1.88</span><span class="rw">0.627</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h1"><span class="pt">0.04</span><span class="rw">4 in PDB</span></td>
+        <td class="sc"><span class="v">5.52</span>
+          <span class="tr"><i style="width:79.9%"></i></span></td>
+      </tr>
+      <tr id="chain-9">
+        <td class="rk">9</td>
+        <td class="nm"><span class="t">AP3A_BC279 Protein 3</span>
+          <span class="w">Q0Q474</span>
+          <span class="w">the whole protein</span></td>
+        <td class="cut"><a href="#orf-6">AP3A_BC279 Protein 3</a><span class="w">stage&nbsp;1 rank 6</span><span class="w">not a polyprotein</span></td>
+        <td class="h h2"><span class="pt">0.96</span><span class="rw">0.319</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
+        <td class="sc"><span class="v">4.56</span>
+          <span class="tr"><i style="width:66.0%"></i></span></td>
+      </tr>
+      <tr id="chain-10">
+        <td class="rk">10</td>
+        <td class="nm"><span class="t">NCAP_BCRP3 Nucleoprotein</span>
+          <span class="w">Q3I5I7</span>
+          <span class="w">the whole protein</span></td>
+        <td class="cut"><a href="#orf-5">NCAP_BCRP3 Nucleoprotein</a><span class="w">stage&nbsp;1 rank 5</span><span class="w">not a polyprotein</span></td>
+        <td class="h h4"><span class="pt">1.90</span><span class="rw">0.634</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h2"><span class="pt">0.10</span><span class="rw">10 in PDB</span></td>
+        <td class="sc"><span class="v">3.50</span>
+          <span class="tr"><i style="width:50.7%"></i></span></td>
+      </tr>
+      <tr id="chain-11">
+        <td class="rk">11</td>
+        <td class="nm"><span class="t">Non-structural protein 10</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 4,231–4,369 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.08</span><span class="rw">8 in PDB</span></td>
+        <td class="sc"><span class="v">2.58</span>
+          <span class="tr"><i style="width:37.4%"></i></span></td>
+      </tr>
+      <tr id="chain-12">
+        <td class="rk">12</td>
+        <td class="nm"><span class="t">Host translation inhibitor nsp1</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 1–180 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.02</span><span class="rw">2 in PDB</span></td>
+        <td class="sc"><span class="v">2.52</span>
+          <span class="tr"><i style="width:36.6%"></i></span></td>
+      </tr>
+      <tr id="chain-13">
+        <td class="rk">13</td>
+        <td class="nm"><span class="t">Non-structural protein 7</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 3,837–3,919 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.02</span><span class="rw">2 in PDB</span></td>
+        <td class="sc"><span class="v">2.52</span>
+          <span class="tr"><i style="width:36.6%"></i></span></td>
+      </tr>
+      <tr id="chain-14">
+        <td class="rk">14</td>
+        <td class="nm"><span class="t">Non-structural protein 8</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 3,920–4,117 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.02</span><span class="rw">2 in PDB</span></td>
+        <td class="sc"><span class="v">2.52</span>
+          <span class="tr"><i style="width:36.6%"></i></span></td>
+      </tr>
+      <tr id="chain-15">
+        <td class="rk">15</td>
+        <td class="nm"><span class="t">Viral protein genome-linked nsp9</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 4,118–4,230 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.02</span><span class="rw">2 in PDB</span></td>
+        <td class="sc"><span class="v">2.52</span>
+          <span class="tr"><i style="width:36.6%"></i></span></td>
+      </tr>
+      <tr id="chain-16">
+        <td class="rk">16</td>
+        <td class="nm"><span class="t">Non-structural protein 2</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 181–818 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.01</span><span class="rw">1 in PDB</span></td>
+        <td class="sc"><span class="v">2.51</span>
+          <span class="tr"><i style="width:36.4%"></i></span></td>
+      </tr>
+      <tr id="chain-17">
+        <td class="rk">17</td>
+        <td class="nm"><span class="t">Non-structural protein 4</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 2,741–3,240 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
+        <td class="sc"><span class="v">2.50</span>
+          <span class="tr"><i style="width:36.3%"></i></span></td>
+      </tr>
+      <tr id="chain-18">
+        <td class="rk">18</td>
+        <td class="nm"><span class="t">Non-structural protein 6</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 3,547–3,836 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
+        <td class="sc"><span class="v">2.50</span>
+          <span class="tr"><i style="width:36.3%"></i></span></td>
+      </tr>
+      <tr id="chain-19">
+        <td class="rk">19</td>
+        <td class="nm"><span class="t">Protein 7a</span>
+          <span class="w">Q3I5J0</span>
+          <span class="w">residues 16–122 of the parent</span></td>
+        <td class="cut"><a href="#orf-8">NS7A_BCRP3 Protein 7a</a><span class="w">stage&nbsp;1 rank 8</span></td>
+        <td class="h h3"><span class="pt">1.62</span><span class="rw">0.538</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
+        <td class="sc"><span class="v">1.62</span>
+          <span class="tr"><i style="width:23.4%"></i></span></td>
+      </tr>
+      <tr id="chain-20">
+        <td class="rk">20</td>
+        <td class="nm"><span class="t">ORF9B_SARS ORF9b protein</span>
+          <span class="w">P59636</span>
+          <span class="w">the whole protein</span></td>
+        <td class="cut"><a href="#orf-9">ORF9B_SARS ORF9b protein</a><span class="w">stage&nbsp;1 rank 9</span><span class="w">not a polyprotein</span></td>
+        <td class="h h2"><span class="pt">0.90</span><span class="rw">0.301</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.01</span><span class="rw">1 in PDB</span></td>
+        <td class="sc"><span class="v">0.91</span>
+          <span class="tr"><i style="width:13.2%"></i></span></td>
+      </tr></tbody>
+  </table>
+  </div>
+    <p class="after">The <b>12</b> chains taken out of the replicase are the
+    clearest case: they span <b>6.90</b> to <b>2.50</b>, and what separates the
+    top of that spread from the bottom is almost entirely whether the chain's own description
+    names a class drugs have historically been found against. The main protease and the
+    polymerase sit at the top; most of their neighbours in the same polyprotein sit at the
+    bottom, earning the inherited conservation term and little else — which is also the honest
+    reading of this stage, since a chain nobody has described in those words is not thereby a
+    bad target. Read the other direction, the three spike chains are identical in four of the
+    five columns and separated by nothing but the count of structures already deposited across
+    their relatives: hundredths of a point, a difference this ranking should not be read as
+    resolving.</p>
   </div>
 
   <div class="stage">
@@ -631,7 +879,8 @@
   boundaries come from that relative — the 3 unidentified ones end here. Those
   9 become 20 chains, and <b>12 of them come out of a single
   ORF</b> — the replicase, step 1's second row. Every chain below names the ORF it was cut
-  from and links back to it.</p>
+  from and links back to it. This is the ranking those scores produce; step 2 above carries
+  the same 20 chains with each score split into the five weights that paid it.</p>
   
   <div class="cmxscroll" tabindex="0" role="region" aria-label="The ranked shortlist of mature chains">
   <table class="cmx pick">
