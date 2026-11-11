@@ -243,8 +243,11 @@ one can be fitted is knowable in advance.
 ## Where this meets a SynX campaign
 
 **This system picks a target, measures the surface a macrocycle would have to bind, defines a
-focused library over it, and says in advance whether a model fitted on the first round of
-measurements would be worth trusting.** What it has not done is measure a macrocycle itself.
+focused library, and says in advance whether a model fitted on the first round of
+measurements would be worth trusting.** Not a library defined *over* that surface: nothing
+downstream reads what the surface stage measured, which is the first of the two missing
+arrows above and is recorded as an empty list in every run rather than drawn as an edge. And
+what it has not done at all is measure a macrocycle itself.
 
 **The chemistry is represented down to the field.** `hpc_pilots/chemistry.py` holds 29 building
 blocks, 20 canonical and 9 non-canonical classes, reached through the `chemistry.library_spec`
