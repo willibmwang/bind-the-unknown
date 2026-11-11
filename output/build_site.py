@@ -355,6 +355,14 @@ def build_flowchart():
     it is that it is not.
     """
     body = (ROOT / "site" / "flowchart.html").read_text()
+    # Filled from the pipeline's own constants rather than from a run. This page is about the
+    # shape of the chain on any virus, so the record of one genome is the wrong source -- but
+    # the residue ceiling and the macrocycle footprint are properties of the code, identical
+    # on every genome, and typed into this page as literals they would go on drawing the old
+    # line after either one moved. Both are passed whether or not today's copy asks for them,
+    # because `fill` refuses a token it has no value for and the page is hand-written.
+    body = fill(body, {"fold_ceiling": FOLD_CEILING,
+                       "footprint": f"{MACROCYCLE_FOOTPRINT_A2:,.0f}"})
     out = (head(f"From an accession to ranked targets · {SITE}",
                 "The shape of the pipeline for any virus: one accession in, ranked targets "
                 "out, with nothing fitted anywhere on the path.", current="flowchart")
