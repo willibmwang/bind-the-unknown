@@ -327,7 +327,12 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .lane-grp:first-child{border-top:0}
 .lane-grp b{font-size:15px;font-weight:650;margin-right:11px}
 .lane-grp span{font-size:14px;color:var(--fg-2);line-height:1.55}
-.lr{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.3fr) auto;gap:16px;
+/* The last column is a fixed width and not `auto`, which is the difference between a
+   threshold a reader can sight down and one that wobbles. With `auto` the column takes its
+   width from the longest value in that row -- "97 aa" against "1,945 aa" -- so the plot
+   column beside it changes width row by row and the dashed line lands a few pixels off on
+   every short one. */
+.lr{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.3fr) 9.5ch;gap:16px;
   align-items:center;padding:11px 17px;border-bottom:1px solid var(--rule-2)}
 .lr:last-of-type{border-bottom:0}
 .lr .who{min-width:0}
