@@ -163,6 +163,25 @@ runs/improve/
 # receptor-binding domain, because that label was deleted with the pathogen.
 # Written by `python -m hpc_pilots.domain_inventory`.
 !runs/domain_inventory.json
+
+# Coordinates for every ranked chain: the functionally important domain of each chain the
+# ceiling refuses whole, and the whole chain for each one inside it. runs/ is otherwise
+# untracked, but the landing page draws twenty structure figures from these and a figure whose
+# coordinates are not in the tree cannot be checked or redrawn. The recorded chain run folded
+# the eleven chains inside the ceiling and kept exactly one of them, the main protease,
+# because it was the only one the page drew; the other ten were folded and discarded. Keeping
+# them is what lets every row open onto its own structure.
+#
+# The directory itself is re-included, because `runs/*` matches it and git will not descend
+# into an excluded directory to reach a negation inside it -- the note at the top of this file
+# is about exactly this.
+#
+# `runs/folded_structure/mpro_nsp5.pdb` is deliberately NOT what these replace. That fold is
+# the artifact this repository reproduces byte for byte, and this module writes nowhere near
+# it; the main protease is folded a second time here, separately, like any other chain.
+# Written by `python -m hpc_pilots.domain_folds`.
+!runs/domain_folds.json
+!runs/domain_folds/
 .venv-pfn/
 
 # The notebook points MPLCONFIGDIR here so a stale user-level matplotlibrc cannot print a

@@ -973,6 +973,126 @@ def domain_inventory(case):
     return payload
 
 
+FOLD_RECORD = "domain_folds.json"
+FOLD_STORE = "domain_folds"
+
+
+def domain_folds(case):
+    """The folds made for this case's chains and domains, keyed by target, or None.
+
+    Guarded on the same two keys `domain_inventory` is guarded on and for the same reason: a
+    fold of one genome's chain attached to another genome's row would join silently.
+    """
+    path = RUNS / FOLD_RECORD
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text())
+    if (payload.get("genome_accession") != case.get("genome_accession")
+            or payload.get("reference_excluded_organism")
+            != case.get("reference_excluded_organism")):
+        return None
+    return {c.get("target"): c for c in (payload.get("chains") or ())}
+
+
+def build_domain_fold_images():
+    """One figure per stored fold, through the same function the committed fold uses.
+
+    Reusing `panels.structure_figure` rather than drawing something lighter is deliberate.
+    These sit on the same page as the main protease's figure, and two renderers would differ
+    in projection, in the confidence bands and in how a low-confidence stretch is marked --
+    so a reader comparing a domain against the chain figure above it would be comparing two
+    drawing conventions as well as two structures.
+
+    Written at a lower dpi than the committed figure. There is one of these per folded unit
+    rather than one on the page, and the full-resolution figure is 240 KB.
+    """
+    record = RUNS / FOLD_RECORD
+    if not record.exists():
+        print("  no domain folds recorded on this machine; no figures written")
+        return
+    os.environ.setdefault("MPLCONFIGDIR", "/tmp/mpl-site")
+    os.environ.setdefault("MPLBACKEND", "Agg")
+    sys.path.insert(0, str(ROOT))
+    sys.path.insert(0, str(ROOT / "notebooks"))
+    import panels                                                      # noqa: E402
+    import matplotlib.pyplot as plt                                     # noqa: E402
+
+    out = DOCS / FOLD_STORE
+    out.mkdir(parents=True, exist_ok=True)
+    payload = json.loads(record.read_text())
+    written = 0
+    for chain in payload.get("chains") or ():
+        for unit in chain.get("units") or ():
+            slug = unit.get("slug")
+            if not unit.get("folded") or not slug:
+                continue
+            pdb = RUNS / FOLD_STORE / f"{slug}.pdb"
+            store = RUNS / FOLD_STORE / f"{slug}.json"
+            if not (pdb.exists() and store.exists()):
+                continue
+            image = out / f"{slug}.png"
+            # Skipped when the figure is already newer than the coordinates it draws. A
+            # rebuild of the site should not re-render twenty figures that have not changed.
+            if image.exists() and image.stat().st_mtime >= pdb.stat().st_mtime:
+                continue
+            stored = json.loads(store.read_text())
+            resnum, xyz, bfac = panels.ca_trace(pdb.read_text())
+            if not len(resnum):
+                continue
+            plddt, _ = panels.plddt_on_0_100(bfac)
+            kind = ("the whole chain" if unit.get("kind") == "whole_chain"
+                    else f"{unit.get('region_type') or 'region'} of {chain.get('target')}")
+            fig = panels.structure_figure(
+                resnum, xyz, plddt,
+                title=f"{unit.get('label')}, folded from sequence alone",
+                subtitle=f"ESMFold v1 · {kind} · {len(resnum)} residues · mean "
+                         f"confidence {plddt.mean():.1f} of 100",
+                runs=tuple(tuple(r) for r in stored.get("low_confidence_runs", [])))
+            fig.savefig(image, facecolor=fig.get_facecolor(), bbox_inches="tight", dpi=110)
+            plt.close(fig)
+            written += 1
+    print(f"wrote {written} structure figure(s) to docs/{FOLD_STORE}/")
+
+
+def _fold_panel(unit, chain_target):
+    """One folded structure, with the numbers that say what it is and how good it is.
+
+    The two spans are both printed, which is the point of the row rather than a detail: the
+    annotation is numbered on the relative and the fold is numbered on this genome, and the
+    two differ by more than a constant. Printing only one of them would leave a reader unable
+    to tell which they were looking at.
+    """
+    slug = unit.get("slug")
+    if not unit.get("folded") or not slug:
+        return ""
+    entry = unit.get("entry_span_on_the_relative") or []
+    here = unit.get("span_in_this_genome") or []
+    plddt = unit.get("mean_plddt")
+    where = []
+    if len(entry) == 2:
+        where.append(f"{entry[0]:,}&ndash;{entry[1]:,} on the relative&rsquo;s entry")
+    if len(here) == 2:
+        where.append(f"{here[0]:,}&ndash;{here[1]:,} in this genome")
+    adjusted = ("" if not unit.get("ends_adjusted") else
+                " &middot; one boundary had no counterpart in this genome and the window was "
+                "taken inward to the nearest residue that did")
+    sites = unit.get("site_residues_inside")
+    marked = (f" &middot; {sites} residue{'s' if sites != 1 else ''} the curators marked as "
+              f"doing the chemistry" if sites else "")
+    confidence = (f"mean confidence <b>{plddt:.1f}</b> of 100"
+                  if isinstance(plddt, (int, float)) else "confidence not recorded")
+    return f"""
+      <div class="dfold">
+        <img src="{FOLD_STORE}/{esc(slug)}.png" loading="lazy"
+          alt="The predicted backbone of {esc(unit.get('label'))}, drawn on its two principal
+            axes and coloured by per-residue confidence, beside a plot of that confidence
+            against residue position.">
+        <div class="cc"><b>{esc(unit.get('label'))}</b> &middot;
+          {num(unit.get('length_aa'))} residues &middot; {confidence}{marked}<br>
+          {' &middot; '.join(where)}{adjusted}</div>
+      </div>"""
+
+
 def _rescued(inventory):
     """How many over-ceiling chains the inventory found a foldable region for.
 
@@ -1029,7 +1149,30 @@ def _region_rows(chain):
     return "".join(out)
 
 
-def domain_block(chain):
+def chain_fold_block(fold_chain):
+    """The folded structure of a chain that was inside the ceiling all along.
+
+    These were folded by the recorded run and their coordinates dropped at the end of it --
+    only the main protease was kept, because it was the one the page drew. So every other row
+    inside the ceiling said it had been folded and could not show what came back. The fold is
+    made again here, per chain, and the row opens onto it.
+    """
+    units = [u for u in (fold_chain or {}).get("units") or ()
+             if u.get("kind") == "whole_chain" and u.get("folded")]
+    if not units:
+        return ""
+    unit = units[0]
+    plddt = unit.get("mean_plddt")
+    rating = (f" &middot; mean confidence {plddt:.1f} of 100"
+              if isinstance(plddt, (int, float)) else "")
+    return f"""
+    <details class="dmns">
+      <summary>Folded structure &mdash; <b>{num(unit.get('length_aa'))}</b> residues{rating}</summary>
+      {_fold_panel(unit, (fold_chain or {}).get('target'))}
+    </details>"""
+
+
+def domain_block(chain, fold_chain=None):
     """The expandable panel of functional regions under one over-ceiling chain.
 
     A `<details>` and not a `<select>`, for a reason the rest of this page shares: the site is
@@ -1056,9 +1199,15 @@ def domain_block(chain):
         lead = (f' &mdash; offered first is <b>{esc(best.get("description") or best.get("type"))}</b>'
                 f' at {num(best.get("length_aa"))} aa'
                 + (f' ({span[0]:,}&ndash;{span[1]:,} on the relative)' if len(span) == 2 else ''))
+    # The structure first and the table under it. A reader opening the row wants to see that
+    # there IS something here before reading twenty-seven rows about what might have been.
+    folded = [u for u in (fold_chain or {}).get("units") or ()
+              if u.get("kind") == "domain" and u.get("folded")]
+    structure = "".join(_fold_panel(u, (fold_chain or {}).get("target")) for u in folded)
     return f"""
     <details class="dmns">
       <summary>{headline}{lead}</summary>
+      {structure}
       <div class="dmn-hd">
         <span class="dn">region</span><span class="dl">length</span>
         <span class="dw">where</span><span class="dy">why it is offered here</span>
@@ -1113,6 +1262,7 @@ def fold_lane(case):
     # predates the inventory must not fail, and must not imply it read one.
     inventory = domain_inventory(case) or {}
     regions = {c.get("target"): c for c in (inventory.get("chains") or ())}
+    folds = domain_folds(case) or {}
     scale = max([r.get("recovered_length_aa") or 0 for r in rows] + [ceiling]) or 1
     recorded = any("folded" in r for r in rows)
 
@@ -1143,13 +1293,17 @@ def fold_lane(case):
                       if isinstance(plddt, (int, float)) else "")
         unnamed = ('<span class="chip-x nv">unrecognised</span>'
                    if row.get("identified") is False else "")
-        # The panel only on the chains the ceiling refuses whole. On a chain that was folded
-        # it would answer a question nobody is asking -- the coordinates are already there --
-        # and the lane would double in height for it.
-        panel = ""
-        if 0 < (row.get("recovered_length_aa") or 0) and not (
-                0 < (row.get("recovered_length_aa") or 0) <= ceiling):
-            panel = domain_block(regions.get(row.get("target")) or {})
+        # Two different panels, decided by which side of the ceiling the chain falls on. A
+        # chain over it opens onto the regions inside it; a chain under it opens onto its own
+        # structure, which the recorded run folded and then dropped for every chain but one.
+        target = row.get("target")
+        length = row.get("recovered_length_aa") or 0
+        if length and length > ceiling:
+            panel = domain_block(regions.get(target) or {}, folds.get(target))
+        elif length:
+            panel = chain_fold_block(folds.get(target))
+        else:
+            panel = ""
         return f"""
     <div class="lr">
       <span class="who"><span class="t">{esc(row.get('target'))}{unnamed}</span>
@@ -2062,6 +2216,9 @@ def main():
     build_flowchart()
     build_hero_image()
     build_fold_image()
+    # Order-independent: `build_index` writes `<img>` tags by path and reads no pixels, so
+    # these are written beside the committed fold's figure rather than before the page.
+    build_domain_fold_images()
     build_results()
     if args.notebook:
         build_notebook()

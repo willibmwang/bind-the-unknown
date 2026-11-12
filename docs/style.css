@@ -403,8 +403,23 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .dmn .dq{display:block;font-family:var(--mono);font-size:10.5px;color:var(--fg-3);
   margin-top:2px;line-height:1.5;overflow-wrap:anywhere}
 .dmn .dy{font-size:12.5px;color:var(--fg-2);line-height:1.5}
-.dmn .dv{font-size:12.5px;color:var(--ok)}
-.dmn.x .dv{color:var(--fg-3)}
+/* Accent and not --ok. A region within the ceiling is not a test that passed, it is a route
+   into the target, and the page already spends its accent on the things a reader is meant to
+   follow. The green read as a verdict on the biology, which is a claim nothing here makes. */
+.dmn .dv{font-size:12.5px;color:var(--accent);font-weight:600}
+.dmn.x .dv{color:var(--fg-3);font-weight:400}
+/* A foldable region carries the accent down its left edge, so the ones that matter are
+   findable by eye in a panel of twenty-seven rows without reading any of them. */
+.dmn{border-left:2.5px solid transparent}
+.dmn:not(.x){border-left-color:var(--accent);background:var(--accent-soft)}
+
+/* The structure itself, inside an opened panel. */
+.dfold{padding:14px 17px 4px 34px;background:var(--surface)}
+.dfold img{display:block;width:100%;height:auto;border:1px solid var(--rule);
+  border-radius:10px;background:var(--surface)}
+.dfold .cc{font-size:12.5px;color:var(--fg-2);line-height:1.6;margin:9px 0 12px}
+.dfold .cc b{color:var(--fg);font-weight:650}
+@media (max-width:760px){.dfold{padding:12px 13px 4px}}
 @media (max-width:760px){
   .dmn,.dmn-hd{grid-template-columns:minmax(0,1fr) 7ch;gap:4px 14px}
   .dmn-hd{display:none}
