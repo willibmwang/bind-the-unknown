@@ -52,6 +52,15 @@ LANDING_RECORD = "onset_chain.json"
 # behind the counts come from for those. Written by `python -m hpc_pilots candidates`.
 CANDIDATES_RECORD = "intake_candidates.json"
 
+# What the curated annotation offers for the chains the folding ceiling refuses whole. The
+# chain record says which chains were folded; this one says which functionally important
+# regions were SHORT ENOUGH to fold, which is the larger set and the one this page has to
+# quote. nsp3 alone offers eighteen foldable regions against a per-chain cap of three, so a
+# page reading only the fold results could say three domains of nsp3 were folded and could
+# not say that the ceiling costs nothing in reachable targets -- which is the finding.
+# Written by `python -m hpc_pilots.domain_inventory`.
+DOMAIN_RECORD = "domain_inventory.json"
+
 # The five terms in the order the rubric is argued in, which is heaviest first, and in plain
 # words beside their keys. The weight is NOT written here -- it is read from the record's own
 # `rubric` block, so the page cannot assert a weight the run did not use.
@@ -939,6 +948,126 @@ def _predicted_is_recorded(case):
     return any("predicted_surface" in r for r in (case.get("surfaces") or []))
 
 
+def domain_inventory(case):
+    """The annotated functional regions for this case's chains, or None if not recorded.
+
+    Refused outright unless the record describes the same run as the page. The inventory is
+    keyed by target name and so are the lane rows, so an inventory of a different genome --
+    or of the same genome identified through its own curated entries rather than held out of
+    them -- would join cleanly and silently, and attach one run's domains to another run's
+    chains. The two differ in exactly the way that matters here: held out, the spike's
+    relative is a bat coronavirus whose entry does not name a receptor-binding domain at all.
+
+    Both keys are checked because neither is sufficient. The accession alone admits the
+    un-held-out case of the same genome, and the excluded organism alone admits a different
+    genome held out of the same reference.
+    """
+    path = RUNS / DOMAIN_RECORD
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text())
+    if (payload.get("genome_accession") != case.get("genome_accession")
+            or payload.get("reference_excluded_organism")
+            != case.get("reference_excluded_organism")):
+        return None
+    return payload
+
+
+def _rescued(inventory):
+    """How many over-ceiling chains the inventory found a foldable region for.
+
+    Read from the record's own summary rather than recounted from its rows. The two would
+    agree today; the point is that if they ever stopped agreeing, the page would be the wrong
+    place to discover it, and recounting here would hide the disagreement instead.
+    """
+    return ((inventory or {}).get("summary") or {}).get(
+        "chains_over_the_ceiling_with_a_foldable_region")
+
+
+def _region_rows(chain):
+    """One chain's annotated functional regions, foldable ones first and refusals named.
+
+    The order is the record's, which is the inventory's stated ordering -- contained
+    annotated site residues first, then an authored term list, then length -- and is not
+    recomputed here. A page that re-sorted would be a second opinion on the question the
+    record exists to answer, and the two would drift.
+
+    Every region is drawn, including the refused ones, with the reason on the row. A region
+    refused for being five residues long is not noise: its positions are a site a macrocycle
+    could be designed at, which is the distinction `domains.MINIMUM_DOMAIN_AA` is careful
+    about, and a page that showed only the foldable ones would make the annotation look
+    thinner than it is.
+    """
+    out = []
+    for region in chain.get("regions") or ():
+        span = region.get("entry_span_on_the_relative") or []
+        where = f"{span[0]:,}&ndash;{span[1]:,}" if len(span) == 2 else "&mdash;"
+        sites = region.get("site_residues_inside") or 0
+        # The reason the row sorts where it does, in the reader's words rather than the
+        # record's key names. Shown only when there is one: a region with no contained site
+        # residues and no matched term is sorted by length alone, and inventing a phrase for
+        # that would read as evidence it does not have.
+        why = []
+        if sites:
+            why.append(f"{sites} annotated site residue{'s' if sites != 1 else ''} inside")
+        terms = region.get("relevance_terms_matched") or []
+        if terms:
+            why.append("names " + ", ".join(f"&ldquo;{esc(t)}&rdquo;" for t in terms[:2]))
+        if region.get("describes_position_not_function"):
+            why.append("describes position, not function")
+        refused = region.get("refused_because")
+        out.append(f"""
+      <div class="dmn{' x' if refused else ''}">
+        <span class="dn">{esc(region.get('description') or region.get('type'))}
+          <span class="dt">{esc(region.get('type'))}</span></span>
+        <span class="dl">{num(region.get('length_aa'))} aa</span>
+        <span class="dw">{where}<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">{' &middot; '.join(why) if why else '&mdash;'}</span>
+        <span class="dv">{'refused' if refused else 'within the ceiling'}
+          {f'<span class="dq">{esc(refused)}</span>' if refused else ''}</span>
+      </div>""")
+    return "".join(out)
+
+
+def domain_block(chain):
+    """The expandable panel of functional regions under one over-ceiling chain.
+
+    A `<details>` and not a `<select>`, for a reason the rest of this page shares: the site is
+    static HTML served from a repository with no build step on the client, so a dropdown that
+    swapped content would need JavaScript to do it, and a reader with JavaScript off would get
+    a control that moves and a page that does not. `<details>` is a disclosure the browser
+    implements, keyboard reachable and announced by a screen reader without any help from us.
+    """
+    foldable = chain.get("regions_foldable") or 0
+    offered = chain.get("regions_offered") or 0
+    best = chain.get("best_region") or {}
+    if not offered:
+        return ""
+    headline = (f"{foldable} of {offered} annotated regions are within the ceiling"
+                if foldable else
+                f"none of its {offered} annotated regions is within the ceiling either")
+    lead = ""
+    if best:
+        span = best.get("entry_span_on_the_relative") or []
+        # "Offered first" and not "shortest": the order is functional relevance, so the
+        # leading region is routinely not the shortest one. Calling it the shortest route in
+        # was wrong on nsp3 the moment it was written -- a 369-residue domain leads there
+        # while a 56-residue one sits further down the same panel.
+        lead = (f' &mdash; offered first is <b>{esc(best.get("description") or best.get("type"))}</b>'
+                f' at {num(best.get("length_aa"))} aa'
+                + (f' ({span[0]:,}&ndash;{span[1]:,} on the relative)' if len(span) == 2 else ''))
+    return f"""
+    <details class="dmns">
+      <summary>{headline}{lead}</summary>
+      <div class="dmn-hd">
+        <span class="dn">region</span><span class="dl">length</span>
+        <span class="dw">where</span><span class="dy">why it is offered here</span>
+        <span class="dv">fold unit</span>
+      </div>
+      {_region_rows(chain)}
+    </details>"""
+
+
 def _bar(width, left=0.0, cls="b"):
     return (f'<i class="{cls}" style="left:{left:.2f}%;width:{max(width, 0.6):.2f}%"></i>')
 
@@ -962,7 +1091,16 @@ def fold_lane(case):
     above it -- the three spike chains, the polymerase, the papain-like protease -- and a
     reader cannot be expected to take that on trust from a sentence when the record carries
     the length of every one of them. Drawn as one dashed line through twenty bars, the
-    eleven that have coordinates and the nine that never will are a single glance.
+    eleven short enough for the endpoint and the nine too long are a single glance.
+
+    **What the nine are no longer.** This lane used to say of them that nothing could be
+    predicted for them, and that was a true statement about the pipeline and a false one
+    about the proteins. Every one of the nine carries an annotated functional region at or
+    under the ceiling -- the polymerase's catalytic domain is 163 residues inside 823, and
+    nsp3 is hopeless at 1,945 and offers eighteen regions that are not. So each over-ceiling
+    row now opens onto what its relative's entry actually offers, read from
+    `runs/domain_inventory.json`, and the group says the length is a bar to folding the chain
+    whole rather than to reaching the target at all.
 
     Rows are sorted by length rather than by rank, because length is what this stage sorts on.
     """
@@ -970,6 +1108,11 @@ def fold_lane(case):
     if not rows:
         return ""
     ceiling = _ceiling(case)
+    # Keyed by target, and absent when no inventory has been recorded for this case. The lane
+    # renders identically without it, minus the panels: a page built from a record that
+    # predates the inventory must not fail, and must not imply it read one.
+    inventory = domain_inventory(case) or {}
+    regions = {c.get("target"): c for c in (inventory.get("chains") or ())}
     scale = max([r.get("recovered_length_aa") or 0 for r in rows] + [ceiling]) or 1
     recorded = any("folded" in r for r in rows)
 
@@ -1000,6 +1143,13 @@ def fold_lane(case):
                       if isinstance(plddt, (int, float)) else "")
         unnamed = ('<span class="chip-x nv">unrecognised</span>'
                    if row.get("identified") is False else "")
+        # The panel only on the chains the ceiling refuses whole. On a chain that was folded
+        # it would answer a question nobody is asking -- the coordinates are already there --
+        # and the lane would double in height for it.
+        panel = ""
+        if 0 < (row.get("recovered_length_aa") or 0) and not (
+                0 < (row.get("recovered_length_aa") or 0) <= ceiling):
+            panel = domain_block(regions.get(row.get("target")) or {})
         return f"""
     <div class="lr">
       <span class="who"><span class="t">{esc(row.get('target'))}{unnamed}</span>
@@ -1007,7 +1157,7 @@ def fold_lane(case):
       {plot(row)}
       <span class="vl">{num(length) if length else '&mdash;'}{' aa' if length else ''}
         {confidence}</span>
-    </div>"""
+    </div>{panel}"""
 
     # Three groups, and the middle one is the stage's answer to the case the project exists
     # for: a chain nothing recognises has no accession, no relative and no annotation, and is
@@ -1027,10 +1177,14 @@ def fold_lane(case):
         (novel, f"Unrecognised, folded anyway &middot; {len(novel)}",
          "no accession, no relative, no annotation. Folding asks for a sequence and nothing "
          "else, so it is the one stage a protein nobody can name still reaches"),
-        (over, f"No coordinates &middot; {len(over)}",
+        (over, f"Too long to fold whole &middot; {len(over)}",
          f"longer than the {ceiling}-residue ceiling, or never located in this genome at "
-         f"all. Nothing can be predicted for these, so the next stage has only a deposited "
-         f"structure to work with, and where there is none it has no surface at all"),
+         f"all. The length is a bar to folding the chain whole and not to reaching the "
+         f"target: open a row to see the functionally important regions its relative&rsquo;s "
+         f"entry annotates, and which of them are short enough. "
+         + (f"{_rescued(inventory)} of these have one"
+            if inventory else
+            "no region inventory has been recorded for this run")),
     ]
     body = []
     for members, title, note in groups:
@@ -1214,9 +1368,10 @@ def surface_lane(case):
         (none, bare_row,
          f"No surface by either route &middot; {len(none)}",
          f"nothing is deposited for these and they are over the {num(ceiling)}-residue "
-         f"ceiling, so no coordinates exist for them at all, none solved and none "
-         f"predicted. The pipeline has no surface to offer here. It says so, and the chain "
-         f"keeps its row"),
+         f"ceiling, so this run folded none of them and has no surface to offer. It says so, "
+         f"and the chain keeps its row. What it is not is a statement that none of them can "
+         f"be reached: stage 3&rsquo;s lane above lists the functionally important regions "
+         f"their relatives annotate, and they are short enough"),
     ]
     body = []
     for members, render, title, note in groups:
@@ -1288,7 +1443,98 @@ def lane_facts(case):
         # asserted "0 quietly dropped" in a hand-typed `<b>0</b>`, which is the one number on
         # a page about not dropping rows that could not report a dropped row.
         "surface_dropped": len(case.get("scores") or []) - len(rows),
+    } | _domain_facts(case)
+
+
+def _domain_facts(case):
+    """The region-inventory counts the stage-3 prose quotes, or empty where none is recorded.
+
+    Empty and not zero. `fill` refuses to ship a `{{token}}` with no value, so a page written
+    against these tokens cannot be built from a record that has no inventory -- which is the
+    correct failure. Returning zeros instead would let the page state that no chain has a
+    foldable region, on the strength of a file that was never written.
+    """
+    inventory = domain_inventory(case)
+    if not inventory:
+        return {}
+    summary = inventory.get("summary") or {}
+    stranded = summary.get("chains_over_the_ceiling_with_none")
+    return {
+        "domain_over": summary.get("chains_over_the_ceiling"),
+        "domain_rescued": summary.get("chains_over_the_ceiling_with_a_foldable_region"),
+        "domain_stranded": stranded,
+        "domain_regions_offered": summary.get("regions_offered"),
+        "domain_regions_foldable": summary.get("regions_foldable"),
+        "domain_siteless": summary.get("chains_with_no_annotated_site_residues"),
+        "domain_minimum_aa": inventory.get("minimum_fold_unit_aa"),
+        # The shortest foldable region on the whole shortlist, with the chain it sits in.
+        # Quoted in the prose because one concrete pair makes the claim legible in a way a
+        # count cannot: a 1,945-residue chain carrying a 91-residue region.
+    } | _gap_facts(inventory) | _richest_facts(inventory)
+
+
+def _richest_facts(inventory):
+    """The over-ceiling chain whose relative annotates the most foldable regions.
+
+    The prose wants one worked example, and this picks it by a stated rule rather than by
+    whichever chain read well on the day the sentence was written. Most foldable regions is
+    the right rule for the point being made -- that a chain far over the ceiling is not a
+    chain out of reach -- because it is the chain where the gap between the two is widest.
+    """
+    best = None
+    for chain in inventory.get("chains") or ():
+        if chain.get("whole_chain_inside_the_ceiling") or not chain.get("regions_foldable"):
+            continue
+        if best is None or chain["regions_foldable"] > best["regions_foldable"]:
+            best = chain
+    if not best:
+        return {}
+    offered = best.get("best_region") or {}
+    return {
+        "domain_richest_chain": best.get("target"),
+        # Pre-formatted, for the reason `_gap_facts` states: `fill` escapes and does not
+        # format, so a four-figure residue count reaches the page without its separator.
+        "domain_richest_whole": f"{best.get('length_aa') or 0:,}",
+        "domain_richest_count": best.get("regions_foldable"),
+        "domain_richest_best": offered.get("description") or offered.get("type"),
+        "domain_richest_best_aa": f"{offered.get('length_aa') or 0:,}",
     }
+
+
+def _gap_facts(inventory):
+    """The widest gap between a chain's length and its shortest reachable region.
+
+    On the RATIO and not on the shortest region outright, which was the first version and
+    picked the wrong example. Measured on the held-out run: the globally shortest foldable
+    region is a 40-residue heptad repeat inside a 458-residue spike fragment, an eleven-fold
+    gap, and it beat the case the sentence is actually for -- nsp3 at 1,945 residues carrying
+    a 56-residue `Ubiquitin-like 2` domain, thirty-five fold. The claim being made is about
+    how far the two can diverge, so the quantity picked has to be the divergence rather than
+    either number alone.
+
+    Lengths are pre-formatted here rather than at the token, because `fill` escapes a value
+    and does not format it, so an int arrives on the page as `1945`.
+    """
+    best = None
+    for chain in inventory.get("chains") or ():
+        whole = chain.get("length_aa") or 0
+        if chain.get("whole_chain_inside_the_ceiling") or not whole:
+            continue
+        foldable = [r["length_aa"] for r in (chain.get("regions") or ())
+                    if r.get("foldable") and r.get("length_aa")]
+        if not foldable:
+            continue
+        shortest = min(foldable)
+        ratio = whole / shortest
+        if best is None or ratio > best[0]:
+            best = (ratio, shortest, chain.get("target"), whole)
+    if not best:
+        return {}
+    _, shortest, target, whole = best
+    return {"domain_shortest": f"{shortest:,}",
+            "domain_shortest_chain": target,
+            "domain_shortest_whole": f"{whole:,}",
+            "domain_shortest_fold": f"{whole / shortest:.0f}"}
 
 
 PREDICTED_RECORD = "predicted_models.json"

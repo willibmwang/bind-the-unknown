@@ -325,6 +325,8 @@
         <li>All <b>{{fold_located}}</b> had their own sequence located in this genome, by alignment rather than by trusting the relative's numbering</li>
         <li><b>{{fold_inside}}</b> of those are short enough for the folding lane; <b>{{fold_over}}</b> are over its <b>{{fold_ceiling}}</b>-residue ceiling, which the lane below draws as one line through every chain</li>
         <li>Every one inside the ceiling is folded, not only the best-ranked one — a chain with no coordinates is a chain the next step cannot measure</li>
+        <li>Being too long is a bar to folding the chain <i>whole</i>, not to reaching the target. All <b>{{domain_rescued}}</b> of the <b>{{domain_over}}</b> over-the-ceiling chains carry a functionally important region their relative's entry annotates that <i>is</i> short enough — <b>{{domain_regions_foldable}}</b> such regions across the shortlist, out of <b>{{domain_regions_offered}}</b> annotated in all</li>
+        <li>The widest gap: {{domain_shortest_chain}}, <b>{{domain_shortest_whole}}</b> residues whole, whose shortest reachable region is <b>{{domain_shortest}}</b> — a <b>{{domain_shortest_fold}}</b>-fold difference between the chain and the piece a binder would aim at</li>
         <li>The one drawn below is the main protease: <b>{{fold_residues}}</b> residues long</li>
         <li>The predictor rates its own confidence <b>{{mean_plddt}}</b> out of 100 — confidence is not accuracy</li>
       </ul></div>
@@ -358,6 +360,47 @@
     ORF rather than only the one that matched it: a coronavirus polyprotein is read as two
     overlapping ORFs through a frameshift, so the polymerase and the helicase sit in a frame
     their own match does not point at.</p>
+    <p class="cap"><b>Being too long is a bar to folding the chain whole, not to reaching
+    the target.</b> This step used to stop at the ceiling: a chain over it was abandoned, and
+    the lane below said of those chains that nothing could be predicted for them. That was a
+    true statement about the pipeline and a false one about the proteins. What a drug is aimed
+    at is almost never a whole chain — it is a pocket, an interface, a catalytic site — and
+    the relative's entry already says where those are. So each over-the-ceiling row below
+    opens onto the functionally important regions its relative annotates, and
+    <b>{{domain_rescued}}</b> of the <b>{{domain_over}}</b> have at least one that is short
+    enough to fold. {{domain_richest_chain}} is the clearest case: the chain is
+    <b>{{domain_richest_whole}}</b> residues and far out of reach, and its relative's entry
+    delimits <b>{{domain_richest_count}}</b> regions inside it that are not — the one offered
+    first is <i>{{domain_richest_best}}</i>, at <b>{{domain_richest_best_aa}}</b> residues.</p>
+    <p class="cap">Which region a row offers first is decided by two things of different
+    standing, and the panel says which did the work on every line. The first is simply read
+    off the entry: how many residues the curators marked as active sites, ligand-binding
+    sites or cleavage sites fall inside the region. That is decisive for enzymes — the
+    polymerase's catalytic domain contains six such residues against two for the domain next
+    to it, so the annotation itself says which one matters. The second is a list of words we
+    chose, matched against the region's description: <i>receptor-binding</i>,
+    <i>catalytic</i>, <i>interface</i> and about twenty more. It exists because the first
+    signal is silent exactly where it is needed — the spike carries one marked site residue
+    across its whole length — and it is a judgement nobody has validated against a labelled
+    set. It orders a list and does nothing else: no region is refused by it, and no target's
+    rank anywhere on this page is touched by it. A region shorter than
+    <b>{{domain_minimum_aa}}</b> residues is refused as something to fold, because
+    coordinates for a five-residue fragment describe nothing, and it keeps its positions
+    anyway — a short motif is exactly the kind of place a macrocycle is designed at.</p>
+    <p class="cap"><b>Four things this does not say.</b> It does not say the fold succeeded:
+    short enough to send is not the same as modelled well, and a predicted structure is a
+    prediction at any length. It does not give the region's position in <i>this</i> genome —
+    the spans in the panel are numbered on the relative's entry, and the two differ by more
+    than a constant, so the pathogen's own numbering has to come from the alignment this step
+    computes rather than from arithmetic on the page. It is bounded by what has been curated,
+    and a region that exists but was never annotated is invisible here. And the thinness of
+    that curation is the real limit, which this run shows directly: held out, the spike's
+    nearest relative is a bat coronavirus whose entry delimits two S1 domains and does not
+    name either as the receptor-binding domain. One of them is. SARS-CoV-2's own entry calls
+    it <i>Receptor-binding domain (RBD)</i> in those words, and deleting the pathogen from the
+    reference deleted the label along with it — so on this page the step offers two candidate
+    domains of the right size and cannot tell you which is the one ACE2 binds. For a genuinely
+    new pathogen that is the normal case, not the exception.</p>
     <!--FOLD-LANE-->
   </div>
 

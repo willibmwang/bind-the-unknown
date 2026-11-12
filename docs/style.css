@@ -364,6 +364,52 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .lane-foot{display:flex;flex-wrap:wrap;gap:5px 18px;justify-content:space-between;
   padding:11px 17px;border-top:1px solid var(--rule);background:var(--surface-2);
   font-family:var(--mono);font-size:11.5px;color:var(--fg-3)}
+
+/* The annotated functional regions of a chain the folding ceiling refuses whole. A
+   `<details>` and not a scripted dropdown: this site is static files with no client build
+   step, so a control that swapped panels would need JavaScript, and a reader with it off
+   would get a control that moves and a page that does not. The browser's own disclosure is
+   keyboard reachable and announced without help. */
+.dmns{border-bottom:1px solid var(--rule-2);background:var(--surface-2)}
+.dmns:last-of-type{border-bottom:0}
+.dmns>summary{padding:9px 17px 9px 34px;font-size:13.5px;color:var(--fg-2);cursor:pointer;
+  position:relative;line-height:1.5}
+.dmns>summary:hover{color:var(--fg)}
+.dmns>summary b{font-weight:650;color:var(--fg)}
+/* The marker is drawn rather than inherited: the platform triangle differs in size and
+   colour between engines, and this one has to sit on a 13.5px line in both themes. */
+.dmns>summary::marker,.dmns>summary::-webkit-details-marker{content:"";display:none}
+.dmns>summary::before{content:"";position:absolute;left:17px;top:50%;width:0;height:0;
+  border-left:5px solid var(--fg-3);border-top:4px solid transparent;
+  border-bottom:4px solid transparent;transform:translateY(-50%);transition:transform .14s}
+.dmns[open]>summary::before{transform:translateY(-50%) rotate(90deg)}
+/* Five columns, and `where` is fixed-width for the reason the lane's value column is: a
+   span column that takes its width from the longest row makes the two beside it move. */
+.dmn,.dmn-hd{display:grid;
+  grid-template-columns:minmax(0,1.35fr) 7ch 13ch minmax(0,1.5fr) minmax(0,.95fr);
+  gap:14px;align-items:baseline;padding:8px 17px 8px 34px}
+.dmn-hd{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--fg-3);border-top:1px solid var(--rule-2);border-bottom:1px solid var(--rule-2)}
+.dmn{border-bottom:1px solid var(--rule-2);font-size:13px}
+.dmn:last-child{border-bottom:0}
+/* A refused region stays legible rather than being greyed to the edge of readable: its
+   reason is the content, and a row nobody can read is a row that may as well be absent. */
+.dmn.x .dn,.dmn.x .dl{color:var(--fg-3)}
+.dmn .dn{font-weight:600;overflow-wrap:anywhere}
+.dmn .dt{display:block;font-family:var(--mono);font-size:10.5px;color:var(--fg-3);
+  font-weight:400;margin-top:2px}
+.dmn .dl,.dmn .dw{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+.dmn .dw{color:var(--fg-2)}
+.dmn .dq{display:block;font-family:var(--mono);font-size:10.5px;color:var(--fg-3);
+  margin-top:2px;line-height:1.5;overflow-wrap:anywhere}
+.dmn .dy{font-size:12.5px;color:var(--fg-2);line-height:1.5}
+.dmn .dv{font-size:12.5px;color:var(--ok)}
+.dmn.x .dv{color:var(--fg-3)}
+@media (max-width:760px){
+  .dmn,.dmn-hd{grid-template-columns:minmax(0,1fr) 7ch;gap:4px 14px}
+  .dmn-hd{display:none}
+  .dmn .dw,.dmn .dy,.dmn .dv{grid-column:1/-1}
+}
 .chip-x{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:20px;
   font-family:var(--mono);font-size:11px;font-weight:500;vertical-align:1px;
   border:1px solid var(--rule);color:var(--fg-2);background:var(--surface-2)}

@@ -672,6 +672,8 @@
         <li>All <b>20</b> had their own sequence located in this genome, by alignment rather than by trusting the relative's numbering</li>
         <li><b>11</b> of those are short enough for the folding lane; <b>9</b> are over its <b>400</b>-residue ceiling, which the lane below draws as one line through every chain</li>
         <li>Every one inside the ceiling is folded, not only the best-ranked one — a chain with no coordinates is a chain the next step cannot measure</li>
+        <li>Being too long is a bar to folding the chain <i>whole</i>, not to reaching the target. All <b>9</b> of the <b>9</b> over-the-ceiling chains carry a functionally important region their relative's entry annotates that <i>is</i> short enough — <b>75</b> such regions across the shortlist, out of <b>143</b> annotated in all</li>
+        <li>The widest gap: Papain-like protease nsp3, <b>1,945</b> residues whole, whose shortest reachable region is <b>56</b> — a <b>35</b>-fold difference between the chain and the piece a binder would aim at</li>
         <li>The one drawn below is the main protease: <b>306</b> residues long</li>
         <li>The predictor rates its own confidence <b>62.6</b> out of 100 — confidence is not accuracy</li>
       </ul></div>
@@ -705,6 +707,47 @@
     ORF rather than only the one that matched it: a coronavirus polyprotein is read as two
     overlapping ORFs through a frameshift, so the polymerase and the helicase sit in a frame
     their own match does not point at.</p>
+    <p class="cap"><b>Being too long is a bar to folding the chain whole, not to reaching
+    the target.</b> This step used to stop at the ceiling: a chain over it was abandoned, and
+    the lane below said of those chains that nothing could be predicted for them. That was a
+    true statement about the pipeline and a false one about the proteins. What a drug is aimed
+    at is almost never a whole chain — it is a pocket, an interface, a catalytic site — and
+    the relative's entry already says where those are. So each over-the-ceiling row below
+    opens onto the functionally important regions its relative annotates, and
+    <b>9</b> of the <b>9</b> have at least one that is short
+    enough to fold. Papain-like protease nsp3 is the clearest case: the chain is
+    <b>1,945</b> residues and far out of reach, and its relative's entry
+    delimits <b>18</b> regions inside it that are not — the one offered
+    first is <i>CoV Nsp3 Y</i>, at <b>369</b> residues.</p>
+    <p class="cap">Which region a row offers first is decided by two things of different
+    standing, and the panel says which did the work on every line. The first is simply read
+    off the entry: how many residues the curators marked as active sites, ligand-binding
+    sites or cleavage sites fall inside the region. That is decisive for enzymes — the
+    polymerase's catalytic domain contains six such residues against two for the domain next
+    to it, so the annotation itself says which one matters. The second is a list of words we
+    chose, matched against the region's description: <i>receptor-binding</i>,
+    <i>catalytic</i>, <i>interface</i> and about twenty more. It exists because the first
+    signal is silent exactly where it is needed — the spike carries one marked site residue
+    across its whole length — and it is a judgement nobody has validated against a labelled
+    set. It orders a list and does nothing else: no region is refused by it, and no target's
+    rank anywhere on this page is touched by it. A region shorter than
+    <b>40</b> residues is refused as something to fold, because
+    coordinates for a five-residue fragment describe nothing, and it keeps its positions
+    anyway — a short motif is exactly the kind of place a macrocycle is designed at.</p>
+    <p class="cap"><b>Four things this does not say.</b> It does not say the fold succeeded:
+    short enough to send is not the same as modelled well, and a predicted structure is a
+    prediction at any length. It does not give the region's position in <i>this</i> genome —
+    the spans in the panel are numbered on the relative's entry, and the two differ by more
+    than a constant, so the pathogen's own numbering has to come from the alignment this step
+    computes rather than from arithmetic on the page. It is bounded by what has been curated,
+    and a region that exists but was never annotated is invisible here. And the thinness of
+    that curation is the real limit, which this run shows directly: held out, the spike's
+    nearest relative is a bat coronavirus whose entry delimits two S1 domains and does not
+    name either as the receptor-binding domain. One of them is. SARS-CoV-2's own entry calls
+    it <i>Receptor-binding domain (RBD)</i> in those words, and deleting the pathogen from the
+    reference deleted the label along with it — so on this page the step offers two candidate
+    domains of the right size and cannot tell you which is the one ACE2 binds. For a genuinely
+    new pathogen that is the normal case, not the exception.</p>
     
   <div class="lane"><div class="lane-grp"><b>Inside the ceiling &middot; 11</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
     <div class="lr">
@@ -783,7 +826,7 @@
       <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:4.27%"></i></span>
       <span class="vl">83 aa
         </span>
-    </div><div class="lane-grp"><b>No coordinates &middot; 9</b><span>longer than the 400-residue ceiling, or never located in this genome at all. Nothing can be predicted for these, so the next stage has only a deposited structure to work with, and where there is none it has no surface at all</span></div>
+    </div><div class="lane-grp"><b>Too long to fold whole &middot; 9</b><span>longer than the 400-residue ceiling, or never located in this genome at all. The length is a bar to folding the chain whole and not to reaching the target: open a row to see the functionally important regions its relative&rsquo;s entry annotates, and which of them are short enough. 9 of these have one</span></div>
     <div class="lr">
       <span class="who"><span class="t">Papain-like protease nsp3</span>
         <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 77 % identity</span></span>
@@ -791,6 +834,258 @@
       <span class="vl">1,945 aa
         </span>
     </div>
+    <details class="dmns">
+      <summary>18 of 27 annotated regions are within the ceiling &mdash; offered first is <b>CoV Nsp3 Y</b> at 369 aa (2,372&ndash;2,740 on the relative)</summary>
+      <div class="dmn-hd">
+        <span class="dn">region</span><span class="dl">length</span>
+        <span class="dw">where</span><span class="dy">why it is offered here</span>
+        <span class="dv">fold unit</span>
+      </div>
+      
+      <div class="dmn">
+        <span class="dn">CoV Nsp3 Y
+          <span class="dt">Domain</span></span>
+        <span class="dl">369 aa</span>
+        <span class="dw">2,372&ndash;2,740<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">9 annotated site residues inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Y1
+          <span class="dt">Region</span></span>
+        <span class="dl">91 aa</span>
+        <span class="dw">2,372&ndash;2,462<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">8 annotated site residues inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Peptidase C16
+          <span class="dt">Domain</span></span>
+        <span class="dl">265 aa</span>
+        <span class="dw">1,611&ndash;1,875<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">7 annotated site residues inside &middot; names &ldquo;peptidase&rdquo;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">C4-type
+          <span class="dt">Zinc finger</span></span>
+        <span class="dl">38 aa</span>
+        <span class="dw">1,729&ndash;1,766<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">4 annotated site residues inside &middot; names &ldquo;zinc&rdquo;</span>
+        <span class="dv">refused
+          <span class="dq">38 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">ZF1
+          <span class="dt">Region</span></span>
+        <span class="dl">14 aa</span>
+        <span class="dw">2,376&ndash;2,389<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">4 annotated site residues inside</span>
+        <span class="dv">refused
+          <span class="dq">14 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">ZF2
+          <span class="dt">Region</span></span>
+        <span class="dl">11 aa</span>
+        <span class="dw">2,422&ndash;2,432<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">4 annotated site residues inside</span>
+        <span class="dv">refused
+          <span class="dq">11 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Macro 1
+          <span class="dt">Domain</span></span>
+        <span class="dl">167 aa</span>
+        <span class="dw">1,003&ndash;1,169<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">3 annotated site residues inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">CoV-Y
+          <span class="dt">Region</span></span>
+        <span class="dl">278 aa</span>
+        <span class="dw">2,463&ndash;2,740<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Y4
+          <span class="dt">Region</span></span>
+        <span class="dl">101 aa</span>
+        <span class="dw">2,640&ndash;2,740<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Nucleic acid-binding
+          <span class="dt">Domain</span></span>
+        <span class="dl">111 aa</span>
+        <span class="dw">1,888&ndash;1,998<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">names &ldquo;nucleic acid&rdquo;, &ldquo;binding&rdquo;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Macro 2
+          <span class="dt">Domain</span></span>
+        <span class="dl">129 aa</span>
+        <span class="dw">1,207&ndash;1,335<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Macro 3
+          <span class="dt">Domain</span></span>
+        <span class="dl">128 aa</span>
+        <span class="dw">1,343&ndash;1,470<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">HD1
+          <span class="dt">Region</span></span>
+        <span class="dl">122 aa</span>
+        <span class="dw">2,203&ndash;2,324<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">G2M
+          <span class="dt">Domain</span></span>
+        <span class="dl">110 aa</span>
+        <span class="dw">2,023&ndash;2,132<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Ubiquitin-like 1
+          <span class="dt">Domain</span></span>
+        <span class="dl">109 aa</span>
+        <span class="dw">822&ndash;930<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Y2
+          <span class="dt">Region</span></span>
+        <span class="dl">95 aa</span>
+        <span class="dw">2,463&ndash;2,557<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Y3
+          <span class="dt">Region</span></span>
+        <span class="dl">82 aa</span>
+        <span class="dw">2,558&ndash;2,639<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">3Ecto
+          <span class="dt">Domain</span></span>
+        <span class="dl">71 aa</span>
+        <span class="dw">2,224&ndash;2,294<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">DPUP
+          <span class="dt">Domain</span></span>
+        <span class="dl">67 aa</span>
+        <span class="dw">1,472&ndash;1,538<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Ubiquitin-like 2
+          <span class="dt">Domain</span></span>
+        <span class="dl">56 aa</span>
+        <span class="dw">1,542&ndash;1,597<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Disordered
+          <span class="dt">Region</span></span>
+        <span class="dl">32 aa</span>
+        <span class="dw">972&ndash;1,003<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">refused
+          <span class="dq">32 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Disordered
+          <span class="dt">Region</span></span>
+        <span class="dl">24 aa</span>
+        <span class="dw">1,175&ndash;1,198<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">refused
+          <span class="dq">24 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Cytoplasmic
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">1,384 aa</span>
+        <span class="dw">819&ndash;2,202<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">11 annotated site residues inside &middot; describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">1384 residues, over the 400-residue ceiling the folding endpoint applies, so this region is no more foldable than the whole chain.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Cytoplasmic
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">416 aa</span>
+        <span class="dw">2,325&ndash;2,740<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">9 annotated site residues inside &middot; describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">416 residues, over the 400-residue ceiling the folding endpoint applies, so this region is no more foldable than the whole chain.</span></span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Lumenal
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">80 aa</span>
+        <span class="dw">2,224&ndash;2,303<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Helical
+          <span class="dt">Transmembrane</span></span>
+        <span class="dl">21 aa</span>
+        <span class="dw">2,203&ndash;2,223<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Helical
+          <span class="dt">Transmembrane</span></span>
+        <span class="dl">21 aa</span>
+        <span class="dw">2,304&ndash;2,324<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+    </details>
     <div class="lr">
       <span class="who"><span class="t">RNA-directed RNA polymerase nsp12</span>
         <span class="w">found in the ORF that matched &middot; 88 % of the relative&rsquo;s chain at 97 % identity</span></span>
@@ -798,6 +1093,105 @@
       <span class="vl">823 aa
         </span>
     </div>
+    <details class="dmns">
+      <summary>7 of 10 annotated regions are within the ceiling &mdash; offered first is <b>RdRp catalytic</b> at 163 aa (4,981&ndash;5,143 on the relative)</summary>
+      <div class="dmn-hd">
+        <span class="dn">region</span><span class="dl">length</span>
+        <span class="dw">where</span><span class="dy">why it is offered here</span>
+        <span class="dv">fold unit</span>
+      </div>
+      
+      <div class="dmn x">
+        <span class="dn">Nsp12 RNA-dependent RNA polymerase
+          <span class="dt">Domain</span></span>
+        <span class="dl">568 aa</span>
+        <span class="dw">4,734&ndash;5,301<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">8 annotated site residues inside &middot; names &ldquo;polymerase&rdquo;, &ldquo;rna&rdquo;</span>
+        <span class="dv">refused
+          <span class="dq">568 residues, over the 400-residue ceiling the folding endpoint applies, so this region is no more foldable than the whole chain.</span></span>
+      </div>
+      <div class="dmn">
+        <span class="dn">RdRp catalytic
+          <span class="dt">Domain</span></span>
+        <span class="dl">163 aa</span>
+        <span class="dw">4,981&ndash;5,143<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">6 annotated site residues inside &middot; names &ldquo;catalytic&rdquo;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Nsp12 Interface
+          <span class="dt">Domain</span></span>
+        <span class="dl">99 aa</span>
+        <span class="dw">4,635&ndash;4,733<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">4 annotated site residues inside &middot; names &ldquo;interface&rdquo;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">RdRp Palm C-ter
+          <span class="dt">Region</span></span>
+        <span class="dl">136 aa</span>
+        <span class="dw">5,049&ndash;5,184<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">3 annotated site residues inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">RdRp Fingers C-ter
+          <span class="dt">Region</span></span>
+        <span class="dl">59 aa</span>
+        <span class="dw">4,990&ndash;5,048<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">3 annotated site residues inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">NiRAN
+          <span class="dt">Domain</span></span>
+        <span class="dl">255 aa</span>
+        <span class="dw">4,376&ndash;4,630<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">2 annotated site residues inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">RdRp Fingers N-ter
+          <span class="dt">Region</span></span>
+        <span class="dl">215 aa</span>
+        <span class="dw">4,736&ndash;4,950<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">RdRp Thumb
+          <span class="dt">Region</span></span>
+        <span class="dl">117 aa</span>
+        <span class="dw">5,185&ndash;5,301<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">RdRp Palm N-ter
+          <span class="dt">Region</span></span>
+        <span class="dl">39 aa</span>
+        <span class="dw">4,951&ndash;4,989<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">refused
+          <span class="dq">39 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Cytoplasmic
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">932 aa</span>
+        <span class="dw">4,370&ndash;5,301<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">15 annotated site residues inside &middot; describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">932 residues, over the 400-residue ceiling the folding endpoint applies, so this region is no more foldable than the whole chain.</span></span>
+      </div>
+    </details>
     <div class="lr">
       <span class="who"><span class="t">Spike protein S1</span>
         <span class="w">found in the ORF that matched &middot; 98 % of the relative&rsquo;s chain at 66 % identity</span></span>
@@ -805,6 +1199,42 @@
       <span class="vl">662 aa
         </span>
     </div>
+    <details class="dmns">
+      <summary>2 of 3 annotated regions are within the ceiling &mdash; offered first is <b>BetaCoV S1-NTD</b> at 281 aa (14&ndash;294 on the relative)</summary>
+      <div class="dmn-hd">
+        <span class="dn">region</span><span class="dl">length</span>
+        <span class="dw">where</span><span class="dy">why it is offered here</span>
+        <span class="dv">fold unit</span>
+      </div>
+      
+      <div class="dmn">
+        <span class="dn">BetaCoV S1-NTD
+          <span class="dt">Domain</span></span>
+        <span class="dl">281 aa</span>
+        <span class="dw">14&ndash;294<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">BetaCoV S1-CTD
+          <span class="dt">Domain</span></span>
+        <span class="dl">176 aa</span>
+        <span class="dw">325&ndash;500<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Extracellular
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">641 aa</span>
+        <span class="dw">14&ndash;654<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside &middot; describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">641 residues, over the 400-residue ceiling the folding endpoint applies, so this region is no more foldable than the whole chain.</span></span>
+      </div>
+    </details>
     <div class="lr">
       <span class="who"><span class="t">Non-structural protein 2</span>
         <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 68 % identity</span></span>
@@ -812,6 +1242,78 @@
       <span class="vl">638 aa
         </span>
     </div>
+    <details class="dmns">
+      <summary>4 of 7 annotated regions are within the ceiling &mdash; offered first is <b>CoV Nsp2 N-terminal</b> at 274 aa (183&ndash;456 on the relative)</summary>
+      <div class="dmn-hd">
+        <span class="dn">region</span><span class="dl">length</span>
+        <span class="dw">where</span><span class="dy">why it is offered here</span>
+        <span class="dv">fold unit</span>
+      </div>
+      
+      <div class="dmn">
+        <span class="dn">CoV Nsp2 N-terminal
+          <span class="dt">Domain</span></span>
+        <span class="dl">274 aa</span>
+        <span class="dw">183&ndash;456<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">12 annotated site residues inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">C2HC
+          <span class="dt">Region</span></span>
+        <span class="dl">47 aa</span>
+        <span class="dw">370&ndash;416<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">4 annotated site residues inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">C2H2
+          <span class="dt">Region</span></span>
+        <span class="dl">37 aa</span>
+        <span class="dw">200&ndash;236<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">4 annotated site residues inside</span>
+        <span class="dv">refused
+          <span class="dq">37 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">C4
+          <span class="dt">Region</span></span>
+        <span class="dl">22 aa</span>
+        <span class="dw">323&ndash;344<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">4 annotated site residues inside</span>
+        <span class="dv">refused
+          <span class="dq">22 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn">
+        <span class="dn">CoV Nsp2 C-terminal
+          <span class="dt">Domain</span></span>
+        <span class="dl">129 aa</span>
+        <span class="dw">690&ndash;818<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">CoV Nsp2 middle
+          <span class="dt">Domain</span></span>
+        <span class="dl">231 aa</span>
+        <span class="dw">458&ndash;688<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Cytoplasmic
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">638 aa</span>
+        <span class="dw">181&ndash;818<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">14 annotated site residues inside &middot; describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">638 residues, over the 400-residue ceiling the folding endpoint applies, so this region is no more foldable than the whole chain.</span></span>
+      </div>
+    </details>
     <div class="lr">
       <span class="who"><span class="t">Helicase nsp13</span>
         <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 100 % identity</span></span>
@@ -819,6 +1321,51 @@
       <span class="vl">601 aa
         </span>
     </div>
+    <details class="dmns">
+      <summary>3 of 4 annotated regions are within the ceiling &mdash; offered first is <b>CV ZBD</b> at 113 aa (5,302&ndash;5,414 on the relative)</summary>
+      <div class="dmn-hd">
+        <span class="dn">region</span><span class="dl">length</span>
+        <span class="dw">where</span><span class="dy">why it is offered here</span>
+        <span class="dv">fold unit</span>
+      </div>
+      
+      <div class="dmn">
+        <span class="dn">CV ZBD
+          <span class="dt">Domain</span></span>
+        <span class="dl">113 aa</span>
+        <span class="dw">5,302&ndash;5,414<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">13 annotated site residues inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">(+)RNA virus helicase ATP-binding
+          <span class="dt">Domain</span></span>
+        <span class="dl">182 aa</span>
+        <span class="dw">5,558&ndash;5,739<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">8 annotated site residues inside &middot; names &ldquo;helicase&rdquo;, &ldquo;binding&rdquo;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">(+)RNA virus helicase C-terminal
+          <span class="dt">Domain</span></span>
+        <span class="dl">163 aa</span>
+        <span class="dw">5,740&ndash;5,902<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside &middot; names &ldquo;helicase&rdquo;, &ldquo;rna&rdquo;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Cytoplasmic
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">601 aa</span>
+        <span class="dw">5,302&ndash;5,902<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">22 annotated site residues inside &middot; describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">601 residues, over the 400-residue ceiling the folding endpoint applies, so this region is no more foldable than the whole chain.</span></span>
+      </div>
+    </details>
     <div class="lr">
       <span class="who"><span class="t">Spike protein S2</span>
         <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 93 % identity</span></span>
@@ -826,6 +1373,105 @@
       <span class="vl">588 aa
         </span>
     </div>
+    <details class="dmns">
+      <summary>3 of 10 annotated regions are within the ceiling &mdash; offered first is <b>Heptad repeat 1</b> at 51 aa (889&ndash;939 on the relative)</summary>
+      <div class="dmn-hd">
+        <span class="dn">region</span><span class="dl">length</span>
+        <span class="dw">where</span><span class="dy">why it is offered here</span>
+        <span class="dv">fold unit</span>
+      </div>
+      
+      <div class="dmn x">
+        <span class="dn">Fusion peptide 1
+          <span class="dt">Region</span></span>
+        <span class="dl">22 aa</span>
+        <span class="dw">785&ndash;806<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside &middot; names &ldquo;fusion&rdquo;</span>
+        <span class="dv">refused
+          <span class="dq">22 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Fusion peptide 2
+          <span class="dt">Region</span></span>
+        <span class="dl">21 aa</span>
+        <span class="dw">804&ndash;824<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">names &ldquo;fusion&rdquo;</span>
+        <span class="dv">refused
+          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Heptad repeat 1
+          <span class="dt">Region</span></span>
+        <span class="dl">51 aa</span>
+        <span class="dw">889&ndash;939<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Coiled coil
+          <span class="dt">Coiled coil</span></span>
+        <span class="dl">45 aa</span>
+        <span class="dw">918&ndash;962<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Heptad repeat 2
+          <span class="dt">Region</span></span>
+        <span class="dl">40 aa</span>
+        <span class="dw">1,132&ndash;1,171<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Coiled coil
+          <span class="dt">Coiled coil</span></span>
+        <span class="dl">29 aa</span>
+        <span class="dw">1,144&ndash;1,172<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">refused
+          <span class="dq">29 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">KxHxx
+          <span class="dt">Motif</span></span>
+        <span class="dl">5 aa</span>
+        <span class="dw">1,238&ndash;1,242<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">refused
+          <span class="dq">5 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Extracellular
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">528 aa</span>
+        <span class="dw">655&ndash;1,182<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">3 annotated site residues inside &middot; describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">528 residues, over the 400-residue ceiling the folding endpoint applies, so this region is no more foldable than the whole chain.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Cytoplasmic
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">39 aa</span>
+        <span class="dw">1,204&ndash;1,242<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">39 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Helical
+          <span class="dt">Transmembrane</span></span>
+        <span class="dl">21 aa</span>
+        <span class="dw">1,183&ndash;1,203<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+    </details>
     <div class="lr">
       <span class="who"><span class="t">Non-structural protein 4</span>
         <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 80 % identity</span></span>
@@ -833,6 +1479,123 @@
       <span class="vl">500 aa
         </span>
     </div>
+    <details class="dmns">
+      <summary>5 of 12 annotated regions are within the ceiling &mdash; offered first is <b>Nsp4C</b> at 99 aa (3,142&ndash;3,240 on the relative)</summary>
+      <div class="dmn-hd">
+        <span class="dn">region</span><span class="dl">length</span>
+        <span class="dw">where</span><span class="dy">why it is offered here</span>
+        <span class="dv">fold unit</span>
+      </div>
+      
+      <div class="dmn">
+        <span class="dn">Nsp4C
+          <span class="dt">Domain</span></span>
+        <span class="dl">99 aa</span>
+        <span class="dw">3,142&ndash;3,240<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">HD2
+          <span class="dt">Region</span></span>
+        <span class="dl">371 aa</span>
+        <span class="dw">2,755&ndash;3,125<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">4Ecto
+          <span class="dt">Domain</span></span>
+        <span class="dl">245 aa</span>
+        <span class="dw">2,776&ndash;3,020<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Cytoplasmic
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">115 aa</span>
+        <span class="dw">3,126&ndash;3,240<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside &middot; describes position, not function</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Cytoplasmic
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">14 aa</span>
+        <span class="dw">2,741&ndash;2,754<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside &middot; describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">14 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Lumenal
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">246 aa</span>
+        <span class="dw">2,776&ndash;3,021<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Cytoplasmic
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">34 aa</span>
+        <span class="dw">3,043&ndash;3,076<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">34 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Helical
+          <span class="dt">Transmembrane</span></span>
+        <span class="dl">21 aa</span>
+        <span class="dw">2,755&ndash;2,775<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Helical
+          <span class="dt">Transmembrane</span></span>
+        <span class="dl">21 aa</span>
+        <span class="dw">3,022&ndash;3,042<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Helical
+          <span class="dt">Transmembrane</span></span>
+        <span class="dl">21 aa</span>
+        <span class="dw">3,077&ndash;3,097<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Helical
+          <span class="dt">Transmembrane</span></span>
+        <span class="dl">21 aa</span>
+        <span class="dw">3,105&ndash;3,125<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Lumenal
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">7 aa</span>
+        <span class="dw">3,098&ndash;3,104<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">7 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+    </details>
     <div class="lr">
       <span class="who"><span class="t">Spike protein S2&#x27;</span>
         <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 95 % identity</span></span>
@@ -840,6 +1603,105 @@
       <span class="vl">458 aa
         </span>
     </div>
+    <details class="dmns">
+      <summary>4 of 10 annotated regions are within the ceiling &mdash; offered first is <b>Heptad repeat 1</b> at 51 aa (889&ndash;939 on the relative)</summary>
+      <div class="dmn-hd">
+        <span class="dn">region</span><span class="dl">length</span>
+        <span class="dw">where</span><span class="dy">why it is offered here</span>
+        <span class="dv">fold unit</span>
+      </div>
+      
+      <div class="dmn x">
+        <span class="dn">Fusion peptide 1
+          <span class="dt">Region</span></span>
+        <span class="dl">22 aa</span>
+        <span class="dw">785&ndash;806<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside &middot; names &ldquo;fusion&rdquo;</span>
+        <span class="dv">refused
+          <span class="dq">22 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Fusion peptide 2
+          <span class="dt">Region</span></span>
+        <span class="dl">21 aa</span>
+        <span class="dw">804&ndash;824<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">names &ldquo;fusion&rdquo;</span>
+        <span class="dv">refused
+          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Heptad repeat 1
+          <span class="dt">Region</span></span>
+        <span class="dl">51 aa</span>
+        <span class="dw">889&ndash;939<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Coiled coil
+          <span class="dt">Coiled coil</span></span>
+        <span class="dl">45 aa</span>
+        <span class="dw">918&ndash;962<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Heptad repeat 2
+          <span class="dt">Region</span></span>
+        <span class="dl">40 aa</span>
+        <span class="dw">1,132&ndash;1,171<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Coiled coil
+          <span class="dt">Coiled coil</span></span>
+        <span class="dl">29 aa</span>
+        <span class="dw">1,144&ndash;1,172<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">refused
+          <span class="dq">29 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">KxHxx
+          <span class="dt">Motif</span></span>
+        <span class="dl">5 aa</span>
+        <span class="dw">1,238&ndash;1,242<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">refused
+          <span class="dq">5 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Extracellular
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">398 aa</span>
+        <span class="dw">785&ndash;1,182<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">1 annotated site residue inside &middot; describes position, not function</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Cytoplasmic
+          <span class="dt">Topological domain</span></span>
+        <span class="dl">39 aa</span>
+        <span class="dw">1,204&ndash;1,242<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">39 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Helical
+          <span class="dt">Transmembrane</span></span>
+        <span class="dl">21 aa</span>
+        <span class="dw">1,183&ndash;1,203<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">describes position, not function</span>
+        <span class="dv">refused
+          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+    </details>
     <div class="lr">
       <span class="who"><span class="t">NCAP_BCRP3 Nucleoprotein</span>
         <span class="w">the ORF translation is the candidate</span></span>
@@ -847,6 +1709,87 @@
       <span class="vl">419 aa
         </span>
     </div>
+    <details class="dmns">
+      <summary>7 of 8 annotated regions are within the ceiling &mdash; offered first is <b>RNA-binding</b> at 146 aa (41&ndash;186 on the relative)</summary>
+      <div class="dmn-hd">
+        <span class="dn">region</span><span class="dl">length</span>
+        <span class="dw">where</span><span class="dy">why it is offered here</span>
+        <span class="dv">fold unit</span>
+      </div>
+      
+      <div class="dmn">
+        <span class="dn">RNA-binding
+          <span class="dt">Region</span></span>
+        <span class="dl">146 aa</span>
+        <span class="dw">41&ndash;186<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">3 annotated site residues inside &middot; names &ldquo;binding&rdquo;, &ldquo;rna&rdquo;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">CoV N NTD
+          <span class="dt">Domain</span></span>
+        <span class="dl">128 aa</span>
+        <span class="dw">48&ndash;175<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">3 annotated site residues inside</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Dimerization
+          <span class="dt">Region</span></span>
+        <span class="dl">104 aa</span>
+        <span class="dw">258&ndash;361<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">names &ldquo;dimerization&rdquo;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">CoV N CTD
+          <span class="dt">Domain</span></span>
+        <span class="dl">118 aa</span>
+        <span class="dw">247&ndash;364<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Disordered
+          <span class="dt">Region</span></span>
+        <span class="dl">59 aa</span>
+        <span class="dw">363&ndash;421<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Disordered
+          <span class="dt">Region</span></span>
+        <span class="dl">49 aa</span>
+        <span class="dw">1&ndash;49<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn">
+        <span class="dn">Disordered
+          <span class="dt">Region</span></span>
+        <span class="dl">46 aa</span>
+        <span class="dw">168&ndash;213<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">within the ceiling
+          </span>
+      </div>
+      <div class="dmn x">
+        <span class="dn">Disordered
+          <span class="dt">Region</span></span>
+        <span class="dl">36 aa</span>
+        <span class="dw">233&ndash;268<span class="dq">on the relative&rsquo;s entry</span></span>
+        <span class="dy">&mdash;</span>
+        <span class="dv">refused
+          <span class="dq">36 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
+      </div>
+    </details>
     <div class="lane-foot"><span>bar length is the chain&rsquo;s own residue count &middot;
       longest 1,945 aa</span>
       <span>the dashed line is the 400-residue ceiling</span></div>
@@ -1006,7 +1949,7 @@
         <span class="w">PDBe maps no deposited chain to Q3I5J0 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>106 aa, inside the 400-residue ceiling</i></span></span>
       <span class="plot"></span>
       <span class="vl">&mdash;</span>
-    </div><div class="lane-grp"><b>No surface by either route &middot; 6</b><span>nothing is deposited for these and they are over the 400-residue ceiling, so no coordinates exist for them at all, none solved and none predicted. The pipeline has no surface to offer here. It says so, and the chain keeps its row</span></div>
+    </div><div class="lane-grp"><b>No surface by either route &middot; 6</b><span>nothing is deposited for these and they are over the 400-residue ceiling, so this run folded none of them and has no surface to offer. It says so, and the chain keeps its row. What it is not is a statement that none of them can be reached: stage 3&rsquo;s lane above lists the functionally important regions their relatives annotate, and they are short enough</span></div>
     <div class="lr none">
       <span class="who"><span class="t">Spike protein S2&#x27;</span>
         <span class="w">PDBe maps no deposited chain to Q3LZX1 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>458 aa, over the ceiling</i></span></span>
