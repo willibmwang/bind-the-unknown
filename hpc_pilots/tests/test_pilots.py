@@ -6602,3 +6602,70 @@ def test_a_domain_description_is_never_dispatched_as_a_query_on_its_own():
     # report one paper where there may be five, which is the same defect pointed the other way.
     blind = _paper_counts([{"hits": [{"citable": True}, {"citable": True}]}])
     assert blind["distinct_papers"] == 2
+
+
+def test_every_bar_on_a_lane_starts_at_zero_against_one_labelled_line():
+    """The mark contract the three lanes share, which a reader has to be able to assume.
+
+    Step 4's lane drew a floating segment from the smallest structure to the largest with a
+    dot on the median and nothing anchored at zero, beside predicted rows drawn as bars from
+    zero -- so the same horizontal extent meant "how much grip" on one row and "how uncertain"
+    on the next, against two dashed rules so faint that neither carried a number anywhere near
+    the plot. What makes the lanes readable now is a contract rather than a style: one bar per
+    row growing from a shared zero, at most one reference line on a plot, and that line's
+    value printed once directly above the first row it crosses.
+    """
+    import json as _json
+    import re as _re
+    import sys as _sys
+
+    from hpc_pilots.common import ROOT
+
+    _sys.path.insert(0, str(ROOT / "output"))
+    import build_site                                          # noqa: E402
+
+    landing = _json.loads((ROOT / "runs/onset_chain.json").read_text())
+    case = next((c for c in landing["cases"] if c.get("reference_excluded_organism")),
+                landing["cases"][0])
+
+    for name, drawn in (("surface", build_site.surface_lane(case)),
+                        ("fold", build_site.fold_lane(case)),
+                        ("site patch", build_site.site_patch_block(case))):
+        if not drawn:
+            continue
+        plots = _re.findall(r'<span class="plot[^"]*">(.*?)</span>', drawn, _re.S)
+        assert plots, name
+        for plot in plots:
+            # Anchored at zero. A bar placed anywhere else means length has stopped being the
+            # quantity, which is the defect the floating range segment was.
+            for left in _re.findall(r'class="b[^"]*" style="left:([0-9.]+)%', plot):
+                assert float(left) == 0.0, (name, left)
+            # At most one reference line. Two of them, one faint, is a reader deciding which
+            # rule the verdict is about before they can read the row.
+            assert plot.count('class="thr"') <= 1, (name, plot[:120])
+            assert "dashed" not in plot
+
+        # The scale is stated once, over the bars rather than under them, and the row it sits
+        # over is the first one drawn.
+        assert drawn.count('class="lane-axis"') == 1, name
+        axis = drawn.index('class="lane-axis"')
+        first = drawn.index('<div class="lr')
+        assert axis < first, f"{name}: the scale strip is below the rows it labels"
+        assert drawn.index('class="lane-grp"') < axis, \
+            f"{name}: the scale strip is above the group it belongs to"
+
+    # The limit's label hangs off its rule rather than straddling it wherever straddling would
+    # reach back over the zero label. The fold lane is the measured case: its ceiling is 400
+    # residues of a 1,945-residue scale, a fifth along, and a centred label printed on top of
+    # the `0`.
+    assert 'class="ll l"' in build_site._lane_axis(1945, 400, "the folding ceiling", "aa")
+    assert 'class="ll c"' in build_site._lane_axis(1186, 600, "a footprint")
+    assert 'class="ll r"' in build_site._lane_axis(1000, 900, "a footprint")
+
+    # A whisker is the spread and only exists where something was measured twice. A domain
+    # solved once gets no mark: a zero-width whisker is the absence of a second opinion, not
+    # an agreement between two numbers.
+    assert build_site._whisker(522.5, 522.5, 1186) == ""
+    assert build_site._whisker(0, 0, 1186) == ""
+    whisker = build_site._whisker(287.0, 1186.0, 1186.0)
+    assert 'left:24.20%' in whisker and 'width:75.80%' in whisker, whisker

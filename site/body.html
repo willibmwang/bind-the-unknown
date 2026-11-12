@@ -388,15 +388,17 @@
     <p class="cap">One row for every chain, each answering a single question: if you wanted
     to put a molecule on this protein, is there anywhere on it to put one?</p>
     <p class="cap">A patch is water-repelling surface, the part a molecule of this class
-    grips, in square angstroms. The line through every row is the roughly <b>{{footprint}}</b>
-    Å² a macrocycle covers when it binds, and the fainter line is half of that, under which
-    there is nothing to hold a molecule at all. Solved and predicted shapes share the
-    scale.</p>
-    <p class="cap">A measured chain gets a dot and a bar, because a structure is one moment of
-    a protein held still and the same chain solved twice does not give the same answer. The dot
-    is the middle of every structure of that domain, the bar runs from smallest to largest, and
-    where a bar straddles the line the verdict is uncertain however confident the dot looks.
-    Nothing drops out quietly: a refused chain still gets a row saying why.</p>
+    grips, in square angstroms. Every bar below starts at zero and they all share one scale,
+    solved and predicted together, so bar length is always the same thing: how much grip
+    there is. The upright line through them is the roughly <b>{{footprint}}</b> Å² a
+    macrocycle covers when it binds — a bar reaching past it has room for one, and a bar
+    under half its length has nothing to hold a molecule at all.</p>
+    <p class="cap">A structure is one moment of a protein held still, and the same chain
+    solved twice does not give the same answer, so where a domain has been solved more than
+    once the bar is the middle answer and the thin line laid across it runs from the smallest
+    to the largest. Where that line crosses the upright one, the measurement does not decide
+    the question however confident the bar looks. Nothing drops out quietly: a refused chain
+    still gets a row saying why.</p>
     <!--SURFACE-LANE-->
     <p class="after"><b>Why the predicted group is kept apart, when the sum is the same
     arithmetic.</b> A deposited structure is something that happened: a protein was purified,

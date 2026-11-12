@@ -339,12 +339,21 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .lr .who .w i{font-style:normal;color:var(--fg-2)}
 .lr .plot{position:relative;display:block;height:20px;background:var(--surface-2);border-radius:5px}
 .lr .plot i{position:absolute;display:block}
-.lr .plot .thr{top:-1px;bottom:-1px;width:0;border-left:1.5px dashed var(--fg-3);opacity:.7}
-/* The reference line rather than the threshold: half a footprint, where the gate stops
-   saying no. Two lines of one weight leave a reader unable to tell which the verdict is
-   about. */
-.lr .plot .thr.faint{opacity:.3}
-.lr .plot .b{top:6px;height:8px;border-radius:5px;background:var(--brand)}
+/* The one line on the plot, and the only mark here that is not data: the limit every bar is
+   read against. Solid and a full shade darker than it was, because this is what the whole
+   lane compares to and it used to be a faint dash nobody could see. It continues the labelled
+   rule in `.lane-axis` above the rows, which is where its number is printed. */
+.lr .plot .thr{top:-3px;bottom:-3px;width:0;border-left:1.5px solid var(--fg-2);opacity:.85;z-index:3}
+/* There is no second reference mark. Half a footprint used to be a faint dashed rule and
+   then a shaded span of track, and both competed with the one line the verdict is about --
+   the shading worst of all, because a lighter block at the left of the track reads as
+   something filled in rather than as something subtracted. A reader comparing bars to ONE
+   line does it at a glance; the floor stays in the prose, where it is a sentence rather than
+   a mark to decode. */
+/* Square where it meets the baseline, rounded at the data end: the end that carries the value
+   is the end that gets the corner. Every bar in every lane starts at zero, so none of them is
+   ever rounded on the left. */
+.lr .plot .b{top:6px;height:8px;border-radius:0 5px 5px 0;background:var(--brand)}
 /* Over the ceiling, so no coordinates exist for it. Grey rather than violet: the bar still
    has to show how far over the line the chain is, and colouring it like a result would make
    the longest chains look like the strongest ones. */
@@ -352,12 +361,52 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 /* Measured on a prediction. Outlined, never filled, for the same reason `.tile.p` is. */
 .lr .plot .b.pred{background:color-mix(in srgb,var(--brand) 20%,transparent);
   border:1.5px solid var(--brand);box-sizing:border-box}
-.lr .plot .rng{top:8px;height:4px;border-radius:3px;background:color-mix(in srgb,var(--brand) 32%,transparent)}
-.lr .plot .dot{top:5px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:var(--brand)}
+/* How far the structures of one domain disagree, drawn ON the bar rather than instead of it.
+   Ink, not violet: this is uncertainty about the magnitude the bar already carries, not a
+   second series, so it must not read as another quantity. The caps are the ends of the range
+   and wear a surface-coloured ring like any marker, so they stay legible where they cross
+   the fill. */
+/* Ringed in the track's own colour, which is the only thing that makes it legible on BOTH
+   surfaces it crosses. Ink alone clears the track comfortably in either mode and fails over
+   the bar in dark, where the violet is a light step: measured, white-on-violet is 2.66:1
+   against the 3:1 a graphical mark needs. One hue cannot clear a dark track and a light fill
+   at once, so the mark carries its own separation. */
+.lr .plot .whisk{top:9px;height:2px;border-radius:2px;background:var(--fg);z-index:2;
+  box-shadow:0 0 0 1px var(--surface-2)}
+.lr .plot .whisk::before,.lr .plot .whisk::after{content:"";position:absolute;top:-4px;
+  width:2px;height:10px;border-radius:1px;background:var(--fg);
+  box-shadow:0 0 0 1px var(--surface-2)}
+.lr .plot .whisk::before{left:0}
+.lr .plot .whisk::after{right:0}
 .lr .vl{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;
   text-align:right;white-space:nowrap}
 .lr .vl .cf{display:block;font-size:11.5px;color:var(--fg-3);margin-top:2px}
-.lr.none .plot{background:transparent;border:1px dashed var(--rule)}
+/* A row with nothing to plot keeps its column so the rhythm holds, and loses the dashed box:
+   eleven dashed empty rectangles down one lane read as marks and carry nothing. */
+.lr.none .plot{background:color-mix(in srgb,var(--surface-2) 45%,transparent);border:0}
+/* The gate's reason, as a tag in front of the place rather than a sentence after it. The
+   sentence was identical on every refused row and three lines long in the mono face. */
+.oor{display:inline-block;margin-right:5px;padding:0 5px;border-radius:3px;
+  background:var(--warn-soft);color:var(--warn);font-size:10.5px;letter-spacing:.01em}
+
+/* The lane's shared scale, once, above the rows. Same grid as `.lr` so zero, the limit and
+   the top of the scale sit exactly over the bars they describe -- the scale used to be a
+   sentence in the footer, below twenty rows of marks drawn against a line it had not yet
+   named. */
+.lane-axis{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1.3fr) 9.5ch;gap:16px;
+  align-items:end;padding:13px 17px 6px}
+.lane-axis .ax{position:relative;display:block;height:15px}
+.lane-axis .ax .lim{position:absolute;top:11px;bottom:-4px;width:0;
+  border-left:1.5px solid var(--fg-2);opacity:.55}
+.lane-axis b{position:absolute;bottom:3px;font-family:var(--mono);font-size:10.5px;
+  font-weight:400;color:var(--fg-3);white-space:nowrap}
+.lane-axis .l0{left:0}
+.lane-axis .lm{right:0}
+/* Centred on the limit, and hung off it where the limit sits near either end of the track --
+   with a gap, so a hung label never touches the rule it names. */
+.lane-axis .ll{color:var(--fg-2);margin-left:6px}
+.lane-axis .ll.c{transform:translateX(-50%);margin-left:0}
+.lane-axis .ll.r{transform:translateX(-100%);margin-left:-6px}
 .lane-foot{display:flex;flex-wrap:wrap;gap:5px 18px;justify-content:space-between;
   padding:11px 17px;border-top:1px solid var(--rule);background:var(--surface-2);
   font-family:var(--mono);font-size:11.5px;color:var(--fg-3)}
@@ -369,7 +418,17 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
    ratio of two lengths a reader can see rather than a percentage they have to trust. Grey
    for the whole patch and brand violet for the part at the site, deliberately the same way
    round as `.b.over`: the larger number is the less interesting one here. */
-.lr .plot .b.faintp{background:color-mix(in srgb,var(--fg-3) 26%,transparent)}
+/* A meter: the track IS the whole, so the fill is a share and nothing else has to be drawn.
+   This row used to carry two bars on a scale shared across the lane -- the unit's whole patch
+   behind, the part at the site in front -- and both failed. `validate_palette.js` put the
+   grey of the back bar at 1.4:1 against the track, and the shared scale ran to 10,262 square
+   angstroms, so one outlying unit squeezed every other row's pair into the first tenth of the
+   track and the ratio the lane exists to show became the hardest thing on it to see. The
+   absolute areas moved to the figure column, where they are read and not compared. */
+.lr .plot.meter{background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--rule)}
+.lr .plot.meter .half{position:absolute;left:50%;top:-3px;bottom:-3px;width:0;
+  border-left:1px solid var(--fg-3);opacity:.5}
+.lr.none .plot.meter{box-shadow:none}
 /* The anchors' own confidence, inline in the detail column rather than in the value column,
    because it governs every figure on the row and not only the one it sits beside. Amber when
    any anchor is under the folding tool's own threshold -- `--warn`, the same colour this
@@ -452,6 +511,10 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
   .lr .who{grid-column:1;grid-row:1}
   .lr .vl{grid-column:2;grid-row:1}
   .lr .plot{grid-column:1 / -1;grid-row:2}
+  /* The scale strip follows the plot column it labels: full width, with the name and value
+     columns gone, so zero and the limit stay over the bars rather than over the names. */
+  .lane-axis{grid-template-columns:1fr}
+  .lane-axis span:empty{display:none}
 }
 
 /* two-up */

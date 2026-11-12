@@ -279,6 +279,14 @@
   after it has coordinates to measure.</p>
   
   <div class="lane"><div class="lane-grp"><b>Folded &middot; 10</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
+    <div class="lane-axis" aria-hidden="true">
+      <span></span>
+      <span class="ax"><i class="lim" style="left:44.49%"></i>
+        <b class="l0">0</b>
+        <b class="ll c" style="left:44.49%">400 aa the folding ceiling</b>
+        <b class="lm">899 aa</b></span>
+      <span></span>
+    </div>
     <div class="lr">
       <span class="who"><span class="t">Non-structural protein 1</span>
         <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 96 % identity</span></span>
@@ -370,9 +378,9 @@
       <span class="vl">495 aa
         </span>
     </div>
-    <div class="lane-foot"><span>bar length is the chain&rsquo;s own residue count &middot;
-      longest 899 aa</span>
-      <span>the dashed line is the 400-residue ceiling</span></div>
+    <div class="lane-foot"><span>bar length is the chain&rsquo;s own residue count, from
+      zero, on one scale &middot; longest 899 aa</span>
+      <span>the upright line is the 400-residue folding ceiling</span></div>
   </div>
 </section>
 <section>
@@ -387,32 +395,41 @@
     <span><span class="key p"></span> 4 of those measured on predicted coordinates instead</span>
   </div>
   
-  <div class="lane"><div class="lane-grp"><b>Measured on a shape a model predicted &middot; 4</b><span>nobody has ever solved these, so the shape being measured was predicted from the sequence by stage 3. The arithmetic is identical and the evidence is not, so this group stays in its own column, outside the count above and outside the ranking</span></div>
+  <div class="lane">
+    <div class="lane-grp"><b>Measured on a shape a model predicted &middot; 4</b><span>nobody has ever solved these, so the shape being measured was predicted from the sequence by stage 3. The arithmetic is identical and the evidence is not, so this group stays in its own column, outside the count above and outside the ranking</span></div>
+    <div class="lane-axis" aria-hidden="true">
+      <span></span>
+      <span class="ax"><i class="lim" style="left:6.21%"></i>
+        <b class="l0">0</b>
+        <b class="ll l" style="left:6.21%">600 &Aring;&sup2; a macrocycle&rsquo;s footprint</b>
+        <b class="lm">9,667 &Aring;&sup2;</b></span>
+      <span></span>
+    </div>
     <div class="lr">
       <span class="who"><span class="t">Serine protease subunit NS2B</span>
         <span class="w">the only surface this chain has &middot; fold confidence 43.3</span></span>
-      <span class="plot"><i class="thr faint" style="left:3.10%"></i><i class="thr" style="left:6.21%"></i>
+      <span class="plot"><i class="thr" style="left:6.21%"></i>
         <i class="b pred" style="left:0.00%;width:48.40%"></i></span>
       <span class="vl">4,679 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">Non-structural protein 1</span>
         <span class="w">the only surface this chain has &middot; fold confidence 26.3</span></span>
-      <span class="plot"><i class="thr faint" style="left:3.10%"></i><i class="thr" style="left:6.21%"></i>
+      <span class="plot"><i class="thr" style="left:6.21%"></i>
         <i class="b pred" style="left:0.00%;width:100.00%"></i></span>
       <span class="vl">9,667 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">Peptide pr</span>
         <span class="w">the only surface this chain has &middot; fold confidence 34.6</span></span>
-      <span class="plot"><i class="thr faint" style="left:3.10%"></i><i class="thr" style="left:6.21%"></i>
+      <span class="plot"><i class="thr" style="left:6.21%"></i>
         <i class="b pred" style="left:0.00%;width:25.49%"></i></span>
       <span class="vl">2,464 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">Protein prM</span>
         <span class="w">the only surface this chain has &middot; fold confidence 39.2</span></span>
-      <span class="plot"><i class="thr faint" style="left:3.10%"></i><i class="thr" style="left:6.21%"></i>
+      <span class="plot"><i class="thr" style="left:6.21%"></i>
         <i class="b pred" style="left:0.00%;width:29.88%"></i></span>
       <span class="vl">2,889 Å²<span class="cf">predicted</span></span>
     </div><div class="lane-grp"><b>A shape could be predicted for these, and this run did not &middot; 6</b><span>nobody has solved these either, but each is short enough for stage 3 to fold, so coordinates can exist for them and the current pipeline measures those. They are blank here for a dull reason. This record was written while the surface stage still ran before the fold, so when it asked for coordinates there were none yet. Re-running the chain fills this group in</span></div>
@@ -470,10 +487,10 @@
       <span class="plot"></span>
       <span class="vl">&mdash;</span>
     </div>
-    <div class="lane-foot"><span>one scale for every bar &middot; longest
-      9,667 Å²</span>
-      <span>dashed lines: the 600 Å² macrocycle footprint, about the area one
-      covers when it binds, and half of that</span></div>
+    <div class="lane-foot"><span>every bar starts at zero, on one scale, deposited and
+      predicted together</span>
+      <span>the line across a bar is how far that domain&rsquo;s structures
+      disagree</span></div>
   </div>
   
 </section>

@@ -316,23 +316,30 @@
     
   </div>
   
-  <div class="lane"><div class="lane-grp"><b>Measured on a structure someone solved &middot; 2</b><span>the coordinates came out of a laboratory, so the patch is measured on an observation of the protein. Every structure of that domain is measured. The dot is the middle answer and the bar is the spread from the smallest to the largest, because the same chain solved twice does not give the same number. A chip beside a name is the gate&rsquo;s separate verdict on whether a macrocycle could bind there at all. It appears only where that answer is yes or uncertain. Where it is no, the row says in words what put the chain out of reach</span></div>
+  <div class="lane">
+    <div class="lane-grp"><b>Measured on a structure someone solved &middot; 2</b><span>the coordinates came out of a laboratory, so the patch is measured on an observation of the protein. A chip beside a name is the gate&rsquo;s separate verdict on whether a macrocycle could bind there at all, and it appears only where that answer is yes or uncertain. Where it is no, the row says what put the chain out of reach</span></div>
+    <div class="lane-axis" aria-hidden="true">
+      <span></span>
+      <span class="ax"><i class="lim" style="left:16.41%"></i>
+        <b class="l0">0</b>
+        <b class="ll l" style="left:16.41%">600 &Aring;&sup2; a macrocycle&rsquo;s footprint</b>
+        <b class="lm">3,657 &Aring;&sup2;</b></span>
+      <span></span>
+    </div>
     <div class="lr">
       <span class="who"><span class="t">VME1_BCHK5 Membrane protein<span class="chip-x g-borderline" title="Can a macrocycle bind here? uncertain: the measurement does not decide">borderline</span></span>
         <span class="w">5 deposited structures
           of the same domain &middot; 39.2 % of its surface</span></span>
-      <span class="plot"><i class="thr faint" style="left:8.20%"></i><i class="thr" style="left:16.41%"></i>
-        <i class="rng" style="left:85.03%;width:14.97%"></i>
-        <i class="dot" style="left:96.68%"></i></span>
+      <span class="plot"><i class="thr" style="left:16.41%"></i>
+        <i class="b" style="left:0.00%;width:96.68%"></i><i class="whisk" style="left:85.03%;width:14.97%"></i></span>
       <span class="vl">3,535 Å²<span class="cf">3,109&ndash;3,657</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">3C-like proteinase nsp5</span>
         <span class="w">3 deposited structures
-          of the same domain &middot; 3.9 % of its surface<br>annotated host membrane, host cytoplasm, which puts it out of reach, so a macrocycle is refused here whatever the patch measures &middot; read off the parent entry, not this chain, so it is the weaker kind of verdict</span></span>
-      <span class="plot"><i class="thr faint" style="left:8.20%"></i><i class="thr" style="left:16.41%"></i>
-        <i class="rng" style="left:12.57%;width:2.92%"></i>
-        <i class="dot" style="left:14.78%"></i></span>
+          of the same domain &middot; 3.9 % of its surface<br><span class="oor">out of reach</span> annotated host membrane, host cytoplasm &middot; off the parent entry, not this chain</span></span>
+      <span class="plot"><i class="thr" style="left:16.41%"></i>
+        <i class="b" style="left:0.00%;width:14.78%"></i><i class="whisk" style="left:12.57%;width:2.92%"></i></span>
       <span class="vl">541 Å²<span class="cf">460&ndash;566</span></span>
     </div><div class="lane-grp"><b>A shape could be predicted for these, and this run did not &middot; 8</b><span>nobody has solved these either, but each is short enough for stage 3 to fold, so coordinates can exist for them and the current pipeline measures those. They are blank here for a dull reason. This record was written while the surface stage still ran before the fold, so when it asked for coordinates there were none yet. Re-running the chain fills this group in</span></div>
     <div class="lr none">
@@ -437,10 +444,10 @@
       <span class="plot"></span>
       <span class="vl">&mdash;</span>
     </div>
-    <div class="lane-foot"><span>one scale for every bar &middot; longest
-      3,657 Å²</span>
-      <span>dashed lines: the 600 Å² macrocycle footprint, about the area one
-      covers when it binds, and half of that</span></div>
+    <div class="lane-foot"><span>every bar starts at zero, on one scale, deposited and
+      predicted together</span>
+      <span>the line across a bar is how far that domain&rsquo;s structures
+      disagree</span></div>
   </div>
   <p class="after">All 1 of those verdicts are decided on where the protein sits, which the gate reads before it reads area at all. Every one of these is annotated somewhere a macrocycle cannot arrive, inside the cell or inside the virion, the virus particle itself. Several of their patches clear the footprint line comfortably and are refused anyway. That is the gate saying something about this class of molecule, not about the target.</p>
 </section>
@@ -470,6 +477,14 @@
   after it has coordinates to measure.</p>
   
   <div class="lane"><div class="lane-grp"><b>Inside the ceiling &middot; 10</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
+    <div class="lane-axis" aria-hidden="true">
+      <span></span>
+      <span class="ax"><i class="lim" style="left:21.21%"></i>
+        <b class="l0">0</b>
+        <b class="ll l" style="left:21.21%">400 aa the folding ceiling</b>
+        <b class="lm">1,886 aa</b></span>
+      <span></span>
+    </div>
     <div class="lr">
       <span class="who"><span class="t">3C-like proteinase nsp5</span>
         <span class="w">found in ORF 4 of the ranked set, 4391 aa &middot; 100 % of the relative&rsquo;s chain at 83 % identity</span></span>
@@ -603,9 +618,9 @@
       <span class="vl">413 aa
         </span>
     </div>
-    <div class="lane-foot"><span>bar length is the chain&rsquo;s own residue count &middot;
-      longest 1,886 aa</span>
-      <span>the dashed line is the 400-residue ceiling</span></div>
+    <div class="lane-foot"><span>bar length is the chain&rsquo;s own residue count, from
+      zero, on one scale &middot; longest 1,886 aa</span>
+      <span>the upright line is the 400-residue folding ceiling</span></div>
   </div>
 </section>
 

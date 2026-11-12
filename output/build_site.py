@@ -1389,6 +1389,79 @@ def _tick(value, scale, faint=False):
     return f'<i class="thr{" faint" if faint else ""}" style="left:{left:.2f}%"></i>'
 
 
+def _whisker(low, high, scale):
+    """The spread across every structure of one domain, drawn over its own bar.
+
+    The bar is the median and the whisker is how far the structures disagree, so bar LENGTH
+    always means the same thing on every row of the lane and the whisker never has to be read
+    as a magnitude. Before this they were one mark: a floating segment from smallest to
+    largest with a dot on the median and nothing at zero, so the same horizontal extent meant
+    "how big" on a predicted row and "how uncertain" on a deposited one, and neither was
+    anchored to anything a reader could point at.
+
+    Nothing is drawn for a domain with one structure. A zero-width whisker is not a measured
+    agreement -- it is the absence of a second opinion -- and drawing it as a dot would put a
+    mark on the page for a quantity that was never measured.
+    """
+    if not high or high <= low:
+        return ""
+    left = min(max(low / scale * 100, 0), 100)
+    width = min(max((high - low) / scale * 100, 0.4), 100 - left)
+    return f'<i class="whisk" style="left:{left:.2f}%;width:{width:.2f}%"></i>'
+
+
+def _share_axis():
+    """The scale for a lane of meters, where each row's track is its own whole.
+
+    A share lane takes no shared absolute scale and must not be given one. The site patches
+    run from 0 to 10,262 square angstroms, so one outlying unit on a common axis squeezes
+    every other row's pair of bars into the first tenth of the track -- and the quantity that
+    lane exists to show is the RATIO, which then becomes the hardest thing on it to see. Each
+    row is a meter against its own unit's patch instead, so the fills are directly comparable
+    as shares and the absolute areas travel in the figure beside them, which is the meter-list
+    contract: a name, a bar and a figure per row.
+    """
+    return """
+    <div class="lane-axis" aria-hidden="true">
+      <span></span>
+      <span class="ax"><i class="lim" style="left:50%"></i>
+        <b class="l0">none of it</b>
+        <b class="ll c" style="left:50%">half</b>
+        <b class="lm">the unit&rsquo;s whole patch</b></span>
+      <span></span>
+    </div>"""
+
+
+def _lane_axis(scale, limit, label, unit="&Aring;&sup2;"):
+    """One scale strip above the rows, so the bars below are read against a visible line.
+
+    The scale used to live in the lane's footer, in words, under twenty rows of bars -- so a
+    reader met the marks before the thing they were drawn against, and the threshold itself
+    was a faint dashed rule with no number on it anywhere near the plot. This puts zero, the
+    limit and the top of the scale over the first bar, on the same grid as every row, and the
+    per-row rule becomes a gridline continuing a labelled line rather than a mark a reader has
+    to decode.
+
+    The limit's label is centred on it and pulled inside the strip at either end, because a
+    label centred on a limit near zero or near the maximum hangs off the plot.
+    """
+    at = min(max(limit / scale * 100, 0), 100)
+    # Centred on the limit only where a centred label has room on both sides. The fold lane
+    # is the case: its ceiling sits at 400 of a 1,945-residue scale, 20.6 % along, and a label
+    # centred there reached back over the `0` and printed on top of it. A third of the track
+    # at either end is the band where the label has to hang off its rule rather than straddle.
+    anchor = "l" if at < 33 else ("r" if at > 67 else "c")
+    return f"""
+    <div class="lane-axis" aria-hidden="true">
+      <span></span>
+      <span class="ax"><i class="lim" style="left:{at:.2f}%"></i>
+        <b class="l0">0</b>
+        <b class="ll {anchor}" style="left:{at:.2f}%">{limit:,.0f} {unit} {label}</b>
+        <b class="lm">{scale:,.0f} {unit}</b></span>
+      <span></span>
+    </div>"""
+
+
 def fold_lane(case):
     """Stage 3's rows: where each chain was found, how long it is, and the ceiling.
 
@@ -1496,18 +1569,21 @@ def fold_lane(case):
             if inventory else
             "no region inventory has been recorded for this run")),
     ]
-    body = []
+    # The same scale strip the other two lanes carry, directly above the first row of bars.
+    body, axis = [], _lane_axis(scale, ceiling, "the folding ceiling", unit="aa")
     for members, title, note in groups:
         if not members:
             continue
         body.append(f'<div class="lane-grp"><b>{title}</b><span>{note}</span></div>')
+        body.append(axis)
+        axis = ""
         body.extend(row_html(r) for r in sorted(
             members, key=lambda r: -(r.get("recovered_length_aa") or 0)))
     return f"""
   <div class="lane">{"".join(body)}
-    <div class="lane-foot"><span>bar length is the chain&rsquo;s own residue count &middot;
-      longest {num(scale)} aa</span>
-      <span>the dashed line is the {num(ceiling)}-residue ceiling</span></div>
+    <div class="lane-foot"><span>bar length is the chain&rsquo;s own residue count, from
+      zero, on one scale &middot; longest {num(scale)} aa</span>
+      <span>the upright line is the {num(ceiling)}-residue folding ceiling</span></div>
   </div>"""
 
 
@@ -1577,35 +1653,45 @@ def surface_lane(case):
         # weaker claim than one read off the chain, and the record says which this was.
         scope = surface.get("location_scope")
         borrowed = ("" if scope == "chain" else
-                    " &middot; read off the parent entry, not this chain, so it is the "
-                    "weaker kind of verdict")
+                    " &middot; off the parent entry, not this chain")
+        # The clause this used to end with -- "which puts it out of reach, so a macrocycle is
+        # refused here whatever the patch measures" -- was identical on all nine measured rows
+        # and three lines long in the mono face, so the sentence a reader had already read
+        # eight times was the largest thing in the row and the chart was a strip beside it.
+        # It is said once, in the group note and in the paragraph under the lane, and what
+        # stays here is the only part that differs per chain: where this protein sits.
+        #
         # "Out of reach" rather than "inside the cell", which is the commoner case but not
         # the only one: ORF9b is annotated `Virion`, which is inside the particle, and
         # UniProt distinguishes that from `Virion membrane` precisely because one is a
         # surface a molecule can arrive at and the other is not.
-        return (f'<br>annotated {esc(where)}, which puts it out of reach, so a macrocycle '
-                f'is refused here whatever the patch measures{borrowed}')
+        return (f'<br><span class="oor">out of reach</span> annotated {esc(where)}'
+                f'{borrowed}')
 
     def measured_row(row):
         surface = row["surface"]
         low, high = surface.get("patch_range_a2") or [0, 0]
         median = surface.get("patch_median_a2") or 0
-        left = (low or 0) / scale * 100
-        span = ((high or 0) - (low or 0)) / scale * 100
-        dot = median / scale * 100
         structures = surface.get("structures_measured")
         fraction = surface.get("patch_fraction_of_surface")
         share = (f" &middot; {fraction * 100:.1f} % of its surface"
                  if fraction is not None else "")
+        # The spread under the value, and only where there is one. `522-522` on the single
+        # structure of nsp2 reads as a measured agreement between two numbers when it is one
+        # number printed twice.
+        # How many structures is already the first thing the left column says, so repeating
+        # it here cost the range its room: `287-1,186 across 5` overran a column sized for
+        # `1,186 A2` and was clipped mid-word.
+        spread = (f'<span class="cf">{low:,.0f}&ndash;{high:,.0f}</span>' if high > low else
+                  '<span class="cf">one structure</span>')
         return f"""
     <div class="lr">
       <span class="who"><span class="t">{esc(row['target'])}{chip(row)}</span>
         <span class="w">{num(structures)} deposited structure{'' if structures == 1 else 's'}
           of the same domain{share}{verdict_note(row)}</span></span>
-      <span class="plot">{_tick(footprint / 2, scale, faint=True)}{_tick(footprint, scale)}
-        <i class="rng" style="left:{left:.2f}%;width:{max(span, 0.4):.2f}%"></i>
-        <i class="dot" style="left:{dot:.2f}%"></i></span>
-      <span class="vl">{median:,.0f} Å²<span class="cf">{low:,.0f}&ndash;{high:,.0f}</span></span>
+      <span class="plot">{_tick(footprint, scale)}
+        {_bar(median / scale * 100)}{_whisker(low, high, scale)}</span>
+      <span class="vl">{median:,.0f} Å²{spread}</span>
     </div>"""
 
     def predicted_row(row):
@@ -1623,7 +1709,7 @@ def surface_lane(case):
     <div class="lr">
       <span class="who"><span class="t">{esc(row['target'])}</span>
         <span class="w">{note}{confidence}</span></span>
-      <span class="plot">{_tick(footprint / 2, scale, faint=True)}{_tick(footprint, scale)}
+      <span class="plot">{_tick(footprint, scale)}
         {_bar(patch / scale * 100, cls="b pred")}</span>
       <span class="vl">{patch:,.0f} Å²<span class="cf">predicted</span></span>
     </div>"""
@@ -1646,6 +1732,15 @@ def surface_lane(case):
 
     measured = [r for r in rows if r["measured"]]
     predicted = [r for r in rows if r["predicted"] and not r["measured"]]
+    # Why the measured group reads the way it does, derived here because the group's note
+    # asserts it. On the held-out SARS-CoV-2 record every measured chain is refused on where
+    # the protein sits, which is worth saying once at the top of the group instead of in a
+    # sentence repeated down every row -- but it is a fact about this record, and the same
+    # lane is drawn for four other genomes. A note that stated it unconditionally would be a
+    # claim about their gates that nothing had checked.
+    turned_away = [r for r in measured if r["surface"].get("gate") == "no"]
+    by_location = [r for r in turned_away if r["surface"].get("exposed") is False]
+    all_on_location = bool(measured) and len(by_location) == len(measured)
     # The rescue set, which is the half of the reorder a record can only state once it has
     # run under it. Where the measurements exist they are shown; where they do not, these are
     # the chains that get them on the next run, named rather than counted, and the group says
@@ -1657,12 +1752,14 @@ def surface_lane(case):
         (measured, measured_row,
          f"Measured on a structure someone solved &middot; {len(measured)}",
          "the coordinates came out of a laboratory, so the patch is measured on an "
-         "observation of the protein. Every structure of that domain is measured. The dot "
-         "is the middle answer and the bar is the spread from the smallest to the largest, "
-         "because the same chain solved twice does not give the same number. A chip beside "
-         "a name is the gate&rsquo;s separate verdict on whether a macrocycle could bind "
-         "there at all. It appears only where that answer is yes or uncertain. Where it is "
-         "no, the row says in words what put the chain out of reach"),
+         "observation of the protein. "
+         + ("Every one of these is refused anyway, on where the protein sits rather than on "
+            "its patch &mdash; the row names the place"
+            if all_on_location else
+            "A chip beside a name is the gate&rsquo;s separate verdict on whether a "
+            "macrocycle could bind there at all, and it appears only where that answer is "
+            "yes or uncertain. Where it is no, the row says what put the chain out of "
+            "reach")),
         (predicted, predicted_row,
          f"Measured on a shape a model predicted &middot; {len(predicted)}",
          "nobody has ever solved these, so the shape being measured was predicted from the "
@@ -1683,11 +1780,16 @@ def surface_lane(case):
          f"be reached: stage 3&rsquo;s lane above lists the functionally important regions "
          f"their relatives annotate, and they are short enough"),
     ]
-    body = []
+    # The scale strip goes immediately above the first row of bars, not at the top of the
+    # lane: a group's note runs to five or six lines, and an axis separated from the marks it
+    # labels by that much stops being read as their axis at all.
+    body, axis = [], _lane_axis(scale, footprint, "a macrocycle&rsquo;s footprint")
     for members, render, title, note in groups:
         if not members:
             continue
         body.append(f'<div class="lane-grp"><b>{title}</b><span>{note}</span></div>')
+        body.append(axis)
+        axis = ""
         order = (sorted(members, key=lambda r: -(r["surface"].get("patch_median_a2") or 0))
                  if render is measured_row else
                  sorted(members, key=lambda r: r.get("rank") or 99))
@@ -1696,8 +1798,7 @@ def surface_lane(case):
     # Why the verdicts read the way they do, counted rather than asserted. Every refusal in
     # this record is decided before area is read, and a column of "no" beside bars that clear
     # the threshold is unreadable without that sentence.
-    refused = [r for r in measured if r["surface"].get("gate") == "no"]
-    on_location = [r for r in refused if r["surface"].get("exposed") is False]
+    refused, on_location = turned_away, by_location
     verdicts = ""
     if refused:
         verdicts = (f"All {len(refused)} of those verdicts are decided on where the protein "
@@ -1711,11 +1812,12 @@ def surface_lane(case):
                     f"{len(on_location)} of {len(refused)} refusals are decided on where "
                     f"the protein sits. The rest fail on area.")
     return f"""
-  <div class="lane">{"".join(body)}
-    <div class="lane-foot"><span>one scale for every bar &middot; longest
-      {scale:,.0f} Å²</span>
-      <span>dashed lines: the {footprint:,.0f} Å² macrocycle footprint, about the area one
-      covers when it binds, and half of that</span></div>
+  <div class="lane">
+    {"".join(body)}
+    <div class="lane-foot"><span>every bar starts at zero, on one scale, deposited and
+      predicted together</span>
+      <span>the line across a bar is how far that domain&rsquo;s structures
+      disagree</span></div>
   </div>
   {f'<p class="after">{verdicts}</p>' if verdicts else ''}"""
 
@@ -1830,9 +1932,6 @@ def site_patch_block(case):
     rows = payload.get("rows") or []
     if not rows:
         return ""
-    footprint = MACROCYCLE_FOOTPRINT_A2
-    scale = max([(r.get("unit_patch") or {}).get("hydrophobic_patch_area") or 0
-                 for r in rows] + [footprint]) or 1
 
     def confidence(block):
         """The anchors' own confidence, which decides whether the rest of the row means much."""
@@ -1915,8 +2014,8 @@ def site_patch_block(case):
           fold positions {esc(shown)} &middot; {num(reach.get('residues'))} residues within
           reach, {num(reach.get('hydrophobic'))} of them water-repelling
           {confidence(row.get('anchor_confidence'))}{chemistry_line(row)}{unchecked}</span></span>
-      <span class="plot">{_tick(footprint / 2, scale, faint=True)}{_tick(footprint, scale)}
-        {_bar(whole / scale * 100, cls="b faintp")}{_bar(area / scale * 100, cls="b site")}</span>
+      <span class="plot meter"><i class="half"></i>
+        {_bar((share or 0) * 100, cls="b site")}</span>
       <span class="vl">{area:,.0f} Å²<span class="cf">{quoted}</span></span>
     </div>"""
 
@@ -1929,7 +2028,7 @@ def site_patch_block(case):
       <span class="who"><span class="t">{esc(row.get('label'))}</span>
         <span class="w">{head}{'<br>' if head else ''}
           {esc(reason)}</span></span>
-      <span class="plot"></span>
+      <span class="plot meter"></span>
       <span class="vl">&mdash;</span>
     </div>"""
 
@@ -1949,13 +2048,10 @@ def site_patch_block(case):
     groups = [
         (chemistry, measured_row,
          f"Measured at the residues the curators marked &middot; {len(chemistry)}",
-         "the solid bar is the part of the unit&rsquo;s largest water-repelling patch that "
-         "lies where a macrocycle sitting on those residues could reach it; the faint bar "
-         "behind it is the whole of that patch, wherever on the unit it is. The gap between "
-         "the two is how much of the surface step 4 scored the unit on is not at the "
-         "chemistry. An empty solid bar does not mean the site has no water-repelling "
-         "surface: it means the unit&rsquo;s LARGEST patch is elsewhere, and a smaller one "
-         "sitting squarely on the site is invisible to this arithmetic"),
+         "each bar is one unit&rsquo;s own largest water-repelling patch, drawn full width "
+         "whatever its area; the fill is how much of it a macrocycle on the marked residues "
+         "could reach, and the area itself is the figure on the right. An empty bar means "
+         "the unit&rsquo;s LARGEST patch is elsewhere, never that the site has none"),
         (processing, measured_row,
          f"Measured, but only at cleavage boundaries &middot; {len(processing)}",
          "the only residues the curators marked inside these units are the points where a "
@@ -1979,11 +2075,16 @@ def site_patch_block(case):
          "genome because the alignment found an indel there, or the unit never got "
          "coordinates. None of them is a statement that nothing happens on these proteins"),
     ]
-    body = []
+    # The scale strip sits immediately above the first row of bars, for the reason
+    # `surface_lane` gives: a group note runs to several lines, and an axis that far from the
+    # marks it labels stops being read as their axis.
+    body, axis = [], _share_axis()
     for members, render, title, note in groups:
         if not members:
             continue
         body.append(f'<div class="lane-grp"><b>{title}</b><span>{note}</span></div>')
+        body.append(axis)
+        axis = ""
         order = (sorted(members,
                         key=lambda r: -((r.get("site_patch") or {}).get(
                             "site_share_of_the_largest_patch") or 0))
@@ -1998,11 +2099,11 @@ def site_patch_block(case):
              f"{overlapping} pairs of these rows carry spans that overlap as numbers while "
              f"sharing no residue.")
     return f"""
-  <div class="lane">{"".join(body)}
-    <div class="lane-foot"><span>one scale for every bar &middot; largest patch on any unit
-      {scale:,.0f} Å²</span>
-      <span>dashed lines: the {footprint:,.0f} Å² a macrocycle covers when it binds, and half
-      of that</span></div>
+  <div class="lane">
+    {"".join(body)}
+    <div class="lane-foot"><span>each bar is one unit&rsquo;s whole patch; the fill is the
+      part of it the marked residues reach</span>
+      <span>areas are in the figures, not the bars &mdash; the units are not one size</span></div>
   </div>
   <p class="after"><b>What had to be true before any of these numbers could be printed.</b>
   An annotated position is curated on the relative&rsquo;s entry, the residues here are
