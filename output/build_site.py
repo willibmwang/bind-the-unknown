@@ -1102,6 +1102,23 @@ def literature_block(case):
     # on the page the fact that these are today's records is the whole of it, and a reader
     # who wants it argued has the record. Where a ceiling WAS applied the sentence has to
     # carry the date, because then it is the measurement the control query exists to make.
+    # Distinct papers, not hit rows. The record's own headline counts rows, and the two are
+    # not close: 65 rows across this run are 33 papers. Two targets that compose the same
+    # query are served the same hits -- S2' and S2 are both the spike and anchor identically,
+    # so four of S2's queries are answered from the cache and repeat S2's records row for row.
+    # Counting rows is right for the record, which is per query; a reader of the page counts
+    # papers, and 65 would read as twice the literature there is.
+    seen = {(h.get("source"), h.get("id"))
+            for row in targets for q in (row.get("queries") or ())
+            for h in (q.get("hits") or ()) if h.get("id")}
+    rows_shown = sum(len(q.get("hits") or ()) for row in targets
+                     for q in (row.get("queries") or ()))
+    asked = sum(1 for row in targets for q in (row.get("queries") or ())
+                if q.get("status") == "ok")
+    headline = (f"{num(len(seen))} distinct records over {num(asked)} composed "
+                f"{'queries' if asked != 1 else 'query'}"
+                + (f", listed {num(rows_shown)} times because targets that compose the same "
+                   f"query are shown the same records" if rows_shown != len(seen) else ""))
     ceiling = payload.get("date_ceiling_applied")
     note = ("Retrieved without a publication-date limit, so these are the records as they "
             "stand today." if not ceiling else
@@ -1109,7 +1126,7 @@ def literature_block(case):
             f"against a control query that omits the limit.")
     return f"""
   <div class="lit">
-    <div class="lith">{esc(payload.get('answer'))}<span>{note}</span></div>
+    <div class="lith">{headline}<span>{note}</span></div>
     {"".join(blocks)}
   </div>"""
 
