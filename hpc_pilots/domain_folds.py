@@ -110,14 +110,21 @@ def _unit_slug(rank, target, label):
     return f"r{int(rank):02d}_{_slug(target)}__{_slug(label)}"
 
 
-def _orf_pool(accession):
-    """The twelve longest open reading frames of this genome, as the recorded run had them.
+def _orf_records(accession):
+    """The twelve longest open reading frames, with the frame metadata that identifies them.
 
     Through `genome_records` and not `fetch_genome`, because the latter returns a bare
     `(header, sequence)` pair for one accession and a list of them for a segmented genome.
     `genome_records` always returns the list, and ORFs are called per segment and pooled:
     translating a concatenation would create reading frames across a junction that exists in
     no molecule, which is the reason `fetch_genome` refuses to join them in the first place.
+
+    `_orf_pool` below used to be the only door and it kept `protein` alone, so an index into
+    the pool was the whole of what a downstream record could say about which reading frame a
+    position was numbered along. `intake.orfs` returns `strand`, `frame` and `nt_start` beside
+    the translation, and those three are the frame itself rather than a position in a list that
+    a different pool would order differently. Kept here, discarded there, and `site_patches`
+    takes this door because its rows publish positions numbered along one of these frames.
     """
     from .intake import genome_records, orfs
 
@@ -125,7 +132,12 @@ def _orf_pool(accession):
     for _header, sequence in genome_records(accession):
         found.extend(orfs(sequence))
     found.sort(key=lambda o: -o["length_aa"])
-    return [o["protein"] for o in found[:ORF_POOL]]
+    return found[:ORF_POOL]
+
+
+def _orf_pool(accession):
+    """The same twelve, as translations alone -- what `_locate` indexes and aligns against."""
+    return [o["protein"] for o in _orf_records(accession)]
 
 
 def _locate(reference, pool, aligner):
@@ -183,6 +195,25 @@ def _reference(accession, span, cache):
     return _entry(accession)["sequence"]["value"]
 
 
+def _region_label(region):
+    """One name for one region, through `domains.label_for` and never built here.
+
+    This module built the fallback itself and disagreed with the module that owns it: the
+    bare feature type against `domains.label_for`'s type-plus-span. Measured on Spike protein
+    S2 (Q3LZX1) on 2026-11-12, an undescribed `Coiled coil` was `Coiled coil` in the fold
+    store and `Coiled coil 918-962` everywhere else, so a per-region join between the two
+    records failed on exactly the regions a curator left undescribed. The inventory row names
+    its span differently from an annotated region, so it is translated here rather than
+    `label_for` being taught a second shape.
+    """
+    span = region.get("entry_span_on_the_relative") or []
+    return domains.label_for({
+        "type": region.get("type"),
+        "description": region.get("description"),
+        "start": span[0] if len(span) == 2 else None,
+        "end": span[1] if len(span) == 2 else None})
+
+
 def _units(chain, located, inventory_chain, ceiling):
     """What to fold for one chain: the whole chain if it fits, else its leading domains."""
     span = chain.get("chain_range_on_the_relative") or chain.get("chain_range")
@@ -210,8 +241,7 @@ def _units(chain, located, inventory_chain, ceiling):
             # The alignment never reached this region -- which happens when the chain was
             # located in a different ORF from the one the region sits in. Recorded rather
             # than skipped, because an absence with a reason is the house rule.
-            units.append({"kind": "domain", "label": region.get("description")
-                          or region.get("region_type") or region.get("type"),
+            units.append({"kind": "domain", "label": _region_label(region),
                           "region_type": region.get("type"),
                           "description": region.get("description"),
                           "entry_span_on_the_relative": entry_span,
@@ -223,7 +253,7 @@ def _units(chain, located, inventory_chain, ceiling):
             continue
         sequence = located["orf"][mapped["start"] - 1:mapped["end"]]
         unit = {"kind": "domain",
-                "label": region.get("description") or region.get("type"),
+                "label": _region_label(region),
                 "region_type": region.get("type"),
                 "description": region.get("description"),
                 "entry_span_on_the_relative": entry_span,

@@ -1595,11 +1595,11 @@
           889&ndash;939 on the relative&rsquo;s entry &middot; 929&ndash;979 in this genome</div>
       </div>
       <div class="dfold">
-        <img src="domain_folds/r03_spike_protein_s2__coiled_coil.png" loading="lazy"
-          alt="The predicted backbone of Coiled coil, drawn on its two principal
+        <img src="domain_folds/r03_spike_protein_s2__coiled_coil_918_962.png" loading="lazy"
+          alt="The predicted backbone of Coiled coil 918-962, drawn on its two principal
             axes and coloured by per-residue confidence, beside a plot of that confidence
             against residue position.">
-        <div class="cc"><b>Coiled coil</b> &middot;
+        <div class="cc"><b>Coiled coil 918-962</b> &middot;
           45 residues &middot; mean confidence <b>93.0</b> of 100<br>
           918&ndash;962 on the relative&rsquo;s entry &middot; 958&ndash;1,002 in this genome</div>
       </div>
@@ -1881,11 +1881,11 @@
           889&ndash;939 on the relative&rsquo;s entry &middot; 929&ndash;979 in this genome</div>
       </div>
       <div class="dfold">
-        <img src="domain_folds/r01_spike_protein_s2__coiled_coil.png" loading="lazy"
-          alt="The predicted backbone of Coiled coil, drawn on its two principal
+        <img src="domain_folds/r01_spike_protein_s2__coiled_coil_918_962.png" loading="lazy"
+          alt="The predicted backbone of Coiled coil 918-962, drawn on its two principal
             axes and coloured by per-residue confidence, beside a plot of that confidence
             against residue position.">
-        <div class="cc"><b>Coiled coil</b> &middot;
+        <div class="cc"><b>Coiled coil 918-962</b> &middot;
           45 residues &middot; mean confidence <b>93.0</b> of 100<br>
           918&ndash;962 on the relative&rsquo;s entry &middot; 958&ndash;1,002 in this genome</div>
       </div>
@@ -2732,6 +2732,399 @@
     into <b>an answer that says where it came from</b>.</p>
     <p class="after">That gate is a statement about this class of molecule and not about the
     target, so it never becomes a term in the ranking.</p>
+  </div>
+
+  <div class="substep" id="site-patch">
+    <h3>Is the patch where the chemistry is?</h3>
+    <p class="cap">Everything above measures the largest water-repelling patch
+    <i>anywhere</i> on a structure. That is the right question for &ldquo;could this protein
+    hold a molecule of this class at all&rdquo;, and it is not the question a binder designer
+    asks second, which is where on the protein to put one. The curators have already marked
+    the residues that do the work — the catalytic ones, the ligand-binding ones — so the same
+    arithmetic can be asked at that location instead of at the chain's best address.</p>
+    <p class="cap">A macrocycle covers about <b>600</b> Å² when it binds, which
+    makes it roughly <b>13.8</b> Å across. So for each folded unit: take the
+    residues the annotation marks, collect everything within that distance of them, and
+    intersect it with the patch step 4 found. <b>23</b> of
+    <b>37</b> folded units have at least one marked residue inside the
+    coordinates; the other units say which of four absences applies.</p>
+    <p class="cap">The two numbers disagree, and the size of the disagreement is the finding.
+    Step 4's question has a yes-or-no answer — does the unit's best patch reach the marked
+    residues at all — and <b>21</b> of <b>23</b> units say
+    yes, which is too coarse to act on. The share says how much. At one end of this run,
+    <i>Y1 on Papain-like protease nsp3</i> holds <b>94 %</b> of its unit's patch at the
+    marked residues; at the other, <i>AP3A_BC279 Protein 3</i> holds
+    <b>19 %</b>, so most of the surface that unit was scored on is somewhere
+    else. Both are a yes.</p>
+    <p class="cap"><b>Not every marked residue is a place to put a binder.</b> On a
+    coronavirus polyprotein most plain site annotations are the points where a protease cuts
+    the chain, and a cleavage boundary sits at the <i>end</i> of a mature chain by
+    construction — so a neighbourhood drawn around one is a neighbourhood of a dangling
+    terminus. Both measurements are therefore reported. <i>3C-like proteinase nsp5</i> is where it
+    costs the most: <b>586.7</b> Å² of its <b>2,012.6</b> Å² patch at
+    all its marked residues, <b>29 %</b> — and
+    <b>185.6</b> Å², <b>9 %</b>, over the residues that do
+    chemistry once its 2 cleavage sites are
+    dropped.</p>
+    <p class="cap"><b>Read the confidence first.</b> These are predicted coordinates, and
+    <b>70</b> of the <b>106</b> marked residues sit below the
+    folding tool's own confidence threshold — many of them cleavage boundaries, disordered
+    because they are chain ends rather than because of anything about the chemistry.
+    <b>8</b> units have nothing but cleavage boundaries in them, and
+    they are grouped apart below.</p>
+    <p class="cap">And before any of it is printed: a marked position is curated on the
+    relative's entry, carried through the alignment into one reading frame of this genome, then
+    into coordinates numbered from one. Each row was checked against the residue the
+    relative's entry actually carries at that position, and <b>23</b> of
+    <b>23</b> land on it. A row that did not would have its figures withheld
+    here, because a patch measured at the wrong residues is worse than no patch — only the
+    second is visible as an absence. The rows run along <b>8</b> different
+    reading frames, and <b>50</b> pairs of them carry spans that overlap as
+    numbers while sharing no residue, so every row names its frame.</p>
+    
+  <div class="lane"><div class="lane-grp"><b>Measured at the residues the curators marked &middot; 15</b><span>the solid bar is the part of the unit&rsquo;s largest water-repelling patch that lies where a macrocycle sitting on those residues could reach it; the faint bar behind it is the whole of that patch, wherever on the unit it is. The gap between the two is how much of the surface step 4 scored the unit on is not at the chemistry. An empty solid bar does not mean the site has no water-repelling surface: it means the unit&rsquo;s LARGEST patch is elsewhere, and a smaller one sitting squarely on the site is invisible to this arithmetic</span></div>
+    <div class="lr">
+      <span class="who"><span class="t">Y1</span>
+        <span class="w">Papain-like protease nsp3 &middot; 2,395&ndash;2,485 of reading frame +1 at nt 266<br>
+          fold positions 5, 10, 15, 18, 51, 54, 58, 61 &middot; 80 residues within
+          reach, 37 of them water-repelling
+          <span class="cf lowc">confidence 34.1, 8 of 8 under the model&rsquo;s own 70</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:23.74%"></i><i class="b site" style="left:0.00%;width:22.43%"></i></span>
+      <span class="vl">2,302 Å²<span class="cf">94 % of 2,437</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">CV ZBD</span>
+        <span class="w">Helicase nsp13 &middot; 824&ndash;936 of reading frame +0 at nt 13768<br>
+          fold positions 1, 5, 8, 16, 19, 26, 29, 33 and 5 more &middot; 95 residues within
+          reach, 50 of them water-repelling
+          <span class="cf lowc">confidence 78.1, 1 of 13 under the model&rsquo;s own 70</span><br>over the chemistry residues alone, 1 cleavage site dropped: 91 residues within reach, patch 1,863.9 Å² <span class="cf">confidence 81.2, none under the threshold</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:23.24%"></i><i class="b site" style="left:0.00%;width:20.83%"></i></span>
+      <span class="vl">2,138 Å²<span class="cf">90 % of 2,385</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">RdRp Palm C-ter</span>
+        <span class="w">RNA-directed RNA polymerase nsp12 &middot; 571&ndash;706 of reading frame +0 at nt 13768<br>
+          fold positions 80, 81, 82 &middot; 50 residues within
+          reach, 26 of them water-repelling
+          <span class="cf">confidence 75.0, none under the threshold</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:15.37%"></i><i class="b site" style="left:0.00%;width:11.92%"></i></span>
+      <span class="vl">1,223 Å²<span class="cf">78 % of 1,577</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 10</span>
+        <span class="w">4,254&ndash;4,392 of reading frame +1 at nt 266<br>
+          fold positions 1, 74, 77, 83, 90, 117, 120, 128 and 2 more &middot; 95 residues within
+          reach, 47 of them water-repelling
+          <span class="cf lowc">confidence 33.2, 10 of 10 under the model&rsquo;s own 70</span><br>over the chemistry residues alone, 2 cleavage sites dropped: 87 residues within reach, patch 3,248.1 Å² <span class="cf lowc">confidence 34.5, 8 of 8 under the model&rsquo;s own 70</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:45.53%"></i><i class="b site" style="left:0.00%;width:34.00%"></i></span>
+      <span class="vl">3,489 Å²<span class="cf">75 % of 4,672</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">C2HC</span>
+        <span class="w">Non-structural protein 2 &middot; 370&ndash;416 of reading frame +1 at nt 266<br>
+          fold positions 1, 4, 13, 47 &middot; 27 residues within
+          reach, 13 of them water-repelling
+          <span class="cf lowc">confidence 40.0, 4 of 4 under the model&rsquo;s own 70</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:18.05%"></i><i class="b site" style="left:0.00%;width:13.39%"></i></span>
+      <span class="vl">1,374 Å²<span class="cf">74 % of 1,852</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Nsp12 Interface</span>
+        <span class="w">RNA-directed RNA polymerase nsp12 &middot; 157&ndash;255 of reading frame +0 at nt 13768<br>
+          fold positions 30, 36, 41, 45 &middot; 45 residues within
+          reach, 25 of them water-repelling
+          <span class="cf lowc">confidence 39.5, 4 of 4 under the model&rsquo;s own 70</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:23.80%"></i><i class="b site" style="left:0.00%;width:14.05%"></i></span>
+      <span class="vl">1,442 Å²<span class="cf">59 % of 2,442</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">CoV N NTD</span>
+        <span class="w">NCAP_BCRP3 Nucleoprotein &middot; 48&ndash;175 of reading frame +1 at nt 28274<br>
+          fold positions 45, 60, 102 &middot; 55 residues within
+          reach, 25 of them water-repelling
+          <span class="cf lowc">confidence 45.7, 3 of 3 under the model&rsquo;s own 70</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:21.56%"></i><i class="b site" style="left:0.00%;width:12.26%"></i></span>
+      <span class="vl">1,258 Å²<span class="cf">57 % of 2,213</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">RdRp catalytic</span>
+        <span class="w">RNA-directed RNA polymerase nsp12 &middot; 503&ndash;665 of reading frame +0 at nt 13768<br>
+          fold positions 31, 34, 35, 148, 149, 150 &middot; 72 residues within
+          reach, 38 of them water-repelling
+          <span class="cf lowc">confidence 70.2, 3 of 6 under the model&rsquo;s own 70</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:17.93%"></i><i class="b site" style="left:0.00%;width:9.74%"></i></span>
+      <span class="vl">1,000 Å²<span class="cf">54 % of 1,840</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">CoV Nsp2 N-terminal</span>
+        <span class="w">Non-structural protein 2 &middot; 183&ndash;456 of reading frame +1 at nt 266<br>
+          fold positions 18, 49, 52, 54, 141, 144, 159, 162 and 4 more &middot; 139 residues within
+          reach, 62 of them water-repelling
+          <span class="cf lowc">confidence 41.4, 12 of 12 under the model&rsquo;s own 70</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:65.66%"></i><i class="b site" style="left:0.00%;width:35.18%"></i></span>
+      <span class="vl">3,610 Å²<span class="cf">54 % of 6,738</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">CoV Nsp3 Y</span>
+        <span class="w">Papain-like protease nsp3 &middot; 2,395&ndash;2,763 of reading frame +1 at nt 266<br>
+          fold positions 5, 10, 15, 18, 51, 54, 58, 61 and 1 more &middot; 98 residues within
+          reach, 41 of them water-repelling
+          <span class="cf lowc">confidence 26.2, 9 of 9 under the model&rsquo;s own 70</span><br>over the chemistry residues alone, 1 cleavage site dropped: 92 residues within reach, patch 2,568.7 Å² <span class="cf lowc">confidence 26.9, 8 of 8 under the model&rsquo;s own 70</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:64.84%"></i><i class="b site" style="left:0.00%;width:25.99%"></i></span>
+      <span class="vl">2,668 Å²<span class="cf">40 % of 6,654</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">RNA-binding</span>
+        <span class="w">NCAP_BCRP3 Nucleoprotein &middot; 41&ndash;186 of reading frame +1 at nt 28274<br>
+          fold positions 52, 67, 109 &middot; 58 residues within
+          reach, 23 of them water-repelling
+          <span class="cf lowc">confidence 45.3, 3 of 3 under the model&rsquo;s own 70</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:26.94%"></i><i class="b site" style="left:0.00%;width:10.71%"></i></span>
+      <span class="vl">1,099 Å²<span class="cf">40 % of 2,764</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Peptidase C16</span>
+        <span class="w">Papain-like protease nsp3 &middot; 1,634&ndash;1,898 of reading frame +1 at nt 266<br>
+          fold positions 41, 119, 122, 154, 156, 202, 216 &middot; 114 residues within
+          reach, 51 of them water-repelling
+          <span class="cf">confidence 83.9, none under the threshold</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:9.11%"></i><i class="b site" style="left:0.00%;width:3.60%"></i></span>
+      <span class="vl">369 Å²<span class="cf">40 % of 935</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">(+)RNA virus helicase ATP-binding</span>
+        <span class="w">Helicase nsp13 &middot; 1,080&ndash;1,261 of reading frame +0 at nt 13768<br>
+          fold positions 26, 27, 28, 29, 30, 31, 32, 33 &middot; 74 residues within
+          reach, 39 of them water-repelling
+          <span class="cf">confidence 87.6, none under the threshold</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:11.94%"></i><i class="b site" style="left:0.00%;width:4.24%"></i></span>
+      <span class="vl">435 Å²<span class="cf">36 % of 1,225</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">3C-like proteinase nsp5</span>
+        <span class="w">3,264&ndash;3,569 of reading frame +1 at nt 266<br>
+          fold positions 1, 41, 145, 306 &middot; 107 residues within
+          reach, 49 of them water-repelling
+          <span class="cf lowc">confidence 52.8, 2 of 4 under the model&rsquo;s own 70</span><br>over the chemistry residues alone, 2 cleavage sites dropped: 89 residues within reach, patch 185.6 Å² <span class="cf">confidence 81.0, none under the threshold</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:19.61%"></i><i class="b site" style="left:0.00%;width:5.72%"></i></span>
+      <span class="vl">587 Å²<span class="cf">29 % of 2,013</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">AP3A_BC279 Protein 3</span>
+        <span class="w">1&ndash;275 of reading frame +0 at nt 25393<br>
+          fold positions 133 &middot; 35 residues within
+          reach, 21 of them water-repelling
+          <span class="cf lowc">confidence 51.0, 1 of 1 under the model&rsquo;s own 70</span></span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:87.69%"></i><i class="b site" style="left:0.00%;width:16.76%"></i></span>
+      <span class="vl">1,720 Å²<span class="cf">19 % of 8,999</span></span>
+    </div><div class="lane-grp"><b>Measured, but only at cleavage boundaries &middot; 8</b><span>the only residues the curators marked inside these units are the points where a protease cuts the polyprotein. A cleavage site sits at the end of a mature chain by construction, so these figures describe a dangling terminus rather than a place to put a binder, and the confidence beside them is low for the same reason: a predicted chain end is disordered. They are shown rather than dropped because the alternative is a shorter table whose length nobody can account for</span></div>
+    <div class="lr">
+      <span class="who"><span class="t">Viral protein genome-linked nsp9</span>
+        <span class="w">4,141&ndash;4,253 of reading frame +1 at nt 266<br>
+          fold positions 1, 113 &middot; 22 residues within
+          reach, 9 of them water-repelling
+          <span class="cf lowc">confidence 36.0, 2 of 2 under the model&rsquo;s own 70</span><br><i>chemistry residues only:</i> every one of this unit&#x27;s 2 annotated residue(s) is a proteolytic processing site, so the figures above measure a neighbourhood around a chain terminus rather than around a binding location.</span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:6.78%"></i><i class="b site" style="left:0.00%;width:3.48%"></i></span>
+      <span class="vl">357 Å²<span class="cf">51 % of 696</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 7</span>
+        <span class="w">3,860&ndash;3,942 of reading frame +1 at nt 266<br>
+          fold positions 1, 83 &middot; 25 residues within
+          reach, 10 of them water-repelling
+          <span class="cf lowc">confidence 64.5, 1 of 2 under the model&rsquo;s own 70</span><br><i>chemistry residues only:</i> every one of this unit&#x27;s 2 annotated residue(s) is a proteolytic processing site, so the figures above measure a neighbourhood around a chain terminus rather than around a binding location.</span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:10.05%"></i><i class="b site" style="left:0.00%;width:5.12%"></i></span>
+      <span class="vl">525 Å²<span class="cf">51 % of 1,032</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Nsp4C</span>
+        <span class="w">Non-structural protein 4 &middot; 3,165&ndash;3,263 of reading frame +1 at nt 266<br>
+          fold positions 99 &middot; 11 residues within
+          reach, 6 of them water-repelling
+          <span class="cf lowc">confidence 31.0, 1 of 1 under the model&rsquo;s own 70</span><br><i>chemistry residues only:</i> every one of this unit&#x27;s 1 annotated residue(s) is a proteolytic processing site, so the figures above measure a neighbourhood around a chain terminus rather than around a binding location.</span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:28.66%"></i><i class="b site" style="left:0.00%;width:6.06%"></i></span>
+      <span class="vl">622 Å²<span class="cf">21 % of 2,941</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 8</span>
+        <span class="w">3,943&ndash;4,140 of reading frame +1 at nt 266<br>
+          fold positions 1, 198 &middot; 26 residues within
+          reach, 13 of them water-repelling
+          <span class="cf lowc">confidence 34.0, 2 of 2 under the model&rsquo;s own 70</span><br><i>chemistry residues only:</i> every one of this unit&#x27;s 2 annotated residue(s) is a proteolytic processing site, so the figures above measure a neighbourhood around a chain terminus rather than around a binding location.</span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:28.87%"></i><i class="b site" style="left:0.00%;width:4.71%"></i></span>
+      <span class="vl">484 Å²<span class="cf">16 % of 2,963</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Host translation inhibitor nsp1</span>
+        <span class="w">1&ndash;180 of reading frame +1 at nt 266<br>
+          fold positions 180 &middot; 11 residues within
+          reach, 3 of them water-repelling
+          <span class="cf lowc">confidence 33.0, 1 of 1 under the model&rsquo;s own 70</span><br><i>chemistry residues only:</i> every one of this unit&#x27;s 1 annotated residue(s) is a proteolytic processing site, so the figures above measure a neighbourhood around a chain terminus rather than around a binding location.</span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:33.35%"></i><i class="b site" style="left:0.00%;width:2.60%"></i></span>
+      <span class="vl">267 Å²<span class="cf">8 % of 3,422</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Non-structural protein 6</span>
+        <span class="w">3,573&ndash;3,859 of reading frame +1 at nt 266<br>
+          fold positions 287 &middot; 6 residues within
+          reach, 3 of them water-repelling
+          <span class="cf lowc">confidence 40.0, 1 of 1 under the model&rsquo;s own 70</span><br><i>chemistry residues only:</i> every one of this unit&#x27;s 1 annotated residue(s) is a proteolytic processing site, so the figures above measure a neighbourhood around a chain terminus rather than around a binding location.</span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:100.00%"></i><i class="b site" style="left:0.00%;width:2.77%"></i></span>
+      <span class="vl">284 Å²<span class="cf">3 % of 10,262</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">(+)RNA virus helicase C-terminal</span>
+        <span class="w">Helicase nsp13 &middot; 1,262&ndash;1,424 of reading frame +0 at nt 13768<br>
+          fold positions 163 &middot; 24 residues within
+          reach, 11 of them water-repelling
+          <span class="cf lowc">confidence 43.0, 1 of 1 under the model&rsquo;s own 70</span><br><i>chemistry residues only:</i> every one of this unit&#x27;s 1 annotated residue(s) is a proteolytic processing site, so the figures above measure a neighbourhood around a chain terminus rather than around a binding location.</span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:4.22%"></i><i class="b site" style="left:0.00%;width:0.60%"></i></span>
+      <span class="vl">0 Å²<span class="cf">0 % of 433</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">CoV Nsp2 C-terminal</span>
+        <span class="w">Non-structural protein 2 &middot; 690&ndash;818 of reading frame +1 at nt 266<br>
+          fold positions 129 &middot; 10 residues within
+          reach, 4 of them water-repelling
+          <span class="cf lowc">confidence 27.0, 1 of 1 under the model&rsquo;s own 70</span><br><i>chemistry residues only:</i> every one of this unit&#x27;s 1 annotated residue(s) is a proteolytic processing site, so the figures above measure a neighbourhood around a chain terminus rather than around a binding location.</span></span>
+      <span class="plot"><i class="thr faint" style="left:2.92%"></i><i class="thr" style="left:5.85%"></i>
+        <i class="b faintp" style="left:0.00%;width:23.60%"></i><i class="b site" style="left:0.00%;width:0.60%"></i></span>
+      <span class="vl">0 Å²<span class="cf">0 % of 2,421</span></span>
+    </div><div class="lane-grp"><b>No functional site to measure &middot; 14</b><span>four different absences, and the row says which: the relative&rsquo;s entry annotates no site residue for this chain at all, or every one it annotates falls outside the window that was folded, or the position has no counterpart in this genome because the alignment found an indel there, or the unit never got coordinates. None of them is a statement that nothing happens on these proteins</span></div>
+    <div class="lr none">
+      <span class="who"><span class="t">Coiled coil 918-962</span>
+        <span class="w">Spike protein S2&#x27; &middot; 958&ndash;1,002 of reading frame +1 at nt 21536<br>
+          the 1 annotated site residue this chain carries lies outside this domain (Coiled coil 918-962). A domain is a window onto a chain and the chemistry is not obliged to fall inside the window that was folded.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Heptad repeat 1</span>
+        <span class="w">Spike protein S2&#x27; &middot; 929&ndash;979 of reading frame +1 at nt 21536<br>
+          the 1 annotated site residue this chain carries lies outside this domain (Heptad repeat 1). A domain is a window onto a chain and the chemistry is not obliged to fall inside the window that was folded.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Heptad repeat 2</span>
+        <span class="w">Spike protein S2&#x27; &middot; 1,172&ndash;1,211 of reading frame +1 at nt 21536<br>
+          the 1 annotated site residue this chain carries lies outside this domain (Heptad repeat 2). A domain is a window onto a chain and the chemistry is not obliged to fall inside the window that was folded.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Coiled coil 918-962</span>
+        <span class="w">Spike protein S2 &middot; 958&ndash;1,002 of reading frame +1 at nt 21536<br>
+          the 3 annotated site residues this chain carries lie outside this domain (Coiled coil 918-962). A domain is a window onto a chain and the chemistry is not obliged to fall inside the window that was folded.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Heptad repeat 1</span>
+        <span class="w">Spike protein S2 &middot; 929&ndash;979 of reading frame +1 at nt 21536<br>
+          the 3 annotated site residues this chain carries lie outside this domain (Heptad repeat 1). A domain is a window onto a chain and the chemistry is not obliged to fall inside the window that was folded.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Heptad repeat 2</span>
+        <span class="w">Spike protein S2 &middot; 1,172&ndash;1,211 of reading frame +1 at nt 21536<br>
+          the 3 annotated site residues this chain carries lie outside this domain (Heptad repeat 2). A domain is a window onto a chain and the chemistry is not obliged to fall inside the window that was folded.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">BetaCoV S1-CTD</span>
+        <span class="w">Spike protein S1 &middot; 343&ndash;536 of reading frame +1 at nt 21536<br>
+          none of the 1 annotated site residue this chain carries has a counterpart in this genome -- it falls in an alignment gap. The positions are recorded under `anchors_unmapped` on the relative&#x27;s numbering; substituting the nearest mapped neighbour would name a residue the curator did not annotate.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">BetaCoV S1-NTD</span>
+        <span class="w">Spike protein S1 &middot; 24&ndash;312 of reading frame +1 at nt 21536<br>
+          none of the 1 annotated site residue this chain carries has a counterpart in this genome -- it falls in an alignment gap. The positions are recorded under `anchors_unmapped` on the relative&#x27;s numbering; substituting the nearest mapped neighbour would name a residue the curator did not annotate.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">VME1_BC279 Membrane protein</span>
+        <span class="w">5&ndash;222 of reading frame +2 at nt 26523<br>
+          the relative&#x27;s entry carries no Active site, Binding site or Site annotation for this chain, so there is no functionally important location to measure at. This is an absence in what has been curated, not a measurement: a residue that does chemistry here may exist and be unannotated.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Dimerization</span>
+        <span class="w">NCAP_BCRP3 Nucleoprotein &middot; 258&ndash;361 of reading frame +1 at nt 28274<br>
+          the 3 annotated site residues this chain carries lie outside this domain (Dimerization). A domain is a window onto a chain and the chemistry is not obliged to fall inside the window that was folded.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">4Ecto</span>
+        <span class="w">Non-structural protein 4 &middot; 2,799&ndash;3,043 of reading frame +1 at nt 266<br>
+          the 2 annotated site residues this chain carries lie outside this domain (4Ecto). A domain is a window onto a chain and the chemistry is not obliged to fall inside the window that was folded.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">HD2</span>
+        <span class="w">Non-structural protein 4 &middot; 2,778&ndash;3,148 of reading frame +1 at nt 266<br>
+          the 2 annotated site residues this chain carries lie outside this domain (HD2). A domain is a window onto a chain and the chemistry is not obliged to fall inside the window that was folded.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">Protein 7a</span>
+        <span class="w">16&ndash;121 of reading frame +0 at nt 27394<br>
+          the relative&#x27;s entry carries no Active site, Binding site or Site annotation for this chain, so there is no functionally important location to measure at. This is an absence in what has been curated, not a measurement: a residue that does chemistry here may exist and be unannotated.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lr none">
+      <span class="who"><span class="t">ORF9B_SARS ORF9b protein</span>
+        <span class="w">1&ndash;97 of reading frame +2 at nt 28284<br>
+          the relative&#x27;s entry carries no Active site, Binding site or Site annotation for this chain, so there is no functionally important location to measure at. This is an absence in what has been curated, not a measurement: a residue that does chemistry here may exist and be unannotated.</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>
+    <div class="lane-foot"><span>one scale for every bar &middot; largest patch on any unit
+      10,262 Å²</span>
+      <span>dashed lines: the 600 Å² a macrocycle covers when it binds, and half
+      of that</span></div>
+  </div>
+  <p class="after"><b>What had to be true before any of these numbers could be printed.</b>
+  An annotated position is curated on the relative&rsquo;s entry, the residues here are
+  numbered along one reading frame of this genome, and the coordinates are numbered from one,
+  so a figure at &ldquo;the active site&rdquo; is three mappings deep. Each row was checked
+  against the residue the relative&rsquo;s entry carries at the annotated position:
+  23 of
+  23 measured units land on it,
+  0 do not and are withheld
+  above. Each row names the reading frame its span is numbered along, because 50 pairs of these rows carry spans that overlap as numbers while sharing no residue. The rows run along 8 frames in all.</p>
   </div>
 
   <div class="stage">

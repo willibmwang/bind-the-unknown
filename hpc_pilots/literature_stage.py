@@ -76,11 +76,36 @@ that very repeat, `Nsp12 Interface` with interface-mimicking peptides against th
 complex, `Y1` with the AlphaFold2 nsp3 domain determination, and `Peptidase C16` with the three
 papers that use the MEROPS name at all.
 
+**Rows are not papers, and both are counted.** A hit row is per query, so a paper retrieved by
+two of a target's queries is two rows, and a target whose composed query another target already
+sent is served the cached answer and repeats it row for row. Measured over the five top-ranked
+chains on 12 November 2026: 65 dated rows holding **33 distinct papers**, 25 of the rows served
+from the cache. The earlier record carried only the row count, under the name `dated_hits`,
+which reads as a count of papers and is not one. Per target it is worse, because the row count
+is bounded by `LITERATURE_HITS_PER_QUERY` times the number of queries and therefore mostly
+measures how many domains stage 3 folded: nsp5 has the largest chain-level `hit_count` in the
+run, 775, and the smallest row count, 5, because one domain means one query, while
+`Spike protein S2` shows 20 rows at zero network calls with all four of its queries answered
+from the cache. So `distinct_papers` is reported beside the row count on every target and on
+the stage, each named for what it counts. The size of a literature is neither of them; it is
+`hit_count`, which is attention and nothing else.
+
+**The query recorded is the query the server received.** `subject` is what this module composes
+and hands to the tool, and `literature.search` composes once more on top of it: a `query`
+subject is wrapped in brackets by `_subject_clause` and the date clause is ANDed on by
+`_compose`. Without a ceiling the difference is a pair of brackets; with one it is a whole
+clause that the recorded `subject` does not mention. Verified live on 12 November 2026 with
+`date_to='2019-12-31'` on nsp12's `RdRp catalytic`: Europe PMC echoed
+`(...) AND FIRST_PDATE:[1800-01-01 TO 2019-12-31]` -- a lower bound this stage never wrote --
+and the ceiling took a control count of 24 records to 0. So every row carries
+`dispatched_query`, and that is the string a page may print as the query that was sent.
+
 **The anchor of last resort, and why it is this genome's accession.** A one-word protein noun
 does not identify a protein. `"Dimerization" AND nucleoprotein` returns 400 records whose top
 three are Hazara virus, a DNA-superhelicity sensor and influenza A -- obviously wrong
 literature for a coronavirus nucleoprotein. So where a chain's name yields no systematic
-designation (`nsp12`, `ORF9b`) the clause `(ACCESSION_ID:"<genome>" OR ACCESSION_ID:"<bare>")`
+designation of the `nsp12` or `ORF9b` sort, the clause
+`(ACCESSION_ID:"<genome>" OR ACCESSION_ID:"<bare>")`
 is added, which takes that query from 400 records to 5 correct ones. The accession is read from
 the case, not written here, and the route is the one `literature.py` documents at length: Europe
 PMC indexes accession numbers text-mined out of article bodies, the bare and versioned forms are
@@ -92,6 +117,19 @@ genome three days old has no literature citing its accession, so a stage that an
 query on the accession would return measured zeros at exactly the onset it exists to serve.
 Anchoring on `nsp12` does not have that failure, because the designation is nomenclature rather
 than a citation. Which route each row took is recorded in `anchor_route`.
+
+**And so the two routes are bounded differently, which is a property of the result.** The
+accession clause names one genome; a designation names a family. `nsp12` and
+`RNA-directed RNA polymerase` are coronavirus-wide nomenclature -- wider still, as it turns
+out -- and nothing in a designation-route query says SARS-CoV-2. The recorded `RdRp catalytic`
+query returns at rank 5 `Key amino acids in RNA polymerase and helicase proteins regulate RNA
+synthesis efficiency in porcine reproductive and respiratory syndrome virus`, which is an
+arterivirus and not a coronavirus at all. That is defensible and at onset it is largely the
+point: for a pathogen three days old the family's literature is the only literature there is,
+which is the argument `literature.py`'s own endpoint survey makes for retrieving a family
+rather than an organism, and a designer reading about a relative's polymerase is reading about
+a fold this one shares. But a reader should not have to discover it from the titles, so it is
+stated as a limitation on the record rather than left in the code.
 
 **Which domains are asked about.** The ones stage 3 actually folded, read off the fold record,
 and not every annotated region. A domain with coordinates is a domain a binder could be designed
@@ -383,6 +421,105 @@ def _anchor_route(chain_name, genome_accession):
     return "descriptive_name_only", spec
 
 
+def _dispatched_query(subject, subject_kind, date_to):
+    """The query string Europe PMC receives, which is not the `subject` this stage composes.
+
+    `literature.search` composes once more on top of what it is handed: `_subject_clause` wraps
+    a `query` subject in brackets and `_compose` ANDs the date clause on. So the `subject` this
+    stage records is the subject CLAUSE and never quite the dispatched string -- without a
+    ceiling the difference is a pair of brackets, with one it is a whole clause the recorded
+    subject does not mention. The defect that makes it matter is that a page prints `subject`
+    as the query that was actually sent, so under a ceiling it would print something that was
+    not sent. Verified live on 12 November 2026 with `date_to='2019-12-31'` on nsp12's
+    `RdRp catalytic`: the subject ends at the anchor disjunction and Europe PMC echoed
+    `(...) AND FIRST_PDATE:[1800-01-01 TO 2019-12-31]`, a lower bound of 1800 this stage never
+    wrote, against a control count of 24 records the ceiling took to 0.
+
+    Composed through `literature`'s own clause builders rather than rebuilt here, so the two
+    cannot drift -- the live echo above came back byte-identical to what they return. They are
+    used in preference to simply reading `search`'s own `query` field because that field is
+    unavailable on exactly the row where the dispatched query matters most: `chief._passthrough`
+    returns `value: None` for a measured zero, and a recorded zero whose query a reader cannot
+    see is the one number in this stage that cannot be checked. Where the field IS present it
+    wins, and the row says so in `dispatched_query_read_from_the_return`.
+
+    Returns None where no subject was composed at all, which is a refusal carrying its own
+    reason on its own row.
+    """
+    if not subject:
+        return None
+    from .literature import _compose, _date_clause, _subject_clause
+    try:
+        return _compose(_subject_clause(subject, subject_kind or "query", "title_abstract"),
+                        _date_clause(None, date_to))
+    except Exception:                                                    # noqa: BLE001
+        # The clause builders raise for the same reasons the dispatch would, and this helper
+        # may not be the thing that fails a row: the caller's own guards record that refusal
+        # with its reason, and a null here says only that the dispatched form is unknown.
+        return None
+
+
+def _paper_key(hit):
+    """What makes two hit rows the same paper, so papers can be counted rather than rows.
+
+    Europe PMC's own key is the `source`/`id` pair -- `MED:42831623`, `PPR:PPR651611` -- and
+    `literature.search` builds its `hits` mapping on exactly that, so it is the identity the
+    retrieval itself uses rather than one invented here. Measured over the run of 12 November
+    2026: every one of the 65 kept rows carried both fields, so neither fallback below fired.
+    They are written anyway, because a count that quietly folded two papers into one would be
+    the same defect as the row count this replaces, pointing the other way.
+    """
+    identifier = hit.get("id")
+    if identifier:
+        return "id", hit.get("source") or "", identifier
+    if hit.get("doi"):
+        return "doi", hit["doi"]
+    # Neither key. The row cannot be matched against another and is counted as its own paper;
+    # folding every unidentified row together would report one paper where there may be five.
+    return "unmatchable", id(hit)
+
+
+def _paper_counts(queries):
+    """Hit rows and distinct papers over a set of queries, counted apart because they differ.
+
+    The defect this replaces, measured over the five top-ranked chains on 12 November 2026:
+    `dated_hits` was 65 and the record held 33 distinct papers, because a hit row is per query
+    and 25 of those rows were served from the query cache to a second target that had composed
+    the same query. A number named for hits and read as papers overstates by 32 papers here,
+    and the overstatement is not a constant -- it is however many targets happen to collide.
+
+    Per target the row count has a second problem this function cannot fix, only expose: it is
+    bounded above by `LITERATURE_HITS_PER_QUERY` times the number of queries, so it measures
+    how many domains stage 3 folded far more than it measures a literature. nsp5 holds the
+    largest chain-level `hit_count` of the run at 775 and the smallest row count at 5, because
+    it folds as a single domain and therefore asks a single query. The caller records that
+    bound as `hit_rows_capped_at` beside these counts.
+
+    Returns the row's own count keys, so a caller merges it straight in. `dated_hits` and
+    `undated_hits` keep the names they already had -- they were always row counts and the page
+    reads them -- and `hit_rows` states the same thing for the reader who would otherwise have
+    to add them up.
+    """
+    rows = dated_rows = undated_rows = cached_rows = 0
+    papers, dated_papers = set(), set()
+    for query in queries:
+        reused = bool(query.get("reused_from"))
+        for hit in query.get("hits") or ():
+            key = _paper_key(hit)
+            rows += 1
+            papers.add(key)
+            if hit.get("citable"):
+                dated_rows += 1
+                dated_papers.add(key)
+            else:
+                undated_rows += 1
+            if reused:
+                cached_rows += 1
+    return {"hit_rows": rows, "dated_hits": dated_rows, "undated_hits": undated_rows,
+            "distinct_papers": len(papers), "distinct_dated_papers": len(dated_papers),
+            "hit_rows_served_from_the_cache": cached_rows}
+
+
 def _hit_row(row):
     """One Europe PMC hit, trimmed to what makes it citable.
 
@@ -420,16 +557,25 @@ def _hit_row(row):
     }
 
 
-def _unasked(scope, domain_label, domain_span, subject, subject_kind, status, note):
+def _unasked(scope, domain_label, domain_span, subject, subject_kind, status, note,
+             dispatched_query=None):
     """A query entry for a query that was never sent, with the same keys as one that was.
 
     One constructor rather than four literals, because the page reads these rows and a refusal
     missing a key the others carry would make a refused query render as a missing one -- which
     is the distinction this repository spends most of its records on. Where a subject was
     composed before the refusal it is kept, so what was not asked is still visible.
+
+    `dispatched_query` is last and optional for the same reason: a query the stage's own budget
+    stopped had a dispatched form, and recording it is what makes "not asked" checkable against
+    "asked and answered". Nothing was read from a return on a row that has no return, so
+    `dispatched_query_read_from_the_return` is False here whatever the string is.
     """
     return {"scope": scope, "domain_label": domain_label, "domain_span": domain_span,
-            "subject": subject, "subject_kind": subject_kind, "status": status, "note": note,
+            "subject": subject, "subject_kind": subject_kind,
+            "dispatched_query": dispatched_query,
+            "dispatched_query_read_from_the_return": False,
+            "status": status, "note": note,
             "hit_count": None, "preprints": None, "seconds": 0.0, "network_calls": None,
             "reused_from": None, "date_filter_verified": None, "hits": []}
 
@@ -452,28 +598,49 @@ def _query_entry(scope, domain_label, domain_span, subject, subject_kind, date_t
     `cache` keys on the composed query, because this run genuinely repeats one. Spike S2' is a
     cleavage product of S2, so ranks 1 and 3 are two ranked chains of one glycoprotein that
     compose the same anchor and fold the same three regions at the same spans -- the collision
-    `domain_folds._unit_slug` had to qualify filenames against. Five of this run's seventeen
-    queries are duplicates of another target's, and asking Europe PMC the same question five
-    times would be a cost with no answer behind it. A reused row says so in `reused_from` and
-    carries no network cost, so the record never claims a call that was not made.
+    `domain_folds._unit_slug` had to qualify filenames against. Five of this run's sixteen
+    queries are duplicates of another target's -- re-measured 12 November 2026, the earlier
+    docstring said seventeen and the stage makes sixteen -- and asking Europe PMC the same
+    question five times would be a cost with no answer behind it. A reused row says so in
+    `reused_from` and carries no network cost, so the record never claims a call that was not
+    made.
+
+    What the reuse must NOT do is drop what the cached row said, which it did: see the comment
+    on the cache branch below, and `hit_rows_served_from_the_cache` for the 25 of this run's 65
+    hit rows that are a second target being shown the first one's records.
     """
     from . import chief
     from .tools import tool as tool_spec
 
     row = {"scope": scope, "domain_label": domain_label, "domain_span": domain_span,
            "subject": subject, "subject_kind": subject_kind,
+           "dispatched_query": _dispatched_query(subject, subject_kind, date_to),
+           "dispatched_query_read_from_the_return": False,
            "status": None, "note": None, "hit_count": None, "preprints": None,
            "seconds": None, "network_calls": None, "reused_from": None,
            "date_filter_verified": None, "hits": []}
 
     if cache is not None and subject in cache:
         done, owner = cache[subject]
+        # `note` is excluded from the copy and composed below instead of being overwritten by
+        # it. The defect that makes the difference: a reused query that was a MEASURED ZERO
+        # came back with status `empty` and `hit_count` 0 and no longer said the absence had
+        # been measured, because the copy brought the sentence across and the update then
+        # replaced it with the reuse sentence. Reproduced 12 November 2026 on two targets
+        # composing the same empty domain query -- the one sentence `literature.py`'s two
+        # pre-dispatch guards exist to earn was the one field the reuse dropped, leaving a zero
+        # that reads as a lookup that went nowhere. The dispatched query IS copied, because the
+        # cache keys on the composed subject and the ceiling is stage-wide, so the owner's
+        # string is this row's string by the premise of the cache.
         row.update({k: v for k, v in done.items()
                     if k not in ("scope", "domain_label", "domain_span", "subject",
-                                 "subject_kind", "seconds", "network_calls", "reused_from")})
+                                 "subject_kind", "seconds", "network_calls", "reused_from",
+                                 "note")})
+        reuse = (f"The identical composed query was already sent for {owner!r}; this row "
+                 f"reuses that answer and cost no request.")
+        kept = done.get("note")
         row.update({"seconds": 0.0, "network_calls": 0, "reused_from": owner,
-                    "note": f"the identical composed query was already sent for {owner!r}; "
-                            f"this row reuses that answer and cost no request"})
+                    "note": f"{kept} {reuse}" if kept else reuse})
         return row
 
     arguments = {"subject": subject, "subject_kind": subject_kind,
@@ -502,6 +669,15 @@ def _query_entry(scope, domain_label, domain_span, subject, subject_kind, date_t
     if isinstance(value, dict):
         hits = sorted((value.get("hits") or {}).values(),
                       key=lambda h: h.get("rank") or 10 ** 6)
+        # The authoritative dispatched string, where there is a payload to read it from. The
+        # locally composed one in the initial row is built by the same clause builders and
+        # measured identical to it, but reading beats deriving wherever a read is available --
+        # this repository's standing preference -- and on a measured zero there is no payload,
+        # which is why the derivation exists at all.
+        dispatched = value.get("query")
+        if dispatched:
+            row.update({"dispatched_query": dispatched,
+                        "dispatched_query_read_from_the_return": True})
         row.update({
             "hit_count": value.get("hit_count"),
             # The PPR count: preprints are the literature at onset, and a PubMed-only backend
@@ -570,12 +746,19 @@ def literature_rows(scored, fold_rows, top=LITERATURE_TOP_TARGETS, date_to=None,
                     budget=LITERATURE_BUDGET_SECONDS, genome_accession=None):
     """Dated, citable literature for the top targets and each of their folded domains.
 
-    One row per target, each carrying one entry per query: the composed query string that was
-    actually sent, the status the gate or the endpoint produced, what it cost, the hit count,
-    the preprint count and the dated rows. A refusal is an entry with its reason and never an
-    omission -- a target with no name, a composed query that fails the balance check, a call
-    the gate refuses on its declared cost, an endpoint error, and a query the stage's own
-    budget stopped before it was sent all produce one.
+    One row per target, each carrying one entry per query: the subject this stage composed, the
+    `dispatched_query` the server actually received, the status the gate or the endpoint
+    produced, what it cost, the hit count, the preprint count and the dated rows. A refusal is
+    an entry with its reason and never an omission -- a target with no name, a composed query
+    that fails the balance check, a call the gate refuses on its declared cost, an endpoint
+    error, and a query the stage's own budget stopped before it was sent all produce one.
+
+    Each target then carries both of the counts a reader might mean by "how much literature":
+    `distinct_papers` and `distinct_dated_papers`, which count papers, and `hit_rows`,
+    `dated_hits` and `undated_hits`, which count ROWS and are the larger pair wherever two
+    targets composed the same query. See `_paper_counts` for the measurement that separated
+    them, and `hit_rows_capped_at` for the ceiling that keeps the row count from being a size
+    of a literature at all.
     """
     from .literature import _balanced
 
@@ -600,7 +783,13 @@ def literature_rows(scored, fold_rows, top=LITERATURE_TOP_TARGETS, date_to=None,
             "generic_remainder_refused": anchors["generic_remainder_refused"],
             "domains_folded": len(folded),
             "no_domain_queries_because": None,
-            "queries": [], "dated_hits": 0, "undated_hits": 0,
+            "queries": [],
+            # Filled by `_paper_counts` once the queries are in. Written here so the key order
+            # of a row is the same whether or not a query ran, which is what lets a reader
+            # diff two targets' rows against each other.
+            "hit_rows": 0, "dated_hits": 0, "undated_hits": 0,
+            "distinct_papers": 0, "distinct_dated_papers": 0,
+            "hit_rows_served_from_the_cache": 0, "hit_rows_capped_at": 0,
         }
         if not folded:
             row["no_domain_queries_because"] = (
@@ -635,14 +824,18 @@ def literature_rows(scored, fold_rows, top=LITERATURE_TOP_TARGETS, date_to=None,
                     scope, label, span, subject, subject_kind, "not_asked",
                     f"the stage had spent {spent:.1f}s of its {budget:.0f}s budget before "
                     f"this query; the composed query is recorded so what was not asked is "
-                    f"visible"))
+                    f"visible",
+                    dispatched_query=_dispatched_query(subject, subject_kind, date_to)))
                 continue
             row["queries"].append(_query_entry(scope, label, span, subject, subject_kind,
                                                date_to, budget, cache=cache, asked_by=target))
 
-        row["dated_hits"] = sum(1 for q in row["queries"] for h in q["hits"] if h["citable"])
-        row["undated_hits"] = sum(1 for q in row["queries"] for h in q["hits"]
-                                  if not h["citable"])
+        row.update(_paper_counts(row["queries"]))
+        # The bound that stops the row count being read as a size of a literature: a query
+        # returns at most `LITERATURE_HITS_PER_QUERY` rows, so this target's rows could not
+        # have exceeded this however much Europe PMC holds. nsp5's 775-record chain query
+        # contributes 5 rows, the same 5 a query matching 5 records would.
+        row["hit_rows_capped_at"] = LITERATURE_HITS_PER_QUERY * len(row["queries"])
         rows.append(row)
     return rows
 
@@ -654,6 +847,11 @@ def stage(scored, fold_rows, top=LITERATURE_TOP_TARGETS, date_to=None,
     Returns `(stage, rows)`, the shape `chain.evidence_stage` returns, so the call site in
     `chain._case` is the one line `stage, literature = literature_stage.stage(...)` beside the
     one it already has for stage 6.
+
+    The stage's own counts are taken over every query of every target at once, not summed from
+    the per-target counts, because a paper two targets both retrieved is one paper and summing
+    would count it twice -- which is the whole of the defect `_paper_counts` records. Measured
+    12 November 2026: summing the per-target distinct counts gives 52 and the stage holds 33.
     """
     started = time.time()
     rows = literature_rows(scored, fold_rows, top=top, date_to=date_to, budget=budget,
@@ -661,6 +859,7 @@ def stage(scored, fold_rows, top=LITERATURE_TOP_TARGETS, date_to=None,
     queries = [q for r in rows for q in r["queries"]]
     ok = [q for q in queries if q["status"] in ("ok", "empty")]
     domain_queries = [q for q in queries if q["scope"] == "domain"]
+    counts = _paper_counts(queries)
     entry = {
         "stage": 7, "name": "Dated literature for each target and each folded domain",
         "tool": "literature.search",
@@ -676,8 +875,16 @@ def stage(scored, fold_rows, top=LITERATURE_TOP_TARGETS, date_to=None,
             "queries_reused_from_an_identical_one":
                 sum(1 for q in queries if q.get("reused_from")),
             "network_calls": sum(q["network_calls"] or 0 for q in queries),
-            "dated_hits": sum(r["dated_hits"] for r in rows),
-            "undated_hits": sum(r["undated_hits"] for r in rows),
+            # Papers first, rows second, and both named. `dated_hits` was the only one of these
+            # the record used to carry, and at 65 against 33 distinct papers it was read as a
+            # paper count it never was. See `_paper_counts`.
+            "distinct_papers": counts["distinct_papers"],
+            "distinct_dated_papers": counts["distinct_dated_papers"],
+            "hit_rows": counts["hit_rows"],
+            "dated_hits": counts["dated_hits"],
+            "undated_hits": counts["undated_hits"],
+            "hit_rows_served_from_the_cache": counts["hit_rows_served_from_the_cache"],
+            "hit_rows_capped_at": LITERATURE_HITS_PER_QUERY * len(queries),
             "per_axis_requested": False,
             "changes_any_rank": False,
             "every_target_has_a_chain_query":
@@ -695,6 +902,20 @@ def stage(scored, fold_rows, top=LITERATURE_TOP_TARGETS, date_to=None,
             "No publication-date ceiling was applied, so these hits include literature "
             "published after the onset this chain replays. They are literature that informs a "
             "binder design now, and they are not a claim about what was knowable at onset."),
+        # Stated for the same reason the ceiling is, and written from this run's own numbers so
+        # it cannot go stale against them. The two counts differ by whatever the targets happen
+        # to collide on, so a sentence quoting a fixed ratio would be wrong on the next run.
+        "counts_mean": (
+            f"distinct_papers and distinct_dated_papers count papers, keyed on Europe PMC's "
+            f"own source/id pair. hit_rows, dated_hits and undated_hits count ROWS, which is "
+            f"per query: this run kept {counts['hit_rows']} rows holding "
+            f"{counts['distinct_papers']} distinct papers, "
+            f"{counts['hit_rows_served_from_the_cache']} of the rows served from the query "
+            f"cache to a target that had composed another's query. Neither count is a size of "
+            f"a literature -- a query returns at most {LITERATURE_HITS_PER_QUERY} rows, so "
+            f"these {len(queries)} queries could not have produced more than "
+            f"{LITERATURE_HITS_PER_QUERY * len(queries)} rows whatever Europe PMC holds. The "
+            f"size is hit_count, which is attention and not quality."),
         "seconds": round(time.time() - started, 2),
         "hands_to_next": "nothing. This annotates the shortlist and never reorders it",
     }
@@ -722,8 +943,15 @@ def run(case=None, path=None, record=True, landing=None, folds=None,
                         budget=budget, genome_accession=case.get("genome_accession"))
 
     queries = [q for r in rows for q in r["queries"]]
-    dated = sum(r["dated_hits"] for r in rows)
-    undated = sum(r["undated_hits"] for r in rows)
+    # Read off the stage entry rather than re-summed here. Both because this repository's rule
+    # is that a number on a record comes from the record, and because the sums are not the same
+    # arithmetic: distinct papers must be de-duplicated across targets, and adding the
+    # per-target counts gave 52 where the stage holds 33 on the run of 12 November 2026.
+    distinct = entry["output"]["distinct_papers"]
+    distinct_dated = entry["output"]["distinct_dated_papers"]
+    dated = entry["output"]["dated_hits"]
+    undated = entry["output"]["undated_hits"]
+    cached_rows = entry["output"]["hit_rows_served_from_the_cache"]
     zero = [q for q in queries if q["hit_count"] == 0]
 
     payload = {
@@ -731,8 +959,11 @@ def run(case=None, path=None, record=True, landing=None, folds=None,
         "status": "complete",
         "question": "For each shortlisted target and each domain that was folded, what dated "
                     "literature exists, and under which query?",
-        "answer": (f"{dated} dated citable rows and {undated} undated ones across "
-                   f"{len(queries)} composed queries over {len(rows)} targets, of which "
+        "answer": (f"{distinct} distinct papers, {distinct_dated} of them dated and citable, "
+                   f"held as {dated} dated hit rows and {undated} undated ones -- a row is per "
+                   f"query, and {cached_rows} of them repeat an answer another target's "
+                   f"identical query had already been given. Across {len(queries)} composed "
+                   f"queries over {len(rows)} targets, of which "
                    f"{len([q for q in queries if q['scope'] == 'domain'])} were per-domain. "
                    + (f"{len(zero)} queries returned a measured zero."
                       if zero else "No query returned zero.")),
@@ -744,6 +975,12 @@ def run(case=None, path=None, record=True, landing=None, folds=None,
         "date_ceiling_applied": entry["date_ceiling_applied"],
         "date_to": date_to,
         "date_ceiling_means": entry["date_ceiling_means"],
+        # Mirrored to the head of the record beside the ceiling sentence, because a reader --
+        # or a page -- that takes a headline number from the top of this file should find the
+        # sentence saying which of two different numbers it is in the same place.
+        "counts_mean": entry["counts_mean"],
+        "distinct_papers": distinct,
+        "distinct_dated_papers": distinct_dated,
         "stage": entry,
         "targets": rows,
         "composition": {
@@ -782,6 +1019,33 @@ def run(case=None, path=None, record=True, landing=None, folds=None,
             "protein is essential, conserved, exposed, expressible or bindable, and it must "
             "not be read as a measure of a target's quality -- `literature.py` is emphatic "
             "about this and nothing here may undo it.",
+            f"A hit row is not a paper, and the record carries both counts because they are "
+            f"not close. This run kept {dated} dated rows holding {distinct_dated} distinct "
+            f"dated papers, {cached_rows} of the rows served from the query cache to a target "
+            f"that had composed another target's query -- Spike protein S2' and Spike protein "
+            f"S2 are two ranked chains of one glycoprotein and anchor identically, so one of "
+            f"them repeats the other row for row. Per target the row count is bounded by "
+            f"hits_per_query times the number of queries, recorded as `hit_rows_capped_at`, so "
+            f"it measures how many domains stage 3 folded far more than it measures a "
+            f"literature: measured 12 November 2026, nsp5 holds the largest chain-level "
+            f"hit_count of the run at 775 and the smallest row count at 5 because it folds as "
+            f"one domain and asks one query, while Spike protein S2 shows 20 rows at zero "
+            f"network calls. `distinct_papers` counts papers; `hit_count` is the size of the "
+            f"literature and is attention, not quality.",
+            "The designation anchor route is not bounded to this organism, where the "
+            "accession route is, and that is a property of the result rather than a detail of "
+            "the code. Where a chain carries a systematic designation the accession clause is "
+            "omitted by design, so the query asks the family's literature: `nsp12` and "
+            "`RNA-directed RNA polymerase` are coronavirus-wide nomenclature and nothing in "
+            "that query names SARS-CoV-2. Measured 12 November 2026, the recorded nsp12 "
+            "`RdRp catalytic` query returns at rank 5 `Key amino acids in RNA polymerase and "
+            "helicase proteins regulate RNA synthesis efficiency in porcine reproductive and "
+            "respiratory syndrome virus`, which is an arterivirus and not a coronavirus. At "
+            "onset that is largely the point -- for a pathogen three days old the family's "
+            "literature is the only literature there is, which is the argument "
+            "`literature.py`'s own endpoint survey makes -- and a reader comparing a "
+            "designation-route target against an accession-route one is comparing a family "
+            "retrieval with a genome retrieval. `anchor_route` says which each target took.",
             "No publication-date ceiling was applied unless `date_to` was passed, so by "
             "default these hits include literature published after the onset this chain "
             "replays. `date_ceiling_applied` states which, on the stage and on this record.",
@@ -789,7 +1053,11 @@ def run(case=None, path=None, record=True, landing=None, folds=None,
             "`literature.AXIS_TERMS` and `domain_inventory.RELEVANCE_TERMS` are authored: no "
             "retrieval quality was measured against a labelled corpus. Every query string is "
             "recorded on its row, because a number whose query is not recorded cannot be "
-            "checked.",
+            "checked. Two strings are recorded and they are not the same: `subject` is what "
+            "this stage composed and handed to the tool, and `dispatched_query` is what Europe "
+            "PMC received -- `literature.search` brackets the subject and ANDs any date clause "
+            "on, so under a ceiling the two differ by a whole clause. Printing `subject` as "
+            "the query that was sent would print something that was not sent.",
             "A domain is queried under the name its annotation gives it, which is often a "
             "database-register name rather than the one the field uses, and that is where "
             "every measured zero in this record comes from. The relative's entry calls the "
@@ -829,7 +1097,8 @@ def run(case=None, path=None, record=True, landing=None, folds=None,
             shown = out
         print(f"wrote {shown}  "
               f"({len(queries)} queries over {len(rows)} targets, "
-              f"{dated} dated rows, {undated} undated, "
+              f"{distinct} distinct papers held as {dated} dated rows and {undated} undated, "
+              f"{cached_rows} rows from the cache, "
               f"{len(zero)} measured zeros)")
     return payload
 

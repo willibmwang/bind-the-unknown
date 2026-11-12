@@ -53,6 +53,17 @@ than a blocklist: a feature type absent from it is excluded by construction, whi
 `Natural variant` (69 on P0DTD1), `Mutagenesis`, `Glycosylation`, `Disulfide bond`,
 `Compositional bias`, `Cross-link`, `Lipidation` and `Signal` never appear without being named
 anywhere. `Chain` is excluded for a different reason, recorded at the constant.
+
+**One name per region, from one function.** `label_for` is the only fallback in the repository
+for a region whose curator description is empty, and it is public for that reason. Three
+fallbacks existed and two disagreed: this module appended the span and said
+`Coiled coil 918-962` while `domain_inventory` and `domain_folds` dropped back to the bare
+feature type and said `Coiled coil`, so one region of Spike protein S2 had two names and any
+join keyed on the label lost it -- silently, because every other region on that chain has a
+description and joined fine. The span is in the fallback and not merely the type because S2's
+range carries two undescribed `Coiled coil` features, 918-962 and 1144-1172, and a name that
+cannot tell them apart is not a name. Every region `annotated_regions` returns carries its
+`label`, so a consumer need not derive one at all.
 """
 
 
@@ -136,11 +147,18 @@ def annotated_regions(accession, within=None):
     Returns, sorted by descending length and then by ascending start so the order is
     reproducible across runs:
 
-        [{"type", "description", "start", "end", "length", "clipped", "entry_span"}]
+        [{"type", "description", "start", "end", "length", "clipped", "entry_span", "label"}]
 
     `start`, `end` and `length` describe the clipped span; `entry_span` is what the curator
     annotated, before clipping, so the provenance survives. Both are on the entry's numbering
     -- nothing here is in the pathogen's numbering yet, which is `map_span`'s job.
+
+    `label` is `label_for(region)`, carried on the region rather than left to each consumer to
+    derive. It is here because deriving it separately is what went wrong: three callers wrote
+    three fallbacks for a region with an empty description and two of them disagreed, giving
+    `Coiled coil 918-962` here and a bare `Coiled coil` in the fold store for one feature of
+    Spike protein S2. A consumer that reads this key cannot reintroduce that, and one that
+    needs the function instead should call `label_for` rather than write a fourth fallback.
 
     Reads the same `intake._entry(accession)` payload `intake.mature_chains` already reads, so
     the annotation is read rather than inferred and costs no extra request.
@@ -160,9 +178,11 @@ def annotated_regions(accession, within=None):
                 continue
             clipped = start < low or end > high
             start, end = max(start, low), min(end, high)
-        regions.append({"type": feature["type"], "description": _description(feature),
-                        "start": start, "end": end, "length": end - start + 1,
-                        "clipped": clipped, "entry_span": [bounds[0], bounds[1]]})
+        region = {"type": feature["type"], "description": _description(feature),
+                  "start": start, "end": end, "length": end - start + 1,
+                  "clipped": clipped, "entry_span": [bounds[0], bounds[1]]}
+        region["label"] = label_for(region)
+        regions.append(region)
     regions.sort(key=lambda region: (-region["length"], region["start"], region["type"]))
     return regions
 
@@ -255,12 +275,32 @@ def map_span(located, chain_start, start, end):
     outward is the conservative direction: it can only ever return a span the annotation
     covers, where walking outward would claim residues the curator did not annotate.
 
-    Returns `{"start", "end", "length", "ends_adjusted", "unmapped_ends"}`, or None when no
-    position in the span maps at all -- a domain the alignment never reached, which happens
-    when the chain was located in a different ORF from the one the domain sits in. `length` is
-    the width of the mapped window and can exceed the annotated width, because an insertion in
-    the pathogen puts residues inside the span that the homolog does not have. That is the
-    honest number: it is the count of residues a fold of this span would contain.
+    Returns, or None when no position in the span maps at all -- a domain the alignment never
+    reached, which happens when the chain was located in a different ORF from the one the
+    domain sits in:
+
+        {"start", "end", "length",            # this genome's numbering
+         "entry_span", "entry_length",        # the homolog's, for the window actually mapped
+         "ends_adjusted", "unmapped_ends"}
+
+    `length` is the width of the mapped window and can exceed the annotated width, because an
+    insertion in the pathogen puts residues inside the span that the homolog does not have.
+    That is the honest number: it is the count of residues a fold of this span would contain.
+
+    **`entry_span` is the window this call mapped, not the window it was asked about, and it
+    was missing.** The two differ whenever an end falls outside the alignment, and a consumer
+    publishing the annotated span beside the mapped one then prints two numbers that describe
+    different sets of residues. Measured on nsp12's `Domain "NiRAN"` on 2026-11-12: asked for
+    the relative's [4376, 4630], 255 annotated residues, it returns [1, 152] in this genome,
+    152 residues -- the chain was located in a reading frame the first 103 of them fall
+    outside. The caller had no way to say which 152 of the 255 it got, so the unit it built
+    carried `entry_span` [4376, 4630] against `span` [1, 152] and a reader comparing the two
+    widths saw a 103-residue discrepancy with nothing to attribute it to. `entry_span` here is
+    [4479, 4630] and `entry_length` is 152, which agrees with `length` and closes the question.
+
+    `entry_length` can still differ from `length` in the other direction, through an indel
+    inside the window rather than at its ends, and that difference is the real one: it is the
+    count of residues this genome gained or lost within the annotated region.
     """
     start, end = int(start), int(end)
     if end < start:
@@ -281,7 +321,70 @@ def map_span(located, chain_start, start, end):
         return None
     unmapped = int(first_at != start) + int(last_at != end)
     return {"start": first, "end": last, "length": last - first + 1,
+            "entry_span": [first_at, last_at], "entry_length": last_at - first_at + 1,
             "ends_adjusted": bool(unmapped), "unmapped_ends": unmapped}
+
+
+def label_for(region):
+    """The one name for one annotated region, and the only fallback any caller may use.
+
+    Public, and public is the point. The fallback existed three times over and the three did
+    not agree: this module appended the span and gave `Coiled coil 918-962`, while
+    `domain_inventory` and `domain_folds` fell back to the bare feature type and gave
+    `Coiled coil`. Verified on Spike protein S2 (Q3LZX1, chain range [655, 1242]) on
+    2026-11-12, where the stored folds under `runs/domain_folds/` carry the bare form in their
+    slugs -- `r01_spike_protein_s2__coiled_coil` and `r03_...` -- and this module's own fold
+    units carry the span form for the same feature. Two names for one region is one name too
+    many: a page joining a fold record to a unit on the label finds nothing for that region,
+    and the failure is silent because every other region on the chain has a description and
+    joins fine.
+
+    **Why the span is in the fallback rather than the bare type.** A label has two jobs: it
+    names the region in the dropdown, and it is what a per-region join is keyed on. The bare
+    type fails both the moment a chain carries two features of one type with no description,
+    which is not hypothetical -- S2's range holds `Coiled coil 918-962` and
+    `Coiled coil 1144-1172`, measured 2026-11-12, so the bare form puts two identically named
+    entries in the dropdown and gives a join two rows it cannot tell apart. Only one of the two
+    is over `MINIMUM_DOMAIN_AA` and reaches the fold store today, which is why the collision
+    has not yet produced a wrong structure under a right name; it is a property of the
+    annotation and not of this genome, and anything that cuts one chain out of another will
+    produce more of them. `Coiled coil 918-962` is a worse name than
+    `Receptor-binding domain (RBD)` and it is still a name that means one region, which is the
+    requirement.
+
+    **Shapes accepted.** One function is only one name if every caller can actually call it, so
+    this reads the three dict shapes the annotation travels in rather than requiring a caller
+    to reshape its row: `annotated_regions`' own region, `domain_inventory`'s row (which keys
+    the span `entry_span_on_the_relative` because the numbering is the relative's), and a
+    `domain_folds` unit (which keys the type `region_type`). The span is read from the entry
+    side in every case, because a label keyed on this genome's numbering would change when the
+    alignment changed and stop matching a record written before it.
+    """
+    description = (region.get("description") or "").strip()
+    if description:
+        return description
+    kind = region.get("type") or region.get("region_type") or "Region"
+    span = region.get("entry_span") or region.get("entry_span_on_the_relative")
+    if not span:
+        # The clipped span, which is what a region carries when nothing recorded the
+        # unclipped one. Named rather than silently skipped: a label built from a clipped
+        # span still identifies one region, and a label with no span at all would be the bare
+        # type this function exists to replace.
+        span = [region.get("start"), region.get("end")]
+    span = tuple(span)
+    if len(span) != 2 or None in span:
+        # No span on either side, which leaves only the bare type. Recorded here as the one
+        # case where the bare type is the honest answer -- there is nothing to disambiguate
+        # with -- rather than left as an unremarked fall-through.
+        return kind
+    return f"{kind} {span[0]}-{span[1]}"
+
+
+# The private name this function was first written under. Nothing outside this module imported
+# it -- grepped across the package on 2026-11-12, the only two call sites were here -- so the
+# alias exists for a session holding the old name while the parallel edits land, and the next
+# reader to find no caller for it should delete it.
+_label = label_for
 
 
 def fold_units(row, located, accession, ceiling):
@@ -290,16 +393,31 @@ def fold_units(row, located, accession, ceiling):
     Returns
 
         [{"kind": "whole_chain" | "domain", "label", "type", "description",
-          "span": [start, end],          # the pathogen's own numbering
-          "entry_span": [start, end],    # the homolog's numbering, for provenance
+          "span": [start, end],              # the pathogen's own numbering
+          "entry_span": [start, end],        # the homolog's numbering, as annotated
+          "entry_span_mapped": [start, end], # the homolog's numbering, as actually mapped
+          "entry_length_mapped",
           "length", "inside_the_ceiling", "refused_because",
-          "clipped", "coincides_with_the_whole_chain", "mapping"}]
+          "clipped", "coincides_with_the_whole_chain", "mapping",
+          "mapping_reproduces_the_span"}]
 
-    The last three keys are additions to the shape the API contract states, each because a
-    number on the page would otherwise be unexplainable: `clipped` says a region was cut at
-    the chain boundary and is therefore partial, `coincides_with_the_whole_chain` says folding
-    this unit would re-fold residues the whole-chain unit already covers, and `mapping` is the
-    `map_span` block, which is where `ends_adjusted` and `unmapped_ends` live.
+    `clipped`, `coincides_with_the_whole_chain` and `mapping` are additions to the shape the
+    API contract states, each because a number on the page would otherwise be unexplainable:
+    `clipped` says a region was cut at the chain boundary and is therefore partial,
+    `coincides_with_the_whole_chain` says folding this unit would re-fold residues the
+    whole-chain unit already covers, and `mapping` is the `map_span` block, which is where
+    `ends_adjusted` and `unmapped_ends` live.
+
+    **`entry_span` and `span` are not always the same residues, and now say so.**
+    `entry_span` is what the curator annotated and `span` is what this genome has for it, and
+    where an end of the annotation falls outside the alignment the second is a part of the
+    first. `entry_span_mapped` is the window `map_span` actually carried over, so the two spans
+    a page prints side by side describe one set of residues: on nsp12's `Domain "NiRAN"`,
+    measured 2026-11-12, `entry_span` is [4376, 4630] at 255 annotated residues while `span` is
+    [1, 152] at 152, and `entry_span_mapped` is [4479, 4630] at 152 -- the 103 residues the
+    alignment never reached are now visible as the difference between two stated windows rather
+    than as an unexplained gap between two widths. Both are kept: `entry_span` is the
+    provenance, and dropping it would lose what was annotated.
 
     **The whole chain is always the first unit.** The pick order in `chain.fold_stage` takes
     the first foldable unit, so putting the whole chain first means the committed
@@ -338,17 +456,25 @@ def fold_units(row, located, accession, ceiling):
     for region in annotated_regions(accession, within=chain_range):
         mapping = map_span(located, chain_start, region["start"], region["end"])
         unit = {"kind": "domain",
-                "label": _label(region),
+                "label": label_for(region),
                 "type": region["type"],
                 "description": region["description"],
                 "span": None,
                 "entry_span": [region["start"], region["end"]],
+                "entry_span_mapped": None,
+                "entry_length_mapped": None,
                 "length": None,
                 "inside_the_ceiling": False,
                 "refused_because": None,
                 "clipped": region["clipped"],
                 "coincides_with_the_whole_chain": False,
-                "mapping": mapping}
+                "mapping": mapping,
+                # Carried so both kinds of unit have the same keys, and None rather than True
+                # because on a domain there is nothing to check: `span` below is read straight
+                # out of `mapping`, so a comparison of the two could not fail and a True would
+                # claim a check that never ran. The whole-chain unit is where the question has
+                # content, and `_whole_chain_unit` makes the argument.
+                "mapping_reproduces_the_span": None}
         if mapping is None:
             # Not a failure of the annotation and not a failure of this genome: the chain was
             # located in one ORF and the alignment simply never reached these residues. nsp12
@@ -364,6 +490,8 @@ def fold_units(row, located, accession, ceiling):
             continue
         unit["span"] = [mapping["start"], mapping["end"]]
         unit["length"] = mapping["length"]
+        unit["entry_span_mapped"] = list(mapping["entry_span"])
+        unit["entry_length_mapped"] = mapping["entry_length"]
         unit["coincides_with_the_whole_chain"] = _coincides(unit["span"], whole["span"])
         if unit["length"] < MINIMUM_DOMAIN_AA:
             unit["refused_because"] = (
@@ -427,20 +555,6 @@ def _description(feature):
     return (feature.get("description") or "").strip().rstrip(";,").strip()
 
 
-def _label(region):
-    """A short name for one region, falling back to its type and span when it has none.
-
-    Two of P0DTC2's features are a `Coiled coil` with an empty description, so a label built
-    from the description alone would put two blank entries in the dropdown the project lead
-    asked for. `Coiled coil 1176-1203` is a worse name than `Receptor-binding domain (RBD)`
-    and it is still a name, which is the requirement.
-    """
-    description = region["description"]
-    if description:
-        return description
-    return f"{region['type']} {region['entry_span'][0]}-{region['entry_span'][1]}"
-
-
 def _whole_chain_unit(row, located, ceiling):
     """The whole chain or the whole ORF as a fold unit, first in the list and never displaced.
 
@@ -449,9 +563,35 @@ def _whole_chain_unit(row, located, ceiling):
     `recovered_length_aa` and already applies the ceiling to. Deliberately the same quantity
     and not the span's width or the row's declared length, so that moving the ceiling decision
     into this module cannot change which chains the existing records say were folded.
+
+    **The chain's own alignment can leave part of the chain unmapped, and this unit claimed it
+    never did.** `mapping` was hard-coded None here, so a whole chain published its full
+    annotated `entry_span` beside a shorter `span` with no flag of any kind -- while a region
+    annotated over the identical range, arriving through `map_span` in `fold_units`, carried
+    `ends_adjusted` and `unmapped_ends` for the same shortfall. Measured on nsp12 on
+    2026-11-12: `entry_span` [4370, 5301] is 932 residues of the relative's chain against
+    `span` [1, 823], 823 residues in this genome, and the alignment covers 88.3% of the chain.
+    The 109-residue difference is real -- the chain was located in a reading frame past the
+    ribosomal frameshift, and the alignment never reaches the first 109 residues of the
+    relative's chain -- and the unit said nothing about it, while the
+    `Topological domain "Cytoplasmic"` clipped to exactly [4370, 5301] reported
+    `ends_adjusted` True on the same row. One of those two was lying by omission.
+
+    So the chain's own range is mapped through `map_span` like any other span, and the block is
+    carried. `span` and `length` are **not** taken from it: they stay `located`'s, for the
+    reason above, and the mapping is a statement about them rather than a replacement for them.
+    The two agree by construction whenever `chain_start` really is index 0 of the sequence that
+    was aligned -- the assumption `map_span` documents -- so `mapping_reproduces_the_span`
+    checks that rather than assuming it, and a False there is the one signal available that the
+    range handed in does not index the alignment it was handed with. Verified True on nsp12,
+    whose mapped window [4479, 5301] is 823 residues and whose `span` is [1, 823].
     """
     orf = (row.get("orf") or {}).get("protein") or ""
     chain_range = row.get("chain_range")
+    mapping = None
+    if located and chain_range:
+        mapping = map_span(located, int(chain_range[0]),
+                           int(chain_range[0]), int(chain_range[1]))
     if located:
         span = [int(located["span"][0]), int(located["span"][1])]
         length = len(located.get("sequence") or "") or (span[1] - span[0] + 1)
@@ -472,12 +612,19 @@ def _whole_chain_unit(row, located, ceiling):
                             "the whole called ORF; no mature-chain boundaries were read"),
             "span": span,
             "entry_span": [int(chain_range[0]), int(chain_range[1])] if chain_range else None,
+            "entry_span_mapped": list(mapping["entry_span"]) if mapping else None,
+            "entry_length_mapped": mapping["entry_length"] if mapping else None,
             "length": length,
             "inside_the_ceiling": 0 < length <= ceiling,
             "refused_because": None,
             "clipped": False,
             "coincides_with_the_whole_chain": True,
-            "mapping": None}
+            "mapping": mapping,
+            # The cross-check the docstring above argues for, and None where there was no
+            # mapping to check: an ORF with no mature-chain range has no entry-side window, so
+            # a boolean there would be an answer to a question nobody asked.
+            "mapping_reproduces_the_span": (None if not (mapping and span) else
+                                            [mapping["start"], mapping["end"]] == span)}
     if not unit["inside_the_ceiling"]:
         # Worded to match the sentence `chain.fold_stage` has written onto an over-ceiling row
         # since the ceiling was first named, so a reader comparing an old record against a new
@@ -553,7 +700,7 @@ def main(argv=None):
             verdict = "foldable"
         print(f"  {region['type']:19s} {region['start']:5d}-{region['end']:<5d} "
               f"{region['length']:5d} aa  {verdict:11s} "
-              f"{'clipped  ' if region['clipped'] else ''}{_label(region)}")
+              f"{'clipped  ' if region['clipped'] else ''}{region['label']}")
     for site in sites:
         positions = ", ".join(str(p) for p in site["positions"])
         print(f"  {site['type']:19s} {positions:17s} "

@@ -196,6 +196,17 @@ runs/improve/
 # where the accession clause takes it to 5 correct ones.
 # Written by `python -m hpc_pilots.literature_stage`.
 !runs/literature_stage.json
+
+# The patch at each folded unit's annotated functional site, beside the patch stage 4 scored
+# the unit on. runs/ is otherwise untracked, and this one has to be in the tree for the same
+# reason the literature record above does: the landing page prints its figures, and a figure
+# on a page whose record is not in the tree cannot be checked. It carries more than figures.
+# It carries the two keys that decide whether a figure may be printed at all -- whether the
+# anchors are the residues the annotation names, and which of this genome's reading frames
+# each span is numbered along -- and the page refuses a row that fails the first. A page built
+# against those keys from a record nobody can read is a page asserting a check it cannot show.
+# Written by `python -m hpc_pilots.site_patches`.
+!runs/site_patches.json
 .venv-pfn/
 
 # The notebook points MPLCONFIGDIR here so a stale user-level matplotlibrc cannot print a

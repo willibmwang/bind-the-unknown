@@ -345,11 +345,13 @@ def build_index():
     body = body.replace("<!--FOLD-LANE-->", fold_lane(holdout))
     body = body.replace("<!--LITERATURE-->", literature_block(holdout))
     body = body.replace("<!--SURFACE-LANE-->", surface_lane(holdout))
+    body = body.replace("<!--SITE-PATCH-->", site_patch_block(holdout))
     body = body.replace("<!--OFFCHAIN-->", build_offchain())
     # Last, so a {{token}} introduced by any generated block above is filled too. The
     # landing page is the held-out case throughout, so its numbers come from that case.
     body = fill(body, facts(holdout) | candidate_facts(holdout) | chain_facts(holdout)
-                | picked_facts(holdout) | lane_facts(holdout))
+                | picked_facts(holdout) | lane_facts(holdout)
+                | site_patch_facts(holdout))
     out = (head(f"{SITE} · one pathogen genome in, every next step out",
                 "Deciding which of a new virus's proteins a drug should aim at, from the "
                 "genome accession alone, with every step on the record. The walkthrough "
@@ -1716,6 +1718,396 @@ def surface_lane(case):
       covers when it binds, and half of that</span></div>
   </div>
   {f'<p class="after">{verdicts}</p>' if verdicts else ''}"""
+
+
+# The patch at the functional site rather than at the chain's best address. Written by
+# `python -m hpc_pilots.site_patches`.
+SITE_PATCH_RECORD = "site_patches.json"
+
+
+def site_patch_record(case):
+    """The site-patch record for this case, or None.
+
+    Guarded on the same two keys the inventory, the folds and the literature are, and for the
+    same reason: these rows are keyed by target and unit label, so a record of a different
+    genome -- or of the same genome identified through its own curated entries rather than
+    held out of them -- would join cleanly and silently.
+
+    A refused record is returned rather than treated as absent. `site_patches` writes one when
+    the machine has no solvent-accessibility backend, with `status` `refused`, an empty `rows`
+    and the reason under `answer`, precisely so a consumer needs no second code path; dropping
+    it here would make the page's behaviour depend on which machine built it, which is the
+    failure that record shape exists to avoid.
+    """
+    path = RUNS / SITE_PATCH_RECORD
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text())
+    if (payload.get("genome_accession") != case.get("genome_accession")
+            or payload.get("reference_excluded_organism")
+            != case.get("reference_excluded_organism")):
+        return None
+    return payload
+
+
+def _publishable(row):
+    """Whether this row's figures may be printed as a measurement of the annotated site.
+
+    **This is the one gate on this section and it is not the `measured` flag.** `measured`
+    says anchors were found in the coordinates and a neighbourhood was measured around them.
+    It does not say those anchors are the residues the annotation names, which is a separate
+    question the record answers separately: `geometry` matches an anchor by number and reports
+    back whatever residue stands there, so a window offset against the numbering the
+    annotation arrived in produces a complete, confident, entirely wrong measurement. The
+    deposited lane has the worked case -- nsp2 on `7fac:A`, a C-terminal construct where all
+    12 anchors land 111 residues from the residues they name -- and a page reading `measured`
+    alone would have published that as nsp2's active-site patch with nothing on the row to
+    say otherwise.
+
+    So a False verdict sends the row to the refusal group, which prints the record's own
+    sentence and no figures. None is not False and is not treated as one: it means the
+    comparison could not be made, the figures stand, and the row is marked. On the record as
+    it stands all 23 measured units come back True, so this gate changes nothing visible
+    today -- which is the point at which it is worth installing, rather than after a run where
+    it would have been needed.
+    """
+    return (bool(row.get("measured"))
+            and row.get("measured_at_the_annotated_residues") is not False)
+
+
+def _frame_note(row):
+    """Which reading frame this row's span is a span in, named rather than implied.
+
+    `span_in_this_genome` is 1-based along one open reading frame and not along the genome, so
+    the pair of integers means nothing without the frame -- and two rows in different frames
+    can carry spans that overlap as integers while sharing no residue. The record counts those
+    pairs over its own rows, so the page prints the frame on every row it draws and never
+    sorts, groups or joins on the span.
+    """
+    frame = row.get("reading_frame") or {}
+    span = row.get("span_in_this_genome") or []
+    where = f"{span[0]:,}&ndash;{span[1]:,}" if len(span) == 2 else ""
+    label = frame.get("reading_frame")
+    if where and label:
+        return f"{where} of reading frame {esc(label)}"
+    return where or (f"reading frame {esc(label)}" if label else "")
+
+
+def site_patch_block(case):
+    """The patch at the annotated site, beside the patch stage 4 scored the unit on.
+
+    Stage 4 reports the largest hydrophobic patch anywhere on a structure, which answers "is
+    this protein amenable to a macrocycle at all". It does not answer where on the protein that
+    surface is, and the two answers routinely disagree: the main protease's largest patch is
+    2,012.6 square angstroms and 185.6 of it is at the catalytic dyad, so 91 % of the surface
+    the chain was scored on is somewhere other than the chemistry. Both bars are therefore
+    drawn on one scale per row -- the faint one is the unit's largest patch and the solid one
+    is the part of it at the annotated residues -- because the gap between them is the finding
+    and a single number cannot carry it.
+
+    Three things gate a row before any figure is printed, and each has its own group rather
+    than a footnote. `_publishable` decides whether the figures describe the annotated site at
+    all. `anchors_are_processing_sites_only` says the annotated residues here are proteolytic
+    cleavage boundaries, which sit at a mature chain's terminus by construction, so the
+    neighbourhood is a neighbourhood of a dangling end -- eight of this run's units are in that
+    state and publishing them beside a catalytic site would be the same error one level down.
+    And `anchor_confidence` is printed on every row, because a site measured on residues the
+    model placed at pLDDT 30 is an arithmetic on coordinates the model never committed to.
+
+    Nothing here is recomputed. Every figure is read off `runs/site_patches.json`, including
+    `site_share_of_the_largest_patch`, which the record derives; the page's job is to show the
+    comparison, and a second computation of it would be a second opinion that could drift.
+    """
+    payload = site_patch_record(case)
+    if not payload:
+        return ""
+    if payload.get("status") != "complete":
+        return f"""
+  <div class="lane">
+    <div class="lane-grp"><b>Not measured on the machine that built this page</b>
+      <span>{esc(payload.get('answer') or 'no reason recorded')}</span></div>
+  </div>"""
+    rows = payload.get("rows") or []
+    if not rows:
+        return ""
+    footprint = MACROCYCLE_FOOTPRINT_A2
+    scale = max([(r.get("unit_patch") or {}).get("hydrophobic_patch_area") or 0
+                 for r in rows] + [footprint]) or 1
+
+    def confidence(block):
+        """The anchors' own confidence, which decides whether the rest of the row means much."""
+        block = block or {}
+        mean = block.get("mean_plddt")
+        below = block.get("below_the_confident_threshold") or 0
+        seen = block.get("anchors_with_a_confidence") or 0
+        threshold = block.get("confident_plddt")
+        if mean is None:
+            return ""
+        # The threshold is the folding tool's own, read off the fold store per unit rather
+        # than restated, so it can be absent on a store that never wrote one. Named only
+        # where it is known: "under the model's own None" is worse than no number.
+        line = (f'{below} of {seen} under the model&rsquo;s own {threshold:.0f}'
+                if isinstance(threshold, (int, float))
+                else f'{below} of {seen} under the threshold')
+        warn = f", {line}" if below else ", none under the threshold"
+        return (f'<span class="cf{" lowc" if below else ""}">confidence '
+                f'{mean:.1f}{warn}</span>')
+
+    def chemistry_line(row):
+        """The same measurement over the residues that do chemistry, where it differs.
+
+        Shown only where the subset is not the whole set. Where it is, the record leaves the
+        block's figures null on purpose -- the row's own are the answer -- and printing a copy
+        would put two numbers on the page that a later edit could separate.
+        """
+        block = row.get("chemistry_only") or {}
+        if not block.get("measured") or block.get("same_as_the_full_set"):
+            if block.get("not_measured_because"):
+                return (f'<br><i>chemistry residues only:</i> '
+                        f'{esc(block["not_measured_because"])}')
+            return ""
+        patch = (block.get("site_patch") or {}).get("site_patch_area_a2")
+        if patch is None:
+            return ""
+        reach = (block.get("reach") or {}).get("residues")
+        dropped = block.get("processing_sites_dropped") or 0
+        plural = "" if dropped == 1 else "s"
+        return (f'<br>over the chemistry residues alone, {dropped} cleavage '
+                f'site{plural} dropped: {num(reach)} residues within reach, patch '
+                f'{patch:,.1f} Å² {confidence(block.get("anchor_confidence"))}')
+
+    def whose(row):
+        """The chain this unit was cut out of, or nothing when the unit IS the chain.
+
+        A whole-chain unit is labelled with its chain's own name, and a chain-level refusal
+        row carries the name in both fields, so printing both unconditionally gives
+        "Protein 3 &middot; Protein 3".
+        """
+        label, target = row.get("label"), row.get("target")
+        return "" if label == target else esc(target)
+
+    def measured_row(row):
+        patch = row.get("site_patch") or {}
+        unit = row.get("unit_patch") or {}
+        reach = row.get("reach") or {}
+        area = patch.get("site_patch_area_a2") or 0.0
+        whole = unit.get("hydrophobic_patch_area") or 0.0
+        share = patch.get("site_share_of_the_largest_patch")
+        positions = row.get("positions_in_the_fold") or []
+        shown = ", ".join(str(p) for p in positions[:8])
+        if len(positions) > 8:
+            shown += f" and {len(positions) - 8} more"
+        # None, not False: the record distinguishes "the anchors are not the annotated
+        # residues" from "nobody could compare them", and only the first is a refusal.
+        unchecked = ('<br><span class="warnline">the residue at one or more anchors could not '
+                     'be compared against the annotation, so these figures are not confirmed '
+                     'to be the annotated site&rsquo;s</span>'
+                     if row.get("measured_at_the_annotated_residues") is None else "")
+        # The share as the record derived it, never recomputed from the two areas beside it.
+        # Dividing them here would put a second arithmetic on the page that a rounding change
+        # in either number could separate from the record's.
+        quoted = (f"{share * 100:.0f} % of {whole:,.0f}" if share is not None
+                  else "of the unit&rsquo;s patch")
+        return f"""
+    <div class="lr">
+      <span class="who"><span class="t">{esc(row.get('label'))}</span>
+        <span class="w">{" &middot; ".join(p for p in (whose(row), _frame_note(row)) if p)}<br>
+          fold positions {esc(shown)} &middot; {num(reach.get('residues'))} residues within
+          reach, {num(reach.get('hydrophobic'))} of them water-repelling
+          {confidence(row.get('anchor_confidence'))}{chemistry_line(row)}{unchecked}</span></span>
+      <span class="plot">{_tick(footprint / 2, scale, faint=True)}{_tick(footprint, scale)}
+        {_bar(whole / scale * 100, cls="b faintp")}{_bar(area / scale * 100, cls="b site")}</span>
+      <span class="vl">{area:,.0f} Å²<span class="cf">{quoted}</span></span>
+    </div>"""
+
+    def bare_row(row):
+        reason = (row.get("not_the_annotated_residues_because")
+                  or row.get("not_measured_because") or "")
+        head = " &middot; ".join(p for p in (whose(row), _frame_note(row)) if p)
+        return f"""
+    <div class="lr none">
+      <span class="who"><span class="t">{esc(row.get('label'))}</span>
+        <span class="w">{head}{'<br>' if head else ''}
+          {esc(reason)}</span></span>
+      <span class="plot"></span>
+      <span class="vl">&mdash;</span>
+    </div>"""
+
+    # Four groups partitioning every row, so the table's length is the record's and not a
+    # consequence of which rows passed which gate. Membership is tested by identity and not by
+    # equality: these are deep nested dicts and `in` on a list of them would compare them
+    # field by field, 37 times over, to answer a question about which object this is.
+    wrong = [r for r in rows if r.get("measured")
+             and r.get("measured_at_the_annotated_residues") is False]
+    publishable = [r for r in rows if _publishable(r)]
+    processing = [r for r in publishable if r.get("anchors_are_processing_sites_only")]
+    only = {id(r) for r in processing}
+    chemistry = [r for r in publishable if id(r) not in only]
+    siteless = [r for r in rows if not r.get("measured")]
+
+    summary = payload.get("summary") or {}
+    groups = [
+        (chemistry, measured_row,
+         f"Measured at the residues the curators marked &middot; {len(chemistry)}",
+         "the solid bar is the part of the unit&rsquo;s largest water-repelling patch that "
+         "lies where a macrocycle sitting on those residues could reach it; the faint bar "
+         "behind it is the whole of that patch, wherever on the unit it is. The gap between "
+         "the two is how much of the surface step 4 scored the unit on is not at the "
+         "chemistry. An empty solid bar does not mean the site has no water-repelling "
+         "surface: it means the unit&rsquo;s LARGEST patch is elsewhere, and a smaller one "
+         "sitting squarely on the site is invisible to this arithmetic"),
+        (processing, measured_row,
+         f"Measured, but only at cleavage boundaries &middot; {len(processing)}",
+         "the only residues the curators marked inside these units are the points where a "
+         "protease cuts the polyprotein. A cleavage site sits at the end of a mature chain by "
+         "construction, so these figures describe a dangling terminus rather than a place to "
+         "put a binder, and the confidence beside them is low for the same reason: a predicted "
+         "chain end is disordered. They are shown rather than dropped because the alternative "
+         "is a shorter table whose length nobody can account for"),
+        (wrong, bare_row,
+         f"Not the annotated residues &middot; {len(wrong)}",
+         "the measurement completed and the residues it landed on are not the ones the "
+         "annotation names, so the figures describe some other location and are withheld here "
+         "rather than printed. The record keeps them, with this sentence beside them, because "
+         "a number reported with what is wrong with it can be checked and a number silently "
+         "dropped cannot"),
+        (siteless, bare_row,
+         f"No functional site to measure &middot; {len(siteless)}",
+         "four different absences, and the row says which: the relative&rsquo;s entry "
+         "annotates no site residue for this chain at all, or every one it annotates falls "
+         "outside the window that was folded, or the position has no counterpart in this "
+         "genome because the alignment found an indel there, or the unit never got "
+         "coordinates. None of them is a statement that nothing happens on these proteins"),
+    ]
+    body = []
+    for members, render, title, note in groups:
+        if not members:
+            continue
+        body.append(f'<div class="lane-grp"><b>{title}</b><span>{note}</span></div>')
+        order = (sorted(members,
+                        key=lambda r: -((r.get("site_patch") or {}).get(
+                            "site_share_of_the_largest_patch") or 0))
+                 if render is measured_row else
+                 sorted(members, key=lambda r: (r.get("rank") or 99, r.get("label") or "")))
+        body.extend(render(r) for r in order)
+
+    frames = summary.get("reading_frames_the_rows_are_numbered_along")
+    overlapping = summary.get("unit_pairs_overlapping_in_different_reading_frames")
+    pairs = ("" if not overlapping else
+             f" Each row names the reading frame its span is numbered along, because "
+             f"{overlapping} pairs of these rows carry spans that overlap as numbers while "
+             f"sharing no residue.")
+    return f"""
+  <div class="lane">{"".join(body)}
+    <div class="lane-foot"><span>one scale for every bar &middot; largest patch on any unit
+      {scale:,.0f} Å²</span>
+      <span>dashed lines: the {footprint:,.0f} Å² a macrocycle covers when it binds, and half
+      of that</span></div>
+  </div>
+  <p class="after"><b>What had to be true before any of these numbers could be printed.</b>
+  An annotated position is curated on the relative&rsquo;s entry, the residues here are
+  numbered along one reading frame of this genome, and the coordinates are numbered from one,
+  so a figure at &ldquo;the active site&rdquo; is three mappings deep. Each row was checked
+  against the residue the relative&rsquo;s entry carries at the annotated position:
+  {num(summary.get('units_measured_at_the_annotated_residues'))} of
+  {num(summary.get('units_measured'))} measured units land on it,
+  {num(summary.get('units_not_measured_at_the_annotated_residues'))} do not and are withheld
+  above.{pairs} The rows run along {num(frames)} frames in all.</p>"""
+
+
+def _site_examples(payload):
+    """The three worked examples the prose quotes, each picked by a stated rule.
+
+    Picked by rule and not by name, for the reason `_richest_facts` gives: a sentence written
+    around whichever row read well on the day it was written goes stale silently, and a reader
+    cannot tell a chosen example from a representative one. The rules here are the claims the
+    paragraph is making.
+
+    `low` and `high` are the two ends of the share among units that carry a residue doing
+    chemistry and whose largest patch reaches the site at all. Both of those are
+    `site_shares_the_patch` true -- that key is the yes-or-no, and the pair is the measurement
+    showing the yes is too coarse to act on.
+
+    `drop` is the unit where dropping the proteolytic cleavage boundaries moves the share
+    furthest. That is the claim about processing sites made as a number rather than as a
+    caution: a cleavage boundary sits at a mature chain's terminus by construction, so a
+    neighbourhood drawn around one is a neighbourhood of a dangling end, and this is the unit
+    where including them costs the most.
+    """
+    def share(row, block=None):
+        patch = ((block or row).get("site_patch") or {})
+        return patch.get("site_share_of_the_largest_patch")
+
+    rows = [r for r in payload.get("rows") or ()
+            if r.get("measured") and not r.get("anchors_are_processing_sites_only")
+            and (r.get("site_patch") or {}).get("site_shares_the_patch")]
+    if not rows:
+        return {}
+    low = min(rows, key=lambda r: share(r) or 0)
+    high = max(rows, key=lambda r: share(r) or 0)
+
+    moved = [r for r in payload.get("rows") or ()
+             if (r.get("chemistry_only") or {}).get("measured")
+             and not r["chemistry_only"].get("same_as_the_full_set")
+             and share(r) is not None and share(r, r["chemistry_only"]) is not None]
+    def where(row):
+        """`a domain on its chain`, or the chain alone where the two names are one.
+
+        A whole-chain unit is labelled with its chain's own name, so naming both gives
+        "Protein 3 on Protein 3". Built here rather than in the prose because `fill` escapes a
+        token and cannot choose between two of them.
+        """
+        label, target = row.get("label"), row.get("target")
+        return label if label == target else f"{label} on {target}"
+
+    facts = {
+        "site_low_unit": where(low),
+        "site_low_share": f"{(share(low) or 0) * 100:.0f}",
+        "site_high_unit": where(high),
+        "site_high_share": f"{(share(high) or 0) * 100:.0f}",
+    }
+    if not moved:
+        return facts
+    drop = max(moved, key=lambda r: abs(share(r) - share(r, r["chemistry_only"])))
+    block = drop["chemistry_only"]
+    dropped = block.get("processing_sites_dropped") or 0
+    return facts | {
+        "site_drop_unit": drop.get("label"),
+        "site_drop_whole": f"{(drop['unit_patch'] or {}).get('hydrophobic_patch_area') or 0:,.1f}",
+        "site_drop_full": f"{drop['site_patch'].get('site_patch_area_a2') or 0:,.1f}",
+        "site_drop_full_share": f"{share(drop) * 100:.0f}",
+        "site_drop_chem": f"{block['site_patch'].get('site_patch_area_a2') or 0:,.1f}",
+        "site_drop_chem_share": f"{share(drop, block) * 100:.0f}",
+        "site_drop_dropped": dropped,
+        "site_drop_plural": "" if dropped == 1 else "s",
+    }
+
+
+def site_patch_facts(case):
+    """The counts the site-patch prose states, or empty where no record was written.
+
+    Empty and not zero, for the reason `_domain_facts` states: `fill` refuses to ship a
+    `{{token}}` with no value, so a page written against these cannot be built from a run that
+    has no site-patch record -- which is the correct failure. Zeros would have the page assert
+    that no unit has a measurable functional site, on the strength of a file that was never
+    written.
+    """
+    payload = site_patch_record(case)
+    if not payload or payload.get("status") != "complete":
+        return {}
+    summary = payload.get("summary") or {}
+    return _site_examples(payload) | {
+        "site_units": summary.get("units"),
+        "site_measured": summary.get("units_measured"),
+        "site_at_annotated": summary.get("units_measured_at_the_annotated_residues"),
+        "site_patch_at_site": summary.get("units_whose_largest_patch_is_at_the_site"),
+        "site_processing_only": summary.get("units_whose_anchors_are_processing_sites_only"),
+        "site_anchors": summary.get("anchors_in_the_folds"),
+        "site_anchors_low": summary.get("anchors_below_the_confident_threshold"),
+        "site_frames": summary.get("reading_frames_the_rows_are_numbered_along"),
+        "site_overlaps": summary.get("unit_pairs_overlapping_in_different_reading_frames"),
+        "site_reach": f"{payload.get('reach_a') or 0:.1f}",
+    }
 
 
 def lane_facts(case):

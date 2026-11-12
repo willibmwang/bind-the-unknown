@@ -424,6 +424,56 @@
     target, so it never becomes a term in the ranking.</p>
   </div>
 
+  <div class="substep" id="site-patch">
+    <h3>Is the patch where the chemistry is?</h3>
+    <p class="cap">Everything above measures the largest water-repelling patch
+    <i>anywhere</i> on a structure. That is the right question for &ldquo;could this protein
+    hold a molecule of this class at all&rdquo;, and it is not the question a binder designer
+    asks second, which is where on the protein to put one. The curators have already marked
+    the residues that do the work — the catalytic ones, the ligand-binding ones — so the same
+    arithmetic can be asked at that location instead of at the chain's best address.</p>
+    <p class="cap">A macrocycle covers about <b>{{footprint}}</b> Å² when it binds, which
+    makes it roughly <b>{{site_reach}}</b> Å across. So for each folded unit: take the
+    residues the annotation marks, collect everything within that distance of them, and
+    intersect it with the patch step 4 found. <b>{{site_measured}}</b> of
+    <b>{{site_units}}</b> folded units have at least one marked residue inside the
+    coordinates; the other units say which of four absences applies.</p>
+    <p class="cap">The two numbers disagree, and the size of the disagreement is the finding.
+    Step 4's question has a yes-or-no answer — does the unit's best patch reach the marked
+    residues at all — and <b>{{site_patch_at_site}}</b> of <b>{{site_measured}}</b> units say
+    yes, which is too coarse to act on. The share says how much. At one end of this run,
+    <i>{{site_high_unit}}</i> holds <b>{{site_high_share}} %</b> of its unit's patch at the
+    marked residues; at the other, <i>{{site_low_unit}}</i> holds
+    <b>{{site_low_share}} %</b>, so most of the surface that unit was scored on is somewhere
+    else. Both are a yes.</p>
+    <p class="cap"><b>Not every marked residue is a place to put a binder.</b> On a
+    coronavirus polyprotein most plain site annotations are the points where a protease cuts
+    the chain, and a cleavage boundary sits at the <i>end</i> of a mature chain by
+    construction — so a neighbourhood drawn around one is a neighbourhood of a dangling
+    terminus. Both measurements are therefore reported. <i>{{site_drop_unit}}</i> is where it
+    costs the most: <b>{{site_drop_full}}</b> Å² of its <b>{{site_drop_whole}}</b> Å² patch at
+    all its marked residues, <b>{{site_drop_full_share}} %</b> — and
+    <b>{{site_drop_chem}}</b> Å², <b>{{site_drop_chem_share}} %</b>, over the residues that do
+    chemistry once its {{site_drop_dropped}} cleavage site{{site_drop_plural}} are
+    dropped.</p>
+    <p class="cap"><b>Read the confidence first.</b> These are predicted coordinates, and
+    <b>{{site_anchors_low}}</b> of the <b>{{site_anchors}}</b> marked residues sit below the
+    folding tool's own confidence threshold — many of them cleavage boundaries, disordered
+    because they are chain ends rather than because of anything about the chemistry.
+    <b>{{site_processing_only}}</b> units have nothing but cleavage boundaries in them, and
+    they are grouped apart below.</p>
+    <p class="cap">And before any of it is printed: a marked position is curated on the
+    relative's entry, carried through the alignment into one reading frame of this genome, then
+    into coordinates numbered from one. Each row was checked against the residue the
+    relative's entry actually carries at that position, and <b>{{site_at_annotated}}</b> of
+    <b>{{site_measured}}</b> land on it. A row that did not would have its figures withheld
+    here, because a patch measured at the wrong residues is worse than no patch — only the
+    second is visible as an absence. The rows run along <b>{{site_frames}}</b> different
+    reading frames, and <b>{{site_overlaps}}</b> pairs of them carry spans that overlap as
+    numbers while sharing no residue, so every row names its frame.</p>
+    <!--SITE-PATCH-->
+  </div>
+
   <div class="stage">
     <div class="stage-head"><span class="sn">5</span><svg class="ic" aria-hidden="true" viewBox="0 0 100 72">
             <circle cx="50" cy="36" r="20" fill="none" stroke="currentColor" stroke-width="2.4" opacity=".32"/>

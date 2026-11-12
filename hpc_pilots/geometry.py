@@ -268,6 +268,12 @@ def surface_markers(pdb_id, chain=None, keep=None, verify=None, anchors=None):
     returned 94 residues. An anchor that does not exist on the chain is reported there rather
     than dropped or snapped to a neighbour, which is what makes that mistake visible instead of
     quietly producing a confident zero.
+
+    That is also why `site_patch_measured` travels with the site figures. A site patch of 0.0
+    is the right answer often enough to be the common case -- the main protease's catalytic
+    dyad is a His/Cys pair and a His/Cys pair is not a hydrophobic patch -- so the figures are
+    None rather than zero when no anchor was found, and `site_patch_absent_because` says so.
+    `_markers` carries the measurement behind that.
     """
     residues = _residues(fetch_structure(pdb_id), chain)
     if not residues:
@@ -304,7 +310,11 @@ def markers_from_coordinates(text, label="predicted coordinates", anchors=None):
     are reachable for a genuinely novel pathogen: no deposition covers the chain, so either the
     patch at the active site is measured on a prediction or it is not measured at all. It
     inherits every caveat above -- `on_predicted_coordinates` travels with it, and a site
-    measured over a low-confidence stretch describes a fold the model never committed to.
+    measured over a low-confidence stretch describes a fold the model never committed to. It
+    also carries `site_patch_measured`, and on this lane that key is doing more work than on a
+    deposition: a predicted chain is numbered from one, so an anchor mapped into the pathogen's
+    own numbering should land, and a `False` here says the mapping is wrong rather than that
+    the site has no patch.
     """
     import tempfile
 
@@ -364,6 +374,20 @@ def _markers(residues, pdb_id, chain=None, keep=None, verify=None, anchors=None)
     residues covering 415.2 square angstroms and never which 5 -- measured 2026-11-12, they
     are Leu50, Phe134, Ala191, Ala193 and Ala194 -- and which 5 is the whole of what a binder
     designer can act on.
+
+    **The site figures distinguish an empty site from an unmeasured one, and did not.** The
+    site block is the patch intersected with the neighbourhood, so it comes back empty for two
+    reasons that are opposite findings. Measured on the main protease with anchors 41 and 145
+    on 2026-11-12, `site_patch_area_a2` is 0.0 on 7K3T:A, on 6YB7:A and on 6W79:A while their
+    chain patches are 637.0, 651.0 and 343.4 square angstroms -- and all three zeros are the
+    right answer, because the catalytic site is a His/Cys dyad and a histidine-cysteine pair
+    is not a hydrophobic patch. An anchor handed over in the wrong numbering produces the same
+    0.0 and means nothing about the protein: asking for the same site with the UniProt numbers
+    3304 and 3408 puts both in `anchors_missing` and intersects the patch with an empty
+    neighbourhood. `site_patch_measured` is therefore returned beside the figures and the
+    figures are None rather than zero when it is False, with `site_patch_absent_because`
+    carrying the sentence. A zero that a reader cannot tell from a failure is worse than no
+    number, because only the second one can be seen to be missing.
     """
     # No author numbering from the mapping endpoint, but a reference sequence to locate the
     # chain in: infer the shift from the residues themselves and clip at it.
@@ -482,8 +506,25 @@ def _markers(residues, pdb_id, chain=None, keep=None, verify=None, anchors=None)
         # `_residues` returned, so no numbering question arises at all here.
         reachable = {id(r) for r in near}
         shared = [r for r in in_order if id(r) in reachable]
-        site_patch_area = sum(r["sasa"] for r in shared)
-        site_sasa = sum(r["sasa"] for r in near)
+        # Floats rather than whatever `sum` returns, because `sum` of an empty list is the
+        # integer 0 and `round(0, 1)` is the integer 0. The site figures are frequently empty
+        # on exactly the targets this exists for -- the main protease's catalytic dyad is one
+        # -- so the common case was the one emitting an int where every neighbouring key is a
+        # float, and a reader comparing 0 against 0.0 across records sees a change that is not
+        # one.
+        site_patch_area = float(sum(r["sasa"] for r in shared))
+        site_sasa = float(sum(r["sasa"] for r in near))
+        # Whether the site was measured at all, which is NOT the same question as whether the
+        # patch reaches it. See the comment on `site_patch_measured` below: this one boolean is
+        # what separates a biological zero from an absent measurement.
+        site_measured = bool(site_summary["anchors_found"])
+        site_absent = None if site_measured else (
+            f"none of the {len(site_summary['anchors_missing'])} anchors asked for exists on "
+            f"this chain's author numbering -- "
+            f"{', '.join(str(a) for a in site_summary['anchors_missing'])} are all in "
+            f"`anchors_missing` -- so there is no neighbourhood for the patch to intersect. "
+            f"The site figures are absent rather than zero: a zero here would read as a "
+            f"finding about the site when it is a fact about the numbering.")
 
     markers = {
         "pdb_id": pdb_id, "chain": chain,
@@ -505,20 +546,45 @@ def _markers(residues, pdb_id, chain=None, keep=None, verify=None, anchors=None)
     if site_summary is not None:
         markers.update({
             "site": site_summary,
-            "site_patch_area_a2": round(site_patch_area, 1),
-            "site_patch_positions": [_resnum(r["number"]) for r in shared],
+            # **A measured zero and an unmeasured zero are opposite findings, and until this
+            # key existed they were the same four characters.** The site figures below are an
+            # intersection, so they come out empty for two unrelated reasons. The first is
+            # biology and is the common case on the headline target: the main protease's
+            # catalytic site is a histidine-cysteine dyad, a His/Cys pair is not hydrophobic,
+            # and a hydrophobic patch therefore has no business being there -- measured
+            # 2026-11-12 with anchors 41 and 145, the site patch is 0.0 square angstroms on
+            # 7K3T:A beside a chain patch of 637.0, on 6YB7:A beside 651.0 and on 6W79:A
+            # beside 343.4. All three are correct answers about the protein. The second is a
+            # failed lookup: an anchor given in the wrong numbering, or a residue disordered
+            # out of the deposition, leaves `anchors_found` empty, and the same intersection
+            # of a patch with nothing is then 0.0 as well while saying nothing whatever about
+            # the site. Reported as a number, the two are indistinguishable, and the wrong one
+            # reads as "the active site has no patch" when the truth is "the active site was
+            # never located".
+            #
+            # So the figures are present only when `anchors_found` is non-empty, and None
+            # otherwise with `site_patch_absent_because` carrying the sentence. A consumer
+            # reading 0.0 is then reading a measurement, and a consumer reading None is being
+            # told the measurement did not happen.
+            "site_patch_measured": site_measured,
+            "site_patch_absent_because": site_absent,
+            "site_patch_area_a2": round(site_patch_area, 1) if site_measured else None,
+            "site_patch_positions": ([_resnum(r["number"]) for r in shared]
+                                     if site_measured else None),
             # Against the neighbourhood's own surface, matching `patch_fraction_of_surface`
             # one key above: how much of what a peptide at this site can touch is patch. The
             # count fraction was the other candidate and is the worse one, because a patch is
             # bound by area and four large aromatics are a site where eight small residues
             # are not.
-            "site_patch_fraction_of_the_site": (round(site_patch_area / site_sasa, 3)
-                                                if site_sasa else 0.0),
+            "site_patch_fraction_of_the_site": (
+                (round(site_patch_area / site_sasa, 3) if site_sasa else 0.0)
+                if site_measured else None),
             # Whether the chain's best patch is at the site at all. The informative answer is
             # frequently False, and that is the finding rather than a failure: it says the
             # surface the markers scored is somewhere other than the chemistry, which is
-            # exactly what a reader pointing a macrocycle at an active site needs told.
-            "site_shares_the_patch": bool(shared),
+            # exactly what a reader pointing a macrocycle at an active site needs told. None,
+            # not False, when the site was never located, for the reason above.
+            "site_shares_the_patch": bool(shared) if site_measured else None,
         })
     return markers
 
@@ -795,11 +861,38 @@ def surface_for_accession(accession, interval=None, replicates=5, cache={}, anch
 
     `anchors` is passed to each structure unchanged and carries the numbering warning on
     `surface_markers` with it, which bites hardest here: this function chooses the structures
-    itself, so a caller cannot know whose author numbering it is handing numbers in. The
-    structures are tried in resolution order and the site block is promoted from the first one
-    that actually found the anchors, with `site_measured_on` naming it, because a chain
-    deposited in a different numbering reports every anchor missing and its empty site block
-    would otherwise read as "nothing is near the site".
+    itself, so a caller cannot know whose author numbering it is handing numbers in. Only
+    structures that actually found the anchors contribute, because a chain deposited in a
+    different numbering reports every anchor missing and its empty site block would otherwise
+    read as "nothing is near the site".
+
+    **The site figures are aggregated over the replicates, exactly as the patch is.** They
+    were not, and that was the defect: `site_patch_area_a2`, `site_patch_positions`,
+    `site_patch_fraction_of_the_site` and `site_shares_the_patch` were lifted whole out of the
+    first structure that found the anchors while `hydrophobic_patch_area` beside them was a
+    median with `patch_area_min` and `patch_area_max` recorded. The spread those keys exist for
+    is the reason -- five structures of the main protease span 625.1 to 824.6 square angstroms,
+    199.5 of spread, and five of the spike receptor-binding domain span 496 -- and the site
+    figures are the same patch intersected with a neighbourhood, so they inherit the same
+    ensemble error. Measured 2026-11-12 with anchors 41 and 145, the dyad's site patch is 0.0
+    on 7K3T:A, 7GEF:A, 6YB7:A and 6W79:A and 121.0 on 6LU7:A: one structure in five disagrees
+    with the other four, and promoting one of them answered a question about the ensemble with
+    a sample of size one.
+
+    So the area and the fraction are medians over the structures that measured the site, with
+    `site_patch_area_min`, `site_patch_area_max` and `site_patch_area_spread` beside them, and
+    `site_shares_the_patch` is the majority -- which for a sample of booleans is the same
+    median rule. `site_structures_measured`, `site_structures_offered`,
+    `site_structures_sharing_the_patch` and `site_structures_used` say what the aggregate was
+    taken over. `site` and `site_patch_positions` stay one structure's, named by
+    `site_patch_positions_measured_on`, because they are author residue numbers and a median
+    over position lists is not a position list -- the same reservation
+    `patch_positions_measured_on` already carries.
+
+    When no structure found the anchors every site figure is None, not zero, and
+    `site_patch_absent_because` says so. A site patch of 0.0 is a real and frequent answer --
+    a His/Cys catalytic dyad is not a hydrophobic patch -- and it has to be readable apart from
+    a site that was never located.
     """
     # `replicates` belongs in the key and was missing from it. The median is taken over up to
     # `replicates` structures, so it is an input to the answer and not a performance knob: with
@@ -955,20 +1048,87 @@ def surface_for_accession(accession, interval=None, replicates=5, cache={}, anch
         markers["patch_positions_measured_on"] = (f"{samples[0]['pdb_id']}:"
                                                   f"{samples[0]['chain']}")
         if anchors:
-            # Promoted from the first structure that found the anchors rather than taken from
-            # the first structure measured, for the reason the docstring gives: a chain
-            # deposited in another numbering reports them all missing, and its empty site block
-            # beside a real patch would read as a finding about the site instead of a fact
-            # about the numbering. When none of them found the anchors the first sample's block
-            # stands, which is the honest version of that answer -- every anchor in
-            # `anchors_missing`, and `site_measured_on` saying where it was looked for.
-            chosen = next((m for m in samples if (m.get("site") or {}).get("anchors_found")),
-                          samples[0])
-            for field in ("site", "site_patch_area_a2", "site_patch_positions",
-                          "site_patch_fraction_of_the_site", "site_shares_the_patch"):
-                if field in chosen:
-                    markers[field] = chosen[field]
-            markers["site_measured_on"] = f"{chosen['pdb_id']}:{chosen['chain']}"
+            # **Aggregated over the replicates, not promoted from one of them.** Until this
+            # block was rewritten the three site figures were copied out of whichever
+            # structure found the anchors first, while every quantity around them -- the patch
+            # area, its fraction of the surface, the exposed fraction, the surface score -- was
+            # a median over up to `replicates` structures with a recorded minimum and maximum.
+            # That asymmetry is not a tidiness complaint: the reason the median and the spread
+            # exist is that one crystal is one sample of an ensemble and the quantity moves
+            # with it, measured on 2026-11-12 at 199.5 square angstroms of spread across five
+            # structures of the main protease -- 625.1 to 824.6 -- and at 496 across five of
+            # the spike receptor-binding domain. The site figures are the same kind of
+            # quantity, computed by intersecting the same patch with a neighbourhood, so a
+            # single structure's value carries the same ensemble error with none of the warning
+            # labels. The site patch of the main protease's dyad is 0.0 on 7K3T:A, 7GEF:A,
+            # 6YB7:A and 6W79:A and 121.0 on 6LU7:A, which is exactly the spread the promotion
+            # was hiding.
+            #
+            # Only the structures that actually found the anchors are aggregated. A deposition
+            # numbered in another convention reports every anchor missing, and averaging its
+            # empty intersection in with real measurements would pull the median towards zero
+            # for a reason that has nothing to do with the protein.
+            at_site = [m for m in samples if m.get("site_patch_measured")]
+            markers["site_structures_measured"] = len(at_site)
+            markers["site_structures_offered"] = len(samples)
+            if at_site:
+                # The neighbourhood block and the patch positions stay one structure's and are
+                # named, for the reason `patch_positions_measured_on` gives one key above:
+                # these are author residue numbers, author numbering differs between
+                # depositions, and a median over position lists is not a position list.
+                chosen = at_site[0]
+                markers["site"] = chosen["site"]
+                markers["site_patch_positions"] = chosen["site_patch_positions"]
+                markers["site_patch_positions_measured_on"] = (f"{chosen['pdb_id']}:"
+                                                               f"{chosen['chain']}")
+                site_areas = [m["site_patch_area_a2"] for m in at_site]
+                markers["site_patch_measured"] = True
+                markers["site_patch_absent_because"] = None
+                markers["site_patch_area_a2"] = round(median(site_areas), 1)
+                markers["site_patch_area_min"] = round(min(site_areas), 1)
+                markers["site_patch_area_max"] = round(max(site_areas), 1)
+                markers["site_patch_area_spread"] = round(max(site_areas) - min(site_areas), 1)
+                markers["site_patch_fraction_of_the_site"] = round(
+                    median([m["site_patch_fraction_of_the_site"] for m in at_site]), 3)
+                # A majority of the structures measured, which for a sample of zeros and ones
+                # IS the median -- so the boolean is aggregated by the same rule as every
+                # number beside it rather than by a second rule invented for booleans. A tie
+                # resolves to False, the conservative direction: half the depositions showing
+                # the chain's best patch somewhere else is not a basis for telling a reader
+                # the patch is at the chemistry. The raw vote stays readable in
+                # `site_structures_sharing_the_patch` next to `site_structures_measured`.
+                sharing = sum(1 for m in at_site if m["site_shares_the_patch"])
+                markers["site_structures_sharing_the_patch"] = sharing
+                markers["site_shares_the_patch"] = sharing * 2 > len(at_site)
+                markers["site_structures_used"] = [f"{m['pdb_id']}:{m['chain']}"
+                                                   for m in at_site]
+                markers["site_measured_on"] = f"{chosen['pdb_id']}:{chosen['chain']}"
+            else:
+                # None of them found the anchors, which is the honest version of that answer
+                # and not a measurement of an empty site -- see `_markers`. The first sample's
+                # block stands so `anchors_missing` and the reach are still readable, every
+                # figure is None rather than zero, and `site_patch_absent_because` says which
+                # of the two happened.
+                stood = samples[0]
+                looked_in = ", ".join(f"{m['pdb_id']}:{m['chain']}" for m in samples)
+                markers["site"] = stood.get("site")
+                markers["site_patch_measured"] = False
+                markers["site_patch_absent_because"] = (
+                    f"{stood.get('site_patch_absent_because') or 'the anchors were not found'}"
+                    f" This held on all {len(samples)} structures measured ({looked_in}), so "
+                    f"the site figures are absent for every one of them.")
+                # Written out rather than left to `.get` returning None, so the record carries
+                # the same keys whether or not the site was found. A consumer that has to tell
+                # an absent key from a null one is reading the shape of the dict instead of
+                # what it says, and the page's per-field joins do exactly that.
+                for field in ("site_patch_area_a2", "site_patch_positions",
+                              "site_patch_fraction_of_the_site", "site_shares_the_patch",
+                              "site_patch_area_min", "site_patch_area_max",
+                              "site_patch_area_spread", "site_patch_positions_measured_on",
+                              "site_structures_sharing_the_patch"):
+                    markers[field] = None
+                markers["site_structures_used"] = []
+                markers["site_measured_on"] = f"{stood['pdb_id']}:{stood['chain']}"
         # When this claim became knowable, which is the earliest deposition among the
         # structures it was actually measured on. Without it the markers are a 2026
         # calculation with no date, and `Dossier.observe` compares `available_from` against

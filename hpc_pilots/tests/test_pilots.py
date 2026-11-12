@@ -5699,3 +5699,906 @@ def test_folding_is_offered_to_candidates_nothing_identified():
     _folded, novel_rows, _folds = fold_stage(only_novel, ceiling=400, pool=())
     assert len(novel_rows) == 1
     assert novel_rows[0]["sequence_recovered"] is True
+
+
+# ------------------------------------------- the domain route, and the patch at the site
+# Everything below here was built across one session and shipped with no test at all: the
+# annotation reader, the three-numbering mapping, the fold-unit builder, the neighbourhood
+# arithmetic and the record that joins them. Every correctness claim rested on a one-off
+# manual check, and two of the bugs that session fixed were introduced by its own earlier
+# fixes -- so these tests are written against the specific numbers those manual checks
+# produced, with the committed artifacts they were taken on, and they run offline.
+
+def _entry_payload():
+    """A 300-residue entry with one mature chain and the annotations that exercise the rules.
+
+    Hand-built rather than fetched, which is the whole point: `domains` reads a cached UniProt
+    payload, so a test that fetched one would be a test of UniProt's curation on the day it
+    ran. The features here are chosen one per rule -- a whitelisted type, an excluded type, a
+    region straddling the chain boundary, two undescribed features of the same type, a domain
+    coincident with the chain, and site annotations of all three kinds -- so a failure names
+    the rule that broke.
+    """
+    sequence = "".join("ACDEFGHIKLMNPQRSTVWY"[(i * 7 + i // 20) % 20] for i in range(300))
+
+    def feature(kind, start, end, description="", **extra):
+        return {"type": kind, "description": description,
+                "location": {"start": {"value": start}, "end": {"value": end}}, **extra}
+
+    return {
+        "sequence": {"value": sequence, "length": 300},
+        "features": [
+            # Coincident with the mature chain to the residue: the nsp5 case, which must be
+            # reported rather than refused.
+            feature("Domain", 101, 250, "Peptidase C30"),
+            feature("Domain", 101, 160, "Macro 1"),
+            # Straddles the chain's start, so it is clipped and marked.
+            feature("Topological domain", 50, 400, "Extracellular"),
+            # Two of one type with no description. The bare feature type cannot name either.
+            feature("Coiled coil", 161, 170),
+            feature("Coiled coil", 220, 249),
+            # Over the minimum but inside an alignment gap, so it has no counterpart here.
+            feature("Region", 155, 175, "Receptor-binding domain (RBD)"),
+            # Excluded by `FUNCTIONAL_REGIONS`, which is a whitelist: 191 of these on the real
+            # entry would bury the four domains that matter.
+            feature("Beta strand", 110, 115),
+            feature("Chain", 101, 250, "Peptidase-like chain"),
+            # The residues that do the chemistry, one of each kind the reader admits.
+            feature("Active site", 141, 141, "Nucleophile"),
+            feature("Binding site", 145, 145, "", ligand={"name": "Zn(2+)"}),
+            feature("Site", 133, 133, "Involved in polymerization"),
+            feature("Site", 250, 250, "Cleavage; by host furin"),
+            feature("Site", 165, 165, "Cleavage; by viral protease"),
+            # Outside the mature chain, so `within` drops it.
+            feature("Site", 290, 290, "Cleavage; by host"),
+        ],
+    }
+
+
+def _located_with_a_gap():
+    """One chain aligned into this genome's reading frame, with an indel in the middle.
+
+    The gap is the reason `map_position` returns None rather than a neighbour, and the reason
+    `map_span` walks inward. Blocks are the plain nested-int form `chain.locate_chain` emits:
+    the homolog's chain indices 60 to 69 have no counterpart, and the pathogen carries ten
+    residues the homolog does not between the two blocks, which is what makes a mapped window
+    able to come out wider than the span that was annotated.
+    """
+    return {"orf_index": 1,
+            "span": [201, 355],
+            "sequence": "M" * 155,
+            "blocks": [[[200, 260], [275, 355]], [[0, 60], [70, 150]]],
+            "covered": 0.93, "identity": 0.88}
+
+
+def test_one_annotated_region_has_one_name_whatever_shape_it_arrives_in():
+    """`domains.label_for` is the only fallback, and the collision it exists for is here.
+
+    Three callers wrote three fallbacks and two disagreed: this module appended the span and
+    said `Coiled coil 918-962` while `domain_inventory` and `domain_folds` dropped back to the
+    bare feature type and said `Coiled coil`, so one region of Spike protein S2 had two names
+    and any join keyed on the label lost it silently -- silently because every other region on
+    that chain has a description and joins fine. The test is therefore not "the function
+    returns a string": it is that the three dict shapes the annotation travels in all reach
+    the same name, and that two undescribed features of one type get names that differ.
+    """
+    from hpc_pilots.domains import annotated_regions, label_for, _label
+
+    payload = _entry_payload()
+    with mock.patch("hpc_pilots.intake._entry", return_value=payload):
+        regions = annotated_regions("FAKE01", within=(101, 250))
+
+    by_label = {r["label"]: r for r in regions}
+    # A curator's description is the name, untouched.
+    assert "Peptidase C30" in by_label
+    assert "Receptor-binding domain (RBD)" in by_label
+
+    # The two undescribed features of one type. The bare type would put two identically named
+    # rows in a dropdown and give a join two rows it cannot tell apart, which is why the span
+    # is in the fallback rather than only the type.
+    coils = sorted(r["label"] for r in regions if r["type"] == "Coiled coil")
+    assert coils == ["Coiled coil 161-170", "Coiled coil 220-249"], coils
+    assert len(set(coils)) == 2
+
+    # The three shapes, all naming one region: an `annotated_regions` region, a
+    # `domain_inventory` row (span under `entry_span_on_the_relative`) and a `domain_folds`
+    # unit (type under `region_type`). A caller that reshapes its row to call this is a caller
+    # that will eventually write a fourth fallback instead.
+    region = {"type": "Coiled coil", "description": "", "entry_span": [918, 962]}
+    row = {"type": "Coiled coil", "description": None,
+           "entry_span_on_the_relative": [918, 962]}
+    unit = {"region_type": "Coiled coil", "description": "",
+            "entry_span_on_the_relative": [918, 962]}
+    assert label_for(region) == label_for(row) == label_for(unit) == "Coiled coil 918-962"
+
+    # The entry side is read even when a clipped span is also present, because a label keyed
+    # on this genome's numbering would change when the alignment changed and stop matching a
+    # record written before it.
+    clipped = {"type": "Topological domain", "description": "",
+               "entry_span": [50, 400], "start": 101, "end": 250}
+    assert label_for(clipped) == "Topological domain 50-400"
+    # And the clipped span where nothing recorded the unclipped one, which still names one
+    # region rather than falling back to the bare type.
+    assert label_for({"type": "Coiled coil", "start": 101, "end": 250}) \
+        == "Coiled coil 101-250"
+    # The one honest bare type: no span on either side, so there is nothing to disambiguate.
+    assert label_for({"type": "Coiled coil", "description": ""}) == "Coiled coil"
+    assert label_for({}) == "Region"
+    # The private name the function was written under is the function, not a copy of it.
+    assert _label is label_for
+
+    # The whitelist is a whitelist. A feature type absent from it is excluded by construction,
+    # and `Chain` is excluded because `intake.mature_chains` owns that question.
+    types = {r["type"] for r in regions}
+    assert "Beta strand" not in types
+    assert "Chain" not in types
+    # The straddling region is clipped to the chain and marked rather than dropped.
+    extracellular = by_label["Extracellular"]
+    assert (extracellular["start"], extracellular["end"]) == (101, 250)
+    assert extracellular["clipped"] is True
+    assert extracellular["entry_span"] == [50, 400], "the provenance survives the clip"
+
+
+def test_an_annotated_span_crosses_the_species_gap_through_blocks_and_not_an_offset():
+    """`map_position` and `map_span`, at the four cases a single offset gets wrong.
+
+    The measurement behind the whole module: spike S1 maps from the relative's [14, 654] to
+    this genome's [24, 685], +10 at the start and +31 at the end, so one offset is wrong by 21
+    residues at the far end of one chain. That difference is indel content, and these are the
+    four things indels do -- a position inside a block maps, a position between blocks does
+    not, an end in a gap walks inward, and a window containing an insertion comes out wider
+    than the annotation it came from.
+    """
+    from hpc_pilots.domains import map_position, map_span
+
+    located = _located_with_a_gap()
+    # Entry position p is index p - chain_start in the sequence that was aligned.
+    assert map_position(located, 0) == 201
+    assert map_position(located, 59) == 260
+    # The gap. None, and never the neighbour: a site reported at the wrong residue is worse
+    # than a site reported as unmappable, because only the second can be seen to be wrong.
+    assert [map_position(located, i) for i in range(60, 70)] == [None] * 10
+    assert map_position(located, 70) == 276
+    assert map_position(located, 149) == 355
+    # Off either end of the alignment, and no blocks at all.
+    assert map_position(located, 400) is None
+    assert map_position({}, 0) is None
+    assert map_position({"blocks": [[[0, 10]]]}, 0) is None, "two sides or nothing"
+
+    # A span wholly inside a block: both ends map, nothing is adjusted, and the two widths
+    # agree.
+    inside = map_span(located, 101, 101, 160)
+    assert inside == {"start": 201, "end": 260, "length": 60,
+                      "entry_span": [101, 160], "entry_length": 60,
+                      "ends_adjusted": False, "unmapped_ends": 0}
+
+    # A span containing the insertion. `length` exceeds `entry_length`, and that is the honest
+    # number: it is the count of residues a fold of this span would contain.
+    across = map_span(located, 101, 155, 175)
+    assert across["entry_length"] == 21 and across["length"] == 26, across
+    assert across["ends_adjusted"] is False, "both ends of this one map"
+
+    # An end in the gap. The scan walks INWARD, so the window returned is inside the
+    # annotation rather than claiming residues the curator did not annotate.
+    walked = map_span(located, 101, 165, 180)
+    assert walked["entry_span"] == [171, 180], walked
+    assert walked["start"] == 276 and walked["unmapped_ends"] == 1
+    assert walked["ends_adjusted"] is True
+    # `entry_span` is the window this call MAPPED and not the window it was asked about. The
+    # two differ exactly here, and a consumer printing the asked-for span beside the mapped one
+    # prints two numbers describing different sets of residues -- measured at 103 residues on
+    # nsp12's NiRAN domain.
+    assert walked["entry_span"] != [165, 180]
+    assert walked["entry_length"] == walked["length"] == 10
+
+    # Nothing in the span maps: the domain the alignment never reached. None, not a span.
+    assert map_span(located, 101, 161, 170) is None
+    assert map_span(located, 101, 160, 101) is None, "an inverted span is not a span"
+
+
+def test_every_fold_unit_is_the_same_shape_and_names_its_own_refusal():
+    """`domains.fold_units`: the whole chain first, the ceiling per unit, nothing dropped.
+
+    The defect this replaces is a ceiling applied to a whole chain with everything inside it
+    discarded -- nine of twenty-one ranked chains sent nowhere for being long, including the
+    polymerase, the helicase and the whole receptor-binding machinery. So the order of the two
+    steps is reversed, and what has to hold is that the reversal costs nothing: the whole
+    chain is still the first unit, so the committed main-protease fold cannot be displaced by
+    a domain, and every refusal is named on the unit it refused.
+    """
+    from hpc_pilots.domains import MINIMUM_DOMAIN_AA, fold_units
+
+    payload = _entry_payload()
+    located = _located_with_a_gap()
+    row = {"name": "a mature chain", "chain_range": [101, 250], "length_aa": 150,
+           "orf": {"protein": "M" * 400}}
+    with mock.patch("hpc_pilots.intake._entry", return_value=payload):
+        units = fold_units(row, located, "FAKE01", ceiling=120)
+
+    # The whole chain is first, always. The pick order in `chain.fold_stage` takes the first
+    # foldable unit, so this is what keeps a recorded fold recorded.
+    assert units[0]["kind"] == "whole_chain"
+    assert all(u["kind"] == "domain" for u in units[1:])
+    # One key set for both kinds, so a consumer joining on any key finds it on every unit.
+    assert len({tuple(sorted(u)) for u in units}) == 1, "two shapes of unit"
+
+    whole = units[0]
+    # Length is `len(located["sequence"])` -- the residues this genome actually has -- which is
+    # the same quantity `chain.fold_stage` already applies the ceiling to. Deliberately not the
+    # span's width, so moving the decision here cannot change which chains were folded.
+    assert whole["length"] == 155 and whole["span"] == [201, 355]
+    assert whole["inside_the_ceiling"] is False, "155 residues against a ceiling of 120"
+    assert "over the 120-residue ceiling" in whole["refused_because"]
+    # The chain's own range is mapped like any other span, and the cross-check says the range
+    # handed in really does index the alignment it was handed with. Hard-coded None here once,
+    # which let a whole chain publish a full `entry_span` beside a shorter `span` with no flag
+    # while a region over the identical range reported `ends_adjusted` for the same shortfall.
+    assert whole["mapping"] is not None
+    assert whole["mapping_reproduces_the_span"] is True
+
+    by_label = {u["label"]: u for u in units}
+    # Coincident with the whole chain to the residue: reported, not refused, because the
+    # consistency check the ask implies needs the unit to be there to check.
+    assert by_label["Peptidase C30"]["coincides_with_the_whole_chain"] is True
+    assert by_label["Macro 1"]["coincides_with_the_whole_chain"] is False
+    assert by_label["Macro 1"]["inside_the_ceiling"] is True
+    assert by_label["Macro 1"]["span"] == [201, 260]
+    # `entry_span` is the provenance and `entry_span_mapped` is what was carried over.
+    assert by_label["Macro 1"]["entry_span"] == [101, 160]
+    assert by_label["Macro 1"]["entry_span_mapped"] == [101, 160]
+
+    # Under the minimum: refused as a thing to fold, kept as a unit, and the sentence says it
+    # stays available as a site. A five-residue motif is exactly where a macrocycle is designed.
+    rbd = by_label["Receptor-binding domain (RBD)"]
+    assert rbd["inside_the_ceiling"] is False
+    assert f"under the {MINIMUM_DOMAIN_AA}-residue minimum" in rbd["refused_because"]
+    assert rbd["span"] is not None, "a refused unit still carries what was mapped"
+
+    # Never mapped at all: the reason names the ALIGNMENT, not the domain, or a reader
+    # concludes the domain does not exist in this genome.
+    gapped = by_label["Coiled coil 161-170"]
+    assert gapped["span"] is None and gapped["mapping"] is None
+    assert "falls in a block of the alignment" in gapped["refused_because"]
+    assert gapped["mapping_reproduces_the_span"] is None, \
+        "None rather than True: there is nothing to check on a domain"
+
+    # A chain with no accession, or no alignment, gets the whole-chain unit and no domain
+    # route. Both are required: with no blocks a span could only be carried over by assuming
+    # the two numberings agree, which is the error the module exists to remove.
+    assert len(fold_units(row, located, None, 400)) == 1
+    assert len(fold_units(row, None, "FAKE01", 400)) == 1
+    assert len(fold_units({"chain_range": None, "orf": {"protein": "M" * 50}},
+                          None, "FAKE01", 400)) == 1
+
+    # An unidentified ORF: no mature-chain range, so the ORF translation is the candidate and
+    # the entry-side keys are null rather than invented.
+    orf_only = fold_units({"orf": {"protein": "M" * 50}}, None, None, 400)[0]
+    assert orf_only["type"] == "ORF" and orf_only["span"] == [1, 50]
+    assert orf_only["entry_span"] is None
+    assert orf_only["mapping_reproduces_the_span"] is None
+    # And a candidate with nothing recoverable at all refuses with the right sentence rather
+    # than a ceiling it never reached.
+    empty = fold_units({"length_aa": 0}, None, None, 400)[0]
+    assert "nothing to fold" in empty["refused_because"]
+
+
+def test_the_macrocycle_reach_is_the_footprint_and_not_a_second_number():
+    """`MACROCYCLE_REACH_A` is derived, and `residues_within` is what it is derived for.
+
+    Typing 13.8 beside a 600 square-angstrom footprint would leave two numbers describing one
+    molecule, free to disagree the moment either moved: raise the footprint to 800 and a
+    hand-typed reach goes on answering for 600. So the constant is checked against the
+    arithmetic that defines it rather than against its own current value.
+    """
+    import math
+
+    from hpc_pilots.geometry import (HYDROPHOBIC, MACROCYCLE_FOOTPRINT_A2, MACROCYCLE_REACH_A,
+                                     residues_within)
+
+    assert MACROCYCLE_REACH_A == math.sqrt(MACROCYCLE_FOOTPRINT_A2 / math.pi)
+    # The one property the derivation has to keep: it follows the footprint. A reach that
+    # stayed put while the footprint moved is the defect the derivation exists to prevent.
+    assert math.isclose(math.pi * MACROCYCLE_REACH_A ** 2, MACROCYCLE_FOOTPRINT_A2)
+
+    def residue(number, letter, x, chain="A", rsa=0.5):
+        return {"chain": chain, "number": str(number), "residue": _three(letter),
+                "rsa": rsa, "sasa": 40.0, "xyz": (float(x), 0.0, 0.0)}
+
+    # Residues on a line, so the reach is readable off the coordinates: 1 and 2 are the
+    # anchors, 3 sits inside the reach of 2, and 4 is just outside everything.
+    far = MACROCYCLE_REACH_A * 2 + 5
+    residues = [residue(1, "L", 0.0), residue(2, "L", 2.0), residue(3, "A", 12.0),
+                residue(4, "W", far)]
+    site = residues_within(residues, [1, 2])
+
+    # The anchors are in the neighbourhood by construction -- an anchor is at zero distance
+    # from itself -- rather than appended afterwards.
+    assert site["anchors_found"] == [1, 2] and site["anchors_missing"] == []
+    assert site["positions"] == [1, 2, 3], site["positions"]
+    # One entry per residue and not per distinct number, so these two can never disagree.
+    assert site["residues"] == len(site["positions"]) == 3
+    assert site["reach_a"] == MACROCYCLE_REACH_A
+    assert site["hydrophobic"] == sum(1 for letter in "LLA" if letter in HYDROPHOBIC)
+    assert site["anchor_chains"] == ["A"]
+
+    # An anchor the structure does not carry is reported rather than dropped or snapped to a
+    # neighbour. That case is ordinary -- a catalytic residue disordered out of a deposition,
+    # or an annotation arriving in the parent's numbering -- and an empty `anchors_found`
+    # beside a populated `anchors_missing` is the pipeline saying which of the two happened.
+    missing = residues_within(residues, [41, 145])
+    assert missing["anchors_found"] == [] and missing["anchors_missing"] == [41, 145]
+    assert missing["residues"] == 0, "a confident neighbourhood of nothing is the failure"
+
+    # Insertion codes are dropped on both sides, so an anchor given as 52 matches a residue
+    # deposited as 52A. Matching the author number as a string misses it, silently.
+    coded = [residue("52A", "L", 0.0), residue(53, "I", 3.0)]
+    assert residues_within(coded, [52])["anchors_found"] == [52]
+
+    # An anchor is a number and not a chain-and-number pair, so on a complex it matches on
+    # every polymer carrying that number. Measured on 6M0J: ACE2 and the receptor-binding
+    # domain share 417, 453 and 501, and one "neighbourhood" of 268 residues was really two
+    # sites. `anchor_chains` is how that is visible rather than inferred from a large count.
+    both = residues_within(
+        [residue(417, "H", 0.0, chain="A"), residue(417, "K", 100.0, chain="E"),
+         residue(418, "G", 3.0, chain="A"), residue(418, "G", 103.0, chain="E")], [417])
+    assert both["anchor_chains"] == ["A", "E"], both["anchor_chains"]
+    assert both["residues"] == 4, "two sites measured at once, which the chains column shows"
+
+    # A reach the caller names, which is the door `_markers` deliberately does not offer.
+    assert residues_within(residues, [1], reach=1.0)["positions"] == [1]
+
+
+def test_the_patch_at_the_catalytic_dyad_is_measured_on_the_committed_domain_fold():
+    """The site arithmetic, end to end, on coordinates in the tree and with no network.
+
+    This is the measurement the whole record is built on, taken on the fold `domain_folds`
+    stored for the main protease, and the numbers here are the ones the module docstrings
+    quote. It pins three separate claims:
+
+    * the dyad lands on **HIS and CYS** at folded positions 41 and 145, read out of the
+      coordinate file rather than assumed, with the confidence the model gave them;
+    * the site patch is an **intersection** of the unit's largest patch with the
+      neighbourhood, not a fresh search inside it, so it is a subset and an empty one means
+      the largest patch is elsewhere rather than that the site has no hydrophobic surface;
+    * **9 %** of the surface stage 4 scored this chain on is at the chemistry -- 185.6 square
+      angstroms of 2,012.6 -- which is the disagreement the record exists to make visible.
+    """
+    pytest.importorskip("freesasa")
+    pytest.importorskip("matplotlib")
+
+    from hpc_pilots.common import ROOT
+    from hpc_pilots.geometry import MACROCYCLE_REACH_A, markers_from_coordinates
+    from hpc_pilots.site_patches import _fold_residues
+
+    pdb = ROOT / "runs/domain_folds/r02_3c_like_proteinase_nsp5__3c_like_proteinase_nsp5.pdb"
+    if not pdb.exists():
+        pytest.skip("the stored domain fold is absent on this machine")
+    text = pdb.read_text()
+
+    # The confidence column is DETECTED and not assumed. This endpoint writes pLDDT on a 0-to-1
+    # scale while the bands the page draws run 0 to 100, and reading the column as it stands
+    # would report the catalytic histidine at 0.77 of 100 -- a catastrophic-looking prediction
+    # that is really a unit error. The sentence saying which branch was taken is carried into
+    # the record so a reader need not trust the normalisation.
+    confidence, letters, note = _fold_residues(text)
+    assert (letters[41], letters[145]) == ("H", "C"), (letters[41], letters[145])
+    assert (confidence[41], confidence[145]) == (77.0, 85.0)
+    assert "100" in note and "0 to 1" in note, note
+    assert set(confidence) == set(letters), "one pass per atom set, not two"
+
+    markers = markers_from_coordinates(text, label="r02", anchors=[41, 145])
+    site = markers["site"]
+    assert site["anchors_found"] == [41, 145] and site["anchors_missing"] == []
+    assert (site["residues"], site["hydrophobic"], site["exposed"]) == (89, 41, 30)
+    assert site["reach_a"] == MACROCYCLE_REACH_A
+
+    # An intersection and not a search. Every site-patch residue is a residue of the unit's
+    # largest patch, and the area is bounded by it.
+    assert markers["site_patch_positions"] == [49, 50]
+    assert set(markers["site_patch_positions"]) <= set(markers["patch_positions"])
+    assert markers["site_patch_area_a2"] == 185.6
+    assert markers["hydrophobic_patch_area"] == 2012.6
+    assert markers["site_patch_area_a2"] < markers["hydrophobic_patch_area"]
+    assert markers["patches_found"] == 18, \
+        "18 components, which is why 6 residues that are both hydrophobic and exposed in the " \
+        "neighbourhood are not in the patch"
+    assert markers["site_shares_the_patch"] is True
+    assert round(185.6 / 2012.6, 3) == 0.092, "9 % of the scored surface is at the chemistry"
+
+    # Every row of this lane is a prediction and says so, including on the error path.
+    assert markers["on_predicted_coordinates"] is True
+    assert markers["is_deposited_measurement"] is False
+
+    # The same site asked for in the relative's own numbering. A zero here would read as a
+    # finding about the site when it is a fact about the numbering, so the figures are absent
+    # rather than zero and a sentence says which.
+    wrong = markers_from_coordinates(text, label="r02", anchors=[3304, 3408])
+    assert wrong["site"]["anchors_found"] == []
+    assert wrong["site"]["anchors_missing"] == [3304, 3408]
+    assert wrong["site_patch_measured"] is False
+    assert wrong["site_patch_area_a2"] is None
+    assert wrong["site_shares_the_patch"] is None
+    assert "fact about the numbering" in wrong["site_patch_absent_because"]
+    # And the whole-unit figures are untouched by a failed anchor lookup, which is what makes
+    # the two separable at all.
+    assert wrong["hydrophobic_patch_area"] == markers["hydrophobic_patch_area"]
+
+
+def test_an_annotated_residue_is_carried_into_the_coordinates_or_recorded_as_lost():
+    """`_anchor_rows` partitions every annotated residue, and the mapping is checkable.
+
+    Two properties, and the second is the one that makes the first worth anything. A residue
+    lands in exactly one of inside, outside and unmapped, so the three counts add to what the
+    chain carries and an absence can be stated as an absence rather than as a row that happens
+    to be short. And the chain of three numberings is CHECKED: every anchor is compared against
+    the residue the relative's entry carries at the annotated position, and shifting the
+    mapping by one residue in either direction has to break that comparison, or agreement is a
+    tautology rather than a check.
+    """
+    from hpc_pilots.domains import annotated_sites
+    from hpc_pilots.site_patches import _anchor_rows
+
+    payload = _entry_payload()
+    located = _located_with_a_gap()
+    with mock.patch("hpc_pilots.intake._entry", return_value=payload):
+        sites = annotated_sites("FAKE01", within=(101, 250))
+
+    # `within` dropped the site outside the mature chain; the other five are carried.
+    carried = sum(len(s["positions"]) for s in sites)
+    assert carried == 5, [s["positions"] for s in sites]
+    # The ligand is read where UniProt puts it, and is None for a feature that has none.
+    assert [s["ligand"] for s in sites if s["type"] == "Binding site"] == ["Zn(2+)"]
+    assert all(s["ligand"] is None for s in sites if s["type"] != "Binding site")
+
+    inside, outside, unmapped = _anchor_rows(
+        sites, located, 101, (201, 260), payload["sequence"]["value"])
+    assert len(inside) + len(outside) + len(unmapped) == carried, "a residue is lost"
+    assert [a["in_the_fold"] for a in inside] == [33, 41, 45]
+    assert [a["in_this_genome"] for a in inside] == [233, 241, 245]
+    # Outside this unit, which is ordinary: a domain is a window onto a chain.
+    assert [a["on_the_relative"] for a in outside] == [250]
+    assert outside[0]["in_the_fold"] is None and outside[0]["in_this_genome"] == 355
+    # No counterpart in this genome at all. Both position keys are None rather than a
+    # neighbour, which is how "nothing is known about where the chemistry is" stays
+    # distinguishable from a confident measurement at the wrong address.
+    assert [a["on_the_relative"] for a in unmapped] == [165]
+    assert unmapped[0]["in_this_genome"] is None and unmapped[0]["in_the_fold"] is None
+
+    # The partition on the DESCRIPTION and not on the feature type. 28 of the 29 plain `Site`
+    # residues on the real run name a cleavage, so a type rule would be right 28 times and
+    # wrong once -- and the once is a genuinely functional position in the one measurement it
+    # appears in, which is the row kept here.
+    terms = {a["on_the_relative"]: a["is_a_processing_site"]
+             for a in inside + outside + unmapped}
+    assert terms == {133: False, 141: False, 145: False, 250: True, 165: True}
+    assert [a["processing_term_matched"] for a in outside] == ["cleavage"]
+
+    # And the shift check, on the committed record and its coordinates. Every anchor is
+    # compared against the relative's residue; all of them agree; shifting the whole mapping
+    # by one residue collapses that to a handful. An off-by-one anywhere in the three-step
+    # chain would therefore have been loud rather than silent.
+    pytest.importorskip("matplotlib")
+    import json as _json
+
+    from hpc_pilots.common import ROOT
+    from hpc_pilots.site_patches import _fold_residues
+
+    record = ROOT / "runs/site_patches.json"
+    if not record.exists():
+        pytest.skip("no site-patch record on this machine")
+    rows = [r for r in _json.loads(record.read_text())["rows"] if r.get("measured")]
+    if not rows:
+        pytest.skip("the recorded run measured nothing on this machine")
+    agreement = {0: 0, 1: 0, -1: 0}
+    checked = 0
+    for row in rows:
+        coordinates = ROOT / "runs/domain_folds" / f"{row['slug']}.pdb"
+        if not coordinates.exists():
+            continue
+        _confidence, letters, _note = _fold_residues(coordinates.read_text())
+        for anchor in row["anchors"]:
+            # The record's own claim about what residue stands at that position, against the
+            # coordinate file. A record that disagreed with the file it was measured on would
+            # be the one failure no amount of agreement with the annotation could catch.
+            assert letters.get(anchor["in_the_fold"]) == anchor["residue_in_the_fold"], \
+                (row["slug"], anchor["in_the_fold"])
+            want = anchor["residue_on_the_relative"]
+            if not want:
+                continue
+            checked += 1
+            for shift in agreement:
+                agreement[shift] += letters.get(anchor["in_the_fold"] + shift) == want
+    if not checked:
+        pytest.skip("no stored coordinates for the recorded anchors on this machine")
+    assert agreement[0] == checked, f"{agreement[0]} of {checked} anchors agree"
+    assert max(agreement[1], agreement[-1]) < checked * 0.25, (
+        f"shifting every anchor by one residue left {agreement} of {checked} agreeing, so "
+        f"the agreement at shift 0 is not evidence the mapping is right")
+
+
+def test_a_site_patch_row_is_the_same_width_measured_or_refused():
+    """One key set for every row, and four absences that stay distinguishable.
+
+    The chain-level fallback row carried 8 keys against the 27 a unit row carried, missing
+    `anchors`, `reach`, `site_patch`, `unit_patch`, `anchor_confidence` and `chemistry_only`
+    among them -- so a consumer joining on any of those found a value on every row but one,
+    which surfaces as a crash in a page template rather than as a number a reader could
+    question. Both builders now start from one skeleton, and this is the test that keeps them
+    there.
+    """
+    import json as _json
+
+    from hpc_pilots.common import ROOT
+    from hpc_pilots.site_patches import _absence, _count, _row_skeleton, _shown
+
+    chain = {"rank": 3, "target": "a chain", "nearest_homolog": "FAKE01"}
+    skeleton = _row_skeleton(chain, "a chain", "a reason")
+    # Explicit nulls, and nulls rather than the chain's own figures: a chain-level row does
+    # have a real range, and putting it in `entry_span_on_the_relative` would make a chain
+    # that was never folded look like a measured unit of itself.
+    assert skeleton["entry_span_on_the_relative"] is None
+    assert skeleton["measured"] is False and skeleton["not_measured_because"] == "a reason"
+    assert skeleton["anchors"] == [] and skeleton["positions_in_the_fold"] == []
+    # The standing travels on every row including an unmeasured one, because the key set is
+    # the whole point: a page joining these against deposited markers must find the field.
+    assert skeleton["on_predicted_coordinates"] is True
+    assert skeleton["is_deposited_measurement"] is False
+    # The verdict a page gates on is None and not False on a row with nothing to assert.
+    assert skeleton["measured_at_the_annotated_residues"] is None
+
+    record = ROOT / "runs/site_patches.json"
+    if record.exists():
+        rows = _json.loads(record.read_text()).get("rows") or []
+        if rows:
+            widths = {tuple(sorted(r)) for r in rows}
+            assert len(widths) == 1, "two shapes of row in the record"
+            assert tuple(sorted(skeleton)) in widths, (
+                set(skeleton) ^ set(rows[0]))
+
+    # The singular, because these sentences are read by a human off a page and not by a
+    # parser. Four of the real run's twenty chains carry exactly one annotated residue, so
+    # `all 1 annotated site residue(s) fall` is a quarter of the cases rather than an edge.
+    assert _count(1, "annotated site residue") == "1 annotated site residue"
+    assert _count(3, "annotated site residue") == "3 annotated site residues"
+
+    # Four absences, and collapsing them into "no site" would throw away the only part of the
+    # record a reader can act on: a gap in curation, a reason to fold a different domain, an
+    # indel to trust nothing about, and a pipeline failure.
+    none_at_all = _absence([], [], [], "domain", "a domain")
+    assert "no Active site, Binding site or Site annotation" in none_at_all
+    assert "absence in what has been curated, not a measurement" in none_at_all
+
+    one_site = [{"positions": [10], "description": "Nucleophile"}]
+    gapped = _absence(one_site, [], [{"on_the_relative": 10}], "domain", "a domain")
+    assert "has a counterpart in this genome" in gapped and "it falls" in gapped
+    assert "anchors_unmapped" in gapped, "the positions are still reachable"
+
+    elsewhere = _absence(one_site, [{"on_the_relative": 10}], [], "domain", "a domain")
+    assert "lies outside this domain (a domain)" in elsewhere
+    assert "window that was folded" in elsewhere
+    # A chain's folded window is named differently from a domain's, because the two are
+    # different refusals and a reader acts on them differently.
+    assert "this chain's folded window" in _absence(
+        one_site, [{"on_the_relative": 10}], [], "whole_chain", "a chain")
+    # Both at once: the gap is counted beside the ones that merely fall elsewhere.
+    mixed = _absence([{"positions": [10, 20], "description": ""}],
+                     [{"on_the_relative": 10}], [{"on_the_relative": 20}],
+                     "domain", "a domain")
+    assert "2 annotated site residues" in mixed and "1 of them falls" in mixed
+
+    # The completion print, which killed a successful run. `write_json` has already run by the
+    # time the path is shown, so a record written outside the tree exited 1 with a traceback
+    # and the full record sitting on disk beside it.
+    assert _shown(ROOT / "runs" / "site_patches.json") == Path("runs/site_patches.json")
+    outside = Path("/tmp/sp_out_probe.json")
+    assert _shown(outside) == outside, "a path outside the tree is shown absolute, not raised"
+
+
+def test_a_span_in_this_genome_is_meaningless_without_the_frame_it_is_numbered_in():
+    """Every row names the reading frame its positions are numbered along.
+
+    `in_this_genome` is 1-based along ONE open reading frame of this genome -- whichever of the
+    twelve the chain aligned best to, which is why nsp12 reads 1-823 rather than somewhere past
+    residue four thousand. The record carried the span and not the frame, so every span and
+    every `positions_in_this_genome` list was a number with no stated coordinate system. The
+    hazard is counted rather than argued: 50 pairs of the 37 rows carry spans that overlap as
+    integers in different frames, two windows with no residue in common that a join or a sort
+    on the span alone places on top of each other.
+    """
+    import json as _json
+
+    from hpc_pilots.common import ROOT
+    from hpc_pilots.site_patches import _reading_frame
+
+    orfs = [{"strand": "+", "frame": 1, "nt_start": 265, "length_aa": 4405, "protein": "M"},
+            {"strand": "-", "frame": 0, "nt_start": 12, "length_aa": 900, "protein": "M"}]
+    frame = _reading_frame({"orf_index": 1}, orfs, 1)
+    # The pool index is NOT the identifier -- it is a position in a list a different run would
+    # order differently -- so the strand, the codon offset and the nucleotide start travel
+    # with it and are the frame itself.
+    assert frame["orf_index"] == 1
+    assert (frame["strand"], frame["frame"], frame["nt_start"]) == ("-", 0, 12)
+    assert frame["reading_frame"] == "-0 at nt 13", frame["reading_frame"]
+    assert frame["agrees_with_the_folds_record"] is True
+
+    # This module locates every chain a second time, so the two locations can differ -- and a
+    # difference means these rows are numbered along one frame while the coordinates they were
+    # measured on were cut out of another. A silent wrong answer, so it is a key.
+    assert _reading_frame({"orf_index": 1}, orfs, 0)["agrees_with_the_folds_record"] is False
+    # None, not False, where there was nothing to compare against.
+    assert _reading_frame({"orf_index": 1}, orfs, None)["agrees_with_the_folds_record"] is None
+    bare = _reading_frame(None, [], None)
+    assert bare["orf_index"] is None and bare["reading_frame"] is None
+
+    record = ROOT / "runs/site_patches.json"
+    if not record.exists():
+        pytest.skip("no site-patch record on this machine")
+    payload = _json.loads(record.read_text())
+    rows, summary = payload.get("rows") or [], payload.get("summary") or {}
+    if not rows or payload.get("status") != "complete":
+        pytest.skip("the recorded run measured nothing on this machine")
+
+    # No row carries a span without the frame that span is a span in.
+    for row in rows:
+        if row.get("span_in_this_genome"):
+            assert (row.get("reading_frame") or {}).get("orf_index") is not None, row["label"]
+    # Nothing in the record claims a frame this run did not locate the chain in.
+    assert summary["units_whose_frame_differs_from_the_folds_record"] == 0, \
+        "this module's own alignment put a chain in a different frame from the one its " \
+        "coordinates were cut out of, so the positions describe different residues"
+
+    # The overlap count is DERIVED and not typed: recounted here from the rows, by the same
+    # definition, so a count that drifted from its own rows fails rather than reassuring.
+    spanned = [r for r in rows if len(r.get("span_in_this_genome") or ()) == 2
+               and (r.get("reading_frame") or {}).get("orf_index") is not None]
+    overlapping = 0
+    for index, first in enumerate(spanned):
+        for second in spanned[index + 1:]:
+            if first["reading_frame"]["orf_index"] == second["reading_frame"]["orf_index"]:
+                continue
+            low, high = first["span_in_this_genome"]
+            other_low, other_high = second["span_in_this_genome"]
+            overlapping += low <= other_high and other_low <= high
+    assert overlapping == summary["unit_pairs_overlapping_in_different_reading_frames"]
+    assert overlapping > 0, (
+        "no pair of rows overlaps across frames on this record, so the sentence the page "
+        "prints about the hazard no longer has a measurement behind it")
+    assert summary["reading_frames_the_rows_are_numbered_along"] == len(
+        {r["reading_frame"]["orf_index"] for r in spanned})
+
+
+def test_the_page_withholds_a_site_patch_measured_at_the_wrong_residues():
+    """The page reads `measured_at_the_annotated_residues`, not `measured`.
+
+    `measured` says anchors were found and a neighbourhood was measured around them. It does
+    not say those anchors are the residues the annotation names: `geometry` matches an anchor
+    by number and reports back whatever residue stands there, so a window offset against the
+    numbering the annotation arrived in yields a complete, confident, entirely wrong
+    measurement. The deposited lane has the worked case -- nsp2 on `7fac:A`, where all 12
+    anchors land 111 residues from the residues they name -- and a page reading `measured`
+    alone would publish that as nsp2's active-site patch with nothing on the row to say
+    otherwise.
+
+    On the record as it stands every measured unit comes back True, so the gate changes nothing
+    visible. That is exactly when it is worth pinning: the test flips the key on one row and
+    requires the figures to leave the page with it.
+    """
+    import copy
+    import json as _json
+    import sys as _sys
+
+    from hpc_pilots.common import ROOT
+
+    _sys.path.insert(0, str(ROOT / "output"))
+    import build_site                                          # noqa: E402
+
+    record = ROOT / "runs/site_patches.json"
+    if not record.exists():
+        pytest.skip("no site-patch record on this machine")
+    payload = _json.loads(record.read_text())
+    if payload.get("status") != "complete" or not payload.get("rows"):
+        pytest.skip("the recorded run measured nothing on this machine")
+    case = {"genome_accession": payload.get("genome_accession"),
+            "reference_excluded_organism": payload.get("reference_excluded_organism")}
+
+    with mock.patch.object(build_site, "site_patch_record", return_value=payload):
+        drawn = build_site.site_patch_block(case)
+    measured = [r for r in payload["rows"] if r.get("measured")]
+    # Every row is drawn, measured or not. A table whose length depends on how the run went is
+    # the defect the record's own refusals exist to avoid.
+    assert drawn.count('class="lr') == len(payload["rows"])
+    assert all(r.get("measured_at_the_annotated_residues") is not False for r in measured), \
+        "this record has a row the page should be withholding; the assertions below assume not"
+
+    victim = next(r for r in measured
+                  if (r.get("site_patch") or {}).get("site_patch_area_a2"))
+    area = f"{victim['site_patch']['site_patch_area_a2']:,.0f} Å²"
+    assert area in drawn, area
+
+    # Now the same record with that one row's verdict flipped, and the sentence the deposited
+    # lane writes when it fires.
+    spoiled = copy.deepcopy(payload)
+    row = next(r for r in spoiled["rows"] if r.get("slug") == victim.get("slug"))
+    row["measured_at_the_annotated_residues"] = False
+    row["anchors_disagreeing_with_the_annotation"] = len(row["anchors"])
+    row["not_the_annotated_residues_because"] = (
+        "every anchor lands 111 residues from the residue the annotation names there.")
+    with mock.patch.object(build_site, "site_patch_record", return_value=spoiled):
+        guarded = build_site.site_patch_block(case)
+
+    assert guarded.count('class="lr') == len(spoiled["rows"]), "the row is kept"
+    assert "Not the annotated residues" in guarded
+    assert "111 residues from the residue" in guarded
+    assert area not in guarded, (
+        "a site patch measured at residues the annotation does not name was published as a "
+        "measurement of that site")
+    # And the reach count goes with it, not just the area: the whole neighbourhood was drawn
+    # around the wrong residues.
+    reach = (victim.get("reach") or {}).get("residues")
+    assert f"{reach} residues within" not in guarded
+
+    # None is not False and is not treated as one. "The anchors are not the annotated
+    # residues" and "nobody could compare them" are different statements; the second keeps its
+    # figures and is marked.
+    unchecked = copy.deepcopy(payload)
+    row = next(r for r in unchecked["rows"] if r.get("slug") == victim.get("slug"))
+    row["measured_at_the_annotated_residues"] = None
+    with mock.patch.object(build_site, "site_patch_record", return_value=unchecked):
+        marked = build_site.site_patch_block(case)
+    assert area in marked and "could not be compared" in marked
+
+    # A machine with no accessibility backend writes a refused record of the same shape, and
+    # the page says so rather than rendering nothing or crashing on a missing key.
+    refused = {"status": "refused", "answer": "no solvent-accessibility backend on this "
+                                              "machine", "rows": [],
+               "genome_accession": case["genome_accession"],
+               "reference_excluded_organism": case["reference_excluded_organism"]}
+    with mock.patch.object(build_site, "site_patch_record", return_value=refused):
+        said = build_site.site_patch_block(case)
+    assert "no solvent-accessibility backend" in said
+    assert 'class="lr' not in said
+
+    # And no record at all is no section, not a half-built one.
+    with mock.patch.object(build_site, "site_patch_record", return_value=None):
+        assert build_site.site_patch_block(case) == ""
+
+
+def test_a_fold_units_filename_cannot_collide_with_another_chains():
+    """`_unit_slug` is qualified by rank, and the collision it exists for is in this data.
+
+    Slugging the name alone collapsed `Spike protein S2'` and `Spike protein S2` onto one
+    string -- the apostrophe is not alphanumeric and is stripped -- so ranks 1 and 3 wrote the
+    same file, the second fold overwrote the first, and the page would have drawn one chain's
+    structure under both rows. Both chains genuinely offer a `Heptad repeat 1`, because S2' is
+    a cleavage product of S2 and they share it, so the collision is a property of this data
+    rather than a freak name.
+    """
+    from hpc_pilots.domain_folds import _region_label, _slug, _unit_slug
+    from hpc_pilots.domains import label_for
+
+    assert _slug("Spike protein S2'") == _slug("Spike protein S2"), \
+        "the apostrophe is stripped, which is why the rank has to be in the filename"
+    first = _unit_slug(1, "Spike protein S2'", "Heptad repeat 1")
+    third = _unit_slug(3, "Spike protein S2", "Heptad repeat 1")
+    assert first != third, (first, third)
+    assert first == "r01_spike_protein_s2__heptad_repeat_1"
+    assert third == "r03_spike_protein_s2__heptad_repeat_1"
+    # Zero-padded, so a store listing sorts the way the ranking reads.
+    assert _unit_slug(2, "x", "y").startswith("r02_")
+    assert _slug("") == "unnamed", "never a filename that is just the rank"
+
+    # And the label a stored fold is named for goes through `domains.label_for` rather than a
+    # second fallback. This module wrote its own and disagreed -- the bare feature type against
+    # type-plus-span -- so an undescribed `Coiled coil` was `Coiled coil` in the fold store and
+    # `Coiled coil 918-962` everywhere else, and a per-region join failed on exactly the
+    # regions a curator left undescribed.
+    region = {"type": "Coiled coil", "description": "",
+              "entry_span_on_the_relative": [918, 962]}
+    assert _region_label(region) == label_for(region) == "Coiled coil 918-962"
+    assert _unit_slug(1, "Spike protein S2'", _region_label(region)) \
+        == "r01_spike_protein_s2__coiled_coil_918_962"
+    assert _region_label({"type": "Coiled coil", "description": "Heptad repeat 1",
+                          "entry_span_on_the_relative": [918, 962]}) == "Heptad repeat 1"
+
+
+def test_a_domain_description_is_never_dispatched_as_a_query_on_its_own():
+    """The literature stage's two measured retrieval decisions, and the quote that got past.
+
+    A domain's UniProt description is not a search term. `Y1` returns records about
+    adrenocortical cells, `Dimerization` returns tens of thousands, and `Peptidase C16` scoped
+    to title or abstract returns nothing at all -- so the description has to be anchored to the
+    protein it belongs to before it is sent, and a chain whose name carries no systematic
+    designation needs the genome accession as the anchor of last resort. Both of those are
+    measurements in the record rather than preferences, and this is what keeps them true.
+    """
+    from hpc_pilots.literature_stage import (_accession_clause, _anchor_route, _paper_counts,
+                                             _phrase, chain_anchors, literature_subject)
+
+    # The quote that slipped the guard. `literature._balanced` refuses an ODD number of quotes,
+    # because an odd number truncates a clause -- and this composition uses every anchor twice,
+    # under TITLE and under ABSTRACT, so one stray quote arrives as a pair and comes out even.
+    # It composed, dispatched and answered 0 at HTTP 200: a false absence of exactly the kind
+    # that guard exists to make unreachable, reached by doubling.
+    assert '"' not in _phrase('Bad "name protein')
+    assert _phrase("  spaced   out  ") == "spaced out"
+    assert _phrase(None) == ""
+
+    # The entry identifier is dropped: it names a database row, not a protein, so a paper
+    # about the protein does not contain it.
+    spec = chain_anchors("AP3A_BC279 Protein 3")
+    assert spec["entry_id_stripped"] == ["AP3A_BC279"]
+    assert spec["name_sent"] == "Protein 3"
+
+    # An anchor that contains another as a substring is dropped, because in a disjunction the
+    # longer phrase is subsumed: a record matching `Spike protein S2'` matches `Spike protein`
+    # too, so keeping both widens nothing and makes the recorded query harder to check.
+    spike = chain_anchors("Spike protein S2'")
+    assert spike["anchors"] == ["Spike protein"], spike["anchors"]
+
+    # A descriptive remainder naming a CLASS rather than a protein is refused -- and the full
+    # name is never refused, so a chain whose whole name is broad still has an anchor.
+    nsp5 = chain_anchors("3C-like proteinase nsp5")
+    assert "nsp5" in nsp5["designations"]
+    assert nsp5["anchors"] == ["nsp5", "3C-like proteinase"], nsp5["anchors"]
+    broad = chain_anchors("Helicase nsp13")
+    assert broad["generic_remainder_refused"] == "Helicase", broad
+    assert broad["anchors"] == ["nsp13"], broad["anchors"]
+    # The long form reaches the same designation as the short one, so two names for one
+    # protein compose one query rather than two.
+    assert "nsp2" in chain_anchors("Non-structural protein 2")["designations"]
+
+    # Both forms of the accession, because the bare and versioned strings are different tokens
+    # in this index with different counts and asking for one discards the other's records.
+    clause = _accession_clause("NC_045512.2")
+    assert 'ACCESSION_ID:"NC_045512.2"' in clause and 'ACCESSION_ID:"NC_045512"' in clause
+    assert _accession_clause(None) == ""
+
+    # The composition itself. The domain phrase is unscoped -- these are database-register
+    # names that live in methods sections -- and the chain's anchors are scoped to title or
+    # abstract so the paper is about the protein.
+    subject, kind = literature_subject("3C-like proteinase nsp5", "Peptidase C30",
+                                       "NC_045512.2")
+    assert kind == "query", "a composed fielded query is not a term"
+    assert subject.startswith('"Peptidase C30" AND ')
+    assert 'TITLE:"nsp5"' in subject and 'ABSTRACT:"nsp5"' in subject
+    # This chain has a designation, so the accession is NOT added: it is the anchor of last
+    # resort and not a default.
+    assert "ACCESSION_ID" not in subject
+    assert _anchor_route("3C-like proteinase nsp5", "NC_045512.2")[0] == "designation"
+
+    # And a chain with no systematic designation, which is the 400-records-to-5 measurement:
+    # `"Dimerization" AND nucleoprotein` returns 400 records topped by Hazara virus and
+    # influenza A, and the accession clause takes it to 5 correct ones.
+    anchored, _kind = literature_subject("NCAP_BCRP3 Nucleoprotein", "Dimerization",
+                                         "NC_045512.2")
+    assert "ACCESSION_ID" in anchored
+    assert _anchor_route("NCAP_BCRP3 Nucleoprotein", "NC_045512.2")[0] == "genome_accession"
+    # With no accession to fall back on the route says so rather than claiming an anchor.
+    assert _anchor_route("NCAP_BCRP3 Nucleoprotein", None)[0] == "descriptive_name_only"
+
+    # The bare description can never be the whole query, which is the refusal the stage exists
+    # for: a chain with no anchor at all raises rather than falling back to it.
+    with pytest.raises(ValueError, match="no anchor phrase"):
+        literature_subject("AP3A_BC279", "Y1", "NC_045512.2")
+    # An empty domain would compose to the chain-level query under a domain's label, and the
+    # row would report a chain's hit count as a domain's.
+    with pytest.raises(ValueError, match="empty once it is made safe"):
+        literature_subject("3C-like proteinase nsp5", '""', "NC_045512.2")
+
+    # Papers, not rows. 65 rows across the recorded run are 33 papers, because two targets
+    # composing the same query are served the same hits from the cache -- so a number named
+    # for hits and read as papers overstated by 32 here, and the overstatement is however
+    # many targets happen to collide rather than a constant.
+    paper = {"source": "MED", "id": "42831623", "citable": True}
+    again = {"source": "MED", "id": "42831623", "citable": True}
+    undated = {"source": "PPR", "id": "PPR651611", "citable": False}
+    counts = _paper_counts([{"hits": [paper, undated]},
+                            {"reused_from": "the query above", "hits": [again]}])
+    assert counts["hit_rows"] == 3 and counts["distinct_papers"] == 2
+    assert counts["dated_hits"] == 2 and counts["distinct_dated_papers"] == 1
+    assert counts["undated_hits"] == 1
+    assert counts["hit_rows_served_from_the_cache"] == 1
+    # A row with neither key is its own paper. Folding every unidentified row together would
+    # report one paper where there may be five, which is the same defect pointed the other way.
+    blind = _paper_counts([{"hits": [{"citable": True}, {"citable": True}]}])
+    assert blind["distinct_papers"] == 2

@@ -47,21 +47,30 @@ LIBRARY_READS_FROM_SURFACE = ()
 # measures and already records per chain, so the missing piece is not a measurement.
 LIBRARY_WOULD_READ = ("patch_median_a2", "patch_fraction_of_surface", "sequons_near_patch")
 
-# And the other end of the same absence, which moving the fold ahead of the surface stage
-# made asymmetric. That swap gave stage 3 a consumer -- stage 4 measures its coordinates with
-# the same arithmetic it uses on a deposition -- and left stage 4 with none: nothing
-# downstream reads a patch median. It is declared here, as an empty tuple beside the one
-# above, for the same reason that one is: a flowchart built from this record then draws the
-# dead end instead of the arrow a reader would assume, and a test can assert the arrow is
-# still missing rather than trusting prose to stay true.
+# And the other end of the same absence. No LATER STAGE reads what stage 4 measures: stage 5
+# defines the same library whatever the surface stage found, so this stays an empty tuple and
+# a flowchart built from this record draws the dead end instead of the arrow a reader would
+# assume. A test asserts the emptiness rather than trusting prose to stay true.
 #
-# Connecting it is not a wiring job. `library_spec` takes an initiator, a randomised-region
-# length range and a set of elongator classes, and all three are properties of the display
-# platform rather than of a target; turning a measured patch area into a randomised-region
-# length is a quantitative claim this project has not established and cannot cite. An arrow
-# drawn on an invented conversion would be worse than no arrow, because it would read as a
-# result. So the absence stays declared until there is a stated rule to put behind it, and
-# stage 4 is described as what it is: a measurement with no consumer.
+# What this comment used to say beyond that is now wrong, and the correction matters more than
+# the tuple. Stage 4 was described here as "a measurement with no consumer", which was fair
+# when the stage reported one number per chain -- the largest hydrophobic patch anywhere on
+# it -- because nothing downstream read it and no reader could act on it either. It now
+# reports the patch AT the residues the curators marked as doing the chemistry, in this
+# genome's own numbering, with the positions listed: the project lead's third ask, which is
+# answered by a reader and not by a stage. On 6LU7 chain A, measured 2026-11-12, those two
+# questions give different answers -- the main protease's catalytic dyad has 93 of the chain's
+# 306 residues within macrocycle reach while the chain's best patch meets that neighbourhood
+# at one residue, `site_patch_fraction_of_the_site` 0.037 -- so the unanchored number was not
+# a weaker version of the useful one, it was a different one. "No consumer" therefore becomes
+# the narrower and true claim: no stage of this pipeline consumes it.
+#
+# Connecting it to stage 5 is still not a wiring job. `library_spec` takes an initiator, a
+# randomised-region length range and a set of elongator classes, and all three are properties
+# of the display platform rather than of a target; turning a measured patch area into a
+# randomised-region length is a quantitative claim this project has not established and cannot
+# cite. An arrow drawn on an invented conversion would be worse than no arrow, because it would
+# read as a result. So the absence stays declared until there is a stated rule to put behind it.
 SURFACE_READ_BY = ()
 
 
@@ -83,6 +92,419 @@ def _decomposed_score(features, rubric):
     from .intake import score_terms
 
     return score_terms(features, rubric)
+
+
+def _anchors_from(sites, key, span):
+    """The anchor residue numbers one structure's own numbering wants.
+
+    `geometry` refuses to convert an anchor, and says why at length: once inside, a converted
+    number and a given number are indistinguishable, so a silent conversion would make every
+    site figure unauditable. The conversion therefore belongs to the caller, and this is the
+    caller doing it in one place with the arithmetic written down.
+
+    `key` names which of the two numberings each site is read in -- `positions_on_the_relative`
+    for a deposited structure of the homolog, `positions` for coordinates predicted from this
+    genome -- and `span` is the window the structure's residue 1 corresponds to, inclusive on
+    both ends. A position outside the window is dropped rather than wrapped, which is what
+    keeps a region's anchors to the residues the region actually contains.
+
+    **The measured hazard this exists to answer.** UniProt numbers the main protease's
+    catalytic cysteine 3,408 on P0DTD1's replicase polyprotein, where nsp5 begins at 3,264,
+    and every deposited structure of that protease calls the same residue 145. Asking
+    `surface_for_accession` for the nsp5 interval with anchors 3304 and 3408 on 2026-11-12
+    returned both of them in `anchors_missing` and a neighbourhood of nothing, where 41 and
+    145 returned 94 residues. So an entry position is turned into a chain-relative one here --
+    3408 - 3264 + 1 = 145, 3304 - 3264 + 1 = 41 -- and the result is recorded beside the
+    numbering it is in.
+
+    That conversion is right for a deposition of a mature chain and it is not guaranteed: a
+    construct deposited in the entry's own numbering reports every anchor missing instead.
+    Nothing here guesses between the two. `surface_for_accession` promotes the site block from
+    the first structure that found the anchors, an anchor it could not find is named in
+    `anchors_missing`, and the row says which numbering was asked for -- which is the
+    difference between a measurement that can be checked and a confident zero.
+    """
+    first = int(span[0]) if span and span[0] is not None else 1
+    last = int(span[1]) if span and len(span) > 1 and span[1] is not None else None
+    wanted = set()
+    for site in sites or ():
+        for position in site.get(key) or ():
+            if position is None:
+                continue
+            position = int(position)
+            if position < first or (last is not None and position > last):
+                continue
+            wanted.add(position - first + 1)
+    return sorted(wanted)
+
+
+def _annotated_residues(sites, key, span, accession):
+    """Which residue the annotation expects at each anchor, keyed by the anchor's own number.
+
+    **The defect this exists to catch, with the number that exposed it.** `_anchors_from`
+    converts an entry position into a structure's numbering as `position - chain_start + 1`,
+    and `geometry` then reports `anchors_found` and `anchors_missing` BY NUMBER ALONE. A
+    number that exists is reported as found whatever residue sits on it, so a deposition
+    numbered on some other convention does not fail loudly -- it returns a full set of anchors
+    and a neighbourhood measured somewhere else. Measured live on 2026-11-12 over the four
+    chains of this ask, both cases of `runs/onset_chain.json`: on the held-out case nsp2's
+    twelve anchors were all found on 7fac:A and all twelve carry the wrong residue -- 20 is
+    Glu where P0C6X7 annotates Cys, 54 is Gly where it annotates His, and so on for the whole
+    zinc-binding cluster. 7fac is titled "crystal structure of C-TERMINUS of the
+    non-structural protein 2", its author numbering runs 4 to 527, and its first residue is
+    position 115 of the mature chain: a construct numbered from its own beginning, so every
+    anchor landed 111 residues from the residue it names. The same chain's anchors agree 12 of
+    12 on 7msx:A in the other case, which is the point -- the conversion is not wrong, the
+    structure it is offered to decides whether it lands, and nothing was checking.
+
+    So the expectation is read off the homolog's own sequence, which is the only place the
+    annotated residue can come from: `intake._entry(accession)["sequence"]["value"]` is the
+    sequence the curator numbered the feature on. Returns `({anchor: (letter, entry_position)},
+    refused_because)` -- the anchor number as the structure will be asked for it, the one-letter
+    residue the annotation expects there, and the entry position it came from so a disagreement
+    can be reported in both numberings.
+
+    `key` selects the route exactly as `_anchors_from` does, and the two must be called with
+    the same one or the expectations will be keyed on anchors nobody asked for.
+    `positions_on_the_relative` and `positions` are index for index on every site
+    `functional_sites` returns -- that is the property its docstring states and the reason a
+    gap stays None -- so the entry position behind a mapped position is recoverable by zipping
+    the two, and this is the only place that pairing is needed.
+
+    `geometry` already carries `numbering_offset` for precisely this hazard on the patch clip,
+    inferring the shift from the residues themselves rather than assuming a convention. The
+    anchors never went through anything like it, and the remedy here is deliberately the weaker
+    one: this reports where the anchors landed and does not move them. Shifting them would be a
+    second guess about the numbering on top of the first, and the measured case above shows
+    what a confident guess buys -- twelve residues of a different part of the protein,
+    published as the catalytic site.
+    """
+    if not accession:
+        return {}, ("no reviewed homolog accession, so there is no curated sequence to say "
+                    "which residue the annotation expects at an anchor.")
+    try:
+        sequence = _entry_sequence(accession)
+    except Exception as failure:                          # noqa: BLE001
+        return {}, (f"the relative's sequence could not be read, so the anchors could not be "
+                    f"checked against it: {type(failure).__name__}: {str(failure)[:160]}")
+    first = int(span[0]) if span and span[0] is not None else 1
+    last = int(span[1]) if span and len(span) > 1 and span[1] is not None else None
+    expected = {}
+    for site in sites or ():
+        relatives = list(site.get("positions_on_the_relative") or ())
+        for entry_position, position in zip(relatives, list(site.get(key) or ())):
+            if position is None or entry_position is None:
+                continue
+            position, entry_position = int(position), int(entry_position)
+            if position < first or (last is not None and position > last):
+                continue
+            if not 0 < entry_position <= len(sequence):
+                continue
+            # `setdefault` rather than assignment because two features routinely name one
+            # residue -- an `Active site` and a `Binding site` at the same position -- and both
+            # read the expectation off the same sequence, so the second is the same letter.
+            expected.setdefault(position - first + 1,
+                                (sequence[entry_position - 1], entry_position))
+    return expected, None
+
+
+def _letters_from_coordinates(text):
+    """Author residue number -> one-letter residue, read off a PDB text's alpha carbons.
+
+    The filter matches `geometry._residues`' own -- `ATOM` lines whose atom name is `CA` --
+    because the residue this answers for has to be the residue the patch arithmetic measured.
+    Alternate locations beyond the first are dropped, which `geometry` does by taking whatever
+    freesasa hands back and this does by keeping the blank or `A` altloc; a residue modelled in
+    two conformations is one residue with one identity either way.
+
+    `geometry._letter` is called rather than copied, so a residue named `C` here is the residue
+    the patch arithmetic calls hydrophobic or does not. The table is nineteen lines long and a
+    second copy of it would agree with the first until someone added selenomethionine to one.
+
+    No accessibility is computed and none is needed: this reads a name, and running freesasa
+    again over a file it has already measured would double the cost of the most expensive step
+    in the stage to answer a question about three columns of text.
+
+    A line too short to hold the columns is skipped rather than indexed. `folded_structure`'s
+    own parser skips an ATOM line whose columns will not parse and still returns the text with
+    `folded` true, as `markers_from_coordinates` records, so a damaged line arrives here inside
+    an accepted prediction -- and an IndexError raised while building a row would take down a
+    stage that runs after four others have already paid for their answers.
+    """
+    from .geometry import _letter, _resnum
+
+    letters = {}
+    for line in (text or "").splitlines():
+        if len(line) < 27 or not line.startswith("ATOM"):
+            continue
+        if line[12:16].strip() != "CA" or line[16] not in (" ", "A"):
+            continue
+        letters.setdefault(_resnum(line[22:27]), _letter(line[17:20]))
+    return letters
+
+
+def _letters_from_deposition(measured_on):
+    """The same reading, for the deposited structure the site block was promoted from.
+
+    `measured_on` is `geometry`'s `site_measured_on`, `"<pdb id>:<chain>"`, and it names the
+    one structure of the replicates whose residues the site figures were actually measured on
+    -- not the first one measured, which is a different structure whenever the first did not
+    find the anchors. Checking the residues of any other deposition would answer for a file
+    the numbers did not come from.
+
+    The chain is honoured, and it is not optional. `geometry._within_reach` documents the
+    measured case: on 6M0J ACE2 carries His417 and the spike's receptor-binding domain carries
+    Lys417, so a number read over the whole deposition matches two different residues. The
+    agreement reported here would then depend on which polymer happened to be read first.
+
+    Returns `(letters, refused_because)`. The file is the one the measurement already
+    downloaded, so `fetch_structure` is a cache hit and no request is made; a miss is recorded
+    as a refusal like every other, because a residue check that cannot be run is not a residue
+    check that passed.
+    """
+    from .geometry import _letter, _resnum, fetch_structure
+
+    pdb_id, _, chain_id = (measured_on or "").partition(":")
+    if not pdb_id:
+        return {}, ("the measurement does not name the structure its site figures were taken "
+                    "on, so there is no file to read the residues from.")
+    try:
+        text = fetch_structure(pdb_id).read_text()
+    except Exception as failure:                          # noqa: BLE001
+        return {}, (f"{pdb_id} could not be read on this machine, so the anchors could not be "
+                    f"checked against it: {type(failure).__name__}: {str(failure)[:160]}")
+    letters = {}
+    for line in text.splitlines():
+        # The same length guard `_letters_from_coordinates` carries, and for the same reason:
+        # a truncated line in a deposited file must be skipped and not indexed into.
+        if len(line) < 27 or not line.startswith("ATOM"):
+            continue
+        if line[12:16].strip() != "CA" or line[16] not in (" ", "A"):
+            continue
+        if chain_id and line[21] != chain_id:
+            continue
+        letters.setdefault(_resnum(line[22:27]), _letter(line[17:20]))
+    if not letters:
+        return {}, (f"no alpha carbon of chain {chain_id or '?'} was read from {pdb_id}, so "
+                    f"the anchors could not be checked against it.")
+    return letters, None
+
+
+def _as_sentence(entry):
+    """Why a chain inside the ceiling was not folded whole, as prose rather than as a code.
+
+    Two different things land in these fields and only one of them is a sentence.
+    `not_folded_because` is written here and reads as English. `fold_absence` comes from
+    `folded_structure.fold` and is a machine reason -- `endpoint_unavailable` is a real value
+    of it -- so splicing it straight into a sentence produced "that fold did not happen:
+    endpoint_unavailable So its 1 annotated region ...", a code mid-clause with no stop after
+    it. A reason that cannot be read is not a reason given.
+
+    So a value that does not end in a full stop is treated as a code: underscores become
+    spaces, it is quoted as the endpoint's own word rather than paraphrased into something it
+    did not say, and the stop is added. Quoted rather than translated because this module does
+    not own that vocabulary and a friendly rewording would be this file inventing a cause.
+    """
+    reason = (entry.get("not_folded_because") or entry.get("fold_absence") or "").strip()
+    if not reason:
+        return "no reason was recorded, which is itself a defect if it is ever read."
+    if reason.endswith((".", "!", "?")):
+        return reason
+    return f"the folding endpoint gave “{reason.replace('_', ' ')}”."
+
+
+def _reach_a():
+    """How far from a marked residue the site arithmetic reaches, read and never typed.
+
+    `geometry` derives it from the footprint the scoring already assumes -- a circular patch of
+    600 square angstroms has a radius of sqrt(600 / pi) -- so the distance a macrocycle spans
+    and the area it buries cannot drift apart. Reading it here rather than writing 13.8 keeps
+    that property one key further out: the stage dictionary and every `site_surface` block on
+    every row then quote the same number, and raising the footprint moves all of them at once.
+    """
+    from .geometry import MACROCYCLE_REACH_A
+
+    return MACROCYCLE_REACH_A
+
+
+def _site_block(markers, anchors, numbering, absent=None, expected=None, observed=None,
+                not_checked_because=None):
+    """The patch at the functional site, read off a measurement that was anchored on it.
+
+    This is the second half of the project lead's third ask -- the residues within a distance
+    a macrocyclic peptide can span, and the stage-4 patch arithmetic run on that location
+    specifically -- lifted out of the geometry's return and onto the row under one key.
+
+    `site_shares_the_patch` is the one to read first, and the informative answer is frequently
+    False. Measured on 6LU7 chain A on 2026-11-12, the main protease's catalytic dyad has 93 of
+    the chain's 306 residues within macrocycle reach, 41 of them hydrophobic, while the chain's
+    largest patch -- 415.2 square angstroms over Leu50, Phe134, Ala191, Ala193 and Ala194 --
+    meets that neighbourhood at exactly one residue, so `site_patch_fraction_of_the_site` is
+    0.037. On 6M0J's receptor-binding domain, anchored at the three ACE2-contacting residues,
+    the patch and the site do not meet at all. That is the finding and not a failure: the
+    surface the amenability score was earned on is somewhere other than the chemistry, and a
+    reader aiming a macrocycle at an active site has to be told so rather than handed the
+    chain's best number.
+
+    The four patch figures keep the names `geometry` gives them rather than being reworded for
+    this row. They are the same quantity measured by the same arithmetic, and two names for one
+    number is the same defect as two copies of one number -- they agree until someone edits one,
+    and the page would then be reading whichever name it happened to be wired to. The reach
+    counts are flattened out of the geometry's `site` block and renamed, because `residues`
+    beside `residues_in_range` on the same row would be unreadable.
+
+    `absent` is the reason there were no anchors to pass, when there were none. A block is
+    returned either way, because a row that simply lacked the key would be indistinguishable
+    from a site measured and found empty.
+
+    **`measured` and `measured_at_the_annotated_residues` are two different questions and both
+    have to be read.** The first says anchors were found and a neighbourhood was measured
+    around them. The second says those anchors are the residues the annotation names, which
+    `geometry` cannot know: it matches an anchor by number and reports it found whatever
+    residue is on it. `expected` is `_annotated_residues`' map and `observed` is the structure's
+    own residues, and comparing the two is the whole of the check. Measured live on 2026-11-12
+    across both cases of `runs/onset_chain.json`: nsp5 4 of 4 anchors on 6w79:A (positions 1,
+    41, 145 and 306 carrying Ser, His, Cys and Gln -- the catalytic dyad), nsp12 13 of 13 on
+    6nur:A, nsp13 21 of 21 on 6jyt:A, and nsp2 **0 of 12** on 7fac:A, a C-terminal construct
+    whose numbering puts every anchor 111 residues from the residue it names.
+
+    The figures are kept rather than withheld when the residues disagree, and
+    `not_the_annotated_residues_because` says so in one sentence. The argument for keeping them
+    is the argument the whole file makes about refusals: a number that is reported with what is
+    wrong with it can be checked, and a number that was silently dropped cannot. The argument
+    for the sentence is the other half of it -- a site patch measured at the wrong residues is
+    worse than no site patch, because only the second is visible as an absence.
+    """
+    site = markers.get("site") or {} if markers else {}
+    found = [int(a) for a in (site.get("anchors_found") or ())]
+    missing = [int(a) for a in (site.get("anchors_missing") or ())]
+    block = {
+        "measured": bool(found),
+        "anchors_asked": list(anchors or ()),
+        "anchors_numbering": numbering,
+        "anchors_found": found,
+        "anchors_missing": missing,
+        "measured_on": (markers or {}).get("site_measured_on") or (markers or {}).get("pdb_id"),
+        "reach_a": site.get("reach_a"),
+        "positions_within_reach": site.get("positions"),
+        "residues_within_reach": site.get("residues"),
+        "hydrophobic_within_reach": site.get("hydrophobic"),
+        "exposed_within_reach": site.get("exposed"),
+        "site_patch_area_a2": (markers or {}).get("site_patch_area_a2"),
+        "site_patch_positions": (markers or {}).get("site_patch_positions"),
+        "site_patch_fraction_of_the_site": (markers or {}).get(
+            "site_patch_fraction_of_the_site"),
+        "site_shares_the_patch": (markers or {}).get("site_shares_the_patch"),
+        "not_measured_because": None,
+    }
+    block.update(_residue_agreement(found, expected, observed, not_checked_because))
+    if found:
+        return block
+    if absent:
+        block["not_measured_because"] = absent
+    elif not anchors:
+        block["not_measured_because"] = (
+            "no annotated site position could be put in this structure's numbering, so there "
+            "was nothing to anchor the measurement on.")
+    else:
+        block["not_measured_because"] = (
+            f"none of the {len(anchors)} anchor residues asked for in {numbering} exists in "
+            f"the structure that was measured. A catalytic residue can be disordered in a "
+            f"deposition, and author numbering is frequently not the numbering an annotation "
+            f"arrives in; the figures are withheld rather than reported as an empty "
+            f"neighbourhood.")
+    return block
+
+
+def _residue_agreement(found, expected, observed, not_checked_because=None):
+    """Did each anchor land on the residue the annotation names? The keys that answer it.
+
+    One function for both routes, because the question is the same one and two copies of a
+    comparison agree until someone edits one. Returns the seven keys `_site_block` publishes:
+
+        anchors_agreeing_with_the_annotation, anchors_disagreeing_with_the_annotation,
+        anchors_not_checked_against_the_annotation, anchors_at_the_wrong_residue,
+        measured_at_the_annotated_residues, not_the_annotated_residues_because,
+        residues_not_checked_because
+
+    `anchors_at_the_wrong_residue` carries both residues and both numberings per anchor, which
+    is what makes a disagreement diagnosable instead of merely visible: `{"anchor": 20,
+    "on_the_relative": 200, "expected_residue": "C", "residue_found": "E"}` says that the
+    structure's residue 20 is Glu where P0C6X7's position 200 is the annotated Cys, and three
+    of those in a row with a constant gap between the numbers is a shifted construct rather
+    than three surprises.
+
+    **What a disagreement means differs by route and the sentence says both, because this
+    function cannot tell them apart.** On a deposition of the relative the residue should be
+    the annotated one, so a disagreement is the numbering landing somewhere else -- a
+    construct numbered from its own first residue, a chain deposited in the parent polyprotein's
+    numbering -- or a deliberately mutated construct, of which an inactivated active site is the
+    commonest kind in this corpus. On predicted coordinates the residues are this genome's and
+    the annotation is the relative's, so a single disagreement can be an ordinary substitution
+    across the species gap. Those causes are distinguishable by eye from the per-anchor rows and
+    not by a count, so no count here claims to have distinguished them. What the counts do
+    settle is the thing that was unanswerable before: whether the figures beside them describe
+    the annotated site at all. Measured on the held-out run's own record, `runs/site_patches.json`
+    of 2026-11-12, the fold side agrees on 106 of 106 anchors across 23 folded units -- so a
+    disagreement there is a finding and not the ordinary case.
+
+    `measured_at_the_annotated_residues` is None rather than False when nothing could be
+    checked, because "the anchors are not the annotated residues" and "nobody could say" are
+    different statements and a False would assert the first.
+    """
+    agreeing, wrong, checked = 0, [], 0
+    for anchor in found or ():
+        want = (expected or {}).get(anchor)
+        has = (observed or {}).get(anchor)
+        # `X` is `geometry._letter`'s answer for a residue outside the twenty it names -- a
+        # selenomethionine or a modified residue -- and comparing a letter that means "not one
+        # of these" against an annotated residue would report a disagreement about the table
+        # rather than about the numbering.
+        if want is None or has is None or has == "X":
+            continue
+        checked += 1
+        if has == want[0]:
+            agreeing += 1
+        else:
+            wrong.append({"anchor": anchor, "on_the_relative": want[1],
+                          "expected_residue": want[0], "residue_found": has})
+    block = {
+        "anchors_agreeing_with_the_annotation": agreeing,
+        "anchors_disagreeing_with_the_annotation": len(wrong),
+        "anchors_not_checked_against_the_annotation": len(found or ()) - checked,
+        "anchors_at_the_wrong_residue": wrong or None,
+        "measured_at_the_annotated_residues": (None if not checked else not wrong),
+        "not_the_annotated_residues_because": None,
+        # Never an unexplained shortfall. A found anchor that was not compared is a refusal
+        # like any other in this file, so where the caller passed no reason the generic one is
+        # written out rather than left as a count with nothing behind it.
+        "residues_not_checked_because": (
+            (not_checked_because
+             or "the residue at one or more of the anchors found could not be compared: "
+                "either the relative's entry has no residue at the annotated position, or the "
+                "structure names a residue there that is not one of the twenty "
+                "`geometry._letter` knows, and comparing an annotated residue against `X` "
+                "would report a disagreement about that table rather than about the numbering.")
+            if checked < len(found or ()) else None),
+    }
+    if not wrong:
+        return block
+    named = "; ".join(f"{row['anchor']} carries {row['residue_found']} where the relative's "
+                      f"entry has {row['expected_residue']} at {row['on_the_relative']}"
+                      for row in wrong[:3])
+    if len(wrong) > 3:
+        named += f"; and {len(wrong) - 3} more"
+    block["not_the_annotated_residues_because"] = (
+        f"{len(wrong)} of the {checked} anchors this measurement was taken at do not carry the "
+        f"residue the annotation names there -- {named}. An annotated position is offered to a "
+        f"structure as `position - chain_start + 1`, which is right for a deposition of the "
+        f"mature chain and wrong for a construct numbered from its own first residue or for a "
+        f"chain deposited in the parent polyprotein's numbering; a deliberately mutated "
+        f"construct and a substitution across the species gap read the same way from here. The "
+        f"figures in this block were measured at the residues named above and are reported "
+        f"rather than withheld so that they can be seen to be the wrong ones, but they are not "
+        f"the annotated site.")
+    return block
 
 
 def surface_rows(ranked, replicates=5, folds=(), fold_rows=()):
@@ -108,13 +530,27 @@ def surface_rows(ranked, replicates=5, folds=(), fold_rows=()):
     place this pipeline can say how far a predicted surface sits from a measured one instead of
     hoping they agree.
 
-    `fold_rows` is the stage-before's row per chain, and it is here for the chains that end
-    with no surface by either route. Such a row could already say why no deposition was
-    measured; what it could not say is why there were no coordinates either, because that
-    reason belongs to the stage before this one. Reading it off the fold row is what lets this
-    stage name the commonest of them -- the residue ceiling, a number this pipeline chose
-    rather than a fact about the target or the endpoint -- instead of leaving it as the
-    difference between two counts.
+    `fold_rows` is the stage-before's row per chain, and it is here for two reasons now. The
+    first is the chains that end with no surface by either route: such a row could already say
+    why no deposition was measured, and what it could not say is why there were no coordinates
+    either, because that reason belongs to the stage before this one. The second is the
+    functional positions. Stage 3 holds the alignment an annotated residue has to be mapped
+    through, so it maps them and writes them on its row; this stage reads them off, and where
+    no fold row is handed over it reads the annotation itself and reports the positions in the
+    relative's numbering alone.
+
+    **The patch is measured at those positions as well as wherever the chain's best one lies.**
+    Both routes take the site anchors -- `site_surface` on the deposited measurement,
+    `predicted_surface.site_surface` on the prediction -- and the two questions have different
+    answers on a construct carrying several domains, which is why both are reported. The
+    unanchored number says whether the protein has a surface a macrocycle could lie across; the
+    anchored one says what a macrocycle lying across the chemistry would actually touch.
+
+    **A region's predicted surface is reported under its chain's row and never as a row of its
+    own.** `domain_surfaces` carries one entry per folded region, because a region is a closer
+    look at a target and not a new target: a second row would double-count the chain in every
+    coverage number this stage publishes, and `rows_out == candidates_in` is the invariant the
+    whole stage rests on.
     """
     from .geometry import surface_for_accession
     from .intake import amenable, chain_locations, exposed_from_locations
@@ -123,8 +559,20 @@ def surface_rows(ranked, replicates=5, folds=(), fold_rows=()):
     # absence rather than coordinates is dropped here, so a chain with no usable prediction is
     # indistinguishable from a chain that was never folded -- both simply have no
     # `predicted_surface`, and the fold row already says which happened and why.
-    coordinates = {f["target_name"]: f for f in (folds or ())
-                   if f and f.get("pdb") and f.get("target_name")}
+    #
+    # A region's fold is keyed on the chain it was cut from instead, off the `unit` block the
+    # fold stage puts on the payload. A payload with no `unit` is read as a whole chain, which
+    # is what every fold made before the domain route existed is.
+    coordinates, regions = {}, {}
+    for folded in (folds or ()):
+        if not (folded and folded.get("pdb") and folded.get("target_name")):
+            continue
+        unit = folded.get("unit") or {}
+        if unit.get("kind") == "domain":
+            regions.setdefault(unit.get("chain"), []).append(folded)
+        else:
+            coordinates[folded["target_name"]] = folded
+    attempts = {r.get("target"): r for r in (fold_rows or ())}
 
     rows = []
     for row in ranked:
@@ -137,16 +585,39 @@ def surface_rows(ranked, replicates=5, folds=(), fold_rows=()):
                  "measured_on_accession": accession,
                  "chain_range": list(span) if span else None,
                  "measured": False, "unmeasured_because": None}
+        # Ask 3's positions, on every row and before any branch, so a chain this stage cannot
+        # measure at all still publishes the residues a binder would be aimed at. Preferred
+        # from the fold row because that stage holds the alignment; recomputed here when this
+        # stage was called without one, in which case `positions` is None throughout and the
+        # relative's numbering is all there is.
+        attempt = attempts.get(name) or {}
+        if attempt.get("functional_sites") is not None:
+            sites = attempt["functional_sites"]
+            sites_absent = attempt.get("functional_sites_absent_because")
+        else:
+            sites, sites_absent = functional_sites(accession, span)
+        entry["functional_sites"] = sites
+        entry["functional_sites_absent_because"] = sites_absent
+        entry["site_positions_in_this_genome"] = sorted(
+            {p for site in sites for p in (site.get("positions") or ()) if p is not None})
+        entry["site_surface"] = None
         if not entry["identified"] or not accession:
             entry["unmeasured_because"] = (
                 "no reviewed homolog accession, so there is no deposited structure to resolve. "
                 "A sequence-only candidate reaches the folding stage and not this one.")
             rows.append(entry)
             continue
+        # The anchors the deposited route wants, in the numbering a deposition of a mature
+        # chain uses. One call and not two: passing anchors adds the site block and changes no
+        # other number in the return, so asking twice would double the SASA work -- the
+        # expensive step of this stage -- for a second copy of the patch median. The
+        # conversion and the hazard in it are documented on `_anchors_from`.
+        site_anchors = _anchors_from(sites, "positions_on_the_relative", span)
         started = time.time()
         try:
             markers = surface_for_accession(accession, interval=interval,
-                                            replicates=replicates)
+                                            replicates=replicates,
+                                            anchors=site_anchors or None)
         except ImportError as missing:
             entry["unmeasured_because"] = (f"no SASA backend on this machine: {missing}. "
                                            "A property of the environment, not of the target.")
@@ -175,7 +646,32 @@ def surface_rows(ranked, replicates=5, folds=(), fold_rows=()):
             "exposed_fraction_of_residues": markers["exposed_fraction"],
             "sequons_near_patch": markers["sequons_near_patch"],
             "available_from": markers.get("available_from"),
+            # The patch anywhere on the chain is the number above; these are the residues it
+            # is made of. They were being counted and discarded, and which five residues a
+            # 415-square-angstrom patch is made of is the whole of what a binder designer can
+            # act on. `patch_positions_measured_on` names the deposition they are numbered in,
+            # because the area above is a median over several and a median of position lists
+            # is not a position list.
+            "patch_positions": markers.get("patch_positions"),
+            "patch_residue_names": markers.get("patch_residue_names"),
+            "patch_positions_measured_on": markers.get("patch_positions_measured_on"),
         })
+        # Where the anchors landed, checked against the residue the annotation names there.
+        # Only when some anchor was found: with none found there is nothing to check and the
+        # block already says why it measured nothing, and reading a structure's residues to
+        # compare against an empty list would record a refusal about a question nobody asked.
+        wanted, wanted_absent, observed, observed_absent = {}, None, {}, None
+        if (markers.get("site") or {}).get("anchors_found"):
+            wanted, wanted_absent = _annotated_residues(
+                sites, "positions_on_the_relative", span, accession)
+            observed, observed_absent = _letters_from_deposition(
+                markers.get("site_measured_on"))
+        entry["site_surface"] = _site_block(
+            markers, site_anchors,
+            "author numbering of the deposited chain, taken as 1-based within the mature "
+            "chain the relative's entry delimits",
+            absent=sites_absent, expected=wanted, observed=observed,
+            not_checked_because=wanted_absent or observed_absent)
         # Localisation scoped to this chain, never inherited from the polyprotein. The gate
         # reads it, and reading it off the entry is what once made a cytosolic protease
         # report as surface-exposed through its membrane-bound siblings.
@@ -201,20 +697,59 @@ def surface_rows(ranked, replicates=5, folds=(), fold_rows=()):
     # it say which: `only_route_to_a_surface` is read off the finished row rather than guessed
     # at from where in the loop the row happened to be.
     for entry in rows:
+        fold = attempts.get(entry["target"]) or {}
+        sites = entry["functional_sites"]
         folded = coordinates.get(entry["target"])
+        # The anchors are checked against the annotated residue on this route too, and the
+        # expectation is built per UNIT rather than per row: an anchor number is relative to
+        # the window that was folded, so a region's anchor 12 and the whole chain's anchor 12
+        # are different residues. The check is not the same question it is on a deposition --
+        # these residues are this genome's and the annotation is the relative's, so a single
+        # disagreement can be a substitution across the species gap -- which is why the block
+        # publishes both residues per anchor instead of only a verdict.
+        accession_for_sites = entry.get("measured_on_accession")
         if folded:
-            entry["predicted_surface"] = _predicted_surface(folded["pdb"], folded, entry)
+            # The prediction is the located window numbered from 1, so a position in this
+            # genome's numbering becomes `position - span[0] + 1` in the coordinates. This is
+            # the one lane in which the site figures are reachable for a genuinely novel
+            # pathogen: nothing is deposited, so either the patch at the marked residues is
+            # measured on a prediction or it is not measured at all.
+            span_folded = fold.get("span_in_this_genome")
+            wanted, wanted_absent = _annotated_residues(sites, "positions", span_folded,
+                                                        accession_for_sites)
+            entry["predicted_surface"] = _predicted_surface(
+                folded["pdb"], folded, entry,
+                anchors=_anchors_from(sites, "positions", span_folded),
+                absent=entry["functional_sites_absent_because"],
+                expected=wanted, not_checked_because=wanted_absent)
+        # One entry per folded region, under the chain's own row. A region's anchors are the
+        # site positions inside its span and nothing else: a residue outside the window it was
+        # cut at is not in these coordinates, and anchoring on it would report a
+        # neighbourhood around whatever residue happened to carry that number.
+        for region in regions.get(entry["target"]) or ():
+            unit = region.get("unit") or {}
+            span_folded = unit.get("span_in_this_genome")
+            wanted, wanted_absent = _annotated_residues(sites, "positions", span_folded,
+                                                        accession_for_sites)
+            measured = _predicted_surface(
+                region["pdb"], region, entry,
+                anchors=_anchors_from(sites, "positions", span_folded),
+                absent=entry["functional_sites_absent_because"], unit=unit,
+                expected=wanted, not_checked_because=wanted_absent)
+            entry.setdefault("domain_surfaces", []).append(measured)
 
     # And for a chain that got neither, both halves of the answer on one row. A reader asking
     # why a chain ends with no surface at all had to join two stages by hand to find out, and
     # the join is not symmetric: one reason is about what has been solved, the other about
     # what this pipeline was willing to fold.
-    attempts = {r.get("target"): r for r in (fold_rows or ())}
     for entry in rows:
         if entry["measured"] or (entry.get("predicted_surface") or {}).get("measured"):
             continue
         fold = attempts.get(entry["target"]) or {}
         refused = (entry.get("predicted_surface") or {}).get("not_measured_because")
+        units = fold.get("fold_units") or ()
+        measured_regions = [s for s in (entry.get("domain_surfaces") or ())
+                            if s.get("measured")]
         entry["no_surface_because"] = {
             "deposited": entry["unmeasured_because"],
             # In order of how far the chain got: a prediction that was measured and failed,
@@ -224,17 +759,29 @@ def surface_rows(ranked, replicates=5, folds=(), fold_rows=()):
                           or fold.get("fold_absence")
                           or fold.get("not_recovered_because")
                           or "no coordinates were offered to this stage for this chain"),
-            # The one of those a reader should be able to count. It is true exactly when the
-            # chain's own length, against a ceiling this pipeline set, is what closed the only
-            # route it had left -- which makes it the one reason here that is ours and not the
-            # world's.
-            "the_folding_ceiling_closed_the_only_route":
-                fold.get("inside_the_ceiling") is False,
+            # The one of those a reader should be able to count, and the one the ceiling
+            # change narrows. It used to be true whenever the chain's own length put it over
+            # the ceiling; the ceiling is now applied per fold unit, so it is true only when NO
+            # unit of the chain was inside it -- neither the whole chain nor any annotated
+            # functional region of it. A chain whose region was folded is a chain this
+            # pipeline's own number did not strand, and saying otherwise would keep claiming a
+            # cost that has been paid. Where the row carries no units at all, which is every
+            # record written before the domain route existed, the old reading stands.
+            "the_folding_ceiling_closed_the_only_route": (
+                not any(unit.get("inside_the_ceiling") for unit in units) if units
+                else fold.get("inside_the_ceiling") is False),
+            # And the route that did reach it, named so this dictionary cannot be read as
+            # "nothing was measured for this chain" when a region of it was. The row is still
+            # counted as having no surface of its own, because the measurement is of a region
+            # and `measured` is a statement about the chain.
+            "but_a_region_of_it_was_measured":
+                [s["unit"]["label"] for s in measured_regions] or None,
         }
     return rows
 
 
-def _predicted_surface(coordinates, folded, entry):
+def _predicted_surface(coordinates, folded, entry, anchors=None, absent=None, unit=None,
+                       expected=None, not_checked_because=None):
     """The patch on predicted coordinates, with its standing attached to it.
 
     Everything here is flagged twice over -- `is_deposited_measurement` false, `in_the_ranking`
@@ -248,18 +795,42 @@ def _predicted_surface(coordinates, folded, entry):
     is reported without an explanation attached: a monomer prediction has no partner to bury
     an interface against, and prediction error is not separable from that here, so stating a
     cause would be inventing one.
+
+    `anchors` are the marked residues in these coordinates' own numbering -- the prediction is
+    numbered from one over the sequence that was folded -- and the measurement at them comes
+    back under `site_surface`. `absent` is the reason there were none, carried through so the
+    block says why rather than simply reporting nothing.
+
+    `expected` is `_annotated_residues`' map for the window that was folded, and the residues
+    these coordinates actually carry are read straight out of the text, which is already in
+    hand. The deposited route needs the same check and needs a file to run it on; here the file
+    is the argument. What the check costs is one pass over the coordinate lines and no SASA
+    work at all, and what it buys is that `anchors_found` stops being a statement about numbers
+    alone -- a span mapped one residue short, or a frame the window disagrees with, now shows
+    up as the wrong residue instead of as a confident neighbourhood. The held-out run's fold
+    side agrees on 106 of 106 anchors across 23 units, measured 2026-11-12, so the check is
+    quiet on this genome by being satisfied rather than by being absent.
+
+    `unit` makes this the measurement of one REGION of the chain rather than of the chain, and
+    the only thing it changes besides the identity keys is the comparison: the deposited median
+    on the row is the whole chain's patch, so a ratio against a region's patch would divide two
+    quantities measured over different surfaces. It is withheld with its reason instead of
+    being published as a number that looks like agreement or disagreement.
     """
     from .geometry import markers_from_coordinates
 
+    label = (unit or {}).get("label") or entry["target"]
     started = time.time()
     try:
         markers = markers_from_coordinates(
-            coordinates, label=f"{folded.get('model') or 'predicted'} · {entry['target']}")
+            coordinates, label=f"{folded.get('model') or 'predicted'} · {label}",
+            anchors=anchors or None)
     except ImportError as missing:
         return {"measured": False,
                 "not_measured_because": f"no SASA backend on this machine: {missing}. "
                                         "A property of the environment, not of the target.",
                 "is_deposited_measurement": False, "in_the_ranking": False,
+                "unit": unit or None,
                 "only_route_to_a_surface": not entry["measured"]}
     except Exception as failure:                          # noqa: BLE001
         # Belt and braces behind the guard inside `markers_from_coordinates`. This stage runs
@@ -269,10 +840,12 @@ def _predicted_surface(coordinates, folded, entry):
         return {"measured": False,
                 "not_measured_because": f"{type(failure).__name__}: {str(failure)[:160]}",
                 "is_deposited_measurement": False, "in_the_ranking": False,
+                "unit": unit or None,
                 "only_route_to_a_surface": not entry["measured"]}
     if markers.get("error"):
         return {"measured": False, "not_measured_because": markers["error"],
                 "is_deposited_measurement": False, "in_the_ranking": False,
+                "unit": unit or None,
                 "only_route_to_a_surface": not entry["measured"]}
 
     deposited = entry.get("patch_median_a2")
@@ -280,27 +853,47 @@ def _predicted_surface(coordinates, folded, entry):
     return {
         "measured": True,
         "measured_on": "coordinates from the fold stage, not a deposition",
+        # What was folded, present only on a region's measurement. A reader meeting two
+        # surfaces under one chain has to be able to tell which residues each is of, and the
+        # span is in this genome's own numbering while `entry_span_on_the_relative` is the
+        # provenance -- the curator annotated the second and the alignment produced the first.
+        "unit": unit or None,
         "model": folded.get("model"),
         "mean_plddt": folded.get("mean_plddt"),
         "confident_fraction": folded.get("confident_fraction"),
         "residues": markers["residues"],
         "patch_a2": patch,
         "patch_fraction_of_surface": markers["patch_fraction_of_surface"],
+        "patch_positions": markers.get("patch_positions"),
+        "patch_residue_names": markers.get("patch_residue_names"),
         "exposed_fraction_of_residues": markers["exposed_fraction"],
         "sequons_near_patch": markers["sequons_near_patch"],
+        "site_surface": _site_block(
+            markers, anchors,
+            "the predicted coordinates' own numbering, 1-based over the "
+            + ("region" if unit else "chain") + " that was folded",
+            absent=absent, expected=expected,
+            observed=_letters_from_coordinates(coordinates),
+            not_checked_because=not_checked_because),
         "seconds": round(time.time() - started, 2),
         # True exactly when no deposited chain covered this target, which is the case the
         # reordering exists for: the novel target whose only coordinates are predicted ones.
         "only_route_to_a_surface": not entry["measured"],
         "deposited_patch_median_a2": deposited,
         "ratio_to_deposited_median": (round(patch / deposited, 2)
-                                      if deposited else None),
+                                      if deposited and not unit else None),
+        "not_compared_because": (
+            "the deposited median on this row is the whole chain's patch and this is a patch "
+            "on one region of it, so the two are measured over different surfaces."
+            if deposited and unit else None),
         "is_deposited_measurement": False,
         "in_the_ranking": False,
         "caveat": "A patch computed on predicted coordinates. It inherits the prediction's "
                   "error, a monomer's surface is not necessarily exposed in an oligomer, and "
                   "over a low-confidence stretch it describes a fold the model did not commit "
-                  "to. Reported beside a deposited measurement and never pooled with one.",
+                  "to. Reported beside a deposited measurement and never pooled with one."
+                  + (" A region folded on its own has also lost whatever its neighbours in the "
+                     "chain contributed to its shape." if unit else ""),
     }
 
 
@@ -578,6 +1171,23 @@ def locate_chain(orf, chain, aligner=None):
     SARS-CoV-2's spike is about 46 per cent identical to bat coronavirus HKU3's, which is a
     real relative and a correct assignment -- so thresholding it would refuse exactly the
     distant relatives the holdout exists to force the pipeline through.
+
+    **And it returns `blocks`, which is what makes a position transferable and not only a
+    span.** The alignment's aligned blocks are kept as plain nested lists of ints,
+    `[[[t0, t1], ...], [[q0, q1], ...]]`, the first list indexing this genome's ORF
+    translation and the second the relative's chain, both 0-based and half-open -- the shape
+    `domains.map_position` documents and consumes. They were being computed, read for the two
+    scalars above and thrown away, and throwing them away is what left every annotation on the
+    relative's entry stranded there: the span alone carries the chain's two endpoints, so a
+    domain or an active-site residue inside the chain could only be carried over by assuming
+    the two numberings agree between the endpoints. They do not. Under the holdout, spike S1
+    runs 14-654 on the relative and 24-685 in this genome -- +10 at the start and +31 at the
+    end -- and the 21-residue disagreement between those two offsets is exactly the indel
+    content the blocks describe and a constant cannot.
+
+    They are `int()`-ed on the way out because Biopython hands back numpy integers, which
+    `json.dump` refuses: a record is written at the end of every run, so a numpy int here is
+    not a type nicety but the difference between a run that records and a run that raises.
     """
     if not orf or not chain:
         return None
@@ -599,7 +1209,9 @@ def locate_chain(orf, chain, aligner=None):
                          if x == y)
     return {"span": [start + 1, end], "sequence": orf[start:end],
             "covered": round(matched / len(chain), 4),
-            "identity": round(identical / matched, 4) if matched else 0.0}
+            "identity": round(identical / matched, 4) if matched else 0.0,
+            "blocks": [[[int(a), int(b)] for a, b in blocks[0]],
+                       [[int(a), int(b)] for a, b in blocks[1]]]}
 
 
 # How much of the relative's mature chain a local alignment has to account for before the
@@ -609,22 +1221,356 @@ def locate_chain(orf, chain, aligner=None):
 # each one fell rather than only which side of the bar it was.
 MINIMUM_CHAIN_COVERAGE = 0.5
 
-# The residue length above which this stage does not send a chain to the folding endpoint.
-# Named rather than left as a default argument because it decides which chains the surface
-# stage can rescue, and that makes it a number the record has to carry and the site has to
-# read: nine of the twenty chains on the SARS-CoV-2 holdout sit above it, including the three
-# spike chains and the polymerase, and a page that drew the line at a hand-typed 400 would
-# keep drawing it there after the ceiling moved.
+# The residue length above which this stage does not send a SEQUENCE to the folding endpoint.
+# Named rather than left as a default argument because the record has to carry it and the site
+# has to read it: nine of the twenty chains on the SARS-CoV-2 holdout are longer than this,
+# including the three spike chains and the polymerase, and a page that drew the line at a
+# hand-typed 400 would keep drawing it there after the ceiling moved.
+#
+# It used to be described here as the number deciding which chains the surface stage can
+# rescue. It is not that any more, and the correction is the point of this change: the ceiling
+# is applied per FOLD UNIT, so a chain over it is no longer a chain with no coordinates -- its
+# leading functional regions are folded instead, and all nine of those chains carry at least
+# one annotated region at or under 400 residues (measured against UniProt on 2026-11-12). What
+# the ceiling still decides is which units reach the endpoint, which is a statement about
+# lengths rather than about chains.
 FOLD_CEILING = 400
 
+# Annotated functional regions folded per chain whose whole sequence is over the ceiling, in
+# the relevance order `domain_inventory` establishes. STATED as a budget, not fitted: nothing
+# was optimised against it. A cap is needed at all because nsp3 offers eighteen foldable
+# regions on the relative's entry -- nineteen once they are mapped into this genome, because
+# the `Disordered` span at 972-1003 is 32 residues there and 56 here, over the minimum this
+# side of the species gap -- and folding every region of every over-ceiling chain would spend
+# one run on one chain: 75 folds across the shortlist is not a page, it is a database.
+#
+# Three rather than one, and the measurement on the held-out run is why. The relevance order
+# leads on contained annotated site residues, which is decisive for an enzyme and close to
+# silent on a glycoprotein, so with a cap of one the leading region is sometimes the one worth
+# looking at and sometimes not. Measured over the thirty-seven units folded on that run:
+# nsp3 led with `CoV Nsp3 Y` at 35.1 mean confidence while its `Peptidase C16` -- the protease
+# the chain is named for -- folded at 76.4 and would not have been folded at all; nsp13 led
+# with `CV ZBD` at 66.1 while its `(+)RNA virus helicase C-terminal` folded at 87.7, the best
+# structure of the thirty-seven; and nsp12 led with its `RdRp catalytic` at 73.7 and also
+# reached `RdRp Palm C-ter` at 74.3. Three reaches the region worth reading on every chain in
+# that run; it does not promise to on another.
+DOMAIN_UNITS_PER_CHAIN = 3
 
-def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=12, budget=240.0):
+# Folding requests one run will spend, over every unit of every chain. Twelve when a run folded
+# whole chains and nothing else, and twelve is the wrong number now: the held-out SARS-CoV-2
+# run offers eleven whole chains inside the ceiling and up to three regions for each of the
+# nine chains over it, so a cap of twelve would fold every chain and exactly one region, and
+# the rescue this stage exists for would be dropped by a bound set before the rescue existed.
+#
+# It is not the bound that keeps a run inside the twenty-five minute cap on the workflow that
+# serves a visitor, and it was never really that either. `budget` is: it is checked before
+# every fold after the first, so the worst case is one fold at the 90 seconds a retried
+# `REQUEST_TIMEOUT` allows, plus the 240-second budget, plus the fold in flight when the
+# budget expires -- about seven minutes a case however high this number is. Raising this one
+# moves which of the two bounds decides, from a count that predates the domain route to the
+# wall clock that measures what the run actually costs. Every drop either of them causes is
+# named on the unit it dropped and counted by kind in the record.
+FOLD_REQUESTS_PER_RUN = 40
+
+# Seconds one run may spend inside the folding endpoint. Named rather than left in the
+# signature for the reason the ceiling is named: the stage dictionary states it, and a record
+# quoting a literal while the code holds the default is a record that goes on quoting it after
+# the default moves. The number itself is unchanged and the argument for it is in the fold loop
+# below -- a retried `REQUEST_TIMEOUT` is 90 seconds, so this is the bound that keeps a run
+# inside the twenty-five minute cap on the workflow that serves a visitor, and the seconds it
+# spends on calls the endpoint refuses are counted apart from the seconds it spends folding.
+FOLD_BUDGET_SECONDS = 240.0
+
+
+def _in_relevance_order(regions, accession, chain_range, ceiling):
+    """One chain's fold units, reordered from longest-first to most-relevant-first.
+
+    `domains.fold_units` hands the regions back longest first, which is the order a caller
+    spending a bounded number of folds would spend them in if length were the question. It is
+    not, and the measurement that says so is `domain_inventory`'s: sorted by length, spike S1
+    leads with `BetaCoV S1-NTD` at 290 residues and no annotated site residue while the
+    `Receptor-binding domain (RBD)` sits behind it at 223; spike S2' leads with
+    `Extracellular`, a membrane-topology span whose whole content is which side of a bilayer
+    the chain is on; and the polymerase leads with `NiRAN` at 255 residues and two site
+    residues while `RdRp catalytic` waits at 163 with six. Length put the best-known antiviral
+    target in the set second and a topology annotation first.
+
+    So the order is read from `domain_inventory`, which is where that correction lives and
+    where it is recorded per region -- `site_residues_inside` as data, `relevance_terms_matched`
+    as an authored term list validated against no labelled corpus, and
+    `describes_position_not_function` sorting the topology spans last. Reached through its
+    `_chain_row` rather than reimplemented here, because a second copy of an ordering rule
+    agrees with the first exactly until someone edits one, and the copy a reader checks is the
+    published one. The three signals are carried onto each unit so a page showing a region
+    first can say why it is first.
+
+    Sorting is stable and a region the inventory does not account for keeps its place at the
+    end of the list, so a chain the inventory refuses -- no accession, an entry that could not
+    be read -- is returned in the length order it arrived in rather than scrambled.
+    """
+    if not regions or not accession:
+        return list(regions)
+    from . import domain_inventory
+
+    try:
+        rows = domain_inventory._chain_row(
+            {"nearest_homolog": accession,
+             "chain_range": list(chain_range) if chain_range else None}, {}, ceiling)
+        ranking = {(row["type"], tuple(row["entry_span_on_the_relative"])): (index, row)
+                   for index, row in enumerate(rows.get("regions") or ())}
+    except Exception:                                     # noqa: BLE001
+        # The order is a display decision and this function may not be the reason a run
+        # fails. The length order `fold_units` produced stands, and every unit still carries
+        # its own length, span and refusal.
+        return list(regions)
+
+    ordered = list(regions)
+    for unit in ordered:
+        found = ranking.get((unit["type"], tuple(unit["entry_span"] or ())))
+        row = found[1] if found else {}
+        unit["site_residues_inside"] = row.get("site_residues_inside")
+        unit["relevance_terms_matched"] = row.get("relevance_terms_matched")
+        unit["describes_position_not_function"] = row.get("describes_position_not_function")
+    ordered.sort(key=lambda unit: ranking.get(
+        (unit["type"], tuple(unit["entry_span"] or ())), (len(ranking), None))[0])
+    for place, unit in enumerate(ordered, 1):
+        unit["relevance_place"] = place
+    return ordered
+
+
+def _not_folded(entry, unit, sentence):
+    """One bound's refusal, written on the unit it refused and on the row only if it was one.
+
+    A row's `not_folded_because` is the whole chain's answer and three tests read it as such,
+    including the one that pins the ceiling's sentence on an over-ceiling chain. A region
+    dropped by a bound must not overwrite that: the chain was not declined by the cap, one of
+    its regions was, and a reader told otherwise would conclude the ceiling had moved. So the
+    sentence goes on the unit always and on the row only for the whole-chain unit.
+    """
+    unit["refused_because"] = sentence
+    if unit["kind"] == "whole_chain":
+        entry["not_folded_because"] = sentence
+
+
+def _set_aside_sentence(regions, inside):
+    """Why a chain folded whole offers none of its regions as a unit of its own.
+
+    Carried as a count and one sentence rather than as 53 rows across the run repeating that
+    sentence. A region of a chain this stage folded whole can never have coordinates of its own
+    here, so each of its rows would be a name, a span and the same refusal -- against a record
+    this stage already quadrupled. What the annotation offers in full, foldable or not, is
+    `domain_inventory`'s record and the question that one exists to answer.
+
+    **It agrees with its own numbers at every count, which it did not.** The sentence took its
+    plural from `len(regions)` and then hard-coded "them", "are" and "none", so at exactly one
+    region it read "This chain's 1 annotated region, 1 of them inside the ceiling, are already
+    covered by the whole-chain fold, so none is offered as a unit of its own." Four of the
+    twenty chains on the held-out run carry exactly one annotated site residue and the same
+    arithmetic produces single-region chains, so the singular is an ordinary case and not an
+    edge -- and a sentence that cannot count to one is the kind a reader stops believing the
+    numbers beside. The zero case is worded differently again, because "0 annotated regions are
+    already covered by the whole-chain fold" asserts a coverage of nothing: a chain whose
+    relative's entry annotates no functional region inside it has nothing to set aside, and
+    saying so is a different fact about the annotation.
+    """
+    if not regions:
+        return ("this stage folds a region only where the whole chain is over the ceiling, and "
+                "the relative's entry annotates no functional region inside this chain in any "
+                "case, so there is none to set aside. An absence in the annotation, not in the "
+                "protein.")
+    if len(regions) == 1:
+        return ("this stage folds a region only where the whole chain is over the ceiling. "
+                "This chain's single annotated region, "
+                + ("inside the ceiling, is" if inside else "over the ceiling, is")
+                + " already covered by the whole-chain fold, so it is not offered as a unit of "
+                  "its own.")
+    return (f"this stage folds a region only where the whole chain is over the ceiling. This "
+            f"chain's {len(regions)} annotated regions, {len(inside)} of them inside the "
+            f"ceiling, are already covered by the whole-chain fold, so none is offered as a "
+            f"unit of its own.")
+
+
+def _still_waiting(tail):
+    """The queued units a bound really dropped, which is not every unit behind it.
+
+    A contingency unit whose chain was folded whole is behind the bound in the order and was
+    never going to be folded: its residues are inside coordinates this stage already holds, so
+    counting it as dropped would publish a cost nobody paid. On the held-out SARS-CoV-2 run the
+    contingency tier is 53 units long and every one of them is skipped, so a tail read without
+    this filter would report the fold cap refusing fifty-odd regions on a run that folded
+    everything it meant to.
+
+    Everything else in the tail is a genuine drop, including a contingency unit whose chain's
+    own fold did NOT land -- that one was about to be folded instead of the chain, and a bound
+    taking it is the reason the chain ends with no coordinates.
+    """
+    kept = []
+    for item in tail:
+        _target, _sequence, entry, _unit, contingent = item
+        if contingent and entry.get("folded"):
+            continue
+        kept.append(item)
+    return kept
+
+
+def _enqueue(queue, entry, unit, source, contingent=False):
+    """One region appended to the fold order, or refused because the frame disagrees with it.
+
+    Lifted out of the fold order so that the two tiers which offer a region -- the regions of a
+    chain the ceiling refuses, and the regions held in reserve for a chain whose own fold does
+    not happen -- cut their residues the same way. They did not have to come from one place
+    until the second tier existed, and a second copy of this slice would be a second chance to
+    get the frame wrong: a region's mapped span is in the numbering of the ORF the chain was
+    located in, which is what `domains.map_span` returns and what the record reports, so it is
+    cut from that reading frame and never from the chain window.
+
+    `contingent` travels with the queued unit and is read by the fold loop, which skips a
+    contingent unit whose chain was folded whole. It is the fifth member of the queue tuple
+    rather than a key on the unit, because the unit is published in the record and this is a
+    fact about one run's fold order and not about the region.
+
+    A length disagreement is a refusal with its arithmetic written out rather than a silent
+    skip, which is this file's rule everywhere: the span, the residues the frame actually
+    yields, the frame's own length and the length the mapping reported, so a reader can see
+    which of the two is wrong.
+    """
+    sequence = (source or "")[unit["span"][0] - 1:unit["span"][1]]
+    if len(sequence) != unit["length"]:
+        unit["refused_because"] = (
+            f"the mapped span {unit['span'][0]}-{unit['span'][1]} selects "
+            f"{len(sequence)} residues of the {len(source or '')}-residue reading "
+            f"frame it was located in, against the {unit['length']} the mapping "
+            f"reports, so the window and the frame disagree and nothing is sent.")
+        return False
+    queue.append((f"{entry['target']} · {unit['label']}", sequence, entry, unit, contingent))
+    return True
+
+
+def functional_sites(accession, chain_range, located=None):
+    """The residues that do the chemistry, in the relative's numbering and in this genome's.
+
+    The project lead's third ask begins with a list of amino-acid positions, and this is that
+    list: every `Active site`, `Binding site` and `Site` residue the curators marked inside
+    this chain. Measured 2026-11-12, P0C6X7 carries 73 Binding site, 22 Active site and 14
+    Site features, so the annotation is dense rather than occasional, and the polymerase's
+    `RdRp catalytic` domain contains six of them.
+
+    Returns `(sites, refused_because)`. Each site is
+
+        {"type", "description", "ligand",
+         "positions_on_the_relative": [int, ...],   # the entry's own numbering
+         "positions": [int | None, ...],            # this genome's, index for index
+         "positions_unmapped": int}
+
+    **A position that cannot be mapped is None and stays None.** `positions` is index for
+    index with `positions_on_the_relative` so the two can be read together, and a gap in the
+    alignment -- an insertion in this genome, or a residue of the relative this genome
+    deleted -- leaves None in its place. Substituting the nearest mapped neighbour would hand
+    back a number that looks like an answer and names a residue the curator did not annotate,
+    and the error does not stay small: under the holdout spike S1 maps from [14, 654] to
+    [24, 685], +10 at the start and +31 at the end, and the 21-residue disagreement between
+    those offsets is exactly the indel content a neighbour substitution papers over. An active
+    site reported at the wrong residue is worse than one reported as unmappable, because only
+    the second can be seen to be wrong.
+
+    With no `located` -- a row whose candidate is its own ORF translation, which this stage
+    never aligns -- every `positions` entry is None and the entry numbering is still returned.
+    That is deliberate and not a degraded answer: the deposited route anchors on the relative's
+    own numbering and needs no alignment at all, so the sites are usable for the structure that
+    exists while being honestly unmapped against the one that was predicted.
+
+    A chain with no accession has no curated entry to read and comes back as an empty list with
+    the reason, like every other refusal in this file.
+    """
+    if not accession:
+        return [], ("no reviewed homolog accession, so no curated annotation exists to read. "
+                    "A sequence-only candidate has no site positions to carry over.")
+    from . import domains
+
+    within = tuple(chain_range) if chain_range else None
+    try:
+        annotated = domains.annotated_sites(accession, within=within)
+    except Exception as failure:                          # noqa: BLE001
+        return [], (f"the relative's entry could not be read: {type(failure).__name__}: "
+                    f"{str(failure)[:160]}")
+    # Entry position `p` is index `p - chain_start` in the chain sequence that was aligned,
+    # because `fold_stage` hands `locate_chain` the slice beginning at `chain_range[0]`. A
+    # chain with no annotated range is a protein that was never cut out of a polyprotein, so
+    # its entry numbering is its own and the first residue is 1.
+    chain_start = int(chain_range[0]) if chain_range else 1
+    sites = []
+    for site in annotated:
+        positions = list(site.get("positions") or ())
+        mapped = [domains.map_position(located, position - chain_start)
+                  for position in positions]
+        sites.append({"type": site["type"], "description": site["description"],
+                      "ligand": site.get("ligand"),
+                      "positions_on_the_relative": positions,
+                      "positions": mapped,
+                      "positions_unmapped": sum(1 for p in mapped if p is None)})
+    if not sites:
+        return [], (f"{accession} carries no Active site, Binding site or Site annotation "
+                    f"inside this chain's range, so there is no marked residue to aim at. An "
+                    f"absence in the annotation, not in the protein.")
+    return sites, None
+
+
+def unit_counts(fold_rows):
+    """What stage 3 offered and what it folded, counted off its own rows.
+
+    Derived rather than tallied during the run, for the reason the over-ceiling names are
+    derived in `_case`: the stage dictionary, the coverage table and the page all state these
+    numbers, and three tallies kept in three places agree until one of them is edited. Every
+    count here is a count of rows or units the record itself carries, so a reader can
+    recompute any of them from the record and get the same answer.
+
+    `chains_with_no_coordinates` counts every row the stage emitted, identified or not, and
+    that is the number this whole change exists to move: on the held-out SARS-CoV-2 run it was
+    nine chains refused on the length of their whole sequence, and each of those nine carries
+    an annotated region inside the ceiling.
+
+    **Offered and recorded are counted separately, and they differ on purpose.** A chain folded
+    whole carries no region rows -- its regions are inside the structure it already has -- so
+    `domain_units_offered` is summed from each row's own count of what the annotation gave it
+    and `domain_units_recorded` counts the rows actually carried. Reporting only the second
+    would say the annotation offered nothing for eleven chains, which is false; reporting only
+    the first would imply there are rows to read that are not there.
+    """
+    rows = list(fold_rows or ())
+    units = [unit for row in rows for unit in (row.get("fold_units") or ())]
+    regions = [unit for unit in units if unit["kind"] == "domain"]
+    whole = [unit for unit in units if unit["kind"] == "whole_chain"]
+    offered = sum(row.get("domain_units_offered") or 0 for row in rows)
+    inside = sum(row.get("domain_units_inside_the_ceiling") or 0 for row in rows)
+    with_coordinates = [row for row in rows
+                        if any(unit.get("folded") for unit in (row.get("fold_units") or ()))]
+    return {
+        "units_offered": len(whole) + offered,
+        "units_inside_the_ceiling": sum(1 for unit in whole
+                                        if unit["inside_the_ceiling"]) + inside,
+        "units_recorded": len(units),
+        "units_folded": sum(1 for unit in units if unit.get("folded")),
+        "domain_units_offered": offered,
+        "domain_units_inside_the_ceiling": inside,
+        "domain_units_recorded": len(regions),
+        "domain_units_folded": sum(1 for unit in regions if unit.get("folded")),
+        "chains_offered_a_domain_route": sum(1 for row in rows
+                                             if row.get("domain_units_inside_the_ceiling")),
+        "chains_rescued_by_the_domain_route": sum(1 for row in rows if row.get("domain_route")),
+        "chains_with_coordinates": len(with_coordinates),
+        "chains_with_no_coordinates": len(rows) - len(with_coordinates),
+        "domain_units_per_chain": DOMAIN_UNITS_PER_CHAIN,
+    }
+
+
+def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=FOLD_REQUESTS_PER_RUN,
+               budget=FOLD_BUDGET_SECONDS):
     """Every ranked chain whose own sequence the chain can locate, folded.
 
     Returns `(primary, rows, folds)`. `primary` is the first fold in pick order and is the
     one the record and the page report in full; `folds` is every fold this stage made, which
     the surface stage reads. `limit` caps the number of folding requests one run will spend
-    and a chain it drops is named in the record rather than quietly left out.
+    and a unit it drops is named in the record rather than quietly left out.
 
     **Why this is not simply "fold the top candidate".** The folding endpoint takes an
     amino-acid sequence, and the only pathogen sequence this chain holds is the six-frame
@@ -650,11 +1596,71 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=12, budget=240.0):
     is what left the polymerase, the helicase and the two methyltransferases unfoldable; they
     are in the genome, in a frame the row does not point at. Each chain is aligned against
     every ranked ORF and the best-covered hit wins, with the ORF it was found in recorded.
+
+    **The ceiling is applied per fold unit, which is what a chain over it now gets instead of
+    nothing.** A located chain is decomposed into units by `domains.fold_units`: the whole
+    chain first, then its annotated functional regions carried into this genome's numbering
+    through the alignment blocks. Each unit meets the ceiling on its own length. Measured
+    against UniProt on 2026-11-12 over the twenty-one ranked chains of the held-out
+    SARS-CoV-2 run, nine chains are longer than 400 residues -- the polymerase at 823, nsp3 at
+    1,945, the helicase at 601, the three spike chains, the nucleoprotein, nsp2 and nsp4 --
+    and ALL NINE carry at least one annotated region at or under it. The old behaviour threw
+    the whole chain away on the strength of its length, so the stage that could give a novel
+    target its only coordinates refused the nine targets a binder designer would pick first.
+
+    Regions are folded only where the whole chain could not be, and `DOMAIN_UNITS_PER_CHAIN`
+    bounds how many. A chain inside the ceiling is folded whole and its regions are left
+    alone: their residues are already in that structure, and spending a fold on them again
+    would buy a second view of coordinates this stage already has.
+
+    **"Could not be" means the fold did not happen, and not merely that the chain is long.**
+    The regions of a chain inside the ceiling are HELD rather than dropped, and the hold is
+    released by the outcome of that chain's own fold. The reason is a defect reproduced on
+    2026-11-12: with two 300-residue chains inside a 400-residue ceiling, the second carrying a
+    200-residue Domain, and `budget=0.1`, the wall budget stopped the second chain's fold --
+    and because its regions had been set aside the moment the ceiling said "inside", the row
+    ended with `units_folded` 0, no coordinates, and its one 200-residue Domain neither folded
+    nor mentioned. The same hole opens under `limit`, and under a folding endpoint that refuses
+    a call, which on 11 Nov 2026 was five calls in seven. A chain whose whole-chain fold did
+    not happen must still be able to reach its regions, so the held units go onto the row and
+    into the fold order when it does not, with `offered_its_regions_because` saying why.
+
+    **Whole chains are ordered ahead of domains across the whole stage, not per chain.** The
+    fold order is every whole-chain unit in the existing identified-then-unidentified order,
+    then every domain unit of a chain over the ceiling, then the held regions as a contingency.
+    Interleaving the first two per chain would let nsp3's three regions, which sit at rank 6,
+    spend the limit and the wall budget that the whole chains at ranks 7 to 20 need -- so a
+    bound firing would stop being a statement about cost and become a statement about where in
+    the ranking a long chain happened to fall. Ordered this way, a domain fold can only ever
+    consume what is left after every whole chain this run can fold has been folded, and the
+    contingency tier can only ever spend what is left after both.
+
+    **What `primary` is when no whole chain is foldable: a REGION, flagged as one on the
+    payload.** The old docstring said `primary` is the first whole chain in the pick order, and
+    that is true whenever the whole-chain half of the order is non-empty -- the invariant the
+    committed main-protease fold rests on, and it is unchanged. That half can be empty: with a
+    single 600-residue chain carrying one 200-residue Domain, the first fold is the Domain, and
+    `primary["unit"]["kind"]` is `"domain"`. The choice taken here is to report it rather than
+    to return an absence, because withholding coordinates this stage actually produced is the
+    very defect the ceiling change exists to remove -- so the payload carries
+    `primary_is_a_region_not_a_whole_chain` on every run, true or false, and
+    `primary_is_a_region_because` naming the region, its type, its chain and its span whenever
+    it is true. A consumer reads the flag; it never has to infer a whole chain from a silence.
+    It cannot arise on this genome, where nsp5 is always inside the ceiling.
     """
+    from . import domains
     from .folded_structure import fold
     from .intake import _aligner
 
-    aligner, rows, pick, parents = None, [], None, {}
+    # `holdings` carries, beside each row, the three things the unit pass needs and the record
+    # does not keep: the ranked row the annotation is read off, the alignment that maps a span
+    # into this genome, and the ORF translation a domain's residues are cut from. Held here
+    # rather than written onto the row for the reason `recovered_sequence` is popped below --
+    # a record carrying twenty ORF translations would be mostly ORF translations.
+    # `contingency` holds the regions of a chain this stage means to fold WHOLE, until the end
+    # of the stage says whether that fold happened. See the hold below for the measured defect
+    # that put them here rather than on the row.
+    aligner, rows, pick, parents, holdings, contingency = None, [], None, {}, [], []
     for row in ranked:
         # Unidentified candidates are folded too, and used to be skipped here. The folding
         # endpoint takes an amino-acid sequence and nothing else -- no accession, no relative,
@@ -681,8 +1687,16 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=12, budget=240.0):
             # A whole ORF rather than a chain of one, so the translation *is* the sequence.
             if orf:
                 entry.update({"sequence_recovered": True, "recovered_length_aa": len(orf),
-                              "recovered_sequence": orf,
                               "recovered_by": "the ORF translation is the candidate"})
+                entry["recovered_sequence"] = orf
+                # No alignment was run on this branch, so the holding carries no blocks. The
+                # unit pass will offer the whole ORF and no region: an annotation on the
+                # relative's entry cannot be carried into a numbering nothing has aligned, and
+                # assuming the two agree is the error `domains` exists to remove. The cost is
+                # real and recorded rather than hidden -- the nucleoprotein is one of the nine
+                # over-ceiling chains and arrives here with no `chain_range`, so it gets no
+                # domain route even though its entry carries foldable regions.
+                holdings.append((entry, row, None, orf))
             else:
                 entry["not_recovered_because"] = "no translated ORF on the row"
             rows.append(entry)
@@ -730,6 +1744,7 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=12, budget=240.0):
                                           f"against {label}, covering "
                                           f"{located['covered']:.0%} of it at "
                                           f"{located['identity']:.0%} identity"})
+            holdings.append((entry, row, located, source))
         else:
             entry["not_recovered_because"] = (
                 f"the best alignment over {len(searched)} ranked ORFs accounted for only "
@@ -738,46 +1753,166 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=12, budget=240.0):
                 f"it points at is not that chain in this genome.")
         rows.append(entry)
 
-    # Two passes, identified first. An unidentified ORF is foldable and must be reachable,
-    # but it must never displace a named chain: the committed main-protease fold is what the
-    # repository reproduces byte for byte, and a one-pass loop would hand the pick to whatever
-    # happened to sort first. Explicit, so the ordering is a decision and not an accident of
-    # how `ranked` was sorted.
-    # The ceiling, written onto every row it decides, before anything is folded. A chain over
-    # it is never sent to the endpoint, so it is also a chain the surface stage cannot rescue:
-    # no coordinates exist for it, and a deposition is the only surface it will ever have.
-    # That was the one drop in this stage with no name and no count. The fold cap and the wall
-    # budget each got a number in the record; the ceiling's share was visible only as the gap
-    # between `foldable` and `chains_folded`, left for a reader to find by subtracting -- and
-    # it is the largest of the three, nine of twenty on the SARS-CoV-2 holdout, including the
-    # three spike chains and the polymerase.
-    for entry in rows:
+    # The ceiling, applied to every FOLD UNIT of every located chain before anything is
+    # folded, and written onto the row and onto each unit it decides.
+    #
+    # It used to be applied to the chain and to nothing else, which made it the largest of
+    # three silent drops in this stage: the fold cap and the wall budget each published a
+    # count, while the chains declined on length alone were visible only as the gap between
+    # `foldable` and `chains_folded` -- nine of twenty on the SARS-CoV-2 holdout, left for a
+    # reader to find by subtracting. The count was then published, and that is as far as a
+    # count can take it. The drop itself is what this pass removes. Those nine chains are the
+    # polymerase, the papain-like protease, the helicase and the whole receptor-binding
+    # machinery, every one of them carries an annotated functional region at or under the
+    # ceiling (measured against UniProt on 2026-11-12), and the region is the part a binder
+    # would be designed against in any case. So the length of the whole chain stops deciding
+    # whether the chain gets coordinates and decides only which of its units reach the
+    # endpoint. What is left of the old drop is a chain with no unit inside the ceiling at
+    # all, which is a much narrower claim and the one `the_folding_ceiling_closed_the_only_
+    # route` now makes in stage 4.
+    for entry, row, located, source in holdings:
         if not entry["sequence_recovered"]:
             continue
-        length = entry.get("recovered_length_aa") or 0
-        entry["inside_the_ceiling"] = 0 < length <= ceiling
-        if not entry["inside_the_ceiling"]:
+        accession, chain_range = row.get("nearest_homolog"), row.get("chain_range")
+        units = domains.fold_units(row, located, accession, ceiling)
+        whole, regions = units[0], _in_relevance_order(units[1:], accession, chain_range,
+                                                       ceiling)
+        # Unchanged in meaning and in wording: this is the whole chain's own verdict, which
+        # the record, the site and three tests read as the chain's length against the ceiling.
+        # A unit's verdict lives on the unit.
+        entry["inside_the_ceiling"] = bool(whole["inside_the_ceiling"])
+        inside = [unit for unit in regions if unit["inside_the_ceiling"]]
+        # Counted before anything is set aside, so the count is what the annotation offered
+        # this chain rather than what this run chose to carry rows for.
+        entry["domain_units_offered"] = len(regions)
+        entry["domain_units_inside_the_ceiling"] = len(inside)
+        entry["domain_units_set_aside_because"] = None
+        # The per-chain budget, applied to both branches below and to neither one's exclusion.
+        # It used to live inside the over-ceiling branch, where it could not describe a region
+        # held back for a chain folded whole -- and such a region is published as soon as that
+        # whole-chain fold does not happen, so it needs its reason written on it too.
+        for rank, unit in enumerate(inside):
+            if rank >= DOMAIN_UNITS_PER_CHAIN:
+                # Refused by the per-chain budget and not by the ceiling, so
+                # `inside_the_ceiling` stays true on it: the unit is foldable and this run
+                # declined to spend a request on it, which are different statements and
+                # the stage after this one reads the first one.
+                unit["refused_because"] = (
+                    f"number {rank + 1} of this chain's {len(inside)} regions inside the "
+                    f"ceiling, in relevance order, and past the first "
+                    f"{DOMAIN_UNITS_PER_CHAIN} this run folds. nsp3 alone offers nineteen "
+                    f"and the whole order would spend a run on one chain.")
+        if entry["inside_the_ceiling"]:
+            # HELD, not discarded, and the difference is a defect this fixes. The set-aside
+            # sentence below is true only once the whole chain has actually been folded, and
+            # the fold loop is 150 lines further down: deciding here keyed the regions off
+            # `inside_the_ceiling`, which says the chain is SHORT ENOUGH to fold and not that
+            # it was folded. Reproduced on 2026-11-12 with two 300-residue chains inside a
+            # 400-residue ceiling, the second carrying a 200-residue Domain, under
+            # `budget=0.1`: the wall budget stopped the second chain's own fold, its regions
+            # had already been dropped, and the row ended with `units_folded` 0,
+            # `fold_units` holding the whole chain alone, and `domain_units_offered` 1 --
+            # a chain with no coordinates whose 200-residue domain this run could not reach
+            # and did not mention. The same thing happens under `limit`, and it happens on
+            # every call the folding endpoint refuses, which on 11 Nov 2026 was five of
+            # seven.
+            #
+            # So the regions wait in `contingency` and the row carries the whole chain alone
+            # for now. If the whole-chain fold lands, they are set aside exactly as before and
+            # the record keeps the shape it had: one sentence and a count rather than 53 rows
+            # repeating that sentence, because a region of a chain folded whole is inside the
+            # coordinates this stage already holds. If it does not land, they go onto the row
+            # and into the fold order, which is the only way a chain whose own fold failed can
+            # still reach the part of it a binder would be designed against.
+            contingency.append((entry, regions, source))
+            regions = []
+        else:
+            length = entry.get("recovered_length_aa") or 0
             entry["not_folded_because"] = (
                 f"{length} residues, over the {ceiling}-residue ceiling this stage sends to "
-                f"the folding endpoint. No coordinates are predicted for it, so a deposited "
-                f"structure covering the chain is the only surface it can have.")
+                f"the folding endpoint. "
+                + (f"{len(inside)} annotated functional region"
+                   f"{'' if len(inside) == 1 else 's'} of it "
+                   f"{'is' if len(inside) == 1 else 'are'} inside the ceiling, and up to "
+                   f"{DOMAIN_UNITS_PER_CHAIN} of them are folded instead."
+                   if inside else
+                   "No coordinates are predicted for it, so a deposited structure covering "
+                   "the chain is the only surface it can have."))
+        entry["fold_units"] = [whole] + regions
+        # Ask 3's positions, mapped here because this is the stage holding the alignment they
+        # have to be mapped through. Stage 4 reads them off the row and anchors the patch
+        # arithmetic on them; stage 3 itself does nothing with them.
+        sites, absent = functional_sites(accession, chain_range, located)
+        entry["functional_sites"] = sites
+        entry["functional_sites_absent_because"] = absent
 
-    foldable = []
+    # The fold order: every whole chain first, in the identified-then-unidentified order the
+    # pick has always used, and only then every domain unit. Two passes within each half, for
+    # the reason the pick was given two passes in the first place -- an unidentified ORF is
+    # foldable and must be reachable, and it must never displace a named chain, because the
+    # committed main-protease fold is what this repository reproduces byte for byte and a
+    # one-pass loop would hand the pick to whatever happened to sort first.
+    #
+    # Whole chains ahead of domains is the same decision taken one level up, and it is a
+    # decision about bounds rather than about relevance. A domain fold must never consume the
+    # limit or the wall budget that a later chain's whole-chain fold needs: nsp3 sits at rank 6
+    # and offers three regions, so interleaving per chain would spend three requests there
+    # before the whole chains at ranks 7 to 20 were folded at all, and a bound firing would
+    # then report where a long chain fell in the ranking rather than what the run cost.
+    # Ordered this way, a domain can only ever take what is left once every whole chain this
+    # run can fold has been folded.
+    queue = []
     for want_identified in (True, False):
-        for entry in rows:
+        for entry, _row, _located, _source in holdings:
             if entry["identified"] is want_identified and entry.get("inside_the_ceiling"):
-                foldable.append((entry["target"], entry["recovered_sequence"], entry))
-    if foldable:
-        pick = foldable[0][:2]
+                queue.append((entry["target"], entry["recovered_sequence"], entry,
+                              entry["fold_units"][0], False))
+    whole_chain_units = len(queue)
+    for want_identified in (True, False):
+        for entry, _row, _located, source in holdings:
+            if (entry["identified"] is not want_identified
+                    or entry.get("inside_the_ceiling") is not False):
+                continue
+            for unit in entry.get("fold_units") or ():
+                if (unit["kind"] != "domain" or not unit["inside_the_ceiling"]
+                        or unit["refused_because"]):
+                    continue
+                _enqueue(queue, entry, unit, source)
+    # Counted here, between the second tier and the third, because this is the number the
+    # record has always published as `domain_units_in_the_order` -- the regions of the chains
+    # the ceiling refuses, which is the work the domain route exists to do. The contingency
+    # tier below is counted separately rather than added to it.
+    over_ceiling_units = len(queue) - whole_chain_units
+    # And last, the regions held back from the chains this stage folds WHOLE, as a contingency
+    # and not as work. Every one of them is skipped the moment its chain's own fold lands --
+    # which on every genome recorded here is every one of them -- and each is folded only if
+    # that fold did not happen, so this tier costs nothing on a healthy run and is the whole
+    # answer on a run where the endpoint refused a chain. It is last because it must never
+    # consume the limit or the wall budget that a whole chain or an over-ceiling chain's region
+    # needs: a contingency can only ever spend what is left after the work.
+    #
+    # In the order the chains were held in, which is the ranked order, and with no
+    # identified-then-unidentified pass of its own. That pass exists to protect the pick, and
+    # a contingency unit cannot reach it: it exists only because some chain is inside the
+    # ceiling, and such a chain is already ahead of it in the order.
+    for entry, held, source in contingency:
+        for unit in held:
+            if unit["inside_the_ceiling"] and not unit["refused_because"]:
+                _enqueue(queue, entry, unit, source, contingent=True)
+    if queue:
+        pick = queue[0][:2]
     # Carried only to choose and fold; a row holding a whole protein sequence would multiply
     # the record's size by the number of candidates for no reader's benefit. Captured above
-    # first, because every chain inside the ceiling is folded now and not only the pick.
+    # first, because every chain inside the ceiling is folded now and not only the pick. A
+    # domain's residues are never written onto the row at all -- they live in the queue, for
+    # the same reason and with no exception needed.
     for entry in rows:
         entry.pop("recovered_sequence", None)
 
     if pick is None:
-        return {"absence": "no ranked candidate yielded a sequence within the residue "
-                           f"ceiling of {ceiling}"}, rows, []
+        return {"absence": "no unit of any ranked candidate was inside the residue ceiling "
+                           f"of {ceiling}: neither a whole chain nor any annotated functional "
+                           f"region of one"}, rows, []
 
     # Every chain inside the ceiling, not just the first one, and the reason is the stage after
     # this one. The surface stage can measure a prediction, so a chain's coordinates are the
@@ -798,41 +1933,74 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=12, budget=240.0):
     # The first fold is the pick, in the order above, so the committed main-protease fold stays
     # the fold this repository reproduces byte for byte.
     # Two bounds, because one folding request is not one bounded cost. `REQUEST_TIMEOUT` is 45
-    # seconds and the lane retries once, so a single chain can spend ninety seconds against a
-    # flaky host -- twelve of those is nineteen minutes, against the twenty-five minute cap on
-    # the workflow that serves a visitor's run. A count alone would have made the slow case a
-    # timeout instead of a record. The wall budget is checked before each fold after the first:
-    # the pick always runs, because it is the fold this repository reproduces.
+    # seconds and the lane retries once, so a single unit can spend ninety seconds against a
+    # flaky host, and a count of requests alone would have made the slow case a timeout instead
+    # of a record. The wall budget is the bound that keeps a run inside the twenty-five minute
+    # cap on the workflow that serves a visitor: it is checked before each fold after the first,
+    # so the worst case is one fold at ninety seconds, plus the budget, plus the fold in flight
+    # when the budget expires -- about seven minutes whatever `limit` is. `limit` is the second
+    # bound rather than the first, and `FOLD_REQUESTS_PER_RUN` records why it is no longer 12.
+    # The pick always runs, because it is the fold this repository reproduces.
     # Seconds the budget spent on calls that came back with nothing, counted apart from the
     # seconds it spent folding. The two are indistinguishable to the budget and must not be
     # indistinguishable in the record: when the endpoint is down, every chain past the first
     # few is dropped with `chains_not_folded_by_budget`, which reads as "the cap is too
     # tight" when what happened is "the host refused". Observed on 11 Nov 2026, when ESM
     # Atlas returned 504 to five of seven calls and the refusals alone exhausted the budget.
+    #
+    # Both bounds count their drops BY KIND, and the two counts are not interchangeable.
+    # `chains_not_folded_by_limit` has meant whole chains since it was first recorded, and the
+    # record's own arithmetic -- chains inside the ceiling equals folds attempted plus the two
+    # bounds' drops -- is asserted in the suite against it. A domain unit dropped by the same
+    # bound is counted beside it under its own name, so the invariant stays an invariant and
+    # the domain route's cost is still visible.
     folds, dropped_limit, dropped_budget = [], 0, 0
+    dropped_limit_units, dropped_budget_units = 0, 0
     refused_calls, refused_seconds = 0, 0.0
+    attempted = 0
     folding_started = time.time()
-    for index, (target, sequence, entry) in enumerate(foldable):
-        if limit is not None and index >= limit:
-            dropped_limit = len(foldable) - index
-            # Named on the row, not only counted in the payload, for the same reason the
-            # ceiling now is: the stage after this one reports why a chain has no surface,
-            # and it can only report a reason that was written down somewhere.
-            for _, _, late in foldable[index:]:
-                late["not_folded_because"] = (
-                    f"the cap of {limit} folds on one run was spent on the chains ahead of "
-                    f"this one in the pick order.")
+    for index, (target, sequence, entry, unit, contingent) in enumerate(queue):
+        # A contingency whose chain was folded whole is not work this run declined, it is work
+        # this run does not need: the region's residues are inside the coordinates the chain
+        # already has. Skipped before either bound is consulted, and deliberately not counted
+        # as a drop by either -- counting it would turn a healthy run into one reporting fifty
+        # units refused by the cap. The set-aside sentence is written after the loop, where it
+        # is true of the units it names.
+        if contingent and entry.get("folded"):
+            continue
+        # The bounds count ATTEMPTS and no longer queue positions, which is what both constants
+        # have always said they are -- `limit` is "folding requests one run will spend". The two
+        # were the same number while every queued unit was folded; a skipped contingency makes
+        # them differ, and reading the position would spend the cap on units nothing was sent
+        # for.
+        if limit is not None and attempted >= limit:
+            late = _still_waiting(queue[index:])
+            dropped_limit = sum(1 for _, _, _, late_unit, _ in late
+                                if late_unit["kind"] == "whole_chain")
+            dropped_limit_units = len(late) - dropped_limit
+            # Named on the row and on the unit, not only counted in the payload, for the same
+            # reason the ceiling is: the stage after this one reports why a chain has no
+            # surface, and it can only report a reason that was written down somewhere.
+            for _, _, late_entry, late_unit, _late_contingent in late:
+                _not_folded(late_entry, late_unit,
+                            f"the cap of {limit} folds on one run was spent on the units "
+                            f"ahead of this one in the fold order, which folds every whole "
+                            f"chain before any region.")
             break
-        if index and budget is not None and time.time() - folding_started >= budget:
-            dropped_budget = len(foldable) - index
-            for _, _, late in foldable[index:]:
-                late["not_folded_because"] = (
-                    f"the {budget:.0f}-second folding budget for one run was spent before "
-                    f"the pick order reached this chain"
-                    + (f", {refused_seconds:.0f} s of it on calls the folding endpoint "
-                       f"refused" if refused_calls else "")
-                    + ".")
+        if attempted and budget is not None and time.time() - folding_started >= budget:
+            late = _still_waiting(queue[index:])
+            dropped_budget = sum(1 for _, _, _, late_unit, _ in late
+                                 if late_unit["kind"] == "whole_chain")
+            dropped_budget_units = len(late) - dropped_budget
+            for _, _, late_entry, late_unit, _late_contingent in late:
+                _not_folded(late_entry, late_unit,
+                            f"the {budget:.0f}-second folding budget for one run was spent "
+                            f"before the fold order reached this unit"
+                            + (f", {refused_seconds:.0f} s of it on calls the folding "
+                               f"endpoint refused" if refused_calls else "")
+                            + ".")
             break
+        attempted += 1
         call_started = time.time()
         try:
             payload = fold(sequence, target_name=target or "", record=False)
@@ -842,15 +2010,76 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=12, budget=240.0):
         if not payload.get("folded"):
             refused_calls += 1
             refused_seconds += time.time() - call_started
+        # What this fold was of, carried on the payload so the stage after this one can tell a
+        # chain's coordinates from a region's without re-deriving it from the name. A region's
+        # `target_name` is `"<chain> · <region>"`, which is a key and not a target: the surface
+        # stage reports it under the chain's own row, because a region is a closer look at a
+        # target and not a new one.
+        payload["unit"] = {"kind": unit["kind"], "chain": entry["target"],
+                           "label": unit["label"], "type": unit["type"],
+                           "span_in_this_genome": unit["span"],
+                           "entry_span_on_the_relative": unit["entry_span"],
+                           "length_aa": unit["length"]}
         # Stated on the row as well as in the payload, so a reader of `foldable` can see which
-        # chains have coordinates without holding the fold payloads beside it.
-        entry["folded"] = bool(payload.get("folded"))
-        entry["mean_plddt"] = payload.get("mean_plddt")
+        # chains have coordinates without holding the fold payloads beside it. A row's own
+        # `folded` stays the whole chain's answer; a region's is on the region.
+        unit["folded"] = bool(payload.get("folded"))
+        unit["target_name"] = target
+        unit["mean_plddt"] = payload.get("mean_plddt")
+        unit["confident_fraction"] = payload.get("confident_fraction")
+        unit["pdb_sha256"] = payload.get("pdb_sha256")
+        if unit["kind"] == "whole_chain":
+            entry["folded"] = bool(payload.get("folded"))
+            entry["mean_plddt"] = payload.get("mean_plddt")
         if payload.get("absence"):
-            entry["fold_absence"] = (payload["absence"].get("reason")
-                                     if isinstance(payload["absence"], dict)
-                                     else payload["absence"])
+            absence = (payload["absence"].get("reason")
+                       if isinstance(payload["absence"], dict) else payload["absence"])
+            unit["fold_absence"] = absence
+            if unit["kind"] == "whole_chain":
+                entry["fold_absence"] = absence
         folds.append(payload)
+    # The held-back regions, resolved now that the whole chain's own fold has an outcome. This
+    # is the decision that used to be taken 150 lines above this point off `inside_the_ceiling`,
+    # which says a chain is short enough to fold and not that it was folded.
+    for entry, held, _source in contingency:
+        inside = [unit for unit in held if unit["inside_the_ceiling"]]
+        if entry.get("folded"):
+            entry["domain_units_set_aside_because"] = _set_aside_sentence(held, inside)
+            continue
+        # The chain's own fold did not happen -- a bound, or a call the endpoint refused -- so
+        # the regions stop being redundant and go onto the row. Each carries its own outcome:
+        # folded where the order reached it, and otherwise the sentence the bound wrote on it.
+        # `domain_units_set_aside_because` stays None, because nothing was set aside.
+        entry["fold_units"] = entry["fold_units"][:1] + held
+        # Nothing to say when the annotation offered nothing. The sentence below asserts that
+        # regions were released, and at zero regions it asserted the release of nothing --
+        # "its 0 annotated regions inside the ceiling are offered after all" -- which is the
+        # same defect `_set_aside_sentence` was just given a zero form for. Every chain inside
+        # the ceiling reaches this branch, including the unidentified ORF of the held-out run,
+        # which has no curated entry and therefore no regions at all.
+        if not inside:
+            entry["offered_its_regions_because"] = None
+        else:
+            entry["offered_its_regions_because"] = (
+                f"this chain is inside the {ceiling}-residue ceiling and would have been "
+                f"folded whole, and that fold did not happen: {_as_sentence(entry)} So "
+                + (f"its single annotated region inside the ceiling is offered after all."
+                   if len(inside) == 1 else
+                   f"its {len(inside)} annotated regions inside the ceiling are offered "
+                   f"after all.")
+                + " A chain whose own fold failed must still be able to reach the part of it "
+                  "a binder would be designed against, and these regions were being dropped "
+                  "before the fold order was ever consulted.")
+    # The row's verdict on the domain route, after the folding is done because it is a
+    # statement about outcomes rather than about offers: true when the only coordinates this
+    # chain has are a region's. It is the count the page leads with -- a chain the ceiling
+    # used to leave with nothing and this stage leaves with a structure.
+    for entry in rows:
+        units = entry.get("fold_units") or ()
+        entry["units_folded"] = sum(1 for unit in units if unit.get("folded"))
+        entry["domain_route"] = bool(
+            units and not (units[0].get("folded"))
+            and any(unit.get("folded") for unit in units[1:]))
     # Never silently. A bound that drops a chain is a chain with no coordinates, which is
     # the defect this whole change exists to remove, so each is named in the record.
     if not folds:
@@ -859,11 +2088,58 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=12, budget=240.0):
         # raise an IndexError in place of the absence this stage is built to report.
         return {"absence": "no fold was attempted: the bounds on this run forbade the first "
                            "one"}, rows, []
+    # What `primary` IS, stated on the payload rather than left to the shape of the queue. The
+    # order puts every whole chain inside the ceiling ahead of every region, so the first fold
+    # is a whole chain whenever one is foldable at all -- which is the invariant the committed
+    # main-protease fold depends on and is asserted both in the suite and against the recorded
+    # run. But that half of the order can be empty, and then the first fold is a region: with
+    # one 600-residue chain carrying one 200-residue Domain, `primary["unit"]["kind"]` is
+    # `domain`, reproduced 2026-11-12. The docstring claimed a whole chain unconditionally.
+    #
+    # It stays a region rather than becoming an absence. Refusing to report coordinates this
+    # stage holds is the defect the whole change exists to remove -- a chain over the ceiling
+    # getting nothing -- so the honest answer is the region plus a flag saying unmistakably
+    # that it is one. The flag is set on every run, false included, so a consumer reads it
+    # rather than inferring a whole chain from its absence.
+    primary_unit = folds[0].get("unit") or {}
+    folds[0].setdefault("primary_is_a_region_not_a_whole_chain",
+                        primary_unit.get("kind") == "domain")
+    if primary_unit.get("kind") == "domain":
+        folds[0].setdefault("primary_is_a_region_because", (
+            f"no whole chain of this run was inside the {ceiling}-residue ceiling, so the "
+            f"first fold in the order is the leading annotated region of the leading chain "
+            f"over it. This payload is {primary_unit.get('label')}, a "
+            f"{primary_unit.get('type')} of {primary_unit.get('chain')} at "
+            f"{primary_unit.get('span_in_this_genome')} in this genome's numbering, and every "
+            f"figure in it describes those {primary_unit.get('length_aa')} residues and not "
+            f"the chain. The pick order itself is unchanged: a region can lead only when no "
+            f"whole chain was foldable, never by displacing one."))
     if dropped_limit:
         folds[0].setdefault("chains_not_folded_by_limit", dropped_limit)
     if dropped_budget:
         folds[0].setdefault("chains_not_folded_by_budget", dropped_budget)
         folds[0].setdefault("folding_budget_seconds", budget)
+    if dropped_limit_units:
+        folds[0].setdefault("domain_units_not_folded_by_limit", dropped_limit_units)
+    if dropped_budget_units:
+        folds[0].setdefault("domain_units_not_folded_by_budget", dropped_budget_units)
+        folds[0].setdefault("folding_budget_seconds", budget)
+    # How the order was spent, so a reader can see that the domain route took what was left
+    # rather than competing for it: whole chains first, then the regions of the chains over the
+    # ceiling, then the contingency tier.
+    #
+    # The contingency is counted apart from the other regions and not added into them. It is
+    # work this run offers and expects not to do -- 17 units on the held-out run, none of them
+    # folded -- so summing the two would inflate `domain_units_in_the_order` from 23 to 40 and
+    # a reader comparing it against `domain_units_folded` would see a 40 per cent shortfall
+    # that is really the tier doing exactly what it is for.
+    folds[0].setdefault("whole_chain_units_in_the_order", whole_chain_units)
+    folds[0].setdefault("domain_units_in_the_order", over_ceiling_units)
+    folds[0].setdefault("contingency_units_in_the_order",
+                        len(queue) - whole_chain_units - over_ceiling_units)
+    folds[0].setdefault("contingency_units_folded",
+                        sum(1 for _, _, _, unit, contingent in queue
+                            if contingent and unit.get("folded")))
     # Recorded whenever any call came back empty, not only when a bound fired. A run where
     # the endpoint refused half its calls and still folded everything it was asked to is a
     # run worth being able to see afterwards.
@@ -1120,6 +2396,16 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
     # an experiment someone performed, a prediction is a model's assertion, and the ratio
     # between the patches they yield is measured on this run rather than assumed (see
     # `surface_rows`). Neither is in the ranking.
+    #
+    # What stage 3 hands stage 4 is wider than coordinates now, and the second half of it is
+    # what makes stage 4 answer the question it was asked. Stage 3 holds the only alignment
+    # between the relative's entry and this genome, so it is the only stage that can carry a
+    # curated position across the species gap -- `locate_chain` keeps the alignment blocks and
+    # `functional_sites` walks them. It therefore hands over the marked residues in this
+    # genome's own numbering as well as the structures, and stage 4 anchors the patch
+    # arithmetic on them instead of reporting the largest patch wherever it happens to lie.
+    # It also hands over coordinates for REGIONS of the chains too long to fold whole, which
+    # stage 4 measures and reports under the chain's own row.
     # Counted from the input list and not from the output, so `candidates_in` is a fact about
     # what these stages were handed rather than a restatement of what they returned. A stage
     # that reports its own output as its input can never be caught covering less than it was
@@ -1133,25 +2419,45 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                 for i, t in enumerate(intake["targets"], 1)
                 if (t.get("orf") or {}).get("protein")]
         folded, fold_rows, folds = fold_stage(ranked, pool=pool)
-        # The chains this stage declined on length alone, named once and read three times
-        # below: as a count, as a list, and in what the stage says it hands on. Named here
-        # rather than recomputed at each of those because the three must agree.
+        # The chains whose WHOLE SEQUENCE this stage declined on length, named once and read
+        # three times below: as a count, as a list, and in what the stage says it hands on.
+        # Named here rather than recomputed at each of those because the three must agree.
+        # It is no longer the same set as the chains that end with no coordinates --
+        # `units` carries that, and the difference between the two is what the domain route
+        # bought.
         over_ceiling = [r["target"] for r in fold_rows
                         if r["identified"] and r.get("inside_the_ceiling") is False]
+        # Counted off the rows rather than tallied during the run, so the stage dictionary,
+        # the coverage table and the page all read one derivation.
+        units = unit_counts(fold_rows)
+        whole_folds = [f for f in folds
+                       if (f.get("unit") or {}).get("kind", "whole_chain") == "whole_chain"]
+        region_folds = [f for f in folds if (f.get("unit") or {}).get("kind") == "domain"]
         stages.append({
-            "stage": 3, "name": "Every chain inside the ceiling to coordinates, the one lane a novel target has",
+            "stage": 3, "name": "Every chain to coordinates, whole where it fits and by its "
+                                "functional regions where it does not",
             "tool": "structures.folded", "endpoints": ["ESM Atlas"],
             # This stage is handed every candidate, not only the identified ones, because
             # folding needs a sequence and nothing else. Both counts are stated so the
             # denominator is visible: `candidates_in` is what it was given, and
             # `identified_in` is the subset the earlier stages could name.
             # The ceiling is an input like the candidate list is, and it was missing. It
-            # decides which chains get coordinates and therefore which chains the stage after
-            # this one can rescue, so a record without it cannot be read for why a chain has
-            # no surface -- and the site drew the line from a literal of its own.
+            # decides which UNITS reach the endpoint, so a record without it cannot be read
+            # for why a chain was folded by its regions rather than whole -- and the site drew
+            # the line from a literal of its own.
             "input": {"candidates_in": len(ranked),
                       "identified_in": len(handed),
-                      "residue_ceiling": FOLD_CEILING},
+                      "residue_ceiling": FOLD_CEILING,
+                      # The per-chain budget on the domain route, in the record because the
+                      # page states it and because it is the reason an offered region can go
+                      # unfolded with nothing wrong with it.
+                      "domain_units_per_chain": DOMAIN_UNITS_PER_CHAIN,
+                      # And the two bounds on the run as a whole, for the same reason the
+                      # ceiling is here: a reader asking why a unit went unfolded is told
+                      # which bound fired, and cannot check it against a number the record
+                      # does not carry.
+                      "fold_requests_per_run": FOLD_REQUESTS_PER_RUN,
+                      "folding_budget_seconds": FOLD_BUDGET_SECONDS},
             "output": {"foldable": sum(1 for r in fold_rows
                                        if r["sequence_recovered"] and r["identified"]),
                        "not_foldable": sum(1 for r in fold_rows
@@ -1163,15 +2469,51 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                        "unidentified_foldable": sum(1 for r in fold_rows
                                                     if r["sequence_recovered"]
                                                     and not r["identified"]),
-                       # How many chains actually have coordinates, which is the number
-                       # the surface stage can act on. `folded_target` names the pick
-                       # because the page and the committed artifact report that one in
-                       # full; the others are named in `also_folded`.
-                       "chains_folded": sum(1 for f in folds if f.get("folded")),
-                       "folds_attempted": len(folds),
-                       "folds_refused": sum(1 for f in folds if not f.get("folded")),
-                       "also_folded": [f.get("target_name") for f in folds[1:]
+                       # How many chains were folded WHOLE, which is what these four keys
+                       # have counted since they were written and what the suite asserts the
+                       # arithmetic of: chains inside the ceiling equals folds attempted plus
+                       # the two bounds' drops. The domain route is counted under its own
+                       # names below rather than added in here, because a region folded and a
+                       # chain folded are different results and one total would hide which
+                       # happened. `folded_target` names the pick because the page and the
+                       # committed artifact report that one in full; the others are named in
+                       # `also_folded`.
+                       "chains_folded": sum(1 for f in whole_folds if f.get("folded")),
+                       "folds_attempted": len(whole_folds),
+                       "folds_refused": sum(1 for f in whole_folds if not f.get("folded")),
+                       "also_folded": [f.get("target_name") for f in whole_folds[1:]
                                        if f.get("folded")],
+                       # The domain route, in the counts a page can read directly. `offered`
+                       # is what the annotation gave this run after the per-chain cap,
+                       # `folded` is what reached the endpoint, and `chains_rescued_by_the_
+                       # domain_route` is the headline: chains that would have ended the run
+                       # with no coordinates at all and now have a structure.
+                       "units_offered": units["units_offered"],
+                       "units_inside_the_ceiling": units["units_inside_the_ceiling"],
+                       "units_recorded": units["units_recorded"],
+                       "units_folded": units["units_folded"],
+                       "domain_units_offered": units["domain_units_offered"],
+                       "domain_units_inside_the_ceiling":
+                           units["domain_units_inside_the_ceiling"],
+                       "domain_units_recorded": units["domain_units_recorded"],
+                       "domain_units_folded": units["domain_units_folded"],
+                       "domain_units_attempted": len(region_folds),
+                       "domains_folded": [f.get("target_name") for f in region_folds
+                                          if f.get("folded")],
+                       "chains_offered_a_domain_route":
+                           units["chains_offered_a_domain_route"],
+                       "chains_rescued_by_the_domain_route":
+                           units["chains_rescued_by_the_domain_route"],
+                       "chains_with_coordinates": units["chains_with_coordinates"],
+                       # What is left of the old drop, and the number this change exists to
+                       # move. A chain is here only when no unit of it -- not the chain, not
+                       # any annotated region of it -- was inside the ceiling or reached the
+                       # endpoint.
+                       "chains_with_no_coordinates": units["chains_with_no_coordinates"],
+                       "domain_units_not_folded_by_limit":
+                           (folded or {}).get("domain_units_not_folded_by_limit", 0),
+                       "domain_units_not_folded_by_budget":
+                           (folded or {}).get("domain_units_not_folded_by_budget", 0),
                        "chains_not_folded_by_limit":
                            (folded or {}).get("chains_not_folded_by_limit", 0),
                        "chains_not_folded_by_budget":
@@ -1180,14 +2522,13 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                        # tight from a host that was down. Both produce the same drop count.
                        "seconds_spent_on_refused_folds":
                            (folded or {}).get("seconds_spent_on_refused_folds", 0),
-                       # The third way a located chain ends without coordinates, and the only
-                       # one that had no number. `foldable` counts chains whose own sequence
-                       # this stage found, at any length; `chains_folded` counts the ones it
-                       # sent to the endpoint. The difference is this plus the two bounds
-                       # above, and this is the largest share of it. Named as well as counted,
-                       # because "nine chains" and "nsp3, nsp12, the spike" are different
-                       # statements to a reader deciding whether the ceiling is costing them
-                       # anything they care about.
+                       # The chains whose own sequence is too long to send, named as well as
+                       # counted because "nine chains" and "nsp3, nsp12, the spike" are
+                       # different statements to a reader deciding whether the ceiling costs
+                       # them anything. It is no longer the count of chains that end with
+                       # nothing: `chains_rescued_by_the_domain_route` is how many of these
+                       # got coordinates anyway, and `chains_with_no_coordinates` is what the
+                       # ceiling still strands.
                        "chains_over_the_ceiling": len(over_ceiling),
                        "over_the_ceiling": over_ceiling,
                        # Stage 3 and stage 4 measure; neither selects. The rubric is five
@@ -1206,10 +2547,18 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                        "error": (folded or {}).get("absence")},
             "seconds": round(time.time() - started, 2),
             "hands_to_next": (
-                f"coordinates for every chain inside the ceiling, and nothing at all for the "
-                f"{len(over_ceiling)} over it. The surface stage measures what it is given "
-                f"with the same arithmetic it uses on a deposition and reports the two apart. "
-                f"It reorders nothing: the ranking was final at the end of stage 2")})
+                f"coordinates for {units['chains_with_coordinates']} of the "
+                f"{len(fold_rows)} chains it reported on -- whole where the chain fits the "
+                f"{FOLD_CEILING}-residue ceiling, and by up to {DOMAIN_UNITS_PER_CHAIN} of its "
+                f"annotated functional regions where it does not, which rescued "
+                f"{units['chains_rescued_by_the_domain_route']} of the {len(over_ceiling)} "
+                f"chains over it. Plus the functional site positions, carried through the "
+                f"alignment into this genome's numbering, which the surface stage anchors the "
+                f"patch arithmetic on. {units['chains_with_no_coordinates']} chains end with "
+                f"no coordinates by either route. The surface stage measures what it is given "
+                f"with the same arithmetic it uses on a deposition and reports the two apart; "
+                f"a region's surface goes under its chain's row and never as a row of its "
+                f"own. It reorders nothing: the ranking was final at the end of stage 2")})
 
     started = time.time()
     rows = surface_rows(handed, replicates=replicates, folds=folds,
@@ -1230,16 +2579,60 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
     # a refusal in the column that says how many chains got an answer.
     attempted = [r for r in rows if r.get("predicted_surface")]
     predicted = [r for r in attempted if r["predicted_surface"]["measured"]]
+    # The region route, counted apart from both of the above. A region's surface is reported
+    # under its chain's row, so it adds no rows and moves none of the counts those three keys
+    # carry; it is a second measurement of part of a chain and is counted as one.
+    region_surfaces = [s for r in rows for s in (r.get("domain_surfaces") or ())]
+    regions_measured = [s for s in region_surfaces if s["measured"]]
+    with_a_region = [r for r in rows
+                     if any(s["measured"] for s in (r.get("domain_surfaces") or ()))]
+    # Where ask 3 actually landed. `site_patch_*` counts the rows whose patch arithmetic was
+    # anchored on the marked residues and found them, which is strictly fewer than the rows
+    # carrying positions: an anchor has to exist in the structure being measured, and author
+    # numbering frequently is not the numbering an annotation arrives in.
+    with_sites = [r for r in rows if r.get("functional_sites")]
+    site_on_deposition = [r for r in rows if (r.get("site_surface") or {}).get("measured")]
+    site_on_prediction = [
+        r for r in rows
+        if ((r.get("predicted_surface") or {}).get("site_surface") or {}).get("measured")
+        or any((s.get("site_surface") or {}).get("measured")
+               for s in (r.get("domain_surfaces") or ()))]
+    # And of those, the ones measured at residues the annotation does not name, which the two
+    # counts above cannot distinguish and must not be read as if they did. `anchors_found` is
+    # matched by NUMBER, so a deposition on another numbering convention reports a full set of
+    # anchors and a neighbourhood somewhere else: measured live on 2026-11-12, nsp2's twelve
+    # anchors are all found on 7fac:A -- a C-terminal construct numbered from its own first
+    # residue -- and all twelve land 111 residues from the residues they name, while the same
+    # anchors agree 12 of 12 on 7msx:A in the other case. One of these counts being non-zero
+    # is a finding about the numbering and not about the protein, and the row's own
+    # `not_the_annotated_residues_because` names the anchors.
+    site_at_wrong_residues = [
+        r for r in rows
+        if (r.get("site_surface") or {}).get("measured_at_the_annotated_residues") is False]
+    site_at_wrong_residues_predicted = [
+        r for r in rows
+        if ((r.get("predicted_surface") or {}).get("site_surface")
+            or {}).get("measured_at_the_annotated_residues") is False
+        or any((s.get("site_surface") or {}).get("measured_at_the_annotated_residues") is False
+               for s in (r.get("domain_surfaces") or ()))]
     stages.append({
-        "stage": 4, "name": "Every chain to a measured surface, or a stated reason",
+        "stage": 4, "name": "Every chain to a measured surface, and the patch at the residues "
+                            "that do the chemistry",
         "tool": "geometry.surface_markers",
         "endpoints": ["PDBe", "RCSB", "UniProt"],
-        # Two inputs now, and the second is the arrow this stage used not to have. The
-        # coordinate count is stated even when it is zero, so a run where the fold produced
-        # nothing is distinguishable from a run where the surface stage ignored what it was
-        # handed.
+        # Three inputs now. The second is the arrow this stage used not to have, stated even
+        # when it is zero so a run where the fold produced nothing is distinguishable from a
+        # run where the surface stage ignored what it was handed. The third is the one ask 3
+        # needs: the marked residues, already carried into this genome's numbering by the stage
+        # that holds the alignment.
         "input": {"candidates_in": len(handed),
-                  "predicted_coordinates_in": sum(1 for f in folds if f.get("pdb"))},
+                  "predicted_coordinates_in": sum(1 for f in folds if f.get("pdb")),
+                  "predicted_region_coordinates_in": sum(
+                      1 for f in folds
+                      if f.get("pdb") and (f.get("unit") or {}).get("kind") == "domain"),
+                  "chains_with_functional_site_positions_in": sum(
+                      1 for r in (fold_rows or ()) if r.get("functional_sites")),
+                  "macrocycle_reach_a": _reach_a()},
         "output": {"rows_out": len(rows), "measured": len(measured),
                    "unmeasured": len(rows) - len(measured),
                    # The check Marta's review asked for, as an assertion in the record
@@ -1256,10 +2649,44 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                        1 for r in predicted
                        if r["predicted_surface"]["only_route_to_a_surface"]),
                    # The complement, and the share of it the ceiling decided. A chain here
-                   # has no deposition covering it and no coordinates either, and the second
-                   # half of that is a choice this pipeline made about length.
+                   # has no deposition covering it and no whole-chain coordinates either.
+                   # `no_surface_over_the_folding_ceiling` is now the narrow claim it should
+                   # always have been: not "the chain was too long" but "no unit of it was
+                   # inside the ceiling", so a chain whose region was folded is no longer
+                   # counted as one the ceiling stranded.
                    "no_surface_by_either_route": len(no_surface),
                    "no_surface_over_the_folding_ceiling": closed_by_ceiling,
+                   # The region route, which adds no rows and is counted on its own. A chain
+                   # in `chains_with_a_region_surface` has a measured patch on part of itself
+                   # and no measurement of the whole, which is why it can appear in
+                   # `no_surface_by_either_route` as well: `measured` is a statement about the
+                   # chain and this is a statement about a region of it.
+                   "region_surfaces_offered": len(region_surfaces),
+                   "region_surfaces_measured": len(regions_measured),
+                   "chains_with_a_region_surface": len(with_a_region),
+                   "chains_with_no_surface_and_no_region_surface": sum(
+                       1 for r in no_surface
+                       if not any(s["measured"] for s in (r.get("domain_surfaces") or ()))),
+                   # Ask 3, as counts. The first is how many chains carry the marked residues
+                   # at all; the other two are how many of them the patch could actually be
+                   # measured at, by each route. The gap between them is the numbering
+                   # problem, not a property of the proteins.
+                   "chains_with_functional_sites": len(with_sites),
+                   "functional_site_positions": sum(
+                       len(s.get("positions_on_the_relative") or ())
+                       for r in rows for s in (r.get("functional_sites") or ())),
+                   "functional_site_positions_mapped_into_this_genome": sum(
+                       len(r.get("site_positions_in_this_genome") or []) for r in rows),
+                   "site_patch_measured_on_a_deposition": len(site_on_deposition),
+                   "site_patch_measured_on_a_prediction": len(site_on_prediction),
+                   # The subset of each that was anchored on residues the annotation does not
+                   # name there, so neither count above can be read as that many measurements
+                   # of a functional site. A site patch at the wrong residues is worse than no
+                   # site patch, because only the second is visible as an absence.
+                   "site_patch_on_a_deposition_not_at_the_annotated_residues":
+                       len(site_at_wrong_residues),
+                   "site_patch_on_a_prediction_not_at_the_annotated_residues":
+                       len(site_at_wrong_residues_predicted),
                    "gate_yes": sum(1 for r in measured if r.get("gate") == "yes"),
                    "gate_borderline": sum(1 for r in measured
                                           if r.get("gate") == "borderline"),
@@ -1268,14 +2695,19 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                    # rows is advisory and is read by nothing that ranks.
                    "changes_any_rank": False,
                    # And the asymmetry the reorder created, as a field rather than as a
-                   # sentence: stage 3 gained a consumer, this stage has none.
+                   # sentence: stage 3 gained a consumer, no later stage reads this one.
                    "read_by_later_stages": list(SURFACE_READ_BY)},
         "seconds": round(time.time() - started, 2),
         "hands_to_next": (
-            "a patch median and range per chain, and nothing downstream reads any of it. "
-            "`SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`: stage 5 "
-            "defines the same library whatever this stage found. Moving the fold ahead of "
-            "this stage gave stage 3 a consumer and left this one without any")})
+            f"a patch median and range per chain, the residues the patch is made of, and the "
+            f"patch measured at the marked functional residues on "
+            f"{len(site_on_deposition)} chains through a deposition and "
+            f"{len(site_on_prediction)} through a prediction. No LATER STAGE reads any of it: "
+            f"`SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 "
+            f"defines the same library whatever this stage found. The site figures are the "
+            f"stage's product for a reader designing a binder rather than an input to "
+            f"anything downstream, which is a narrower claim than the one this key used to "
+            f"make and the honest one")})
 
     started = time.time()
     spec = chemistry.library_spec()
@@ -1331,13 +2763,16 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                                           "sequence_sha256", "mean_plddt",
                                           "confident_fraction", "pdb_sha256", "absence")
                    if folded and k in folded} if folded else None,
-        # The other chains folded this run, in the same shape and under a key of their own.
+        # The other things folded this run, in the same shape and under a key of their own.
         # `folded` stays the pick alone because the page, the committed artifact and every
         # record already on disk report that one, and widening it would have made this change
-        # unreadable against them. The digest is carried per chain so a reader can tell two
+        # unreadable against them. The digest is carried per fold so a reader can tell two
         # predictions apart; the coordinates themselves are not, for the reason the primary's
-        # are not -- 193KB per chain would be most of the record.
-        "folded_also": [{k: f[k] for k in ("target_name", "sequence_length",
+        # are not -- 193KB per chain would be most of the record. `unit` is carried because
+        # this list now holds regions as well as chains, and a region's `target_name` is
+        # `"<chain> · <region>"`: without the block saying which chain and which residues,
+        # a reader would have to parse the name to find out.
+        "folded_also": [{k: f[k] for k in ("target_name", "unit", "sequence_length",
                                            "sequence_sha256", "mean_plddt",
                                            "confident_fraction", "pdb_sha256", "absence")
                          if k in f} for f in folds[1:]] or None,
@@ -1389,6 +2824,32 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
             "fold_covers_every_chain": (
                 sum(1 for r in fold_rows if r["identified"]) == len(scored)
                 if fold else None),
+            # The domain route in the one table a reader checks first, because the rest of
+            # this table reads as though a chain over the ceiling still ends with nothing.
+            # `chains_with_no_coordinates` is the number that replaced it: every row the fold
+            # stage emitted where no unit at all reached the endpoint.
+            "fold_units_offered": (units["units_offered"] if fold else None),
+            "fold_units_folded": (units["units_folded"] if fold else None),
+            "domain_units_offered": (units["domain_units_offered"] if fold else None),
+            "domain_units_folded": (units["domain_units_folded"] if fold else None),
+            "chains_rescued_by_the_domain_route": (
+                units["chains_rescued_by_the_domain_route"] if fold else None),
+            "chains_with_no_coordinates": (
+                units["chains_with_no_coordinates"] if fold else None),
+            # And the same for stage 4: a surface on part of a chain is not a surface on the
+            # chain, so it is counted beside `chains_with_any_surface` and never inside it.
+            "chains_with_a_region_surface": len(with_a_region),
+            "region_surfaces_measured": len(regions_measured),
+            "chains_with_functional_sites": len(with_sites),
+            "site_patch_measured_on_a_deposition": len(site_on_deposition),
+            "site_patch_measured_on_a_prediction": len(site_on_prediction),
+            # Carried into the coverage table as well as the stage dictionary, because this is
+            # the table a reader checks first and a count of site patches with no count of the
+            # ones taken at the wrong residues is the half of the answer that flatters.
+            "site_patch_on_a_deposition_not_at_the_annotated_residues":
+                len(site_at_wrong_residues),
+            "site_patch_on_a_prediction_not_at_the_annotated_residues":
+                len(site_at_wrong_residues_predicted),
             "evidence_targets": len(evidence) if evidence else 0,
             "evidence_calls": sum(len(r["calls"]) for r in evidence) if evidence else 0},
     }
@@ -1498,12 +2959,17 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
                   "were six named by hand, and SARS-CoV-2's RNA-directed RNA polymerase -- "
                   "fifth of the ranked candidates -- was never asked about. It is exhaustive "
                   "here, one row per chain, measured or refused with the reason. Folding now "
-                  "runs ahead of it and folds every chain inside the residue ceiling, so a "
-                  "chain no deposition covers can still be measured on predicted "
-                  "coordinates; the two are reported apart and neither is in the ranking, "
-                  "which is final at the end of stage 2. One break remains and is recorded "
-                  "rather than drawn over: the library definition reads nothing the surface "
-                  "stage measured, so stage 4 is a measurement with no consumer.",
+                  "runs ahead of it and the residue ceiling is applied per fold unit rather "
+                  "than per chain, so a chain too long to fold whole is folded by its "
+                  "annotated functional regions instead and a chain no deposition covers can "
+                  "still be measured on predicted coordinates; the two are reported apart and "
+                  "neither is in the ranking, which is final at the end of stage 2. Stage 4 "
+                  "also reports the patch at the residues the curators marked as doing the "
+                  "chemistry, in this genome's own numbering, which is a different quantity "
+                  "from the largest patch on the chain and frequently somewhere else. One "
+                  "break remains and is recorded rather than drawn over: the library "
+                  "definition reads nothing the surface stage measured, so no later stage "
+                  "consumes stage 4's output.",
         "genome_accession": accession,
         "cases": out,
         "seconds_total": round(sum(c["seconds"] for c in out), 2),
@@ -1511,20 +2977,27 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
             "The library stage reads nothing the four stages before it produced. The library "
             "definition is the same whatever the surface stage found, and the arrow a "
             "flowchart would draw there does not exist yet. The reorder sharpened this "
-            "rather than fixing it: folding gained a consumer in the surface stage, and the "
-            "surface stage still has none, so stage 4 is the one stage here whose output "
-            "nothing reads. `SURFACE_READ_BY` and `LIBRARY_READS_FROM_SURFACE` are both "
-            "empty in the record for that reason.",
+            "rather than fixing it: folding gained a consumer in the surface stage, and no "
+            "later stage reads the surface stage, so stage 4 is the one stage here whose "
+            "output nothing downstream consumes. `SURFACE_READ_BY` and "
+            "`LIBRARY_READS_FROM_SURFACE` are both empty in the record for that reason. What "
+            "stage 4 now produces for a reader rather than for a stage -- the marked residue "
+            "positions, the residues within macrocycle reach of them and the patch measured "
+            "there -- is the project lead's third ask and is not a substitute for that arrow.",
             "Stages 3 and 4 measure and do not select. The rubric is five weights fixed "
             "before the run and no fold or surface term is among them, so the ranking is "
             "final at the end of stage 2 and the swap changed what can be measured, not "
             "what gets picked. Both stages record `changes_any_rank` false.",
-            "The residue ceiling decides who can be rescued. A chain over it is never sent "
-            "to the folding endpoint, so if no deposition covers it, it ends the run with no "
-            "surface by any route -- nine of the twenty chains on the SARS-CoV-2 holdout sit "
-            "above it, including the three spike chains and the polymerase. The count, the "
-            "names and the per-chain reason are in the record; the ceiling is a cost control "
-            "and not a finding about those proteins.",
+            "The residue ceiling now decides which fold UNITS reach the endpoint rather than "
+            "which chains do. Nine of the twenty chains on the SARS-CoV-2 holdout are longer "
+            "than it, including the three spike chains and the polymerase, and every one of "
+            "them carries an annotated functional region at or under it, so the region is "
+            "folded where the chain cannot be. The count, the names, the per-chain reason and "
+            "the per-region outcome are in the record. Two things that follow and are not "
+            "softened: a region folded on its own is a model of that region in isolation and "
+            "has lost whatever its neighbours in the chain contributed to its shape, and a "
+            "chain whose row carries no annotated range is never aligned, so it gets no "
+            "region route even where its entry offers one -- the nucleoprotein is that case.",
             "The gate in the surface stage is advisory: the patch spread across structures of "
             "one domain is comparable to the footprint it is thresholded against, so most "
             "rows that are not refused on localisation read borderline rather than yes or "

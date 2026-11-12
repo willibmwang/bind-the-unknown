@@ -362,6 +362,22 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
   padding:11px 17px;border-top:1px solid var(--rule);background:var(--surface-2);
   font-family:var(--mono);font-size:11.5px;color:var(--fg-3)}
 
+/* ----------------------------------------------- the patch at the annotated site
+   Two bars in one row on one scale: `faintp` is the unit's largest patch wherever it lies,
+   and the solid bar over it is the part of that patch the annotated residues can reach. The
+   faint one is written first so the solid one sits on top of it, which makes the share the
+   ratio of two lengths a reader can see rather than a percentage they have to trust. Grey
+   for the whole patch and brand violet for the part at the site, deliberately the same way
+   round as `.b.over`: the larger number is the less interesting one here. */
+.lr .plot .b.faintp{background:color-mix(in srgb,var(--fg-3) 26%,transparent)}
+/* The anchors' own confidence, inline in the detail column rather than in the value column,
+   because it governs every figure on the row and not only the one it sits beside. Amber when
+   any anchor is under the folding tool's own threshold -- `--warn`, the same colour this
+   stylesheet gives every other "read this before the number next to it". */
+.lr .who .w .cf{display:inline;color:var(--fg-2)}
+.lr .who .w .cf.lowc{color:var(--warn)}
+.lr .who .w .warnline{display:block;color:var(--warn);margin-top:2px}
+
 /* The annotated functional regions of a chain the folding ceiling refuses whole. A
    `<details>` and not a scripted dropdown: this site is static files with no client build
    step, so a control that swapped panels would need JavaScript, and a reader with it off
