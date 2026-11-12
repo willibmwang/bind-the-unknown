@@ -194,12 +194,11 @@ def head(title, description, depth=0, current=""):
 
     `current` is the nav key for the page being written, so that link is marked
     `aria-current="page"` and a screen reader says which page this is rather than reading
-    five indistinguishable links.
+    four indistinguishable links.
     """
     up = "../" * depth
     nav = [("flowchart", f"{up}flowchart.html", "Diagram"),
            ("runs", f"{up}results/index.html", "Runs"),
-           ("notebook", f"{up}notebook.html", "Notebook"),
            ("code", f"https://github.com/{REPO}", "Code")]
     CUR = ' aria-current="page"'
     links = "\n  ".join(
