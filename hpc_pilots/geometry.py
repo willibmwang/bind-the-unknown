@@ -38,6 +38,7 @@ holdout work established matters: a pocket can be measured on a protein nobody h
 while an antibody count or a citation count cannot.
 """
 import json
+import math
 import pathlib
 import urllib.request
 import warnings
@@ -226,7 +227,7 @@ def numbering_offset(residues, sequence, seed=12):
 NUMBERING_AGREEMENT = 0.9
 
 
-def surface_markers(pdb_id, chain=None, keep=None, verify=None):
+def surface_markers(pdb_id, chain=None, keep=None, verify=None, anchors=None):
     """Interface-shaped markers for one structure, optionally for one domain of it.
 
     `chain` restricts the calculation to one polymer, which matters for a complex: the spike
@@ -245,14 +246,36 @@ def surface_markers(pdb_id, chain=None, keep=None, verify=None):
     construct much larger than the target is not the target's patch at all: SARS-CoV-2's nsp3
     is a 1,945-residue chain carrying the 265-residue papain-like protease, and the largest
     patch on the construct belongs to whichever of its domains happens to carry one.
+
+    `anchors` is a list of author residue numbers -- an active site, a ligand-binding site, a
+    catalytic dyad -- and asks for the patch arithmetic *at that location* instead of wherever
+    the chain's best patch lies. It answers a question `keep` cannot: `keep` narrows the search
+    to a domain, and a domain is still hundreds of residues of surface, while a macrocycle
+    covers one 13.8-angstrom disc of it. Measured on 6LU7 chain A on 2026-11-12, the main
+    protease's catalytic dyad has 93 of the chain's 306 residues within reach, so naming the
+    anchors discards two thirds of the surface the unanchored call reports on. The
+    neighbourhood, its hydrophobic count and the share of the site the patch covers come back
+    under `site` and the `site_*` keys.
+
+    **The anchors must be the deposited chain's author numbering.** Nothing here converts them,
+    and that is deliberate rather than unfinished: once inside, a converted number and a given
+    number are indistinguishable, so a silent conversion would make every site figure
+    unauditable. The hazard is real and was measured, not imagined -- UniProt numbers the main
+    protease's catalytic cysteine 3,408 on P0DTD1's replicase polyprotein, where nsp5 begins
+    at 3,264, and every Mpro deposition calls the same residue 145. Asking
+    `surface_for_accession` for the nsp5 interval with anchors 3304 and 3408 on 2026-11-12
+    returned both of them in `anchors_missing` and a neighbourhood of nothing, where 41 and 145
+    returned 94 residues. An anchor that does not exist on the chain is reported there rather
+    than dropped or snapped to a neighbour, which is what makes that mistake visible instead of
+    quietly producing a confident zero.
     """
     residues = _residues(fetch_structure(pdb_id), chain)
     if not residues:
         return {"pdb_id": pdb_id, "chain": chain, "residues": 0, "error": "no residues read"}
-    return _markers(residues, pdb_id, chain, keep, verify)
+    return _markers(residues, pdb_id, chain, keep, verify, anchors)
 
 
-def markers_from_coordinates(text, label="predicted coordinates"):
+def markers_from_coordinates(text, label="predicted coordinates", anchors=None):
     """The same measurement, on coordinates a model emitted rather than a deposited file.
 
     This is the only route to a surface for a target nothing has solved, and it is the lane a
@@ -273,6 +296,15 @@ def markers_from_coordinates(text, label="predicted coordinates"):
     `keep` is not offered. A deposited file is a construct that may carry much more than the
     target, which is what `keep` exists to confine the patch search to; these coordinates are
     the folded chain itself, numbered from one, so there is nothing to clip.
+
+    `anchors` is offered, and the same fact about the numbering is why. A clip is meaningless
+    here because the coordinates are already only the target; an anchor is not, because the
+    chain is numbered from one and that is exactly the numbering a functional site mapped into
+    the pathogen's own protein arrives in. This is also the only lane in which the site figures
+    are reachable for a genuinely novel pathogen: no deposition covers the chain, so either the
+    patch at the active site is measured on a prediction or it is not measured at all. It
+    inherits every caveat above -- `on_predicted_coordinates` travels with it, and a site
+    measured over a low-confidence stretch describes a fold the model never committed to.
     """
     import tempfile
 
@@ -302,18 +334,36 @@ def markers_from_coordinates(text, label="predicted coordinates"):
             return {"pdb_id": label, "chain": None, "residues": 0,
                     "error": "no residues read from the predicted coordinates",
                     "on_predicted_coordinates": True, "is_deposited_measurement": False}
-        markers = _markers(residues, label, None, None, None)
+        markers = _markers(residues, label, None, None, None, anchors)
     markers["on_predicted_coordinates"] = True
     markers["is_deposited_measurement"] = False
     return markers
 
 
-def _markers(residues, pdb_id, chain=None, keep=None, verify=None):
+def _markers(residues, pdb_id, chain=None, keep=None, verify=None, anchors=None):
     """The measurement itself, over residues already read from a file.
 
     Separated from `surface_markers` so a prediction and a deposition go through one body of
     arithmetic instead of two. The `chain` and `keep` semantics are documented on
     `surface_markers`, which is the registered tool; this function is the shared half.
+
+    `anchors` is last in the signature because it has to be: `surface_markers` and
+    `markers_from_coordinates` both call this positionally, so a parameter inserted anywhere
+    earlier would hand `keep` a list of residue numbers and be read as a clip. It is a list of
+    author residue numbers -- the residues doing the chemistry -- and when it is given the
+    return carries a `site` block measuring the neighbourhood around them, plus the patch
+    arithmetic at that location. The reach is `MACROCYCLE_REACH_A` and is not an argument here,
+    because every caller of this function is asking about the same molecule; `residues_within`
+    is the public door for a caller that wants the neighbourhood at another distance.
+
+    Two things are now returned unconditionally that the arithmetic was already computing and
+    throwing away. `patch_positions` and `patch_residue_names` are the largest patch's own
+    residues: the component is the same one `hydrophobic_patch_residues` counts, read out
+    instead of counted and discarded, so they cost no distance calculation and no second pass.
+    A reader of 6LU7 chain A was previously told that the main protease carries a patch of 5
+    residues covering 415.2 square angstroms and never which 5 -- measured 2026-11-12, they
+    are Leu50, Phe134, Ala191, Ala193 and Ala194 -- and which 5 is the whole of what a binder
+    designer can act on.
     """
     # No author numbering from the mapping endpoint, but a reference sequence to locate the
     # chain in: infer the shift from the residues themselves and clip at it.
@@ -369,6 +419,18 @@ def _markers(residues, pdb_id, chain=None, keep=None, verify=None):
     best = patches[0] if patches else []
     patch_area = sum(r["sasa"] for r in best)
 
+    # The patch's own residue numbers, which this arithmetic already had in hand. `best` is
+    # the largest component and only its length and its area were being reported; naming its
+    # residues is pure gain from work already done, not a new measurement.
+    #
+    # One entry per patch residue rather than per distinct number, so `len(patch_positions)`
+    # is `hydrophobic_patch_residues` by construction and the two can never disagree. Across
+    # several chains the same author number can therefore appear twice; that is two residues
+    # on two chains and not a duplicate, and `chain` is how a caller confines it.
+    in_order = sorted(best, key=lambda r: (_resnum(r["number"]), r["chain"]))
+    patch_positions = [_resnum(r["number"]) for r in in_order]
+    patch_residue_names = [_letter(r["residue"]) for r in in_order]
+
     # Sequons are read on the patch, not the whole protein: shielding matters where the
     # binding would happen. Sequence order within the chain is reconstructed from residue
     # numbers, which is adequate for the N-X-S/T motif.
@@ -398,7 +460,32 @@ def _markers(residues, pdb_id, chain=None, keep=None, verify=None):
                 sequons += 1
                 break
 
-    return {
+    # The same patch, asked about at a location the caller names rather than wherever on the
+    # chain the largest one happens to lie. The neighbourhood is drawn from every residue read
+    # and not from the `keep`-clipped domain, which is the rule the sequon scan above already
+    # follows: anything that can reach the site is looked for over the whole file, and only
+    # membership of the patch is confined. A residue of the neighbouring domain eleven
+    # angstroms from the catalytic cysteine is in contact with a macrocycle bound there whether
+    # or not the clip kept it.
+    # Named `site_summary` rather than `site`, which the sequon loop above is already using
+    # for one sequon's coordinates. The two never overlap in time, and relying on that is how
+    # a later edit that moves either block produces a wrong number instead of an error.
+    site_summary = None
+    if anchors:
+        site_summary, near, _seats = _within_reach(residues, anchors, MACROCYCLE_REACH_A)
+        # The existing patch intersected with that neighbourhood, and explicitly **not** a
+        # fresh patch search over the neighbourhood alone. The argument is the one `keep`'s
+        # docstring makes about accessibility: a region measured by itself exposes faces that
+        # were never solvent-facing, so re-growing components inside a 13.8-angstrom ball
+        # would report a patch assembled from residues the whole structure keeps buried.
+        # Identity is the intersection key because `best` and `near` hold the same dicts
+        # `_residues` returned, so no numbering question arises at all here.
+        reachable = {id(r) for r in near}
+        shared = [r for r in in_order if id(r) in reachable]
+        site_patch_area = sum(r["sasa"] for r in shared)
+        site_sasa = sum(r["sasa"] for r in near)
+
+    markers = {
         "pdb_id": pdb_id, "chain": chain,
         "residues": len(residues), "residues_in_range": len(within),
         "keep": list(keep) if keep else None,
@@ -408,16 +495,50 @@ def _markers(residues, pdb_id, chain=None, keep=None, verify=None):
         "total_sasa": round(total_sasa, 1),
         "hydrophobic_patch_area": round(patch_area, 1),
         "hydrophobic_patch_residues": len(best),
+        "patch_positions": patch_positions,
+        "patch_residue_names": patch_residue_names,
         "patch_fraction_of_surface": round(patch_area / total_sasa, 3) if total_sasa else 0.0,
         "patches_found": len(patches),
         "sequons_near_patch": sequons,
         "sequence_length": len(sequence),
     }
+    if site_summary is not None:
+        markers.update({
+            "site": site_summary,
+            "site_patch_area_a2": round(site_patch_area, 1),
+            "site_patch_positions": [_resnum(r["number"]) for r in shared],
+            # Against the neighbourhood's own surface, matching `patch_fraction_of_surface`
+            # one key above: how much of what a peptide at this site can touch is patch. The
+            # count fraction was the other candidate and is the worse one, because a patch is
+            # bound by area and four large aromatics are a site where eight small residues
+            # are not.
+            "site_patch_fraction_of_the_site": (round(site_patch_area / site_sasa, 3)
+                                                if site_sasa else 0.0),
+            # Whether the chain's best patch is at the site at all. The informative answer is
+            # frequently False, and that is the finding rather than a failure: it says the
+            # surface the markers scored is somewhere other than the chemistry, which is
+            # exactly what a reader pointing a macrocycle at an active site needs told.
+            "site_shares_the_patch": bool(shared),
+        })
+    return markers
 
 
 # A macrocyclic peptide buries roughly this much on binding. A patch far below it cannot host
 # one; a patch far above it is a large surface with no single site, which the fraction catches.
 MACROCYCLE_FOOTPRINT_A2 = 600.0
+
+# How far from one residue a macrocycle bound there can still reach. Derived from the footprint
+# above and not stated beside it: a circular patch of 600 square angstroms has a radius of
+# sqrt(600 / pi) = 13.8 angstroms, so the span of the molecule is not a second free parameter
+# -- it is the radius the footprint the scoring already assumes implies. Typing 13.8 here would
+# leave two numbers describing one molecule, free to disagree the moment either moves: raise
+# the footprint to 800 and a hand-typed reach would still be answering for 600.
+#
+# It inherits the footprint's roughness, which is "roughly 400 to 800" in the module docstring
+# above, so the reach is good to a couple of angstroms and not to a decimal place. That is
+# enough for the question it is asked -- which residues a peptide at this site could contact --
+# and it is why no narrower figure is quoted anywhere it is reported.
+MACROCYCLE_REACH_A = math.sqrt(MACROCYCLE_FOOTPRINT_A2 / math.pi)
 
 
 def macrocycle_surface_score(markers):
@@ -438,6 +559,134 @@ def macrocycle_surface_score(markers):
     exposure = markers["exposed_fraction"]
     shielding = min(1.0, markers["sequons_near_patch"] / 4.0)
     return round(3.0 * size + 1.5 * contiguity + 1.0 * exposure - 1.5 * shielding, 4)
+
+
+def _within_reach(residues, anchors, reach):
+    """One neighbourhood, computed once, returned in the three shapes its callers need.
+
+    Returns `(summary, neighbourhood, anchor_records)`. `residues_within` wants the summary
+    alone; `_markers` wants the records too, because it already holds a patch and the site
+    figures are that patch intersected with this neighbourhood. Split this way the distance
+    pass runs once per measurement rather than once per consumer, and the two callers report
+    one neighbourhood instead of two that could drift apart -- the same reason `_markers`
+    itself was split out of `surface_markers`.
+
+    **The distance is alpha-carbon to alpha-carbon, said plainly rather than dressed up.**
+    `_residues` keeps one atom per residue -- it skips every line whose atom name is not `CA`
+    -- so no side-chain coordinate exists here to measure from, and calling this atom-to-atom
+    would claim a precision the data does not carry. The error is one-sided and worth stating
+    where it is reported: an extended lysine's terminal nitrogen sits about 6.4 angstroms out
+    from its own alpha carbon, so two long side chains can touch across a gap this counts as
+    out of range. The neighbourhood is therefore a floor on what a macrocycle at the site can
+    contact and never a ceiling. Reading every atom would widen it, and would also move the
+    patch arithmetic every other number in this module is computed from, which is not a change
+    to make inside a feature about positions.
+
+    Insertion codes are dropped on both sides through `_resnum`, so an anchor given as 52
+    matches a residue deposited as 52A. That is the normalisation the `keep` clip already uses,
+    and the alternative -- matching the author number as a string -- misses the residue the
+    caller meant on any entry carrying an insertion, silently.
+
+    **An anchor is a number and not a chain-and-number pair, which matters on a complex.**
+    Every residue carrying the number is taken, so an unrestricted read of two polymers matches
+    it on both. Measured on 6M0J on 2026-11-12: ACE2 carries His417, Thr453 and Ala501 and the
+    spike receptor-binding domain carries Lys417, Tyr453 and Asn501, so asking for the
+    receptor-binding motif over the whole deposition took all six and returned one
+    "neighbourhood" of 268 residues that is really two sites, 182 residues around ACE2's own
+    numbers and 86 around the motif. The remedy is the caller's and it already exists -- pass
+    `chain` to `surface_markers`, which is what `surface_for_accession` does on every pick --
+    and `anchor_chains` in the return names the polymers so a merged measurement is visible
+    rather than inferred from a count that merely looks large.
+    """
+    wanted = sorted({_resnum(number) for number in (anchors or ())})
+    asked = set(wanted)
+    seats = [r for r in residues if _resnum(r["number"]) in asked]
+    present = {_resnum(r["number"]) for r in seats}
+    found = sorted(present)
+    missing = [number for number in wanted if number not in present]
+
+    # An anchor is at zero distance from itself, so the anchors are in the neighbourhood by
+    # construction rather than by being appended afterwards.
+    near = []
+    for residue in residues:
+        for seat in seats:
+            dx = residue["xyz"][0] - seat["xyz"][0]
+            dy = residue["xyz"][1] - seat["xyz"][1]
+            dz = residue["xyz"][2] - seat["xyz"][2]
+            if dx * dx + dy * dy + dz * dz <= reach * reach:
+                near.append(residue)
+                break
+
+    summary = {
+        "anchors_found": found,
+        "anchors_missing": missing,
+        "positions": sorted(_resnum(r["number"]) for r in near),
+        "residues": len(near),
+        "hydrophobic": sum(1 for r in near if _letter(r["residue"]) in HYDROPHOBIC),
+        "exposed": sum(1 for r in near if r["rsa"] >= EXPOSED_RSA),
+        "reach_a": reach,
+        # Which polymers the anchors were matched on, so a merged neighbourhood is visible in
+        # the record instead of being inferred from a count that looks high. More than one
+        # chain here means the anchor numbers exist on more than one chain and the figures
+        # describe both sites at once; see the docstring above for the measured case.
+        "anchor_chains": sorted({r["chain"] for r in seats}),
+    }
+    return summary, near, seats
+
+
+def residues_within(residues, anchors, reach=MACROCYCLE_REACH_A):
+    """Residues whose alpha carbon lies within `reach` of any anchor residue's alpha carbon.
+
+    This is the question a binder designer asks of a functional site and the pipeline could
+    not answer: not "is this protein amenable" but "if a macrocycle sits on these residues,
+    what else does it touch". The surface markers above report the largest patch *anywhere* on
+    the chain, which on a construct carrying several domains is frequently nowhere near the
+    chemistry -- SARS-CoV-2's nsp3 is 1,945 residues and its best patch belongs to whichever
+    of its domains happens to carry one. Naming the anchors moves the question to the site.
+
+    `anchors` is a list of author residue numbers, as deposited; `residues` is what `_residues`
+    read, so the neighbourhood spans every chain in that read unless the caller restricted it.
+    A partner chain's residues inside the reach are real contacts and are counted, which is
+    what makes this readable on an interface: the ACE2 residues a peptide at the spike's
+    receptor-binding motif would meet are the reason to bind there. The cost of the same
+    freedom is that an anchor number existing on two chains matches on both -- `_within_reach`
+    documents the measured case and `anchor_chains` reports it.
+
+    Returns
+      {"anchors_found": [...], "anchors_missing": [...],
+       "positions": [...],            # author numbers, sorted, anchors included
+       "residues": int, "hydrophobic": int, "exposed": int,
+       "reach_a": reach, "anchor_chains": [...]}
+
+    `positions` carries one entry per residue rather than per distinct number, so `residues`
+    is `len(positions)` and the two cannot disagree; across several chains the same author
+    number can appear twice, which is two residues and not a duplicate.
+
+    `hydrophobic` is the count a macrocycle cares about -- the stage-4 patch arithmetic asked
+    at this location -- and `exposed` says how much of the neighbourhood is surface at all,
+    since a site whose neighbours are buried offers less to lie against than the count
+    suggests.
+
+    An anchor absent from the structure is reported in `anchors_missing` rather than dropped.
+    That case is ordinary and not an error: a catalytic residue can be disordered in the
+    deposition, and author numbering frequently is not the numbering the annotation arrived
+    in, so an empty `anchors_found` beside a populated `anchors_missing` is the pipeline saying
+    which of the two happened instead of returning a confident neighbourhood of nothing.
+
+    What the numbers look like, measured on 6LU7 chain A on 2026-11-12, with the main
+    protease's catalytic dyad -- His41 and Cys145 -- as the anchors: 93 of the chain's 306
+    residues are within reach, 41 of them hydrophobic and 33 of them exposed. The chain's
+    largest patch, 415.2 square angstroms over five residues, meets that neighbourhood at
+    exactly one of them, Leu50, so `_markers` reports `site_shares_the_patch` true and
+    `site_patch_fraction_of_the_site` 0.037. Those two keys read together are the point: the
+    patch the surface score was earned on is almost entirely somewhere other than the
+    chemistry, and a reader aiming a macrocycle at the active site has to be told that rather
+    than handed the chain's best number.
+
+    The distance is alpha carbon to alpha carbon, not atom to atom; `_within_reach` carries
+    the full statement of what that costs and why the coordinates allow nothing better.
+    """
+    return _within_reach(residues, anchors, reach)[0]
 
 
 # ---------------------------------------------------------------------------
@@ -537,12 +786,20 @@ def representative_structure(accession, minimum_residues=50, interval=None):
     return picks
 
 
-def surface_for_accession(accession, interval=None, replicates=5, cache={}):
+def surface_for_accession(accession, interval=None, replicates=5, cache={}, anchors=None):
     """Surface markers for a UniProt accession via its best deposited structure.
 
     Cached in process. A genome's candidates frequently share a homolog -- every mature chain
     of a polyprotein resolves to the same entry -- and the SASA calculation is the expensive
     step in the ranking.
+
+    `anchors` is passed to each structure unchanged and carries the numbering warning on
+    `surface_markers` with it, which bites hardest here: this function chooses the structures
+    itself, so a caller cannot know whose author numbering it is handing numbers in. The
+    structures are tried in resolution order and the site block is promoted from the first one
+    that actually found the anchors, with `site_measured_on` naming it, because a chain
+    deposited in a different numbering reports every anchor missing and its empty site block
+    would otherwise read as "nothing is near the site".
     """
     # `replicates` belongs in the key and was missing from it. The median is taken over up to
     # `replicates` structures, so it is an input to the answer and not a performance knob: with
@@ -552,7 +809,15 @@ def surface_for_accession(accession, interval=None, replicates=5, cache={}):
     # declared parameter a policy can set, so a key that drops it would let the schema promise
     # a control the code does not offer, which is the defect `pick_batch` already had once with
     # `forest_trees` and `ucb_beta`.
-    key = (accession, tuple(interval.values()) if interval else None, replicates)
+    #
+    # `anchors` joins the key for the same reason and before it can repeat the fault: one call
+    # asking for the patch at the catalytic dyad and a later call asking for the chain's best
+    # patch are different questions about the same accession, and sharing one cached answer
+    # would hand the second caller the first caller's site block. Normalised through `_resnum`
+    # and sorted so the key matches on what the measurement matches on -- two callers naming
+    # the same residues in a different order are asking one question.
+    key = (accession, tuple(interval.values()) if interval else None, replicates,
+           tuple(sorted({_resnum(a) for a in anchors})) if anchors else None)
     if key in cache:
         return cache[key]
     try:
@@ -607,7 +872,8 @@ def surface_for_accession(accession, interval=None, replicates=5, cache={}):
         for pick in picks:
             try:
                 measured = surface_markers(pick["pdb_id"], pick["chain"],
-                                           keep=pick.get("keep"), verify=verify)
+                                           keep=pick.get("keep"), verify=verify,
+                                           anchors=anchors)
             except ImportError:
                 # Never swallowed into a per-structure skip. A missing SASA backend fails
                 # identically on every structure, so swallowing it turns one environment
@@ -680,6 +946,29 @@ def surface_for_accession(accession, interval=None, replicates=5, cache={}):
         # quantities, and a reader cannot see that from the median.
         markers["structures_clipped_to_domain"] = sum(1 for m in samples if m.get("keep"))
         markers["surface_score"] = round(median(scores), 4) if scores else None
+        # Which structure the residue numbers belong to. `patch_positions` is the first
+        # sample's and `hydrophobic_patch_residues` just above is the median over all of them,
+        # so the list and the count will not always be the same length -- deliberately, because
+        # author numbering differs between depositions and a median over position lists is not
+        # a position list. Named rather than dropped: the positions are the one output a binder
+        # designer acts on, and the fix for an ambiguous provenance is to state it.
+        markers["patch_positions_measured_on"] = (f"{samples[0]['pdb_id']}:"
+                                                  f"{samples[0]['chain']}")
+        if anchors:
+            # Promoted from the first structure that found the anchors rather than taken from
+            # the first structure measured, for the reason the docstring gives: a chain
+            # deposited in another numbering reports them all missing, and its empty site block
+            # beside a real patch would read as a finding about the site instead of a fact
+            # about the numbering. When none of them found the anchors the first sample's block
+            # stands, which is the honest version of that answer -- every anchor in
+            # `anchors_missing`, and `site_measured_on` saying where it was looked for.
+            chosen = next((m for m in samples if (m.get("site") or {}).get("anchors_found")),
+                          samples[0])
+            for field in ("site", "site_patch_area_a2", "site_patch_positions",
+                          "site_patch_fraction_of_the_site", "site_shares_the_patch"):
+                if field in chosen:
+                    markers[field] = chosen[field]
+            markers["site_measured_on"] = f"{chosen['pdb_id']}:{chosen['chain']}"
         # When this claim became knowable, which is the earliest deposition among the
         # structures it was actually measured on. Without it the markers are a 2026
         # calculation with no date, and `Dossier.observe` compares `available_from` against
