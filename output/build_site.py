@@ -343,6 +343,7 @@ def build_index():
     body = body.replace("<!--CHAINS-->", chain_matrix(holdout))
     body = body.replace("<!--PICKED-->", picked_table(holdout))
     body = body.replace("<!--FOLD-LANE-->", fold_lane(holdout))
+    body = body.replace("<!--LITERATURE-->", literature_block(holdout))
     body = body.replace("<!--SURFACE-LANE-->", surface_lane(holdout))
     body = body.replace("<!--OFFCHAIN-->", build_offchain())
     # Last, so a {{token}} introduced by any generated block above is filled too. The
@@ -969,6 +970,148 @@ def domain_inventory(case):
 
 FOLD_RECORD = "domain_folds.json"
 FOLD_STORE = "domain_folds"
+
+# Dated, citable literature for each shortlisted target and each domain that was folded.
+# Written by `python -m hpc_pilots.literature_stage`.
+LITERATURE_RECORD = "literature_stage.json"
+
+
+def literature_record(case):
+    """The literature stage's record for this case, or None.
+
+    Guarded on the same two keys the other two records are, and for the same reason: a
+    literature row keyed by target name would join a different run's chains silently.
+    """
+    path = RUNS / LITERATURE_RECORD
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text())
+    if (payload.get("genome_accession") != case.get("genome_accession")
+            or payload.get("reference_excluded_organism")
+            != case.get("reference_excluded_organism")):
+        return None
+    return payload
+
+
+def _hit_rows(query):
+    """The dated hits of one query, as links.
+
+    A hit with no publication date is drawn and marked rather than dropped. The record keeps
+    it under `citable: false` with a reason, and a page that silently showed only the dated
+    ones would make the retrieval look cleaner than it was.
+    """
+    out = []
+    for hit in query.get("hits") or ():
+        date = hit.get("first_publication_date") or ""
+        marks = []
+        if hit.get("is_preprint"):
+            marks.append('<span class="pp">preprint</span>')
+        if not hit.get("citable"):
+            marks.append(f'<span class="pp un">{esc(hit.get("uncitable_because") or "undated")}</span>')
+        title = esc(hit.get("title") or "untitled")
+        url = hit.get("url")
+        linked = f'<a href="{esc(url)}" rel="noopener">{title}</a>' if url else title
+        out.append(f"""
+        <li><span class="lt">{linked}</span>
+          <span class="lm">{esc(date[:10]) or '&mdash;'}
+            {('&middot; ' + esc(hit.get('journal'))) if hit.get('journal') else ''}
+            {' '.join(marks)}</span></li>""")
+    return "".join(out)
+
+
+def _query_block(query):
+    """One composed query: what was asked, what came back, and the rows worth citing."""
+    scope = query.get("scope")
+    label = query.get("domain_label")
+    span = query.get("domain_span") or []
+    where = (f' <span class="w">{span[0]:,}&ndash;{span[1]:,}</span>'
+             if len(span) == 2 else "")
+    name = (f'<b>{esc(label)}</b>{where}' if scope == "domain"
+            else "<b>the whole chain</b>")
+    status = query.get("status")
+    count = query.get("hit_count")
+    if status != "ok":
+        return f"""
+      <div class="lq x">
+        <div class="lqh">{name}<span class="lqn">{esc(status)}</span></div>
+        <div class="lqq">{esc(query.get('subject'))}</div>
+        <div class="lqz">{esc(query.get('note') or 'not asked')}</div>
+      </div>"""
+    preprints = query.get("preprints")
+    tally = (f"{num(count)} record{'s' if count != 1 else ''}"
+             + (f", {num(preprints)} of them preprints" if preprints else ""))
+    empty = ('<div class="lqz">No record matches this query. A measured zero, not a '
+             'question that was skipped.</div>' if not count else "")
+    return f"""
+      <div class="lq">
+        <div class="lqh">{name}<span class="lqn">{tally}</span></div>
+        <div class="lqq">{esc(query.get('subject'))}</div>
+        {empty}
+        <ol class="lh">{_hit_rows(query)}</ol>
+      </div>"""
+
+
+def literature_block(case):
+    """Dated literature for the shortlist, per target and per folded domain.
+
+    Placed between stages 3 and 4 because that is where it becomes answerable. Before stage 3
+    a domain is a span on somebody else's entry; after it the domain has coordinates, and a
+    region with coordinates is one a binder could be designed against this week -- so the
+    literature for it is the literature a designer would actually open. That is also why the
+    queries are per folded domain rather than per annotated region: the stage asks about the
+    things stage 3 made real.
+
+    The composed query is printed on every row. This repository says repeatedly that a number
+    whose query is not recorded cannot be checked, and these are the numbers most able to
+    mislead: a hit count is evidence of attention and of nothing else, which the retrieval
+    module's own docstring is emphatic about, so the page shows the question rather than
+    letting the count stand on its own.
+    """
+    payload = literature_record(case)
+    if not payload:
+        return ""
+    targets = payload.get("targets") or []
+    if not targets:
+        return ""
+    blocks = []
+    for row in targets:
+        queries = row.get("queries") or []
+        asked = [q for q in queries if q.get("status") == "ok"]
+        dated = row.get("dated_hits") or 0
+        route = row.get("anchor_route")
+        # Why this target's query is shaped the way it is. The two routes are a measured
+        # decision in the record, not a quirk, and a reader comparing two targets' queries
+        # will otherwise see an inconsistency rather than a rule.
+        why = ("anchored on the genome accession, because the chain's name yields no "
+               "systematic designation and a one-word protein noun does not identify a "
+               "protein" if route == "genome_accession" else
+               "anchored on the chain's own designation, which identifies the protein "
+               "without needing the accession")
+        blocks.append(f"""
+    <div class="lrow">
+      <div class="lrh"><span class="t">{esc(row.get('target'))}</span>
+        <span class="w">{esc(row.get('nearest_homolog'))} &middot; {num(dated)} dated
+          record{'s' if dated != 1 else ''} kept &middot; {len(asked)} of {len(queries)}
+          queries answered</span>
+        <span class="w">{why}</span></div>
+      {"".join(_query_block(q) for q in queries)}
+    </div>""")
+
+    # Stated as what the retrieval IS rather than as what it is not. The record's own
+    # `date_ceiling_means` spells the consequence out at length, which belongs in the record;
+    # on the page the fact that these are today's records is the whole of it, and a reader
+    # who wants it argued has the record. Where a ceiling WAS applied the sentence has to
+    # carry the date, because then it is the measurement the control query exists to make.
+    ceiling = payload.get("date_ceiling_applied")
+    note = ("Retrieved without a publication-date limit, so these are the records as they "
+            "stand today." if not ceiling else
+            f"Limited to work published on or before {esc(payload.get('date_to'))}, checked "
+            f"against a control query that omits the limit.")
+    return f"""
+  <div class="lit">
+    <div class="lith">{esc(payload.get('answer'))}<span>{note}</span></div>
+    {"".join(blocks)}
+  </div>"""
 
 
 def domain_folds(case):

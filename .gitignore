@@ -182,6 +182,20 @@ runs/improve/
 # Written by `python -m hpc_pilots.domain_folds`.
 !runs/domain_folds.json
 !runs/domain_folds/
+
+# Dated, citable literature for each shortlisted target and each domain stage 3 folded. runs/
+# is otherwise untracked, but the landing page prints sixty-five records between steps 3 and 4
+# and the composed query behind every one of them, and a query printed on a page that is not
+# in the tree cannot be checked -- which is the rule `literature.py` states about its own hit
+# counts and the reason this stage records the query at all. It also carries the two retrieval
+# decisions that are measurements rather than choices: that a domain description must be
+# anchored to its protein before it is sent, because `Peptidase C16` scoped to title or
+# abstract returns 0 and unscoped-and-anchored returns 3; and that the genome accession is
+# added only where a chain's name yields no systematic designation, because
+# `"Dimerization" AND nucleoprotein` returns 400 records topped by Hazara virus and influenza A
+# where the accession clause takes it to 5 correct ones.
+# Written by `python -m hpc_pilots.literature_stage`.
+!runs/literature_stage.json
 .venv-pfn/
 
 # The notebook points MPLCONFIGDIR here so a stale user-level matplotlibrc cannot print a
