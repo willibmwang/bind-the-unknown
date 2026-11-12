@@ -667,15 +667,12 @@
             <circle class="ac" cx="84" cy="26" r="4"/>
           </svg><span class="what">Predict a 3-D shape</span><span class="secs">3 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>20</b> chains, and any ORF nothing recognised along with them — this step needs a sequence and nothing else, so it is the one an unknown protein reaches</li></ul></div>
+      <div><h3>In</h3><ul><li><b>20</b> chains, and any ORF nothing recognised along with them — this step needs only a sequence, so it is the one an unknown protein reaches</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li>All <b>20</b> had their own sequence located in this genome, by alignment rather than by trusting the relative's numbering</li>
-        <li><b>11</b> of those are short enough for the folding lane; <b>9</b> are over its <b>400</b>-residue ceiling, which the lane below draws as one line through every chain</li>
-        <li>Every one inside the ceiling is folded, not only the best-ranked one — a chain with no coordinates is a chain the next step cannot measure</li>
-        <li>Being too long is a bar to folding the chain <i>whole</i>, not to reaching the target. All <b>9</b> of the <b>9</b> over-the-ceiling chains carry a functionally important region their relative's entry annotates that <i>is</i> short enough — <b>75</b> such regions across the shortlist, out of <b>143</b> annotated in all</li>
-        <li>The widest gap: Papain-like protease nsp3, <b>1,945</b> residues whole, whose shortest reachable region is <b>56</b> — a <b>35</b>-fold difference between the chain and the piece a binder would aim at</li>
-        <li>The one drawn below is the main protease: <b>306</b> residues long</li>
-        <li>The predictor rates its own confidence <b>62.6</b> out of 100 — confidence is not accuracy</li>
+        <li>All <b>20</b> had their own sequence located in this genome by alignment, rather than by trusting the relative's numbering</li>
+        <li><b>11</b> of those are short enough for the folding lane and every one of them is folded, not only the best-ranked; <b>9</b> are over its <b>400</b>-residue ceiling</li>
+        <li>All <b>9</b> of the <b>9</b> over-the-ceiling chains still carry an annotated region that <i>is</i> short enough — <b>75</b> such regions across the shortlist, out of <b>143</b> annotated in all</li>
+        <li>The one drawn below is the main protease, <b>306</b> residues, which the predictor rates <b>62.6</b> out of 100 for its own confidence — confidence is not accuracy</li>
       </ul></div>
     </div>
   </div>
@@ -697,42 +694,33 @@
       <div class="cc">Drawn from the stored coordinates in <span class="mono">runs/folded_structure/mpro_nsp5.pdb</span>. The blue domain is predicted confidently and the orange half is not. The stretches marked along the bottom never clear the threshold — residues 1–11, 45–64, 166–170 and <b>183–306</b>. That last run is 124 residues, 40 % of the chain. The tool's own payload states that a predicted structure is not an experimental one and must never be pooled with deposited-structure counts.</div>
     </div>
     <p class="cap" style="margin-top:30px">That is the one chain the record reports in full.
-    Below is every chain this step was handed, with how its own sequence was found in this
-    genome and where it fell against the ceiling — because the ceiling is what decides whether
-    the next step has anything to measure at all. The boundaries of a mature chain are
-    annotated on the relative, not here, and slicing this genome at them is wrong in a way
-    that does not announce itself: SARS-CoV's main protease starts at residue 3241 and
-    SARS-CoV-2's at 3264, so the same cut returns 306 residues — the correct length, 23
-    residues into the wrong window. Each chain is aligned instead, and against every called
-    ORF rather than only the one that matched it: a coronavirus polyprotein is read as two
-    overlapping ORFs through a frameshift, so the polymerase and the helicase sit in a frame
-    their own match does not point at.</p>
-    <p class="cap"><b>Being too long is a bar to folding the chain whole, not to reaching
-    the target.</b> This step used to stop at the ceiling: a chain over it was abandoned, and
-    the lane below said of those chains that nothing could be predicted for them. That was a
-    true statement about the pipeline and a false one about the proteins. What a drug is aimed
-    at is almost never a whole chain — it is a pocket, an interface, a catalytic site — and
-    the relative's entry already says where those are. So each over-the-ceiling row below
-    opens onto the functionally important regions its relative annotates, and
-    <b>9</b> of the <b>9</b> have at least one that is short
-    enough to fold. Papain-like protease nsp3 is the clearest case: the chain is
-    <b>1,945</b> residues and far out of reach, and its relative's entry
-    delimits <b>18</b> regions inside it that are not — the one offered
-    first is <i>CoV Nsp3 Y</i>, at <b>369</b> residues.</p>
-    <p class="cap">Which region a row offers first is decided by two things of different
-    standing, and the panel says which did the work on every line. The first is simply read
-    off the entry: how many residues the curators marked as active sites, ligand-binding
-    sites or cleavage sites fall inside the region. That is decisive for enzymes — the
-    polymerase's catalytic domain contains six such residues against two for the domain next
-    to it, so the annotation itself says which one matters. The second is a list of words we
-    chose, matched against the region's description: <i>receptor-binding</i>,
-    <i>catalytic</i>, <i>interface</i> and about twenty more. It exists because the first
-    signal is silent exactly where it is needed — the spike carries one marked site residue
-    across its whole length. It orders a list and does nothing else: no region is refused by
-    it, and no target's rank anywhere on this page is touched by it. A region shorter than
-    <b>40</b> residues is refused as something to fold, because
-    coordinates for a five-residue fragment describe nothing, and it keeps its positions
-    anyway — a short motif is exactly the kind of place a macrocycle is designed at.</p>
+    Below is every chain this step was handed, with where its own sequence was found in this
+    genome and where it fell against the ceiling. A chain's boundaries are annotated on the
+    relative, not here, and slicing this genome at them is wrong in a way that does not
+    announce itself: SARS-CoV's main protease starts at residue 3241 and SARS-CoV-2's at 3264,
+    so the same cut returns 306 residues — the correct length, 23 residues into the wrong
+    window. Each chain is aligned instead, and against every called ORF rather than only the
+    one that matched it, because a coronavirus polyprotein is read as two overlapping frames.</p>
+    <p class="cap"><b>Being too long is a bar to folding the chain whole, not to reaching the
+    target.</b> What a drug is aimed at is almost never a whole chain — it is a pocket, an
+    interface, a catalytic site — and the relative's entry already says where those are. So
+    each over-the-ceiling row below opens onto the regions its relative annotates, and
+    <b>9</b> of the <b>9</b> have at least one short enough to
+    fold. Papain-like protease nsp3 is the clearest case: <b>1,945</b>
+    residues whole and far out of reach, with <b>18</b> regions inside it
+    that are not — the one offered first is <i>CoV Nsp3 Y</i>, at
+    <b>369</b> residues.</p>
+    <p class="cap">Which region a row offers first comes down to two things, and the panel says
+    which did the work on every line. The first is read off the entry: how many residues the
+    curators marked as active, ligand-binding or cleavage sites fall inside the region. That is
+    decisive for enzymes — the polymerase's catalytic domain contains six such residues against
+    two for the domain beside it. The second is a list of words we chose —
+    <i>receptor-binding</i>, <i>catalytic</i>, <i>interface</i> and about twenty more — matched
+    against the region's description, for the cases where the first signal is silent, as on the
+    spike. It orders a list and does nothing else: it refuses no region and touches no target's
+    rank. A region shorter than <b>40</b> residues is refused as something
+    to fold, since coordinates for a five-residue fragment describe nothing, but it keeps its
+    positions anyway — a short motif is exactly where a macrocycle is designed.</p>
     
   <div class="lane"><div class="lane-grp"><b>Inside the ceiling &middot; 11</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
     <div class="lr">
@@ -2179,35 +2167,31 @@
       <div class="out"><h3>Out</h3><ul>
         <li><b>20</b> answers for 20 chains, <b>0</b> quietly dropped</li>
         <li><b>9</b> measured on real deposited structures, <b>11</b> refused with a stated reason</li>
-        <li><b>5</b> of the <b>11</b> with nothing deposited are inside the folding ceiling, so step 3's coordinates are the only surface they can have — measured with the same arithmetic, kept apart from the deposited numbers, never added to them</li>
-        <li><b>14</b> of <b>20</b> chains have a surface by one route or the other, where <b>9</b> do from depositions alone; <b>6</b> have neither</li>
-        <li>Every patch, the largest unbroken stretch of water-repelling surface, is measured against the <b>600</b> Å² a macrocycle buries, and the lane below draws that line through every chain</li>
+        <li><b>5</b> of those <b>11</b> are inside the folding ceiling, so step 3's coordinates are the only surface they can have — measured with the same arithmetic, never added to the deposited numbers</li>
+        <li><b>14</b> of <b>20</b> chains have a surface by one route or the other, against <b>9</b> from depositions alone; <b>6</b> have neither</li>
+        <li>Every patch is measured against the <b>600</b> Å² a macrocycle buries, the line the lane below draws through every chain</li>
       </ul></div>
     </div>
   </div>
 
   <div class="substep" id="surface-out">
     <h3>What the measurement returned, chain by chain</h3>
-    <p class="cap">One row for every chain on the shortlist, each answering a single
-    question: if you wanted to put a molecule on this protein, is there anywhere on it to put
-    one?</p>
-    <p class="cap">A patch is measured because water-repelling surface is the part of a
-    protein this class of molecule grips. Its area is reported in square angstroms, and a
-    macrocycle covers roughly <b>600</b> of them when it binds, which is the line
-    drawn through every row below. The fainter line is half of it, the width under which
-    there is not enough surface to hold a molecule at all. Every bar sits on that same scale,
-    whether the shape underneath it was solved in a laboratory or predicted from the
-    sequence, so the two can be read against each other.</p>
-    <p class="cap">A measured chain gets a dot and a bar. A protein is not a fixed object,
-    and a structure is one moment of it held still, so the same chain solved twice does not
-    give the same answer. Measuring across every structure of that domain instead of picking
-    one moves the figure by hundreds of square angstroms. The dot is the middle of those
-    answers and the bar runs from the smallest to the largest. Where a bar straddles the
-    line, the verdict is uncertain however confident the dot looks, because a measurement
-    that wide does not actually tell the two sides apart.</p>
-    <p class="cap">Nothing is missing from the list. A chain can be refused, and its row says
-    in plain words which reason applies to it, but it cannot quietly drop out between the
-    step and the page.</p>
+    <p class="cap">One row for every chain on the shortlist, each answering a single question:
+    if you wanted to put a molecule on this protein, is there anywhere on it to put one?</p>
+    <p class="cap">A patch is water-repelling surface, the part of a protein this class of
+    molecule grips. Its area is in square angstroms, and the line drawn through every row is
+    the roughly <b>600</b> Å² a macrocycle covers when it binds; the fainter line is
+    half of that, under which there is not enough surface to hold a molecule at all. Every bar
+    sits on that same scale, whether the shape underneath it was solved in a laboratory or
+    predicted from the sequence.</p>
+    <p class="cap">A measured chain gets a dot and a bar. A structure is one moment of a
+    protein held still, so the same chain solved twice does not give the same answer — and
+    measuring across every structure of a domain rather than picking one moves the figure by
+    hundreds of square angstroms. The dot is the middle of those answers, the bar runs from
+    smallest to largest, and where a bar straddles the line the verdict is uncertain however
+    confident the dot looks. Nothing is missing from the list: a chain can be refused, and its
+    row then says in plain words why, but it cannot quietly drop out between the step and the
+    page.</p>
     
   <div class="lane"><div class="lane-grp"><b>Measured on a structure someone solved &middot; 9</b><span>the coordinates came out of a laboratory, so the patch is measured on an observation of the protein. Every structure of that domain is measured. The dot is the middle answer and the bar is the spread from the smallest to the largest, because the same chain solved twice does not give the same number. A chip beside a name is the gate&rsquo;s separate verdict on whether a macrocycle could bind there at all. It appears only where that answer is yes or uncertain. Where it is no, the row says in words what put the chain out of reach</span></div>
     <div class="lr">
@@ -2363,44 +2347,34 @@
       covers when it binds, and half of that</span></div>
   </div>
   <p class="after">All 9 of those verdicts are decided on where the protein sits, which the gate reads before it reads area at all. Every one of these is annotated somewhere a macrocycle cannot arrive, inside the cell or inside the virion, the virus particle itself. Several of their patches clear the footprint line comfortably and are refused anyway. That is the gate saying something about this class of molecule, not about the target.</p>
-    <p class="after"><b>Why the second group is kept apart from the first, when the sum is
-    the same arithmetic.</b> A deposited structure is something that happened: a protein was
-    purified, persuaded into a crystal or frozen in ice, put in a beam, and coordinates were
-    fitted to what came back. A predicted structure is a claim a model makes after reading
-    the sequence, and no one has ever looked at the molecule. Run the same patch calculation
-    over each and you get two numbers of the same kind and two pieces of evidence that are
-    not.</p>
-    <p class="after">Nothing that keeps them apart is accuracy in the abstract. A deposited
-    patch has a spread this page can show you, because the same chain has been solved several
-    times and the structures disagree, and that disagreement is the bar. A prediction has no
-    such bar. Ask the same model for the same sequence and it returns the same coordinates,
-    so the error does not average out, and what the model offers instead is a confidence per
-    residue. The main protease fold is scored <b>62.6</b> out of 100, and the
-    stretches marked along the bottom of the figure above never clear the threshold at all,
-    the last of them running to the end of the chain. Measuring a patch across that stretch
-    describes a shape the model declined to commit to.</p>
-    <p class="after">A predicted chain is also alone, folded by itself with no partner, no
-    membrane and nothing else of the virus particle around it, so every face is out in the open, including the ones
-    that in the real protein are pressed against something else. Greasy surface that is
-    buried in life is exposed in the model, and the patch inflates. That is the likeliest
-    reason the main protease's predicted patch comes out several times larger than its
-    deposited one, as section 04 reports it. It is not separable here from ordinary
-    prediction error, so the record states the ratio and names no cause.</p>
-    <p class="after">The predicted group earns its place anyway, because a deposited
-    structure exists only where somebody already did the work, and that availability tracks
-    attention rather than importance. The two enzymes approved antivirals already hit are
-    measured here on several structures apiece, while the membrane protein and the small
-    accessory proteins have nothing deposited anywhere. A pipeline that can only measure
-    depositions therefore answers best on exactly the targets that need it least, and goes
-    quiet on a genuinely new pathogen, the case this project exists for. The prediction does
-    not replace a measurement, and the gap between the two numbers below is the reason it
-    cannot. What it does is turn <b>no answer at all</b> into <b>an answer that says where it
-    came from</b>, for chains that would otherwise leave this step with a blank.</p>
-    <p class="after">The gate reads where the protein sits before it reads area, and on a
-    virus's replicase that is usually where the answer comes from. A patch can clear the
-    footprint comfortably and still be refused because the protein it sits on is inside the
-    cell, where a macrocycle cannot go. That is a statement about this class of molecule,
-    not about the target, so it stays a gate and never a term in the ranking.</p>
+    <p class="after"><b>Why the predicted group is kept apart, when the sum is the same
+    arithmetic.</b> A deposited structure is something that happened: a protein was purified,
+    persuaded into a crystal or frozen in ice, put in a beam, and coordinates were fitted to
+    what came back. A predicted structure is a claim a model makes after reading the sequence,
+    and no one has ever looked at the molecule. The deposited patch also comes with a spread,
+    because the same chain has been solved several times and the structures disagree. A
+    prediction has no such bar — ask the same model for the same sequence and it returns the
+    same coordinates — and what it offers instead is a confidence per residue. The main
+    protease fold scores <b>62.6</b> out of 100, and the stretches marked along the
+    figure above never clear the threshold at all.</p>
+    <p class="after">A predicted chain is also folded alone, with no partner and no membrane
+    around it, so faces that are pressed against something else in the real protein sit out in
+    the open. Greasy surface that is buried in life is exposed in the model and the patch
+    inflates, which is the likeliest reason the main protease's predicted patch comes out
+    several times larger than its deposited one. That is not separable from ordinary prediction
+    error, so the record states the ratio and names no cause.</p>
+    <p class="after">The predicted group earns its place anyway, because a deposited structure
+    exists only where somebody already did the work, and that tracks attention rather than
+    importance. The two enzymes approved antivirals hit are measured here on several structures
+    apiece, while the membrane protein and the small accessory proteins have nothing deposited
+    anywhere. A pipeline that can only measure depositions therefore answers best on exactly
+    the targets that need it least, and goes quiet on a genuinely new pathogen — the case this
+    project exists for. The prediction does not replace a measurement; what it does is turn
+    <b>no answer at all</b> into <b>an answer that says where it came from</b>.</p>
+    <p class="after">The gate reads where the protein sits before it reads area. A patch can
+    clear the footprint comfortably and still be refused because the protein it sits on is
+    inside the cell, where a macrocycle cannot go. That is a statement about this class of
+    molecule, not about the target, so it stays a gate and never a term in the ranking.</p>
   </div>
 
   <div class="stage">
@@ -2428,7 +2402,7 @@
 
 <section id="tools">
   <div class="sec-head"><h2>The tools each step called</h2><span class="tag">file, databases, return</span></div>
-  <p class="cap">Six tool calls run the five steps above. Each is a named function with a declared cost and a recorded return — not a prompt, and not a model deciding what to do next. Each card is headed by the file and function in this repository that ran it, with the name it is registered under beside it; what each one gave back is below.</p>
+  <p class="cap">Six tool calls run the five steps above. Each is a named function with a declared cost and a recorded return — not a prompt, and not a model deciding what to do next. Each card is headed by the file and function that ran it, with the name it is registered under beside it.</p>
 
   <div class="tool-card" id="t-intake">
     <div class="tc-head"><span class="sn">1</span><span class="tn">hpc_pilots/intake.py<i>:</i>run_intake</span><span class="reg">intake.rank_targets</span><span class="plain">Read the genome, find the proteins</span><span class="db">NCBI · UniProt · 14.4 s · 2 requests</span></div>
@@ -2515,12 +2489,12 @@
         <div class="pdbrow"><span class="who">Non-structural protein 2 <em>P0C6X7 · 181–818</em></span><span class="ids">7fac:A</span></div>
         <div class="pdbrow"><span class="who">ORF9B_SARS ORF9b protein <em>P59636</em></span><span class="ids">2cme:A · 2cme:B · 2cme:C · 2cme:D · 2cme:E</span></div>
       </div>
-      <div class="fields"><span class="lead">The other <b>11</b> chains had no deposited structure to measure, and each is named in <a href="#surface-out">the lane above</a> with the accession that came back empty, the sentence the tool returned, and where the chain fell against the folding ceiling. That list was retyped here for a while, grouped by accession and annotated by hand, which made it the one place on the page where a chain could be described as rescued without the record saying so.</span></div>
+      <div class="fields"><span class="lead">The other <b>11</b> chains had no deposited structure to measure. Each is named in <a href="#surface-out">the lane above</a> with the accession that came back empty, the sentence the tool returned, and where the chain fell against the folding ceiling.</span></div>
       <div class="accs"><span class="lead">Those <b>11</b> are the reason step 3 now runs first and folds every chain it can. Where coordinates exist, this step measures them with the same arithmetic, and for <b>5</b> chains that is the only surface they will ever have. On a chain that has both, the two answers are far apart:</span>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">5 deposited structures</i> <em>median of 5 · a real measurement</em></span><span class="ids">562.4 Å² · 4.4 % of the surface</span></div>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">the predicted shape</i> <em>ESMFold v1 · mean confidence 62.6</em></span><span class="ids">2,012.6 Å² · 11.0 % of the surface</span></div>
       </div>
-      <p class="cap" style="margin-top:14px">The prediction reads <b>3.6×</b> larger. A predicted shape inherits the predictor's error, and a single chain modelled alone has no partner to bury a face against that a real structure would. The record states the ratio and attributes nothing. Both numbers stay out of the ranking, and the predicted one is never added to the count of chains measured on deposited structures. It is a different kind of evidence, kept under its own key.</p>
+      <p class="cap" style="margin-top:14px">The prediction reads <b>3.6×</b> larger. Both numbers stay out of the ranking, and the predicted one is never added to the count of chains measured on deposited structures — it is a different kind of evidence, kept under its own key.</p>
     </div>
   </div>
 
@@ -2547,16 +2521,14 @@
 
 <section id="picked">
   <div class="sec-head"><h2>The shortlist</h2><span class="tag">9 identified ORFs cut into 20 chains</span></div>
-  <p class="cap">This is the deliverable, and it is a different list from step 1's, not a
-  shorter version of it. Step 1 ranks whole stretches of genome (ORFs). Step 2 cuts the
-  polyproteins among them into the mature chains
-  the virus actually folds, and a binder is aimed at a chain. Only the 9 ORFs
-  that matched a relative can be cut, since the boundaries come from that relative, and the
-  3 unrecognised ones end here. Those 9 become 20 chains,
-  and <b>12 of them come out of a single ORF</b>, the replicase, step 1's second
-  row. Every chain below names the ORF it was cut from and links back to it. This is the
-  ranking those scores produce. Step 2 above carries the same 20 chains with each
-  score split into the five weights that paid it.</p>
+  <p class="cap">This is the deliverable, and it is a different list from step 1's rather than
+  a shorter version of it. Step 1 ranks whole stretches of genome (ORFs); step 2 cuts the
+  polyproteins among them into the mature chains the virus actually folds, which is what a
+  binder is aimed at. Only the 9 ORFs that matched a relative can be cut, since
+  the boundaries come from that relative, so the 3 unrecognised ones end here.
+  Those 9 become 20 chains, and <b>12 of them come out of a
+  single ORF</b>: the replicase, step 1's second row. Every chain below links back to the ORF
+  it was cut from.</p>
   
   <div class="cmxscroll" tabindex="0" role="region" aria-label="The ranked shortlist of mature chains">
   <table class="cmx pick">
@@ -2715,12 +2687,12 @@
   </table>
   </div>
   <p class="after">The two chains that approved antivirals already hit are not ORFs at all.
-  The main protease (<span class="mono">nsp5</span>), which nirmatrelvir inhibits, is
-  rank 2 here, and the polymerase (<span class="mono">nsp12</span>), which
-  remdesivir inhibits, is rank 5. Both are interior fragments of that one
-  replicase row above, so a pipeline that stopped at step 1 could not have surfaced either of
-  them. With SARS-CoV-2 deleted from the reference library, both still land in the top five,
-  scored only against relatives, never against the virus itself.</p>
+  The main protease (<span class="mono">nsp5</span>), which nirmatrelvir inhibits, is rank
+  2 here; the polymerase (<span class="mono">nsp12</span>), which remdesivir
+  inhibits, is rank 5. Both are interior fragments of that one replicase row, so a
+  pipeline that stopped at step 1 could not have surfaced either. With SARS-CoV-2 deleted from
+  the reference library, both still land in the top five — scored only against relatives,
+  never against the virus itself.</p>
 </section>
 
 <footer>
