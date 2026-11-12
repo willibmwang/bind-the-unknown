@@ -1,0 +1,379 @@
+{
+  "tool": "structure.fold_sequence",
+  "model": "ESMFold v1",
+  "target_name": "C2HC",
+  "sequence_length": 47,
+  "sequence_sha256": "df71952914fb948936391455f40b36a0954f072bffbe96f9d51115d8a1e497d9",
+  "max_residues": 400,
+  "neighbour_cutoff_angstrom": 10.0,
+  "confident_plddt": 70.0,
+  "ambiguous_positions": [],
+  "folded": true,
+  "absence": null,
+  "model_date": "2022-10-18",
+  "citation": "Lin et al., Evolutionary-scale prediction of atomic-level protein structure with a language model, Science 379:1123 (2023), doi:10.1126/science.ade2574; preprint doi:10.1101/2022.07.20.500902. Served by the ESM Metagenomic Atlas (api.esmatlas.com) under CC-BY-4.0, (c) Meta Platforms. A prediction cited without the model and its version is not a cited claim.",
+  "endpoint": "https://api.esmatlas.com/foldSequence/v1/pdb/",
+  "limitations": [
+    "A predicted structure is not an experimental one. Nothing in this payload was measured, and it must never be pooled with the PDBe deposition counts structures.evidence returns.",
+    "pLDDT is the model's own confidence, not its accuracy, and not a measurement of anything. It is least trustworthy on exactly the sequences this lane exists for.",
+    "ESMFold runs single-sequence with no MSA and no template. For a sequence with few homologs, accuracy is lower than published benchmark averages, which are dominated by well-represented families. A low pLDDT on a novel pathogen protein is the expected reading, not a defect.",
+    "The neighbour count is a burial proxy, not SASA: a count of CB atoms within a radius, with no solvent model, no probe radius and no sidechain packing past CB. It is computed on predicted coordinates and inherits their error, and over a low-pLDDT stretch it carries no information at all.",
+    "One monomer, one conformation, in vacuum. No partners, glycans, membrane, ligand or ensemble. For a viral glycoprotein the biological unit is usually a trimer, so a surface scored here as least-buried may be an oligomeric interface that is never solvent-exposed in the assembled particle.",
+    "A fragment folded in isolation is not that fragment's fold inside the chain it was cut from, and the 400-residue ceiling forces most full-length glycoproteins to be cut.",
+    "This bears on accessibility weakly, as a hypothesis about which residues are exposed in a predicted monomer. It establishes nothing whatever about essentiality, conservation, assay availability, public labels or precedent, and it is not reagent tractability: a confident fold is not evidence that the protein expresses solubly or survives immobilisation.",
+    "The ESMFold v1 training corpus has its own cutoff, which this module did not verify. Any claim that a prediction for this pathogen is free of hindsight is unverified here.",
+    "The host caches by sequence, so a repeated call is roughly twenty times faster than the first. Only the cold number is a cost a campaign pays."
+  ],
+  "network_calls": 1,
+  "sources": [
+    "https://api.esmatlas.com/foldSequence/v1/pdb/"
+  ],
+  "model_date_is_parsed": true,
+  "pdb_bytes": 29688,
+  "pdb_sha256": "61aab06eac82ea803db2e432ca2931724d0dffc718c3a7ca23d3f18e93984d32",
+  "residues_modelled": 47,
+  "unmodelled_positions": [],
+  "out_of_range_positions": [],
+  "alignment_verified": true,
+  "alignment_mismatches": [],
+  "plddt_scale": "0-100. The endpoint writes pLDDT into the PDB B-factor column on a 0-1 scale; these values are that column multiplied by 100.",
+  "plddt": [
+    {
+      "position": 1,
+      "residue": "C",
+      "plddt": 46.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 2,
+      "residue": "P",
+      "plddt": 39.0,
+      "neighbour_count": 6
+    },
+    {
+      "position": 3,
+      "residue": "A",
+      "plddt": 41.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 4,
+      "residue": "C",
+      "plddt": 43.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 5,
+      "residue": "H",
+      "plddt": 41.0,
+      "neighbour_count": 6
+    },
+    {
+      "position": 6,
+      "residue": "N",
+      "plddt": 40.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 7,
+      "residue": "S",
+      "plddt": 39.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 8,
+      "residue": "E",
+      "plddt": 39.0,
+      "neighbour_count": 5
+    },
+    {
+      "position": 9,
+      "residue": "V",
+      "plddt": 40.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 10,
+      "residue": "G",
+      "plddt": 39.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 11,
+      "residue": "P",
+      "plddt": 40.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 12,
+      "residue": "E",
+      "plddt": 39.0,
+      "neighbour_count": 5
+    },
+    {
+      "position": 13,
+      "residue": "H",
+      "plddt": 36.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 14,
+      "residue": "S",
+      "plddt": 37.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 15,
+      "residue": "L",
+      "plddt": 39.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 16,
+      "residue": "A",
+      "plddt": 39.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 17,
+      "residue": "E",
+      "plddt": 41.0,
+      "neighbour_count": 4
+    },
+    {
+      "position": 18,
+      "residue": "Y",
+      "plddt": 43.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 19,
+      "residue": "H",
+      "plddt": 43.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 20,
+      "residue": "N",
+      "plddt": 42.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 21,
+      "residue": "E",
+      "plddt": 43.0,
+      "neighbour_count": 5
+    },
+    {
+      "position": 22,
+      "residue": "S",
+      "plddt": 41.0,
+      "neighbour_count": 5
+    },
+    {
+      "position": 23,
+      "residue": "G",
+      "plddt": 39.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 24,
+      "residue": "L",
+      "plddt": 38.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 25,
+      "residue": "K",
+      "plddt": 40.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 26,
+      "residue": "T",
+      "plddt": 41.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 27,
+      "residue": "I",
+      "plddt": 43.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 28,
+      "residue": "L",
+      "plddt": 41.0,
+      "neighbour_count": 15
+    },
+    {
+      "position": 29,
+      "residue": "R",
+      "plddt": 41.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 30,
+      "residue": "K",
+      "plddt": 44.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 31,
+      "residue": "G",
+      "plddt": 39.0,
+      "neighbour_count": 6
+    },
+    {
+      "position": 32,
+      "residue": "G",
+      "plddt": 37.0,
+      "neighbour_count": 5
+    },
+    {
+      "position": 33,
+      "residue": "R",
+      "plddt": 38.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 34,
+      "residue": "T",
+      "plddt": 41.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 35,
+      "residue": "I",
+      "plddt": 41.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 36,
+      "residue": "A",
+      "plddt": 41.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 37,
+      "residue": "F",
+      "plddt": 40.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 38,
+      "residue": "G",
+      "plddt": 38.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 39,
+      "residue": "G",
+      "plddt": 35.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 40,
+      "residue": "C",
+      "plddt": 39.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 41,
+      "residue": "V",
+      "plddt": 38.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 42,
+      "residue": "F",
+      "plddt": 42.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 43,
+      "residue": "S",
+      "plddt": 37.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 44,
+      "residue": "Y",
+      "plddt": 42.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 45,
+      "residue": "V",
+      "plddt": 39.0,
+      "neighbour_count": 5
+    },
+    {
+      "position": 46,
+      "residue": "G",
+      "plddt": 36.0,
+      "neighbour_count": 6
+    },
+    {
+      "position": 47,
+      "residue": "C",
+      "plddt": 35.0,
+      "neighbour_count": 6
+    }
+  ],
+  "mean_plddt": 39.89,
+  "median_plddt": 40.0,
+  "min_plddt": 35.0,
+  "confident_fraction": 0.0,
+  "low_confidence_runs": [
+    [
+      1,
+      47
+    ]
+  ],
+  "exposure_proxy": {
+    "method": "count of other residues whose CB (CA for glycine) lies within 10.0 angstrom. A contact number.",
+    "is_sasa": false,
+    "lower_is_more_exposed": true,
+    "computed_over_confident_residues_only": true,
+    "confident_residues_used": 0,
+    "first_quartile_count": null,
+    "least_buried_positions": [],
+    "caveat": "A proxy for burial on predicted coordinates, not a solvent-accessible surface area and not a measurement. Positions are reported only where pLDDT clears the threshold, because a contact number over a low-confidence stretch describes a fold the model did not commit to. A monomer surface is not necessarily exposed in an oligomer."
+  },
+  "unverified": [
+    "Every coordinate, every pLDDT value and every neighbour count. A prediction and a proxy computed on it are model assertions, not measurements, and nothing here was checked against an experiment."
+  ],
+  "seconds": 6.032,
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "3c5a431948d96780893cb452506c0a4629280f96",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-12T09:09:11.439230+00:00"
+  },
+  "content_sha256": "3f1e0fbf743eb3849f709b700025480d676156f9cb030a74ddba5fddd7ae5268",
+  "unit": {
+    "kind": "domain",
+    "label": "C2HC",
+    "region_type": "Region",
+    "description": "C2HC",
+    "entry_span_on_the_relative": [
+      370,
+      416
+    ],
+    "span_in_this_genome": [
+      370,
+      416
+    ],
+    "length_aa": 47,
+    "mapped_length_aa": 47,
+    "ends_adjusted": false,
+    "unmapped_ends": 0,
+    "site_residues_inside": 4,
+    "refused_because": null
+  }
+}

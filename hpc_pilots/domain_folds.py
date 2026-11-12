@@ -69,11 +69,20 @@ INVENTORY = ROOT / "runs" / "domain_inventory.json"
 # had, and searching a different number would locate chains that run never located.
 ORF_POOL = 12
 
-# Domains folded per over-ceiling chain, longest-relevance-first. One is enough for the page
-# -- it opens on the region the inventory offers first -- and nsp3 alone has eighteen
-# foldable regions, so a cap is the difference between a run that finishes and one that spends
-# its whole budget on a single chain.
-DOMAINS_PER_CHAIN = 1
+# Domains folded per over-ceiling chain, in the inventory's relevance order. A cap is needed
+# at all because nsp3 offers eighteen foldable regions and folding every one of them would
+# spend a whole run on a single chain; 75 across the shortlist is not a page, it is a
+# database.
+#
+# Three rather than one, and the spike is why. The inventory orders on contained annotated
+# site residues first, which is decisive for an enzyme and silent on a glycoprotein: spike S1
+# carries one marked site residue in its whole length, so neither signal fires and length
+# breaks the tie. That hands the lead to `BetaCoV S1-NTD` at 281 residues, which folds at 26.9
+# mean confidence -- the worst of the twenty -- while `BetaCoV S1-CTD`, the domain that is
+# structurally the receptor-binding one, sits behind it at 176. Folding one per chain showed
+# the reader the weakest structure on the page and hid the one worth looking at. Three reaches
+# it on every chain in this run.
+DOMAINS_PER_CHAIN = 3
 
 # Seconds the whole run may spend inside the folding endpoint. Measured on the recorded run:
 # a 306-residue chain takes about 13 seconds and a 400-residue one about 26, and the endpoint

@@ -1,0 +1,1261 @@
+{
+  "tool": "structure.fold_sequence",
+  "model": "ESMFold v1",
+  "target_name": "BetaCoV S1-CTD",
+  "sequence_length": 194,
+  "sequence_sha256": "9a865a672eeb612295d8ab5e0411a7f0b18f40a489a10db6ed4f53788853e507",
+  "max_residues": 400,
+  "neighbour_cutoff_angstrom": 10.0,
+  "confident_plddt": 70.0,
+  "ambiguous_positions": [],
+  "folded": true,
+  "absence": null,
+  "model_date": "2022-10-18",
+  "citation": "Lin et al., Evolutionary-scale prediction of atomic-level protein structure with a language model, Science 379:1123 (2023), doi:10.1126/science.ade2574; preprint doi:10.1101/2022.07.20.500902. Served by the ESM Metagenomic Atlas (api.esmatlas.com) under CC-BY-4.0, (c) Meta Platforms. A prediction cited without the model and its version is not a cited claim.",
+  "endpoint": "https://api.esmatlas.com/foldSequence/v1/pdb/",
+  "limitations": [
+    "A predicted structure is not an experimental one. Nothing in this payload was measured, and it must never be pooled with the PDBe deposition counts structures.evidence returns.",
+    "pLDDT is the model's own confidence, not its accuracy, and not a measurement of anything. It is least trustworthy on exactly the sequences this lane exists for.",
+    "ESMFold runs single-sequence with no MSA and no template. For a sequence with few homologs, accuracy is lower than published benchmark averages, which are dominated by well-represented families. A low pLDDT on a novel pathogen protein is the expected reading, not a defect.",
+    "The neighbour count is a burial proxy, not SASA: a count of CB atoms within a radius, with no solvent model, no probe radius and no sidechain packing past CB. It is computed on predicted coordinates and inherits their error, and over a low-pLDDT stretch it carries no information at all.",
+    "One monomer, one conformation, in vacuum. No partners, glycans, membrane, ligand or ensemble. For a viral glycoprotein the biological unit is usually a trimer, so a surface scored here as least-buried may be an oligomeric interface that is never solvent-exposed in the assembled particle.",
+    "A fragment folded in isolation is not that fragment's fold inside the chain it was cut from, and the 400-residue ceiling forces most full-length glycoproteins to be cut.",
+    "This bears on accessibility weakly, as a hypothesis about which residues are exposed in a predicted monomer. It establishes nothing whatever about essentiality, conservation, assay availability, public labels or precedent, and it is not reagent tractability: a confident fold is not evidence that the protein expresses solubly or survives immobilisation.",
+    "The ESMFold v1 training corpus has its own cutoff, which this module did not verify. Any claim that a prediction for this pathogen is free of hindsight is unverified here.",
+    "The host caches by sequence, so a repeated call is roughly twenty times faster than the first. Only the cold number is a cost a campaign pays."
+  ],
+  "network_calls": 1,
+  "sources": [
+    "https://api.esmatlas.com/foldSequence/v1/pdb/"
+  ],
+  "model_date_is_parsed": true,
+  "pdb_bytes": 125916,
+  "pdb_sha256": "9ffd5dc7aa1998cc35e5ddd4daff8a7eccd72be03fb6b99d4f9f5ec1a3c6fffe",
+  "residues_modelled": 194,
+  "unmodelled_positions": [],
+  "out_of_range_positions": [],
+  "alignment_verified": true,
+  "alignment_mismatches": [],
+  "plddt_scale": "0-100. The endpoint writes pLDDT into the PDB B-factor column on a 0-1 scale; these values are that column multiplied by 100.",
+  "plddt": [
+    {
+      "position": 1,
+      "residue": "N",
+      "plddt": 25.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 2,
+      "residue": "L",
+      "plddt": 24.0,
+      "neighbour_count": 6
+    },
+    {
+      "position": 3,
+      "residue": "C",
+      "plddt": 28.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 4,
+      "residue": "P",
+      "plddt": 23.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 5,
+      "residue": "F",
+      "plddt": 23.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 6,
+      "residue": "G",
+      "plddt": 23.0,
+      "neighbour_count": 6
+    },
+    {
+      "position": 7,
+      "residue": "E",
+      "plddt": 23.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 8,
+      "residue": "V",
+      "plddt": 24.0,
+      "neighbour_count": 5
+    },
+    {
+      "position": 9,
+      "residue": "F",
+      "plddt": 27.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 10,
+      "residue": "N",
+      "plddt": 26.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 11,
+      "residue": "A",
+      "plddt": 25.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 12,
+      "residue": "T",
+      "plddt": 25.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 13,
+      "residue": "R",
+      "plddt": 25.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 14,
+      "residue": "F",
+      "plddt": 28.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 15,
+      "residue": "A",
+      "plddt": 25.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 16,
+      "residue": "S",
+      "plddt": 25.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 17,
+      "residue": "V",
+      "plddt": 27.0,
+      "neighbour_count": 15
+    },
+    {
+      "position": 18,
+      "residue": "Y",
+      "plddt": 27.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 19,
+      "residue": "A",
+      "plddt": 25.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 20,
+      "residue": "W",
+      "plddt": 27.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 21,
+      "residue": "N",
+      "plddt": 30.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 22,
+      "residue": "R",
+      "plddt": 28.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 23,
+      "residue": "K",
+      "plddt": 27.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 24,
+      "residue": "R",
+      "plddt": 27.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 25,
+      "residue": "I",
+      "plddt": 29.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 26,
+      "residue": "S",
+      "plddt": 27.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 27,
+      "residue": "N",
+      "plddt": 26.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 28,
+      "residue": "C",
+      "plddt": 25.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 29,
+      "residue": "V",
+      "plddt": 25.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 30,
+      "residue": "A",
+      "plddt": 27.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 31,
+      "residue": "D",
+      "plddt": 25.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 32,
+      "residue": "Y",
+      "plddt": 25.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 33,
+      "residue": "S",
+      "plddt": 23.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 34,
+      "residue": "V",
+      "plddt": 25.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 35,
+      "residue": "L",
+      "plddt": 26.0,
+      "neighbour_count": 15
+    },
+    {
+      "position": 36,
+      "residue": "Y",
+      "plddt": 25.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 37,
+      "residue": "N",
+      "plddt": 26.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 38,
+      "residue": "S",
+      "plddt": 24.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 39,
+      "residue": "A",
+      "plddt": 24.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 40,
+      "residue": "S",
+      "plddt": 25.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 41,
+      "residue": "F",
+      "plddt": 28.0,
+      "neighbour_count": 18
+    },
+    {
+      "position": 42,
+      "residue": "S",
+      "plddt": 25.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 43,
+      "residue": "T",
+      "plddt": 25.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 44,
+      "residue": "F",
+      "plddt": 28.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 45,
+      "residue": "K",
+      "plddt": 24.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 46,
+      "residue": "C",
+      "plddt": 25.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 47,
+      "residue": "Y",
+      "plddt": 23.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 48,
+      "residue": "G",
+      "plddt": 24.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 49,
+      "residue": "V",
+      "plddt": 25.0,
+      "neighbour_count": 15
+    },
+    {
+      "position": 50,
+      "residue": "S",
+      "plddt": 25.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 51,
+      "residue": "P",
+      "plddt": 26.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 52,
+      "residue": "T",
+      "plddt": 25.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 53,
+      "residue": "K",
+      "plddt": 27.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 54,
+      "residue": "L",
+      "plddt": 26.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 55,
+      "residue": "N",
+      "plddt": 27.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 56,
+      "residue": "D",
+      "plddt": 26.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 57,
+      "residue": "L",
+      "plddt": 25.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 58,
+      "residue": "C",
+      "plddt": 24.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 59,
+      "residue": "F",
+      "plddt": 27.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 60,
+      "residue": "T",
+      "plddt": 24.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 61,
+      "residue": "N",
+      "plddt": 24.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 62,
+      "residue": "V",
+      "plddt": 25.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 63,
+      "residue": "Y",
+      "plddt": 24.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 64,
+      "residue": "A",
+      "plddt": 24.0,
+      "neighbour_count": 17
+    },
+    {
+      "position": 65,
+      "residue": "D",
+      "plddt": 23.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 66,
+      "residue": "S",
+      "plddt": 25.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 67,
+      "residue": "F",
+      "plddt": 26.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 68,
+      "residue": "V",
+      "plddt": 27.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 69,
+      "residue": "I",
+      "plddt": 27.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 70,
+      "residue": "R",
+      "plddt": 25.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 71,
+      "residue": "G",
+      "plddt": 25.0,
+      "neighbour_count": 15
+    },
+    {
+      "position": 72,
+      "residue": "D",
+      "plddt": 27.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 73,
+      "residue": "E",
+      "plddt": 27.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 74,
+      "residue": "V",
+      "plddt": 29.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 75,
+      "residue": "R",
+      "plddt": 28.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 76,
+      "residue": "Q",
+      "plddt": 29.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 77,
+      "residue": "I",
+      "plddt": 31.0,
+      "neighbour_count": 17
+    },
+    {
+      "position": 78,
+      "residue": "A",
+      "plddt": 31.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 79,
+      "residue": "P",
+      "plddt": 30.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 80,
+      "residue": "G",
+      "plddt": 28.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 81,
+      "residue": "Q",
+      "plddt": 27.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 82,
+      "residue": "T",
+      "plddt": 27.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 83,
+      "residue": "G",
+      "plddt": 26.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 84,
+      "residue": "K",
+      "plddt": 27.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 85,
+      "residue": "I",
+      "plddt": 29.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 86,
+      "residue": "A",
+      "plddt": 27.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 87,
+      "residue": "D",
+      "plddt": 27.0,
+      "neighbour_count": 6
+    },
+    {
+      "position": 88,
+      "residue": "Y",
+      "plddt": 28.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 89,
+      "residue": "N",
+      "plddt": 28.0,
+      "neighbour_count": 5
+    },
+    {
+      "position": 90,
+      "residue": "Y",
+      "plddt": 26.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 91,
+      "residue": "K",
+      "plddt": 29.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 92,
+      "residue": "L",
+      "plddt": 31.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 93,
+      "residue": "P",
+      "plddt": 31.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 94,
+      "residue": "D",
+      "plddt": 33.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 95,
+      "residue": "D",
+      "plddt": 31.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 96,
+      "residue": "F",
+      "plddt": 31.0,
+      "neighbour_count": 15
+    },
+    {
+      "position": 97,
+      "residue": "T",
+      "plddt": 29.0,
+      "neighbour_count": 15
+    },
+    {
+      "position": 98,
+      "residue": "G",
+      "plddt": 28.0,
+      "neighbour_count": 15
+    },
+    {
+      "position": 99,
+      "residue": "C",
+      "plddt": 27.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 100,
+      "residue": "V",
+      "plddt": 30.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 101,
+      "residue": "I",
+      "plddt": 30.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 102,
+      "residue": "A",
+      "plddt": 29.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 103,
+      "residue": "W",
+      "plddt": 32.0,
+      "neighbour_count": 20
+    },
+    {
+      "position": 104,
+      "residue": "N",
+      "plddt": 31.0,
+      "neighbour_count": 15
+    },
+    {
+      "position": 105,
+      "residue": "S",
+      "plddt": 30.0,
+      "neighbour_count": 18
+    },
+    {
+      "position": 106,
+      "residue": "N",
+      "plddt": 30.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 107,
+      "residue": "N",
+      "plddt": 30.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 108,
+      "residue": "L",
+      "plddt": 27.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 109,
+      "residue": "D",
+      "plddt": 28.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 110,
+      "residue": "S",
+      "plddt": 27.0,
+      "neighbour_count": 6
+    },
+    {
+      "position": 111,
+      "residue": "K",
+      "plddt": 27.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 112,
+      "residue": "V",
+      "plddt": 25.0,
+      "neighbour_count": 17
+    },
+    {
+      "position": 113,
+      "residue": "G",
+      "plddt": 28.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 114,
+      "residue": "G",
+      "plddt": 28.0,
+      "neighbour_count": 15
+    },
+    {
+      "position": 115,
+      "residue": "N",
+      "plddt": 29.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 116,
+      "residue": "Y",
+      "plddt": 30.0,
+      "neighbour_count": 17
+    },
+    {
+      "position": 117,
+      "residue": "N",
+      "plddt": 30.0,
+      "neighbour_count": 18
+    },
+    {
+      "position": 118,
+      "residue": "Y",
+      "plddt": 31.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 119,
+      "residue": "L",
+      "plddt": 28.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 120,
+      "residue": "Y",
+      "plddt": 31.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 121,
+      "residue": "R",
+      "plddt": 29.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 122,
+      "residue": "L",
+      "plddt": 29.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 123,
+      "residue": "F",
+      "plddt": 28.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 124,
+      "residue": "R",
+      "plddt": 28.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 125,
+      "residue": "K",
+      "plddt": 26.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 126,
+      "residue": "S",
+      "plddt": 27.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 127,
+      "residue": "N",
+      "plddt": 27.0,
+      "neighbour_count": 5
+    },
+    {
+      "position": 128,
+      "residue": "L",
+      "plddt": 25.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 129,
+      "residue": "K",
+      "plddt": 28.0,
+      "neighbour_count": 5
+    },
+    {
+      "position": 130,
+      "residue": "P",
+      "plddt": 27.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 131,
+      "residue": "F",
+      "plddt": 25.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 132,
+      "residue": "E",
+      "plddt": 26.0,
+      "neighbour_count": 6
+    },
+    {
+      "position": 133,
+      "residue": "R",
+      "plddt": 25.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 134,
+      "residue": "D",
+      "plddt": 26.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 135,
+      "residue": "I",
+      "plddt": 26.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 136,
+      "residue": "S",
+      "plddt": 25.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 137,
+      "residue": "T",
+      "plddt": 23.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 138,
+      "residue": "E",
+      "plddt": 23.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 139,
+      "residue": "I",
+      "plddt": 25.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 140,
+      "residue": "Y",
+      "plddt": 24.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 141,
+      "residue": "Q",
+      "plddt": 23.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 142,
+      "residue": "A",
+      "plddt": 25.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 143,
+      "residue": "G",
+      "plddt": 25.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 144,
+      "residue": "S",
+      "plddt": 26.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 145,
+      "residue": "T",
+      "plddt": 29.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 146,
+      "residue": "P",
+      "plddt": 27.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 147,
+      "residue": "C",
+      "plddt": 26.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 148,
+      "residue": "N",
+      "plddt": 28.0,
+      "neighbour_count": 6
+    },
+    {
+      "position": 149,
+      "residue": "G",
+      "plddt": 24.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 150,
+      "residue": "V",
+      "plddt": 24.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 151,
+      "residue": "E",
+      "plddt": 24.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 152,
+      "residue": "G",
+      "plddt": 24.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 153,
+      "residue": "F",
+      "plddt": 25.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 154,
+      "residue": "N",
+      "plddt": 26.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 155,
+      "residue": "C",
+      "plddt": 25.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 156,
+      "residue": "Y",
+      "plddt": 27.0,
+      "neighbour_count": 18
+    },
+    {
+      "position": 157,
+      "residue": "F",
+      "plddt": 26.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 158,
+      "residue": "P",
+      "plddt": 25.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 159,
+      "residue": "L",
+      "plddt": 25.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 160,
+      "residue": "Q",
+      "plddt": 24.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 161,
+      "residue": "S",
+      "plddt": 25.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 162,
+      "residue": "Y",
+      "plddt": 25.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 163,
+      "residue": "G",
+      "plddt": 24.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 164,
+      "residue": "F",
+      "plddt": 29.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 165,
+      "residue": "Q",
+      "plddt": 28.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 166,
+      "residue": "P",
+      "plddt": 27.0,
+      "neighbour_count": 17
+    },
+    {
+      "position": 167,
+      "residue": "T",
+      "plddt": 30.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 168,
+      "residue": "N",
+      "plddt": 30.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 169,
+      "residue": "G",
+      "plddt": 26.0,
+      "neighbour_count": 8
+    },
+    {
+      "position": 170,
+      "residue": "V",
+      "plddt": 28.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 171,
+      "residue": "G",
+      "plddt": 26.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 172,
+      "residue": "Y",
+      "plddt": 25.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 173,
+      "residue": "Q",
+      "plddt": 27.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 174,
+      "residue": "P",
+      "plddt": 25.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 175,
+      "residue": "Y",
+      "plddt": 27.0,
+      "neighbour_count": 17
+    },
+    {
+      "position": 176,
+      "residue": "R",
+      "plddt": 27.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 177,
+      "residue": "V",
+      "plddt": 29.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 178,
+      "residue": "V",
+      "plddt": 28.0,
+      "neighbour_count": 15
+    },
+    {
+      "position": 179,
+      "residue": "V",
+      "plddt": 30.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 180,
+      "residue": "L",
+      "plddt": 28.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 181,
+      "residue": "S",
+      "plddt": 27.0,
+      "neighbour_count": 17
+    },
+    {
+      "position": 182,
+      "residue": "F",
+      "plddt": 30.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 183,
+      "residue": "E",
+      "plddt": 30.0,
+      "neighbour_count": 14
+    },
+    {
+      "position": 184,
+      "residue": "L",
+      "plddt": 27.0,
+      "neighbour_count": 17
+    },
+    {
+      "position": 185,
+      "residue": "L",
+      "plddt": 29.0,
+      "neighbour_count": 13
+    },
+    {
+      "position": 186,
+      "residue": "H",
+      "plddt": 27.0,
+      "neighbour_count": 16
+    },
+    {
+      "position": 187,
+      "residue": "A",
+      "plddt": 27.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 188,
+      "residue": "P",
+      "plddt": 26.0,
+      "neighbour_count": 10
+    },
+    {
+      "position": 189,
+      "residue": "A",
+      "plddt": 23.0,
+      "neighbour_count": 11
+    },
+    {
+      "position": 190,
+      "residue": "T",
+      "plddt": 25.0,
+      "neighbour_count": 6
+    },
+    {
+      "position": 191,
+      "residue": "V",
+      "plddt": 26.0,
+      "neighbour_count": 9
+    },
+    {
+      "position": 192,
+      "residue": "C",
+      "plddt": 22.0,
+      "neighbour_count": 12
+    },
+    {
+      "position": 193,
+      "residue": "G",
+      "plddt": 24.0,
+      "neighbour_count": 7
+    },
+    {
+      "position": 194,
+      "residue": "P",
+      "plddt": 24.0,
+      "neighbour_count": 3
+    }
+  ],
+  "mean_plddt": 26.61,
+  "median_plddt": 27.0,
+  "min_plddt": 22.0,
+  "confident_fraction": 0.0,
+  "low_confidence_runs": [
+    [
+      1,
+      194
+    ]
+  ],
+  "exposure_proxy": {
+    "method": "count of other residues whose CB (CA for glycine) lies within 10.0 angstrom. A contact number.",
+    "is_sasa": false,
+    "lower_is_more_exposed": true,
+    "computed_over_confident_residues_only": true,
+    "confident_residues_used": 0,
+    "first_quartile_count": null,
+    "least_buried_positions": [],
+    "caveat": "A proxy for burial on predicted coordinates, not a solvent-accessible surface area and not a measurement. Positions are reported only where pLDDT clears the threshold, because a contact number over a low-confidence stretch describes a fold the model did not commit to. A monomer surface is not necessarily exposed in an oligomer."
+  },
+  "unverified": [
+    "Every coordinate, every pLDDT value and every neighbour count. A prediction and a proxy computed on it are model assertions, not measurements, and nothing here was checked against an experiment."
+  ],
+  "seconds": 12.795,
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "3c5a431948d96780893cb452506c0a4629280f96",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-12T09:08:36.466159+00:00"
+  },
+  "content_sha256": "45e620a1a89a702bc935ab9efddcf2f68f459aa90459fd20ce36caffbe58946d",
+  "unit": {
+    "kind": "domain",
+    "label": "BetaCoV S1-CTD",
+    "region_type": "Domain",
+    "description": "BetaCoV S1-CTD",
+    "entry_span_on_the_relative": [
+      325,
+      500
+    ],
+    "span_in_this_genome": [
+      343,
+      536
+    ],
+    "length_aa": 194,
+    "mapped_length_aa": 194,
+    "ends_adjusted": false,
+    "unmapped_ends": 0,
+    "site_residues_inside": 0,
+    "refused_because": null
+  }
+}
