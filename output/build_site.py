@@ -518,18 +518,25 @@ def candidate_matrix(case):
       that homolog gets more distant, which is why a held-out run's scores fall by about three
       points rather than collapsing, and why the conservation column is the one that says how
       far the evidence actually reached.
-    * Three of the twelve score nothing at all. They are in the table with their reason,
-      because they are the operating envelope rather than a gap: no relative at either
-      homology tier and no surface signal in their own sequence either. A table of the nine
-      that worked would be the pipeline grading its own coverage.
+    * Only the ORFs stage 1 actually identified. Three of the twelve score nothing at all --
+      no relative at either homology tier and no surface signal in their own sequence -- and
+      they used to sit in the table under their reason, as the operating envelope rather than
+      a gap. The project lead asked on 12 Nov 2026 for the nine instead: a row that reads
+      "Not identified" across every column is not a ranking, and the table is the ranking.
+
+      The counts they were standing in for must therefore survive somewhere a reader sees.
+      They do, in stage 1's own In/Out block beside this table, which states that twelve were
+      ranked and three came back unrecognised and off the table. If that block is ever
+      rewritten, the three stop being reported anywhere on the page, which is the one outcome
+      this filter must not produce.
     """
     rows, record = candidate_rows(case)
+    rows = [r for r in rows if r.get("score") is not None]
     if not rows:
         return ""
     source = record or case
     rubric, ceiling = source["rubric"], source["term_ceiling"]
-    scored = [r for r in rows if r.get("score") is not None]
-    top = max((r["score"] for r in scored), default=0) or 1
+    top = max((r["score"] for r in rows), default=0) or 1
     total_ceiling = round(sum(ceiling[key] for key, _, _ in TERM_COLUMNS), 2)
 
     head_cells = term_head_cells(rubric, ceiling)
@@ -538,18 +545,6 @@ def candidate_matrix(case):
     for row in rows:
         where = (f'{esc(row["strand"])}{esc(row["frame"])} · nt {row["nt_start"]:,} '
                  f'· {row["length_aa"]:,} aa')
-        if row.get("score") is None:
-            # One cell across the five terms. Writing five zeroes here would read as five
-            # measurements that came back zero, and nothing was measured: the ranker never
-            # reached the features because nothing identified the protein.
-            body.append(f"""
-      <tr class="unid" id="orf-{esc(row['rank'])}">
-        <td class="rk">{esc(row['rank'])}</td>
-        <td class="nm"><span class="t">Not identified</span><span class="w">{where}</span></td>
-        <td class="why" colspan="5">{esc(row.get('unidentified_because'))}</td>
-        <td class="sc">&mdash;</td>
-      </tr>""")
-            continue
         cells = term_cells(row["features"], row["terms"], ceiling,
                            row.get("conservation_scale"))
         route = row.get("identification_route")
@@ -583,7 +578,7 @@ def candidate_matrix(case):
     return f"""
   <div class="cmxscroll" tabindex="0" role="region" aria-label="The ranked ORFs and their scores">
   <table class="cmx">
-    <caption>Every ORF stage 1 ranked, highest composite score first. Each cell is the points
+    <caption>Every ORF stage 1 identified, highest composite score first. Each cell is the points
       that weight paid, with the measurement it was computed from underneath; the shading is
       the share of that column's maximum. Nothing here is fitted — the five weights were
       fixed before the run.</caption>

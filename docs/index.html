@@ -264,13 +264,13 @@
       <div class="out"><h3>Out</h3><ul>
         <li><b>28</b> open reading frames — stretches of genome that could code for a protein</li>
         <li><b>12</b> worth ranking</li>
-        <li><b>9</b> matched to a known relative, <b>3</b> unrecognised and reported as such</li>
+        <li><b>9</b> matched to a known relative and scored in the table below; <b>3</b> matched nothing at either tier and are off it</li>
       </ul></div>
     </div>
   </div>
 
   <div class="substep">
-    <h3>The 12 it ranked, and why each one scored what it did</h3>
+    <h3>The 9 it ranked, and why each one scored what it did</h3>
     <p class="cap">Nothing is read off an existing annotation of this genome. The sequence
     is translated in all six reading frames, every stretch between stop codons of at least
     60 residues is kept, and the 12 longest are searched against
@@ -283,7 +283,7 @@
     
   <div class="cmxscroll" tabindex="0" role="region" aria-label="The ranked ORFs and their scores">
   <table class="cmx">
-    <caption>Every ORF stage 1 ranked, highest composite score first. Each cell is the points
+    <caption>Every ORF stage 1 identified, highest composite score first. Each cell is the points
       that weight paid, with the measurement it was computed from underneath; the shading is
       the share of that column's maximum. Nothing here is fitted — the five weights were
       fixed before the run.</caption>
@@ -367,24 +367,6 @@
         <td class="h h2"><span class="pt">0.90</span><span class="rw">0.301</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.01</span><span class="rw">1 in PDB</span></td>
         <td class="sc"><span class="v">0.91</span>
           <span class="tr"><i style="width:13.2%"></i></span></td>
-      </tr>
-      <tr class="unid" id="orf-10">
-        <td class="rk">10</td>
-        <td class="nm"><span class="t">Not identified</span><span class="w">-2 · nt 23,414 · 100 aa</span></td>
-        <td class="why" colspan="5">no homolog at either tier and neither topology route fired</td>
-        <td class="sc">&mdash;</td>
-      </tr>
-      <tr class="unid" id="orf-11">
-        <td class="rk">11</td>
-        <td class="nm"><span class="t">Not identified</span><span class="w">+2 · nt 21,935 · 87 aa</span></td>
-        <td class="why" colspan="5">no homolog at either tier and neither topology route fired</td>
-        <td class="sc">&mdash;</td>
-      </tr>
-      <tr class="unid" id="orf-12">
-        <td class="rk">12</td>
-        <td class="nm"><span class="t">Not identified</span><span class="w">+2 · nt 2,957 · 82 aa</span></td>
-        <td class="why" colspan="5">no homolog at either tier and neither topology route fired</td>
-        <td class="sc">&mdash;</td>
       </tr></tbody>
   </table>
   </div><p class="after">The five weights and every number in this table are read from <span class="mono">runs/intake_candidates.json</span>, which is this same stage run on its own. The chain record keeps stage 1 as counts, and the build refuses to ship this table unless those counts match. The later sections are from <span class="mono">runs/onset_chain.json</span>.</p>

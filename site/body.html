@@ -243,13 +243,13 @@
       <div class="out"><h3>Out</h3><ul>
         <li><b>{{orfs_found}}</b> open reading frames — stretches of genome that could code for a protein</li>
         <li><b>{{orfs_ranked}}</b> worth ranking</li>
-        <li><b>{{identified}}</b> matched to a known relative, <b>{{unidentified}}</b> unrecognised and reported as such</li>
+        <li><b>{{identified}}</b> matched to a known relative and scored in the table below; <b>{{unidentified}}</b> matched nothing at either tier and are off it</li>
       </ul></div>
     </div>
   </div>
 
   <div class="substep">
-    <h3>The {{orfs_ranked}} it ranked, and why each one scored what it did</h3>
+    <h3>The {{identified}} it ranked, and why each one scored what it did</h3>
     <p class="cap">Nothing is read off an existing annotation of this genome. The sequence
     is translated in all six reading frames, every stretch between stop codons of at least
     {{minimum_orf_aa}} residues is kept, and the {{orfs_ranked}} longest are searched against
