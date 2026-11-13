@@ -6335,7 +6335,15 @@ def test_a_site_patch_row_is_the_same_width_measured_or_refused():
     one_site = [{"positions": [10], "description": "Nucleophile"}]
     gapped = _absence(one_site, [], [{"on_the_relative": 10}], "domain", "a domain")
     assert "has a counterpart in this genome" in gapped and "it falls" in gapped
-    assert "anchors_unmapped" in gapped, "the positions are still reachable"
+    # What this refusal has to promise is that the positions were not lost and that a reader
+    # knows whose numbering they are in -- without that, "no measurement" reads as "no data".
+    # It used to promise it by naming the field they are stored under, and the assertion
+    # pinned that name. The sentence is read verbatim off the site, and the site does not
+    # print field names, so the promise is now made in words and the old spelling is banned
+    # rather than required.
+    assert "The record keeps those positions" in gapped, "the positions are still reachable"
+    assert "relative's own numbering" in gapped, "and a reader is told whose numbering"
+    assert "anchors_unmapped" not in gapped, "a field name must not reach a reader"
 
     elsewhere = _absence(one_site, [{"on_the_relative": 10}], [], "domain", "a domain")
     assert "lies outside this domain (a domain)" in elsewhere
