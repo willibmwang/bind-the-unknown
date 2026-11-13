@@ -525,60 +525,6 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .dfold .cc{font-size:12.5px;color:var(--fg-2);line-height:1.6;margin:9px 0 12px}
 .dfold .cc b{color:var(--fg);font-weight:650}
 @media (max-width:760px){.dfold{padding:12px 13px 4px}}
-
-/* The two-numberings table. Five columns, and the two span columns are deliberately the same
-   fixed width as each other: they hold the same kind of value measured on two different
-   proteins, and a reader comparing them down the page should not have to re-find the column
-   edge on every row. The shift column is last because it is the conclusion the other four
-   support, and it is the one column that carries a sentence under its figure. */
-/* Scoped to beat `.substep h3`'s own margin on specificity rather than with `!important`,
-   which this stylesheet uses nowhere else and should not start here for a top margin. */
-.substep h3.xh{margin-top:38px}
-.xfer{border:1px solid var(--rule);border-radius:14px;background:var(--surface);
-  overflow:hidden;margin:16px 0 18px}
-/* The length column is 9ch and not the 7ch its neighbour `.dmn` uses, because this table
-   carries whole chains as well as regions and `1,945 aa` is eight characters where no region
-   on the page reaches four digits. At 7.5ch that one row wrapped its unit onto a second line. */
-.xf{display:grid;grid-template-columns:minmax(0,1.5fr) 9ch 12ch 12ch minmax(0,1.15fr);
-  gap:14px;align-items:baseline;padding:9px 17px;font-size:13px;
-  border-bottom:1px solid var(--rule-2)}
-.xf:last-child{border-bottom:0}
-.xf-hd{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
-  color:var(--fg-3);border-bottom:1px solid var(--rule)}
-/* The chain's own row. Tinted rather than ruled off, because a rule would read as the end of
-   a group when it is the head of one, and the regions under it are its contents. */
-.xf.xg{background:var(--surface-2)}
-.xf.xg .xn{font-weight:650}
-.xf .xn{font-weight:600;overflow-wrap:anywhere}
-/* The regions are indented under their chain so the nesting survives without a second border.
-   The header row is not a region, so it keeps the flush edge. */
-.xf:not(.xg):not(.xf-hd) .xn{padding-left:15px}
-.xf .xt{display:block;font-family:var(--mono);font-size:10.5px;color:var(--fg-3);
-  font-weight:400;margin-top:2px}
-.xf .xl,.xf .xw,.xf .xs{font-family:var(--mono);font-size:12px;
-  font-variant-numeric:tabular-nums}
-.xf .xw{color:var(--fg-2)}
-.xf .xs{color:var(--fg);font-weight:600}
-.xf-hd .xs,.xf-hd .xl,.xf-hd .xw{font-weight:inherit;color:inherit;font-size:inherit}
-.xf .xq{display:block;font-family:var(--mono);font-size:10.5px;color:var(--fg-3);
-  font-weight:400;line-height:1.5;margin-top:3px}
-@media (max-width:860px){
-  /* Two columns, and the span columns keep their labels because out of a five-column grid a
-     bare pair of numbers no longer says which protein it is measured on. */
-  /* A FIXED second column rather than `auto`, which is max-content: the widest cell at this
-     breakpoint is a labelled span like `HERE 1,172-1,211`, and a max-content track cannot
-     shrink below it however narrow the screen gets. `.dmn` next door uses a fixed track here
-     for the same reason. Not measured against a real overflow -- headless Chrome clamps its
-     viewport at 500px, where nothing overflows -- so this is the conservative track, not a fix. */
-  .xf{grid-template-columns:minmax(0,1fr) 16ch;gap:3px 14px;padding:11px 14px}
-  .xf .xw,.xf .xs{overflow-wrap:anywhere}
-  .xf-hd{display:none}
-  .xf .xw::before{font-family:var(--mono);font-size:10.5px;color:var(--fg-3);
-    letter-spacing:.06em;text-transform:uppercase}
-  .xf .xwa::before{content:"relative "}
-  .xf .xwb::before{content:"here "}
-  .xf:not(.xg):not(.xf-hd) .xn{padding-left:0}
-}
 @media (max-width:760px){
   .dmn,.dmn-hd{grid-template-columns:minmax(0,1fr) 7ch;gap:4px 14px}
   .dmn-hd{display:none}
