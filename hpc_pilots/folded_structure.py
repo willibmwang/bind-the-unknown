@@ -148,6 +148,22 @@ REQUEST_TIMEOUT = 45
 exactly where the measured cold time reaches 25.6 s -- so 45 is past the gateway's own ceiling
 and a timeout here means the gateway never answered."""
 
+LONG_REQUEST_TIMEOUT = int(os.environ.get("ESMFOLD_LONG_TIMEOUT") or 170)
+"""Seconds per request to the SECOND host, which is a different machine with different
+numbers and must not inherit the Atlas's.
+
+45 seconds is right for a gateway that cuts at 30. It is wrong for a GPU deployment that
+cold-starts in about 30 seconds before folding anything and then takes 37 seconds on a
+932-residue chain and 109 on a 1,200. Measured end to end on 13 Nov 2026, a cold 932-residue
+fold timed out at 45 s on the first attempt and only succeeded because the retry found the
+container warm -- which is luck, and with `RETRIES` at 2 a slower chain would have spent both
+attempts and been recorded as an absence the host never actually refused. A false absence is
+the most expensive error this lane can make: it is indistinguishable from a real one.
+
+170 sits just past the 150 seconds a Modal web endpoint will hold a connection for, so what
+comes back is the HOST's own answer about being too slow rather than ours about waiting.
+"""
+
 RETRIES = 2
 """Total attempts, not additional ones. One retry, because the observed failure is a flaky host
 rather than a malformed request, and more than one would push the declared worst case past what
@@ -160,18 +176,66 @@ RETRY_STATUS = frozenset({429, 500, 502, 503, 504})
 """Statuses worth a second attempt. 400, 413 and 422 are refusals of this exact body and will
 be refused identically however often they are sent."""
 
+LONG_ENDPOINT = os.environ.get("ESMFOLD_LONG_ENDPOINT")
+"""A second ESMFold deployment for the chains the public host refuses on length, or None.
+
+**The split, and why it is a split rather than a replacement.** `api.esmatlas.com` stops at
+400 residues, which on the held-out SARS-CoV-2 run refuses eight of the twelve shortlisted
+chains whole -- all three spike chains, the polymerase, nsp3, nsp13, nsp14 and the
+nucleoprotein. A GPU deployment has no such limit. It is also not the same artifact: the same
+weights on different hardware put the main protease 0.841 angstrom from the committed fold at
+`runs/folded_structure/mpro_nsp5.pdb`, which this repository reproduces byte for byte against
+the public host. Moving every fold to a GPU would quietly end that reproduction.
+
+So short sequences keep going to the host the committed artifact came from, and only the
+chains that host will not take are sent elsewhere. Nothing a recorded run already contains
+changes; what was an absence becomes a structure.
+"""
+
+LONG_MAX_RESIDUES = int(os.environ.get("ESMFOLD_LONG_MAX_RESIDUES") or 1200)
+"""What the second host can return inside one request, measured on a Modal H100 on 13 Nov
+2026: 932 residues answered in 37 s and 1,200 in 109 s, while 1,500 and 1,922 both hit the
+150-second limit a web endpoint holds a connection for and came back 303 to a polling URL
+that a POST cannot follow. So this is a WALL-CLOCK ceiling wearing a length's clothes, and
+raising it without making the host faster converts a local refusal into a lost fold. nsp3 at
+1,922 residues stays above it and keeps the domain route."""
+
+LONG_TOKEN = os.environ.get("ESMFOLD_LONG_TOKEN")
+"""Bearer token for the second host, when it is deployed behind one. Absent is allowed so the
+lane works against an open deployment, which is what a first bring-up produces."""
+
 MODEL = "ESMFold v1"
-def _served_by():
+
+
+def route(length):
+    """Which host should take a sequence of this length, and why. Returns (endpoint, why).
+
+    `(None, reason)` means neither host will take it, which is a real zero for the target and
+    is recorded as one rather than attempted.
+    """
+    if length <= MAX_RESIDUES:
+        return ENDPOINT, "inside the public host's ceiling"
+    if LONG_ENDPOINT and length <= LONG_MAX_RESIDUES:
+        return LONG_ENDPOINT, (f"over the public host's {MAX_RESIDUES}-residue ceiling and "
+                               f"inside the second host's {LONG_MAX_RESIDUES}")
+    return None, (f"{length} residues is over the public host's {MAX_RESIDUES}"
+                  + (f" and over the second host's {LONG_MAX_RESIDUES}" if LONG_ENDPOINT
+                     else " and no second host is configured"))
+
+
+def _served_by(endpoint=None):
     """Who actually answered, not who usually answers.
 
     The citation named api.esmatlas.com unconditionally. Once ENDPOINT became settable that
     was a provenance error waiting to happen: a fold produced by a local deployment would
     have carried a citation crediting a host that never saw the sequence."""
-    host = re.sub(r"^https?://([^/]+).*$", r"\1", ENDPOINT)
+    host = re.sub(r"^https?://([^/]+).*$", r"\1", endpoint or ENDPOINT)
     if host == "api.esmatlas.com":
         return ("Served by the ESM Metagenomic Atlas (api.esmatlas.com) under CC-BY-4.0, "
                 "(c) Meta Platforms.")
-    return f"Served by {host}, configured through ESMFOLD_ENDPOINT, not by the ESM Atlas."
+    variable = ("ESMFOLD_LONG_ENDPOINT" if LONG_ENDPOINT and host == re.sub(
+        r"^https?://([^/]+).*$", r"\1", LONG_ENDPOINT) else "ESMFOLD_ENDPOINT")
+    return f"Served by {host}, configured through {variable}, not by the ESM Atlas."
 
 
 CITATION = ("Lin et al., Evolutionary-scale prediction of atomic-level protein structure with a "
@@ -260,13 +324,20 @@ def clean_sequence(sequence):
     return cleaned
 
 
-def _attempt(body):
+def _attempt(body, endpoint=None):
     """One POST of the raw sequence. Never raises for an HTTP status; records it."""
+    endpoint = endpoint or ENDPOINT
+    headers = {"User-Agent": USER_AGENT, "Content-Type": "text/plain", "Accept": "*/*"}
+    # Only to the second host, and only when one is configured. Sending a bearer token to
+    # the public Atlas would be leaking a credential to a third party for no purpose.
+    if LONG_TOKEN and endpoint == LONG_ENDPOINT:
+        headers["Authorization"] = f"Bearer {LONG_TOKEN}"
     request = urllib.request.Request(
-        ENDPOINT, data=body.encode("ascii"), method="POST",
-        headers={"User-Agent": USER_AGENT, "Content-Type": "text/plain", "Accept": "*/*"})
+        endpoint, data=body.encode("ascii"), method="POST", headers=headers)
+    timeout = (LONG_REQUEST_TIMEOUT if LONG_ENDPOINT and endpoint == LONG_ENDPOINT
+               else REQUEST_TIMEOUT)
     try:
-        with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             return _Opened(body=response.read().decode("utf-8", "replace"),
                            status=getattr(response, "status", 200))
     except urllib.error.HTTPError as error:
@@ -281,7 +352,7 @@ def _attempt(body):
         return _Opened(transport=f"{type(error).__name__}: {error}")
 
 
-def _post(sequence, sources):
+def _post(sequence, sources, endpoint=None):
     """Fetch the predicted PDB, retrying only a transport failure or a retryable status.
 
     Returns `(pdb_text, attempts, absence)`. `absence` is None on success and otherwise the
@@ -293,8 +364,8 @@ def _post(sequence, sources):
         if attempt > 1:
             time.sleep(RETRY_PAUSE)
         attempts += 1
-        sources.append(ENDPOINT)
-        last = _attempt(sequence)
+        sources.append(endpoint or ENDPOINT)
+        last = _attempt(sequence, endpoint)
         if last.body is not None:
             return last.body, attempts, None
         retryable = last.transport or (last.status in RETRY_STATUS)
@@ -435,15 +506,25 @@ def fold(sequence, target_name="", neighbour_cutoff=10.0, confident_plddt=70.0, 
         "ambiguous_positions": [i for i, residue in enumerate(cleaned, 1)
                                 if residue in AMBIGUOUS],
         "folded": False, "absence": None, "model_date": None,
-        "citation": CITATION, "endpoint": ENDPOINT,
         "limitations": list(LIMITATIONS),
     }
 
-    if len(cleaned) > MAX_RESIDUES:
+    # Which host takes this one, decided on length alone and written onto the record before
+    # anything is sent. The citation follows the host that actually answered rather than the
+    # one this module usually uses, so a GPU fold is never cited to the Atlas.
+    endpoint, why = route(len(cleaned))
+    payload["endpoint"] = endpoint or ENDPOINT
+    payload["routed_because"] = why
+    payload["citation"] = (CITATION if endpoint in (None, ENDPOINT) else
+                           CITATION.replace(_served_by(ENDPOINT), _served_by(endpoint)))
+    payload["max_residues"] = MAX_RESIDUES if endpoint in (None, ENDPOINT) else LONG_MAX_RESIDUES
+
+    if endpoint is None:
         payload["absence"] = {
             "reason": "sequence_too_long", "detail": f"{len(cleaned)} residues exceeds the "
             f"measured {MAX_RESIDUES}-residue ceiling, above which the host returns HTTP 413 "
             f"'Sequence is longer than 400.'", "http_status": None, "attempts": 0,
+            "routed_because": why,
             "note": "Refused locally, so no request was spent on a deterministic no. This is a "
                     "real limit on the lane and a real zero for this target: a full-length "
                     "viral glycoprotein cannot be folded here, and folding a fragment of it "
@@ -454,7 +535,7 @@ def fold(sequence, target_name="", neighbour_cutoff=10.0, confident_plddt=70.0, 
         payload["provenance"] = provenance()
         return _finish(payload, None, target_name, record)
 
-    text, attempts, absence = _post(cleaned, sources)
+    text, attempts, absence = _post(cleaned, sources, endpoint)
     payload["network_calls"] = attempts
     payload["sources"] = list(dict.fromkeys(sources))
     if absence is not None:
