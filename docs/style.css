@@ -81,8 +81,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,[role="button"]:focus-v
 /* masthead */
 header.top{padding-block:76px 34px;border-bottom:1px solid var(--rule)}
 /* The landing hero only. Result pages keep the plain header.top above. */
+/* Short of a full screen, deliberately. At `100vh - 62px` the first thing a visitor sees is
+   a title, two buttons and nothing else -- no sign that the page continues, and the four
+   facts that answer "what is this" are a scroll away with no cue to scroll. Capping it lets
+   the facts strip break the fold on a laptop, which is the cheapest possible way to say
+   there is more. The cap is absolute as well as relative, or a tall monitor reintroduces
+   the same empty screen. */
 header.hero{display:grid;grid-template-columns:1.32fr .68fr;align-items:center;gap:48px;
-  min-height:calc(100vh - 62px);border-bottom:0;padding-block:40px 56px}
+  min-height:min(82vh,700px);border-bottom:0;padding-block:40px 48px}
 .hero-text{min-width:0}
 .hero-art{width:100%;max-width:400px;height:auto;justify-self:center;display:block;
   /* decorative: the real fold, but the page does not depend on it loading */
@@ -164,6 +170,10 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
 .step{position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:17px 10px 15px;text-align:center;min-width:0}
 .step .ic{display:block;width:100%;max-width:90px;height:auto;margin:0 auto 12px}
+/* The step's number, so figure 1 and the five panels in section 03 are plainly the same five
+   things. Absolute, in the corner, out of the icon's way. */
+.step .no{position:absolute;top:8px;left:9px;font-family:var(--mono);font-size:11px;
+  font-weight:500;color:var(--fg-3);font-variant-numeric:tabular-nums}
 .ic .ac{fill:var(--brand)}
 .ic .acs{stroke:var(--brand)}
 .step .lbl{font-size:14.5px;font-weight:500;line-height:1.3}
@@ -319,7 +329,10 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .lane{border:1px solid var(--rule);border-radius:14px;background:var(--surface);overflow:hidden}
 /* Block rather than flex, so the note wraps back to the left margin instead of hanging under
    the heading it follows. */
-.lane-grp{padding:13px 17px;background:var(--surface-2);
+/* The right padding is there to shorten the line, not to make room for anything. The lane
+   is wider than the text column, and a group note set across the whole of it runs to 110
+   characters; the background has to stay full width, so the text column narrows instead. */
+.lane-grp{padding:13px clamp(17px,16%,230px) 13px 17px;background:var(--surface-2);
   border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
 .lane-grp:first-child{border-top:0}
 .lane-grp b{font-size:15px;font-weight:650;margin-right:11px}
@@ -334,8 +347,13 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .lr:last-of-type{border-bottom:0}
 .lr .who{min-width:0}
 .lr .who .t{display:block;font-size:15px;font-weight:600;overflow-wrap:anywhere}
-.lr .who .w{display:block;font-family:var(--mono);font-size:12px;color:var(--fg-3);
-  margin-top:3px;line-height:1.5;overflow-wrap:anywhere}
+/* The body face, not mono. This line is a sentence -- "2 deposited structures of the same
+   domain, 3.0 % of its surface, annotated host endoplasmic reticulum-golgi intermediate
+   compartment" -- and three wrapped lines of 12px monospace is the least readable thing a
+   stylesheet can ask for. The figures inside it are few and short, and tabular numerals keep
+   them aligned down the column without the whole sentence paying for it. */
+.lr .who .w{display:block;font-size:13px;color:var(--fg-3);margin-top:3px;line-height:1.5;
+  overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
 .lr .who .w i{font-style:normal;color:var(--fg-2)}
 .lr .plot{position:relative;display:block;height:20px;background:var(--surface-2);border-radius:5px}
 .lr .plot i{position:absolute;display:block}
@@ -444,10 +462,25 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
    keyboard reachable and announced without help. */
 .dmns{border-bottom:1px solid var(--rule-2);background:var(--surface-2)}
 .dmns:last-of-type{border-bottom:0}
-.dmns>summary{padding:9px 17px 9px 34px;font-size:13.5px;color:var(--fg-2);cursor:pointer;
-  position:relative;line-height:1.5}
-.dmns>summary:hover{color:var(--fg)}
+/* The control belongs to the row above it, and used to read as another row: a grey line of
+   13.5px text with a 5px triangle in front. Three things fixed that, none of them colour on
+   the text itself. It carries an accent rail down its left edge, so the eye reads it as
+   hanging off the row rather than following it; the word at the right end says what clicking
+   does, in the page's own small-caps mono; and the whole strip lights up on hover. */
+.lr:has(+ .dmns){border-bottom:0}
+.dmns>summary{display:flex;align-items:center;gap:10px;padding:9px 17px 9px 34px;
+  font-size:13.5px;color:var(--fg-2);cursor:pointer;position:relative;line-height:1.5;
+  box-shadow:inset 2.5px 0 0 color-mix(in srgb,var(--accent) 45%,transparent);
+  transition:background .14s}
+.dmns>summary:hover{color:var(--fg);background:var(--accent-soft)}
+.dmns[open]>summary{background:var(--accent-soft);
+  box-shadow:inset 2.5px 0 0 var(--accent)}
 .dmns>summary b{font-weight:650;color:var(--fg)}
+/* "open" / "close", in the mono face at the right edge. A disclosure whose state is carried
+   only by a 5px triangle is a disclosure most readers never try. */
+.dmns>summary::after{content:"open";margin-left:auto;flex:none;font-family:var(--mono);
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.dmns[open]>summary::after{content:"close";color:var(--fg-3)}
 /* The marker is drawn rather than inherited: the platform triangle differs in size and
    colour between engines, and this one has to sit on a 13.5px line in both themes. */
 .dmns>summary::marker,.dmns>summary::-webkit-details-marker{content:"";display:none}
@@ -611,7 +644,11 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .pdbrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:16px;align-items:baseline;font-size:14px;padding:9px 0;border-bottom:1px solid var(--rule-2)}
 .pdbrow:last-child{border-bottom:0}
 .pdbrow .who{min-width:0;overflow-wrap:anywhere}
-.pdbrow .who em{font-style:normal;font-family:var(--mono);font-size:12.5px;color:var(--fg-3)}
+/* On its own line. Inline, the accession and range run on from the chain's name and the
+   pair wraps mid-phrase -- "median of" at the end of one line and "5 · a real
+   measurement" at the start of the next. */
+.pdbrow .who em{display:block;margin-top:2px;font-style:normal;font-family:var(--mono);
+  font-size:12.5px;color:var(--fg-3)}
 /* The plain-English gloss beside a chain's real name. The name is first because it is the
    string the record carries and the thing a reader can search the JSON for; the gloss only
    says what it does, and is omitted where there is nothing to say that the record supports. */
@@ -621,7 +658,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 @media(max-width:560px){.pdbrow{grid-template-columns:1fr;gap:4px}}
 .foldimg{margin-top:17px}
 .foldimg img{display:block;width:100%;border:1px solid var(--rule);border-radius:14px;background:#fff}
-.foldimg .cc{font-size:14px;color:var(--fg-3);margin-top:11px;line-height:1.6}
+.foldimg .cc{font-size:14px;color:var(--fg-3);margin-top:11px;line-height:1.6;max-width:92ch}
 
 /* The fold, traced by residue. Band colours are the notebook's PLDDT_BANDS; the darkest blue
    is lifted in dark mode, where #133C8C on near-black all but disappears. */
@@ -745,7 +782,9 @@ a{color:var(--accent)}
 .steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:22px}
 @media(max-width:620px){.steps3{grid-template-columns:1fr}}
 .steps3 div{background:var(--surface-2);border-radius:7px;padding:16px 18px;font-size:14.5px;color:var(--fg-2);line-height:1.55}
-.steps3 b{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3);margin-bottom:7px}
+/* The leading kicker only, so a <b> inside the card's own sentence stays emphasis. */
+.steps3 div>b:first-child{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3);margin-bottom:7px}
+.steps3 b{color:var(--fg);font-weight:650}
 
 /* ---- the record link on a result page ---- */
 .reclink{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;margin:20px 0 0;padding:16px 18px;background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:7px}
@@ -805,12 +844,38 @@ a{color:var(--accent)}
   font-size:14.5px;font-weight:600}
 .lith span{display:block;margin-top:4px;font-size:13px;font-weight:400;color:var(--fg-2);
   line-height:1.55}
+/* Each target is a disclosure, shut by default. Opened all at once this section is longer
+   than the four stages it sits between, and all of it is citations -- the thing a reader
+   wants a list of, not a wall of. The counts stay on the shut row, so the section can be
+   read without opening anything. */
 .lrow{border-bottom:1px solid var(--rule)}
 .lrow:last-child{border-bottom:0}
-.lrh{padding:12px 17px 10px}
+.lrh{display:block;padding:12px 44px 11px 17px;position:relative;cursor:pointer;
+  list-style:none;transition:background .14s}
+.lrh::marker,.lrh::-webkit-details-marker{content:"";display:none}
+.lrh:hover{background:var(--surface-2)}
+.lrow[open]>.lrh{background:var(--surface-2);border-bottom:1px solid var(--rule)}
 .lrh .t{display:block;font-size:15px;font-weight:650}
-.lrh .w{display:block;font-family:var(--mono);font-size:11.5px;color:var(--fg-3);
-  margin-top:3px;line-height:1.55}
+.lrow[open]>.lrh .t,.lrh:hover .t{color:var(--accent)}
+/* The counts, in the page's body face rather than in mono. These are a sentence with three
+   numbers in it, and eleven words of monospace at 11.5px is the hardest line on the page to
+   read; the numbers keep the mono, which is what it is for. */
+.lrh .w{display:block;font-size:13px;color:var(--fg-2);margin-top:4px;line-height:1.55}
+.lrh .w b{font-family:var(--mono);font-weight:500;color:var(--fg);
+  font-variant-numeric:tabular-nums}
+.lrh .w em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--fg-3);
+  margin-right:7px}
+/* How this target's query was anchored, at the head of the open panel. It explains the
+   queries below it, so it sits with them rather than on the shut row. */
+.lwhy{padding:11px 17px;font-size:13px;color:var(--fg-2);line-height:1.55;
+  border-bottom:1px solid var(--rule-2)}
+/* The chevron, drawn: its position is fixed to the first line of the row rather than to the
+   row's middle, so it does not drift down as the explanation under the title wraps. */
+.lrh::after{content:"";position:absolute;right:19px;top:19px;width:8px;height:8px;
+  border-right:1.8px solid var(--fg-3);border-bottom:1.8px solid var(--fg-3);
+  transform:rotate(45deg);transition:transform .16s}
+.lrow[open]>.lrh::after{transform:rotate(225deg);border-color:var(--accent)}
+.lrh:hover::after{border-color:var(--accent)}
 /* Each composed query, accented like the regions above so the two sections read as one
    system rather than two tables that happen to sit together. */
 .lq{padding:9px 17px 11px 34px;border-top:1px solid var(--rule-2);
@@ -835,3 +900,107 @@ a{color:var(--accent)}
   border:1px solid var(--rule);color:var(--fg-2)}
 .pp.un{border-style:dashed}
 @media (max-width:760px){.lq{padding-left:17px}}
+
+/* ================================================================= folded prose
+   Sections 03 and 05 carry the reasoning behind every number on them, and that reasoning
+   used to arrive as six or seven paragraphs in front of the picture it is about. Nothing has
+   been cut: each of those runs is now a labelled disclosure, so a reader meets the figure
+   first and opens the argument when they want it. Same mechanics as `.dmns` below -- the
+   browser's own `<details>`, no script, keyboard reachable and announced without help.
+
+   The summary is a row and not a sentence: a short question on the left, a count of what is
+   inside on the right, and a chevron that turns. The question matters more than it looks --
+   "Why the predicted group is kept apart" tells a reader whether to open it, where "More"
+   does not. */
+.disc{border:1px solid var(--rule);border-radius:12px;background:var(--surface);
+  margin:0 0 9px;overflow:hidden}
+.disc>summary{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;
+  font-size:15.5px;font-weight:600;color:var(--fg);background:var(--surface-2);
+  list-style:none;line-height:1.4}
+.disc>summary::marker,.disc>summary::-webkit-details-marker{content:"";display:none}
+/* The hint always exists in the markup, empty where there is nothing to count, because its
+   auto margin is what pushes the chevron to the right edge. */
+.disc>summary em{font-style:normal;font-weight:400;font-size:13.5px;color:var(--fg-3);
+  margin-left:auto;flex:none;text-align:right}
+/* Drawn, not inherited: the platform triangle differs in size and colour between engines. */
+.disc>summary::after{content:"";flex:none;width:8px;height:8px;margin-left:4px;
+  border-right:1.8px solid var(--fg-3);border-bottom:1.8px solid var(--fg-3);
+  transform:translateY(-2px) rotate(45deg);transition:transform .16s}
+.disc[open]>summary{border-bottom:1px solid var(--rule)}
+.disc[open]>summary::after{transform:translateY(2px) rotate(225deg)}
+.disc>summary:hover{color:var(--accent)}
+.disc>summary:hover::after{border-color:var(--accent)}
+.disc-b{padding:18px 20px 4px}
+.disc-b p{margin:0 0 15px;font-size:15.5px;line-height:1.62;color:var(--fg-2);max-width:66ch}
+.disc-b p b{color:var(--fg);font-weight:650}
+.disc-b>:last-child{margin-bottom:16px}
+/* A stack of disclosures is one object, so it gets one outer margin rather than seven. */
+.discs{margin:22px 0 26px}
+
+/* ================================================================ how to read it
+   A key built out of the lane's own markup. The swatches below are the same elements the
+   rows are drawn with, so the key cannot drift from the thing it explains: change the bar
+   and the key changes with it. This replaced three paragraphs that described the marks in
+   words, which is the slowest way to tell someone what a line means. */
+.howto{border:1px solid var(--rule);border-radius:14px;background:var(--surface);
+  padding:4px 17px 14px;margin:0 0 16px}
+.howto .ht-ttl{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--fg-3);padding:13px 0 4px}
+.howto .lr{border-bottom:0;padding-left:0;padding-right:0}
+.howto .lr .who .t{color:var(--fg-3);font-weight:500}
+.ht-keys{list-style:none;margin:6px 0 0;padding:12px 0 0;border-top:1px solid var(--rule-2);
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:11px 22px}
+.ht-keys li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:11px;align-items:center;
+  font-size:14px;color:var(--fg-2);line-height:1.45}
+.ht-keys b{color:var(--fg);font-weight:600}
+/* Each swatch is a 34px length of track carrying one mark, drawn with the lane's own rules. */
+.sw{position:relative;display:block;height:18px;background:var(--surface-2);border-radius:4px}
+.sw i{position:absolute;display:block}
+.sw .b{left:0;top:5px;height:8px;width:72%;border-radius:0 5px 5px 0;background:var(--brand)}
+.sw .b.pred{background:color-mix(in srgb,var(--brand) 20%,transparent);
+  border:1.5px solid var(--brand);box-sizing:border-box}
+.sw .b.over{background:color-mix(in srgb,var(--fg-3) 50%,transparent)}
+.sw .thr{left:58%;top:-3px;bottom:-3px;width:0;border-left:1.5px solid var(--fg-2);z-index:3}
+.sw .whisk{left:18%;width:62%;top:8px;height:2px;border-radius:2px;background:var(--fg);
+  z-index:2;box-shadow:0 0 0 1px var(--surface-2)}
+.sw .whisk::before,.sw .whisk::after{content:"";position:absolute;top:-4px;width:2px;
+  height:10px;border-radius:1px;background:var(--fg);box-shadow:0 0 0 1px var(--surface-2)}
+.sw .whisk::before{left:0}
+.sw .whisk::after{right:0}
+
+/* ============================================================== the opener cards
+   The three things a stranger needs before anything else -- what goes in, what runs, what
+   comes out -- as three cards with an icon apiece rather than as three paragraphs. The icons
+   are the same five drawn in figure 1, cut down to one mark each. */
+.oc3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0 0;
+  padding-bottom:22px;border-bottom:1px solid var(--rule)}
+@media(max-width:720px){.oc3{grid-template-columns:1fr}}
+.oc{background:var(--bg);border:1px solid var(--rule);border-radius:11px;padding:16px 17px}
+.oc .ico{display:block;width:44px;height:auto;margin-bottom:12px}
+.oc .ico .ac{fill:var(--brand)}
+.oc .ico .acs{stroke:var(--brand)}
+/* Direct child only: the card's kicker is mono small-caps, and a <b> inside its prose is
+   emphasis and must stay prose. */
+.oc>b{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:7px}
+.oc p{margin:0;font-size:15px;line-height:1.55;color:var(--fg-2)}
+.oc p b{color:var(--fg);font-weight:650}
+.oc p+p{margin-top:9px}
+.oc-foot{margin:19px 0 0!important;font-size:16px!important;color:var(--fg-2)}
+.opener p.lead{font-size:20px;line-height:1.5;color:var(--fg);font-weight:500;margin-bottom:0}
+
+/* =============================================================== the step ledger
+   Figure 1 says what the five steps do. This says what each one cost and what it handed on,
+   as one five-column strip under it, so the page answers "how long did this take" without a
+   reader opening five panels to add it up. */
+.ledger{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:12px;overflow:hidden;margin-top:13px}
+@media(max-width:860px){.ledger{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){.ledger{grid-template-columns:repeat(2,1fr)}}
+.ledger div{background:var(--surface);padding:12px 13px;min-width:0}
+.ledger dd{margin:0}
+.ledger .s{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--fg-3)}
+.ledger .v{display:block;font-family:var(--mono);font-size:17px;font-weight:500;margin-top:5px;
+  font-variant-numeric:tabular-nums}
+.ledger .u{display:block;font-size:12.5px;color:var(--fg-3);margin-top:3px;line-height:1.35}

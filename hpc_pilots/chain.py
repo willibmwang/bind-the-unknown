@@ -3049,6 +3049,18 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
             "stage 4 now produces for a reader rather than for a stage -- the marked residue "
             "positions, the residues within macrocycle reach of them and the patch measured "
             "there -- is the project lead's third ask and is not a substitute for that arrow.",
+            "Stage 2 now selects as well as scores. A chain is carried forward only where at "
+            "least one of four evidence terms -- surface exposure, essential class, drugged "
+            "class, structures in the family -- pays half a point or more, so a chain that "
+            "pays nothing on all four is never folded, never measured and never searched for "
+            "literature. Conservation is deliberately not one of the four: it says the genome "
+            "was recognised, not that what was recognised is worth aiming at, and it is "
+            "inherited unchanged by every chain cut from one polyprotein. The consequence is "
+            "the one to hold against this record: a highly conserved protein whose relatives "
+            "carry no localisation, no class keyword and no deposited structure leaves the "
+            "pipeline at stage 2 on the strength of four annotations that are themselves a "
+            "measure of how well studied it is. Every dropped row is named in the stage "
+            "block with the four numbers it failed on.",
             "Stages 3 and 4 measure and do not select. The rubric is five weights fixed "
             "before the run and no fold or surface term is among them, so the ranking is "
             "final at the end of stage 2 and the swap changed what can be measured, not "
@@ -3188,7 +3200,13 @@ def sweep(genomes=GENOMES, top=12, replicates=5, fold=True, record=True):
             "proteins and the gene calling is six-frame, and `run_intake` refuses a genome "
             "too large to be viral rather than ranking it.",
             "A stage that fails for one genome is recorded as an error row rather than "
-            "dropping the genome, for the same reason the surface stage refuses in writing."],
+            "dropping the genome, for the same reason the surface stage refuses in writing.",
+            "Coverage is measured over the chains that cleared stage 2's evidence gate, not "
+            "over every chain the cut produced. The gate drops a chain paying under half a "
+            "point on all four of surface exposure, essential class, drugged class and "
+            "structures in the family, and how many that is differs by genome -- so the "
+            "denominator these percentages are taken over is itself a result of the run and "
+            "is stated per genome in each case's stage-2 block."],
         "interpretation": "A record of what each stage produced on each genome. No binding, "
                           "affinity, inhibition or antiviral property is predicted for any "
                           "protein or any library member.",

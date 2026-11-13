@@ -37,23 +37,54 @@
     <div><dt>Input</dt><dd>NC_045512.2</dd></div>
     <div><dt>Genome</dt><dd>29,903 letters</dd></div>
     <div><dt>Difficulty</dt><dd>SARS-CoV-2 hidden</dd></div>
-    <div><dt>The five steps</dt><dd>142 seconds</dd></div>
+    <div><dt>The five steps</dt><dd>38 seconds</dd></div>
   </dl>
 
 
 <div class="opener">
   <div class="lbl">In plain terms</div>
-  <p><b>The question.</b> A new virus turns up. Which of its proteins should a drug aim
-  at? Normally a person answers that, from the literature and from viruses already
-  understood.</p>
-  <p><b>The input is one accession number</b>, the public database ID for a genome, and
-  nothing else. From it, five steps work out which proteins the virus makes, rank them as drug
-  targets, predict one protein's 3-D shape — nobody has solved a structure for a brand-new
-  virus, so a predicted one is all there is to measure — and check whether a drug would have
-  anywhere on it to grip. No person names the target.</p>
-  <p><b>The test below</b> ran on SARS-CoV-2 with SARS-CoV-2 itself hidden from every database
-  it could reach, so it could not simply recognise the answer. It still put the real drug
-  targets at the top, including the one an approved antiviral hits.</p>
+  <p class="lead">A new virus turns up. Which of its proteins should a drug aim at? Normally
+  a person answers that, from the literature and from viruses already understood.</p>
+  <div class="oc3">
+    <div class="oc">
+      <svg class="ico" viewBox="0 0 100 72" aria-hidden="true">
+        <line x1="6" y1="26" x2="94" y2="26" stroke="currentColor" stroke-width="3.6" opacity=".34"/>
+        <line x1="6" y1="46" x2="94" y2="46" stroke="currentColor" stroke-width="3.6" opacity=".34"/>
+        <rect class="ac" x="12" y="24" width="24" height="24" rx="3"/>
+        <rect class="ac" x="44" y="24" width="16" height="24" rx="3" opacity=".6"/>
+        <rect class="ac" x="68" y="24" width="12" height="24" rx="3" opacity=".38"/>
+      </svg>
+      <b>What goes in</b>
+      <p>One accession number — the public database ID for a genome — and nothing else. No
+      target name, no shortlist, no structure.</p>
+    </div>
+    <div class="oc">
+      <svg class="ico" viewBox="0 0 100 72" aria-hidden="true">
+        <path class="acs" d="M16 52 Q27 16 40 46 Q52 70 62 34 Q70 10 84 26" fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle class="ac" cx="16" cy="52" r="5"/>
+        <circle class="ac" cx="84" cy="26" r="5"/>
+      </svg>
+      <b>What runs</b>
+      <p>Five steps work out which proteins the virus makes, rank them as drug targets,
+      predict one protein's 3-D shape, and check whether a drug would have anywhere on it to
+      grip. <b>No person names the target.</b></p>
+      <p>Nobody has solved a structure for a brand-new virus, so a predicted one is all there
+      is to measure.</p>
+    </div>
+    <div class="oc">
+      <svg class="ico" viewBox="0 0 100 72" aria-hidden="true">
+        <rect class="ac" x="16" y="16" width="68" height="9" rx="4.5"/>
+        <rect class="ac" x="16" y="31" width="54" height="9" rx="4.5" opacity=".72"/>
+        <rect x="16" y="46" width="40" height="9" rx="4.5" fill="currentColor" opacity=".26"/>
+      </svg>
+      <b>What comes out</b>
+      <p>A ranked shortlist of the chains a binder could be aimed at, every score broken into
+      its parts, and every surface either measured, predicted, or refused with a reason.</p>
+    </div>
+  </div>
+  <p class="oc-foot"><b>The test below</b> ran on SARS-CoV-2 with SARS-CoV-2 itself hidden
+  from every database it could reach, so it could not simply recognise the answer. It still
+  put the real drug targets at the top, including the one an approved antiviral hits.</p>
 </div>
 
 <nav class="toc" aria-label="Contents">
@@ -99,6 +130,7 @@
             <rect class="ac" x="44" y="24" width="16" height="24" rx="3" opacity=".6"/>
             <rect class="ac" x="68" y="24" width="12" height="24" rx="3" opacity=".38"/>
           </svg>
+          <div class="no">1</div>
           <div class="lbl">Read the genome</div>
           <div class="val">29,903</div>
           <div class="unit">letters in</div>
@@ -111,8 +143,9 @@
             <rect x="16" y="42" width="40" height="8" rx="4" fill="currentColor" opacity=".26"/>
             <rect x="16" y="56" width="26" height="8" rx="4" fill="currentColor" opacity=".26"/>
           </svg>
+          <div class="no">2</div>
           <div class="lbl">Rank the proteins</div>
-          <div class="val">20</div>
+          <div class="val">12</div>
           <div class="unit">chains</div>
         </div>
 
@@ -122,6 +155,7 @@
             <circle class="ac" cx="16" cy="52" r="4"/>
             <circle class="ac" cx="84" cy="26" r="4"/>
           </svg>
+          <div class="no">3</div>
           <div class="lbl">Fold the target</div>
           <div class="val">306</div>
           <div class="unit">building blocks</div>
@@ -134,8 +168,9 @@
             <path class="ac" d="M50 11 A25 25 0 0 1 71.65 48.5 L50 36 Z" opacity=".85"/>
             <circle cx="60" cy="27" r="2.4" fill="currentColor" opacity=".3"/>
           </svg>
+          <div class="no">4</div>
           <div class="lbl">Measure the surface</div>
-          <div class="val">9 / 20</div>
+          <div class="val">5 / 12</div>
           <div class="unit">measured</div>
         </div>
 
@@ -151,6 +186,7 @@
             <circle class="ac" cx="50" cy="56" r="4.4" opacity=".62"/>
             <circle class="ac" cx="64.1" cy="50.1" r="4.4" opacity=".8"/>
           </svg>
+          <div class="no">5</div>
           <div class="lbl">Design the library</div>
           <div class="val">159 B</div>
           <div class="unit">molecules</div>
@@ -160,7 +196,16 @@
     </div>
 
 
-    <figcaption>Every number here comes from one run, recorded below.</figcaption>
+    <dl class="ledger">
+      <div><dt class="s">1 · intake</dt><dd><span class="v">11 s</span><span class="u">NCBI, UniProt</span></dd></div>
+      <div><dt class="s">2 · score</dt><dd><span class="v">3 s</span><span class="u">UniProt</span></dd></div>
+      <div><dt class="s">3 · fold</dt><dd><span class="v">18 s</span><span class="u">ESM Atlas</span></dd></div>
+      <div><dt class="s">4 · surface</dt><dd><span class="v">6 s</span><span class="u">PDBe, RCSB</span></dd></div>
+      <div><dt class="s">5 · library</dt><dd><span class="v">instant</span><span class="u">local tables</span></dd></div>
+    </dl>
+
+    <figcaption>Every number here comes from one run, recorded below. The five steps together
+    took 38 seconds.</figcaption>
   </figure>
 </section>
 
@@ -257,7 +302,7 @@
             <rect class="ac" x="12" y="24" width="24" height="24" rx="3"/>
             <rect class="ac" x="44" y="24" width="16" height="24" rx="3" opacity=".6"/>
             <rect class="ac" x="68" y="24" width="12" height="24" rx="3" opacity=".38"/>
-          </svg><span class="what">Read the genome, find the proteins</span><span class="secs">14 s</span></div>
+          </svg><span class="what">Read the genome, find the proteins</span><span class="secs">11 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li>One accession, <b>NC_045512.2</b></li><li>SARS-CoV-2 itself hidden from the reference library</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
@@ -274,15 +319,21 @@
     is translated in all six reading frames, every stretch between stop codons of at least
     60 residues is kept, and the 12 longest are searched against
     17,512 reviewed viral proteins with SARS-CoV-2 deleted from them.</p>
-    <p class="cap">Shared five-residue runs settle a close relative in milliseconds and are
-    what the match column reports; a slower pass groups residues by chemical type for fainter
-    resemblances and reports a bit score instead. With no relative at either tier, a protein is
-    classed by hydropathy, which returns a class rather than a name and cannot outrank a real
-    match.</p>
+    <details class="disc" style="margin-bottom:22px">
+      <summary>How a relative is matched, and what happens when there is none<em>two tiers,
+        then a fallback</em></summary>
+      <div class="disc-b">
+        <p>Shared five-residue runs settle a close relative in milliseconds and are what the
+        match column reports; a slower pass groups residues by chemical type for fainter
+        resemblances and reports a bit score instead.</p>
+        <p>With no relative at either tier, a protein is classed by hydropathy, which returns
+        a class rather than a name and cannot outrank a real match.</p>
+      </div>
+    </details>
     
   <div class="cmxscroll" tabindex="0" role="region" aria-label="The ranked ORFs and their scores">
   <table class="cmx">
-    <caption>Every ORF stage 1 identified, highest composite score first. Each cell is the points
+    <caption>Every ORF stage 1 identified and the gate kept, highest composite score first. Each cell is the points
       that weight paid, with the measurement it was computed from underneath; the shading is
       the share of that column's maximum. Nothing here is fitted — the five weights were
       fixed before the run.</caption>
@@ -342,33 +393,9 @@
         <td class="h h2"><span class="pt">0.95</span><span class="rw">0.317</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
         <td class="sc"><span class="v">2.55</span>
           <span class="tr"><i style="width:36.8%"></i></span></td>
-      </tr>
-      <tr id="orf-7">
-        <td class="rk">7</td>
-        <td class="nm"><span class="t">NS8_BC279 Non-structural protein 8</span><span class="w">Bat coronavirus 279/2005 · remote</span>
-          <span class="w">+2 · nt 27,893 · 121 aa</span></td>
-        <td class="h h5"><span class="pt">2.49</span><span class="rw">0.830 · bits over 200</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
-        <td class="sc"><span class="v">2.49</span>
-          <span class="tr"><i style="width:35.9%"></i></span></td>
-      </tr>
-      <tr id="orf-8">
-        <td class="rk">8</td>
-        <td class="nm"><span class="t">NS7A_BCRP3 Protein 7a</span><span class="w">Bat coronavirus Rp3/2004 · exact</span>
-          <span class="w">+0 · nt 27,393 · 121 aa</span></td>
-        <td class="h h3"><span class="pt">1.62</span><span class="rw">0.538</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.02</span><span class="rw">2 in PDB</span></td>
-        <td class="sc"><span class="v">1.64</span>
-          <span class="tr"><i style="width:23.6%"></i></span></td>
-      </tr>
-      <tr id="orf-9">
-        <td class="rk">9</td>
-        <td class="nm"><span class="t">ORF9B_SARS ORF9b protein</span><span class="w">Severe acute respiratory syndrome coronavirus · exact</span>
-          <span class="w">+2 · nt 28,283 · 97 aa</span></td>
-        <td class="h h2"><span class="pt">0.90</span><span class="rw">0.301</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.01</span><span class="rw">1 in PDB</span></td>
-        <td class="sc"><span class="v">0.91</span>
-          <span class="tr"><i style="width:13.2%"></i></span></td>
       </tr></tbody>
   </table>
-  </div><p class="after">The five weights and every number in this table are read from <span class="mono">runs/intake_candidates.json</span>, which is this same stage run on its own. The chain record keeps stage 1 as counts, and the build refuses to ship this table unless those counts match. The later sections are from <span class="mono">runs/onset_chain.json</span>.</p>
+  </div><p class="after"><b>3 more identified ORFs</b> were scored and are not in this table. A row is kept when at least one of <span class="mono">surface_exposed</span>, <span class="mono">essential_class</span>, <span class="mono">druggable_class</span>, <span class="mono">structures_in_family</span> pays 0.5 points or more; these paid under it on all 4, so they are off the table and out of the pipeline — nothing after this stage folds them, measures a surface on them or reads literature for them. Conservation is not one of the four: it says how well this genome was recognised, not whether what was recognised is worth aiming at. The numbering keeps each row its place in the full ranking, so a gap in the # column is one of these. They are: NS8_BC279 Non-structural protein 8, NS7A_BCRP3 Protein 7a, ORF9B_SARS ORF9b protein.</p>
     <p class="after">The spike and the replicase finish within a few hundredths of each
     other by opposite routes: the spike for sitting on the outside, the replicase for matching
     a known relative. Only that match is measured against this genome — the other four columns
@@ -382,19 +409,19 @@
             <rect class="ac" x="16" y="28" width="54" height="8" rx="4" opacity=".72"/>
             <rect x="16" y="42" width="40" height="8" rx="4" fill="currentColor" opacity=".26"/>
             <rect x="16" y="56" width="26" height="8" rx="4" fill="currentColor" opacity=".26"/>
-          </svg><span class="what">Score and rank them</span><span class="secs">75 s</span></div>
+          </svg><span class="what">Score and rank them</span><span class="secs">3 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>12</b> candidates</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li><b>20</b> protein chains out of the <b>9</b> identified ORFs — <b>16</b> cut out of a larger parent, <b>4</b> already whole</li>
+        <li><b>12</b> protein chains out of the <b>9</b> identified ORFs — <b>9</b> cut out of a larger parent, <b>3</b> already whole</li>
         <li>Start and stop come from the matched relative's annotation, which is why an ORF that reached no relative is cut into nothing and leaves the list here</li>
-        <li>Scored on the same five weights as the ORFs above, <b>6.91</b> down to <b>0.91</b> of a possible <b>9.4</b>. The <b>12</b> chains from one ORF alone span <b>6.90</b> to <b>2.50</b>: the spread the parent's single score hides</li>
+        <li>Scored on the same five weights as the ORFs above, <b>6.90</b> down to <b>2.55</b> of a possible <b>9.4</b>. The <b>6</b> chains from one ORF alone span <b>6.90</b> to <b>4.13</b>: the spread the parent's single score hides</li>
       </ul></div>
     </div>
   </div>
 
   <div class="substep">
-    <h3>The 20 chains it produced, and what each one scored</h3>
+    <h3>The 12 chains it produced, and what each one scored</h3>
     <p class="cap">A mature chain is what the virus actually folds, and what a binder is
     aimed at. A polyprotein is made as one long protein and cut into them by the virus's own
     proteases, at boundaries annotated on the curated relative each ORF matched, and every row
@@ -405,7 +432,7 @@
     
   <div class="cmxscroll" tabindex="0" role="region" aria-label="Every mature chain and its score">
   <table class="cmx">
-    <caption>Every mature chain stage 2 produced, highest composite score first. Each cell is
+    <caption>Every mature chain stage 2 produced and the gate kept, highest composite score first. Each cell is
       the points that weight paid, with the measurement it was computed from underneath; the
       shading is the share of that column's maximum. &ldquo;Cut out of&rdquo; names the ORF the
       chain was taken from and links to its row in the table above, so a chain's score can be read against its parent's.
@@ -422,16 +449,6 @@
     <tbody>
       <tr id="chain-1">
         <td class="rk">1</td>
-        <td class="nm"><span class="t">Spike protein S2&#x27;</span>
-          <span class="w">Q3LZX1</span>
-          <span class="w">residues 785–1,242 of the parent</span></td>
-        <td class="cut"><a href="#orf-1">SPIKE_BCHK3 Spike glycoprotein</a><span class="w">stage&nbsp;1 rank 1</span></td>
-        <td class="h h3"><span class="pt">1.39</span><span class="rw">0.462</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h5"><span class="pt">0.42</span><span class="rw">42 in PDB</span></td>
-        <td class="sc"><span class="v">6.91</span>
-          <span class="tr"><i style="width:100.0%"></i></span></td>
-      </tr>
-      <tr id="chain-2">
-        <td class="rk">2</td>
         <td class="nm"><span class="t">3C-like proteinase nsp5</span>
           <span class="w">P0C6X7</span>
           <span class="w">residues 3,241–3,546 of the parent</span></td>
@@ -440,15 +457,25 @@
         <td class="sc"><span class="v">6.90</span>
           <span class="tr"><i style="width:100.0%"></i></span></td>
       </tr>
+      <tr id="chain-2">
+        <td class="rk">2</td>
+        <td class="nm"><span class="t">Spike protein S2&#x27;</span>
+          <span class="w">Q3LZX1</span>
+          <span class="w">residues 785–1,242 of the parent</span></td>
+        <td class="cut"><a href="#orf-1">SPIKE_BCHK3 Spike glycoprotein</a><span class="w">stage&nbsp;1 rank 1</span></td>
+        <td class="h h3"><span class="pt">1.34</span><span class="rw">0.448</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h5"><span class="pt">0.42</span><span class="rw">42 in PDB</span></td>
+        <td class="sc"><span class="v">6.86</span>
+          <span class="tr"><i style="width:99.4%"></i></span></td>
+      </tr>
       <tr id="chain-3">
         <td class="rk">3</td>
         <td class="nm"><span class="t">Spike protein S2</span>
           <span class="w">Q3LZX1</span>
           <span class="w">residues 655–1,242 of the parent</span></td>
         <td class="cut"><a href="#orf-1">SPIKE_BCHK3 Spike glycoprotein</a><span class="w">stage&nbsp;1 rank 1</span></td>
-        <td class="h h3"><span class="pt">1.39</span><span class="rw">0.462</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h5"><span class="pt">0.40</span><span class="rw">40 in PDB</span></td>
-        <td class="sc"><span class="v">6.89</span>
-          <span class="tr"><i style="width:99.7%"></i></span></td>
+        <td class="h h3"><span class="pt">1.34</span><span class="rw">0.448</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h5"><span class="pt">0.40</span><span class="rw">40 in PDB</span></td>
+        <td class="sc"><span class="v">6.84</span>
+          <span class="tr"><i style="width:99.1%"></i></span></td>
       </tr>
       <tr id="chain-4">
         <td class="rk">4</td>
@@ -456,9 +483,9 @@
           <span class="w">Q3LZX1</span>
           <span class="w">residues 14–654 of the parent</span></td>
         <td class="cut"><a href="#orf-1">SPIKE_BCHK3 Spike glycoprotein</a><span class="w">stage&nbsp;1 rank 1</span></td>
-        <td class="h h3"><span class="pt">1.39</span><span class="rw">0.462</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h4"><span class="pt">0.39</span><span class="rw">39 in PDB</span></td>
-        <td class="sc"><span class="v">6.88</span>
-          <span class="tr"><i style="width:99.6%"></i></span></td>
+        <td class="h h3"><span class="pt">1.34</span><span class="rw">0.448</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h4"><span class="pt">0.39</span><span class="rw">39 in PDB</span></td>
+        <td class="sc"><span class="v">6.83</span>
+          <span class="tr"><i style="width:99.0%"></i></span></td>
       </tr>
       <tr id="chain-5">
         <td class="rk">5</td>
@@ -478,7 +505,7 @@
         <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
         <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">2.40</span><span class="rw">class 3</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
         <td class="sc"><span class="v">6.40</span>
-          <span class="tr"><i style="width:92.7%"></i></span></td>
+          <span class="tr"><i style="width:92.8%"></i></span></td>
       </tr>
       <tr id="chain-7">
         <td class="rk">7</td>
@@ -496,22 +523,32 @@
           <span class="w">Q0Q472</span>
           <span class="w">the whole protein</span></td>
         <td class="cut"><a href="#orf-4">VME1_BC279 Membrane protein</a><span class="w">stage&nbsp;1 rank 4</span><span class="w">not a polyprotein</span></td>
-        <td class="h h4"><span class="pt">1.88</span><span class="rw">0.627</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h1"><span class="pt">0.04</span><span class="rw">4 in PDB</span></td>
-        <td class="sc"><span class="v">5.52</span>
-          <span class="tr"><i style="width:79.9%"></i></span></td>
+        <td class="h h4"><span class="pt">1.87</span><span class="rw">0.624</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h1"><span class="pt">0.04</span><span class="rw">4 in PDB</span></td>
+        <td class="sc"><span class="v">5.51</span>
+          <span class="tr"><i style="width:79.8%"></i></span></td>
       </tr>
       <tr id="chain-9">
         <td class="rk">9</td>
-        <td class="nm"><span class="t">AP3A_BC279 Protein 3</span>
-          <span class="w">Q0Q474</span>
-          <span class="w">the whole protein</span></td>
-        <td class="cut"><a href="#orf-6">AP3A_BC279 Protein 3</a><span class="w">stage&nbsp;1 rank 6</span><span class="w">not a polyprotein</span></td>
-        <td class="h h2"><span class="pt">0.96</span><span class="rw">0.319</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
-        <td class="sc"><span class="v">4.56</span>
-          <span class="tr"><i style="width:66.0%"></i></span></td>
+        <td class="nm"><span class="t">2&#x27;-O-methyltransferase nsp16</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 6,776–7,073 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h1"><span class="pt">0.05</span><span class="rw">5 in PDB</span></td>
+        <td class="sc"><span class="v">4.15</span>
+          <span class="tr"><i style="width:60.2%"></i></span></td>
       </tr>
       <tr id="chain-10">
         <td class="rk">10</td>
+        <td class="nm"><span class="t">Guanine-N7 methyltransferase nsp14</span>
+          <span class="w">P0C6X7</span>
+          <span class="w">residues 5,903–6,429 of the parent</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h1"><span class="pt">0.03</span><span class="rw">3 in PDB</span></td>
+        <td class="sc"><span class="v">4.13</span>
+          <span class="tr"><i style="width:59.9%"></i></span></td>
+      </tr>
+      <tr id="chain-11">
+        <td class="rk">11</td>
         <td class="nm"><span class="t">NCAP_BCRP3 Nucleoprotein</span>
           <span class="w">Q3I5I7</span>
           <span class="w">the whole protein</span></td>
@@ -520,108 +557,18 @@
         <td class="sc"><span class="v">3.50</span>
           <span class="tr"><i style="width:50.7%"></i></span></td>
       </tr>
-      <tr id="chain-11">
-        <td class="rk">11</td>
-        <td class="nm"><span class="t">Non-structural protein 10</span>
-          <span class="w">P0C6X7</span>
-          <span class="w">residues 4,231–4,369 of the parent</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.08</span><span class="rw">8 in PDB</span></td>
-        <td class="sc"><span class="v">2.58</span>
-          <span class="tr"><i style="width:37.4%"></i></span></td>
-      </tr>
-      <tr id="chain-12">
-        <td class="rk">12</td>
-        <td class="nm"><span class="t">Host translation inhibitor nsp1</span>
-          <span class="w">P0C6X7</span>
-          <span class="w">residues 1–180 of the parent</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.02</span><span class="rw">2 in PDB</span></td>
-        <td class="sc"><span class="v">2.52</span>
-          <span class="tr"><i style="width:36.6%"></i></span></td>
-      </tr>
       <tr id="chain-13">
         <td class="rk">13</td>
-        <td class="nm"><span class="t">Non-structural protein 7</span>
-          <span class="w">P0C6X7</span>
-          <span class="w">residues 3,837–3,919 of the parent</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.02</span><span class="rw">2 in PDB</span></td>
-        <td class="sc"><span class="v">2.52</span>
-          <span class="tr"><i style="width:36.6%"></i></span></td>
-      </tr>
-      <tr id="chain-14">
-        <td class="rk">14</td>
-        <td class="nm"><span class="t">Non-structural protein 8</span>
-          <span class="w">P0C6X7</span>
-          <span class="w">residues 3,920–4,117 of the parent</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.02</span><span class="rw">2 in PDB</span></td>
-        <td class="sc"><span class="v">2.52</span>
-          <span class="tr"><i style="width:36.6%"></i></span></td>
-      </tr>
-      <tr id="chain-15">
-        <td class="rk">15</td>
-        <td class="nm"><span class="t">Viral protein genome-linked nsp9</span>
-          <span class="w">P0C6X7</span>
-          <span class="w">residues 4,118–4,230 of the parent</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.02</span><span class="rw">2 in PDB</span></td>
-        <td class="sc"><span class="v">2.52</span>
-          <span class="tr"><i style="width:36.6%"></i></span></td>
-      </tr>
-      <tr id="chain-16">
-        <td class="rk">16</td>
-        <td class="nm"><span class="t">Non-structural protein 2</span>
-          <span class="w">P0C6X7</span>
-          <span class="w">residues 181–818 of the parent</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.01</span><span class="rw">1 in PDB</span></td>
-        <td class="sc"><span class="v">2.51</span>
-          <span class="tr"><i style="width:36.4%"></i></span></td>
-      </tr>
-      <tr id="chain-17">
-        <td class="rk">17</td>
-        <td class="nm"><span class="t">Non-structural protein 4</span>
-          <span class="w">P0C6X7</span>
-          <span class="w">residues 2,741–3,240 of the parent</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
-        <td class="sc"><span class="v">2.50</span>
-          <span class="tr"><i style="width:36.3%"></i></span></td>
-      </tr>
-      <tr id="chain-18">
-        <td class="rk">18</td>
-        <td class="nm"><span class="t">Non-structural protein 6</span>
-          <span class="w">P0C6X7</span>
-          <span class="w">residues 3,547–3,836 of the parent</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="h h5"><span class="pt">2.50</span><span class="rw">0.835</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
-        <td class="sc"><span class="v">2.50</span>
-          <span class="tr"><i style="width:36.3%"></i></span></td>
-      </tr>
-      <tr id="chain-19">
-        <td class="rk">19</td>
-        <td class="nm"><span class="t">Protein 7a</span>
-          <span class="w">Q3I5J0</span>
-          <span class="w">residues 16–122 of the parent</span></td>
-        <td class="cut"><a href="#orf-8">NS7A_BCRP3 Protein 7a</a><span class="w">stage&nbsp;1 rank 8</span></td>
-        <td class="h h3"><span class="pt">1.62</span><span class="rw">0.538</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
-        <td class="sc"><span class="v">1.62</span>
-          <span class="tr"><i style="width:23.4%"></i></span></td>
-      </tr>
-      <tr id="chain-20">
-        <td class="rk">20</td>
-        <td class="nm"><span class="t">ORF9B_SARS ORF9b protein</span>
-          <span class="w">P59636</span>
+        <td class="nm"><span class="t">AP3A_BC279 Protein 3</span>
+          <span class="w">Q0Q474</span>
           <span class="w">the whole protein</span></td>
-        <td class="cut"><a href="#orf-9">ORF9B_SARS ORF9b protein</a><span class="w">stage&nbsp;1 rank 9</span><span class="w">not a polyprotein</span></td>
-        <td class="h h2"><span class="pt">0.90</span><span class="rw">0.301</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h1"><span class="pt">0.01</span><span class="rw">1 in PDB</span></td>
-        <td class="sc"><span class="v">0.91</span>
-          <span class="tr"><i style="width:13.2%"></i></span></td>
+        <td class="cut"><a href="#orf-6">AP3A_BC279 Protein 3</a><span class="w">stage&nbsp;1 rank 6</span><span class="w">not a polyprotein</span></td>
+        <td class="h h2"><span class="pt">0.95</span><span class="rw">0.317</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h4"><span class="pt">1.60</span><span class="rw">class 2</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
+        <td class="sc"><span class="v">2.55</span>
+          <span class="tr"><i style="width:37.0%"></i></span></td>
       </tr></tbody>
   </table>
-  </div>
+  </div><p class="after"><b>11 more mature chains</b> were scored and are not in this table. A row is kept when at least one of <span class="mono">surface_exposed</span>, <span class="mono">essential_class</span>, <span class="mono">druggable_class</span>, <span class="mono">structures_in_family</span> pays 0.5 points or more; these paid under it on all 4, so they are off the table and out of the pipeline — nothing after this stage folds them, measures a surface on them or reads literature for them. Conservation is not one of the four: it says how well this genome was recognised, not whether what was recognised is worth aiming at. The numbering keeps each row its place in the full ranking, so a gap in the # column is one of these. They are: Non-structural protein 10, Uridylate-specific endoribonuclease nsp15, Host translation inhibitor nsp1, Non-structural protein 7, Non-structural protein 8, Viral protein genome-linked nsp9, Non-structural protein 2, Non-structural protein 4, Non-structural protein 6, Protein 7a, ORF9B_SARS ORF9b protein.</p>
   </div>
 
   <div class="stage">
@@ -629,12 +576,12 @@
             <path class="acs" d="M16 52 Q27 16 40 46 Q52 70 62 34 Q70 10 84 26" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
             <circle class="ac" cx="16" cy="52" r="4"/>
             <circle class="ac" cx="84" cy="26" r="4"/>
-          </svg><span class="what">Predict a 3-D shape</span><span class="secs">3 s</span></div>
+          </svg><span class="what">Predict a 3-D shape</span><span class="secs">18 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>20</b> chains, which is what folding needs — a sequence and nothing else</li></ul></div>
+      <div><h3>In</h3><ul><li><b>12</b> chains, which is what folding needs — a sequence and nothing else</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li>All <b>20</b> had their own sequence located in this genome by alignment, rather than by trusting the relative's numbering</li>
-        <li><b>11</b> of those are short enough for the folding lane and every one of them is folded, not only the best-ranked; <b>9</b> are over its <b>400</b>-residue ceiling</li>
+        <li>All <b>12</b> had their own sequence located in this genome by alignment, rather than by trusting the relative's numbering</li>
+        <li><b>4</b> of those are short enough for the folding lane and every one of them is folded, not only the best-ranked; <b>8</b> are over its <b>400</b>-residue ceiling</li>
         <li>All <b>9</b> of <b>9</b> over-the-ceiling chains still carry an annotated region that <i>is</i> short enough — <b>75</b> such regions across the shortlist, out of <b>143</b> annotated in all</li>
         <li>The one drawn below is the main protease, <b>306</b> residues, which the predictor rates <b>62.6</b> out of 100 for its own confidence — confidence is not accuracy</li>
       </ul></div>
@@ -646,7 +593,7 @@
     <p class="cap">Returned by <span class="mono">structures.folded</span>, the ESMFold call listed in <a href="#t-fold">section 04</a>.</p>
     <dl class="ret">
       <div><dt>Model</dt><dd>ESMFold v1 (2022-10-18)</dd></div>
-      <div><dt>Chains folded</dt><dd>all 11 inside the 400-residue ceiling</dd></div>
+      <div><dt>Chains folded</dt><dd>all 4 inside the 400-residue ceiling</dd></div>
       <div><dt>Drawn below</dt><dd>Main protease · 306 residues</dd></div>
       <div><dt>Coordinates returned</dt><dd>193,227 bytes</dd></div>
       <div><dt>Confidence mean / median / min</dt><dd>62.6 / 63.0 / 20.0</dd></div>
@@ -1101,7 +1048,7 @@
       </details>
     </div>
     
-  <div class="lane"><div class="lane-grp"><b>Inside the ceiling &middot; 11</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
+  <div class="lane"><div class="lane-grp"><b>Folded &middot; 4</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
     <div class="lane-axis" aria-hidden="true">
       <span></span>
       <span class="ax"><i class="lim" style="left:20.57%"></i>
@@ -1115,7 +1062,7 @@
         <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 96 % identity</span></span>
       <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:15.73%"></i></span>
       <span class="vl">306 aa
-        </span>
+        <span class="cf">confidence 62.6</span></span>
     </div>
     <details class="dmns">
       <summary>Folded structure &mdash; <b>306</b> residues &middot; mean confidence 62.6 of 100</summary>
@@ -1135,35 +1082,18 @@
       </div>
     </details>
     <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 6</span>
-        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 99 % of the relative&rsquo;s chain at 88 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:14.76%"></i></span>
-      <span class="vl">287 aa
-        </span>
+      <span class="who"><span class="t">2&#x27;-O-methyltransferase nsp16</span>
+        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 93 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:15.32%"></i></span>
+      <span class="vl">298 aa
+        <span class="cf">confidence 58.4</span></span>
     </div>
-    <details class="dmns">
-      <summary>Folded structure &mdash; <b>287</b> residues &middot; mean confidence 43.3 of 100</summary>
-      
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r18_non_structural_protein_6__non_structural_protein_6.png" loading="lazy"
-          alt="The predicted backbone of Non-structural protein 6, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"Non-structural protein 6","seq":"KRTIKGTHHWLLLTILTSLLVLVQSTQWSLFFFLYENAFLPFAMGIIAMSAFAMMFVKHKHAFLCLFLLPSLATVAYFNMVYMPASWVMRIMTWLDMVDTSLSGFKLKDCVMYASAVVLLILMTARTVYDDGARRVWTLMNVLTLVYKVYYGNALDQAISMWALIISVTSNYSGVVTTVMFLARGIVFMCVEYCPIFFITGNTLQCIMLVYCFLGYFCTCYFGLFCLLNRYFRLTLGVYDYLVSTQEFRYMNSQGLLPPKNSIDAFKLNIKLLGVGGKPCIKVATVQ","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287],"at":3573,"pl":[39.0,47.0,43.0,43.0,42.0,43.0,43.0,44.0,45.0,47.0,44.0,45.0,46.0,44.0,41.0,42.0,44.0,41.0,40.0,41.0,43.0,38.0,39.0,38.0,37.0,35.0,35.0,33.0,34.0,32.0,33.0,36.0,31.0,31.0,35.0,36.0,37.0,37.0,39.0,41.0,40.0,41.0,44.0,43.0,43.0,44.0,45.0,43.0,41.0,43.0,43.0,41.0,40.0,42.0,40.0,38.0,35.0,41.0,39.0,42.0,38.0,37.0,41.0,39.0,37.0,37.0,41.0,39.0,38.0,39.0,39.0,37.0,40.0,41.0,36.0,36.0,40.0,38.0,32.0,30.0,34.0,34.0,28.0,32.0,32.0,37.0,34.0,41.0,41.0,42.0,45.0,49.0,48.0,42.0,49.0,51.0,41.0,43.0,46.0,43.0,41.0,38.0,43.0,40.0,43.0,47.0,46.0,46.0,47.0,46.0,46.0,44.0,43.0,45.0,44.0,44.0,44.0,44.0,43.0,44.0,44.0,43.0,45.0,43.0,42.0,41.0,42.0,39.0,40.0,43.0,45.0,44.0,46.0,52.0,49.0,49.0,53.0,56.0,51.0,54.0,56.0,53.0,51.0,56.0,54.0,48.0,53.0,51.0,45.0,46.0,45.0,49.0,47.0,43.0,48.0,52.0,49.0,49.0,53.0,55.0,52.0,48.0,56.0,55.0,50.0,52.0,53.0,49.0,43.0,44.0,41.0,35.0,36.0,41.0,41.0,41.0,45.0,44.0,46.0,44.0,47.0,46.0,46.0,46.0,46.0,45.0,42.0,45.0,42.0,40.0,39.0,39.0,39.0,34.0,36.0,38.0,39.0,35.0,33.0,37.0,41.0,44.0,45.0,44.0,42.0,44.0,43.0,42.0,43.0,44.0,39.0,43.0,43.0,39.0,38.0,42.0,38.0,33.0,37.0,38.0,33.0,32.0,38.0,35.0,32.0,35.0,36.0,34.0,35.0,36.0,36.0,33.0,35.0,35.0,33.0,32.0,37.0,38.0,40.0,45.0,47.0,43.0,43.0,49.0,53.0,50.0,52.0,57.0,58.0,58.0,59.0,65.0,64.0,65.0,63.0,63.0,65.0,62.0,62.0,55.0,54.0,60.0,59.0,61.0,58.0,54.0,58.0,58.0,53.0,53.0,54.0,52.0,49.0,44.0,34.0,36.0,37.0,37.0,37.0,34.0,40.0,36.0,38.0,35.0,35.0,36.0,40.0],"band":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddcdddddddddddddddddddddddddddddddddddddcddcccccccccdccdddddddcddcccdcccccdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddccccccccccccccccccccccccccccddddddddddddddd","x":[144.3,128.7,112.0,94.6,83.0,66.8,61.2,48.0,33.4,31.1,27.0,11.3,2.2,1.9,-8.3,-23.5,-28.0,-29.2,-43.5,-55.8,-56.7,-61.8,-77.8,-84.5,-84.3,-96.3,-111.5,-107.5,-116.1,-134.8,-133.3,-127.9,-147.8,-158.1,-151.8,-143.2,-140.4,-134.9,-117.1,-100.8,-100.2,-99.5,-82.8,-71.9,-75.1,-66.8,-49.0,-46.3,-47.0,-31.9,-17.4,-19.7,-15.8,2.6,11.2,10.6,15.5,38.7,32.9,31.9,15.6,2.6,3.8,-6.3,-22.6,-27.5,-28.6,-41.4,-54.4,-61.9,-63.0,-73.8,-85.7,-90.1,-95.4,-106.2,-115.8,-121.1,-128.9,-139.3,-149.1,-158.1,-162.4,-179.4,-168.7,-162.2,-143.0,-134.5,-155.6,-156.2,-136.5,-143.8,-164.6,-153.6,-141.5,-160.4,-170.8,-153.0,-154.6,-177.0,-171.6,-155.6,-168.0,-153.7,-135.8,-136.1,-120.4,-120.0,-111.0,-94.9,-87.5,-87.4,-75.3,-60.9,-57.5,-52.7,-37.7,-27.3,-26.5,-17.1,-2.2,2.5,4.2,17.8,31.6,34.9,35.1,53.1,61.8,60.4,65.0,49.2,33.5,39.0,36.9,17.0,10.9,16.9,5.0,-13.5,-11.9,-10.3,-28.5,-40.1,-34.0,-40.5,-59.8,-63.0,-58.5,-76.5,-91.3,-84.2,-87.9,-69.9,-65.8,-64.5,-49.9,-36.7,-35.3,-30.0,-14.3,-5.0,-5.0,6.6,21.9,26.2,28.0,42.9,54.1,55.8,75.8,80.8,88.4,73.9,70.5,61.1,47.9,41.7,37.2,26.1,14.1,9.4,2.4,-11.3,-20.8,-24.7,-33.5,-46.0,-54.5,-58.1,-67.5,-78.8,-86.3,-87.8,-107.5,-114.5,-108.5,-121.2,-138.5,-143.3,-141.0,-136.2,-120.4,-116.8,-110.7,-96.0,-87.5,-85.6,-74.8,-60.5,-57.7,-54.1,-39.1,-28.7,-28.5,-20.3,-5.7,-0.1,2.0,14.7,25.8,28.1,33.5,47.5,53.8,55.0,65.8,78.3,80.6,85.6,100.9,107.0,104.2,109.0,126.5,129.4,125.1,138.2,153.6,149.5,149.6,168.0,178.5,173.6,184.0,206.7,212.3,203.3,209.6,230.3,224.7,215.1,233.5,246.8,232.6,228.4,205.6,194.7,184.3,163.7,152.1,164.2,157.1,174.7,167.2,148.3,159.1,171.2,151.6,140.9,159.4,158.9,136.4,137.0,152.9,137.8,135.3,157.2,168.8,183.8,198.6,216.4,227.7,243.0,258.1,270.5,289.0],"y":[113.2,106.5,118.0,102.9,122.6,107.8,98.0,115.8,116.2,93.4,94.3,111.0,99.2,80.6,91.7,100.2,79.4,69.9,86.5,83.3,61.0,65.2,80.9,65.8,48.2,60.0,63.3,41.0,31.5,42.6,35.4,13.3,14.8,24.6,13.7,-7.9,-10.6,7.7,17.6,2.0,1.3,24.4,27.8,11.5,22.6,42.3,31.6,21.0,41.1,49.5,31.9,32.1,54.8,50.5,38.5,54.8,73.6,77.4,97.2,98.8,114.8,102.8,88.4,104.4,108.1,86.6,81.0,99.6,94.4,74.5,81.1,99.3,85.6,73.3,91.7,99.5,79.0,78.2,99.3,93.1,73.2,89.0,100.6,92.2,95.0,83.3,74.1,59.4,51.3,49.9,38.8,25.7,23.7,18.7,3.5,-4.0,-4.5,-16.4,-29.6,-34.3,-40.9,-56.6,-72.7,-77.4,-63.5,-44.2,-35.4,-20.1,-35.4,-41.7,-21.3,-16.5,-35.0,-32.4,-10.7,-17.6,-32.8,-18.1,-3.3,-17.6,-22.4,-0.3,4.5,-13.9,-8.5,12.2,9.2,-1.4,18.3,35.0,35.3,51.8,38.4,22.8,37.2,43.3,21.7,16.7,34.8,28.1,7.3,16.4,29.4,11.4,-0.8,16.0,17.1,-5.2,-6.6,7.5,1.8,-18.3,-40.3,-51.9,-60.4,-39.7,-33.7,-52.5,-48.8,-26.3,-31.7,-46.5,-30.8,-16.8,-33.1,-36.6,-14.3,-12.1,-31.6,-27.5,-19.3,-41.9,-52.5,-52.1,-74.3,-70.6,-53.5,-67.4,-85.5,-71.7,-62.7,-83.9,-89.7,-71.2,-76.9,-97.5,-90.3,-74.1,-91.1,-106.0,-91.0,-74.8,-87.0,-108.2,-102.8,-94.1,-114.4,-125.0,-110.2,-105.4,-125.4,-112.3,-124.2,-104.7,-93.1,-110.8,-107.5,-85.0,-89.2,-103.2,-86.0,-70.6,-86.6,-89.0,-66.3,-64.4,-82.0,-71.9,-52.3,-62.7,-73.7,-53.8,-43.2,-61.1,-59.2,-36.1,-41.0,-56.6,-42.5,-25.6,-39.7,-37.2,-14.2,-7.2,-20.5,-6.8,13.4,9.0,2.9,23.2,34.9,23.6,26.8,48.9,49.3,55.7,36.5,22.9,35.4,29.8,7.3,8.5,19.1,2.1,-14.1,-21.7,-21.0,-39.0,-34.4,-24.0,-42.4,-58.9,-73.6,-65.1,-43.3,-52.7,-63.3,-43.9,-32.2,-47.3,-46.3,-23.0,-22.2,-39.7,-27.7,-13.9,6.9,14.4,5.2,-3.4,-6.4,-4.7,-1.8,-16.3,-0.1,-14.5,-7.3],"z":[-5.2,-2.7,-4.7,-4.3,-3.6,-2.6,-5.9,-7.2,-4.2,-4.6,-8.4,-7.8,-5.0,-7.1,-9.9,-7.4,-5.9,-9.4,-10.5,-7.3,-7.9,-11.6,-10.7,-8.2,-10.6,-13.2,-10.5,-9.6,-12.9,-11.9,-8.4,-8.7,-10.4,-7.5,-4.4,-4.7,-1.0,1.2,-0.7,-0.6,3.2,3.6,1.0,2.9,6.3,4.9,3.5,6.9,8.9,6.4,6.8,10.6,10.7,8.4,11.4,14.0,12.3,12.1,10.4,6.5,6.8,9.1,6.2,3.9,6.5,7.1,3.4,2.8,5.9,4.8,1.1,2.5,4.8,1.7,-0.3,2.8,3.4,-0.3,0.0,3.3,2.2,-0.1,3.2,5.7,8.9,11.6,12.8,10.2,9.5,13.3,13.5,10.6,12.0,15.2,13.3,11.6,15.0,16.3,13.3,13.9,17.4,16.6,14.7,11.7,12.2,10.2,12.6,9.8,7.4,9.9,11.0,7.4,6.2,9.1,8.1,4.4,5.7,8.0,5.1,2.7,5.5,5.9,2.1,1.4,4.2,2.7,-1.3,-0.0,1.3,-1.4,-5.1,-5.1,-3.5,-6.1,-9.1,-7.6,-7.3,-10.9,-12.1,-10.1,-11.6,-15.1,-14.5,-13.1,-16.1,-18.6,-16.7,-16.6,-20.4,-20.9,-18.4,-17.0,-18.1,-19.7,-16.3,-14.6,-17.3,-16.9,-13.1,-13.6,-16.2,-13.8,-11.0,-13.3,-14.4,-10.8,-9.9,-12.8,-12.1,-8.3,-9.5,-9.4,-6.2,-3.2,-3.9,-7.4,-5.9,-3.1,-5.3,-7.7,-4.7,-3.5,-7.1,-7.0,-3.7,-5.1,-8.5,-6.9,-4.6,-7.4,-9.7,-7.7,-4.8,-6.2,-7.9,-4.6,-3.1,-5.8,-5.8,-2.2,-0.1,2.9,5.2,7.1,3.8,3.7,7.2,6.5,3.2,5.1,7.6,4.8,3.5,6.8,7.1,3.6,4.3,7.5,5.5,2.9,5.7,7.8,4.5,4.0,7.6,7.2,4.0,5.9,8.9,6.4,4.9,8.4,8.7,5.1,5.7,8.7,6.9,3.7,6.3,8.1,4.8,3.6,6.9,6.4,3.0,3.4,1.5,4.1,7.1,5.8,5.5,9.0,10.5,9.1,10.6,7.0,7.6,9.2,12.6,11.9,13.3,11.6,8.7,6.8,7.0,5.6,2.7,1.9,1.7,-0.5,-2.7,-2.7,-3.5,-6.1,-8.1,-9.9,-8.1,-7.8,-4.9,-7.6,-4.8,-7.0,-3.8,-5.0,-4.3,-2.2,-4.0],"runs":[[1,287]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>Non-structural protein 6</b> &middot;
-          287 residues &middot; mean confidence <b>43.3</b> of 100<br>
-          3,547&ndash;3,836 on the relative&rsquo;s entry &middot; 3,573&ndash;3,859 in this genome</div>
-      </div>
-    </details>
     <div class="lr">
       <span class="who"><span class="t">AP3A_BC279 Protein 3</span>
         <span class="w">the ORF translation is the candidate</span></span>
       <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:14.14%"></i></span>
       <span class="vl">275 aa
-        </span>
+        <span class="cf">confidence 47.4</span></span>
     </div>
     <details class="dmns">
       <summary>Folded structure &mdash; <b>275</b> residues &middot; mean confidence 47.4 of 100</summary>
@@ -1187,7 +1117,7 @@
         <span class="w">the ORF translation is the candidate</span></span>
       <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:11.41%"></i></span>
       <span class="vl">222 aa
-        </span>
+        <span class="cf">confidence 51.8</span></span>
     </div>
     <details class="dmns">
       <summary>Folded structure &mdash; <b>218</b> residues &middot; mean confidence 49.0 of 100</summary>
@@ -1205,175 +1135,7 @@
           218 residues &middot; mean confidence <b>49.0</b> of 100<br>
           5&ndash;222 in this genome</div>
       </div>
-    </details>
-    <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 8</span>
-        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 97 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:10.18%"></i></span>
-      <span class="vl">198 aa
-        </span>
-    </div>
-    <details class="dmns">
-      <summary>Folded structure &mdash; <b>198</b> residues &middot; mean confidence 52.4 of 100</summary>
-      
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r14_non_structural_protein_8__non_structural_protein_8.png" loading="lazy"
-          alt="The predicted backbone of Non-structural protein 8, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"Non-structural protein 8","seq":"AIASEFSSLPSYAAFATAQEAYEQAVANGDSEVVLKKLKKSLNVAKSEFDRDAAMQRKLEKMADQAMTQMYKQARSEDKRAKVTSAMQTMLFTMLRKLDNDALNNIINNARDGCVPLNIIPLTTAAKLMVVIPDYNTYKNTCDGTTFTYASALWEIQQVVDADSKIVQLSEISMDNSPNLAWPLIVTALRANSAVKLQ","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198],"at":3943,"pl":[45.0,54.0,56.0,59.0,64.0,69.0,70.0,74.0,76.0,78.0,85.0,83.0,85.0,88.0,88.0,87.0,89.0,91.0,90.0,91.0,92.0,93.0,91.0,92.0,92.0,92.0,92.0,92.0,90.0,91.0,91.0,91.0,91.0,92.0,94.0,93.0,93.0,94.0,93.0,93.0,92.0,92.0,92.0,91.0,91.0,89.0,89.0,88.0,87.0,85.0,84.0,83.0,81.0,81.0,79.0,77.0,75.0,73.0,71.0,70.0,69.0,66.0,63.0,65.0,63.0,60.0,55.0,59.0,58.0,52.0,51.0,55.0,51.0,46.0,47.0,47.0,46.0,44.0,42.0,42.0,45.0,42.0,42.0,46.0,46.0,46.0,47.0,46.0,46.0,46.0,46.0,43.0,45.0,48.0,43.0,40.0,43.0,43.0,42.0,44.0,48.0,46.0,45.0,47.0,48.0,45.0,45.0,46.0,43.0,42.0,38.0,34.0,34.0,31.0,33.0,31.0,33.0,31.0,30.0,32.0,35.0,36.0,35.0,35.0,36.0,36.0,33.0,34.0,35.0,31.0,30.0,30.0,31.0,31.0,35.0,34.0,33.0,33.0,33.0,33.0,31.0,33.0,32.0,31.0,33.0,33.0,32.0,33.0,36.0,32.0,30.0,35.0,34.0,31.0,32.0,35.0,31.0,31.0,31.0,33.0,33.0,32.0,34.0,33.0,33.0,31.0,32.0,30.0,32.0,31.0,30.0,30.0,31.0,31.0,34.0,33.0,34.0,36.0,36.0,34.0,36.0,38.0,36.0,34.0,39.0,39.0,36.0,36.0,38.0,38.0,34.0,35.0,35.0,31.0,30.0,30.0,28.0,23.0],"band":"dcccccbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbcccccccccccccddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","x":[126.5,115.1,93.8,82.8,65.5,75.2,79.9,62.8,72.7,81.5,102.0,103.3,113.2,129.0,133.3,134.4,148.6,161.8,162.6,168.0,184.2,193.5,192.4,201.9,218.7,223.1,223.1,237.7,251.6,249.9,262.7,257.0,253.4,238.1,227.9,226.2,216.6,201.8,197.3,191.8,178.1,169.1,165.2,154.4,141.5,137.4,131.0,116.4,108.9,106.3,94.5,80.5,77.8,72.9,58.1,48.4,46.6,37.9,22.4,17.2,14.1,1.0,-11.4,-14.0,-20.3,-35.1,-43.5,-46.0,-56.2,-69.9,-75.7,-80.2,-93.1,-104.8,-113.6,-126.2,-143.5,-143.0,-120.5,-121.3,-120.1,-101.5,-90.5,-94.4,-86.1,-67.2,-63.1,-65.4,-51.3,-35.2,-37.1,-34.7,-16.7,-6.8,-11.7,-2.6,17.3,18.6,30.8,16.2,26.3,21.0,-0.3,-2.2,5.8,-9.0,-26.7,-20.8,-18.7,-39.0,-48.1,-40.3,-53.1,-35.6,-26.6,-28.0,-34.7,-18.1,-2.7,-13.7,-1.3,-17.3,-14.3,-23.1,-41.0,-47.0,-43.6,-56.5,-73.8,-73.3,-70.5,-89.9,-106.7,-121.6,-127.8,-139.8,-125.2,-108.5,-114.2,-93.6,-93.6,-76.1,-85.3,-106.7,-110.8,-119.9,-108.3,-123.7,-113.0,-122.9,-109.0,-89.5,-94.2,-99.4,-79.2,-68.8,-80.9,-72.2,-50.4,-52.9,-63.8,-46.9,-39.3,-45.6,-62.1,-68.4,-91.3,-104.2,-108.5,-127.4,-138.4,-135.7,-155.2,-149.1,-167.3,-158.5,-141.4,-121.9,-114.4,-112.1,-101.2,-83.2,-75.1,-77.8,-68.1,-50.7,-50.9,-51.6,-34.6,-22.6,-25.8,-17.2,0.7,3.8,1.4,25.0,31.3,38.0],"y":[8.6,1.3,-0.2,19.6,5.4,0.2,22.1,20.4,3.2,9.1,0.4,9.7,29.3,18.0,3.8,20.7,32.7,14.7,9.3,31.0,32.0,12.4,18.6,38.9,29.2,14.9,32.8,44.5,26.7,24.8,9.6,-12.5,-10.0,6.6,-5.4,-23.7,-11.8,-1.8,-21.5,-30.3,-12.8,-14.9,-37.2,-32.9,-16.9,-30.4,-47.4,-33.7,-25.7,-46.7,-52.4,-34.2,-38.2,-60.3,-54.7,-39.3,-55.0,-70.0,-54.4,-49.6,-71.9,-74.7,-56.6,-64.9,-85.6,-76.6,-64.0,-81.8,-94.0,-76.2,-74.7,-97.0,-96.2,-76.6,-87.5,-100.7,-89.8,-105.4,-103.1,-80.4,-81.3,-95.1,-80.1,-63.3,-75.1,-83.5,-62.4,-53.6,-68.9,-65.8,-43.4,-45.0,-58.7,-44.0,-27.5,-38.7,-40.2,-17.7,-7.6,5.2,23.6,19.4,13.8,32.3,45.8,37.0,38.6,59.6,66.2,57.3,66.7,87.2,83.9,89.7,71.1,74.3,52.7,53.4,48.8,32.5,13.2,-2.5,-10.2,9.7,11.9,-9.1,-1.4,17.6,4.2,-10.9,2.6,13.2,0.8,17.2,21.4,38.9,52.9,60.7,82.5,86.9,110.2,111.9,130.6,128.8,109.2,92.3,73.7,56.8,36.5,40.6,58.6,48.1,33.5,51.1,61.5,41.7,42.0,62.3,56.0,36.8,45.0,56.4,39.5,18.5,5.7,1.7,-4.2,15.5,14.1,26.2,7.1,-2.1,3.4,10.4,-1.7,-10.9,-25.1,-18.5,-37.3,-30.2,-10.9,-22.9,-34.8,-15.8,-1.7,-15.6,-15.7,7.1,7.5,-6.4,7.5,24.0,11.7,10.0,32.8,35.5,53.0,63.3],"z":[-10.9,-7.9,-9.2,-8.2,-7.5,-4.1,-3.1,-0.6,1.3,4.7,3.9,0.4,1.5,3.5,0.6,-2.0,0.2,0.9,-2.8,-3.7,-1.1,-2.3,-6.0,-5.2,-3.3,-6.3,-8.7,-6.4,-6.1,-2.4,-0.4,-0.2,3.5,2.9,0.1,2.3,5.0,2.7,1.0,4.3,5.0,1.6,2.1,5.3,3.7,0.8,3.0,4.8,1.5,0.1,3.1,2.8,-0.9,-0.3,2.4,0.0,-2.7,-0.3,0.8,-2.8,-3.6,-0.5,-1.6,-5.1,-3.8,-1.3,-4.1,-6.5,-3.8,-3.1,-6.8,-6.8,-3.8,-4.6,-7.5,-5.1,-3.0,-0.0,0.8,1.2,5.1,4.9,2.6,5.0,8.0,6.3,5.1,8.5,9.9,7.3,7.5,11.2,10.8,8.5,10.9,13.8,12.0,11.4,14.2,16.5,15.0,11.4,12.5,14.7,11.9,9.5,12.0,13.0,9.5,8.6,11.7,10.6,7.4,5.0,3.5,-0.3,-1.1,-3.7,-1.0,1.1,0.6,-0.2,3.4,4.8,2.3,3.4,7.0,6.8,5.7,8.6,11.5,10.7,12.3,11.9,8.2,9.6,11.2,9.1,8.3,6.9,6.2,3.8,2.3,3.5,1.5,3.8,2.6,2.7,1.9,-1.4,-1.8,-0.7,-3.5,-5.8,-5.3,-5.8,-9.0,-9.9,-9.3,-11.4,-14.4,-16.0,-18.2,-17.0,-18.8,-15.1,-14.9,-14.8,-10.9,-11.8,-12.6,-9.1,-7.5,-3.9,-3.0,0.4,-0.7,1.2,-0.6,-4.2,-3.3,-2.1,-5.2,-7.1,-4.5,-4.5,-8.3,-8.2,-5.7,-7.8,-10.7,-8.5,-7.5,-11.2,-11.4,-11.1,-8.7,-11.8],"runs":[[1,6],[61,198]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>Non-structural protein 8</b> &middot;
-          198 residues &middot; mean confidence <b>52.4</b> of 100<br>
-          3,920&ndash;4,117 on the relative&rsquo;s entry &middot; 3,943&ndash;4,140 in this genome</div>
-      </div>
-    </details>
-    <div class="lr">
-      <span class="who"><span class="t">Host translation inhibitor nsp1</span>
-        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 84 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:9.25%"></i></span>
-      <span class="vl">180 aa
-        </span>
-    </div>
-    <details class="dmns">
-      <summary>Folded structure &mdash; <b>180</b> residues &middot; mean confidence 31.9 of 100</summary>
-      
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r12_host_translation_inhibitor_nsp1__host_translation_inhibitor_nsp1.png" loading="lazy"
-          alt="The predicted backbone of Host translation inhibitor nsp1, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"Host translation inhibitor nsp1","seq":"MESLVPGFNEKTHVQLSLPVLQVRDVLVRGFGDSVEEVLSEARQHLKDGTCGLVEVEKGVLPQLEQPYVFIKRSDARTAPHGHVMVELVAELEGIQYGRSGETLGVLVPHVGEIPVAYRKVLLRKNGNKGAGGHSYGADLKSFDLGDELGTDPYEDFQENWNTKHSSGVTRELMRELNGG","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180],"at":1,"pl":[37.0,38.0,34.0,35.0,37.0,32.0,34.0,30.0,32.0,29.0,29.0,27.0,23.0,23.0,22.0,23.0,22.0,25.0,24.0,25.0,25.0,25.0,28.0,26.0,26.0,27.0,29.0,29.0,29.0,30.0,30.0,31.0,37.0,40.0,42.0,49.0,48.0,44.0,46.0,51.0,50.0,46.0,48.0,51.0,45.0,43.0,46.0,43.0,39.0,34.0,32.0,32.0,33.0,33.0,34.0,31.0,32.0,30.0,30.0,29.0,29.0,31.0,33.0,31.0,35.0,34.0,32.0,33.0,34.0,34.0,34.0,32.0,31.0,31.0,32.0,30.0,31.0,29.0,31.0,29.0,29.0,28.0,26.0,28.0,28.0,26.0,25.0,27.0,28.0,26.0,27.0,29.0,29.0,28.0,28.0,27.0,29.0,28.0,25.0,25.0,26.0,27.0,29.0,28.0,27.0,31.0,28.0,30.0,28.0,26.0,26.0,27.0,31.0,32.0,33.0,30.0,31.0,31.0,28.0,27.0,28.0,29.0,26.0,29.0,31.0,32.0,33.0,30.0,32.0,29.0,27.0,27.0,27.0,27.0,25.0,29.0,25.0,28.0,26.0,27.0,26.0,26.0,27.0,27.0,28.0,27.0,30.0,32.0,32.0,30.0,31.0,34.0,32.0,34.0,34.0,34.0,36.0,36.0,36.0,36.0,35.0,35.0,35.0,35.0,33.0,31.0,31.0,32.0,30.0,34.0,40.0,39.0,35.0,38.0,45.0,43.0,45.0,44.0,55.0,33.0],"band":"dddddddddddddddddddddddddddddddddddddddccddcddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddcd","x":[135.3,138.6,130.2,115.6,119.7,138.3,143.1,137.9,153.0,155.3,154.1,131.1,124.9,107.2,100.2,77.7,70.9,50.5,41.7,35.5,14.7,4.8,-9.3,-24.4,-27.0,-32.5,-50.5,-56.4,-78.4,-81.2,-102.7,-107.4,-128.5,-116.5,-97.9,-88.5,-88.9,-80.6,-63.8,-59.9,-57.9,-44.5,-31.3,-30.2,-24.5,-9.2,-0.9,0.4,14.4,-1.1,1.3,-19.9,-32.2,-49.7,-67.1,-82.8,-102.3,-116.8,-129.8,-116.9,-111.0,-130.6,-118.0,-105.6,-117.9,-99.7,-89.4,-68.6,-50.4,-36.5,-14.8,-0.3,21.0,35.2,52.8,60.0,80.6,79.9,65.9,72.4,54.1,46.3,41.8,27.9,14.5,15.6,8.3,-8.1,-16.1,-14.3,-27.1,-42.4,-46.2,-59.6,-71.4,-90.7,-91.9,-112.5,-119.8,-106.7,-94.8,-92.1,-69.0,-61.6,-51.5,-33.5,-34.0,-11.5,-13.3,-9.2,13.5,21.5,21.6,15.8,35.4,34.3,34.5,14.1,7.6,9.5,-3.4,-20.2,-19.6,-18.8,-39.6,-47.8,-44.4,-67.4,-76.5,-96.0,-110.9,-111.2,-90.0,-89.3,-66.2,-59.8,-42.3,-28.7,-29.9,-20.9,-24.8,-6.6,9.2,11.2,16.8,24.1,45.5,54.9,49.3,71.4,82.6,80.7,64.8,80.9,97.7,84.6,76.2,96.2,102.0,82.4,78.9,99.9,97.4,76.4,70.2,88.9,81.3,62.6,44.1,56.0,66.5,47.1,36.0,55.1,55.2,33.5,36.4,55.5,43.9,49.6],"y":[38.7,16.4,14.5,-1.9,-10.6,-22.8,-16.9,5.7,14.6,37.7,44.8,48.0,60.7,72.8,75.2,76.6,82.6,72.7,79.6,58.2,66.3,55.0,46.5,54.8,73.6,70.7,57.2,70.5,64.1,71.8,79.0,83.4,81.1,73.0,59.0,76.4,89.3,73.1,69.3,91.6,94.8,76.2,84.4,105.3,96.1,83.9,102.9,114.2,97.6,92.3,69.4,64.3,45.1,49.5,36.7,36.1,31.3,16.0,28.0,45.5,30.5,20.7,5.2,0.6,-13.4,-11.8,5.9,9.3,17.2,28.3,27.4,43.5,34.3,47.7,49.0,26.4,34.1,39.0,27.1,5.6,-1.9,-13.7,0.1,15.2,-1.0,-17.2,-1.3,3.9,-17.8,-19.2,-0.8,-6.4,-22.3,-6.9,-0.9,-14.5,-25.2,-20.4,-43.0,-61.5,-67.9,-48.4,-44.5,-22.3,-22.8,-8.8,-1.6,-1.6,9.8,-7.2,-2.6,-24.4,-44.4,-40.3,-43.6,-64.7,-53.4,-44.9,-66.3,-73.4,-56.6,-59.8,-82.5,-83.1,-74.3,-90.7,-107.9,-108.3,-119.9,-107.5,-109.6,-94.1,-90.7,-72.6,-74.5,-57.1,-72.3,-66.2,-89.4,-94.9,-115.0,-114.5,-113.9,-134.6,-127.3,-148.7,-146.4,-126.0,-121.5,-124.8,-104.5,-84.8,-73.0,-55.8,-66.0,-71.6,-50.2,-40.0,-54.3,-55.5,-32.9,-27.2,-40.7,-36.7,-15.6,-3.9,1.2,11.3,15.9,24.9,38.8,45.7,49.2,59.2,72.5,77.4,81.5,93.5,107.3,99.1],"z":[-17.5,-16.4,-12.7,-13.7,-10.1,-9.0,-5.4,-5.2,-2.7,-3.9,-0.3,0.0,-3.1,-2.3,-6.0,-5.4,-8.9,-8.4,-11.6,-12.7,-11.8,-14.6,-11.8,-14.3,-12.4,-8.8,-8.1,-5.1,-4.9,-1.4,-1.5,2.1,3.8,6.8,7.5,9.2,6.1,3.8,6.3,6.8,3.0,2.7,5.6,3.9,0.5,2.5,4.2,0.8,-0.4,-3.1,-3.1,-4.0,-4.1,-1.8,-3.2,-0.4,-2.3,-0.8,1.8,3.0,5.8,6.8,8.6,5.4,3.1,0.5,-1.4,0.3,-1.5,1.0,-0.4,1.2,1.8,-0.2,2.4,1.9,1.1,-2.4,-4.8,-5.6,-3.4,-6.4,-9.3,-8.0,-6.5,-9.3,-11.7,-9.2,-9.1,-12.9,-13.6,-10.9,-13.5,-15.2,-12.0,-12.3,-8.8,-7.4,-7.5,-8.5,-5.3,-3.3,-2.5,-2.5,1.0,0.6,4.2,4.9,8.1,10.8,11.1,11.0,8.9,5.2,3.2,1.4,-2.0,-0.9,0.0,-3.6,-5.0,-2.4,-3.1,-6.8,-6.5,-4.3,-6.5,-6.5,-3.6,-3.6,-0.5,2.3,4.0,6.0,5.6,7.5,7.5,10.1,10.5,7.2,8.8,10.9,8.3,6.7,3.1,2.8,2.4,1.8,-1.9,-2.7,-2.2,-4.2,-2.2,-2.5,-0.6,2.3,2.2,2.8,5.5,7.5,7.1,8.3,11.2,12.5,11.5,12.5,15.8,16.8,14.6,11.8,14.2,15.9,12.6,11.3,14.4,13.8,10.1,10.6,12.8,16.1],"runs":[[1,180]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>Host translation inhibitor nsp1</b> &middot;
-          180 residues &middot; mean confidence <b>31.9</b> of 100<br>
-          1&ndash;180 on the relative&rsquo;s entry &middot; 1&ndash;180 in this genome</div>
-      </div>
-    </details>
-    <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 10</span>
-        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 97 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:7.15%"></i></span>
-      <span class="vl">139 aa
-        </span>
-    </div>
-    <details class="dmns">
-      <summary>Folded structure &mdash; <b>139</b> residues &middot; mean confidence 32.5 of 100</summary>
-      
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r11_non_structural_protein_10__non_structural_protein_10.png" loading="lazy"
-          alt="The predicted backbone of Non-structural protein 10, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"Non-structural protein 10","seq":"AGNATEVPANSTVLSFCAFAVDAAKAYKDYLASGGQPITNCVKMLCTHTGTGQAITVTPEANMDQESFGGASCCLYCRCHIDHPNPKGFCDLKGKYVQIPTTCANDPVGFTLKNTVCTVCGMWKGYGCSCDQLREPMLQ","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139],"at":4254,"pl":[27.0,32.0,29.0,34.0,34.0,31.0,30.0,32.0,34.0,34.0,26.0,32.0,25.0,29.0,27.0,28.0,26.0,29.0,34.0,32.0,33.0,40.0,44.0,44.0,49.0,47.0,48.0,51.0,52.0,50.0,51.0,55.0,50.0,47.0,45.0,40.0,37.0,30.0,32.0,31.0,30.0,30.0,29.0,30.0,28.0,29.0,28.0,27.0,28.0,27.0,27.0,27.0,29.0,29.0,30.0,31.0,30.0,28.0,29.0,29.0,29.0,29.0,31.0,29.0,29.0,29.0,28.0,28.0,25.0,25.0,26.0,27.0,30.0,31.0,34.0,33.0,31.0,32.0,29.0,30.0,29.0,31.0,29.0,30.0,30.0,29.0,29.0,30.0,30.0,33.0,30.0,30.0,27.0,25.0,28.0,26.0,29.0,27.0,29.0,26.0,27.0,26.0,26.0,26.0,27.0,28.0,26.0,25.0,27.0,29.0,30.0,34.0,32.0,33.0,37.0,43.0,41.0,40.0,37.0,36.0,39.0,40.0,42.0,40.0,39.0,36.0,37.0,37.0,37.0,38.0,37.0,34.0,30.0,31.0,31.0,31.0,28.0,30.0,29.0],"band":"dddddddddddddddddddddddddddccccccdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","x":[50.6,48.7,35.1,13.7,11.9,-10.0,-20.3,-36.6,-57.9,-62.9,-42.3,-44.4,-22.4,-23.1,-7.1,8.9,23.6,15.9,12.9,33.6,45.2,31.9,31.9,54.3,55.3,39.4,50.4,69.9,59.2,49.7,70.3,79.1,62.4,68.8,49.3,35.4,16.2,21.0,2.3,7.0,1.4,0.8,-21.3,-20.3,-35.2,-42.4,-52.0,-65.7,-73.3,-92.7,-98.7,-83.3,-83.5,-62.9,-62.9,-54.4,-43.2,-42.8,-24.6,-41.1,-55.5,-55.0,-52.5,-68.8,-88.2,-94.1,-102.3,-90.7,-108.3,-106.7,-83.4,-72.5,-52.3,-41.9,-22.7,-12.3,-22.9,-33.5,-51.1,-69.8,-82.5,-98.5,-99.8,-114.9,-101.1,-104.2,-85.2,-70.4,-56.6,-46.3,-48.7,-25.6,-27.0,-9.7,4.0,-9.2,2.7,-13.6,-11.0,-14.7,-31.3,-22.2,-11.4,-9.4,5.6,19.5,42.3,47.7,49.9,43.9,61.4,50.3,72.0,65.2,45.6,48.4,65.2,77.4,81.8,61.4,47.5,38.2,33.5,51.3,36.3,27.8,47.2,56.9,76.8,84.7,96.6,104.8,110.5,122.2,134.3,151.3,151.8,156.2,177.0],"y":[120.9,109.1,126.0,117.4,129.8,138.0,122.7,135.0,129.1,119.7,108.3,85.6,90.0,72.5,80.1,64.7,68.3,56.6,37.0,34.9,36.4,21.4,6.5,6.1,4.2,-12.0,-23.7,-21.8,-29.1,-46.5,-52.9,-50.4,-63.3,-80.2,-78.4,-79.2,-66.4,-48.0,-43.1,-21.5,-21.3,1.7,6.4,13.5,30.5,33.3,51.8,51.1,72.4,63.0,52.9,57.0,35.1,27.1,7.2,-8.7,-23.2,-42.0,-55.5,-71.7,-61.5,-76.9,-61.0,-74.6,-62.5,-47.8,-28.4,-14.2,1.7,11.4,15.2,-4.8,4.5,-13.0,-9.4,-11.3,-0.1,19.2,15.4,23.8,6.2,21.0,6.8,-10.4,-23.6,-41.2,-51.4,-38.6,-34.6,-13.9,-5.4,-1.9,-5.3,-18.9,-28.4,-43.9,-49.7,-65.6,-63.9,-86.5,-84.1,-101.7,-95.6,-117.1,-127.4,-117.5,-118.3,-106.5,-87.6,-72.1,-61.6,-41.6,-37.1,-35.1,-24.2,-8.6,6.6,0.2,22.4,32.4,13.6,19.5,4.6,6.8,6.7,26.9,38.0,37.4,48.3,39.4,24.1,42.5,50.4,32.0,29.9,40.4,30.0,9.6,14.0],"z":[-9.1,-5.9,-4.3,-4.3,-1.2,-1.6,0.6,2.4,0.8,4.2,4.5,3.5,2.3,-0.3,-3.0,-1.6,-4.5,-7.4,-5.3,-3.8,-7.0,-8.7,-5.8,-5.6,-9.3,-9.4,-6.7,-8.5,-11.6,-9.6,-8.4,-11.9,-13.3,-10.9,-8.9,-12.0,-11.4,-13.5,-15.7,-15.2,-11.5,-11.5,-11.9,-8.4,-9.2,-5.6,-6.9,-3.9,-4.2,-3.5,-6.8,-9.6,-10.5,-11.5,-9.6,-12.1,-9.8,-12.0,-10.9,-10.4,-8.2,-5.4,-2.6,-1.0,-1.2,-3.8,-2.3,-4.5,-4.6,-1.0,-0.6,0.1,1.0,2.7,0.6,3.9,6.7,5.4,7.8,6.1,7.2,7.5,10.5,10.1,11.8,9.4,10.9,8.9,11.9,11.9,15.5,16.0,19.8,20.7,18.0,16.1,13.1,12.1,8.2,7.4,4.5,2.6,-0.8,-2.0,0.1,2.4,1.3,4.4,2.3,4.8,3.0,2.5,3.4,7.1,6.7,3.9,3.5,0.3,-0.3,-0.0,0.0,3.4,6.2,8.7,11.5,10.4,10.8,7.4,8.0,4.8,6.9,8.6,5.1,4.3,7.5,5.7,2.5,4.0,5.1],"runs":[[1,139]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>Non-structural protein 10</b> &middot;
-          139 residues &middot; mean confidence <b>32.5</b> of 100<br>
-          4,231&ndash;4,369 on the relative&rsquo;s entry &middot; 4,254&ndash;4,392 in this genome</div>
-      </div>
-    </details>
-    <div class="lr">
-      <span class="who"><span class="t">Viral protein genome-linked nsp9</span>
-        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 97 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:5.81%"></i></span>
-      <span class="vl">113 aa
-        </span>
-    </div>
-    <details class="dmns">
-      <summary>Folded structure &mdash; <b>113</b> residues &middot; mean confidence 49.2 of 100</summary>
-      
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r15_viral_protein_genome_linked_nsp9__viral_protein_genome_linked_nsp9.png" loading="lazy"
-          alt="The predicted backbone of Viral protein genome-linked nsp9, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"Viral protein genome-linked nsp9","seq":"NNELSPVALRQMSCAAGTTQTACTDDNALAYYNTTKGGRFVLALLSDLQDLKWARFPKSDGTGTIYTELEPPCRFVTDTPKGPKVKYLYFIKGLNNLNRGMVLGSLAATVRLQ","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113],"at":4141,"pl":[35.0,34.0,37.0,33.0,32.0,30.0,33.0,33.0,33.0,34.0,33.0,32.0,31.0,32.0,30.0,30.0,30.0,29.0,29.0,32.0,32.0,30.0,33.0,36.0,38.0,39.0,39.0,40.0,43.0,40.0,42.0,41.0,37.0,34.0,36.0,36.0,36.0,38.0,41.0,46.0,52.0,57.0,59.0,64.0,63.0,67.0,68.0,70.0,70.0,71.0,71.0,69.0,68.0,66.0,61.0,62.0,57.0,58.0,55.0,56.0,56.0,59.0,61.0,64.0,63.0,66.0,67.0,69.0,69.0,68.0,66.0,68.0,64.0,67.0,62.0,63.0,63.0,61.0,66.0,69.0,73.0,73.0,70.0,70.0,71.0,70.0,70.0,66.0,69.0,64.0,64.0,59.0,50.0,49.0,43.0,41.0,41.0,39.0,36.0,33.0,33.0,33.0,35.0,32.0,32.0,33.0,34.0,37.0,36.0,39.0,41.0,37.0,37.0],"band":"ddddddddddddddddddddddddddddddddddddddddcccccccbbbbcccccccccccccccccccccccccccccbbbbbbbccccccdddddddddddddddddddd","x":[6.9,3.6,15.6,4.6,9.9,24.5,9.2,13.1,15.6,-0.1,1.9,-17.6,-19.8,-35.9,-36.7,-46.4,-67.6,-70.3,-85.9,-71.8,-69.2,-75.3,-55.8,-68.6,-49.5,-43.0,-23.0,-16.2,-0.2,-12.1,-0.8,-11.5,-6.0,-11.4,-19.1,-6.0,15.3,17.7,23.4,19.7,14.1,16.5,-0.8,-5.3,-26.7,-31.0,-47.7,-36.0,-38.1,-19.9,-2.7,15.4,32.3,35.3,53.2,61.4,78.0,95.2,96.9,117.9,111.5,124.9,108.4,88.8,82.5,67.6,54.9,40.3,18.6,5.4,-14.6,-27.8,-45.6,-63.6,-77.9,-95.2,-94.7,-113.7,-109.3,-123.5,-122.6,-127.5,-117.0,-95.6,-82.7,-62.2,-45.0,-31.6,-10.9,3.4,25.3,35.5,53.3,50.8,41.9,60.6,63.8,75.3,62.9,81.9,78.1,64.7,60.1,64.4,50.5,43.1,35.4,35.3,32.2,21.0,23.3,8.3,18.1],"y":[123.2,102.3,88.3,69.4,64.4,46.3,29.6,12.2,-6.1,-20.2,-41.5,-42.8,-65.1,-63.6,-85.7,-91.4,-94.0,-80.1,-63.9,-45.5,-39.8,-18.6,-6.7,7.7,18.5,36.0,31.0,9.8,-1.2,-20.4,-40.1,-50.8,-72.6,-80.2,-102.2,-105.9,-112.6,-102.8,-82.6,-64.4,-46.9,-26.9,-13.5,7.3,12.1,34.6,50.2,59.9,53.0,63.0,53.5,49.2,45.0,35.7,39.8,24.0,26.3,11.5,-4.0,2.1,23.8,30.8,41.7,40.2,27.1,35.2,20.8,24.4,18.6,8.2,17.5,12.9,-0.6,11.8,2.4,10.5,4.7,5.8,18.6,24.4,45.5,38.1,29.1,35.7,33.8,24.5,21.2,2.9,7.2,-9.4,-5.0,-8.7,-23.2,-30.0,-49.8,-59.2,-50.9,-68.3,-72.5,-63.5,-42.9,-42.1,-20.4,-19.7,-0.9,7.2,27.7,32.3,54.8,57.0,77.7,84.7,94.1],"z":[2.3,0.7,3.0,4.1,7.7,8.0,7.2,9.7,7.4,8.8,7.4,5.5,4.8,2.1,2.3,-1.0,0.3,3.3,2.5,2.3,6.1,5.1,5.4,7.3,8.1,5.8,3.8,4.8,2.9,2.4,1.9,-0.9,-0.5,-3.9,-3.5,-6.5,-5.4,-2.0,-3.7,-1.6,-3.7,-1.8,-2.5,-1.3,-0.4,-0.8,-1.0,-3.7,-7.5,-8.9,-6.9,-9.2,-6.8,-3.4,-1.2,1.2,3.8,3.3,6.1,6.7,7.3,4.6,2.7,0.6,-2.3,-4.9,-6.7,-9.5,-8.8,-11.4,-12.2,-9.3,-9.0,-7.9,-5.4,-3.2,0.4,2.6,5.7,8.5,7.0,3.6,0.6,0.2,-2.9,-2.4,-4.8,-4.7,-6.1,-7.0,-6.5,-9.8,-9.6,-5.9,-7.1,-5.6,-2.2,-0.7,2.6,4.1,2.9,6.1,5.4,9.3,9.8,6.4,7.4,3.7,3.2,-0.2,-2.0,-4.6,-7.6],"runs":[[1,47],[52,80],[88,113]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>Viral protein genome-linked nsp9</b> &middot;
-          113 residues &middot; mean confidence <b>49.2</b> of 100<br>
-          4,118&ndash;4,230 on the relative&rsquo;s entry &middot; 4,141&ndash;4,253 in this genome</div>
-      </div>
-    </details>
-    <div class="lr">
-      <span class="who"><span class="t">Protein 7a</span>
-        <span class="w">found in the ORF that matched &middot; 99 % of the relative&rsquo;s chain at 91 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:5.45%"></i></span>
-      <span class="vl">106 aa
-        </span>
-    </div>
-    <details class="dmns">
-      <summary>Folded structure &mdash; <b>106</b> residues &middot; mean confidence 73.7 of 100</summary>
-      
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r19_protein_7a__protein_7a.png" loading="lazy"
-          alt="The predicted backbone of Protein 7a, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"Protein 7a","seq":"ELYHYQECVRGTTVLLKEPCSSGTYEGNSPFHPLADNKFALTCFSTQFAFACPDGVKHVYQLRARSVSPKLFIRQEEVQELYSPIFLIVAAIVFITLCFTLKRKTE","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106],"at":16,"pl":[71.0,81.0,78.0,79.0,76.0,76.0,74.0,74.0,74.0,70.0,69.0,76.0,76.0,78.0,79.0,78.0,79.0,79.0,80.0,80.0,74.0,74.0,76.0,78.0,75.0,73.0,68.0,61.0,59.0,57.0,63.0,67.0,68.0,73.0,72.0,77.0,77.0,79.0,78.0,77.0,74.0,74.0,72.0,65.0,61.0,64.0,69.0,73.0,78.0,79.0,81.0,82.0,81.0,83.0,81.0,84.0,83.0,82.0,81.0,78.0,76.0,73.0,71.0,69.0,62.0,53.0,50.0,49.0,46.0,45.0,47.0,51.0,51.0,55.0,58.0,58.0,60.0,65.0,68.0,70.0,72.0,74.0,77.0,79.0,81.0,82.0,84.0,87.0,88.0,88.0,89.0,89.0,89.0,89.0,88.0,88.0,88.0,86.0,85.0,84.0,84.0,82.0,81.0,79.0,72.0,70.0],"band":"bbbbbbbbbbcbbbbbbbbbbbbbbbcccccccbbbbbbbbbbccccbbbbbbbbbbbbbbbbccccddddccccccccbbbbbbbbbbbbbbbbbbbbbbbbbbb","x":[-143.5,-129.5,-109.4,-99.9,-77.7,-68.3,-46.6,-44.4,-26.9,-27.5,-37.7,-49.0,-71.6,-79.7,-98.7,-111.4,-130.5,-148.4,-152.9,-175.8,-191.9,-200.4,-186.0,-182.8,-163.0,-155.8,-136.9,-126.4,-113.3,-117.9,-129.7,-129.6,-146.1,-140.2,-151.5,-155.3,-158.1,-136.7,-127.7,-107.3,-95.8,-76.6,-59.2,-58.4,-79.9,-91.8,-101.7,-120.2,-138.2,-153.8,-173.4,-184.7,-207.3,-204.3,-193.8,-172.5,-158.7,-140.4,-122.6,-106.4,-85.2,-69.9,-48.1,-31.9,-16.6,-0.2,12.0,28.7,41.3,52.0,64.1,60.7,82.9,82.3,97.8,109.1,110.4,118.1,134.3,139.5,140.3,153.0,166.9,179.7,179.6,187.0,203.3,209.8,210.4,222.2,237.1,239.5,243.3,258.4,269.3,269.6,277.3,293.7,299.9,299.2,311.1,325.9,329.0,332.1,347.5,358.8],"y":[-72.7,-57.8,-53.3,-33.4,-30.9,-11.3,-7.3,10.5,20.6,15.0,32.2,40.3,40.1,32.8,41.9,26.6,29.0,17.3,0.8,3.6,18.6,11.8,-5.4,-12.0,-12.8,-32.3,-30.5,-22.9,-7.7,14.8,19.5,41.2,46.0,64.5,78.1,70.4,48.5,46.7,37.5,37.8,19.5,20.5,7.7,-12.8,-11.9,-31.6,-39.5,-28.5,-35.5,-23.3,-34.2,-25.9,-28.5,-41.5,-57.5,-52.8,-51.7,-38.7,-43.5,-28.0,-33.1,-16.6,-23.7,-10.3,-9.7,-16.6,0.9,-14.0,0.9,0.4,16.3,31.8,32.2,36.3,20.4,40.1,45.9,25.1,26.7,47.1,39.2,21.5,31.7,41.1,22.0,10.6,25.4,24.0,1.3,2.1,16.2,2.8,-15.6,-4.0,3.1,-17.9,-26.3,-11.0,-16.2,-38.3,-35.6,-22.0,-37.5,-54.0,-41.4,-39.9],"z":[-4.9,-6.6,-4.9,-5.3,-4.5,-4.3,-3.3,-0.9,1.0,4.7,6.6,3.8,3.2,-0.1,-1.6,-3.3,-5.2,-4.0,-6.4,-6.2,-5.1,-1.7,-0.9,2.7,4.4,5.9,8.2,11.6,9.8,9.9,6.8,6.3,3.8,1.9,-0.4,-4.1,-3.3,-2.1,0.9,2.5,3.6,5.6,4.3,6.3,7.4,7.9,4.7,3.9,1.8,0.1,-0.7,-3.7,-4.0,-7.2,-5.0,-5.9,-2.9,-3.4,-1.1,-0.8,0.4,0.7,0.8,1.9,-0.8,1.5,0.4,0.8,2.6,-0.6,1.3,-1.5,-1.6,-5.4,-6.6,-7.5,-3.7,-2.8,-5.3,-4.0,-0.4,-1.2,-3.6,-0.9,1.1,-1.8,-2.3,1.2,1.1,-2.1,-0.5,2.5,0.3,-1.8,1.3,2.7,-0.6,-0.7,2.8,2.0,-1.2,0.5,3.3,0.7,-1.1,2.1],"runs":[[27,33],[64,79]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>Protein 7a</b> &middot;
-          106 residues &middot; mean confidence <b>73.7</b> of 100<br>
-          16&ndash;122 on the relative&rsquo;s entry &middot; 16&ndash;121 in this genome</div>
-      </div>
-    </details>
-    <div class="lr">
-      <span class="who"><span class="t">ORF9B_SARS ORF9b protein</span>
-        <span class="w">the ORF translation is the candidate</span></span>
-      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:4.99%"></i></span>
-      <span class="vl">97 aa
-        </span>
-    </div>
-    <details class="dmns">
-      <summary>Folded structure &mdash; <b>97</b> residues &middot; mean confidence 39.5 of 100</summary>
-      
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r20_orf9b_sars_orf9b_protein__orf9b_sars_orf9b_protein.png" loading="lazy"
-          alt="The predicted backbone of ORF9B_SARS ORF9b protein, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"ORF9B_SARS ORF9b protein","seq":"MDPKISEMHPALRLVDPQIQLAVTRMENAVGRDQNNVGPKVYPIILRLGSPLSLNMARKTLNSLEDKAFQLTPIAVQMTKLATTEELPDEFVVVTVK","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97],"at":1,"pl":[29.0,37.0,36.0,39.0,40.0,41.0,39.0,37.0,40.0,38.0,37.0,39.0,37.0,35.0,39.0,42.0,41.0,44.0,45.0,44.0,42.0,46.0,47.0,46.0,48.0,46.0,48.0,45.0,44.0,42.0,41.0,41.0,41.0,44.0,45.0,42.0,40.0,36.0,38.0,39.0,40.0,41.0,38.0,44.0,39.0,42.0,39.0,34.0,37.0,37.0,36.0,34.0,44.0,45.0,49.0,47.0,48.0,50.0,51.0,50.0,48.0,49.0,47.0,45.0,40.0,41.0,37.0,38.0,39.0,36.0,36.0,34.0,32.0,29.0,28.0,31.0,29.0,29.0,30.0,31.0,34.0,31.0,33.0,32.0,35.0,35.0,35.0,36.0,39.0,37.0,39.0,39.0,38.0,41.0,38.0,37.0,36.0],"band":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddcccddddddddddddddddddddddddddddddddddddd","x":[101.1,81.0,69.2,67.7,45.5,44.7,49.0,31.9,15.2,7.5,-11.8,-7.2,-4.6,-26.4,-34.7,-43.4,-28.9,-31.0,-21.3,-5.1,-0.7,0.0,14.6,27.6,28.4,33.8,50.4,58.5,57.1,67.4,84.2,87.1,90.4,108.3,114.6,96.1,99.6,79.2,61.0,54.6,32.2,23.7,1.3,-7.5,-26.1,-41.7,-59.6,-77.8,-93.8,-100.9,-105.8,-95.4,-75.1,-72.5,-75.2,-63.3,-48.0,-46.9,-45.7,-29.9,-18.2,-20.5,-13.0,6.1,11.3,32.8,37.3,43.4,22.2,13.0,-8.7,-9.2,-31.3,-20.2,-37.8,-34.8,-20.2,-20.4,0.1,-2.5,0.2,2.2,-11.2,-26.8,-44.5,-59.1,-55.5,-76.8,-81.0,-76.2,-52.8,-39.2,-16.9,-2.1,18.4,37.0,51.7],"y":[-48.9,-36.6,-52.1,-41.9,-34.6,-47.1,-65.6,-59.3,-75.5,-78.9,-74.9,-52.4,-55.2,-62.5,-43.1,-25.6,-17.2,2.3,-8.4,-16.5,4.8,12.0,-5.1,-1.3,21.4,15.7,1.7,19.0,33.7,19.2,15.5,37.7,43.3,29.5,46.1,47.5,31.0,35.5,20.6,24.0,27.8,21.7,24.8,6.4,17.7,1.3,10.7,3.1,7.4,-13.9,-18.7,-38.5,-27.2,-23.5,-45.2,-52.7,-36.3,-42.7,-64.8,-61.4,-49.4,-63.4,-79.0,-66.3,-72.8,-68.2,-52.0,-36.2,-27.6,-19.0,-13.3,4.2,9.8,28.8,42.0,50.7,66.9,73.3,82.4,94.0,77.5,95.0,89.4,107.3,92.6,89.7,67.3,57.6,54.4,32.2,28.8,15.5,21.7,4.7,11.1,-2.4,-1.0],"z":[-1.6,-1.2,0.8,4.3,3.9,7.1,5.0,2.7,3.5,7.0,5.2,5.3,9.1,9.3,7.9,10.2,12.8,10.9,7.9,10.2,11.4,7.8,6.8,9.9,9.2,5.7,6.7,8.8,6.0,3.5,6.0,6.3,2.7,1.6,-0.7,-3.1,-5.8,-7.5,-7.6,-4.0,-4.6,-1.2,-1.0,0.7,1.9,1.8,3.5,1.4,4.0,3.1,-0.6,0.3,0.3,-3.4,-4.5,-1.5,-2.2,-5.9,-4.8,-2.1,-4.6,-7.6,-5.2,-4.7,-8.3,-7.5,-10.3,-7.9,-7.8,-10.9,-9.9,-12.1,-12.0,-11.2,-11.5,-8.0,-9.0,-5.2,-5.7,-2.2,0.4,2.9,5.8,6.1,6.4,3.4,2.6,2.1,-1.8,-1.4,-1.3,-3.6,-3.7,-4.6,-6.2,-5.9,-8.8],"runs":[[1,97]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>ORF9B_SARS ORF9b protein</b> &middot;
-          97 residues &middot; mean confidence <b>39.5</b> of 100<br>
-          1&ndash;97 in this genome</div>
-      </div>
-    </details>
-    <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 7</span>
-        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 99 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b" style="left:0.00%;width:4.27%"></i></span>
-      <span class="vl">83 aa
-        </span>
-    </div>
-    <details class="dmns">
-      <summary>Folded structure &mdash; <b>83</b> residues &middot; mean confidence 76.5 of 100</summary>
-      
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r13_non_structural_protein_7__non_structural_protein_7.png" loading="lazy"
-          alt="The predicted backbone of Non-structural protein 7, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"Non-structural protein 7","seq":"SKMSDVKCTSVVLLSVLQQLRVESSSKLWAQCVQLHNDILLAKDTTEAFEKMVSLLSVLLSMQGAVDINKLCEEMLDNRATLQ","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83],"at":3860,"pl":[78.0,81.0,86.0,86.0,85.0,86.0,88.0,87.0,85.0,85.0,86.0,84.0,82.0,82.0,81.0,78.0,77.0,76.0,73.0,69.0,60.0,52.0,53.0,53.0,62.0,71.0,78.0,79.0,81.0,83.0,84.0,84.0,87.0,90.0,90.0,90.0,92.0,92.0,91.0,91.0,92.0,90.0,88.0,89.0,88.0,88.0,90.0,90.0,88.0,89.0,90.0,88.0,86.0,86.0,84.0,82.0,81.0,79.0,75.0,74.0,73.0,68.0,53.0,51.0,48.0,52.0,59.0,60.0,66.0,68.0,66.0,69.0,70.0,69.0,70.0,70.0,69.0,64.0,66.0,61.0,58.0,57.0,51.0],"band":"bbbbbbbbbbbbbbbbbbbccccccbbbbbbbbaaaaaaaaabbbbaabbabbbbbbbbbbcccdcccccccbcbbccccccc","x":[-105.6,-89.8,-84.0,-79.4,-66.6,-54.5,-51.7,-45.1,-30.6,-21.6,-17.3,-6.7,5.4,11.4,18.0,30.6,39.7,44.2,54.6,67.5,75.0,95.5,101.8,84.1,86.8,73.2,63.6,56.2,47.1,36.6,27.6,20.2,10.3,0.2,-7.7,-15.6,-26.2,-34.8,-43.0,-53.0,-62.5,-68.5,-90.6,-93.0,-83.3,-74.6,-63.2,-56.1,-49.4,-37.5,-26.2,-23.1,-13.3,0.3,6.2,10.0,22.7,36.2,38.8,43.6,58.0,69.2,68.9,91.6,86.1,67.3,63.1,40.7,35.9,40.1,27.3,9.4,10.8,10.2,-7.3,-18.7,-14.4,-21.1,-40.5,-43.9,-40.1,-54.6,-70.9],"y":[18.3,12.5,-4.7,8.7,21.8,3.8,-3.9,16.5,18.6,-1.3,5.3,23.9,11.9,-3.1,13.9,22.9,2.7,-0.3,19.9,14.4,-3.3,4.5,-15.9,-29.0,-51.4,-60.9,-71.6,-53.5,-44.6,-64.1,-63.3,-42.1,-47.3,-65.2,-52.1,-37.0,-53.2,-61.2,-40.4,-38.6,-58.7,-56.0,-60.4,-44.8,-26.0,-36.4,-51.8,-35.4,-22.4,-39.4,-42.6,-20.6,-19.5,-36.6,-25.5,-6.6,-18.5,-25.2,-3.8,1.7,-14.8,-6.3,14.3,15.6,19.9,32.7,52.9,45.6,67.2,73.1,55.7,60.9,82.2,75.5,61.3,77.9,91.9,77.0,74.3,96.8,94.6,77.3,91.4],"z":[-0.1,2.6,0.3,-2.6,-0.3,0.8,-2.7,-3.9,-1.0,-1.9,-5.4,-4.1,-1.6,-4.2,-6.5,-3.8,-3.1,-6.8,-6.9,-3.9,-6.1,-5.0,-3.2,-2.6,-3.0,-5.7,-2.8,-0.9,-4.1,-4.8,-1.4,-1.8,-5.2,-3.5,-0.7,-3.2,-5.1,-1.9,-1.1,-4.6,-4.1,-0.5,0.3,3.0,4.3,7.3,5.3,2.9,5.8,7.4,4.1,3.8,7.3,6.2,3.1,5.1,7.5,4.7,3.8,7.3,7.7,4.8,6.8,6.8,3.2,3.3,5.1,6.0,6.7,3.2,2.0,4.2,3.0,-0.6,0.0,1.7,-1.2,-3.8,-1.9,-2.4,-6.1,-6.4,-5.0],"runs":[[20,25],[62,72],[77,83]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>Non-structural protein 7</b> &middot;
-          83 residues &middot; mean confidence <b>76.5</b> of 100<br>
-          3,837&ndash;3,919 on the relative&rsquo;s entry &middot; 3,860&ndash;3,942 in this genome</div>
-      </div>
-    </details><div class="lane-grp"><b>Too long to fold whole &middot; 9</b><span>longer than the 400-residue ceiling, or never located in this genome at all. The length is a bar to folding the chain whole and not to reaching the target: open a row to see the functionally important regions its relative&rsquo;s entry annotates, and which of them are short enough. 9 of these have one</span></div>
+    </details><div class="lane-grp"><b>Too long to fold whole &middot; 8</b><span>longer than the 400-residue ceiling, or never located in this genome at all. The length is a bar to folding the chain whole and not to reaching the target: open a row to see the functionally important regions its relative&rsquo;s entry annotates, and which of them are short enough. 9 of these have one</span></div>
     <div class="lr">
       <span class="who"><span class="t">Papain-like protease nsp3</span>
         <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 77 % identity</span></span>
@@ -1890,125 +1652,6 @@
       </div>
     </details>
     <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 2</span>
-        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 68 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:32.80%"></i></span>
-      <span class="vl">638 aa
-        </span>
-    </div>
-    <details class="dmns">
-      <summary>4 of 7 annotated regions are within the ceiling &mdash; offered first is <b>CoV Nsp2 N-terminal</b> at 274 aa (183&ndash;456 on the relative)</summary>
-      
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r16_non_structural_protein_2__cov_nsp2_n_terminal.png" loading="lazy"
-          alt="The predicted backbone of CoV Nsp2 N-terminal, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"CoV Nsp2 N-terminal","seq":"TRYVDNNFCGPDGYPLECIKDLLARAGKASCTLSEQLDFIDTKRGVYCCREHEHEIAWYTERSEKSYELQTPFEIKLAKKFDTFNGECPNFVFPLNSIIKTIQPRVEKKKLDGFMGRIRSVYPVASPNECNQMCLSTLMKCDHCGETSWQTGDFVKATCEFCGTENLTKEGATTCGYLPQNAVVKIYCPACHNSEVGPEHSLAEYHNESGLKTILRKGGRTIAFGGCVFSYVGCHNKCAYWVPRASANIGCNHTGVVGEGSEGLNDNLLEILQK","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,261,262,263,264,265,266,267,268,269,270,271,272,273,274],"at":183,"pl":[24.0,27.0,24.0,27.0,25.0,28.0,27.0,27.0,29.0,27.0,25.0,26.0,29.0,31.0,30.0,32.0,34.0,33.0,35.0,37.0,39.0,38.0,37.0,40.0,38.0,35.0,37.0,32.0,30.0,30.0,28.0,32.0,29.0,29.0,30.0,30.0,30.0,30.0,30.0,31.0,30.0,27.0,27.0,27.0,26.0,28.0,27.0,25.0,28.0,27.0,30.0,32.0,29.0,25.0,28.0,25.0,24.0,24.0,27.0,25.0,25.0,27.0,28.0,27.0,27.0,28.0,29.0,29.0,30.0,29.0,32.0,32.0,30.0,32.0,31.0,33.0,33.0,33.0,32.0,30.0,34.0,30.0,28.0,27.0,26.0,26.0,26.0,28.0,27.0,29.0,27.0,28.0,27.0,28.0,30.0,28.0,29.0,29.0,29.0,32.0,31.0,30.0,30.0,32.0,33.0,33.0,37.0,40.0,39.0,33.0,34.0,38.0,35.0,33.0,31.0,31.0,28.0,30.0,28.0,26.0,26.0,29.0,24.0,26.0,26.0,25.0,26.0,25.0,24.0,25.0,27.0,26.0,26.0,30.0,30.0,37.0,43.0,46.0,53.0,62.0,65.0,68.0,73.0,68.0,61.0,64.0,52.0,53.0,48.0,48.0,40.0,38.0,37.0,39.0,37.0,44.0,56.0,59.0,62.0,61.0,67.0,66.0,63.0,68.0,59.0,48.0,49.0,46.0,40.0,37.0,29.0,28.0,24.0,26.0,26.0,25.0,24.0,27.0,25.0,25.0,26.0,25.0,25.0,28.0,28.0,32.0,31.0,32.0,33.0,32.0,28.0,32.0,28.0,30.0,29.0,29.0,28.0,26.0,28.0,29.0,27.0,28.0,25.0,27.0,28.0,26.0,26.0,25.0,25.0,24.0,26.0,24.0,26.0,26.0,25.0,27.0,23.0,25.0,27.0,25.0,26.0,26.0,25.0,24.0,23.0,24.0,25.0,28.0,31.0,31.0,31.0,30.0,29.0,29.0,33.0,30.0,28.0,25.0,28.0,30.0,30.0,32.0,31.0,29.0,30.0,29.0,27.0,25.0,24.0,23.0,24.0,24.0,23.0,22.0,23.0,20.0,24.0,21.0,22.0,22.0,25.0,25.0,25.0,28.0,29.0,30.0,30.0,30.0,29.0,31.0,29.0,31.0,30.0,29.0],"band":"ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddccccbcccccddddddddcccccccccddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","x":[-20.5,-25.4,-9.3,-23.2,-3.0,-14.0,0.3,-13.3,-32.4,-35.7,-41.6,-62.6,-67.2,-66.0,-68.0,-90.9,-83.7,-76.0,-95.7,-106.9,-94.6,-96.9,-118.8,-120.0,-108.7,-123.7,-140.0,-147.3,-145.2,-157.8,-155.2,-161.1,-144.2,-155.0,-153.3,-131.7,-127.8,-139.7,-125.5,-106.7,-117.7,-128.4,-112.0,-94.8,-79.5,-64.5,-52.8,-32.1,-14.6,-4.2,12.9,-0.3,-11.2,-0.5,-4.8,-26.6,-27.1,-27.3,-46.6,-58.6,-55.7,-61.6,-80.4,-91.7,-101.6,-115.9,-111.7,-132.6,-128.1,-143.7,-144.7,-153.4,-133.2,-121.0,-135.1,-132.7,-109.4,-110.1,-124.1,-109.8,-93.9,-109.0,-104.2,-82.2,-87.2,-81.4,-58.7,-52.5,-49.0,-26.8,-28.7,-17.8,-27.4,-16.8,-33.4,-31.3,-42.4,-58.8,-55.3,-55.5,-74.9,-85.1,-78.5,-90.7,-109.4,-107.0,-108.0,-87.4,-98.8,-106.2,-84.8,-75.0,-90.0,-86.5,-63.7,-64.8,-76.6,-63.0,-45.8,-57.0,-60.4,-37.7,-24.9,-6.5,6.9,19.4,41.4,44.6,27.6,34.4,54.2,41.6,30.0,47.9,64.5,63.4,86.0,93.0,102.6,116.3,114.0,135.2,127.2,117.7,126.5,105.4,99.7,79.4,68.8,65.0,49.7,49.7,63.0,83.5,86.7,77.5,76.2,72.4,80.3,61.8,73.1,83.4,72.8,92.6,94.0,114.8,112.0,129.4,124.7,133.1,137.9,134.9,123.9,105.6,93.4,109.9,123.8,115.5,133.5,144.4,134.5,113.4,100.4,83.2,66.7,52.1,32.1,15.8,0.4,-15.5,-8.7,6.1,18.8,40.6,44.4,51.3,64.2,86.7,80.3,71.6,87.6,94.7,114.1,118.1,118.0,138.5,149.7,163.3,155.5,145.4,122.2,115.7,92.6,86.3,67.0,63.1,48.4,29.1,35.2,26.8,40.2,28.9,43.3,31.6,41.2,61.2,50.9,53.5,37.1,43.0,27.2,31.8,20.8,18.9,18.7,-3.8,-5.7,-11.2,-4.9,1.4,12.6,27.5,35.3,57.4,64.7,71.3,82.1,92.5,112.5,116.5,100.3,108.7,90.0,77.3,61.3,47.4,26.3,29.7,12.3,13.8,-1.0,-2.4,15.1,7.1,-10.7,0.8,19.3,6.6,-9.9,6.5,14.5,-7.5,-12.6,4.9],"y":[172.3,149.8,141.5,125.4,115.0,107.2,89.3,75.8,63.4,58.3,36.8,44.3,50.2,72.8,80.6,80.7,102.4,103.4,93.6,107.4,126.0,119.0,116.3,136.2,146.8,136.9,147.1,126.6,129.4,109.1,89.3,67.9,50.5,44.3,66.5,66.8,47.6,56.5,74.8,61.1,51.2,69.2,84.7,73.9,83.9,67.8,85.4,74.9,88.6,98.8,83.1,66.7,78.8,66.0,45.5,51.8,59.0,37.4,33.6,50.1,43.2,21.3,24.1,31.4,10.9,12.2,-8.3,-11.7,-26.2,-40.1,-58.4,-59.6,-69.4,-50.5,-37.1,-51.1,-50.5,-27.8,-26.4,-40.1,-26.2,-9.5,-14.8,-9.0,13.6,25.8,18.8,23.3,3.7,7.9,-14.4,-29.2,-44.8,-64.0,-71.6,-87.9,-77.9,-76.2,-98.1,-106.1,-95.0,-101.4,-122.8,-133.8,-123.3,-120.8,-137.2,-137.7,-130.2,-111.0,-108.0,-110.6,-95.0,-81.2,-84.2,-79.6,-60.0,-53.2,-57.4,-42.2,-27.1,-29.4,-34.8,-43.0,-26.8,-38.4,-39.9,-21.9,-10.4,-16.1,-6.4,12.8,11.9,10.5,24.1,42.3,48.4,64.2,80.0,97.1,116.1,123.0,144.0,147.1,128.6,122.6,100.5,93.8,74.1,71.1,56.7,49.2,50.2,60.2,70.8,90.8,93.9,115.4,121.4,126.7,142.7,154.3,147.2,141.3,120.9,117.4,100.5,86.6,66.5,68.2,44.6,31.2,12.7,5.1,-4.6,-12.9,1.7,13.9,27.2,16.2,32.8,33.7,30.3,21.6,27.7,10.8,18.9,3.9,11.5,3.5,13.5,28.6,23.4,28.1,14.9,-3.2,-2.9,-6.1,-28.0,-26.5,-11.1,-17.9,-13.3,-34.5,-42.2,-34.5,-50.4,-60.2,-81.4,-91.0,-91.8,-102.3,-103.4,-94.7,-107.5,-99.9,-115.3,-104.6,-90.3,-99.5,-91.5,-93.1,-90.5,-81.1,-81.9,-75.0,-60.4,-68.9,-60.8,-58.9,-60.3,-40.7,-42.4,-21.3,-19.7,-16.5,-37.4,-26.5,-45.3,-36.0,-45.3,-29.9,-35.2,-38.8,-23.6,-12.7,-29.1,-43.4,-34.8,-48.3,-56.3,-53.4,-65.8,-55.2,-69.5,-69.5,-72.4,-86.9,-98.3,-114.8,-111.1,-133.7,-136.3,-120.6,-135.1,-154.9,-150.0,-135.6,-151.2,-166.2,-151.3,-147.1,-169.1,-174.8],"z":[11.8,12.3,9.9,8.6,7.9,4.6,5.2,7.2,6.3,10.0,11.1,11.3,7.9,7.8,11.3,11.3,11.7,8.0,6.9,9.2,8.1,4.5,5.1,6.9,3.9,1.5,3.6,5.1,8.9,9.4,7.3,8.3,8.0,4.6,3.4,4.8,2.5,-0.5,-0.2,-0.6,-3.5,-5.1,-5.4,-7.2,-4.8,-3.6,-1.9,-1.2,-0.1,-3.2,-2.6,-4.2,-6.8,-9.5,-7.9,-8.4,-12.0,-12.3,-10.3,-12.0,-15.5,-14.7,-12.5,-15.5,-15.2,-12.2,-10.8,-9.2,-6.4,-8.0,-5.7,-2.2,-1.5,-2.9,-0.8,2.3,1.8,1.2,4.2,6.2,4.7,5.7,9.3,8.6,9.3,6.2,5.8,2.1,-0.0,-0.2,0.8,-1.5,0.7,-0.1,-2.2,0.6,3.4,0.8,-0.2,3.5,4.3,1.1,0.3,2.9,1.6,-2.2,-4.9,-6.8,-10.0,-8.1,-6.7,-10.3,-11.7,-8.6,-9.0,-12.7,-11.8,-8.9,-11.4,-13.6,-10.6,-9.4,-12.3,-10.4,-12.0,-14.7,-13.3,-15.7,-14.0,-10.4,-11.6,-11.8,-8.5,-6.0,-7.5,-5.3,-5.3,-2.9,-5.2,-4.2,-6.2,-7.4,-7.6,-4.1,-2.2,-1.0,-1.0,-2.4,-3.2,-6.9,-8.4,-12.2,-15.5,-14.2,-17.6,-16.3,-12.5,-11.3,-7.8,-5.6,-3.9,-6.6,-9.8,-11.5,-13.5,-12.2,-9.7,-9.0,-7.4,-3.9,-3.6,-6.8,-6.1,-7.7,-4.8,-2.5,-0.7,2.1,3.1,6.2,8.4,7.0,10.2,8.1,10.5,9.6,10.8,11.6,9.1,11.5,14.7,13.2,16.2,15.3,18.2,16.4,19.5,18.9,19.4,15.8,14.6,11.1,12.9,13.8,10.2,9.3,11.0,8.4,8.8,5.9,5.1,8.4,8.3,11.6,11.7,15.0,16.5,15.2,12.3,8.9,6.0,2.7,-0.5,-3.6,-7.2,-5.7,-3.2,0.3,2.7,6.4,9.1,11.1,14.5,16.0,20.0,19.5,17.8,14.4,12.2,8.9,5.9,4.3,0.8,1.8,-0.8,2.4,4.1,1.9,1.0,-1.9,-4.2,-7.8,-8.6,-11.3,-9.9,-12.9,-11.6,-14.5,-16.2,-13.7,-10.8,-11.3,-8.8,-6.3,-5.8,-5.2,-3.1,-1.1,-1.0,-0.0,2.7,3.7,3.7,6.0],"runs":[[1,142],[144,274]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>CoV Nsp2 N-terminal</b> &middot;
-          274 residues &middot; mean confidence <b>31.6</b> of 100 &middot; 12 residues the curators marked as doing the chemistry<br>
-          183&ndash;456 on the relative&rsquo;s entry &middot; 183&ndash;456 in this genome</div>
-      </div>
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r16_non_structural_protein_2__c2hc.png" loading="lazy"
-          alt="The predicted backbone of C2HC, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"C2HC","seq":"CPACHNSEVGPEHSLAEYHNESGLKTILRKGGRTIAFGGCVFSYVGC","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47],"at":370,"pl":[46.0,39.0,41.0,43.0,41.0,40.0,39.0,39.0,40.0,39.0,40.0,39.0,36.0,37.0,39.0,39.0,41.0,43.0,43.0,42.0,43.0,41.0,39.0,38.0,40.0,41.0,43.0,41.0,41.0,44.0,39.0,37.0,38.0,41.0,41.0,41.0,40.0,38.0,35.0,39.0,38.0,42.0,37.0,42.0,39.0,36.0,35.0],"band":"ddddddddddddddddddddddddddddddddddddddddddddddd","x":[45.9,53.3,46.2,59.0,76.3,79.1,76.6,88.8,67.1,69.8,51.3,47.9,40.8,19.8,4.5,15.7,-0.9,6.3,-1.1,-2.6,-2.1,-20.6,-38.0,-45.5,-46.2,-49.6,-55.3,-44.0,-56.0,-40.4,-52.8,-73.2,-70.3,-63.5,-53.6,-50.4,-35.4,-29.0,-28.4,-14.6,-26.6,-9.2,-16.1,-5.2,8.5,29.6,43.8],"y":[-6.1,-25.8,-19.4,-0.7,-11.3,-26.3,-16.8,-2.2,6.2,28.8,41.8,40.0,18.8,27.6,9.0,-9.5,-26.7,-38.0,-60.2,-65.7,-88.8,-87.1,-83.1,-62.1,-44.8,-26.4,-4.9,15.6,36.3,52.8,71.9,65.6,42.2,28.7,9.0,-5.1,-23.4,-39.1,-26.9,-9.4,9.5,22.3,43.6,57.9,64.3,68.0,50.2],"z":[7.3,6.6,3.2,3.5,4.9,2.1,-1.2,-3.4,-4.2,-4.2,-3.3,-7.2,-7.3,-6.3,-6.0,-7.6,-7.3,-4.3,-5.1,-1.4,-1.2,1.1,-1.1,0.2,-2.5,-0.2,-1.7,-0.8,-1.5,-2.8,-4.3,-2.4,-2.6,0.4,-0.5,2.7,2.3,5.0,8.1,7.0,6.2,4.8,5.6,3.2,6.1,4.8,5.4],"runs":[[1,47]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>C2HC</b> &middot;
-          47 residues &middot; mean confidence <b>39.9</b> of 100 &middot; 4 residues the curators marked as doing the chemistry<br>
-          370&ndash;416 on the relative&rsquo;s entry &middot; 370&ndash;416 in this genome</div>
-      </div>
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r16_non_structural_protein_2__cov_nsp2_c_terminal.png" loading="lazy"
-          alt="The predicted backbone of CoV Nsp2 C-terminal, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"CoV Nsp2 C-terminal","seq":"ADSIIIGGAKLKALNLGETFVTHSKGLYRKCVKSREETGLLMPLKAPKEIIFLEGETLPTEVLTEEVVLKTGDLQPLEQPTSEAVEAPLVGTPVCINGLMLLEIKDTEKYCALAPNMMVTNNTFTLKGG","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129],"at":690,"pl":[33.0,33.0,27.0,29.0,29.0,30.0,32.0,31.0,32.0,31.0,30.0,29.0,26.0,28.0,26.0,24.0,27.0,27.0,26.0,26.0,24.0,26.0,25.0,25.0,28.0,29.0,29.0,30.0,28.0,24.0,25.0,24.0,28.0,28.0,30.0,29.0,28.0,25.0,27.0,24.0,24.0,25.0,28.0,29.0,27.0,31.0,29.0,30.0,29.0,31.0,30.0,33.0,29.0,30.0,31.0,30.0,30.0,30.0,29.0,27.0,27.0,28.0,26.0,26.0,26.0,25.0,26.0,23.0,27.0,25.0,25.0,27.0,30.0,27.0,29.0,29.0,29.0,30.0,32.0,30.0,29.0,29.0,28.0,29.0,28.0,28.0,28.0,27.0,28.0,29.0,28.0,33.0,28.0,32.0,32.0,32.0,31.0,31.0,31.0,34.0,35.0,34.0,37.0,32.0,33.0,32.0,31.0,34.0,33.0,34.0,31.0,32.0,31.0,31.0,32.0,29.0,28.0,27.0,31.0,28.0,28.0,29.0,30.0,32.0,31.0,29.0,28.0,30.0,27.0],"band":"ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","x":[69.1,56.2,37.0,27.7,4.2,-6.1,-29.5,-28.3,-12.0,7.7,25.6,45.7,63.6,76.3,100.0,107.1,126.3,123.0,129.4,110.6,116.5,103.9,99.5,94.3,73.2,65.9,74.8,72.5,82.4,89.3,81.0,91.8,86.4,84.1,64.7,78.8,79.0,57.9,46.0,30.9,30.0,29.2,19.5,38.7,37.2,35.4,53.3,44.1,48.5,44.9,55.2,45.3,59.3,48.5,53.6,58.7,42.7,44.7,50.9,30.4,42.7,40.8,18.4,20.0,26.8,8.7,16.6,4.4,3.4,3.5,-15.1,-10.5,-20.3,-33.0,-53.4,-65.0,-77.4,-95.8,-105.5,-107.3,-127.6,-139.8,-135.3,-118.3,-107.5,-109.2,-90.7,-82.7,-65.5,-52.2,-33.2,-21.9,-31.4,-12.1,-12.9,2.5,2.3,-19.9,-23.9,-30.5,-23.4,-36.2,-29.1,-47.1,-43.7,-46.6,-43.3,-21.1,-32.5,-29.3,-44.0,-33.8,-48.5,-49.0,-43.9,-66.6,-71.4,-75.7,-76.0,-92.1,-97.9,-90.6,-104.4,-97.1,-107.9,-100.3,-104.2,-107.8,-105.4],"y":[-128.6,-122.4,-112.1,-101.0,-101.9,-83.3,-82.0,-99.7,-89.5,-101.7,-86.8,-92.4,-89.7,-73.9,-76.0,-61.6,-53.3,-30.2,-18.7,-13.9,2.7,-3.4,15.5,8.5,17.9,5.7,-0.3,19.2,20.5,42.0,49.2,69.2,83.8,101.2,113.8,129.4,122.5,119.0,133.4,115.4,100.0,84.4,65.4,53.0,40.8,22.6,9.8,-1.7,-19.0,-22.4,-40.7,-51.6,-61.8,-80.1,-83.2,-63.9,-55.4,-33.2,-25.4,-18.2,1.3,7.0,6.7,23.8,40.2,48.6,44.2,63.1,59.2,81.6,78.4,97.7,89.7,72.0,81.6,69.8,57.3,69.4,53.1,33.1,37.1,18.1,13.9,-1.2,5.3,-16.4,-11.4,-32.4,-31.6,-32.2,-32.5,-42.3,-34.2,-26.3,-28.6,-13.5,-13.6,-20.1,-5.8,-15.3,-1.6,-5.5,0.6,9.4,4.4,24.3,39.1,43.2,43.1,27.1,23.4,18.4,4.2,6.3,-13.5,-16.0,-19.1,-41.5,-46.1,-62.6,-69.9,-51.7,-37.6,-21.6,-21.0,-3.5,-10.7,10.3,6.9],"z":[7.4,4.5,5.6,2.7,2.8,1.3,1.7,4.2,6.4,7.0,6.7,8.5,6.0,8.0,7.7,4.5,6.0,5.6,2.1,-0.0,-2.4,-5.5,-7.4,-11.0,-10.1,-7.2,-3.9,-1.7,1.6,1.1,4.3,3.4,6.1,3.6,3.4,4.9,8.4,9.2,6.8,6.9,4.0,6.9,5.4,5.1,8.4,6.1,7.1,10.2,7.7,3.9,2.0,-1.1,-3.6,-5.2,-8.8,-10.5,-13.0,-12.2,-15.6,-17.3,-17.9,-14.3,-15.2,-17.8,-15.4,-13.5,-10.1,-9.4,-5.7,-5.0,-2.7,-1.1,2.0,0.8,0.8,-1.8,0.5,-0.3,-2.6,-0.8,0.7,-0.2,3.4,3.0,6.1,7.5,9.5,10.2,7.8,10.8,8.8,5.8,2.5,0.8,-3.0,-4.5,-8.4,-8.5,-5.6,-2.3,0.6,3.6,7.0,8.9,12.5,14.6,11.7,10.6,7.3,4.6,1.7,-1.7,-3.5,-7.4,-9.4,-10.1,-6.5,-5.6,-1.8,-1.7,1.9,4.2,1.9,-0.6,-3.9,-6.2,-9.6,-11.4,-15.0],"runs":[[1,129]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>CoV Nsp2 C-terminal</b> &middot;
-          129 residues &middot; mean confidence <b>28.9</b> of 100 &middot; 1 residue the curators marked as doing the chemistry<br>
-          690&ndash;818 on the relative&rsquo;s entry &middot; 690&ndash;818 in this genome</div>
-      </div>
-      <div class="dmn-hd">
-        <span class="dn">region</span><span class="dl">length</span>
-        <span class="dw">where</span><span class="dy">why it is offered here</span>
-        <span class="dv">fold unit</span>
-      </div>
-      
-      <div class="dmn">
-        <span class="dn">CoV Nsp2 N-terminal
-          <span class="dt">Domain</span></span>
-        <span class="dl">274 aa</span>
-        <span class="dw">183&ndash;456<span class="dq">183&ndash;456 in this genome</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">12 annotated site residues inside</span>
-        <span class="dv">within the ceiling
-          </span>
-      </div>
-      <div class="dmn">
-        <span class="dn">C2HC
-          <span class="dt">Region</span></span>
-        <span class="dl">47 aa</span>
-        <span class="dw">370&ndash;416<span class="dq">370&ndash;416 in this genome</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">4 annotated site residues inside</span>
-        <span class="dv">within the ceiling
-          </span>
-      </div>
-      <div class="dmn x">
-        <span class="dn">C2H2
-          <span class="dt">Region</span></span>
-        <span class="dl">37 aa</span>
-        <span class="dw">200&ndash;236<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">4 annotated site residues inside</span>
-        <span class="dv">refused
-          <span class="dq">37 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
-      </div>
-      <div class="dmn x">
-        <span class="dn">C4
-          <span class="dt">Region</span></span>
-        <span class="dl">22 aa</span>
-        <span class="dw">323&ndash;344<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">4 annotated site residues inside</span>
-        <span class="dv">refused
-          <span class="dq">22 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
-      </div>
-      <div class="dmn">
-        <span class="dn">CoV Nsp2 C-terminal
-          <span class="dt">Domain</span></span>
-        <span class="dl">129 aa</span>
-        <span class="dw">690&ndash;818<span class="dq">690&ndash;818 in this genome</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">1 annotated site residue inside</span>
-        <span class="dv">within the ceiling
-          </span>
-      </div>
-      <div class="dmn">
-        <span class="dn">CoV Nsp2 middle
-          <span class="dt">Domain</span></span>
-        <span class="dl">231 aa</span>
-        <span class="dw">458&ndash;688<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">&mdash;</span>
-        <span class="dv">within the ceiling
-          </span>
-      </div>
-      <div class="dmn x">
-        <span class="dn">Cytoplasmic
-          <span class="dt">Topological domain</span></span>
-        <span class="dl">638 aa</span>
-        <span class="dw">181&ndash;818<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">14 annotated site residues inside &middot; describes position, not function</span>
-        <span class="dv">refused
-          <span class="dq">638 residues, over the 400-residue ceiling the folding endpoint applies, so this region is no more foldable than the whole chain.</span></span>
-      </div>
-    </details>
-    <div class="lr">
       <span class="who"><span class="t">Helicase nsp13</span>
         <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 100 % identity</span></span>
       <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:30.90%"></i></span>
@@ -2247,169 +1890,12 @@
       </div>
     </details>
     <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 4</span>
-        <span class="w">found in ORF 3 of the ranked set, 4405 aa &middot; 100 % of the relative&rsquo;s chain at 80 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:25.71%"></i></span>
-      <span class="vl">500 aa
+      <span class="who"><span class="t">Guanine-N7 methyltransferase nsp14</span>
+        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 95 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:20.57%"></i><i class="b over" style="left:0.00%;width:27.10%"></i></span>
+      <span class="vl">527 aa
         </span>
     </div>
-    <details class="dmns">
-      <summary>5 of 12 annotated regions are within the ceiling &mdash; offered first is <b>Nsp4C</b> at 99 aa (3,142&ndash;3,240 on the relative)</summary>
-      
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r17_non_structural_protein_4__nsp4c.png" loading="lazy"
-          alt="The predicted backbone of Nsp4C, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"Nsp4C","seq":"VVFNGVSFSTFEEAALCTFLLNKEMYLKLRSDVLLPLTQYNRYLALYNKYKYFSGAMDTTSYREAACCHLAKALNDFSNSGSDVLYQPPQTSITSAVLQ","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99],"at":3165,"pl":[47.0,48.0,44.0,43.0,45.0,50.0,50.0,52.0,53.0,51.0,48.0,49.0,51.0,50.0,47.0,51.0,53.0,51.0,47.0,49.0,49.0,48.0,47.0,43.0,43.0,46.0,44.0,43.0,41.0,41.0,42.0,40.0,39.0,38.0,41.0,42.0,44.0,48.0,49.0,48.0,51.0,51.0,53.0,51.0,52.0,53.0,54.0,52.0,49.0,50.0,47.0,43.0,43.0,39.0,38.0,35.0,35.0,39.0,42.0,45.0,44.0,42.0,46.0,48.0,48.0,48.0,50.0,49.0,50.0,52.0,51.0,51.0,51.0,51.0,53.0,54.0,48.0,49.0,49.0,41.0,43.0,38.0,41.0,36.0,36.0,38.0,36.0,36.0,32.0,33.0,33.0,31.0,31.0,30.0,29.0,28.0,30.0,30.0,31.0],"band":"dddddcccccddccdcccddddddddddddddddddddddccccccccdcddddddddddddddddcdccccccccddddddddddddddddddddddd","x":[-10.3,8.8,7.9,26.3,39.6,32.2,19.4,0.6,-11.8,-31.2,-38.6,-46.2,-24.8,-16.6,-33.1,-29.5,-6.8,-10.6,-25.3,-11.2,5.6,-6.6,-6.5,-22.8,-36.9,-31.2,-37.7,-56.9,-63.1,-59.4,-74.6,-89.9,-91.2,-97.5,-83.7,-86.9,-69.0,-63.1,-60.4,-50.4,-35.0,-30.7,-27.3,-14.0,-2.5,0.6,6.1,20.8,29.6,32.9,37.8,56.8,62.3,64.6,82.9,97.9,103.4,97.8,76.5,65.9,68.4,65.3,49.1,39.5,42.8,35.1,16.2,12.9,14.8,0.3,-15.0,-13.8,-15.8,-34.0,-43.4,-39.1,-48.2,-67.0,-69.6,-66.3,-84.1,-69.8,-68.2,-49.3,-35.4,-17.7,-2.2,16.1,33.9,40.0,60.7,73.9,66.6,78.2,100.7,107.0,99.0,106.5,128.6],"y":[104.9,106.9,97.8,97.6,104.4,87.6,90.1,76.5,74.3,75.9,82.9,61.2,52.7,67.7,62.8,40.2,43.1,55.7,39.9,21.6,32.7,36.8,17.0,26.7,30.3,9.6,1.2,13.8,4.3,-15.1,-8.2,3.4,-4.5,-27.0,-29.8,-52.3,-61.8,-67.8,-45.8,-42.0,-58.9,-50.9,-29.1,-37.5,-49.5,-30.8,-18.4,-34.3,-35.8,-13.7,-9.1,-21.8,-8.0,8.5,-0.2,-1.5,20.1,43.4,41.3,58.3,55.2,32.8,32.3,46.4,32.6,14.7,26.6,33.2,11.6,4.8,21.3,15.7,-6.8,-2.1,11.4,-3.5,-18.9,-7.4,-3.4,-24.7,-33.6,-51.4,-64.7,-70.3,-75.3,-62.4,-79.3,-68.3,-74.1,-95.2,-87.5,-85.4,-69.4,-82.3,-80.3,-59.4,-48.8,-62.8,-59.0],"z":[-5.4,-3.3,0.0,2.3,-0.6,-2.9,-6.0,-6.4,-9.6,-7.7,-4.2,-3.8,-4.2,-1.7,0.9,0.5,1.0,4.1,5.2,4.7,6.5,9.5,11.6,13.7,10.8,9.7,13.0,12.8,9.5,11.2,13.7,11.7,8.1,7.7,4.8,4.1,5.8,2.2,1.2,4.5,4.3,0.9,2.0,4.7,2.2,0.0,3.0,4.4,0.9,0.7,4.3,3.7,0.9,3.4,5.1,2.2,0.9,1.5,3.1,1.4,-2.4,-2.2,0.5,-1.9,-4.8,-2.9,-1.9,-5.5,-6.6,-3.9,-4.7,-8.4,-7.6,-5.5,-8.1,-11.0,-8.7,-7.7,-11.4,-12.7,-10.7,-10.5,-7.3,-9.3,-6.2,-6.7,-6.6,-5.1,-7.2,-5.6,-6.2,-2.9,-0.5,2.0,1.3,0.1,3.1,5.9,5.2],"runs":[[1,99]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>Nsp4C</b> &middot;
-          99 residues &middot; mean confidence <b>44.4</b> of 100 &middot; 1 residue the curators marked as doing the chemistry<br>
-          3,142&ndash;3,240 on the relative&rsquo;s entry &middot; 3,165&ndash;3,263 in this genome</div>
-      </div>
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r17_non_structural_protein_4__hd2.png" loading="lazy"
-          alt="The predicted backbone of HD2, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"HD2","seq":"LVFLFVAAIFYLITPVHVMSKHTDFSSEIIGYKAIDGGVTRDIASTDTCFANKHADFDTWFSQRGGSYTNDKACPLIAAVITREVGFVVPGLPGTILRTTNGDFLHFLPRVFSAVGNICYTPSKLIEYTDFATSACVLAAECTIFKDASGKPVPYCYDTNVLEGSVAYESLRPDTRYVLMDGSIIQFPNTYLEGSVRVVTTFDSEYCRHGTCERSEAGVCVSTSGRWVLNNDYYRSLPGVFCGVDAVNLLTNMFTPLIQPIGALDISASIVAGGIVAIVVTCLAYYFMRFRRAFGEYSHVVAFNTLLFLMSFTVLCLTPVYSFLPGVYSVIYLYLTFYLTNDVSFLAHIQWMVMFTPLVPFWITIAYIICI","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,299,300,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,320,321,322,323,324,325,326,327,328,329,330,331,332,333,334,335,336,337,338,339,340,341,342,343,344,345,346,347,348,349,350,351,352,353,354,355,356,357,358,359,360,361,362,363,364,365,366,367,368,369,370,371],"at":2778,"pl":[42.0,46.0,47.0,46.0,46.0,46.0,46.0,44.0,44.0,44.0,42.0,40.0,38.0,35.0,33.0,29.0,28.0,29.0,24.0,24.0,24.0,24.0,23.0,22.0,24.0,21.0,22.0,21.0,22.0,24.0,24.0,27.0,25.0,26.0,26.0,28.0,27.0,26.0,28.0,31.0,29.0,33.0,30.0,27.0,29.0,27.0,28.0,28.0,29.0,30.0,27.0,27.0,28.0,27.0,29.0,30.0,33.0,32.0,32.0,32.0,33.0,31.0,31.0,30.0,27.0,25.0,26.0,31.0,26.0,25.0,27.0,29.0,28.0,26.0,26.0,23.0,24.0,24.0,23.0,24.0,26.0,25.0,25.0,26.0,24.0,24.0,25.0,24.0,25.0,23.0,24.0,25.0,25.0,24.0,26.0,26.0,27.0,27.0,25.0,25.0,24.0,25.0,23.0,25.0,25.0,23.0,27.0,23.0,23.0,23.0,20.0,22.0,20.0,18.0,20.0,20.0,22.0,25.0,22.0,27.0,25.0,24.0,23.0,23.0,21.0,22.0,21.0,22.0,21.0,22.0,23.0,21.0,21.0,21.0,21.0,22.0,22.0,24.0,24.0,23.0,25.0,25.0,28.0,29.0,31.0,35.0,38.0,40.0,39.0,42.0,37.0,33.0,31.0,27.0,27.0,25.0,29.0,26.0,24.0,24.0,25.0,26.0,24.0,22.0,23.0,23.0,24.0,27.0,26.0,27.0,30.0,30.0,31.0,33.0,34.0,33.0,35.0,32.0,34.0,32.0,33.0,34.0,35.0,34.0,35.0,32.0,32.0,28.0,26.0,27.0,28.0,25.0,24.0,22.0,23.0,23.0,25.0,25.0,26.0,25.0,27.0,27.0,28.0,27.0,26.0,29.0,27.0,27.0,27.0,28.0,28.0,28.0,27.0,30.0,28.0,24.0,24.0,26.0,26.0,25.0,25.0,25.0,21.0,22.0,22.0,22.0,25.0,24.0,24.0,26.0,25.0,26.0,27.0,25.0,24.0,22.0,22.0,20.0,20.0,22.0,22.0,20.0,22.0,25.0,26.0,24.0,25.0,29.0,26.0,28.0,29.0,31.0,28.0,29.0,29.0,28.0,26.0,29.0,27.0,26.0,27.0,28.0,27.0,26.0,30.0,35.0,34.0,34.0,40.0,42.0,43.0,45.0,48.0,46.0,50.0,52.0,50.0,50.0,55.0,53.0,50.0,51.0,56.0,53.0,50.0,53.0,54.0,51.0,50.0,47.0,49.0,45.0,43.0,43.0,44.0,42.0,41.0,43.0,45.0,43.0,46.0,47.0,46.0,46.0,49.0,48.0,46.0,47.0,48.0,47.0,46.0,45.0,44.0,42.0,40.0,39.0,34.0,37.0,34.0,30.0,29.0,33.0,30.0,30.0,33.0,32.0,34.0,37.0,37.0,34.0,36.0,37.0,34.0,33.0,34.0,32.0,32.0,27.0,30.0,26.0,29.0,29.0,30.0,29.0,28.0,30.0,31.0,28.0,32.0,33.0,30.0,30.0,37.0,34.0,33.0,38.0,41.0,38.0,41.0,45.0,47.0,47.0,47.0,48.0,46.0,47.0,47.0,49.0,48.0,46.0,50.0],"band":"ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddcccccccccccccccdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddc","x":[211.7,201.8,190.7,184.3,177.1,164.5,155.6,150.9,140.4,128.6,122.9,117.0,104.4,94.6,82.3,76.4,69.5,60.1,49.9,44.1,33.1,23.4,13.9,4.8,-8.3,-15.5,-36.0,-40.1,-58.7,-61.3,-80.0,-95.6,-112.7,-129.6,-145.5,-162.5,-181.8,-172.8,-162.1,-139.4,-134.6,-113.0,-109.9,-98.1,-82.6,-98.2,-114.5,-116.3,-112.3,-90.3,-90.2,-88.1,-66.4,-58.5,-72.4,-88.4,-77.5,-66.6,-85.4,-98.1,-86.0,-82.2,-103.5,-114.2,-104.9,-91.5,-109.8,-116.4,-136.9,-150.5,-165.3,-154.6,-134.4,-131.7,-140.7,-121.2,-105.0,-115.5,-117.1,-95.5,-88.5,-100.4,-94.6,-72.4,-72.7,-82.6,-61.8,-63.3,-46.8,-54.1,-33.7,-24.5,-23.7,-26.5,-39.6,-24.4,-40.1,-30.4,-38.1,-39.5,-23.1,-6.9,-9.7,-8.8,-23.2,-6.9,-16.3,-0.7,10.2,4.2,15.8,-1.8,-0.1,-13.8,-31.0,-48.8,-51.9,-54.6,-53.9,-54.6,-43.7,-48.5,-28.5,-34.6,-34.1,-51.7,-45.7,-60.7,-50.3,-64.3,-54.4,-70.5,-89.2,-81.9,-99.1,-97.6,-108.2,-113.7,-127.7,-146.3,-152.1,-158.4,-161.3,-182.6,-179.6,-200.4,-204.0,-210.7,-231.7,-224.3,-226.4,-209.5,-197.1,-192.3,-169.5,-164.4,-146.8,-159.2,-150.9,-151.9,-131.2,-120.0,-130.1,-115.4,-92.4,-96.0,-78.7,-73.3,-83.5,-104.1,-100.6,-110.4,-105.6,-125.7,-130.7,-138.5,-134.0,-147.9,-135.8,-145.6,-150.2,-161.0,-142.5,-140.4,-118.7,-118.3,-98.2,-93.8,-92.4,-71.3,-60.4,-60.2,-45.7,-24.2,-14.6,-20.8,-36.5,-45.7,-63.6,-65.2,-81.3,-80.6,-79.4,-85.9,-66.7,-53.5,-63.0,-51.7,-34.7,-43.7,-63.6,-74.7,-89.7,-106.5,-108.1,-131.1,-124.7,-122.0,-99.1,-86.5,-70.7,-55.9,-54.1,-33.1,-22.9,-12.6,-18.5,-9.7,-9.5,-1.4,11.2,11.9,-4.9,-3.7,14.8,2.7,13.7,-0.3,13.5,23.7,25.0,16.6,29.4,17.9,27.7,49.6,46.4,33.4,50.3,66.1,53.7,47.3,69.0,75.0,56.1,64.9,83.7,71.8,54.7,66.2,70.0,48.3,41.0,53.9,43.6,50.8,65.3,76.7,77.1,85.8,100.7,105.5,108.3,121.5,134.3,136.9,142.5,158.0,167.2,168.2,177.7,192.7,198.0,200.1,213.1,224.9,228.3,234.0,248.7,257.4,259.6,281.4,280.5,270.3,283.5,276.0,257.1,249.5,236.6,223.6,221.0,216.7,202.0,191.5,190.3,181.8,166.7,160.7,159.6,146.9,133.3,131.6,128.0,112.5,103.8,103.7,96.3,80.2,65.3,74.9,80.7,62.0,68.3,85.8,75.5,61.3,78.3,87.5,67.0,63.4,84.6,82.6,60.2,65.2,83.8,71.8,53.2,66.2,78.3,63.1,42.1,35.4,23.9,24.5,46.0,37.7,31.8,54.5,60.6,54.1,65.5,82.2,78.1,77.5,96.7,105.6,116.0,123.2,132.1,149.1,150.6,151.6,166.5,178.8,178.2,182.6,199.8,207.8,206.8,217.9,235.0],"y":[-11.0,6.1,11.7,-10.0,-11.0,8.7,0.3,-19.7,-9.2,4.2,-14.7,-26.6,-9.1,-5.9,-25.0,-24.8,-2.8,-10.0,-27.5,-14.8,1.3,-16.7,-21.9,-1.3,-6.1,-19.4,-18.1,3.3,-3.8,18.6,15.8,11.6,25.3,13.9,30.1,15.0,27.4,48.7,41.6,40.9,21.9,17.7,-3.5,-9.9,-26.5,-38.8,-40.1,-64.0,-61.1,-56.4,-65.6,-87.0,-80.1,-100.9,-117.7,-112.9,-103.3,-122.9,-135.0,-118.4,-117.9,-140.7,-146.1,-133.2,-143.3,-126.2,-116.3,-94.7,-101.7,-99.7,-84.4,-81.5,-72.0,-59.4,-40.3,-31.7,-44.1,-38.4,-17.0,-19.5,-28.3,-10.7,6.1,3.4,-6.9,11.2,19.1,10.9,24.5,21.2,14.1,2.5,-20.4,-31.8,-30.3,-39.9,-50.9,-55.6,-76.0,-74.6,-91.0,-77.3,-87.2,-69.2,-73.7,-68.8,-59.3,-62.6,-43.2,-41.9,-24.0,-9.2,2.7,22.2,12.2,0.3,-19.1,-18.0,-41.2,-50.6,-70.2,-80.3,-89.0,-110.1,-110.5,-123.5,-128.7,-117.0,-127.0,-115.4,-94.1,-92.4,-89.0,-77.8,-63.2,-51.2,-65.1,-48.0,-64.2,-52.8,-58.8,-39.3,-50.6,-41.3,-34.6,-35.6,-18.5,-25.4,-26.0,-42.4,-27.8,-28.6,-9.7,-4.6,-2.6,-5.1,7.1,15.1,-1.9,15.7,22.9,4.8,-0.5,12.7,14.7,32.2,41.5,54.7,70.5,66.2,70.0,90.4,106.8,106.5,84.9,79.0,57.7,49.6,35.0,17.0,29.9,44.7,57.5,69.8,71.9,90.4,93.3,115.4,125.3,131.3,111.2,106.2,123.4,114.6,93.2,92.9,75.8,78.4,64.9,69.5,57.3,71.6,58.2,75.3,70.8,82.5,98.8,95.1,109.0,128.6,140.6,129.4,145.0,133.8,146.2,147.4,134.0,116.2,119.6,119.5,136.7,136.4,160.0,157.7,152.8,135.4,116.8,102.1,88.5,70.0,71.7,48.8,45.1,60.3,62.9,64.9,52.9,38.1,20.1,22.2,0.1,-18.1,-16.2,-1.3,-11.9,-10.3,11.2,15.8,5.5,19.1,38.6,36.8,33.9,53.3,66.0,76.6,79.4,82.0,94.5,113.2,104.6,96.3,117.9,117.5,112.2,92.1,106.6,110.3,88.1,83.6,101.0,94.7,73.2,80.0,92.5,75.0,61.3,76.5,79.4,57.0,53.3,70.2,60.7,40.0,48.9,61.0,42.4,29.8,45.8,46.4,23.7,30.1,36.1,18.2,-0.8,-23.6,-21.5,-6.3,-21.7,-27.8,-6.7,1.5,-15.8,-13.8,9.2,6.7,-9.1,4.2,22.7,10.9,2.6,23.9,33.0,16.8,21.3,44.4,42.8,27.4,43.8,48.4,26.9,14.9,6.0,-6.1,-18.6,-22.7,-29.0,-39.8,-47.6,-52.8,-62.4,-72.4,-78.1,-85.8,-97.9,-106.0,-110.8,-120.5,-132.8,-140.4,-143.1,-139.9,-119.5,-124.5,-116.4,-95.3,-93.7,-98.8,-81.5,-65.5,-77.1,-75.0,-53.1,-48.5,-60.8,-53.8,-37.6,-55.0,-66.6,-51.3,-52.0,-75.2,-75.0,-60.3,-73.5,-93.1,-82.7,-75.0,-96.3,-105.1,-90.7],"z":[-12.7,-14.6,-11.3,-10.7,-14.3,-13.9,-10.6,-12.3,-15.3,-12.9,-10.9,-14.1,-15.5,-12.0,-11.9,-15.7,-15.4,-12.0,-13.9,-17.0,-15.0,-13.1,-16.5,-16.6,-13.6,-16.5,-15.0,-15.5,-13.8,-13.4,-15.6,-12.9,-13.7,-12.1,-11.6,-12.1,-11.8,-12.2,-15.4,-15.3,-17.3,-18.5,-17.2,-20.2,-19.4,-21.2,-18.6,-18.1,-14.3,-15.2,-18.7,-17.4,-16.6,-15.9,-15.0,-12.4,-9.4,-8.4,-9.5,-8.0,-4.7,-4.7,-5.9,-3.3,-0.3,1.1,2.8,1.7,2.8,-0.3,-2.0,-5.4,-4.7,-7.8,-6.4,-8.0,-6.2,-2.8,-4.5,-5.7,-2.4,-0.6,-3.1,-3.4,-0.0,1.6,2.3,5.7,6.4,9.8,11.2,8.2,9.0,5.8,2.7,0.2,-2.0,-5.4,-6.6,-10.6,-10.5,-9.2,-5.7,-3.2,-0.3,2.5,5.6,8.6,10.0,13.7,15.4,16.5,19.7,19.3,21.3,20.3,18.3,14.5,13.7,10.2,9.8,6.4,4.7,5.8,9.5,9.2,12.7,14.5,17.6,19.8,20.5,23.2,20.9,17.8,18.3,15.0,12.7,10.4,9.3,10.1,6.6,4.9,1.7,1.5,-2.0,-3.7,-6.1,-9.7,-8.0,-5.7,-2.9,-0.3,-0.8,3.0,2.3,6.0,7.3,10.2,12.5,15.0,13.7,14.9,18.2,20.1,20.0,17.9,19.6,16.5,18.5,17.0,13.3,13.8,11.4,9.5,9.6,6.0,5.1,2.4,0.3,-1.3,-4.4,-2.5,-2.7,0.5,1.8,3.8,5.8,5.5,8.9,7.9,8.0,11.7,12.5,12.0,11.2,7.4,7.0,3.5,3.1,-0.8,-2.5,-5.5,-8.5,-10.9,-12.6,-10.2,-12.2,-15.3,-14.5,-13.2,-12.8,-10.0,-9.0,-7.1,-4.0,-3.1,-0.0,-2.4,-1.6,-4.8,-4.0,-6.9,-7.1,-8.4,-5.0,-7.0,-5.1,-7.5,-4.4,-6.1,-2.8,-2.7,-0.2,2.5,4.6,7.9,10.7,12.7,12.1,8.7,7.3,5.3,2.1,-0.0,-2.9,-1.7,-0.6,-3.6,-5.6,-4.1,-3.9,-7.5,-8.6,-7.0,-7.1,-10.0,-7.8,-4.6,-6.1,-5.1,-1.6,-1.4,-0.6,2.5,6.0,7.7,9.4,6.1,5.2,8.7,8.2,4.6,5.8,8.6,6.2,3.9,6.8,8.0,4.5,4.1,7.5,6.8,3.4,5.0,7.8,5.2,3.0,6.0,6.9,3.4,4.0,3.9,0.3,-1.5,-0.7,0.2,-2.3,0.2,2.1,-0.8,-2.1,1.3,2.2,-1.2,-0.9,2.6,1.5,-1.5,0.7,3.2,0.4,-1.0,2.5,3.2,-0.3,0.1,3.7,3.1,3.5,6.9,8.0,7.2,10.6,9.1,6.5,9.5,11.8,8.7,7.7,11.4,12.0,8.7,9.1,12.6,11.2,8.3,10.2,12.9,10.2,7.7,9.4,5.7,4.9,1.1,1.6,2.2,-1.5,-1.9,0.5,-2.0,-4.6,-2.0,-0.8,-4.6,-4.7,-1.4,-3.3,-5.4,-2.4,-1.9,-5.7,-5.7,-2.7,-4.8,-7.8,-5.8,-4.1,-7.4,-8.8,-5.8,-6.1],"runs":[[1,371]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>HD2</b> &middot;
-          371 residues &middot; mean confidence <b>31.1</b> of 100<br>
-          2,755&ndash;3,125 on the relative&rsquo;s entry &middot; 2,778&ndash;3,148 in this genome</div>
-      </div>
-      <div class="dfold">
-        
-    <div class="ftrace">
-      <noscript><img src="domain_folds/r17_non_structural_protein_4__4ecto.png" loading="lazy"
-          alt="The predicted backbone of 4Ecto, drawn on its two principal
-            axes and coloured by per-residue confidence, beside a plot of that confidence
-            against residue position."></noscript>
-      <script type="application/json" class="ft-data">{"name":"4Ecto","seq":"HTDFSSEIIGYKAIDGGVTRDIASTDTCFANKHADFDTWFSQRGGSYTNDKACPLIAAVITREVGFVVPGLPGTILRTTNGDFLHFLPRVFSAVGNICYTPSKLIEYTDFATSACVLAAECTIFKDASGKPVPYCYDTNVLEGSVAYESLRPDTRYVLMDGSIIQFPNTYLEGSVRVVTTFDSEYCRHGTCERSEAGVCVSTSGRWVLNNDYYRSLPGVFCGVDAVNLLTNMFTPLIQPIGALDI","num":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245],"at":2799,"pl":[25.0,30.0,26.0,28.0,25.0,26.0,25.0,26.0,26.0,25.0,29.0,27.0,27.0,27.0,26.0,25.0,24.0,26.0,29.0,28.0,29.0,27.0,24.0,25.0,26.0,25.0,26.0,24.0,28.0,27.0,28.0,28.0,31.0,33.0,34.0,37.0,39.0,39.0,38.0,38.0,39.0,37.0,34.0,33.0,33.0,30.0,29.0,27.0,27.0,24.0,23.0,24.0,24.0,24.0,23.0,25.0,22.0,23.0,26.0,24.0,22.0,22.0,22.0,21.0,23.0,22.0,25.0,25.0,24.0,25.0,26.0,26.0,28.0,28.0,27.0,26.0,27.0,27.0,26.0,26.0,27.0,26.0,27.0,28.0,29.0,29.0,29.0,28.0,28.0,26.0,26.0,23.0,21.0,22.0,20.0,21.0,22.0,21.0,24.0,24.0,26.0,24.0,24.0,24.0,23.0,23.0,23.0,22.0,22.0,24.0,21.0,21.0,21.0,22.0,22.0,23.0,26.0,25.0,26.0,28.0,26.0,30.0,29.0,29.0,36.0,36.0,38.0,37.0,42.0,39.0,32.0,30.0,28.0,28.0,26.0,29.0,29.0,30.0,29.0,29.0,27.0,28.0,23.0,24.0,24.0,26.0,28.0,26.0,28.0,29.0,33.0,33.0,35.0,37.0,34.0,35.0,30.0,32.0,30.0,31.0,34.0,34.0,33.0,33.0,33.0,32.0,29.0,27.0,26.0,27.0,26.0,24.0,22.0,22.0,22.0,21.0,23.0,22.0,24.0,23.0,25.0,25.0,25.0,26.0,26.0,26.0,26.0,27.0,26.0,29.0,28.0,28.0,31.0,28.0,26.0,24.0,26.0,26.0,25.0,26.0,25.0,23.0,23.0,22.0,23.0,27.0,25.0,27.0,27.0,29.0,29.0,30.0,29.0,27.0,27.0,27.0,23.0,24.0,25.0,23.0,19.0,20.0,22.0,22.0,23.0,24.0,23.0,24.0,26.0,25.0,25.0,25.0,26.0,22.0,24.0,24.0,23.0,24.0,22.0,22.0,23.0,24.0,23.0,22.0,18.0],"band":"ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","x":[-5.3,-7.1,16.3,16.8,36.6,35.4,49.2,55.3,55.5,73.2,73.6,80.2,92.9,95.8,118.7,125.6,112.8,117.5,100.1,111.0,97.9,99.6,95.2,80.8,98.6,111.0,108.5,112.1,102.0,111.0,131.7,134.4,126.8,147.3,143.1,123.7,134.2,152.0,137.7,125.2,143.3,153.7,135.6,136.6,120.0,123.8,109.4,112.6,103.6,95.9,76.3,76.1,64.3,60.8,48.0,64.7,75.4,55.5,52.2,73.3,75.4,67.9,61.9,43.2,29.8,25.0,11.3,5.1,-16.7,-18.4,1.9,2.2,20.9,35.8,45.8,66.0,76.7,98.8,111.4,116.5,94.4,91.7,70.1,71.2,49.3,45.6,27.3,16.5,15.3,-3.9,4.5,-11.3,-6.8,-20.2,-9.4,12.1,7.4,28.3,22.6,41.2,33.3,37.4,38.2,46.1,45.9,68.6,67.7,88.5,86.9,81.3,86.9,67.7,53.7,36.3,34.5,16.5,13.2,12.5,-8.7,-0.7,-17.3,-19.7,-28.1,-43.5,-54.1,-76.9,-89.0,-86.7,-63.9,-62.6,-46.5,-58.3,-42.7,-46.4,-34.5,-33.1,-29.1,-15.6,-19.5,-38.4,-28.6,-15.5,-25.3,-47.5,-47.7,-60.9,-50.3,-67.5,-59.4,-42.0,-48.3,-31.5,-25.3,-34.4,-21.5,-23.1,-17.3,-7.9,-11.9,8.7,0.8,14.3,4.2,6.4,0.7,-0.2,5.0,-12.1,1.0,-0.2,-19.9,-13.3,-12.0,-32.1,-28.7,-51.0,-54.5,-71.4,-83.2,-102.3,-114.9,-132.6,-146.4,-158.8,-146.5,-147.5,-168.5,-164.2,-166.8,-148.5,-137.3,-142.9,-138.5,-125.5,-130.1,-108.0,-114.1,-101.3,-111.3,-104.1,-113.7,-120.4,-112.7,-90.1,-91.2,-84.0,-101.1,-93.1,-115.0,-114.4,-129.6,-116.7,-102.3,-118.9,-128.6,-110.1,-106.4,-85.0,-81.6,-80.5,-101.5,-94.8,-92.1,-69.1,-65.4,-72.0,-61.4,-43.5,-45.0,-53.5,-39.3,-21.9,-28.8,-38.7,-20.3,-18.5,-38.3,-32.9,-47.9,-32.7,-41.6,-27.0,-7.6,-9.0,-2.2],"y":[-162.3,-146.3,-143.5,-120.3,-122.6,-99.6,-100.0,-78.0,-72.7,-57.1,-35.4,-23.2,-7.4,8.5,10.9,29.2,25.1,2.3,-11.2,-28.2,-47.6,-53.7,-75.1,-88.4,-100.7,-86.8,-90.7,-68.3,-63.1,-79.0,-72.6,-51.8,-37.8,-31.1,-25.4,-14.6,-5.4,-0.5,5.7,19.1,27.4,32.3,44.8,56.1,44.4,43.3,29.2,30.2,8.8,19.3,31.1,38.4,22.0,2.2,2.8,-0.3,-15.3,-27.4,-27.6,-35.4,-51.2,-72.8,-75.3,-62.1,-59.8,-37.8,-28.1,-10.3,-6.6,14.6,21.4,13.9,24.5,32.8,48.8,47.0,66.4,61.3,78.7,83.3,88.1,67.4,58.3,35.3,28.4,6.8,-2.5,-16.4,-34.3,-45.0,-66.9,-78.4,-99.3,-107.8,-115.4,-115.4,-97.8,-88.2,-69.2,-56.2,-35.2,-36.1,-13.4,-0.8,17.4,22.8,42.8,50.4,70.1,70.7,92.6,100.0,81.1,79.4,55.7,47.0,28.6,10.7,2.5,-19.0,-26.8,-48.6,-57.1,-72.1,-86.0,-84.8,-104.6,-104.7,-104.7,-83.2,-69.6,-54.2,-37.7,-33.6,-14.7,-14.8,7.3,3.1,25.6,22.5,22.0,40.9,52.8,60.1,69.9,57.3,65.8,78.5,82.8,95.7,114.2,125.1,143.1,135.2,135.9,118.4,119.8,100.1,93.1,101.6,121.8,120.5,129.6,118.2,129.6,117.7,130.0,131.1,118.1,98.2,88.2,84.2,60.5,49.4,41.6,35.4,34.3,19.4,26.6,18.1,22.4,15.0,29.7,12.0,2.7,19.6,12.0,-0.9,16.0,23.6,34.5,57.1,65.2,82.4,97.4,90.7,69.3,59.7,42.0,45.4,29.4,43.0,25.9,28.6,5.7,2.2,-11.7,-21.1,-24.1,-47.8,-43.8,-31.3,-48.7,-64.2,-56.1,-52.2,-70.1,-77.1,-66.9,-86.0,-88.5,-99.4,-95.0,-96.0,-74.8,-66.0,-83.6,-78.1,-56.3,-60.5,-78.1,-66.9,-48.6,-55.6,-52.6,-31.4,-21.3,-17.6,0.1,18.2,18.0,3.6,14.0,23.1,43.8],"z":[-5.8,-3.2,-3.1,-2.9,-1.1,-0.5,2.5,1.9,5.6,5.9,4.8,7.8,5.9,8.6,8.1,10.3,13.4,13.2,12.4,10.6,10.9,7.3,8.4,6.3,5.3,3.2,-0.5,-0.5,-3.7,-6.0,-5.5,-4.4,-7.1,-5.9,-2.3,-3.3,-6.3,-3.9,-1.1,-3.4,-5.4,-2.1,-1.2,-4.4,-6.2,-10.0,-11.9,-15.6,-16.6,-19.6,-18.8,-15.3,-13.4,-15.2,-12.0,-9.3,-11.6,-11.6,-7.8,-7.5,-10.3,-9.3,-12.9,-13.0,-9.8,-10.7,-8.2,-10.5,-9.9,-8.8,-7.5,-3.8,-2.2,-4.7,-2.5,-4.2,-3.6,-3.2,-4.8,-1.1,-0.3,1.5,0.8,0.2,0.8,-0.6,1.4,-1.0,1.4,0.3,0.2,2.2,0.6,3.3,6.4,7.8,9.9,10.2,11.9,12.5,12.3,16.1,16.1,13.2,15.6,15.6,13.8,15.1,13.2,9.4,9.3,11.1,11.4,8.8,8.6,10.6,8.1,10.6,9.9,9.9,12.3,11.1,14.4,13.0,15.5,15.3,15.2,19.0,18.8,20.1,18.5,16.4,15.5,11.7,10.7,6.8,6.1,3.1,2.6,0.5,-2.7,-3.5,-6.3,-5.8,-2.4,-0.0,3.1,4.3,7.9,6.6,8.6,10.1,8.0,4.8,1.5,-0.8,-4.5,-5.6,-9.2,-10.2,-9.0,-5.9,-2.8,0.5,3.7,6.9,10.0,12.8,15.0,13.2,14.2,17.7,17.4,16.4,12.8,13.0,9.2,9.8,6.7,8.2,5.0,6.9,4.9,4.1,1.3,-1.2,-1.9,-4.9,-7.5,-9.3,-6.5,-6.6,-3.1,-3.8,-0.9,-0.1,1.2,-1.8,-3.6,-7.3,-9.5,-12.5,-14.8,-14.3,-13.2,-9.6,-8.7,-5.5,-4.8,-4.2,-1.4,0.9,1.2,1.4,4.6,6.6,9.0,8.3,4.8,2.7,1.0,-2.1,-5.8,-4.9,-3.7,-7.1,-8.8,-6.5,-7.6,-11.2,-11.9,-10.4,-12.4,-15.7,-17.8,-16.4,-17.6,-21.1,-21.4,-21.4,-25.1,-26.5,-26.2,-29.7,-29.4],"runs":[[1,245]],"thr":70.0,"legend":[["vh","very high, 90 and above"],["c","confident, 70 to 90"],["l","low, 50 to 70"],["vl","very low, under 50"]]}</script>
-    </div>
-        <div class="cc"><b>4Ecto</b> &middot;
-          245 residues &middot; mean confidence <b>26.7</b> of 100<br>
-          2,776&ndash;3,020 on the relative&rsquo;s entry &middot; 2,799&ndash;3,043 in this genome</div>
-      </div>
-      <div class="dmn-hd">
-        <span class="dn">region</span><span class="dl">length</span>
-        <span class="dw">where</span><span class="dy">why it is offered here</span>
-        <span class="dv">fold unit</span>
-      </div>
-      
-      <div class="dmn">
-        <span class="dn">Nsp4C
-          <span class="dt">Domain</span></span>
-        <span class="dl">99 aa</span>
-        <span class="dw">3,142&ndash;3,240<span class="dq">3,165&ndash;3,263 in this genome</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">1 annotated site residue inside</span>
-        <span class="dv">within the ceiling
-          </span>
-      </div>
-      <div class="dmn">
-        <span class="dn">HD2
-          <span class="dt">Region</span></span>
-        <span class="dl">371 aa</span>
-        <span class="dw">2,755&ndash;3,125<span class="dq">2,778&ndash;3,148 in this genome</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">&mdash;</span>
-        <span class="dv">within the ceiling
-          </span>
-      </div>
-      <div class="dmn">
-        <span class="dn">4Ecto
-          <span class="dt">Domain</span></span>
-        <span class="dl">245 aa</span>
-        <span class="dw">2,776&ndash;3,020<span class="dq">2,799&ndash;3,043 in this genome</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">&mdash;</span>
-        <span class="dv">within the ceiling
-          </span>
-      </div>
-      <div class="dmn">
-        <span class="dn">Cytoplasmic
-          <span class="dt">Topological domain</span></span>
-        <span class="dl">115 aa</span>
-        <span class="dw">3,126&ndash;3,240<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">1 annotated site residue inside &middot; describes position, not function</span>
-        <span class="dv">within the ceiling
-          </span>
-      </div>
-      <div class="dmn x">
-        <span class="dn">Cytoplasmic
-          <span class="dt">Topological domain</span></span>
-        <span class="dl">14 aa</span>
-        <span class="dw">2,741&ndash;2,754<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">1 annotated site residue inside &middot; describes position, not function</span>
-        <span class="dv">refused
-          <span class="dq">14 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
-      </div>
-      <div class="dmn">
-        <span class="dn">Lumenal
-          <span class="dt">Topological domain</span></span>
-        <span class="dl">246 aa</span>
-        <span class="dw">2,776&ndash;3,021<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">describes position, not function</span>
-        <span class="dv">within the ceiling
-          </span>
-      </div>
-      <div class="dmn x">
-        <span class="dn">Cytoplasmic
-          <span class="dt">Topological domain</span></span>
-        <span class="dl">34 aa</span>
-        <span class="dw">3,043&ndash;3,076<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">describes position, not function</span>
-        <span class="dv">refused
-          <span class="dq">34 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
-      </div>
-      <div class="dmn x">
-        <span class="dn">Helical
-          <span class="dt">Transmembrane</span></span>
-        <span class="dl">21 aa</span>
-        <span class="dw">2,755&ndash;2,775<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">describes position, not function</span>
-        <span class="dv">refused
-          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
-      </div>
-      <div class="dmn x">
-        <span class="dn">Helical
-          <span class="dt">Transmembrane</span></span>
-        <span class="dl">21 aa</span>
-        <span class="dw">3,022&ndash;3,042<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">describes position, not function</span>
-        <span class="dv">refused
-          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
-      </div>
-      <div class="dmn x">
-        <span class="dn">Helical
-          <span class="dt">Transmembrane</span></span>
-        <span class="dl">21 aa</span>
-        <span class="dw">3,077&ndash;3,097<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">describes position, not function</span>
-        <span class="dv">refused
-          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
-      </div>
-      <div class="dmn x">
-        <span class="dn">Helical
-          <span class="dt">Transmembrane</span></span>
-        <span class="dl">21 aa</span>
-        <span class="dw">3,105&ndash;3,125<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">describes position, not function</span>
-        <span class="dv">refused
-          <span class="dq">21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
-      </div>
-      <div class="dmn x">
-        <span class="dn">Lumenal
-          <span class="dt">Topological domain</span></span>
-        <span class="dl">7 aa</span>
-        <span class="dw">3,098&ndash;3,104<span class="dq">on the relative&rsquo;s entry</span><span class="dq">on the relative&rsquo;s entry</span></span>
-        <span class="dy">describes position, not function</span>
-        <span class="dv">refused
-          <span class="dq">7 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint.</span></span>
-      </div>
-    </details>
     <div class="lr">
       <span class="who"><span class="t">Spike protein S2&#x27;</span>
         <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 95 % identity</span></span>
@@ -2701,12 +2187,13 @@
   <div class="lit">
     <div class="lith">33 distinct records over 13 composed queries, listed 65 times because targets that compose the same query are shown the same records<span>Retrieved without a publication-date limit, so these are the records as they stand today.</span></div>
     
-    <div class="lrow">
-      <div class="lrh"><span class="t">Spike protein S2&#x27;</span>
-        <span class="w">Q3LZX1 &middot; 20 dated
-          records kept &middot; 4 of 4
-          queries answered</span>
-        <span class="w">anchored on the genome accession, because the chain's name yields no systematic designation and a one-word protein noun does not identify a protein</span></div>
+    <details class="lrow">
+      <summary class="lrh"><span class="t">Spike protein S2&#x27;</span>
+        <span class="w"><em>Q3LZX1</em>
+          <b>20</b> dated records kept
+          &middot; <b>4</b> of <b>4</b>
+          queries answered</span></summary>
+      <div class="lwhy">anchored on the genome accession, because the chain's name yields no systematic designation and a one-word protein noun does not identify a protein</div>
       
       <div class="lq">
         <div class="lqh"><b>the whole chain</b><span class="lqn">726 records, 223 of them preprints</span></div>
@@ -2781,7 +2268,7 @@
           <span class="lm">2024-05-14
             &middot; Nature communications
             </span></li>
-        <li><span class="lt"><a href="https://europepmc.org/article/PPR/PPR204942" rel="noopener">Spike Protein of SARS-CoV-2: Impact of Single Amino Acid Mutation and Effect of Drug Binding to the Variant-&lt;em&gt;in Silico&lt;/em&gt; Analysis</a></span>
+        <li><span class="lt"><a href="https://europepmc.org/article/PPR/PPR204942" rel="noopener">Spike Protein of SARS-CoV-2: Impact of Single Amino Acid Mutation and Effect of Drug Binding to the Variant-in Silico Analysis</a></span>
           <span class="lm">2020-08-20
             
             <span class="pp">preprint</span></span></li></ol>
@@ -2812,13 +2299,14 @@
             &middot; Gene reports
             </span></li></ol>
       </div>
-    </div>
-    <div class="lrow">
-      <div class="lrh"><span class="t">3C-like proteinase nsp5</span>
-        <span class="w">P0C6X7 &middot; 5 dated
-          records kept &middot; 1 of 1
-          queries answered</span>
-        <span class="w">anchored on the chain's own designation, which identifies the protein without needing the accession</span></div>
+    </details>
+    <details class="lrow">
+      <summary class="lrh"><span class="t">3C-like proteinase nsp5</span>
+        <span class="w"><em>P0C6X7</em>
+          <b>5</b> dated records kept
+          &middot; <b>1</b> of <b>1</b>
+          query answered</span></summary>
+      <div class="lwhy">anchored on the chain's own designation, which identifies the protein without needing the accession</div>
       
       <div class="lq">
         <div class="lqh"><b>the whole chain</b><span class="lqn">775 records, 98 of them preprints</span></div>
@@ -2846,13 +2334,14 @@
             &middot; mBio
             </span></li></ol>
       </div>
-    </div>
-    <div class="lrow">
-      <div class="lrh"><span class="t">Spike protein S2</span>
-        <span class="w">Q3LZX1 &middot; 20 dated
-          records kept &middot; 4 of 4
-          queries answered</span>
-        <span class="w">anchored on the genome accession, because the chain's name yields no systematic designation and a one-word protein noun does not identify a protein</span></div>
+    </details>
+    <details class="lrow">
+      <summary class="lrh"><span class="t">Spike protein S2</span>
+        <span class="w"><em>Q3LZX1</em>
+          <b>20</b> dated records kept
+          &middot; <b>4</b> of <b>4</b>
+          queries answered</span></summary>
+      <div class="lwhy">anchored on the genome accession, because the chain's name yields no systematic designation and a one-word protein noun does not identify a protein</div>
       
       <div class="lq">
         <div class="lqh"><b>the whole chain</b><span class="lqn">726 records, 223 of them preprints</span></div>
@@ -2927,7 +2416,7 @@
           <span class="lm">2024-05-14
             &middot; Nature communications
             </span></li>
-        <li><span class="lt"><a href="https://europepmc.org/article/PPR/PPR204942" rel="noopener">Spike Protein of SARS-CoV-2: Impact of Single Amino Acid Mutation and Effect of Drug Binding to the Variant-&lt;em&gt;in Silico&lt;/em&gt; Analysis</a></span>
+        <li><span class="lt"><a href="https://europepmc.org/article/PPR/PPR204942" rel="noopener">Spike Protein of SARS-CoV-2: Impact of Single Amino Acid Mutation and Effect of Drug Binding to the Variant-in Silico Analysis</a></span>
           <span class="lm">2020-08-20
             
             <span class="pp">preprint</span></span></li></ol>
@@ -2958,13 +2447,14 @@
             &middot; Gene reports
             </span></li></ol>
       </div>
-    </div>
-    <div class="lrow">
-      <div class="lrh"><span class="t">Spike protein S1</span>
-        <span class="w">Q3LZX1 &middot; 5 dated
-          records kept &middot; 1 of 3
-          queries answered</span>
-        <span class="w">anchored on the genome accession, because the chain's name yields no systematic designation and a one-word protein noun does not identify a protein</span></div>
+    </details>
+    <details class="lrow">
+      <summary class="lrh"><span class="t">Spike protein S1</span>
+        <span class="w"><em>Q3LZX1</em>
+          <b>5</b> dated records kept
+          &middot; <b>1</b> of <b>3</b>
+          queries answered</span></summary>
+      <div class="lwhy">anchored on the genome accession, because the chain's name yields no systematic designation and a one-word protein noun does not identify a protein</div>
       
       <div class="lq">
         <div class="lqh"><b>the whole chain</b><span class="lqn">726 records, 223 of them preprints</span></div>
@@ -3002,13 +2492,14 @@
         <div class="lqq">&quot;BetaCoV S1-CTD&quot; AND (TITLE:&quot;Spike protein&quot; OR ABSTRACT:&quot;Spike protein&quot;) AND (ACCESSION_ID:&quot;NC_045512.2&quot; OR ACCESSION_ID:&quot;NC_045512&quot;)</div>
         <div class="lqz">a measured absence: Europe PMC holds no record matching this composed query. The date bounds and the query string were validated before dispatch and the response was checked for an in-body error code, so this zero is a recorded absence of indexed literature and not a failed lookup.</div>
       </div>
-    </div>
-    <div class="lrow">
-      <div class="lrh"><span class="t">RNA-directed RNA polymerase nsp12</span>
-        <span class="w">P0C6X7 &middot; 15 dated
-          records kept &middot; 3 of 4
-          queries answered</span>
-        <span class="w">anchored on the chain's own designation, which identifies the protein without needing the accession</span></div>
+    </details>
+    <details class="lrow">
+      <summary class="lrh"><span class="t">RNA-directed RNA polymerase nsp12</span>
+        <span class="w"><em>P0C6X7</em>
+          <b>15</b> dated records kept
+          &middot; <b>3</b> of <b>4</b>
+          queries answered</span></summary>
+      <div class="lwhy">anchored on the chain's own designation, which identifies the protein without needing the accession</div>
       
       <div class="lq">
         <div class="lqh"><b>the whole chain</b><span class="lqn">851 records, 166 of them preprints</span></div>
@@ -3093,7 +2584,7 @@
         <div class="lqq">&quot;RdRp Palm C-ter&quot; AND ((TITLE:&quot;nsp12&quot; OR ABSTRACT:&quot;nsp12&quot;) OR (TITLE:&quot;RNA-directed RNA polymerase&quot; OR ABSTRACT:&quot;RNA-directed RNA polymerase&quot;))</div>
         <div class="lqz">a measured absence: Europe PMC holds no record matching this composed query. The date bounds and the query string were validated before dispatch and the response was checked for an in-body error code, so this zero is a recorded absence of indexed literature and not a failed lookup.</div>
       </div>
-    </div>
+    </details>
   </div>
   </div>
 
@@ -3104,14 +2595,14 @@
             <circle cx="50" cy="36" r="25" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".35"/>
             <path class="ac" d="M50 11 A25 25 0 0 1 71.65 48.5 L50 36 Z" opacity=".85"/>
             <circle cx="60" cy="27" r="2.4" fill="currentColor" opacity=".3"/>
-          </svg><span class="what">Measure the surface a drug would grip</span><span class="secs">50 s</span></div>
+          </svg><span class="what">Measure the surface a drug would grip</span><span class="secs">6 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>20</b> chains</li><li>And the coordinates step 3 predicted, which is the only thing there is to measure when nothing has been solved</li></ul></div>
+      <div><h3>In</h3><ul><li><b>12</b> chains</li><li>And the coordinates step 3 predicted, which is the only thing there is to measure when nothing has been solved</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li><b>20</b> answers for 20 chains, <b>0</b> quietly dropped</li>
-        <li><b>9</b> measured on real deposited structures, <b>11</b> refused with a stated reason</li>
-        <li><b>5</b> of those <b>11</b> are inside the folding ceiling, so step 3's coordinates are the only surface they can have — measured with the same arithmetic, never added to the deposited numbers</li>
-        <li><b>14</b> of <b>20</b> chains have a surface by one route or the other, against <b>9</b> from depositions alone; <b>6</b> have neither</li>
+        <li><b>12</b> answers for 12 chains, <b>0</b> quietly dropped</li>
+        <li><b>5</b> measured on real deposited structures, <b>7</b> refused with a stated reason</li>
+        <li><b>2</b> of those <b>7</b> are inside the folding ceiling, so step 3's coordinates are the only surface they can have — measured with the same arithmetic, never added to the deposited numbers</li>
+        <li><b>7</b> of <b>12</b> chains have a surface by one route or the other, against <b>5</b> from depositions alone; <b>5</b> have neither</li>
         <li>Every patch is measured against the <b>600</b> Å² a macrocycle buries, the line the lane below draws through every chain</li>
       </ul></div>
     </div>
@@ -3120,132 +2611,99 @@
   <div class="substep" id="surface-out">
     <h3>What the measurement returned, chain by chain</h3>
     <p class="cap">One row for every chain, each answering a single question: if you wanted
-    to put a molecule on this protein, is there anywhere on it to put one?</p>
-    <p class="cap">A patch is water-repelling surface, the part a molecule of this class
-    grips, in square angstroms. Every bar below starts at zero and they all share one scale,
-    solved and predicted together, so bar length is always the same thing: how much grip
-    there is. The upright line through them is the roughly <b>600</b> Å² a
-    macrocycle covers when it binds — a bar reaching past it has room for one, and a bar
-    under half its length has nothing to hold a molecule at all.</p>
-    <p class="cap">A structure is one moment of a protein held still, and the same chain
-    solved twice does not give the same answer, so where a domain has been solved more than
-    once the bar is the middle answer and the thin line laid across it runs from the smallest
-    to the largest. Where that line crosses the upright one, the measurement does not decide
-    the question however confident the bar looks. Nothing drops out quietly: a refused chain
-    still gets a row saying why.</p>
+    to put a molecule on this protein, is there anywhere on it to put one? A patch is
+    water-repelling surface — the part a molecule of this class grips — in square angstroms.
+    Nothing drops out quietly: a refused chain still gets a row saying why.</p>
+
+    <div class="howto">
+      <div class="ht-ttl">How to read a row</div>
+      <div class="lr">
+        <span class="who"><span class="t">the chain</span>
+          <span class="w">how its coordinates were come by, and why it was refused if it was</span></span>
+        <span class="plot"><i class="thr" style="left:50%"></i>
+          <i class="b" style="left:0;width:72%"></i><i class="whisk" style="left:58%;width:26%"></i></span>
+        <span class="vl">858 Å²<span class="cf">758–957</span></span>
+      </div>
+      <ul class="ht-keys">
+        <li><span class="sw"><i class="b"></i></span>
+          <span><b>how much grip there is.</b> Every bar starts at zero and they share one
+          scale, solved and predicted together.</span></li>
+        <li><span class="sw"><i class="b" style="width:40%"></i><i class="thr"></i></span>
+          <span><b>the 600 Å² a macrocycle covers.</b> Past the line there is room
+          for one; under half its length, nothing to hold a molecule at all.</span></li>
+        <li><span class="sw"><i class="b"></i><i class="whisk"></i></span>
+          <span><b>how far repeat solutions disagree.</b> The bar is the middle answer; where
+          this crosses the line, the measurement does not decide the question.</span></li>
+        <li><span class="sw"><i class="b pred"></i></span>
+          <span><b>measured on a predicted shape.</b> Outlined, never filled, and never added
+          to the deposited count.</span></li>
+      </ul>
+    </div>
     
   <div class="lane">
-    <div class="lane-grp"><b>Measured on a structure someone solved &middot; 9</b><span>the coordinates came out of a laboratory, so the patch is measured on an observation of the protein. Every one of these is refused anyway, on where the protein sits rather than on its patch &mdash; the row names the place</span></div>
+    <div class="lane-grp"><b>Measured on a structure someone solved &middot; 5</b><span>the coordinates came out of a laboratory, so the patch is measured on an observation of the protein. Every one of these is refused anyway, on where the protein sits rather than on its patch &mdash; the row names the place</span></div>
     <div class="lane-axis" aria-hidden="true">
       <span></span>
-      <span class="ax"><i class="lim" style="left:50.59%"></i>
+      <span class="ax"><i class="lim" style="left:6.67%"></i>
         <b class="l0">0</b>
-        <b class="ll c" style="left:50.59%">600 &Aring;&sup2; a macrocycle&rsquo;s footprint</b>
-        <b class="lm">1,186 &Aring;&sup2;</b></span>
+        <b class="ll l" style="left:6.67%">600 &Aring;&sup2; a macrocycle&rsquo;s footprint</b>
+        <b class="lm">8,999 &Aring;&sup2;</b></span>
       <span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Guanine-N7 methyltransferase nsp14</span>
+        <span class="w">5 deposited structures
+          of the same domain &middot; 4.2 % of its surface<br><span class="oor">out of reach</span> annotated host cytoplasm, host endoplasmic reticulum</span></span>
+      <span class="plot"><i class="thr" style="left:6.67%"></i>
+        <i class="b" style="left:0.00%;width:10.86%"></i><i class="whisk" style="left:7.81%;width:4.40%"></i></span>
+      <span class="vl">978 Å²<span class="cf">703&ndash;1,099</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">Helicase nsp13</span>
         <span class="w">2 deposited structures
           of the same domain &middot; 3.0 % of its surface<br><span class="oor">out of reach</span> annotated host endoplasmic reticulum-golgi intermediate compartment</span></span>
-      <span class="plot"><i class="thr" style="left:50.59%"></i>
-        <i class="b" style="left:0.00%;width:72.34%"></i><i class="whisk" style="left:63.95%;width:16.75%"></i></span>
+      <span class="plot"><i class="thr" style="left:6.67%"></i>
+        <i class="b" style="left:0.00%;width:9.53%"></i><i class="whisk" style="left:8.43%;width:2.21%"></i></span>
       <span class="vl">858 Å²<span class="cf">758&ndash;957</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">RNA-directed RNA polymerase nsp12</span>
         <span class="w">2 deposited structures
           of the same domain &middot; 2.5 % of its surface<br><span class="oor">out of reach</span> annotated host cytoplasm, host endosome, host membrane &middot; off the parent entry, not this chain</span></span>
-      <span class="plot"><i class="thr" style="left:50.59%"></i>
-        <i class="b" style="left:0.00%;width:61.81%"></i><i class="whisk" style="left:56.11%;width:11.41%"></i></span>
+      <span class="plot"><i class="thr" style="left:6.67%"></i>
+        <i class="b" style="left:0.00%;width:8.15%"></i><i class="whisk" style="left:7.40%;width:1.50%"></i></span>
       <span class="vl">733 Å²<span class="cf">666&ndash;801</span></span>
     </div>
     <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 8</span>
+      <span class="who"><span class="t">2&#x27;-O-methyltransferase nsp16</span>
         <span class="w">5 deposited structures
-          of the same domain &middot; 6.7 % of its surface<br><span class="oor">out of reach</span> annotated host cytoplasm, host perinuclear region, host cytoplasm, host endoplasmic reticulum</span></span>
-      <span class="plot"><i class="thr" style="left:50.59%"></i>
-        <i class="b" style="left:0.00%;width:56.00%"></i><i class="whisk" style="left:24.20%;width:75.80%"></i></span>
-      <span class="vl">664 Å²<span class="cf">287&ndash;1,186</span></span>
-    </div>
-    <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 10</span>
-        <span class="w">5 deposited structures
-          of the same domain &middot; 10.9 % of its surface<br><span class="oor">out of reach</span> annotated host cytoplasm, host perinuclear region, host cytoplasm, host endoplasmic reticulum</span></span>
-      <span class="plot"><i class="thr" style="left:50.59%"></i>
-        <i class="b" style="left:0.00%;width:52.16%"></i><i class="whisk" style="left:50.83%;width:5.67%"></i></span>
-      <span class="vl">619 Å²<span class="cf">603&ndash;670</span></span>
-    </div>
-    <div class="lr">
-      <span class="who"><span class="t">ORF9B_SARS ORF9b protein</span>
-        <span class="w">5 deposited structures
-          of the same domain &middot; 12.8 % of its surface<br><span class="oor">out of reach</span> annotated virion, host cytoplasmic vesicle membrane, host cytoplasm &middot; off the parent entry, not this chain</span></span>
-      <span class="plot"><i class="thr" style="left:50.59%"></i>
-        <i class="b" style="left:0.00%;width:47.45%"></i><i class="whisk" style="left:35.14%;width:25.57%"></i></span>
-      <span class="vl">563 Å²<span class="cf">417&ndash;720</span></span>
+          of the same domain &middot; 5.2 % of its surface<br><span class="oor">out of reach</span> annotated host cytoplasm, host endosome, host membrane &middot; off the parent entry, not this chain</span></span>
+      <span class="plot"><i class="thr" style="left:6.67%"></i>
+        <i class="b" style="left:0.00%;width:7.36%"></i><i class="whisk" style="left:7.23%;width:2.15%"></i></span>
+      <span class="vl">662 Å²<span class="cf">650&ndash;844</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">3C-like proteinase nsp5</span>
         <span class="w">5 deposited structures
           of the same domain &middot; 4.4 % of its surface<br><span class="oor">out of reach</span> annotated host cytoplasm, host golgi apparatus</span></span>
-      <span class="plot"><i class="thr" style="left:50.59%"></i>
-        <i class="b" style="left:0.00%;width:47.42%"></i><i class="whisk" style="left:28.25%;width:29.96%"></i></span>
+      <span class="plot"><i class="thr" style="left:6.67%"></i>
+        <i class="b" style="left:0.00%;width:6.25%"></i><i class="whisk" style="left:3.72%;width:3.95%"></i></span>
       <span class="vl">562 Å²<span class="cf">335&ndash;690</span></span>
-    </div>
+    </div><div class="lane-grp"><b>Measured on a shape a model predicted &middot; 2</b><span>nobody has ever solved these, so the shape being measured was predicted from the sequence by stage 3. The arithmetic is identical and the evidence is not, so this group stays in its own column, outside the count above and outside the ranking</span></div>
     <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 2</span>
-        <span class="w">1 deposited structure
-          of the same domain &middot; 2.1 % of its surface<br><span class="oor">out of reach</span> annotated host cytoplasm, host endosome</span></span>
-      <span class="plot"><i class="thr" style="left:50.59%"></i>
-        <i class="b" style="left:0.00%;width:44.06%"></i></span>
-      <span class="vl">522 Å²<span class="cf">one structure</span></span>
-    </div>
-    <div class="lr">
-      <span class="who"><span class="t">Viral protein genome-linked nsp9</span>
-        <span class="w">3 deposited structures
-          of the same domain &middot; 5.5 % of its surface<br><span class="oor">out of reach</span> annotated host cytoplasm, host perinuclear region, host cytoplasm, host endoplasmic reticulum</span></span>
-      <span class="plot"><i class="thr" style="left:50.59%"></i>
-        <i class="b" style="left:0.00%;width:26.89%"></i><i class="whisk" style="left:15.62%;width:47.34%"></i></span>
-      <span class="vl">319 Å²<span class="cf">185&ndash;747</span></span>
-    </div>
-    <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 7</span>
-        <span class="w">5 deposited structures
-          of the same domain &middot; 4.2 % of its surface<br><span class="oor">out of reach</span> annotated host cytoplasm, host perinuclear region, host cytoplasm, host endoplasmic reticulum</span></span>
-      <span class="plot"><i class="thr" style="left:50.59%"></i>
-        <i class="b" style="left:0.00%;width:10.03%"></i><i class="whisk" style="left:8.30%;width:11.10%"></i></span>
-      <span class="vl">119 Å²<span class="cf">98&ndash;230</span></span>
-    </div><div class="lane-grp"><b>A shape could be predicted for these, and this run did not &middot; 5</b><span>nobody has solved these either, but each is short enough for stage 3 to fold, so coordinates can exist for them and the current pipeline measures those. They are blank here for a dull reason. This record was written while the surface stage still ran before the fold, so when it asked for coordinates there were none yet. Re-running the chain fills this group in</span></div>
-    <div class="lr none">
       <span class="who"><span class="t">VME1_BC279 Membrane protein</span>
-        <span class="w">PDBe maps no deposited chain to Q0Q472 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>222 aa, inside the 400-residue ceiling</i></span></span>
-      <span class="plot"></span>
-      <span class="vl">&mdash;</span>
+        <span class="w">the only surface this chain has &middot; fold confidence 51.8</span></span>
+      <span class="plot"><i class="thr" style="left:6.67%"></i>
+        <i class="b pred" style="left:0.00%;width:95.15%"></i></span>
+      <span class="vl">8,562 Å²<span class="cf">predicted</span></span>
     </div>
-    <div class="lr none">
+    <div class="lr">
       <span class="who"><span class="t">AP3A_BC279 Protein 3</span>
-        <span class="w">PDBe maps no deposited chain to Q0Q474 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>275 aa, inside the 400-residue ceiling</i></span></span>
-      <span class="plot"></span>
-      <span class="vl">&mdash;</span>
-    </div>
-    <div class="lr none">
-      <span class="who"><span class="t">Host translation inhibitor nsp1</span>
-        <span class="w">180 chains map to P0C6X7 and none covers 1-180 &middot; <i>180 aa, inside the 400-residue ceiling</i></span></span>
-      <span class="plot"></span>
-      <span class="vl">&mdash;</span>
-    </div>
-    <div class="lr none">
-      <span class="who"><span class="t">Non-structural protein 6</span>
-        <span class="w">180 chains map to P0C6X7 and none covers 3547-3836 &middot; <i>287 aa, inside the 400-residue ceiling</i></span></span>
-      <span class="plot"></span>
-      <span class="vl">&mdash;</span>
-    </div>
-    <div class="lr none">
-      <span class="who"><span class="t">Protein 7a</span>
-        <span class="w">PDBe maps no deposited chain to Q3I5J0 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>106 aa, inside the 400-residue ceiling</i></span></span>
-      <span class="plot"></span>
-      <span class="vl">&mdash;</span>
-    </div><div class="lane-grp"><b>No surface by either route &middot; 6</b><span>nothing is deposited for these and they are over the 400-residue ceiling, so this run folded none of them and has no surface to offer. It says so, and the chain keeps its row. What it is not is a statement that none of them can be reached: stage 3&rsquo;s lane above lists the functionally important regions their relatives annotate, and they are short enough</span></div>
+        <span class="w">the only surface this chain has &middot; fold confidence 47.4</span></span>
+      <span class="plot"><i class="thr" style="left:6.67%"></i>
+        <i class="b pred" style="left:0.00%;width:100.00%"></i></span>
+      <span class="vl">8,999 Å²<span class="cf">predicted</span></span>
+    </div><div class="lane-grp"><b>No surface by either route &middot; 5</b><span>nothing is deposited for these and they are over the 400-residue ceiling, so this run folded none of them and has no surface to offer. It says so, and the chain keeps its row. What it is not is a statement that none of them can be reached: stage 3&rsquo;s lane above lists the functionally important regions their relatives annotate, and they are short enough</span></div>
     <div class="lr none">
       <span class="who"><span class="t">Spike protein S2&#x27;</span>
         <span class="w">PDBe maps no deposited chain to Q3LZX1 at all. The protein may be well solved under another accession; this entry is not it. &middot; <i>458 aa, over the ceiling</i></span></span>
@@ -3276,42 +2734,48 @@
       <span class="plot"></span>
       <span class="vl">&mdash;</span>
     </div>
-    <div class="lr none">
-      <span class="who"><span class="t">Non-structural protein 4</span>
-        <span class="w">180 chains map to P0C6X7 and none covers 2741-3240 &middot; <i>500 aa, over the ceiling</i></span></span>
-      <span class="plot"></span>
-      <span class="vl">&mdash;</span>
-    </div>
     <div class="lane-foot"><span>every bar starts at zero, on one scale, deposited and
       predicted together</span>
       <span>the line across a bar is how far that domain&rsquo;s structures
       disagree</span></div>
   </div>
-  <p class="after">All 9 of those verdicts are decided on where the protein sits, which the gate reads before it reads area at all. Every one of these is annotated somewhere a macrocycle cannot arrive, inside the cell or inside the virion, the virus particle itself. Several of their patches clear the footprint line comfortably and are refused anyway. That is the gate saying something about this class of molecule, not about the target.</p>
-    <p class="after"><b>Why the predicted group is kept apart, when the sum is the same
-    arithmetic.</b> A deposited structure is something that happened: a protein was purified,
-    crystallised or frozen, put in a beam, and coordinates were fitted to what came back. A
-    predicted structure is a claim a model makes from the sequence, with no one having looked
-    at the molecule.</p>
-    <p class="after">The deposited patch comes with a spread, because the same chain has been
-    solved several times and the structures disagree. A prediction has no such bar — the same
-    sequence returns the same coordinates — only a confidence per residue,
-    <b>62.6</b> out of 100 for the main protease.</p>
-    <p class="after">A predicted chain is also folded alone, with no partner and no membrane
-    around it, so faces that are buried in life sit out in the open and the patch inflates.
-    That is the likeliest reason the main protease's predicted patch comes out several times
-    larger than its deposited one, and it is not separable from ordinary prediction error — so
-    the record states the ratio and names no cause.</p>
-    <p class="after">The predicted group earns its place anyway. A deposited structure exists
-    only where somebody already did the work, which tracks attention rather than importance:
-    the two enzymes approved antivirals hit have several structures apiece, while the membrane
-    and accessory proteins have none anywhere.</p>
-    <p class="after">A pipeline that can only measure depositions answers best on the targets
-    that need it least, and goes quiet on a genuinely new pathogen — the case this project
-    exists for. The prediction does not replace a measurement; it turns <b>no answer at all</b>
-    into <b>an answer that says where it came from</b>.</p>
-    <p class="after">That gate is a statement about this class of molecule and not about the
-    target, so it never becomes a term in the ranking.</p>
+  <p class="after">All 5 of those verdicts are decided on where the protein sits, which the gate reads before it reads area at all. Every one of these is annotated somewhere a macrocycle cannot arrive, inside the cell or inside the virion, the virus particle itself. Several of their patches clear the footprint line comfortably and are refused anyway. That is the gate saying something about this class of molecule, not about the target.</p>
+    <div class="discs">
+      <details class="disc">
+        <summary>Why the predicted group is kept apart, when the sum is the same
+          arithmetic<em>4 notes</em></summary>
+        <div class="disc-b">
+          <p>A deposited structure is something that happened: a protein was purified,
+          crystallised or frozen, put in a beam, and coordinates were fitted to what came
+          back. A predicted structure is a claim a model makes from the sequence, with no one
+          having looked at the molecule.</p>
+          <p>The deposited patch comes with a spread, because the same chain has been solved
+          several times and the structures disagree. A prediction has no such bar — the same
+          sequence returns the same coordinates — only a confidence per residue,
+          <b>62.6</b> out of 100 for the main protease.</p>
+          <p>A predicted chain is also folded alone, with no partner and no membrane around
+          it, so faces that are buried in life sit out in the open and the patch inflates.
+          That is the likeliest reason the main protease's predicted patch comes out several
+          times larger than its deposited one, and it is not separable from ordinary
+          prediction error — so the record states the ratio and names no cause.</p>
+          <p>That gate is a statement about this class of molecule and not about the target,
+          so it never becomes a term in the ranking.</p>
+        </div>
+      </details>
+      <details class="disc">
+        <summary>Why a predicted surface earns its place at all<em>2 notes</em></summary>
+        <div class="disc-b">
+          <p>A deposited structure exists only where somebody already did the work, which
+          tracks attention rather than importance: the two enzymes approved antivirals hit
+          have several structures apiece, while the membrane and accessory proteins have none
+          anywhere.</p>
+          <p>A pipeline that can only measure depositions answers best on the targets that
+          need it least, and goes quiet on a genuinely new pathogen — the case this project
+          exists for. The prediction does not replace a measurement; it turns <b>no answer at
+          all</b> into <b>an answer that says where it came from</b>.</p>
+        </div>
+      </details>
+    </div>
   </div>
 
   <div class="substep" id="site-patch">
@@ -3322,12 +2786,15 @@
     asks second, which is where on the protein to put one. The curators have already marked
     the residues that do the work — the catalytic ones, the ligand-binding ones — so the same
     arithmetic can be asked at that location instead of at the chain's best address.</p>
-    <p class="cap">A macrocycle covers about <b>600</b> Å² when it binds, which
-    makes it roughly <b>13.8</b> Å across. So for each folded unit: take the
-    residues the annotation marks, collect everything within that distance of them, and
-    intersect it with the patch step 4 found. <b>23</b> of
-    <b>37</b> folded units have at least one marked residue inside the
-    coordinates; the other units say which of four absences applies.</p>
+    <div class="steps3" style="margin:0 0 26px">
+      <div><b>1 · mark</b> Take the residues the curated entry marks as doing the work.</div>
+      <div><b>2 · reach</b> Collect everything within <b>13.8</b> Å of them — a
+      macrocycle covers about <b>600</b> Å² when it binds, which makes it roughly
+      that far across.</div>
+      <div><b>3 · intersect</b> Keep the part that is also in the patch step 4 found.
+      <b>23</b> of <b>37</b> folded units have at least one marked
+      residue inside the coordinates; the rest say which of four absences applies.</div>
+    </div>
     <p class="cap">The two numbers disagree, and the size of the disagreement is the finding.
     Step 4's question has a yes-or-no answer — does the unit's best patch reach the marked
     residues at all — and <b>21</b> of <b>23</b> units say
@@ -3336,31 +2803,51 @@
     marked residues; at the other, <i>AP3A_BC279 Protein 3</i> holds
     <b>19 %</b>, so most of the surface that unit was scored on is somewhere
     else. Both are a yes.</p>
-    <p class="cap"><b>Not every marked residue is a place to put a binder.</b> On a
-    coronavirus polyprotein most plain site annotations are the points where a protease cuts
-    the chain, and a cleavage boundary sits at the <i>end</i> of a mature chain by
-    construction — so a neighbourhood drawn around one is a neighbourhood of a dangling
-    terminus. Both measurements are therefore reported. <i>3C-like proteinase nsp5</i> is where it
-    costs the most: <b>586.7</b> Å² of its <b>2,012.6</b> Å² patch at
-    all its marked residues, <b>29 %</b> — and
-    <b>185.6</b> Å², <b>9 %</b>, over the residues that do
-    chemistry once its 2 cleavage sites are
-    dropped.</p>
-    <p class="cap"><b>Read the confidence first.</b> These are predicted coordinates, and
-    <b>70</b> of the <b>106</b> marked residues sit below the
-    folding tool's own confidence threshold — many of them cleavage boundaries, disordered
-    because they are chain ends rather than because of anything about the chemistry.
-    <b>8</b> units have nothing but cleavage boundaries in them, and
-    they are grouped apart below.</p>
-    <p class="cap">And before any of it is printed: a marked position is curated on the
-    relative's entry, carried through the alignment into one reading frame of this genome, then
-    into coordinates numbered from one. Each row was checked against the residue the
-    relative's entry actually carries at that position, and <b>23</b> of
-    <b>23</b> land on it. A row that did not would have its figures withheld
-    here, because a patch measured at the wrong residues is worse than no patch — only the
-    second is visible as an absence. The rows run along <b>8</b> different
-    reading frames, and <b>50</b> pairs of them carry spans that overlap as
-    numbers while sharing no residue, so every row names its frame.</p>
+    <div class="discs">
+      <details class="disc">
+        <summary>Not every marked residue is a place to put a binder<em>why two figures, not
+          one</em></summary>
+        <div class="disc-b">
+          <p>On a coronavirus polyprotein most plain site annotations are the points where a
+          protease cuts the chain, and a cleavage boundary sits at the <i>end</i> of a mature
+          chain by construction — so a neighbourhood drawn around one is a neighbourhood of a
+          dangling terminus. Both measurements are therefore reported.</p>
+          <p><i>3C-like proteinase nsp5</i> is where it costs the most: <b>586.7</b>
+          Å² of its <b>2,012.6</b> Å² patch at all its marked residues,
+          <b>29 %</b> — and <b>185.6</b> Å²,
+          <b>9 %</b>, over the residues that do chemistry once its
+          2 cleavage sites are dropped.</p>
+        </div>
+      </details>
+      <details class="disc">
+        <summary>Read the confidence first<em>these are predicted coordinates</em></summary>
+        <div class="disc-b">
+          <p><b>70</b> of the <b>106</b> marked residues sit
+          below the folding tool's own confidence threshold — many of them cleavage
+          boundaries, disordered because they are chain ends rather than because of anything
+          about the chemistry.</p>
+          <p><b>8</b> units have nothing but cleavage boundaries in
+          them, and they are grouped apart below.</p>
+        </div>
+      </details>
+      <details class="disc">
+        <summary>How a curated position was carried into these coordinates<em>and what is
+          withheld if it did not land</em></summary>
+        <div class="disc-b">
+          <p>A marked position is curated on the relative's entry, carried through the
+          alignment into one reading frame of this genome, then into coordinates numbered from
+          one. Each row was checked against the residue the relative's entry actually carries
+          at that position, and <b>23</b> of <b>23</b> land
+          on it.</p>
+          <p>A row that did not would have its figures withheld here, because a patch measured
+          at the wrong residues is worse than no patch — only the second is visible as an
+          absence.</p>
+          <p>The rows run along <b>8</b> different reading frames, and
+          <b>50</b> pairs of them carry spans that overlap as numbers while
+          sharing no residue, so every row names its frame.</p>
+        </div>
+      </details>
+    </div>
     
   <div class="lane">
     <div class="lane-grp"><b>Measured at the residues the curators marked &middot; 15</b><span>each bar is one unit&rsquo;s own largest water-repelling patch, drawn full width whatever its area; the fill is how much of it a macrocycle on the marked residues could reach, and the area itself is the figure on the right. An empty bar means the unit&rsquo;s LARGEST patch is elsewhere, never that the site has none</span></div>
@@ -3743,7 +3230,7 @@
   <p class="cap">Six tool calls run the five steps. Each is a named function with a declared cost and a recorded return — not a prompt, and not a model deciding what to do next. Each card is headed by the file and function that ran it.</p>
 
   <div class="tool-card" id="t-intake">
-    <div class="tc-head"><span class="sn">1</span><span class="tn">hpc_pilots/intake.py<i>:</i>run_intake</span><span class="reg">intake.rank_targets</span><span class="plain">Read the genome, find the proteins</span><span class="db">NCBI · UniProt · 14.4 s · 2 requests</span></div>
+    <div class="tc-head"><span class="sn">1</span><span class="tn">hpc_pilots/intake.py<i>:</i>run_intake</span><span class="reg">intake.rank_targets</span><span class="plain">Read the genome, find the proteins</span><span class="db">NCBI · UniProt · 10.8 s · 2 requests</span></div>
     <div class="tc-body">
       <dl class="ret">
         <div><dt>Genome read</dt><dd>29,903 nt · 1 segment</dd></div>
@@ -3760,12 +3247,12 @@
   </div>
 
   <div class="tool-card" id="t-score">
-    <div class="tc-head"><span class="sn">2</span><span class="tn">hpc_pilots/intake.py<i>:</i>decompose → rank_score</span><span class="reg">intake.decompose + intake.rank_score</span><span class="plain">Cut polyproteins apart, then score</span><span class="db">UniProt · 74.8 s</span></div>
+    <div class="tc-head"><span class="sn">2</span><span class="tn">hpc_pilots/intake.py<i>:</i>decompose → rank_score</span><span class="reg">intake.decompose + intake.rank_score</span><span class="plain">Cut polyproteins apart, then score</span><span class="db">UniProt · 3.0 s</span></div>
     <div class="tc-body">
       <dl class="ret">
-        <div><dt>Chains out</dt><dd>20</dd></div>
+        <div><dt>Chains out</dt><dd>12</dd></div>
         <div><dt>Weights, fixed in advance</dt><dd>3 · 2 · 1.5 · 0.8 · 0.5</dd></div>
-        <div><dt>Scores that re-add from their parts</dt><dd>20 of 20</dd></div>
+        <div><dt>Scores that re-add from their parts</dt><dd>12 of 12</dd></div>
         <div><dt>Highest / lowest score</dt><dd>6.906 / 0.913</dd></div>
       </dl>
       <div class="fields"><span class="lead">Per chain:</span>
@@ -3790,19 +3277,19 @@
   </div>
 
   <div class="tool-card" id="t-fold">
-    <div class="tc-head"><span class="sn">3</span><span class="tn">hpc_pilots/folded_structure.py<i>:</i>fold</span><span class="reg">structures.folded</span><span class="plain">Predict a 3-D shape from sequence alone</span><span class="db">ESM Atlas · 2.7 s · 1 request</span></div>
+    <div class="tc-head"><span class="sn">3</span><span class="tn">hpc_pilots/folded_structure.py<i>:</i>fold</span><span class="reg">structures.folded</span><span class="plain">Predict a 3-D shape from sequence alone</span><span class="db">ESM Atlas · 18.2 s · 1 request</span></div>
     <div class="tc-body">
       <p class="cap" style="margin:0">What this call returned, and the drawing of the fold, are under <a href="#fold-out">step 3 in section 03</a>.</p>
     </div>
   </div>
 
   <div class="tool-card" id="t-surface">
-    <div class="tc-head"><span class="sn">4</span><span class="tn">hpc_pilots/geometry.py<i>:</i>surface_for_accession</span><span class="reg">geometry.surface_markers</span><span class="plain">Measure the surface a drug would grip</span><span class="db">PDBe · RCSB · UniProt · 50.0 s</span></div>
+    <div class="tc-head"><span class="sn">4</span><span class="tn">hpc_pilots/geometry.py<i>:</i>surface_for_accession</span><span class="reg">geometry.surface_markers</span><span class="plain">Measure the surface a drug would grip</span><span class="db">PDBe · RCSB · UniProt · 5.6 s</span></div>
     <div class="tc-body">
       <dl class="ret">
-        <div><dt>Rows returned</dt><dd>20 for 20 chains</dd></div>
-        <div><dt>Measured</dt><dd>9</dd></div>
-        <div><dt>Refused, with reason</dt><dd>11</dd></div>
+        <div><dt>Rows returned</dt><dd>12 for 12 chains</dd></div>
+        <div><dt>Measured</dt><dd>5</dd></div>
+        <div><dt>Refused, with reason</dt><dd>7</dd></div>
         <div><dt>Largest patch seen</dt><dd>858 Å²</dd></div>
       </dl>
       <div class="fields"><span class="lead">Per chain, when measured:</span>
@@ -3816,7 +3303,10 @@
         locations: host cytoplasm, endosome, membrane → exposed: false<br>
         gate: no — measured, then set aside because it sits inside the cell</div>
       </div>
-      <div class="accs"><span class="lead">The deposited structures it measured on, returned as <span class="k">structures_used</span>. Every one is a real PDB entry and chain, and none is SARS-CoV-2's. Each chain is named as the record names it, so the raw JSON can be searched by name:</span>
+      <details class="disc" style="margin-top:17px">
+        <summary>The deposited structures it measured on<em>9 chains · 35 entries</em></summary>
+        <div class="disc-b accs" style="margin-top:0;padding-top:16px;border-top:0">
+        <span class="lead">Returned as <span class="k">structures_used</span>. Every one is a real PDB entry and chain, and none is SARS-CoV-2's. Each chain is named as the record names it, so the raw JSON can be searched by name:</span>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">the main protease</i> <em>P0C6X7 · 3241–3546</em></span><span class="ids">6w79:A · 6wco:A · 5c5o:A · 5c5o:B · 3tnt:A</span></div>
         <div class="pdbrow"><span class="who">RNA-directed RNA polymerase nsp12 <i class="gl">copies the genome</i> <em>P0C6X7 · 4370–5301</em></span><span class="ids">6nur:A · 6nus:A</span></div>
         <div class="pdbrow"><span class="who">Helicase nsp13 <i class="gl">unwinds RNA</i> <em>P0C6X7 · 5302–5902</em></span><span class="ids">6jyt:A · 6jyt:B</span></div>
@@ -3826,9 +3316,10 @@
         <div class="pdbrow"><span class="who">Viral protein genome-linked nsp9 <em>P0C6X7 · 4118–4230</em></span><span class="ids">1qz8:A · 1qz8:B · 1uw7:A</span></div>
         <div class="pdbrow"><span class="who">Non-structural protein 2 <em>P0C6X7 · 181–818</em></span><span class="ids">7fac:A</span></div>
         <div class="pdbrow"><span class="who">ORF9B_SARS ORF9b protein <em>P59636</em></span><span class="ids">2cme:A · 2cme:B · 2cme:C · 2cme:D · 2cme:E</span></div>
-      </div>
-      <div class="fields"><span class="lead">The other <b>11</b> chains had nothing deposited to measure. <a href="#surface-out">The lane above</a> names each one, with the accession that came back empty, the sentence the tool returned, and where the chain fell against the folding ceiling.</span></div>
-      <div class="accs"><span class="lead">Those <b>11</b> are why step 3 now runs first and folds every chain it can. Where coordinates exist this step measures them with the same arithmetic, and for <b>5</b> chains that is the only surface they will ever have. On a chain that has both, the two answers are far apart:</span>
+        </div>
+      </details>
+      <div class="fields"><span class="lead">The other <b>7</b> chains had nothing deposited to measure. <a href="#surface-out">The lane above</a> names each one, with the accession that came back empty, the sentence the tool returned, and where the chain fell against the folding ceiling.</span></div>
+      <div class="accs"><span class="lead">Those <b>7</b> are why step 3 now runs first and folds every chain it can. Where coordinates exist this step measures them with the same arithmetic, and for <b>2</b> chains that is the only surface they will ever have. On a chain that has both, the two answers are far apart:</span>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">5 deposited structures</i> <em>median of 5 · a real measurement</em></span><span class="ids">562.4 Å² · 4.4 % of the surface</span></div>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">the predicted shape</i> <em>ESMFold v1 · mean confidence 62.6</em></span><span class="ids">2,012.6 Å² · 11.0 % of the surface</span></div>
       </div>
@@ -3858,13 +3349,13 @@
 </section>
 
 <section id="picked">
-  <div class="sec-head"><h2>The shortlist</h2><span class="tag">9 identified ORFs cut into 20 chains</span></div>
+  <div class="sec-head"><h2>The shortlist</h2><span class="tag">9 identified ORFs cut into 12 chains</span></div>
   <p class="cap">This is the deliverable, and a different list from step 1's rather than a
   shorter version of it: step 1 ranks whole stretches of genome, step 2 cuts them into the
   mature chains a binder is actually aimed at. Only the 9 ORFs that matched a
   relative can be cut, since the boundaries come from that relative, so the 3
-  unrecognised ones end here. Those 9 become 20 chains, and
-  <b>12 of them come out of a single ORF</b>: the replicase, step 1's second
+  unrecognised ones end here. Those 9 become 12 chains, and
+  <b>6 of them come out of a single ORF</b>: the replicase, step 1's second
   row.</p>
   
   <div class="cmxscroll" tabindex="0" role="region" aria-label="The ranked shortlist of mature chains">
@@ -3883,31 +3374,31 @@
     <tbody>
       <tr>
         <td class="rk">1</td>
-        <td class="nm"><span class="t">Spike protein S2&#x27;</span></td>
-        <td class="cut"><a href="#orf-1">SPIKE_BCHK3 Spike glycoprotein</a><span class="w">stage&nbsp;1 rank 1</span></td>
-        <td class="sc"><span class="v">6.91</span>
-          <span class="tr"><i style="width:100.0%"></i></span></td>
-      </tr>
-      <tr>
-        <td class="rk">2</td>
         <td class="nm"><span class="t">3C-like proteinase nsp5</span></td>
         <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
         <td class="sc"><span class="v">6.90</span>
           <span class="tr"><i style="width:100.0%"></i></span></td>
       </tr>
       <tr>
+        <td class="rk">2</td>
+        <td class="nm"><span class="t">Spike protein S2&#x27;</span></td>
+        <td class="cut"><a href="#orf-1">SPIKE_BCHK3 Spike glycoprotein</a><span class="w">stage&nbsp;1 rank 1</span></td>
+        <td class="sc"><span class="v">6.86</span>
+          <span class="tr"><i style="width:99.4%"></i></span></td>
+      </tr>
+      <tr>
         <td class="rk">3</td>
         <td class="nm"><span class="t">Spike protein S2</span></td>
         <td class="cut"><a href="#orf-1">SPIKE_BCHK3 Spike glycoprotein</a><span class="w">stage&nbsp;1 rank 1</span></td>
-        <td class="sc"><span class="v">6.89</span>
-          <span class="tr"><i style="width:99.7%"></i></span></td>
+        <td class="sc"><span class="v">6.84</span>
+          <span class="tr"><i style="width:99.1%"></i></span></td>
       </tr>
       <tr>
         <td class="rk">4</td>
         <td class="nm"><span class="t">Spike protein S1</span></td>
         <td class="cut"><a href="#orf-1">SPIKE_BCHK3 Spike glycoprotein</a><span class="w">stage&nbsp;1 rank 1</span></td>
-        <td class="sc"><span class="v">6.88</span>
-          <span class="tr"><i style="width:99.6%"></i></span></td>
+        <td class="sc"><span class="v">6.83</span>
+          <span class="tr"><i style="width:99.0%"></i></span></td>
       </tr>
       <tr>
         <td class="rk">5</td>
@@ -3921,7 +3412,7 @@
         <td class="nm"><span class="t">Papain-like protease nsp3</span></td>
         <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
         <td class="sc"><span class="v">6.40</span>
-          <span class="tr"><i style="width:92.7%"></i></span></td>
+          <span class="tr"><i style="width:92.8%"></i></span></td>
       </tr>
       <tr>
         <td class="rk">7</td>
@@ -3934,98 +3425,42 @@
         <td class="rk">8</td>
         <td class="nm"><span class="t">VME1_BC279 Membrane protein</span> <span class="w">not a polyprotein</span></td>
         <td class="cut"><a href="#orf-4">VME1_BC279 Membrane protein</a><span class="w">stage&nbsp;1 rank 4</span></td>
-        <td class="sc"><span class="v">5.52</span>
-          <span class="tr"><i style="width:79.9%"></i></span></td>
+        <td class="sc"><span class="v">5.51</span>
+          <span class="tr"><i style="width:79.8%"></i></span></td>
       </tr>
       <tr>
         <td class="rk">9</td>
-        <td class="nm"><span class="t">AP3A_BC279 Protein 3</span> <span class="w">not a polyprotein</span></td>
-        <td class="cut"><a href="#orf-6">AP3A_BC279 Protein 3</a><span class="w">stage&nbsp;1 rank 6</span></td>
-        <td class="sc"><span class="v">4.56</span>
-          <span class="tr"><i style="width:66.0%"></i></span></td>
+        <td class="nm"><span class="t">2&#x27;-O-methyltransferase nsp16</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="sc"><span class="v">4.15</span>
+          <span class="tr"><i style="width:60.2%"></i></span></td>
       </tr>
       <tr>
         <td class="rk">10</td>
+        <td class="nm"><span class="t">Guanine-N7 methyltransferase nsp14</span></td>
+        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
+        <td class="sc"><span class="v">4.13</span>
+          <span class="tr"><i style="width:59.9%"></i></span></td>
+      </tr>
+      <tr>
+        <td class="rk">11</td>
         <td class="nm"><span class="t">NCAP_BCRP3 Nucleoprotein</span> <span class="w">not a polyprotein</span></td>
         <td class="cut"><a href="#orf-5">NCAP_BCRP3 Nucleoprotein</a><span class="w">stage&nbsp;1 rank 5</span></td>
         <td class="sc"><span class="v">3.50</span>
           <span class="tr"><i style="width:50.7%"></i></span></td>
       </tr>
       <tr>
-        <td class="rk">11</td>
-        <td class="nm"><span class="t">Non-structural protein 10</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="sc"><span class="v">2.58</span>
-          <span class="tr"><i style="width:37.4%"></i></span></td>
-      </tr>
-      <tr>
-        <td class="rk">12</td>
-        <td class="nm"><span class="t">Host translation inhibitor nsp1</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="sc"><span class="v">2.52</span>
-          <span class="tr"><i style="width:36.6%"></i></span></td>
-      </tr>
-      <tr>
         <td class="rk">13</td>
-        <td class="nm"><span class="t">Non-structural protein 7</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="sc"><span class="v">2.52</span>
-          <span class="tr"><i style="width:36.6%"></i></span></td>
-      </tr>
-      <tr>
-        <td class="rk">14</td>
-        <td class="nm"><span class="t">Non-structural protein 8</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="sc"><span class="v">2.52</span>
-          <span class="tr"><i style="width:36.6%"></i></span></td>
-      </tr>
-      <tr>
-        <td class="rk">15</td>
-        <td class="nm"><span class="t">Viral protein genome-linked nsp9</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="sc"><span class="v">2.52</span>
-          <span class="tr"><i style="width:36.6%"></i></span></td>
-      </tr>
-      <tr>
-        <td class="rk">16</td>
-        <td class="nm"><span class="t">Non-structural protein 2</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="sc"><span class="v">2.51</span>
-          <span class="tr"><i style="width:36.4%"></i></span></td>
-      </tr>
-      <tr>
-        <td class="rk">17</td>
-        <td class="nm"><span class="t">Non-structural protein 4</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="sc"><span class="v">2.50</span>
-          <span class="tr"><i style="width:36.3%"></i></span></td>
-      </tr>
-      <tr>
-        <td class="rk">18</td>
-        <td class="nm"><span class="t">Non-structural protein 6</span></td>
-        <td class="cut"><a href="#orf-2">R1AB_SARS Replicase polyprotein 1ab</a><span class="w">stage&nbsp;1 rank 2</span></td>
-        <td class="sc"><span class="v">2.50</span>
-          <span class="tr"><i style="width:36.3%"></i></span></td>
-      </tr>
-      <tr>
-        <td class="rk">19</td>
-        <td class="nm"><span class="t">Protein 7a</span></td>
-        <td class="cut"><a href="#orf-8">NS7A_BCRP3 Protein 7a</a><span class="w">stage&nbsp;1 rank 8</span></td>
-        <td class="sc"><span class="v">1.62</span>
-          <span class="tr"><i style="width:23.4%"></i></span></td>
-      </tr>
-      <tr>
-        <td class="rk">20</td>
-        <td class="nm"><span class="t">ORF9B_SARS ORF9b protein</span> <span class="w">not a polyprotein</span></td>
-        <td class="cut"><a href="#orf-9">ORF9B_SARS ORF9b protein</a><span class="w">stage&nbsp;1 rank 9</span></td>
-        <td class="sc"><span class="v">0.91</span>
-          <span class="tr"><i style="width:13.2%"></i></span></td>
+        <td class="nm"><span class="t">AP3A_BC279 Protein 3</span> <span class="w">not a polyprotein</span></td>
+        <td class="cut"><a href="#orf-6">AP3A_BC279 Protein 3</a><span class="w">stage&nbsp;1 rank 6</span></td>
+        <td class="sc"><span class="v">2.55</span>
+          <span class="tr"><i style="width:37.0%"></i></span></td>
       </tr></tbody>
   </table>
   </div>
   <p class="after">The two chains that approved antivirals already hit are not ORFs at all.
   The main protease (<span class="mono">nsp5</span>), which nirmatrelvir inhibits, is rank
-  2 here; the polymerase (<span class="mono">nsp12</span>), which remdesivir
+  1 here; the polymerase (<span class="mono">nsp12</span>), which remdesivir
   inhibits, is rank 5. Both are interior fragments of that one replicase row, so a
   pipeline that stopped at step 1 could not have surfaced either. With SARS-CoV-2 deleted from
   the reference library, both still land in the top five — scored only against relatives,

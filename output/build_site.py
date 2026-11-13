@@ -584,8 +584,16 @@ def candidate_matrix(case):
     rows = [r for r in rows if r.get("score") is not None]
     if not rows:
         return ""
-    source = record or case
-    rubric, ceiling = source["rubric"], source["term_ceiling"]
+    # Where the weights come from depends on which record supplied the rows. The stage-1
+    # record carries `rubric` and `term_ceiling` at its top level; a chain record does not --
+    # it keeps the weights inside stage 2's output, because stage 2 is the stage that publishes
+    # them. Reading `case["rubric"]` worked only for as long as no chain record carried its own
+    # `candidates` and this function always fell back to the stage-1 record; the first chain
+    # record to carry them raised KeyError here.
+    if record is not None:
+        rubric, ceiling = record["rubric"], record["term_ceiling"]
+    else:
+        rubric, ceiling = _chain_rubric(case)
     top = max((r["score"] for r in rows), default=0) or 1
     total_ceiling = round(sum(ceiling[key] for key, _, _ in TERM_COLUMNS), 2)
 
@@ -1052,6 +1060,20 @@ def literature_record(case):
     return payload
 
 
+# Inline markup a publisher put inside a record title. Europe PMC returns titles with
+# `<em>` and friends in them -- "Effect of Drug Binding to the Variant-<em>in Silico</em>
+# Analysis" -- and escaping the title, which is the only safe thing to do with a string
+# this page did not write, prints those tags at the reader. The tags are dropped and their
+# text kept, so the title reads as a title. Everything that survives is still escaped on
+# the way out; this never puts a stranger's angle bracket back into the page.
+_TITLE_TAG = re.compile(r"</?(?:em|i|b|strong|sub|sup|u|span)\b[^<>]*>", re.I)
+
+
+def _plain_title(text):
+    """A record title with a publisher's inline tags dropped and their text kept."""
+    return re.sub(r"\s{2,}", " ", _TITLE_TAG.sub("", text)).strip()
+
+
 def _hit_rows(query):
     """The dated hits of one query, as links.
 
@@ -1067,7 +1089,7 @@ def _hit_rows(query):
             marks.append('<span class="pp">preprint</span>')
         if not hit.get("citable"):
             marks.append(f'<span class="pp un">{esc(hit.get("uncitable_because") or "undated")}</span>')
-        title = esc(hit.get("title") or "untitled")
+        title = esc(_plain_title(hit.get("title") or "untitled"))
         url = hit.get("url")
         linked = f'<a href="{esc(url)}" rel="noopener">{title}</a>' if url else title
         out.append(f"""
@@ -1146,15 +1168,26 @@ def literature_block(case):
                "protein" if route == "genome_accession" else
                "anchored on the chain's own designation, which identifies the protein "
                "without needing the accession")
+        # One disclosure per target, shut. Open, this section is four hundred lines of
+        # citations -- thirteen queries, five records apiece -- and a reader scrolling to
+        # stage 4 has to pass every one of them. Shut, the same records are two clicks from
+        # anywhere and the section is a list of targets with its counts on it, which is what
+        # a reader checks first anyway. Nothing is dropped and nothing is fetched on demand:
+        # the markup is all here, the browser is merely not drawing it.
+        # The shut row carries the name and the counts and nothing else. How the query was
+        # anchored is two lines of explanation that belong beside the queries themselves,
+        # which is where it now sits -- on the shut row it was longer than everything else
+        # on it put together.
         blocks.append(f"""
-    <div class="lrow">
-      <div class="lrh"><span class="t">{esc(row.get('target'))}</span>
-        <span class="w">{esc(row.get('nearest_homolog'))} &middot; {num(dated)} dated
-          record{'s' if dated != 1 else ''} kept &middot; {len(asked)} of {len(queries)}
-          queries answered</span>
-        <span class="w">{why}</span></div>
+    <details class="lrow">
+      <summary class="lrh"><span class="t">{esc(row.get('target'))}</span>
+        <span class="w"><em>{esc(row.get('nearest_homolog'))}</em>
+          <b>{num(dated)}</b> dated record{'s' if dated != 1 else ''} kept
+          &middot; <b>{len(asked)}</b> of <b>{len(queries)}</b>
+          {'queries' if len(queries) != 1 else 'query'} answered</span></summary>
+      <div class="lwhy">{why}</div>
       {"".join(_query_block(q) for q in queries)}
-    </div>""")
+    </details>""")
 
     # Stated as what the retrieval IS rather than as what it is not. The record's own
     # `date_ceiling_means` spells the consequence out at length, which belongs in the record;
