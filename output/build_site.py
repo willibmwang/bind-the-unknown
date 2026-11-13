@@ -343,6 +343,7 @@ def build_index():
     body = body.replace("<!--CHAINS-->", chain_matrix(holdout))
     body = body.replace("<!--PICKED-->", picked_table(holdout))
     body = body.replace("<!--FOLD-TRACE-->", fold_trace())
+    body = body.replace("<!--DOMAIN-TRANSFER-->", domain_transfer(holdout))
     body = body.replace("<!--FOLD-LANE-->", fold_lane(holdout))
     body = body.replace("<!--LITERATURE-->", literature_block(holdout))
     body = body.replace("<!--SURFACE-LANE-->", surface_lane(holdout))
@@ -1314,8 +1315,23 @@ def _rescued(inventory):
         "chains_over_the_ceiling_with_a_foldable_region")
 
 
-def _region_rows(chain):
+def _region_rows(chain, fold_chain=None):
     """One chain's annotated functional regions, foldable ones first and refusals named.
+
+    **The `where` column is the relative's numbering and used to say nothing else.** The
+    inventory record is annotated on the homolog by construction -- it states in its own
+    limitations that mapping those coordinates needs stage 3's alignment and that it will not
+    approximate one -- so every span in this panel is a position in somebody else's protein.
+    The fold record is where the other numbering lives, and joining the two puts this genome's
+    span under the relative's on the rows that have one: of the 143 regions the held-out run
+    was offered, the 26 that were folded carry a mapped span and the rest were never sent
+    through `domains.map_span`, so they have none to show and are not given one.
+
+    The join is on `(type, entry_span)` and not on the label, which is the key
+    `chain._in_relevance_order` uses against the same two records. A label join would be
+    wrong here for a reason already measured on this page: Spike protein S2 carries two
+    `Coiled coil` features with no description between them, and a name that cannot tell
+    918-962 from 1144-1172 cannot key a join either.
 
     The order is the record's, which is the inventory's stated ordering -- contained
     annotated site residues first, then an authored term list, then length -- and is not
@@ -1328,10 +1344,22 @@ def _region_rows(chain):
     about, and a page that showed only the foldable ones would make the annotation look
     thinner than it is.
     """
+    mapped = {(u.get("region_type"), tuple(u.get("entry_span_on_the_relative") or ())):
+              u.get("span_in_this_genome")
+              for u in (fold_chain or {}).get("units") or ()
+              if u.get("kind") == "domain" and u.get("span_in_this_genome")}
     out = []
     for region in chain.get("regions") or ():
         span = region.get("entry_span_on_the_relative") or []
         where = f"{span[0]:,}&ndash;{span[1]:,}" if len(span) == 2 else "&mdash;"
+        # The caption under the span says which numbering it is in, and it has to say two
+        # different things: a region that was folded has both numberings and the second one is
+        # the useful line, while a region that was not has only the relative's and saying so
+        # is the whole point of the caption.
+        here = mapped.get((region.get("type"), tuple(span)))
+        where += ('<span class="dq">' + (f'{here[0]:,}&ndash;{here[1]:,} in this genome'
+                                         if here else 'on the relative&rsquo;s entry')
+                  + '</span>')
         sites = region.get("site_residues_inside") or 0
         # The reason the row sorts where it does, in the reader's words rather than the
         # record's key names. Shown only when there is one: a region with no contained site
@@ -1357,6 +1385,150 @@ def _region_rows(chain):
           {f'<span class="dq">{esc(refused)}</span>' if refused else ''}</span>
       </div>""")
     return "".join(out)
+
+
+def _shift(entry_span, genome_span):
+    """The two offsets between one span's two numberings, and whether they agree.
+
+    Returns `(start_shift, end_shift)` or None where either span is missing. Two numbers and
+    not one, because one is the claim this table exists to refute: a reader shown a single
+    offset per row would reasonably conclude that a constant could have been added instead of
+    running an alignment, and on 24 of the 26 folded regions that conclusion happens to be
+    right. It is the other two that decide the design -- `BetaCoV S1-NTD` moves +10 at its
+    start and +18 at its end, `BetaCoV S1-CTD` +18 and +36 -- and a one-number column could
+    not show them without choosing which end to report.
+    """
+    if not (entry_span and genome_span) or len(entry_span) != 2 or len(genome_span) != 2:
+        return None
+    return int(genome_span[0]) - int(entry_span[0]), int(genome_span[1]) - int(entry_span[1])
+
+
+def _shift_cell(shift):
+    """The shift column: one figure when the ends agree, two when they do not."""
+    if shift is None:
+        return "&mdash;"
+
+    def one(value):
+        return f"&minus;{abs(value):,}" if value < 0 else (f"+{value:,}" if value else "0")
+
+    return one(shift[0]) if shift[0] == shift[1] else f"{one(shift[0])} / {one(shift[1])}"
+
+
+def _span_cell(span, fallback="&mdash;"):
+    return f"{span[0]:,}&ndash;{span[1]:,}" if span and len(span) == 2 else fallback
+
+
+def domain_transfer(case):
+    """Both cuts of stage 3, with the relative's numbering and this genome's side by side.
+
+    The page already says that boundaries are annotated on a relative and that slicing this
+    genome at them fails. It said it in prose, once, about mature chains -- and the harder
+    half of the claim is about what happens *inside* a chain, where every annotated region a
+    long chain is rescued by has to be carried across the same species gap. This table is that
+    half, as data: one group per chain that was cut into regions, the chain's own transfer on
+    the group row and each region's underneath it.
+
+    **What the shift column is for.** Across the 26 folded regions of the held-out run the
+    offset between the two numberings takes six distinct values -- 0 on the nucleoprotein and
+    nsp2, +23 on nsp3 and nsp4, +40 on both spike S2 chains, &minus;4,478 on nsp12 and nsp13,
+    and on spike S1 two offsets that are not the same at the two ends of one region (+10 and
+    +18 on the NTD, +18 and +36 on the CTD). No constant reproduces that column, which is the
+    whole argument for running an alignment per chain and walking its blocks per span, and it
+    is an argument a reader can check here rather than take on trust.
+
+    **Why the chain sits on the group row rather than in a table of its own.** The two cuts
+    are one mechanism applied twice: the chain is found in this genome by aligning the
+    relative's chain against every called ORF, and the region is found by walking the blocks
+    of that same alignment. Putting them in separate tables would present them as two
+    unrelated steps and lose the fact that a region's shift is inherited from its chain's
+    except where an indel falls between them -- which is exactly what the spike S1 rows show
+    and the nsp3 rows do not.
+
+    Built from `runs/domain_folds.json`, which is the record that carries both numberings per
+    unit. `runs/domain_inventory.json` deliberately does not: it states in its own limitations
+    that its coordinates are the relative's and that mapping them needs stage 3's alignment,
+    so the region rows elsewhere on this page are the relative's numbering and this table is
+    where the other side of that sentence lives.
+    """
+    # `domain_folds` returns the record keyed by target rather than the raw payload, and the
+    # insertion order is the record's, which is rank order. Iterating the values therefore
+    # gives the same chains in the same order the lane below draws them in.
+    record = domain_folds(case) or {}
+    chains = [c for c in record.values()
+              if any(u.get("kind") == "domain" for u in (c.get("units") or ()))]
+    if not chains:
+        return ""
+
+    out = []
+    for chain in chains:
+        entry = chain.get("chain_range_on_the_relative")
+        genome = chain.get("span_in_this_genome")
+        orf = chain.get("found_in_orf")
+        # A chain with no annotated range was never part of a polyprotein, so the reference
+        # aligned for it is the homolog's whole entry rather than a slice of it. Said on the
+        # row, because "the whole entry" in the relative's column is the reason its regions
+        # shift by nothing and a blank there would read as missing data.
+        where = (_span_cell(entry) if entry else
+                 '<span class="xq">the whole entry</span>')
+        note = f"found in ORF {orf}" if orf is not None else ""
+        out.append(f"""
+      <div class="xf xg">
+        <span class="xn">{esc(chain.get('target'))}
+          <span class="xt">mature chain &middot; {esc(chain.get('nearest_homolog') or '')}</span></span>
+        <span class="xl">{num(chain.get('length_aa'))} aa</span>
+        <span class="xw xwa">{where}</span>
+        <span class="xw xwb">{_span_cell(genome)}</span>
+        <span class="xs">{_shift_cell(_shift(entry, genome))}
+          {f'<span class="xq">{esc(note)}</span>' if note else ''}</span>
+      </div>""")
+        for unit in chain.get("units") or ():
+            if unit.get("kind") != "domain":
+                continue
+            relative = unit.get("entry_span_on_the_relative")
+            here = unit.get("span_in_this_genome")
+            shift = _shift(relative, here)
+            # Three different things can be said about one region's transfer and only one of
+            # them is ever true at a time, so they are tested in the order a reader would ask
+            # them in: did the two ends move together, did an end fall outside the alignment,
+            # and did the numbering turn out to be the same on both sides.
+            if shift and shift[0] != shift[1]:
+                said = (f"its two ends move by {abs(shift[1] - shift[0]):,} residues "
+                        f"against each other")
+            elif unit.get("ends_adjusted"):
+                ends = unit.get("unmapped_ends") or 0
+                said = (f"{ends} end{'s' if ends != 1 else ''} fell outside the alignment "
+                        f"and walked inward")
+            elif shift == (0, 0):
+                said = "the two numberings agree here"
+            else:
+                said = ""
+            mapped = unit.get("mapped_length_aa")
+            length = unit.get("length_aa")
+            # The mapped width differs from the annotated one only through an indel inside the
+            # span, which is the one difference worth a reader's attention; equal widths are
+            # the rule and printing both every time would bury the exceptions.
+            width = (f'{num(length)} aa' if mapped in (None, length) else
+                     f'{num(length)} aa<span class="xq">{num(mapped)} aa here</span>')
+            out.append(f"""
+      <div class="xf">
+        <span class="xn">{esc(unit.get('label') or unit.get('description') or '')}
+          <span class="xt">{esc(unit.get('region_type') or '')}</span></span>
+        <span class="xl">{width}</span>
+        <span class="xw xwa">{_span_cell(relative)}</span>
+        <span class="xw xwb">{_span_cell(here)}</span>
+        <span class="xs">{_shift_cell(shift)}
+          {f'<span class="xq">{esc(said)}</span>' if said else ''}</span>
+      </div>""")
+    return f"""
+    <div class="xfer">
+      <div class="xf xf-hd">
+        <span class="xn">chain, then the regions cut out of it</span>
+        <span class="xl">length</span>
+        <span class="xw xwa">on the relative</span>
+        <span class="xw xwb">in this genome</span>
+        <span class="xs">shift</span>
+      </div>{''.join(out)}
+    </div>"""
 
 
 def chain_fold_block(fold_chain):
@@ -1423,7 +1595,7 @@ def domain_block(chain, fold_chain=None):
         <span class="dw">where</span><span class="dy">why it is offered here</span>
         <span class="dv">fold unit</span>
       </div>
-      {_region_rows(chain)}
+      {_region_rows(chain, fold_chain)}
     </details>"""
 
 
@@ -2298,7 +2470,52 @@ def lane_facts(case):
         # asserted "0 quietly dropped" in a hand-typed `<b>0</b>`, which is the one number on
         # a page about not dropping rows that could not report a dropped row.
         "surface_dropped": len(case.get("scores") or []) - len(rows),
-    } | _domain_facts(case)
+    } | _domain_facts(case) | _transfer_facts(case)
+
+
+def _transfer_facts(case):
+    """The figures the two-numberings prose quotes, counted off the same record it draws.
+
+    Every one of these was hand-typed first and that is why they are here. The paragraph said
+    "+40 on both spike S2 chains, +23 on nsp3 and nsp4, about -4,478 on the polymerase" and
+    named four rows that disagree with themselves, which was true of `runs/domain_folds.json`
+    as written at e70f2da and is true of no record in particular. This repository has already
+    made the argument against that kind of sentence twice -- a page that drew the ceiling at a
+    hand-typed 400 would keep drawing it there after the ceiling moved, and an overview
+    quoting a chain count went stale the first time the next run moved it. A paragraph about
+    numbering that is itself wrong about the numbering would be the worst place to leave one.
+
+    Empty where no fold record matches this case, for the reason `_domain_facts` states: `fill`
+    refuses to ship an unresolved `{{token}}`, so the page fails to build rather than claiming
+    a count it has no record for.
+    """
+    record = domain_folds(case) or {}
+    chains = [c for c in record.values()
+              if any(u.get("kind") == "domain" for u in (c.get("units") or ()))]
+    if not chains:
+        return {}
+    regions = [u for c in chains for u in c["units"] if u.get("kind") == "domain"]
+    shifts, disagree = [], []
+    for row, entry_key, genome_key in (
+            [(c, "chain_range_on_the_relative", "span_in_this_genome") for c in chains]
+            + [(u, "entry_span_on_the_relative", "span_in_this_genome") for u in regions]):
+        shift = _shift(row.get(entry_key), row.get(genome_key))
+        if shift is None:
+            continue
+        if row.get("kind") == "domain":
+            shifts.append(shift)
+        if shift[0] != shift[1]:
+            disagree.append((abs(shift[1] - shift[0]),
+                             row.get("label") or row.get("target") or ""))
+    # The widest disagreement between one span's two ends, which is the single number that
+    # decides the design: it is how far wrong a constant offset would put one end of that row.
+    widest = max(disagree) if disagree else (0, "")
+    return {"xfer_chains": len(chains),
+            "xfer_regions": len(regions),
+            "xfer_shifts": len({s[0] for s in shifts} | {s[1] for s in shifts}),
+            "xfer_disagree": len(disagree),
+            "xfer_widest": widest[1],
+            "xfer_widest_aa": f"{widest[0]:,}"}
 
 
 def _domain_facts(case):

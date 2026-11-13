@@ -332,34 +332,128 @@
     <p class="cap" style="margin-top:30px">That is the one chain the record reports in full.
     Below is every chain this step was handed, with where its sequence was found in this genome
     and where it fell against the ceiling.</p>
-    <p class="cap">Boundaries are annotated on the relative, not here, and slicing this genome
-    at them fails silently: SARS-CoV's main protease starts at residue
-    3241 and SARS-CoV-2's at 3264, so the same cut returns 306 residues — the right length, 23
-    residues into the wrong window. Each chain is aligned instead, against every called ORF
-    rather than only the one it matched.</p>
     <p class="cap"><b>Being too long bars folding the chain whole, not reaching the
     target.</b> What a drug is aimed at is almost never a whole chain — it is a pocket, an
     interface, a catalytic site — and the relative's entry already says where those are. So
     each over-the-ceiling row below opens onto the regions its relative annotates, and
     <b>{{domain_rescued}}</b> of <b>{{domain_over}}</b> have at least one short enough to
-    fold. {{domain_richest_chain}} is the clearest case: <b>{{domain_richest_whole}}</b>
-    residues whole, with <b>{{domain_richest_count}}</b> regions inside it that are not — the
-    first offered is <i>{{domain_richest_best}}</i>, at <b>{{domain_richest_best_aa}}</b>
-    residues.</p>
-    <p class="cap">Which region a row offers first comes down to two things, and the panel
-    says which did the work. First, how many residues the curators marked as active,
-    ligand-binding or cleavage sites fall inside it — decisive for enzymes: the polymerase's
-    catalytic domain holds six against two for the domain beside it. Second, failing that, a
-    list of words we chose (<i>receptor-binding</i>, <i>catalytic</i>, <i>interface</i> and
-    about twenty more) matched against the description.</p>
-    <p class="cap">That list orders rows and nothing else: it refuses no region and touches no
-    rank. Regions under <b>{{domain_minimum_aa}}</b> residues are not folded at all, since
-    coordinates for a five-residue fragment describe nothing.</p>
+    fold.</p>
+
+    <h3 class="xh">Two cuts, and where each one landed</h3>
+    <p class="cap">A polyprotein is cut into chains, and a chain too long to fold is cut again
+    into the regions its relative's entry annotates. Both cuts are made at coordinates written
+    down for <i>another virus</i>, so both have to be carried into this genome's own numbering
+    before they mean anything here. The last column is how far each span moved in the
+    crossing.</p>
+    <p class="cap"><b>No single number does that job.</b> Read the shift column down: across
+    <b>{{xfer_chains}}</b> chains and the <b>{{xfer_regions}}</b> regions cut out of them it
+    takes <b>{{xfer_shifts}}</b> different values. Some of the spread is ordinary — residues
+    inserted upstream push everything after them along by the same amount — and some is not.
+    A chain found in a different reading frame from the one that named it moves by thousands,
+    and the table says which frame each was found in.</p>
+    <p class="cap"><b>And {{xfer_disagree}} rows do not agree with themselves.</b> Where a
+    span's two ends shift by different amounts, no single number carries both. Sometimes that
+    is an insertion or a deletion <i>inside</i> the span; sometimes it is an end the alignment
+    never reached, in which case the end walks inward and the row says so. The widest here is
+    <b>{{xfer_widest}}</b>, whose two ends move <b>{{xfer_widest_aa}}</b> residues against
+    each other. Choose a constant for a row like that and one end lands that far into the
+    wrong place — and nothing downstream would notice. The fold would come back, the
+    confidence would look the same, and the structure would be of the wrong piece of
+    protein.</p>
+    <!--DOMAIN-TRANSFER-->
+    <p class="cap">Every figure above is read back out of
+    <span class="mono">runs/domain_folds.json</span>, which records both numberings for every
+    region it folded. The regions that were <i>not</i> folded have only the relative's
+    numbering and are shown that way in the panels below, because mapping a span is work this
+    pipeline does when it is about to use the span and not before.</p>
+
+    <div class="discs">
+      <details class="disc">
+        <summary>Where did each chain's sequence come from?<em></em></summary>
+        <div class="disc-b">
+          <p>Boundaries are annotated on the relative, not here, and slicing this genome at
+          them fails silently: SARS-CoV's main protease starts at residue 3241 and
+          SARS-CoV-2's at 3264, so the same cut returns 306 residues — the right length, 23
+          residues into the wrong window.</p>
+          <p>Each chain is aligned instead, against every called ORF rather than only the one
+          it matched. The table above the panels shows where every cut landed.</p>
+        </div>
+      </details>
+      <details class="disc">
+        <summary>What counts as a region here?<em>and the annotation we leave out</em></summary>
+        <div class="disc-b">
+          <p>Nine kinds of annotation on the relative's entry, named rather than inferred:
+          <b>Domain</b>, <b>Region</b>, <b>Motif</b>, <b>Zinc finger</b>, <b>DNA binding</b>,
+          <b>Coiled coil</b>, <b>Repeat</b>, <b>Topological domain</b> and
+          <b>Transmembrane</b>. Nothing else is read. The list is deliberately a whitelist, so
+          a kind of annotation nobody considered is excluded by default rather than admitted
+          by default.</p>
+          <p><b>Region</b> is on it because UniProt files the spike's receptor-binding domain
+          as a Region and not a Domain. Leaving the type out would lose the best-known
+          antiviral target in the set on a technicality of filing.</p>
+          <p>What is left out, and why it is not an oversight: secondary structure is
+          excluded, because one replicase entry carries <b>191</b> beta strands, 171 helices
+          and 44 turns against 36 domains and 21 regions, and a six-residue strand is not a
+          piece of protein anyone folds or binds. Single-residue observations are excluded —
+          natural variants, mutagenesis — because they are facts about residues, not spans.
+          Modifications are excluded, because a glycosylation site is something done to a
+          span rather than a span. Signal peptides are excluded because they are cut off
+          before the protein exists to be bound.</p>
+          <p>Active sites, ligand-binding sites and cleavage sites are read too, but kept
+          apart and never offered as something to fold. A two-residue site is a place to aim
+          at, not a shape to predict.</p>
+        </div>
+      </details>
+      <details class="disc">
+        <summary>How a span on the relative becomes a span here<em>and when we return nothing
+          instead</em></summary>
+        <div class="disc-b">
+          <p>The alignment that found the chain is kept, not just the window it pointed at.
+          Each end of each annotated region is walked through its matched blocks into this
+          genome's own numbering, so an insertion or deletion between the two species moves
+          one end without dragging the other.</p>
+          <p><b>A position with no counterpart returns nothing rather than its nearest
+          neighbour.</b> Where one species has residues the other deleted, the honest answer
+          is that the region's edge is not in this genome — a region reported at the wrong
+          residue is worse than one reported as unmappable, because only the second can be
+          seen to be wrong. An end that lands in such a gap walks <i>inward</i> until it
+          finds a residue, so the span returned is always inside what the curator annotated
+          and never claims residues they did not.</p>
+          <p>A region whose whole span falls outside the alignment gets no coordinates at all
+          and says so. That is not a statement that the region does not exist here — it is a
+          statement that this alignment never reached it.</p>
+        </div>
+      </details>
+      <details class="disc">
+        <summary>Which annotated region does a row offer first?<em>and what that ordering
+          may not do</em></summary>
+        <div class="disc-b">
+          <p>Two things decide it, and the panel says which did the work. First, how many
+          residues the curators marked as active, ligand-binding or cleavage sites fall inside
+          the region — decisive for enzymes: the polymerase's catalytic domain holds six
+          against two for the domain beside it. Second, failing that, a list of words we chose
+          (<i>receptor-binding</i>, <i>catalytic</i>, <i>interface</i> and about twenty more)
+          matched against the description.</p>
+          <p>That list orders rows and nothing else: it refuses no region and touches no rank.
+          Regions under <b>{{domain_minimum_aa}}</b> residues are not folded at all, since
+          coordinates for a five-residue fragment describe nothing.</p>
+          <p>{{domain_richest_chain}} is the clearest case: <b>{{domain_richest_whole}}</b>
+          residues whole, with <b>{{domain_richest_count}}</b> regions inside it that are not
+          — the first offered is <i>{{domain_richest_best}}</i>, at
+          <b>{{domain_richest_best_aa}}</b> residues.</p>
+        </div>
+      </details>
+    </div>
     <!--FOLD-LANE-->
   </div>
 
   <div class="substep" id="literature">
     <h3>Current Literature on Selected Domains</h3>
+    <p class="cap">Asked here, between steps 3 and 4, because this is where it becomes
+    answerable: before step 3 a domain is a span on somebody else's entry, and after it the
+    domain has coordinates. Open a target to see the query that was composed for it and the
+    records that came back. <b>A hit count is evidence of attention and nothing else</b>, so
+    every count on these rows is printed beside the question that produced it.</p>
     <!--LITERATURE-->
   </div>
 
