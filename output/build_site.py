@@ -2187,6 +2187,31 @@ def site_patch_block(case):
     if not rows:
         return ""
 
+    # This record is a run of its own and can be a generation behind the chain record the
+    # rest of the page is rendering. It is today: it was written over a 20-chain run, and
+    # stage 2's evidence gate has since cut the shortlist to 12. The fold store survives the
+    # same mismatch harmlessly because it is keyed by target and never asked for a chain that
+    # is not on the shortlist -- this block draws every row it is handed, so unfiltered it
+    # prints ten chains the run no longer ranks under a heading that says it is measuring the
+    # shortlist's chemistry. That is the one failure mode worse than a gap: not a reader
+    # seeing less than the run holds, but a reader seeing candidates that are not candidates.
+    #
+    # Filtered here rather than regenerated, because regenerating is not a build step: these
+    # rows are measured on stored folds, so an honest record is downstream of an ESM Atlas
+    # spend. What a filter must not do is hide that it fired, so both halves of the mismatch
+    # are named under the table -- the chains dropped, and the shortlist chains this record
+    # has no row for.
+    shortlist = {r.get("target") for r in (case.get("scores") or []) if r.get("target")}
+    off_shortlist, absent = [], []
+    if shortlist:
+        have = {r.get("target") for r in rows}
+        off_shortlist = sorted(t for t in {r.get("target") for r in rows}
+                               if t and t not in shortlist)
+        absent = sorted(t for t in shortlist if t not in have)
+        rows = [r for r in rows if r.get("target") in shortlist]
+    if not rows:
+        return ""
+
     def confidence(block):
         """The anchors' own confidence, which decides whether the rest of the row means much."""
         block = block or {}
@@ -2346,8 +2371,50 @@ def site_patch_block(case):
                  sorted(members, key=lambda r: (r.get("rank") or 99, r.get("label") or "")))
         body.extend(render(r) for r in order)
 
-    frames = summary.get("reading_frames_the_rows_are_numbered_along")
-    overlapping = summary.get("unit_pairs_overlapping_in_different_reading_frames")
+    # Recomputed from the rows drawn rather than read from `summary`, which counts the whole
+    # record. A filtered table under figures taken from the unfiltered record would be the
+    # same defect this filter exists to remove, one level down.
+    measured = [r for r in rows if r.get("measured")]
+    at_annotated = [r for r in measured
+                    if r.get("measured_at_the_annotated_residues") is True]
+
+    def _frame(row):
+        return (row.get("reading_frame") or {}).get("reading_frame")
+
+    def _span(row):
+        span = row.get("span_in_this_genome") or []
+        return tuple(span) if len(span) == 2 else None
+
+    frames = len({_frame(r) for r in rows if _frame(r)})
+    # Pairs whose spans overlap as integers while lying in different frames, which is the
+    # claim the sentence below makes: they share numbers and no residue.
+    marked = [(_span(r), _frame(r)) for r in rows]
+    overlapping = sum(
+        1
+        for i, (sa, fa) in enumerate(marked)
+        for sb, fb in marked[i + 1:]
+        if sa and sb and fa and fb and fa != fb and sa[0] <= sb[1] and sb[0] <= sa[1])
+
+    # Said on the page, not just in the comment above: a filter nobody can see is a filter
+    # nobody can check.
+    stale = ""
+    if off_shortlist or absent:
+        parts = []
+        if off_shortlist:
+            parts.append(
+                f"{len(off_shortlist)} chain{'' if len(off_shortlist) == 1 else 's'} it "
+                f"measured are not on this run&rsquo;s shortlist and are not shown "
+                f"({', '.join(esc(t) for t in off_shortlist)})")
+        if absent:
+            parts.append(
+                f"{len(absent)} shortlisted chain{'' if len(absent) == 1 else 's'} "
+                f"{'has' if len(absent) == 1 else 'have'} no row here at all "
+                f"({', '.join(esc(t) for t in absent)})")
+        stale = (f'<li><b>This section is measured from an older run than the shortlist '
+                 f'above.</b> {"; and ".join(parts)}. The rows are measured on stored '
+                 f'predicted structures, so bringing the two into line means folding again '
+                 f'rather than rebuilding this page.</li>')
+
     pairs = ("" if not overlapping else
              f" Each row names the frame its span is numbered along, because {overlapping} "
              f"pairs of these rows carry spans that overlap as numbers while sharing no "
@@ -2366,11 +2433,12 @@ def site_patch_block(case):
     frame of this genome, and the coordinates are numbered from one.</li>
     <li><b>Every row was checked against the residue the relative&rsquo;s entry carries at the
     annotated position.</b>
-    {num(summary.get('units_measured_at_the_annotated_residues'))} of
-    {num(summary.get('units_measured'))} measured units land on it, and
-    {num(summary.get('units_not_measured_at_the_annotated_residues'))} do not and are withheld
+    {num(len(at_annotated))} of
+    {num(len(measured))} measured units land on it, and
+    {num(len(wrong))} do not and are withheld
     above.</li>
     <li><b>The rows run along {num(frames)} reading frames in all.</b>{pairs}</li>
+    {stale}
   </ul>"""
 
 
