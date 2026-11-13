@@ -20,12 +20,25 @@
         "segments": 1,
         "orfs_found": 23,
         "orfs_ranked": 12,
-        "reference_entries": 17541,
+        "reference_entries": 17529,
         "reference_entries_removed": null,
         "identified": 1,
-        "unidentified": 11
+        "unidentified": 11,
+        "gate": {
+          "terms": [
+            "surface_exposed",
+            "essential_class",
+            "druggable_class",
+            "structures_in_family"
+          ],
+          "floor": 0.5,
+          "rule": "a row is kept when at least one of 4 evidence terms pays 0.5 points or more. Conservation is not among them: it says how well this genome was recognised, not whether what was recognised is worth aiming at",
+          "kept": 12,
+          "gated_out": 0,
+          "dropped": []
+        }
       },
-      "seconds": 27.61,
+      "seconds": 14.35,
       "hands_to_next": "one reviewed accession and one residue range per candidate"
     },
     {
@@ -39,7 +52,7 @@
         "candidates_in": 12
       },
       "output": {
-        "chains_out": 13,
+        "chains_out": 7,
         "rubric": {
           "conservation": 3.0,
           "surface_exposed": 2.0,
@@ -47,38 +60,156 @@
           "druggable_class": 0.8,
           "structures_in_family_capped": 0.5
         },
+        "chains_scored_before_the_gate": 13,
+        "gate": {
+          "terms": [
+            "surface_exposed",
+            "essential_class",
+            "druggable_class",
+            "structures_in_family"
+          ],
+          "floor": 0.5,
+          "rule": "a row is kept when at least one of 4 evidence terms pays 0.5 points or more. Conservation is not among them: it says how well this genome was recognised, not whether what was recognised is worth aiming at",
+          "kept": 7,
+          "gated_out": 6,
+          "dropped": [
+            {
+              "rank": 8,
+              "name": "Protein C",
+              "parent": "POLG_DEN1W Genome polyprotein",
+              "score": 2.9619,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 9,
+              "name": "Protein prM",
+              "parent": "POLG_DEN1W Genome polyprotein",
+              "score": 2.9619,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 10,
+              "name": "Non-structural protein 2A",
+              "parent": "POLG_DEN1W Genome polyprotein",
+              "score": 2.9619,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 11,
+              "name": "Non-structural protein 2A-alpha",
+              "parent": "POLG_DEN1W Genome polyprotein",
+              "score": 2.9619,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 12,
+              "name": "Non-structural protein 4A",
+              "parent": "POLG_DEN1W Genome polyprotein",
+              "score": 2.9619,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 13,
+              "name": "Non-structural protein 4B",
+              "parent": "POLG_DEN1W Genome polyprotein",
+              "score": 2.9619,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            }
+          ]
+        },
         "all_decompositions_reproduce_the_score": true
       },
-      "seconds": 5.78,
-      "hands_to_next": "every chain, with the accession and range its surface is measured on"
+      "seconds": 0.97,
+      "hands_to_next": "every chain that cleared the gate, with the accession and range its surface is measured on. 6 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them"
     },
     {
       "stage": 3,
-      "name": "Every chain inside the ceiling to coordinates, the one lane a novel target has",
+      "name": "Every chain to coordinates, whole where it fits and by its functional regions where it does not",
       "tool": "structures.folded",
       "endpoints": [
         "ESM Atlas"
       ],
       "input": {
-        "candidates_in": 13,
-        "identified_in": 13,
-        "residue_ceiling": 400
+        "candidates_in": 7,
+        "identified_in": 7,
+        "gated_out_before_this_stage": 6,
+        "residue_ceiling": 400,
+        "domain_units_per_chain": 3,
+        "fold_requests_per_run": 40,
+        "folding_budget_seconds": 240.0
       },
       "output": {
-        "foldable": 13,
+        "foldable": 7,
         "not_foldable": 0,
         "unidentified_foldable": 0,
-        "chains_folded": 4,
-        "folds_attempted": 8,
-        "folds_refused": 4,
+        "chains_folded": 3,
+        "folds_attempted": 4,
+        "folds_refused": 1,
         "also_folded": [
           "Non-structural protein 1",
-          "Peptide pr",
-          "Protein prM"
+          "Peptide pr"
         ],
+        "units_offered": 33,
+        "units_inside_the_ceiling": 13,
+        "units_recorded": 22,
+        "units_folded": 3,
+        "domain_units_offered": 26,
+        "domain_units_inside_the_ceiling": 9,
+        "domain_units_recorded": 15,
+        "domain_units_folded": 0,
+        "domain_units_attempted": 5,
+        "domains_folded": [],
+        "chains_offered_a_domain_route": 5,
+        "chains_rescued_by_the_domain_route": 0,
+        "chains_with_coordinates": 3,
+        "chains_with_no_coordinates": 4,
+        "domain_units_not_folded_by_limit": 0,
+        "domain_units_not_folded_by_budget": 0,
         "chains_not_folded_by_limit": 0,
-        "chains_not_folded_by_budget": 2,
-        "seconds_spent_on_refused_folds": 152.0,
+        "chains_not_folded_by_budget": 0,
+        "seconds_spent_on_refused_folds": 237.8,
         "chains_over_the_ceiling": 3,
         "over_the_ceiling": [
           "Serine protease NS3",
@@ -93,12 +224,12 @@
         "sequence_sha256": "e2c8d2d4bf745d9af488603ce80a7586f4e46d133d411a24763f4d4b7783ce88",
         "error": null
       },
-      "seconds": 270.4,
-      "hands_to_next": "coordinates for every chain inside the ceiling, and nothing at all for the 3 over it. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart. It reorders nothing: the ranking was final at the end of stage 2"
+      "seconds": 240.19,
+      "hands_to_next": "coordinates for 3 of the 7 chains it reported on -- whole where the chain fits the 400-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 3 chains over it. Plus the functional site positions, carried through the alignment into this genome's numbering, which the surface stage anchors the patch arithmetic on. 4 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region's surface goes under its chain's row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2"
     },
     {
       "stage": 4,
-      "name": "Every chain to a measured surface, or a stated reason",
+      "name": "Every chain to a measured surface, and the patch at the residues that do the chemistry",
       "tool": "geometry.surface_markers",
       "endpoints": [
         "PDBe",
@@ -106,27 +237,41 @@
         "UniProt"
       ],
       "input": {
-        "candidates_in": 13,
-        "predicted_coordinates_in": 4
+        "candidates_in": 7,
+        "predicted_coordinates_in": 3,
+        "predicted_region_coordinates_in": 0,
+        "chains_with_functional_site_positions_in": 7,
+        "macrocycle_reach_a": 13.81976597885342
       },
       "output": {
-        "rows_out": 13,
+        "rows_out": 7,
         "measured": 0,
-        "unmeasured": 13,
+        "unmeasured": 7,
         "nothing_dropped": true,
-        "predicted_coordinates_offered": 4,
-        "measured_on_predicted_coordinates": 4,
-        "predicted_was_the_only_route": 4,
-        "no_surface_by_either_route": 9,
-        "no_surface_over_the_folding_ceiling": 3,
+        "predicted_coordinates_offered": 3,
+        "measured_on_predicted_coordinates": 3,
+        "predicted_was_the_only_route": 3,
+        "no_surface_by_either_route": 4,
+        "no_surface_over_the_folding_ceiling": 1,
+        "region_surfaces_offered": 0,
+        "region_surfaces_measured": 0,
+        "chains_with_a_region_surface": 0,
+        "chains_with_no_surface_and_no_region_surface": 4,
+        "chains_with_functional_sites": 7,
+        "functional_site_positions": 46,
+        "functional_site_positions_mapped_into_this_genome": 46,
+        "site_patch_measured_on_a_deposition": 0,
+        "site_patch_measured_on_a_prediction": 3,
+        "site_patch_on_a_deposition_not_at_the_annotated_residues": 0,
+        "site_patch_on_a_prediction_not_at_the_annotated_residues": 0,
         "gate_yes": 0,
         "gate_borderline": 0,
         "gate_no": 0,
         "changes_any_rank": false,
         "read_by_later_stages": []
       },
-      "seconds": 0.11,
-      "hands_to_next": "a patch median and range per chain, and nothing downstream reads any of it. `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`: stage 5 defines the same library whatever this stage found. Moving the fold ahead of this stage gave stage 3 a consumer and left this one without any"
+      "seconds": 0.09,
+      "hands_to_next": "a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 3 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage's product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one"
     },
     {
       "stage": 5,
@@ -142,7 +287,7 @@
           "patch_fraction_of_surface",
           "sequons_near_patch"
         ],
-        "not_connected_because": "library_spec takes an initiator, a randomised-region length range and a set of elongator classes, all three properties of the display platform rather than of a target. No stated rule turns a measured patch area into any of them, and inventing one would publish a conversion as a result."
+        "not_connected_because": "the library definition takes an initiator, a randomised-region length range and a set of elongator classes, all three properties of the display platform rather than of a target. No stated rule turns a measured patch area into any of them, and inventing one would publish a conversion as a result."
       },
       "output": {
         "initiator": "ClAc-D-Tyr",
@@ -173,7 +318,7 @@
       ],
       "input": {
         "targets_in": 3,
-        "ranked_available": 13,
+        "ranked_available": 7,
         "wall_budget_seconds": 700.0
       },
       "output": {
@@ -181,11 +326,11 @@
         "calls_made": 15,
         "ok": 13,
         "not_ok": 2,
-        "network_calls": 127,
+        "network_calls": 109,
         "changes_any_rank": false,
         "every_target_has_every_tool": true
       },
-      "seconds": 334.63,
+      "seconds": 132.56,
       "hands_to_next": "nothing. This annotates the shortlist and never reorders it"
     }
   ],
@@ -710,168 +855,6 @@
       },
       "score": 4.9619,
       "decomposition_reproduces_score": true
-    },
-    {
-      "rank": 8,
-      "target": "Protein C",
-      "parent": "POLG_DEN1W Genome polyprotein",
-      "tier": "exact",
-      "nearest_homolog": "P27909",
-      "chain_range": [
-        1,
-        100
-      ],
-      "conservation": 0.9873,
-      "conservation_scale": "shared_kmer_fraction_of_query",
-      "conservation_at_ceiling": false,
-      "surface_exposed": false,
-      "essential_class": false,
-      "druggable_class": 0,
-      "structures_in_family": 0,
-      "score_terms": {
-        "conservation": 2.9619,
-        "surface_exposed": 0.0,
-        "essential_class": 0.0,
-        "structures_in_family": 0.0,
-        "druggable_class": 0.0
-      },
-      "score": 2.9619,
-      "decomposition_reproduces_score": true
-    },
-    {
-      "rank": 9,
-      "target": "Protein prM",
-      "parent": "POLG_DEN1W Genome polyprotein",
-      "tier": "exact",
-      "nearest_homolog": "P27909",
-      "chain_range": [
-        115,
-        280
-      ],
-      "conservation": 0.9873,
-      "conservation_scale": "shared_kmer_fraction_of_query",
-      "conservation_at_ceiling": false,
-      "surface_exposed": false,
-      "essential_class": false,
-      "druggable_class": 0,
-      "structures_in_family": 0,
-      "score_terms": {
-        "conservation": 2.9619,
-        "surface_exposed": 0.0,
-        "essential_class": 0.0,
-        "structures_in_family": 0.0,
-        "druggable_class": 0.0
-      },
-      "score": 2.9619,
-      "decomposition_reproduces_score": true
-    },
-    {
-      "rank": 10,
-      "target": "Non-structural protein 2A",
-      "parent": "POLG_DEN1W Genome polyprotein",
-      "tier": "exact",
-      "nearest_homolog": "P27909",
-      "chain_range": [
-        1128,
-        1345
-      ],
-      "conservation": 0.9873,
-      "conservation_scale": "shared_kmer_fraction_of_query",
-      "conservation_at_ceiling": false,
-      "surface_exposed": false,
-      "essential_class": false,
-      "druggable_class": 0,
-      "structures_in_family": 0,
-      "score_terms": {
-        "conservation": 2.9619,
-        "surface_exposed": 0.0,
-        "essential_class": 0.0,
-        "structures_in_family": 0.0,
-        "druggable_class": 0.0
-      },
-      "score": 2.9619,
-      "decomposition_reproduces_score": true
-    },
-    {
-      "rank": 11,
-      "target": "Non-structural protein 2A-alpha",
-      "parent": "POLG_DEN1W Genome polyprotein",
-      "tier": "exact",
-      "nearest_homolog": "P27909",
-      "chain_range": [
-        1128,
-        1315
-      ],
-      "conservation": 0.9873,
-      "conservation_scale": "shared_kmer_fraction_of_query",
-      "conservation_at_ceiling": false,
-      "surface_exposed": false,
-      "essential_class": false,
-      "druggable_class": 0,
-      "structures_in_family": 0,
-      "score_terms": {
-        "conservation": 2.9619,
-        "surface_exposed": 0.0,
-        "essential_class": 0.0,
-        "structures_in_family": 0.0,
-        "druggable_class": 0.0
-      },
-      "score": 2.9619,
-      "decomposition_reproduces_score": true
-    },
-    {
-      "rank": 12,
-      "target": "Non-structural protein 4A",
-      "parent": "POLG_DEN1W Genome polyprotein",
-      "tier": "exact",
-      "nearest_homolog": "P27909",
-      "chain_range": [
-        2095,
-        2221
-      ],
-      "conservation": 0.9873,
-      "conservation_scale": "shared_kmer_fraction_of_query",
-      "conservation_at_ceiling": false,
-      "surface_exposed": false,
-      "essential_class": false,
-      "druggable_class": 0,
-      "structures_in_family": 0,
-      "score_terms": {
-        "conservation": 2.9619,
-        "surface_exposed": 0.0,
-        "essential_class": 0.0,
-        "structures_in_family": 0.0,
-        "druggable_class": 0.0
-      },
-      "score": 2.9619,
-      "decomposition_reproduces_score": true
-    },
-    {
-      "rank": 13,
-      "target": "Non-structural protein 4B",
-      "parent": "POLG_DEN1W Genome polyprotein",
-      "tier": "exact",
-      "nearest_homolog": "P27909",
-      "chain_range": [
-        2245,
-        2493
-      ],
-      "conservation": 0.9873,
-      "conservation_scale": "shared_kmer_fraction_of_query",
-      "conservation_at_ceiling": false,
-      "surface_exposed": false,
-      "essential_class": false,
-      "druggable_class": 0,
-      "structures_in_family": 0,
-      "score_terms": {
-        "conservation": 2.9619,
-        "surface_exposed": 0.0,
-        "essential_class": 0.0,
-        "structures_in_family": 0.0,
-        "druggable_class": 0.0
-      },
-      "score": 2.9619,
-      "decomposition_reproduces_score": true
     }
   ],
   "surfaces": [
@@ -886,24 +869,224 @@
       ],
       "measured": false,
       "unmeasured_because": "1 chains map to P27909 and none covers 1346-1475",
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by viral protease NS3",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1346
+          ],
+          "positions": [
+            1346
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by autolysis",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1475
+          ],
+          "positions": [
+            1475
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        1346,
+        1475
+      ],
+      "site_surface": null,
       "seconds": 0.0,
       "structures_offered": [],
       "chains_mapped_to_accession": 1,
       "predicted_surface": {
         "measured": true,
         "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
         "model": "ESMFold v1",
         "mean_plddt": 43.26,
         "confident_fraction": 0.0,
         "residues": 130,
         "patch_a2": 4679.0,
         "patch_fraction_of_surface": 0.393,
+        "patch_positions": [
+          2,
+          4,
+          8,
+          9,
+          10,
+          13,
+          14,
+          16,
+          17,
+          18,
+          21,
+          22,
+          26,
+          28,
+          32,
+          34,
+          38,
+          39,
+          40,
+          42,
+          43,
+          44,
+          51,
+          53,
+          56,
+          57,
+          59,
+          61,
+          65,
+          70,
+          95,
+          97,
+          98,
+          99,
+          101,
+          104,
+          105,
+          106,
+          109,
+          110,
+          112,
+          114,
+          116,
+          118,
+          119,
+          120,
+          121,
+          122,
+          123,
+          124
+        ],
+        "patch_residue_names": [
+          "W",
+          "L",
+          "I",
+          "M",
+          "A",
+          "I",
+          "V",
+          "I",
+          "L",
+          "L",
+          "L",
+          "L",
+          "V",
+          "L",
+          "L",
+          "A",
+          "L",
+          "I",
+          "A",
+          "Y",
+          "V",
+          "I",
+          "L",
+          "L",
+          "A",
+          "A",
+          "V",
+          "W",
+          "A",
+          "A",
+          "L",
+          "I",
+          "L",
+          "L",
+          "A",
+          "L",
+          "A",
+          "I",
+          "V",
+          "Y",
+          "M",
+          "I",
+          "A",
+          "L",
+          "F",
+          "V",
+          "W",
+          "Y",
+          "F",
+          "W"
+        ],
         "exposed_fraction_of_residues": 0.9,
         "sequons_near_patch": 0,
-        "seconds": 0.02,
+        "site_surface": {
+          "measured": true,
+          "anchors_asked": [
+            1,
+            130
+          ],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [
+            1,
+            130
+          ],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 Serine protease subunit NS2B",
+          "reach_a": 13.81976597885342,
+          "positions_within_reach": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            44,
+            45,
+            47,
+            48,
+            49,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130
+          ],
+          "residues_within_reach": 22,
+          "hydrophobic_within_reach": 8,
+          "exposed_within_reach": 19,
+          "site_patch_area_a2": 799.7,
+          "site_patch_positions": [
+            2,
+            4,
+            8,
+            44,
+            122,
+            123,
+            124
+          ],
+          "site_patch_fraction_of_the_site": 0.346,
+          "site_shares_the_patch": true,
+          "not_measured_because": null,
+          "anchors_agreeing_with_the_annotation": 2,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": true,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
+        "seconds": 0.03,
         "only_route_to_a_surface": true,
         "deposited_patch_median_a2": null,
         "ratio_to_deposited_median": null,
+        "not_compared_because": null,
         "is_deposited_measurement": false,
         "in_the_ranking": false,
         "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
@@ -920,13 +1103,119 @@
       ],
       "measured": false,
       "unmeasured_because": "1 chains map to P27909 and none covers 1476-2094",
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by autolysis",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1476
+          ],
+          "positions": [
+            1476
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Active site",
+          "description": "Charge relay system; for serine protease NS3 activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1526
+          ],
+          "positions": [
+            1526
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Active site",
+          "description": "Charge relay system; for serine protease NS3 activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1550
+          ],
+          "positions": [
+            1550
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Active site",
+          "description": "Charge relay system; for serine protease NS3 activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1610
+          ],
+          "positions": [
+            1610
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "ATP",
+          "positions_on_the_relative": [
+            1669,
+            1670,
+            1671,
+            1672,
+            1673,
+            1674,
+            1675,
+            1676
+          ],
+          "positions": [
+            1669,
+            1670,
+            1671,
+            1672,
+            1673,
+            1674,
+            1675,
+            1676
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by autolysis",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2094
+          ],
+          "positions": [
+            2094
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        1476,
+        1526,
+        1550,
+        1610,
+        1669,
+        1670,
+        1671,
+        1672,
+        1673,
+        1674,
+        1675,
+        1676,
+        2094
+      ],
+      "site_surface": null,
       "seconds": 0.0,
       "structures_offered": [],
       "chains_mapped_to_accession": 1,
       "no_surface_because": {
         "deposited": "1 chains map to P27909 and none covers 1476-2094",
-        "predicted": "619 residues, over the 400-residue ceiling this stage sends to the folding endpoint. No coordinates are predicted for it, so a deposited structure covering the chain is the only surface it can have.",
-        "the_folding_ceiling_closed_the_only_route": true
+        "predicted": "619 residues, over the 400-residue ceiling this stage sends to the folding endpoint. 3 annotated functional regions of it are inside the ceiling, and up to 3 of them are folded instead.",
+        "the_folding_ceiling_closed_the_only_route": false,
+        "but_a_region_of_it_was_measured": null
       }
     },
     {
@@ -940,13 +1229,319 @@
       ],
       "measured": false,
       "unmeasured_because": "1 chains map to P27909 and none covers 2494-3392",
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by viral protease NS3",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2494
+          ],
+          "positions": [
+            2494
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2507
+          ],
+          "positions": [
+            2507
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding; via carbonyl oxygen",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2510
+          ],
+          "positions": [
+            2510
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2511
+          ],
+          "positions": [
+            2511
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding; via carbonyl oxygen",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2513
+          ],
+          "positions": [
+            2513
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2518
+          ],
+          "positions": [
+            2518
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2522
+          ],
+          "positions": [
+            2522
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2549
+          ],
+          "positions": [
+            2549
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Essential for 2'-O-methyltransferase activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2554
+          ],
+          "positions": [
+            2554
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2579
+          ],
+          "positions": [
+            2579
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2580
+          ],
+          "positions": [
+            2580
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2597
+          ],
+          "positions": [
+            2597
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2598
+          ],
+          "positions": [
+            2598
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2624
+          ],
+          "positions": [
+            2624
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2625
+          ],
+          "positions": [
+            2625
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Essential for 2'-O-methyltransferase and N-7 methyltransferase activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2639
+          ],
+          "positions": [
+            2639
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2640
+          ],
+          "positions": [
+            2640
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2643
+          ],
+          "positions": [
+            2643
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Essential for 2'-O-methyltransferase activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2673
+          ],
+          "positions": [
+            2673
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2704
+          ],
+          "positions": [
+            2704
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2706
+          ],
+          "positions": [
+            2706
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Essential for 2'-O-methyltransferase activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2709
+          ],
+          "positions": [
+            2709
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2711
+          ],
+          "positions": [
+            2711
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        2494,
+        2507,
+        2510,
+        2511,
+        2513,
+        2518,
+        2522,
+        2549,
+        2554,
+        2579,
+        2580,
+        2597,
+        2598,
+        2624,
+        2625,
+        2639,
+        2640,
+        2643,
+        2673,
+        2704,
+        2706,
+        2709,
+        2711
+      ],
+      "site_surface": null,
       "seconds": 0.0,
       "structures_offered": [],
       "chains_mapped_to_accession": 1,
       "no_surface_because": {
         "deposited": "1 chains map to P27909 and none covers 2494-3392",
-        "predicted": "899 residues, over the 400-residue ceiling this stage sends to the folding endpoint. No coordinates are predicted for it, so a deposited structure covering the chain is the only surface it can have.",
-        "the_folding_ceiling_closed_the_only_route": true
+        "predicted": "899 residues, over the 400-residue ceiling this stage sends to the folding endpoint. 2 annotated functional regions of it are inside the ceiling, and up to 3 of them are folded instead.",
+        "the_folding_ceiling_closed_the_only_route": false,
+        "but_a_region_of_it_was_measured": null
       }
     },
     {
@@ -960,13 +1555,46 @@
       ],
       "measured": false,
       "unmeasured_because": "1 chains map to P27909 and none covers 281-775",
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host signal peptidase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            281
+          ],
+          "positions": [
+            281
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by host signal peptidase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            775
+          ],
+          "positions": [
+            775
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        281,
+        775
+      ],
+      "site_surface": null,
       "seconds": 0.0,
       "structures_offered": [],
       "chains_mapped_to_accession": 1,
       "no_surface_because": {
         "deposited": "1 chains map to P27909 and none covers 281-775",
         "predicted": "495 residues, over the 400-residue ceiling this stage sends to the folding endpoint. No coordinates are predicted for it, so a deposited structure covering the chain is the only surface it can have.",
-        "the_folding_ceiling_closed_the_only_route": true
+        "the_folding_ceiling_closed_the_only_route": true,
+        "but_a_region_of_it_was_measured": null
       }
     },
     {
@@ -980,24 +1608,327 @@
       ],
       "measured": false,
       "unmeasured_because": "1 chains map to P27909 and none covers 776-1127",
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host signal peptidase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            776
+          ],
+          "positions": [
+            776
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by host",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1127
+          ],
+          "positions": [
+            1127
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        776,
+        1127
+      ],
+      "site_surface": null,
       "seconds": 0.0,
       "structures_offered": [],
       "chains_mapped_to_accession": 1,
       "predicted_surface": {
         "measured": true,
         "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
         "model": "ESMFold v1",
         "mean_plddt": 26.32,
         "confident_fraction": 0.0,
         "residues": 352,
         "patch_a2": 9666.6,
         "patch_fraction_of_surface": 0.272,
+        "patch_positions": [
+          25,
+          28,
+          32,
+          34,
+          36,
+          42,
+          44,
+          50,
+          54,
+          55,
+          60,
+          63,
+          66,
+          67,
+          68,
+          71,
+          75,
+          78,
+          79,
+          80,
+          84,
+          86,
+          88,
+          89,
+          90,
+          93,
+          96,
+          97,
+          98,
+          103,
+          104,
+          115,
+          118,
+          149,
+          150,
+          152,
+          158,
+          160,
+          162,
+          163,
+          167,
+          168,
+          169,
+          171,
+          175,
+          178,
+          179,
+          184,
+          186,
+          187,
+          188,
+          194,
+          196,
+          198,
+          200,
+          201,
+          202,
+          210,
+          212,
+          215,
+          217,
+          218,
+          220,
+          223,
+          224,
+          225,
+          241,
+          242,
+          243,
+          246,
+          247,
+          251,
+          265,
+          268,
+          270,
+          273,
+          277,
+          279,
+          280,
+          285,
+          286,
+          287,
+          298,
+          311,
+          316,
+          318,
+          323,
+          329,
+          330,
+          331,
+          333,
+          335,
+          345,
+          346,
+          349,
+          350,
+          352
+        ],
+        "patch_residue_names": [
+          "V",
+          "W",
+          "Y",
+          "F",
+          "A",
+          "L",
+          "A",
+          "W",
+          "V",
+          "C",
+          "A",
+          "L",
+          "I",
+          "M",
+          "W",
+          "I",
+          "L",
+          "I",
+          "L",
+          "L",
+          "M",
+          "F",
+          "V",
+          "V",
+          "V",
+          "V",
+          "I",
+          "L",
+          "A",
+          "M",
+          "I",
+          "W",
+          "W",
+          "A",
+          "W",
+          "I",
+          "Y",
+          "F",
+          "I",
+          "F",
+          "I",
+          "W",
+          "L",
+          "L",
+          "Y",
+          "V",
+          "C",
+          "M",
+          "A",
+          "A",
+          "I",
+          "V",
+          "A",
+          "M",
+          "Y",
+          "W",
+          "I",
+          "W",
+          "L",
+          "A",
+          "F",
+          "I",
+          "V",
+          "C",
+          "I",
+          "W",
+          "M",
+          "I",
+          "I",
+          "I",
+          "Y",
+          "I",
+          "A",
+          "W",
+          "L",
+          "L",
+          "F",
+          "L",
+          "C",
+          "V",
+          "V",
+          "V",
+          "L",
+          "W",
+          "C",
+          "L",
+          "F",
+          "C",
+          "W",
+          "Y",
+          "M",
+          "I",
+          "L",
+          "V",
+          "M",
+          "V",
+          "A"
+        ],
         "exposed_fraction_of_residues": 0.909,
         "sequons_near_patch": 2,
+        "site_surface": {
+          "measured": true,
+          "anchors_asked": [
+            1,
+            352
+          ],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [
+            1,
+            352
+          ],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 Non-structural protein 1",
+          "reach_a": 13.81976597885342,
+          "positions_within_reach": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            14,
+            15,
+            16,
+            17,
+            18,
+            20,
+            180,
+            181,
+            182,
+            183,
+            184,
+            185,
+            186,
+            188,
+            189,
+            343,
+            344,
+            345,
+            346,
+            347,
+            348,
+            349,
+            350,
+            351,
+            352
+          ],
+          "residues_within_reach": 30,
+          "hydrophobic_within_reach": 13,
+          "exposed_within_reach": 29,
+          "site_patch_area_a2": 697.6,
+          "site_patch_positions": [
+            184,
+            186,
+            188,
+            345,
+            346,
+            349,
+            350,
+            352
+          ],
+          "site_patch_fraction_of_the_site": 0.247,
+          "site_shares_the_patch": true,
+          "not_measured_because": null,
+          "anchors_agreeing_with_the_annotation": 2,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": true,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
         "seconds": 0.05,
         "only_route_to_a_surface": true,
         "deposited_patch_median_a2": null,
         "ratio_to_deposited_median": null,
+        "not_compared_because": null,
         "is_deposited_measurement": false,
         "in_the_ranking": false,
         "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
@@ -1014,24 +1945,183 @@
       ],
       "measured": false,
       "unmeasured_because": "1 chains map to P27909 and none covers 115-205",
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host signal peptidase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            115
+          ],
+          "positions": [
+            115
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by host furin",
+          "ligand": null,
+          "positions_on_the_relative": [
+            205
+          ],
+          "positions": [
+            205
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        115,
+        205
+      ],
+      "site_surface": null,
       "seconds": 0.0,
       "structures_offered": [],
       "chains_mapped_to_accession": 1,
       "predicted_surface": {
         "measured": true,
         "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
         "model": "ESMFold v1",
         "mean_plddt": 34.64,
         "confident_fraction": 0.0,
         "residues": 91,
         "patch_a2": 2463.8,
         "patch_fraction_of_surface": 0.264,
+        "patch_positions": [
+          1,
+          3,
+          12,
+          13,
+          24,
+          29,
+          31,
+          33,
+          34,
+          36,
+          37,
+          38,
+          39,
+          41,
+          44,
+          45,
+          49,
+          51,
+          67,
+          68,
+          70,
+          74,
+          75,
+          77,
+          80
+        ],
+        "patch_residue_names": [
+          "F",
+          "L",
+          "M",
+          "I",
+          "L",
+          "A",
+          "V",
+          "M",
+          "C",
+          "L",
+          "I",
+          "A",
+          "M",
+          "L",
+          "L",
+          "C",
+          "M",
+          "Y",
+          "W",
+          "C",
+          "A",
+          "W",
+          "V",
+          "Y",
+          "C"
+        ],
         "exposed_fraction_of_residues": 0.912,
         "sequons_near_patch": 1,
+        "site_surface": {
+          "measured": true,
+          "anchors_asked": [
+            1,
+            91
+          ],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [
+            1,
+            91
+          ],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 Peptide pr",
+          "reach_a": 13.81976597885342,
+          "positions_within_reach": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            36,
+            62,
+            63,
+            64,
+            65,
+            66,
+            87,
+            88,
+            89,
+            90,
+            91
+          ],
+          "residues_within_reach": 32,
+          "hydrophobic_within_reach": 11,
+          "exposed_within_reach": 25,
+          "site_patch_area_a2": 580.5,
+          "site_patch_positions": [
+            1,
+            3,
+            12,
+            13,
+            24,
+            36
+          ],
+          "site_patch_fraction_of_the_site": 0.184,
+          "site_shares_the_patch": true,
+          "not_measured_because": null,
+          "anchors_agreeing_with_the_annotation": 2,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": true,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
         "seconds": 0.01,
         "only_route_to_a_surface": true,
         "deposited_patch_median_a2": null,
         "ratio_to_deposited_median": null,
+        "not_compared_because": null,
         "is_deposited_measurement": false,
         "in_the_ranking": false,
         "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
@@ -1048,147 +2138,46 @@
       ],
       "measured": false,
       "unmeasured_because": "1 chains map to P27909 and none covers 206-280",
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host furin",
+          "ligand": null,
+          "positions_on_the_relative": [
+            206
+          ],
+          "positions": [
+            206
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by host signal peptidase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            280
+          ],
+          "positions": [
+            280
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        206,
+        280
+      ],
+      "site_surface": null,
       "seconds": 0.0,
       "structures_offered": [],
       "chains_mapped_to_accession": 1,
       "no_surface_because": {
         "deposited": "1 chains map to P27909 and none covers 206-280",
         "predicted": "endpoint_unavailable",
-        "the_folding_ceiling_closed_the_only_route": false
-      }
-    },
-    {
-      "target": "Protein C",
-      "rank": 8,
-      "identified": true,
-      "measured_on_accession": "P27909",
-      "chain_range": [
-        1,
-        100
-      ],
-      "measured": false,
-      "unmeasured_because": "1 chains map to P27909 and none covers 1-100",
-      "seconds": 0.0,
-      "structures_offered": [],
-      "chains_mapped_to_accession": 1,
-      "no_surface_because": {
-        "deposited": "1 chains map to P27909 and none covers 1-100",
-        "predicted": "endpoint_unavailable",
-        "the_folding_ceiling_closed_the_only_route": false
-      }
-    },
-    {
-      "target": "Protein prM",
-      "rank": 9,
-      "identified": true,
-      "measured_on_accession": "P27909",
-      "chain_range": [
-        115,
-        280
-      ],
-      "measured": false,
-      "unmeasured_because": "1 chains map to P27909 and none covers 115-280",
-      "seconds": 0.0,
-      "structures_offered": [],
-      "chains_mapped_to_accession": 1,
-      "predicted_surface": {
-        "measured": true,
-        "measured_on": "coordinates from the fold stage, not a deposition",
-        "model": "ESMFold v1",
-        "mean_plddt": 39.2,
-        "confident_fraction": 0.0,
-        "residues": 166,
-        "patch_a2": 2888.6,
-        "patch_fraction_of_surface": 0.179,
-        "exposed_fraction_of_residues": 0.873,
-        "sequons_near_patch": 0,
-        "seconds": 0.02,
-        "only_route_to_a_surface": true,
-        "deposited_patch_median_a2": null,
-        "ratio_to_deposited_median": null,
-        "is_deposited_measurement": false,
-        "in_the_ranking": false,
-        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
-      }
-    },
-    {
-      "target": "Non-structural protein 2A",
-      "rank": 10,
-      "identified": true,
-      "measured_on_accession": "P27909",
-      "chain_range": [
-        1128,
-        1345
-      ],
-      "measured": false,
-      "unmeasured_because": "1 chains map to P27909 and none covers 1128-1345",
-      "seconds": 0.0,
-      "structures_offered": [],
-      "chains_mapped_to_accession": 1,
-      "no_surface_because": {
-        "deposited": "1 chains map to P27909 and none covers 1128-1345",
-        "predicted": "endpoint_unavailable",
-        "the_folding_ceiling_closed_the_only_route": false
-      }
-    },
-    {
-      "target": "Non-structural protein 2A-alpha",
-      "rank": 11,
-      "identified": true,
-      "measured_on_accession": "P27909",
-      "chain_range": [
-        1128,
-        1315
-      ],
-      "measured": false,
-      "unmeasured_because": "1 chains map to P27909 and none covers 1128-1315",
-      "seconds": 0.0,
-      "structures_offered": [],
-      "chains_mapped_to_accession": 1,
-      "no_surface_because": {
-        "deposited": "1 chains map to P27909 and none covers 1128-1315",
-        "predicted": "endpoint_unavailable",
-        "the_folding_ceiling_closed_the_only_route": false
-      }
-    },
-    {
-      "target": "Non-structural protein 4A",
-      "rank": 12,
-      "identified": true,
-      "measured_on_accession": "P27909",
-      "chain_range": [
-        2095,
-        2221
-      ],
-      "measured": false,
-      "unmeasured_because": "1 chains map to P27909 and none covers 2095-2221",
-      "seconds": 0.0,
-      "structures_offered": [],
-      "chains_mapped_to_accession": 1,
-      "no_surface_because": {
-        "deposited": "1 chains map to P27909 and none covers 2095-2221",
-        "predicted": "the 240-second folding budget for one run was spent before the pick order reached this chain, 152 s of it on calls the folding endpoint refused.",
-        "the_folding_ceiling_closed_the_only_route": false
-      }
-    },
-    {
-      "target": "Non-structural protein 4B",
-      "rank": 13,
-      "identified": true,
-      "measured_on_accession": "P27909",
-      "chain_range": [
-        2245,
-        2493
-      ],
-      "measured": false,
-      "unmeasured_because": "1 chains map to P27909 and none covers 2245-2493",
-      "seconds": 0.0,
-      "structures_offered": [],
-      "chains_mapped_to_accession": 1,
-      "no_surface_because": {
-        "deposited": "1 chains map to P27909 and none covers 2245-2493",
-        "predicted": "the 240-second folding budget for one run was spent before the pick order reached this chain, 152 s of it on calls the folding endpoint refused.",
-        "the_folding_ceiling_closed_the_only_route": false
+        "the_folding_ceiling_closed_the_only_route": false,
+        "but_a_region_of_it_was_measured": null
       }
     }
   ],
@@ -1247,6 +2236,21 @@
   "folded_also": [
     {
       "target_name": "Non-structural protein 1",
+      "unit": {
+        "kind": "whole_chain",
+        "chain": "Non-structural protein 1",
+        "label": "Non-structural protein 1",
+        "type": "Chain",
+        "span_in_this_genome": [
+          776,
+          1127
+        ],
+        "entry_span_on_the_relative": [
+          776,
+          1127
+        ],
+        "length_aa": 352
+      },
       "sequence_length": 352,
       "sequence_sha256": "86d88ef46d96e9d153d94b2d7538204b4b7516857e716d5d56b7c9fa22b39efe",
       "mean_plddt": 26.32,
@@ -1256,6 +2260,21 @@
     },
     {
       "target_name": "Peptide pr",
+      "unit": {
+        "kind": "whole_chain",
+        "chain": "Peptide pr",
+        "label": "Peptide pr",
+        "type": "Chain",
+        "span_in_this_genome": [
+          115,
+          205
+        ],
+        "entry_span_on_the_relative": [
+          115,
+          205
+        ],
+        "length_aa": 91
+      },
       "sequence_length": 91,
       "sequence_sha256": "4b76e05658fae53e967b34c1049a95b03b0db8379c0327965b9429cd3f3041b1",
       "mean_plddt": 34.64,
@@ -1265,6 +2284,21 @@
     },
     {
       "target_name": "Small envelope protein M",
+      "unit": {
+        "kind": "whole_chain",
+        "chain": "Small envelope protein M",
+        "label": "Small envelope protein M",
+        "type": "Chain",
+        "span_in_this_genome": [
+          206,
+          280
+        ],
+        "entry_span_on_the_relative": [
+          206,
+          280
+        ],
+        "length_aa": 75
+      },
       "sequence_length": 75,
       "sequence_sha256": "6a2f39e1740e4921ec4c14f02ca801d350f0ff781d8a588af4ce6dc86a7f4b2a",
       "absence": {
@@ -1276,45 +2310,135 @@
       }
     },
     {
-      "target_name": "Protein C",
-      "sequence_length": 100,
-      "sequence_sha256": "c6e48e229dea46f3f06dbffa381f0b089772ca2a581ea652065b1df5ea988e82",
-      "absence": {
-        "reason": "endpoint_unavailable",
-        "detail": "HTTP 504: {\"message\": \"Endpoint request timed out\"}",
-        "http_status": 504,
-        "attempts": 2,
-        "note": "No structure was obtained. This is a statement about this endpoint on this call and not a statement about the target: it must not be read as the sequence being unfoldable, and no fallback keyless ESMFold host exists to retry against."
-      }
-    },
-    {
-      "target_name": "Protein prM",
-      "sequence_length": 166,
-      "sequence_sha256": "a744d01c73f14f0b4210926febc9179375ace917c30da2017b2ffa64545fbb1a",
-      "mean_plddt": 39.2,
-      "confident_fraction": 0.0,
-      "pdb_sha256": "7bdba4785b8ba25fcfc19018aff8a1d8756642199fb96d1ef11ad2ef1dea407f",
-      "absence": null
-    },
-    {
-      "target_name": "Non-structural protein 2A",
-      "sequence_length": 218,
-      "sequence_sha256": "3cc29480fbfa4b8f108afea04249169cadea1e3486a023423a4b991d992b4458",
-      "absence": {
-        "reason": "endpoint_unavailable",
-        "detail": "HTTP 504: {\"message\": \"Endpoint request timed out\"}",
-        "http_status": 504,
-        "attempts": 2,
-        "note": "No structure was obtained. This is a statement about this endpoint on this call and not a statement about the target: it must not be read as the sequence being unfoldable, and no fallback keyless ESMFold host exists to retry against."
-      }
-    },
-    {
-      "target_name": "Non-structural protein 2A-alpha",
-      "sequence_length": 188,
-      "sequence_sha256": "cfe210788886cc5d0b8848ead2e3c9cc7943e5e4eda4425a1807b1983ac02496",
+      "target_name": "Serine protease NS3 \u00b7 Helicase ATP-binding",
+      "unit": {
+        "kind": "domain",
+        "chain": "Serine protease NS3",
+        "label": "Helicase ATP-binding",
+        "type": "Domain",
+        "span_in_this_genome": [
+          1656,
+          1812
+        ],
+        "entry_span_on_the_relative": [
+          1656,
+          1812
+        ],
+        "length_aa": 157
+      },
+      "sequence_length": 157,
+      "sequence_sha256": "66ffc95612c612371d9c6c634b60966da1e857688845f0fa5967d7c84601ebcd",
       "absence": {
         "reason": "endpoint_unavailable",
         "detail": "HTTP 504: Gateway Time-out",
+        "http_status": 504,
+        "attempts": 2,
+        "note": "No structure was obtained. This is a statement about this endpoint on this call and not a statement about the target: it must not be read as the sequence being unfoldable, and no fallback keyless ESMFold host exists to retry against."
+      }
+    },
+    {
+      "target_name": "Serine protease NS3 \u00b7 Peptidase S7",
+      "unit": {
+        "kind": "domain",
+        "chain": "Serine protease NS3",
+        "label": "Peptidase S7",
+        "type": "Domain",
+        "span_in_this_genome": [
+          1476,
+          1653
+        ],
+        "entry_span_on_the_relative": [
+          1476,
+          1653
+        ],
+        "length_aa": 178
+      },
+      "sequence_length": 178,
+      "sequence_sha256": "d7b1a30957363e3b675810f80175c31c9fcd8ee6c91c7e3a62d13193314be020",
+      "absence": {
+        "reason": "endpoint_unavailable",
+        "detail": "HTTP 504: Gateway Time-out",
+        "http_status": 504,
+        "attempts": 2,
+        "note": "No structure was obtained. This is a statement about this endpoint on this call and not a statement about the target: it must not be read as the sequence being unfoldable, and no fallback keyless ESMFold host exists to retry against."
+      }
+    },
+    {
+      "target_name": "Serine protease NS3 \u00b7 Helicase C-terminal",
+      "unit": {
+        "kind": "domain",
+        "chain": "Serine protease NS3",
+        "label": "Helicase C-terminal",
+        "type": "Domain",
+        "span_in_this_genome": [
+          1822,
+          1989
+        ],
+        "entry_span_on_the_relative": [
+          1822,
+          1989
+        ],
+        "length_aa": 168
+      },
+      "sequence_length": 168,
+      "sequence_sha256": "8c502e5b655e984240d23ef120872729838b71d358b517303d0e672efee734d0",
+      "absence": {
+        "reason": "endpoint_unavailable",
+        "detail": "HTTP 504: {\"message\": \"Endpoint request timed out\"}",
+        "http_status": 504,
+        "attempts": 2,
+        "note": "No structure was obtained. This is a statement about this endpoint on this call and not a statement about the target: it must not be read as the sequence being unfoldable, and no fallback keyless ESMFold host exists to retry against."
+      }
+    },
+    {
+      "target_name": "RNA-directed RNA polymerase/Methyltransferase NS5 \u00b7 mRNA cap 0-1 NS5-type MT",
+      "unit": {
+        "kind": "domain",
+        "chain": "RNA-directed RNA polymerase/Methyltransferase NS5",
+        "label": "mRNA cap 0-1 NS5-type MT",
+        "type": "Domain",
+        "span_in_this_genome": [
+          2495,
+          2756
+        ],
+        "entry_span_on_the_relative": [
+          2495,
+          2756
+        ],
+        "length_aa": 262
+      },
+      "sequence_length": 262,
+      "sequence_sha256": "caa4c937a514ba5c176dfb4b817ef9274664781f9ad7266ee4ff1d14a1e9b5d6",
+      "absence": {
+        "reason": "endpoint_unavailable",
+        "detail": "HTTP 504: Gateway Time-out",
+        "http_status": 504,
+        "attempts": 2,
+        "note": "No structure was obtained. This is a statement about this endpoint on this call and not a statement about the target: it must not be read as the sequence being unfoldable, and no fallback keyless ESMFold host exists to retry against."
+      }
+    },
+    {
+      "target_name": "RNA-directed RNA polymerase/Methyltransferase NS5 \u00b7 RdRp catalytic",
+      "unit": {
+        "kind": "domain",
+        "chain": "RNA-directed RNA polymerase/Methyltransferase NS5",
+        "label": "RdRp catalytic",
+        "type": "Domain",
+        "span_in_this_genome": [
+          3021,
+          3170
+        ],
+        "entry_span_on_the_relative": [
+          3021,
+          3170
+        ],
+        "length_aa": 150
+      },
+      "sequence_length": 150,
+      "sequence_sha256": "524bd77388a9aa9d70a6a44782305bb7c55e7905a9cb80dbd5131299a16f42ed",
+      "absence": {
+        "reason": "endpoint_unavailable",
+        "detail": "HTTP 504: {\"message\": \"Endpoint request timed out\"}",
         "http_status": 504,
         "attempts": 2,
         "note": "No structure was obtained. This is a statement about this endpoint on this call and not a statement about the target: it must not be read as the sequence being unfoldable, and no fallback keyless ESMFold host exists to retry against."
@@ -1347,8 +2471,84 @@
       "identity_over_aligned_columns": 0.9769,
       "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 98% identity",
       "inside_the_ceiling": true,
+      "domain_units_offered": 7,
+      "domain_units_inside_the_ceiling": 2,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 7 annotated regions, 2 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "Serine protease subunit NS2B",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            1346,
+            1475
+          ],
+          "entry_span": [
+            1346,
+            1475
+          ],
+          "entry_span_mapped": [
+            1346,
+            1475
+          ],
+          "entry_length_mapped": 130,
+          "length": 130,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 1346,
+            "end": 1475,
+            "length": 130,
+            "entry_span": [
+              1346,
+              1475
+            ],
+            "entry_length": 130,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": true,
+          "folded": true,
+          "target_name": "Serine protease subunit NS2B",
+          "mean_plddt": 43.26,
+          "confident_fraction": 0.0,
+          "pdb_sha256": "d931639ec0e3f1158cc829cc3c4d8c8974c9352c9bb1ca9790d07082949e7e04"
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by viral protease NS3",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1346
+          ],
+          "positions": [
+            1346
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by autolysis",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1475
+          ],
+          "positions": [
+            1475
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
       "folded": true,
-      "mean_plddt": 43.26
+      "mean_plddt": 43.26,
+      "units_folded": 1,
+      "domain_route": false
     },
     {
       "target": "Serine protease NS3",
@@ -1375,7 +2575,371 @@
       "identity_over_aligned_columns": 0.9871,
       "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 99% identity",
       "inside_the_ceiling": false,
-      "not_folded_because": "619 residues, over the 400-residue ceiling this stage sends to the folding endpoint. No coordinates are predicted for it, so a deposited structure covering the chain is the only surface it can have."
+      "domain_units_offered": 5,
+      "domain_units_inside_the_ceiling": 3,
+      "domain_units_set_aside_because": null,
+      "not_folded_because": "619 residues, over the 400-residue ceiling this stage sends to the folding endpoint. 3 annotated functional regions of it are inside the ceiling, and up to 3 of them are folded instead.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "Serine protease NS3",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            1476,
+            2094
+          ],
+          "entry_span": [
+            1476,
+            2094
+          ],
+          "entry_span_mapped": [
+            1476,
+            2094
+          ],
+          "entry_length_mapped": 619,
+          "length": 619,
+          "inside_the_ceiling": false,
+          "refused_because": "619 residues, over the 400-residue ceiling this stage sends to the folding endpoint.",
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 1476,
+            "end": 2094,
+            "length": 619,
+            "entry_span": [
+              1476,
+              2094
+            ],
+            "entry_length": 619,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": true
+        },
+        {
+          "kind": "domain",
+          "label": "Helicase ATP-binding",
+          "type": "Domain",
+          "description": "Helicase ATP-binding",
+          "span": [
+            1656,
+            1812
+          ],
+          "entry_span": [
+            1656,
+            1812
+          ],
+          "entry_span_mapped": [
+            1656,
+            1812
+          ],
+          "entry_length_mapped": 157,
+          "length": 157,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 1656,
+            "end": 1812,
+            "length": 157,
+            "entry_span": [
+              1656,
+              1812
+            ],
+            "entry_length": 157,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 8,
+          "relevance_terms_matched": [
+            "helicase",
+            "binding",
+            "atp"
+          ],
+          "describes_position_not_function": false,
+          "relevance_place": 1,
+          "folded": false,
+          "target_name": "Serine protease NS3 \u00b7 Helicase ATP-binding",
+          "mean_plddt": null,
+          "confident_fraction": null,
+          "pdb_sha256": null,
+          "fold_absence": "endpoint_unavailable"
+        },
+        {
+          "kind": "domain",
+          "label": "Peptidase S7",
+          "type": "Domain",
+          "description": "Peptidase S7",
+          "span": [
+            1476,
+            1653
+          ],
+          "entry_span": [
+            1476,
+            1653
+          ],
+          "entry_span_mapped": [
+            1476,
+            1653
+          ],
+          "entry_length_mapped": 178,
+          "length": 178,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 1476,
+            "end": 1653,
+            "length": 178,
+            "entry_span": [
+              1476,
+              1653
+            ],
+            "entry_length": 178,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 4,
+          "relevance_terms_matched": [
+            "peptidase"
+          ],
+          "describes_position_not_function": false,
+          "relevance_place": 2,
+          "folded": false,
+          "target_name": "Serine protease NS3 \u00b7 Peptidase S7",
+          "mean_plddt": null,
+          "confident_fraction": null,
+          "pdb_sha256": null,
+          "fold_absence": "endpoint_unavailable"
+        },
+        {
+          "kind": "domain",
+          "label": "Helicase C-terminal",
+          "type": "Domain",
+          "description": "Helicase C-terminal",
+          "span": [
+            1822,
+            1989
+          ],
+          "entry_span": [
+            1822,
+            1989
+          ],
+          "entry_span_mapped": [
+            1822,
+            1989
+          ],
+          "entry_length_mapped": 168,
+          "length": 168,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 1822,
+            "end": 1989,
+            "length": 168,
+            "entry_span": [
+              1822,
+              1989
+            ],
+            "entry_length": 168,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 0,
+          "relevance_terms_matched": [
+            "helicase"
+          ],
+          "describes_position_not_function": false,
+          "relevance_place": 3,
+          "folded": false,
+          "target_name": "Serine protease NS3 \u00b7 Helicase C-terminal",
+          "mean_plddt": null,
+          "confident_fraction": null,
+          "pdb_sha256": null,
+          "fold_absence": "endpoint_unavailable"
+        },
+        {
+          "kind": "domain",
+          "label": "DEAH box",
+          "type": "Motif",
+          "description": "DEAH box",
+          "span": [
+            1760,
+            1763
+          ],
+          "entry_span": [
+            1760,
+            1763
+          ],
+          "entry_span_mapped": [
+            1760,
+            1763
+          ],
+          "entry_length_mapped": 4,
+          "length": 4,
+          "inside_the_ceiling": false,
+          "refused_because": "4 residues, under the 40-residue minimum this stage requires of a fold unit. It stays available as a site, which carries its positions without claiming a fold.",
+          "clipped": false,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 1760,
+            "end": 1763,
+            "length": 4,
+            "entry_span": [
+              1760,
+              1763
+            ],
+            "entry_length": 4,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 0,
+          "relevance_terms_matched": [],
+          "describes_position_not_function": false,
+          "relevance_place": 4
+        },
+        {
+          "kind": "domain",
+          "label": "Cytoplasmic",
+          "type": "Topological domain",
+          "description": "Cytoplasmic",
+          "span": [
+            1476,
+            2094
+          ],
+          "entry_span": [
+            1476,
+            2094
+          ],
+          "entry_span_mapped": [
+            1476,
+            2094
+          ],
+          "entry_length_mapped": 619,
+          "length": 619,
+          "inside_the_ceiling": false,
+          "refused_because": "619 residues, over the 400-residue ceiling this stage sends to the folding endpoint.",
+          "clipped": true,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 1476,
+            "end": 2094,
+            "length": 619,
+            "entry_span": [
+              1476,
+              2094
+            ],
+            "entry_length": 619,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 13,
+          "relevance_terms_matched": [],
+          "describes_position_not_function": true,
+          "relevance_place": 5
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by autolysis",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1476
+          ],
+          "positions": [
+            1476
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Active site",
+          "description": "Charge relay system; for serine protease NS3 activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1526
+          ],
+          "positions": [
+            1526
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Active site",
+          "description": "Charge relay system; for serine protease NS3 activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1550
+          ],
+          "positions": [
+            1550
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Active site",
+          "description": "Charge relay system; for serine protease NS3 activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1610
+          ],
+          "positions": [
+            1610
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "ATP",
+          "positions_on_the_relative": [
+            1669,
+            1670,
+            1671,
+            1672,
+            1673,
+            1674,
+            1675,
+            1676
+          ],
+          "positions": [
+            1669,
+            1670,
+            1671,
+            1672,
+            1673,
+            1674,
+            1675,
+            1676
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by autolysis",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2094
+          ],
+          "positions": [
+            2094
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "units_folded": 0,
+      "domain_route": false
     },
     {
       "target": "RNA-directed RNA polymerase/Methyltransferase NS5",
@@ -1402,7 +2966,510 @@
       "identity_over_aligned_columns": 0.9855,
       "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 99% identity",
       "inside_the_ceiling": false,
-      "not_folded_because": "899 residues, over the 400-residue ceiling this stage sends to the folding endpoint. No coordinates are predicted for it, so a deposited structure covering the chain is the only surface it can have."
+      "domain_units_offered": 4,
+      "domain_units_inside_the_ceiling": 2,
+      "domain_units_set_aside_because": null,
+      "not_folded_because": "899 residues, over the 400-residue ceiling this stage sends to the folding endpoint. 2 annotated functional regions of it are inside the ceiling, and up to 3 of them are folded instead.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "RNA-directed RNA polymerase/Methyltransferase NS5",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            2494,
+            3392
+          ],
+          "entry_span": [
+            2494,
+            3392
+          ],
+          "entry_span_mapped": [
+            2494,
+            3392
+          ],
+          "entry_length_mapped": 899,
+          "length": 899,
+          "inside_the_ceiling": false,
+          "refused_because": "899 residues, over the 400-residue ceiling this stage sends to the folding endpoint.",
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 2494,
+            "end": 3392,
+            "length": 899,
+            "entry_span": [
+              2494,
+              3392
+            ],
+            "entry_length": 899,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": true
+        },
+        {
+          "kind": "domain",
+          "label": "mRNA cap 0-1 NS5-type MT",
+          "type": "Domain",
+          "description": "mRNA cap 0-1 NS5-type MT",
+          "span": [
+            2495,
+            2756
+          ],
+          "entry_span": [
+            2495,
+            2756
+          ],
+          "entry_span_mapped": [
+            2495,
+            2756
+          ],
+          "entry_length_mapped": 262,
+          "length": 262,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 2495,
+            "end": 2756,
+            "length": 262,
+            "entry_span": [
+              2495,
+              2756
+            ],
+            "entry_length": 262,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 22,
+          "relevance_terms_matched": [
+            "rna"
+          ],
+          "describes_position_not_function": false,
+          "relevance_place": 1,
+          "folded": false,
+          "target_name": "RNA-directed RNA polymerase/Methyltransferase NS5 \u00b7 mRNA cap 0-1 NS5-type MT",
+          "mean_plddt": null,
+          "confident_fraction": null,
+          "pdb_sha256": null,
+          "fold_absence": "endpoint_unavailable"
+        },
+        {
+          "kind": "domain",
+          "label": "Interaction with host SCRIB",
+          "type": "Region",
+          "description": "Interaction with host SCRIB",
+          "span": [
+            2709,
+            2713
+          ],
+          "entry_span": [
+            2709,
+            2713
+          ],
+          "entry_span_mapped": [
+            2709,
+            2713
+          ],
+          "entry_length_mapped": 5,
+          "length": 5,
+          "inside_the_ceiling": false,
+          "refused_because": "5 residues, under the 40-residue minimum this stage requires of a fold unit. It stays available as a site, which carries its positions without claiming a fold.",
+          "clipped": false,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 2709,
+            "end": 2713,
+            "length": 5,
+            "entry_span": [
+              2709,
+              2713
+            ],
+            "entry_length": 5,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 2,
+          "relevance_terms_matched": [],
+          "describes_position_not_function": false,
+          "relevance_place": 2
+        },
+        {
+          "kind": "domain",
+          "label": "RdRp catalytic",
+          "type": "Domain",
+          "description": "RdRp catalytic",
+          "span": [
+            3021,
+            3170
+          ],
+          "entry_span": [
+            3021,
+            3170
+          ],
+          "entry_span_mapped": [
+            3021,
+            3170
+          ],
+          "entry_length_mapped": 150,
+          "length": 150,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 3021,
+            "end": 3170,
+            "length": 150,
+            "entry_span": [
+              3021,
+              3170
+            ],
+            "entry_length": 150,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 0,
+          "relevance_terms_matched": [
+            "catalytic"
+          ],
+          "describes_position_not_function": false,
+          "relevance_place": 3,
+          "folded": false,
+          "target_name": "RNA-directed RNA polymerase/Methyltransferase NS5 \u00b7 RdRp catalytic",
+          "mean_plddt": null,
+          "confident_fraction": null,
+          "pdb_sha256": null,
+          "fold_absence": "endpoint_unavailable"
+        },
+        {
+          "kind": "domain",
+          "label": "Cytoplasmic",
+          "type": "Topological domain",
+          "description": "Cytoplasmic",
+          "span": [
+            2494,
+            3392
+          ],
+          "entry_span": [
+            2494,
+            3392
+          ],
+          "entry_span_mapped": [
+            2494,
+            3392
+          ],
+          "entry_length_mapped": 899,
+          "length": 899,
+          "inside_the_ceiling": false,
+          "refused_because": "899 residues, over the 400-residue ceiling this stage sends to the folding endpoint.",
+          "clipped": true,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 2494,
+            "end": 3392,
+            "length": 899,
+            "entry_span": [
+              2494,
+              3392
+            ],
+            "entry_length": 899,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 23,
+          "relevance_terms_matched": [],
+          "describes_position_not_function": true,
+          "relevance_place": 4
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by viral protease NS3",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2494
+          ],
+          "positions": [
+            2494
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2507
+          ],
+          "positions": [
+            2507
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding; via carbonyl oxygen",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2510
+          ],
+          "positions": [
+            2510
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2511
+          ],
+          "positions": [
+            2511
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding; via carbonyl oxygen",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2513
+          ],
+          "positions": [
+            2513
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2518
+          ],
+          "positions": [
+            2518
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2522
+          ],
+          "positions": [
+            2522
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2549
+          ],
+          "positions": [
+            2549
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Essential for 2'-O-methyltransferase activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2554
+          ],
+          "positions": [
+            2554
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2579
+          ],
+          "positions": [
+            2579
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2580
+          ],
+          "positions": [
+            2580
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2597
+          ],
+          "positions": [
+            2597
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2598
+          ],
+          "positions": [
+            2598
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2624
+          ],
+          "positions": [
+            2624
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2625
+          ],
+          "positions": [
+            2625
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Essential for 2'-O-methyltransferase and N-7 methyltransferase activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2639
+          ],
+          "positions": [
+            2639
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2640
+          ],
+          "positions": [
+            2640
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2643
+          ],
+          "positions": [
+            2643
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Essential for 2'-O-methyltransferase activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2673
+          ],
+          "positions": [
+            2673
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2704
+          ],
+          "positions": [
+            2704
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "mRNA cap binding",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2706
+          ],
+          "positions": [
+            2706
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Essential for 2'-O-methyltransferase activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2709
+          ],
+          "positions": [
+            2709
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "S-adenosyl-L-methionine",
+          "positions_on_the_relative": [
+            2711
+          ],
+          "positions": [
+            2711
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "units_folded": 0,
+      "domain_route": false
     },
     {
       "target": "Envelope protein E",
@@ -1429,7 +3496,160 @@
       "identity_over_aligned_columns": 0.9778,
       "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 98% identity",
       "inside_the_ceiling": false,
-      "not_folded_because": "495 residues, over the 400-residue ceiling this stage sends to the folding endpoint. No coordinates are predicted for it, so a deposited structure covering the chain is the only surface it can have."
+      "domain_units_offered": 2,
+      "domain_units_inside_the_ceiling": 0,
+      "domain_units_set_aside_because": null,
+      "not_folded_because": "495 residues, over the 400-residue ceiling this stage sends to the folding endpoint. No coordinates are predicted for it, so a deposited structure covering the chain is the only surface it can have.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "Envelope protein E",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            281,
+            775
+          ],
+          "entry_span": [
+            281,
+            775
+          ],
+          "entry_span_mapped": [
+            281,
+            775
+          ],
+          "entry_length_mapped": 495,
+          "length": 495,
+          "inside_the_ceiling": false,
+          "refused_because": "495 residues, over the 400-residue ceiling this stage sends to the folding endpoint.",
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 281,
+            "end": 775,
+            "length": 495,
+            "entry_span": [
+              281,
+              775
+            ],
+            "entry_length": 495,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": true
+        },
+        {
+          "kind": "domain",
+          "label": "Extracellular",
+          "type": "Topological domain",
+          "description": "Extracellular",
+          "span": [
+            281,
+            725
+          ],
+          "entry_span": [
+            281,
+            725
+          ],
+          "entry_span_mapped": [
+            281,
+            725
+          ],
+          "entry_length_mapped": 445,
+          "length": 445,
+          "inside_the_ceiling": false,
+          "refused_because": "445 residues, over the 400-residue ceiling this stage sends to the folding endpoint.",
+          "clipped": false,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 281,
+            "end": 725,
+            "length": 445,
+            "entry_span": [
+              281,
+              725
+            ],
+            "entry_length": 445,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 1,
+          "relevance_terms_matched": [],
+          "describes_position_not_function": true,
+          "relevance_place": 1
+        },
+        {
+          "kind": "domain",
+          "label": "Extracellular",
+          "type": "Topological domain",
+          "description": "Extracellular",
+          "span": [
+            747,
+            752
+          ],
+          "entry_span": [
+            747,
+            752
+          ],
+          "entry_span_mapped": [
+            747,
+            752
+          ],
+          "entry_length_mapped": 6,
+          "length": 6,
+          "inside_the_ceiling": false,
+          "refused_because": "6 residues, under the 40-residue minimum this stage requires of a fold unit. It stays available as a site, which carries its positions without claiming a fold.",
+          "clipped": false,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 747,
+            "end": 752,
+            "length": 6,
+            "entry_span": [
+              747,
+              752
+            ],
+            "entry_length": 6,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 0,
+          "relevance_terms_matched": [],
+          "describes_position_not_function": true,
+          "relevance_place": 2
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host signal peptidase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            281
+          ],
+          "positions": [
+            281
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by host signal peptidase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            775
+          ],
+          "positions": [
+            775
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "units_folded": 0,
+      "domain_route": false
     },
     {
       "target": "Non-structural protein 1",
@@ -1456,8 +3676,84 @@
       "identity_over_aligned_columns": 0.9602,
       "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 96% identity",
       "inside_the_ceiling": true,
+      "domain_units_offered": 2,
+      "domain_units_inside_the_ceiling": 1,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 2 annotated regions, 1 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "Non-structural protein 1",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            776,
+            1127
+          ],
+          "entry_span": [
+            776,
+            1127
+          ],
+          "entry_span_mapped": [
+            776,
+            1127
+          ],
+          "entry_length_mapped": 352,
+          "length": 352,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 776,
+            "end": 1127,
+            "length": 352,
+            "entry_span": [
+              776,
+              1127
+            ],
+            "entry_length": 352,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": true,
+          "folded": true,
+          "target_name": "Non-structural protein 1",
+          "mean_plddt": 26.32,
+          "confident_fraction": 0.0,
+          "pdb_sha256": "433855ecc5c61cf756e16d0c66207d11a28d0d0bb76bb94a7611b646ae47a532"
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host signal peptidase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            776
+          ],
+          "positions": [
+            776
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by host",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1127
+          ],
+          "positions": [
+            1127
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
       "folded": true,
-      "mean_plddt": 26.32
+      "mean_plddt": 26.32,
+      "units_folded": 1,
+      "domain_route": false
     },
     {
       "target": "Peptide pr",
@@ -1484,8 +3780,84 @@
       "identity_over_aligned_columns": 0.978,
       "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 98% identity",
       "inside_the_ceiling": true,
+      "domain_units_offered": 2,
+      "domain_units_inside_the_ceiling": 1,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 2 annotated regions, 1 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "Peptide pr",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            115,
+            205
+          ],
+          "entry_span": [
+            115,
+            205
+          ],
+          "entry_span_mapped": [
+            115,
+            205
+          ],
+          "entry_length_mapped": 91,
+          "length": 91,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 115,
+            "end": 205,
+            "length": 91,
+            "entry_span": [
+              115,
+              205
+            ],
+            "entry_length": 91,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": true,
+          "folded": true,
+          "target_name": "Peptide pr",
+          "mean_plddt": 34.64,
+          "confident_fraction": 0.0,
+          "pdb_sha256": "489720c26c9cc17e4bd3d2a97c77dbb3aa21684d0ba0efc0f6f00dfbed6280b5"
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host signal peptidase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            115
+          ],
+          "positions": [
+            115
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by host furin",
+          "ligand": null,
+          "positions_on_the_relative": [
+            205
+          ],
+          "positions": [
+            205
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
       "folded": true,
-      "mean_plddt": 34.64
+      "mean_plddt": 34.64,
+      "units_folded": 1,
+      "domain_route": false
     },
     {
       "target": "Small envelope protein M",
@@ -1512,178 +3884,251 @@
       "identity_over_aligned_columns": 1.0,
       "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 100% identity",
       "inside_the_ceiling": true,
+      "domain_units_offered": 4,
+      "domain_units_inside_the_ceiling": 0,
+      "domain_units_set_aside_because": null,
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "Small envelope protein M",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            206,
+            280
+          ],
+          "entry_span": [
+            206,
+            280
+          ],
+          "entry_span_mapped": [
+            206,
+            280
+          ],
+          "entry_length_mapped": 75,
+          "length": 75,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 206,
+            "end": 280,
+            "length": 75,
+            "entry_span": [
+              206,
+              280
+            ],
+            "entry_length": 75,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": true,
+          "folded": false,
+          "target_name": "Small envelope protein M",
+          "mean_plddt": null,
+          "confident_fraction": null,
+          "pdb_sha256": null,
+          "fold_absence": "endpoint_unavailable"
+        },
+        {
+          "kind": "domain",
+          "label": "Extracellular",
+          "type": "Topological domain",
+          "description": "Extracellular",
+          "span": [
+            206,
+            242
+          ],
+          "entry_span": [
+            206,
+            242
+          ],
+          "entry_span_mapped": [
+            206,
+            242
+          ],
+          "entry_length_mapped": 37,
+          "length": 37,
+          "inside_the_ceiling": false,
+          "refused_because": "37 residues, under the 40-residue minimum this stage requires of a fold unit. It stays available as a site, which carries its positions without claiming a fold.",
+          "clipped": true,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 206,
+            "end": 242,
+            "length": 37,
+            "entry_span": [
+              206,
+              242
+            ],
+            "entry_length": 37,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 1,
+          "relevance_terms_matched": [],
+          "describes_position_not_function": true,
+          "relevance_place": 1
+        },
+        {
+          "kind": "domain",
+          "label": "Helical",
+          "type": "Transmembrane",
+          "description": "Helical",
+          "span": [
+            262,
+            280
+          ],
+          "entry_span": [
+            262,
+            280
+          ],
+          "entry_span_mapped": [
+            262,
+            280
+          ],
+          "entry_length_mapped": 19,
+          "length": 19,
+          "inside_the_ceiling": false,
+          "refused_because": "19 residues, under the 40-residue minimum this stage requires of a fold unit. It stays available as a site, which carries its positions without claiming a fold.",
+          "clipped": false,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 262,
+            "end": 280,
+            "length": 19,
+            "entry_span": [
+              262,
+              280
+            ],
+            "entry_length": 19,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 1,
+          "relevance_terms_matched": [],
+          "describes_position_not_function": true,
+          "relevance_place": 2
+        },
+        {
+          "kind": "domain",
+          "label": "Helical",
+          "type": "Transmembrane",
+          "description": "Helical",
+          "span": [
+            243,
+            260
+          ],
+          "entry_span": [
+            243,
+            260
+          ],
+          "entry_span_mapped": [
+            243,
+            260
+          ],
+          "entry_length_mapped": 18,
+          "length": 18,
+          "inside_the_ceiling": false,
+          "refused_because": "18 residues, under the 40-residue minimum this stage requires of a fold unit. It stays available as a site, which carries its positions without claiming a fold.",
+          "clipped": false,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 243,
+            "end": 260,
+            "length": 18,
+            "entry_span": [
+              243,
+              260
+            ],
+            "entry_length": 18,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 0,
+          "relevance_terms_matched": [],
+          "describes_position_not_function": true,
+          "relevance_place": 3
+        },
+        {
+          "kind": "domain",
+          "label": "Cytoplasmic",
+          "type": "Topological domain",
+          "description": "Cytoplasmic",
+          "span": [
+            261,
+            261
+          ],
+          "entry_span": [
+            261,
+            261
+          ],
+          "entry_span_mapped": [
+            261,
+            261
+          ],
+          "entry_length_mapped": 1,
+          "length": 1,
+          "inside_the_ceiling": false,
+          "refused_because": "1 residues, under the 40-residue minimum this stage requires of a fold unit. It stays available as a site, which carries its positions without claiming a fold.",
+          "clipped": false,
+          "coincides_with_the_whole_chain": false,
+          "mapping": {
+            "start": 261,
+            "end": 261,
+            "length": 1,
+            "entry_span": [
+              261,
+              261
+            ],
+            "entry_length": 1,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": null,
+          "site_residues_inside": 0,
+          "relevance_terms_matched": [],
+          "describes_position_not_function": true,
+          "relevance_place": 4
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host furin",
+          "ligand": null,
+          "positions_on_the_relative": [
+            206
+          ],
+          "positions": [
+            206
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by host signal peptidase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            280
+          ],
+          "positions": [
+            280
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
       "folded": false,
       "mean_plddt": null,
-      "fold_absence": "endpoint_unavailable"
-    },
-    {
-      "target": "Protein C",
-      "rank": 8,
-      "identified": true,
-      "identification_route": null,
-      "chain_range_on_the_relative": [
-        1,
-        100
-      ],
-      "declared_length_aa": 100,
-      "parent_orf_length_aa": 3392,
-      "sequence_recovered": true,
-      "not_recovered_because": null,
-      "reference_chain_length_aa": 100,
-      "orfs_searched": 12,
-      "found_in": "the ORF that matched",
-      "span_in_this_genome": [
-        1,
-        100
-      ],
-      "recovered_length_aa": 100,
-      "chain_covered_by_alignment": 1.0,
-      "identity_over_aligned_columns": 0.97,
-      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 97% identity",
-      "inside_the_ceiling": true,
-      "folded": false,
-      "mean_plddt": null,
-      "fold_absence": "endpoint_unavailable"
-    },
-    {
-      "target": "Protein prM",
-      "rank": 9,
-      "identified": true,
-      "identification_route": null,
-      "chain_range_on_the_relative": [
-        115,
-        280
-      ],
-      "declared_length_aa": 166,
-      "parent_orf_length_aa": 3392,
-      "sequence_recovered": true,
-      "not_recovered_because": null,
-      "reference_chain_length_aa": 166,
-      "orfs_searched": 12,
-      "found_in": "the ORF that matched",
-      "span_in_this_genome": [
-        115,
-        280
-      ],
-      "recovered_length_aa": 166,
-      "chain_covered_by_alignment": 1.0,
-      "identity_over_aligned_columns": 0.988,
-      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 99% identity",
-      "inside_the_ceiling": true,
-      "folded": true,
-      "mean_plddt": 39.2
-    },
-    {
-      "target": "Non-structural protein 2A",
-      "rank": 10,
-      "identified": true,
-      "identification_route": null,
-      "chain_range_on_the_relative": [
-        1128,
-        1345
-      ],
-      "declared_length_aa": 218,
-      "parent_orf_length_aa": 3392,
-      "sequence_recovered": true,
-      "not_recovered_because": null,
-      "reference_chain_length_aa": 218,
-      "orfs_searched": 12,
-      "found_in": "the ORF that matched",
-      "span_in_this_genome": [
-        1128,
-        1345
-      ],
-      "recovered_length_aa": 218,
-      "chain_covered_by_alignment": 1.0,
-      "identity_over_aligned_columns": 0.9312,
-      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 93% identity",
-      "inside_the_ceiling": true,
-      "folded": false,
-      "mean_plddt": null,
-      "fold_absence": "endpoint_unavailable"
-    },
-    {
-      "target": "Non-structural protein 2A-alpha",
-      "rank": 11,
-      "identified": true,
-      "identification_route": null,
-      "chain_range_on_the_relative": [
-        1128,
-        1315
-      ],
-      "declared_length_aa": 188,
-      "parent_orf_length_aa": 3392,
-      "sequence_recovered": true,
-      "not_recovered_because": null,
-      "reference_chain_length_aa": 188,
-      "orfs_searched": 12,
-      "found_in": "the ORF that matched",
-      "span_in_this_genome": [
-        1128,
-        1315
-      ],
-      "recovered_length_aa": 188,
-      "chain_covered_by_alignment": 1.0,
-      "identity_over_aligned_columns": 0.9309,
-      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 93% identity",
-      "inside_the_ceiling": true,
-      "folded": false,
-      "mean_plddt": null,
-      "fold_absence": "endpoint_unavailable"
-    },
-    {
-      "target": "Non-structural protein 4A",
-      "rank": 12,
-      "identified": true,
-      "identification_route": null,
-      "chain_range_on_the_relative": [
-        2095,
-        2221
-      ],
-      "declared_length_aa": 127,
-      "parent_orf_length_aa": 3392,
-      "sequence_recovered": true,
-      "not_recovered_because": null,
-      "reference_chain_length_aa": 127,
-      "orfs_searched": 12,
-      "found_in": "the ORF that matched",
-      "span_in_this_genome": [
-        2095,
-        2221
-      ],
-      "recovered_length_aa": 127,
-      "chain_covered_by_alignment": 1.0,
-      "identity_over_aligned_columns": 0.9764,
-      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 98% identity",
-      "inside_the_ceiling": true,
-      "not_folded_because": "the 240-second folding budget for one run was spent before the pick order reached this chain, 152 s of it on calls the folding endpoint refused."
-    },
-    {
-      "target": "Non-structural protein 4B",
-      "rank": 13,
-      "identified": true,
-      "identification_route": null,
-      "chain_range_on_the_relative": [
-        2245,
-        2493
-      ],
-      "declared_length_aa": 249,
-      "parent_orf_length_aa": 3392,
-      "sequence_recovered": true,
-      "not_recovered_because": null,
-      "reference_chain_length_aa": 249,
-      "orfs_searched": 12,
-      "found_in": "the ORF that matched",
-      "span_in_this_genome": [
-        2245,
-        2493
-      ],
-      "recovered_length_aa": 249,
-      "chain_covered_by_alignment": 1.0,
-      "identity_over_aligned_columns": 0.9759,
-      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 98% identity",
-      "inside_the_ceiling": true,
-      "not_folded_because": "the 240-second folding budget for one run was spent before the pick order reached this chain, 152 s of it on calls the folding endpoint refused."
+      "fold_absence": "endpoint_unavailable",
+      "offered_its_regions_because": null,
+      "units_folded": 0,
+      "domain_route": false
     }
   ],
   "evidence": [
@@ -1702,7 +4147,7 @@
           "endpoint": "Europe PMC",
           "status": "empty",
           "note": "{'subject_zero': True, 'axes_zero': ('assay_availability', 'conservation', 'essentiality', 'precedent', 'public_labels'), 'means': 'A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.'}",
-          "seconds": 33.59,
+          "seconds": 3.51,
           "network_calls": 7,
           "returned": {}
         },
@@ -1711,8 +4156,8 @@
           "endpoint": "EBI HMMER",
           "status": "ok",
           "note": null,
-          "seconds": 38.32,
-          "network_calls": 11,
+          "seconds": 55.25,
+          "network_calls": 15,
           "returned": {
             "resolution_attempts_count": 1,
             "database_id": "swissprot",
@@ -1731,7 +4176,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 14.65,
+          "seconds": 6.14,
           "network_calls": 15,
           "returned": {
             "protein_name": "Genome polyprotein",
@@ -1751,7 +4196,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 1.8,
+          "seconds": 1.26,
           "network_calls": 2,
           "returned": {
             "sequence_length": 3392,
@@ -1771,7 +4216,7 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 2.06,
+          "seconds": 3.64,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -1802,7 +4247,7 @@
           "endpoint": "Europe PMC",
           "status": "ok",
           "note": null,
-          "seconds": 25.17,
+          "seconds": 9.19,
           "network_calls": 7,
           "returned": {
             "subject_kind": "term",
@@ -1820,8 +4265,8 @@
           "endpoint": "EBI HMMER",
           "status": "ok",
           "note": null,
-          "seconds": 20.26,
-          "network_calls": 7,
+          "seconds": 4.56,
+          "network_calls": 5,
           "returned": {
             "resolution_attempts_count": 1,
             "database_id": "swissprot",
@@ -1840,7 +4285,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 13.6,
+          "seconds": 6.12,
           "network_calls": 15,
           "returned": {
             "protein_name": "Genome polyprotein",
@@ -1860,7 +4305,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 2.83,
+          "seconds": 1.48,
           "network_calls": 2,
           "returned": {
             "sequence_length": 3392,
@@ -1880,7 +4325,7 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 2.11,
+          "seconds": 10.9,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -1911,7 +4356,7 @@
           "endpoint": "Europe PMC",
           "status": "empty",
           "note": "{'subject_zero': True, 'axes_zero': ('assay_availability', 'conservation', 'essentiality', 'precedent', 'public_labels'), 'means': 'A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.'}",
-          "seconds": 40.25,
+          "seconds": 3.42,
           "network_calls": 7,
           "returned": {}
         },
@@ -1920,8 +4365,8 @@
           "endpoint": "EBI HMMER",
           "status": "ok",
           "note": null,
-          "seconds": 121.47,
-          "network_calls": 25,
+          "seconds": 5.8,
+          "network_calls": 5,
           "returned": {
             "resolution_attempts_count": 1,
             "database_id": "swissprot",
@@ -1940,7 +4385,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 13.99,
+          "seconds": 6.07,
           "network_calls": 15,
           "returned": {
             "protein_name": "Genome polyprotein",
@@ -1960,7 +4405,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 1.58,
+          "seconds": 1.24,
           "network_calls": 2,
           "returned": {
             "sequence_length": 3392,
@@ -1980,7 +4425,7 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 2.93,
+          "seconds": 13.99,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -1997,24 +4442,37 @@
       ]
     }
   ],
-  "seconds": 638.53,
+  "seconds": 388.15,
   "coverage": {
-    "chains_ranked": 13,
-    "surface_rows": 13,
+    "chains_ranked": 7,
+    "surface_rows": 7,
     "surface_measured": 0,
-    "surface_refused": 13,
+    "surface_refused": 7,
     "surface_covers_every_chain": true,
-    "surface_on_predicted_coordinates": 4,
-    "surface_predicted_was_the_only_route": 4,
-    "chains_with_any_surface": 4,
-    "chains_with_no_surface": 9,
-    "chains_with_no_surface_over_the_ceiling": 3,
+    "surface_on_predicted_coordinates": 3,
+    "surface_predicted_was_the_only_route": 3,
+    "chains_with_any_surface": 3,
+    "chains_with_no_surface": 4,
+    "chains_with_no_surface_over_the_ceiling": 1,
     "chains_over_the_folding_ceiling": 3,
-    "fold_rows": 13,
+    "fold_rows": 7,
     "fold_rows_unidentified": 0,
-    "fold_sequence_recovered": 13,
+    "fold_sequence_recovered": 7,
     "fold_sequence_recovered_unidentified": 0,
     "fold_covers_every_chain": true,
+    "fold_units_offered": 33,
+    "fold_units_folded": 3,
+    "domain_units_offered": 26,
+    "domain_units_folded": 0,
+    "chains_rescued_by_the_domain_route": 0,
+    "chains_with_no_coordinates": 4,
+    "chains_with_a_region_surface": 0,
+    "region_surfaces_measured": 0,
+    "chains_with_functional_sites": 7,
+    "site_patch_measured_on_a_deposition": 0,
+    "site_patch_measured_on_a_prediction": 3,
+    "site_patch_on_a_deposition_not_at_the_annotated_residues": 0,
+    "site_patch_on_a_prediction_not_at_the_annotated_residues": 0,
     "evidence_targets": 3,
     "evidence_calls": 15
   },

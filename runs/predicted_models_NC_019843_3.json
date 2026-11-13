@@ -1,0 +1,116 @@
+{
+  "experiment": "predicted-model-inventory",
+  "status": "complete",
+  "case": "MERS-CoV, Middle East respiratory syndrome-related coronavirus held out",
+  "genome_accession": "NC_019843.3",
+  "reference_excluded_organism": "Middle East respiratory syndrome-related coronavirus",
+  "accessions": [
+    {
+      "accession": "Q0Q4F2",
+      "uniprot_entry_id": "SPIKE_BC133",
+      "sequence_length": 1350,
+      "asked_about": [
+        {
+          "rank": 1,
+          "target": "Spike protein S1",
+          "range": "13-749"
+        },
+        {
+          "rank": 2,
+          "target": "Spike protein S2",
+          "range": "750-1235"
+        },
+        {
+          "rank": 3,
+          "target": "Spike protein S2'",
+          "range": "885-1350"
+        }
+      ],
+      "requested_ranges": [
+        "13-749",
+        "750-1235",
+        "885-1350"
+      ],
+      "predicted_model_count": 4,
+      "any_prediction_exists": true,
+      "providers_with_models": [
+        "SWISS-MODEL"
+      ],
+      "models_by_provider": {
+        "SWISS-MODEL": 4
+      },
+      "models_by_tool_used": {
+        "not stated by the host": 4
+      },
+      "models_by_category": {
+        "TEMPLATE-BASED": 4
+      },
+      "alphafold_host_queried": true,
+      "alphafold_host_served_models": false,
+      "alphafold_host_model_count": 0,
+      "alphafold_host_models_by_tool_used": {},
+      "alphafold_authored_model_count": 0,
+      "tools_used": [],
+      "models_found_only_by_alphafold_host": [],
+      "mean_confidence_by_metric": {
+        "QMEANDisCo": 0.6827
+      },
+      "ranges": [
+        {
+          "range": "13-749",
+          "width": 737,
+          "models_overlapping": 4,
+          "modelled": true,
+          "best_plddt_model": null,
+          "no_plddt_because": "no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply"
+        },
+        {
+          "range": "750-1235",
+          "width": 486,
+          "models_overlapping": 4,
+          "modelled": true,
+          "best_plddt_model": null,
+          "no_plddt_because": "no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply"
+        },
+        {
+          "range": "885-1350",
+          "width": 466,
+          "models_overlapping": 4,
+          "modelled": true,
+          "best_plddt_model": null,
+          "no_plddt_because": "no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply"
+        }
+      ],
+      "excluded_experimental_count": 1,
+      "per_residue_refusals": [],
+      "network_calls": 2,
+      "bytes_received": 4533,
+      "content_sha256": "70282e249712838b07fa1a8ffda169b7e685e39a2a92edfff5be322194c1fde9"
+    }
+  ],
+  "predicted_model_count": 4,
+  "alphafold_host_model_count": 0,
+  "alphafold_authored_model_count": 0,
+  "headline": "4 predicted models across 1 accessions. 0 were served by the AlphaFold host and 0 were computed by AlphaFold.",
+  "interpretation": "The provenance of the `structures.predicted` scalars on the landing page. Each accession's predicted models are counted three ways that the page's single `predicted_model_count` collapses into one: by the provider that served the model, by the tool that computed it, and by model category. Nothing here is a new capability and nothing here changes a rank; it re-asks one tool already in the toolkit for the same accessions the held-out run reached, and keeps the list that the chain record reduces to a count.",
+  "limitations": [
+    "The AlphaFold host's name is not the provenance of what it serves. Every model provider `AlphaFold DB` returned for these accessions was computed by ColabFold v1.5.2, so `alphafold_host_served_models: true` must not be read as 'AlphaFold modelled this protein'. `alphafold_authored_model_count` is counted from each model's `tool_used`, which is the only field that answers that.",
+    "ColabFold is counted apart from AlphaFold rather than folded into it. It runs the same network weights behind a different MSA pipeline, which makes it AlphaFold-derived and still not an AlphaFold DB model.",
+    "A predicted model is not experimental evidence that the protein adopts the modelled conformation, and a high pLDDT is a statement about the predictor's confidence rather than an observation of the fold.",
+    "pLDDT (0-100) and QMEANDisCo (0-1) are different quantities, not one quantity rescaled. Averages are grouped by metric and never merged. An accession whose models are all template-based carries no pLDDT at all, so the `confident_plddt` threshold the page prints does not apply to it.",
+    "A predicted-model count is not an attention proxy and must never be pooled with deposited-structure counts. Experimentally determined entries are partitioned out here and counted in `excluded_experimental_count` only.",
+    "Absence is recorded, not inferred. `alphafold_host_served_models: false` on Q3LZX1 is a measured absence -- the host was asked unconditionally and holds nothing -- and not a request that was skipped.",
+    "The accessions are read out of the landing record's held-out case rather than written here, so this inventory covers the relatives the chain actually reached. It says nothing about SARS-CoV-2's own P0DTD1, whose curated entries that case deletes before the run."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "161f2223fe4c87205556d65162bd4a1256a22abe",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-13T15:09:43.945756+00:00"
+  },
+  "content_sha256": "41c45e627dd751e2b1c2f75e7d48a3fcef5a24003529d1292bef4dcad69de502"
+}

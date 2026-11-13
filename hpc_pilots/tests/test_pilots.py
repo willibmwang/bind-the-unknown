@@ -6255,6 +6255,14 @@ def test_an_annotated_residue_is_carried_into_the_coordinates_or_recorded_as_los
         pytest.skip("the recorded run measured nothing on this machine")
     agreement = {0: 0, 1: 0, -1: 0}
     checked = 0
+    # A disagreement is allowed where the row RECORDS it. The point of this check is that the
+    # mapping is right wherever the record claims it is, not that the annotation and the
+    # genome never differ -- they do, and the pipeline's job is to say so. nsp16 is the case:
+    # one of its five anchors carries S where the relative's entry has A at 6776, the row
+    # carries `measured_at_the_annotated_residues` false with that sentence, and the page
+    # withholds its figures. Asserting zero disagreements would make this test fail the first
+    # time the check it is testing actually fires.
+    disagreed = 0
     for row in rows:
         coordinates = ROOT / "runs/domain_folds" / f"{row['slug']}.pdb"
         if not coordinates.exists():
@@ -6270,11 +6278,20 @@ def test_an_annotated_residue_is_carried_into_the_coordinates_or_recorded_as_los
             if not want:
                 continue
             checked += 1
+            if letters.get(anchor["in_the_fold"]) != want:
+                disagreed += 1
+                assert row.get("measured_at_the_annotated_residues") is False, (
+                    "an anchor disagrees with the annotation and the row does not say so",
+                    row["slug"], anchor["in_the_fold"])
             for shift in agreement:
                 agreement[shift] += letters.get(anchor["in_the_fold"] + shift) == want
     if not checked:
         pytest.skip("no stored coordinates for the recorded anchors on this machine")
-    assert agreement[0] == checked, f"{agreement[0]} of {checked} anchors agree"
+    assert agreement[0] == checked - disagreed, (
+        f"{agreement[0]} of {checked} anchors agree with {disagreed} recorded disagreements")
+    # The recorded disagreements are a small minority, or "agreement at shift 0" stops being
+    # evidence of anything. This is the number that would move if the mapping broke.
+    assert disagreed < checked * 0.1, f"{disagreed} of {checked} anchors disagree"
     assert max(agreement[1], agreement[-1]) < checked * 0.25, (
         f"shifting every anchor by one residue left {agreement} of {checked} agreeing, so "
         f"the agreement at shift 0 is not evidence the mapping is right")
@@ -6479,11 +6496,24 @@ def test_the_page_withholds_a_site_patch_measured_at_the_wrong_residues():
     # Every row is drawn, measured or not. A table whose length depends on how the run went is
     # the defect the record's own refusals exist to avoid.
     assert drawn.count('class="lr') == len(payload["rows"])
-    assert all(r.get("measured_at_the_annotated_residues") is not False for r in measured), \
-        "this record has a row the page should be withholding; the assertions below assume not"
+    # Rows the live record ALREADY withholds, checked for real before the synthetic case
+    # below. This used to assert there were none, which made the test fail the first time the
+    # withholding it exists to test actually had something to withhold -- nsp16 arrived with
+    # one anchor carrying S where the relative's entry has A, and the premise collapsed.
+    really_wrong = [r for r in measured
+                    if r.get("measured_at_the_annotated_residues") is False]
+    for row in really_wrong:
+        reason = row.get("not_the_annotated_residues_because") or ""
+        assert reason, ("a row was marked wrong with no reason to print", row["slug"])
+        assert build_site.esc(reason) in drawn, (
+            "a row measured at the wrong residues did not reach the refusal group",
+            row["slug"])
 
+    # The synthetic case takes a row that is NOT already withheld, so flipping its verdict
+    # tests the flip rather than re-testing a row the record had already marked.
     victim = next(r for r in measured
-                  if (r.get("site_patch") or {}).get("site_patch_area_a2"))
+                  if (r.get("site_patch") or {}).get("site_patch_area_a2")
+                  and r.get("measured_at_the_annotated_residues") is not False)
     area = f"{victim['site_patch']['site_patch_area_a2']:,.0f} Å²"
     assert area in drawn, area
 

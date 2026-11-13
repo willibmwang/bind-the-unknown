@@ -25,7 +25,7 @@
   <h1>Dengue</h1>
   <p class="standfirst">One genome accession went in. This is what each stage of the chain
   handed the next.</p>
-  <dl class="strip"><div><dt>Accession</dt><dd>NC_001477.1</dd></div><div><dt>Chains ranked</dt><dd>13</dd></div><div><dt>Surfaces measured</dt><dd>0 of 13</dd></div><div><dt>Nothing dropped</dt><dd>yes</dd></div><div><dt>Seconds</dt><dd>639</dd></div></dl>
+  <dl class="strip"><div><dt>Accession</dt><dd>NC_001477.1</dd></div><div><dt>Chains ranked</dt><dd>7</dd></div><div><dt>Surfaces measured</dt><dd>0 of 7</dd></div><div><dt>Nothing dropped</dt><dd>yes</dd></div><div><dt>Seconds</dt><dd>388</dd></div></dl>
   <p class="reclink"><a href="NC_001477_1.json">Download the raw record · JSON</a>
   <span>Every number on this page is read from it. Nothing here is retyped.</span></p>
 </header>
@@ -36,41 +36,41 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">1</span>
       <span class="what">Genome to candidate proteins</span>
-      <span class="secs">27.61 s</span></div>
+      <span class="secs">14.35 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>genome accession</b> NC_001477.1</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>genome length in nucleotides</b> 10,735</li><li><b>segments</b> 1</li><li><b>ORFs found</b> 23</li><li><b>ORFs ranked</b> 12</li><li><b>reference entries</b> 17,541</li><li><b>reference entries removed</b> —</li><li><b>identified</b> 1</li><li><b>unidentified</b> 11</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>genome length in nucleotides</b> 10,735</li><li><b>segments</b> 1</li><li><b>ORFs found</b> 23</li><li><b>ORFs ranked</b> 12</li><li><b>reference entries</b> 17,529</li><li><b>reference entries removed</b> —</li><li><b>identified</b> 1</li><li><b>unidentified</b> 11</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;one reviewed accession and one residue range per candidate</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">2</span>
       <span class="what">Polyproteins to mature chains, and the score for each</span>
-      <span class="secs">5.78 s</span></div>
+      <span class="secs">0.97 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>candidates in</b> 12</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>chains out</b> 13</li><li><b>every score re-adds from its parts</b> yes</li></ul></div>
-    </div><div class="hands"><b>hands on</b> &nbsp;every chain, with the accession and range its surface is measured on</div>
+      <div class="out"><h3>Out</h3><ul><li><b>chains out</b> 7</li><li><b>chains scored before the gate</b> 13</li><li><b>every score re-adds from its parts</b> yes</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;every chain that cleared the gate, with the accession and range its surface is measured on. 6 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">3</span>
-      <span class="what">Every chain inside the ceiling to coordinates, the one lane a novel target has</span>
-      <span class="secs">270.4 s</span></div>
+      <span class="what">Every chain to coordinates, whole where it fits and by its functional regions where it does not</span>
+      <span class="secs">240.2 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>candidates in</b> 13</li><li><b>identified in</b> 13</li><li><b>residue ceiling</b> 400</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>foldable</b> 13</li><li><b>not foldable</b> 0</li><li><b>unidentified foldable</b> 0</li><li><b>chains folded</b> 4</li><li><b>folds attempted</b> 8</li><li><b>folds refused</b> 4</li><li><b>chains not folded by limit</b> 0</li><li><b>chains not folded by budget</b> 2</li><li><b>seconds spent on refused folds</b> 152</li><li><b>chains over the ceiling</b> 3</li><li><b>changes any rank</b> no</li><li><b>folded target</b> Serine protease subunit NS2B</li><li><b>residues</b> 130</li><li><b>mean confidence, out of 100</b> 43.26</li><li><b>at or above 70</b> 0</li><li><b>sequence sha256</b> e2c8d2d4bf745d9af488603ce80a7586f4e46d133d411a24763f4d4b7783ce88</li><li><b>error</b> —</li></ul></div>
-    </div><div class="hands"><b>hands on</b> &nbsp;coordinates for every chain inside the ceiling, and nothing at all for the 3 over it. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart. It reorders nothing: the ranking was final at the end of stage 2</div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 7</li><li><b>identified in</b> 7</li><li><b>gated out before this stage</b> 6</li><li><b>residue ceiling</b> 400</li><li><b>domain units per chain</b> 3</li><li><b>fold requests per run</b> 40</li><li><b>folding budget seconds</b> 240</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>foldable</b> 7</li><li><b>not foldable</b> 0</li><li><b>unidentified foldable</b> 0</li><li><b>chains folded</b> 3</li><li><b>folds attempted</b> 4</li><li><b>folds refused</b> 1</li><li><b>units offered</b> 33</li><li><b>units inside the ceiling</b> 13</li><li><b>units recorded</b> 22</li><li><b>units folded</b> 3</li><li><b>domain units offered</b> 26</li><li><b>domain units inside the ceiling</b> 9</li><li><b>domain units recorded</b> 15</li><li><b>domain units folded</b> 0</li><li><b>domain units attempted</b> 5</li><li><b>chains offered a domain route</b> 5</li><li><b>chains rescued by the domain route</b> 0</li><li><b>chains with coordinates</b> 3</li><li><b>chains with no coordinates</b> 4</li><li><b>domain units not folded by limit</b> 0</li><li><b>domain units not folded by budget</b> 0</li><li><b>chains not folded by limit</b> 0</li><li><b>chains not folded by budget</b> 0</li><li><b>seconds spent on refused folds</b> 237.8</li><li><b>chains over the ceiling</b> 3</li><li><b>changes any rank</b> no</li><li><b>folded target</b> Serine protease subunit NS2B</li><li><b>residues</b> 130</li><li><b>mean confidence, out of 100</b> 43.26</li><li><b>at or above 70</b> 0</li><li><b>sequence sha256</b> e2c8d2d4bf745d9af488603ce80a7586f4e46d133d411a24763f4d4b7783ce88</li><li><b>error</b> —</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;coordinates for 3 of the 7 chains it reported on -- whole where the chain fits the 400-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 3 chains over it. Plus the functional site positions, carried through the alignment into this genome&#x27;s numbering, which the surface stage anchors the patch arithmetic on. 4 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region&#x27;s surface goes under its chain&#x27;s row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">4</span>
-      <span class="what">Every chain to a measured surface, or a stated reason</span>
-      <span class="secs">0.11 s</span></div>
+      <span class="what">Every chain to a measured surface, and the patch at the residues that do the chemistry</span>
+      <span class="secs">0.09 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>candidates in</b> 13</li><li><b>predicted coordinates in</b> 4</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>rows out</b> 13</li><li><b>measured</b> 0</li><li><b>unmeasured</b> 13</li><li><b>nothing dropped</b> yes</li><li><b>predicted coordinates offered</b> 4</li><li><b>measured on predicted coordinates</b> 4</li><li><b>predicted was the only route</b> 4</li><li><b>no surface by either route</b> 9</li><li><b>no surface over the folding ceiling</b> 3</li><li><b>gate yes</b> 0</li><li><b>gate borderline</b> 0</li><li><b>gate no</b> 0</li><li><b>changes any rank</b> no</li></ul></div>
-    </div><div class="hands"><b>hands on</b> &nbsp;a patch median and range per chain, and nothing downstream reads any of it. `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`: stage 5 defines the same library whatever this stage found. Moving the fold ahead of this stage gave stage 3 a consumer and left this one without any</div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 7</li><li><b>predicted coordinates in</b> 3</li><li><b>predicted region coordinates in</b> 0</li><li><b>chains with functional site positions in</b> 7</li><li><b>macrocycle reach a</b> 13.82</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>rows out</b> 7</li><li><b>measured</b> 0</li><li><b>unmeasured</b> 7</li><li><b>nothing dropped</b> yes</li><li><b>predicted coordinates offered</b> 3</li><li><b>measured on predicted coordinates</b> 3</li><li><b>predicted was the only route</b> 3</li><li><b>no surface by either route</b> 4</li><li><b>no surface over the folding ceiling</b> 1</li><li><b>region surfaces offered</b> 0</li><li><b>region surfaces measured</b> 0</li><li><b>chains with a region surface</b> 0</li><li><b>chains with no surface and no region surface</b> 4</li><li><b>chains with functional sites</b> 7</li><li><b>functional site positions</b> 46</li><li><b>functional site positions mapped into this genome</b> 46</li><li><b>site patch measured on a deposition</b> 0</li><li><b>site patch measured on a prediction</b> 3</li><li><b>site patch on a deposition not at the annotated residues</b> 0</li><li><b>site patch on a prediction not at the annotated residues</b> 0</li><li><b>gate yes</b> 0</li><li><b>gate borderline</b> 0</li><li><b>gate no</b> 0</li><li><b>changes any rank</b> no</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 3 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage&#x27;s product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one</div>
   </div>
 
   <div class="stage">
@@ -78,7 +78,7 @@
       <span class="what">A library definition over the randomised region</span>
       <span class="secs">0 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>would read if connected</b> patch median square angstroms, patch fraction of surface, sequons near patch</li><li><b>not connected because</b> library_spec takes an initiator, a randomised-region length range and a set of elongator classes, all three properties of the display platform rather than of a target. No stated rule turns a measured patch area into any of them, and inventing one would publish a conversion as a result.</li></ul></div>
+      <div><h3>In</h3><ul><li><b>would read if connected</b> patch median square angstroms, patch fraction of surface, sequons near patch</li><li><b>not connected because</b> the library definition takes an initiator, a randomised-region length range and a set of elongator classes, all three properties of the display platform rather than of a target. No stated rule turns a measured patch area into any of them, and inventing one would publish a conversion as a result.</li></ul></div>
       <div class="out"><h3>Out</h3><ul><li><b>initiator</b> ClAc-D-Tyr</li><li><b>closure residue</b> C</li><li><b>building blocks per position</b> 25</li><li><b>possible molecules</b> 158,945,703,125</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;the position count the go/no-go test in arm 2 reads</div>
   </div>
@@ -86,17 +86,17 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">6</span>
       <span class="what">Evidence on the highest-ranked targets</span>
-      <span class="secs">334.6 s</span></div>
+      <span class="secs">132.6 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>targets in</b> 3</li><li><b>ranked available</b> 13</li><li><b>wall budget seconds</b> 700</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>targets covered</b> 3</li><li><b>calls made</b> 15</li><li><b>OK</b> 13</li><li><b>not OK</b> 2</li><li><b>network calls</b> 127</li><li><b>changes any rank</b> no</li><li><b>every target has every tool</b> yes</li></ul></div>
+      <div><h3>In</h3><ul><li><b>targets in</b> 3</li><li><b>ranked available</b> 7</li><li><b>wall budget seconds</b> 700</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>targets covered</b> 3</li><li><b>calls made</b> 15</li><li><b>OK</b> 13</li><li><b>not OK</b> 2</li><li><b>network calls</b> 109</li><li><b>changes any rank</b> no</li><li><b>every target has every tool</b> yes</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;nothing. This annotates the shortlist and never reorders it</div>
   </div>
 </section>
 
 <section>
   <div class="sec-head"><h2>The shortlist</h2>
-    <span class="tag">1 identified ORF cut into 13 chains</span></div>
+    <span class="tag">1 identified ORF cut into 7 chains</span></div>
   <ul class="pts">
     <li><b>A different list from the stage-1 candidates above, not a shorter one.</b> Stage 1
     ranks whole ORFs; stage 2 cuts the long proteins among them into the shorter chains a
@@ -107,7 +107,7 @@
   
   <div class="cmxscroll" tabindex="0" role="region" aria-label="Every mature chain and its score">
   <table class="cmx">
-    <caption>Every mature chain stage 2 produced, highest composite score first. Each cell is
+    <caption>Every mature chain stage 2 produced and the gate kept, highest composite score first. Each cell is
       the points that weight paid, with the measurement it was computed from underneath; the
       shading is the share of that column's maximum. &ldquo;Cut out of&rdquo; names the ORF the
       chain was taken from, so a chain's score can be read against its parent's.
@@ -191,75 +191,15 @@
         <td class="h h5"><span class="pt">2.96</span><span class="rw">0.987</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
         <td class="sc"><span class="v">4.96</span>
           <span class="tr"><i style="width:72.1%"></i></span></td>
-      </tr>
-      <tr id="chain-8">
-        <td class="rk">8</td>
-        <td class="nm"><span class="t">Protein C</span>
-          <span class="w">P27909</span>
-          <span class="w">residues 1–100 of the parent</span></td>
-        <td class="cut">POLG_DEN1W Genome polyprotein</td>
-        <td class="h h5"><span class="pt">2.96</span><span class="rw">0.987</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
-        <td class="sc"><span class="v">2.96</span>
-          <span class="tr"><i style="width:43.0%"></i></span></td>
-      </tr>
-      <tr id="chain-9">
-        <td class="rk">9</td>
-        <td class="nm"><span class="t">Protein prM</span>
-          <span class="w">P27909</span>
-          <span class="w">residues 115–280 of the parent</span></td>
-        <td class="cut">POLG_DEN1W Genome polyprotein</td>
-        <td class="h h5"><span class="pt">2.96</span><span class="rw">0.987</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
-        <td class="sc"><span class="v">2.96</span>
-          <span class="tr"><i style="width:43.0%"></i></span></td>
-      </tr>
-      <tr id="chain-10">
-        <td class="rk">10</td>
-        <td class="nm"><span class="t">Non-structural protein 2A</span>
-          <span class="w">P27909</span>
-          <span class="w">residues 1,128–1,345 of the parent</span></td>
-        <td class="cut">POLG_DEN1W Genome polyprotein</td>
-        <td class="h h5"><span class="pt">2.96</span><span class="rw">0.987</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
-        <td class="sc"><span class="v">2.96</span>
-          <span class="tr"><i style="width:43.0%"></i></span></td>
-      </tr>
-      <tr id="chain-11">
-        <td class="rk">11</td>
-        <td class="nm"><span class="t">Non-structural protein 2A-alpha</span>
-          <span class="w">P27909</span>
-          <span class="w">residues 1,128–1,315 of the parent</span></td>
-        <td class="cut">POLG_DEN1W Genome polyprotein</td>
-        <td class="h h5"><span class="pt">2.96</span><span class="rw">0.987</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
-        <td class="sc"><span class="v">2.96</span>
-          <span class="tr"><i style="width:43.0%"></i></span></td>
-      </tr>
-      <tr id="chain-12">
-        <td class="rk">12</td>
-        <td class="nm"><span class="t">Non-structural protein 4A</span>
-          <span class="w">P27909</span>
-          <span class="w">residues 2,095–2,221 of the parent</span></td>
-        <td class="cut">POLG_DEN1W Genome polyprotein</td>
-        <td class="h h5"><span class="pt">2.96</span><span class="rw">0.987</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
-        <td class="sc"><span class="v">2.96</span>
-          <span class="tr"><i style="width:43.0%"></i></span></td>
-      </tr>
-      <tr id="chain-13">
-        <td class="rk">13</td>
-        <td class="nm"><span class="t">Non-structural protein 4B</span>
-          <span class="w">P27909</span>
-          <span class="w">residues 2,245–2,493 of the parent</span></td>
-        <td class="cut">POLG_DEN1W Genome polyprotein</td>
-        <td class="h h5"><span class="pt">2.96</span><span class="rw">0.987</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
-        <td class="sc"><span class="v">2.96</span>
-          <span class="tr"><i style="width:43.0%"></i></span></td>
       </tr></tbody>
   </table>
-  </div>
+  </div><ul class="pts sm" style="margin:20px 0 0"><li><b>6 more mature chains were scored and are not in this table.</b> A row is kept when at least one of exposure on the outside of the virus, essentiality, druggability, structures in the family pays 0.5 points or more, and these paid under that on all 4.</li><li><b>They leave the pipeline here.</b> Nothing after this stage folds them, measures a surface on them or reads literature for them.</li><li><b>Conservation is not one of the four</b>, because it says how well this genome was recognised rather than whether what was recognised is worth aiming at.</li><li><b>The numbering keeps each row its place in the full ranking</b>, so a gap in the # column is one of these: Protein C, Protein prM, Non-structural protein 2A, Non-structural protein 2A-alpha, Non-structural protein 4A, Non-structural protein 4B.</li></ul>
 </section>
 
 
 <section>
   <div class="sec-head"><h2>The structure it folded</h2><span class="tag">step 3</span></div>
-  <div class="sub">8 chains folded this run; this is the one the record reports in full</div>
+  <div class="sub">9 chains folded this run; this is the one the record reports in full</div>
   <div class="two">
     <div class="card acc">
       <div class="label">Serine protease subunit NS2B</div>
@@ -284,7 +224,7 @@
     measure.</li>
   </ul>
   
-  <div class="lane"><div class="lane-grp"><b>Folded &middot; 10</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
+  <div class="lane"><div class="lane-grp"><b>Folded &middot; 4</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
     <div class="lane-axis" aria-hidden="true">
       <span></span>
       <span class="ax"><i class="lim" style="left:44.49%"></i>
@@ -301,53 +241,11 @@
         <span class="cf">confidence 26.3</span></span>
     </div>
     <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 4B</span>
-        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 98 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:44.49%"></i><i class="b" style="left:0.00%;width:27.70%"></i></span>
-      <span class="vl">249 aa
-        </span>
-    </div>
-    <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 2A</span>
-        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 93 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:44.49%"></i><i class="b" style="left:0.00%;width:24.25%"></i></span>
-      <span class="vl">218 aa
-        </span>
-    </div>
-    <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 2A-alpha</span>
-        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 93 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:44.49%"></i><i class="b" style="left:0.00%;width:20.91%"></i></span>
-      <span class="vl">188 aa
-        </span>
-    </div>
-    <div class="lr">
-      <span class="who"><span class="t">Protein prM</span>
-        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 99 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:44.49%"></i><i class="b" style="left:0.00%;width:18.46%"></i></span>
-      <span class="vl">166 aa
-        <span class="cf">confidence 39.2</span></span>
-    </div>
-    <div class="lr">
       <span class="who"><span class="t">Serine protease subunit NS2B</span>
         <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 98 % identity</span></span>
       <span class="plot"><i class="thr" style="left:44.49%"></i><i class="b" style="left:0.00%;width:14.46%"></i></span>
       <span class="vl">130 aa
         <span class="cf">confidence 43.3</span></span>
-    </div>
-    <div class="lr">
-      <span class="who"><span class="t">Non-structural protein 4A</span>
-        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 98 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:44.49%"></i><i class="b" style="left:0.00%;width:14.13%"></i></span>
-      <span class="vl">127 aa
-        </span>
-    </div>
-    <div class="lr">
-      <span class="who"><span class="t">Protein C</span>
-        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 97 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:44.49%"></i><i class="b" style="left:0.00%;width:11.12%"></i></span>
-      <span class="vl">100 aa
-        </span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">Peptide pr</span>
@@ -391,19 +289,19 @@
 </section>
 <section>
   <div class="sec-head"><h2>Surfaces</h2><span class="tag">one row per ranked chain</span></div>
-  <div class="good"><p><b>13 answers for
-  13 chains.</b> A chain can be refused, but it cannot
+  <div class="good"><p><b>7 answers for
+  7 chains.</b> A chain can be refused, but it cannot
   disappear from the list.</p></div>
   
-  <div class="tiles" aria-hidden="true"><span class="tile p"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile p"></span><span class="tile p"></span><span class="tile r"></span><span class="tile r"></span><span class="tile p"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span></div>
+  <div class="tiles" aria-hidden="true"><span class="tile p"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile p"></span><span class="tile p"></span><span class="tile r"></span></div>
   <div class="legend">
     <span><span class="key m"></span> 0 measured on deposited structures</span>
-    <span><span class="key r"></span> 13 with none, each with a reason</span>
-    <span><span class="key p"></span> 4 of those measured on predicted coordinates instead</span>
+    <span><span class="key r"></span> 7 with none, each with a reason</span>
+    <span><span class="key p"></span> 3 of those measured on predicted coordinates instead</span>
   </div>
   
   <div class="lane">
-    <div class="lane-grp"><b>Measured on a shape a model predicted &middot; 4</b><span>nobody has ever solved these, so the shape being measured was predicted from the sequence by stage 3. The arithmetic is identical and the evidence is not, so this group stays in its own column, outside the count above and outside the ranking</span></div>
+    <div class="lane-grp"><b>Measured on a shape a model predicted &middot; 3</b><span>nobody has ever solved these, so the shape being measured was predicted from the sequence by stage 3. The arithmetic is identical and the evidence is not, so this group stays in its own column, outside the count above and outside the ranking</span></div>
     <div class="lane-axis" aria-hidden="true">
       <span></span>
       <span class="ax"><i class="lim" style="left:6.21%"></i>
@@ -432,47 +330,10 @@
       <span class="plot"><i class="thr" style="left:6.21%"></i>
         <i class="b pred" style="left:0.00%;width:25.49%"></i></span>
       <span class="vl">2,464 Å²<span class="cf">predicted</span></span>
-    </div>
-    <div class="lr">
-      <span class="who"><span class="t">Protein prM</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.2</span></span>
-      <span class="plot"><i class="thr" style="left:6.21%"></i>
-        <i class="b pred" style="left:0.00%;width:29.88%"></i></span>
-      <span class="vl">2,889 Å²<span class="cf">predicted</span></span>
-    </div><div class="lane-grp"><b>A shape could be predicted for these, and this run did not &middot; 6</b><span>nobody has solved these either, but each is short enough for stage 3 to fold, so coordinates can exist for them and the current pipeline measures those. They are blank here for a dull reason. This record was written while the surface stage still ran before the fold, so when it asked for coordinates there were none yet. Re-running the chain fills this group in</span></div>
+    </div><div class="lane-grp"><b>A shape could be predicted for these, and this run did not &middot; 1</b><span>nobody has solved these either, but each is short enough for stage 3 to fold, so coordinates can exist for them and the current pipeline measures those. They are blank here for a dull reason. This record was written while the surface stage still ran before the fold, so when it asked for coordinates there were none yet. Re-running the chain fills this group in</span></div>
     <div class="lr none">
       <span class="who"><span class="t">Small envelope protein M</span>
         <span class="w">1 chains map to P27909 and none covers 206-280 &middot; <i>75 aa, inside the 400-residue ceiling</i></span></span>
-      <span class="plot"></span>
-      <span class="vl">&mdash;</span>
-    </div>
-    <div class="lr none">
-      <span class="who"><span class="t">Protein C</span>
-        <span class="w">1 chains map to P27909 and none covers 1-100 &middot; <i>100 aa, inside the 400-residue ceiling</i></span></span>
-      <span class="plot"></span>
-      <span class="vl">&mdash;</span>
-    </div>
-    <div class="lr none">
-      <span class="who"><span class="t">Non-structural protein 2A</span>
-        <span class="w">1 chains map to P27909 and none covers 1128-1345 &middot; <i>218 aa, inside the 400-residue ceiling</i></span></span>
-      <span class="plot"></span>
-      <span class="vl">&mdash;</span>
-    </div>
-    <div class="lr none">
-      <span class="who"><span class="t">Non-structural protein 2A-alpha</span>
-        <span class="w">1 chains map to P27909 and none covers 1128-1315 &middot; <i>188 aa, inside the 400-residue ceiling</i></span></span>
-      <span class="plot"></span>
-      <span class="vl">&mdash;</span>
-    </div>
-    <div class="lr none">
-      <span class="who"><span class="t">Non-structural protein 4A</span>
-        <span class="w">1 chains map to P27909 and none covers 2095-2221 &middot; <i>127 aa, inside the 400-residue ceiling</i></span></span>
-      <span class="plot"></span>
-      <span class="vl">&mdash;</span>
-    </div>
-    <div class="lr none">
-      <span class="who"><span class="t">Non-structural protein 4B</span>
-        <span class="w">1 chains map to P27909 and none covers 2245-2493 &middot; <i>249 aa, inside the 400-residue ceiling</i></span></span>
       <span class="plot"></span>
       <span class="vl">&mdash;</span>
     </div><div class="lane-grp"><b>No surface by either route &middot; 3</b><span>nothing is deposited for these and they are over the 400-residue ceiling, so this run folded none of them and has no surface to offer. It says so, and the chain keeps its row. What it is not is a statement that none of them can be reached: stage 3&rsquo;s lane above lists the functionally important regions their relatives annotate, and they are short enough</span></div>
@@ -515,7 +376,7 @@
     tool declaring exactly 600 is admitted.</li>
     <li><b>What keeps them off the path is the cost they actually run up</b>, about 210
     seconds for one target across the five, against a chain that finishes in
-    639 seconds.</li>
+    388 seconds.</li>
     <li><b>Nothing they return changes a rank.</b></li>
   </ul>
   
@@ -527,7 +388,7 @@
       <div class="pdbrow none">
         <span class="who">Search the literature<em>Europe PMC</em></span>
         <span class="ids">empty
-          · 33.59 s
+          · 3.51 s
           · 7 requests
           <br>A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.
           
@@ -536,8 +397,8 @@
       <div class="pdbrow">
         <span class="who">Find relatives<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 38.32 s
-          · 11 requests
+          · 55.25 s
+          · 15 requests
           
           <br>resolution attempts count 1 · database ID swissprot · database name SwissProt · database version 2025 01 · database release date 2025-01-01 · declared databases not served count 0 · homologs count 50 · homolog count 50 · hits returned 50 · hits dropped by min identity 0
         </span>
@@ -545,7 +406,7 @@
       <div class="pdbrow">
         <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
-          · 14.65 s
+          · 6.14 s
           · 15 requests
           
           <br>protein name Genome polyprotein · organism Dengue virus type 1 (strain Brazil/97-11/1997) · sequence md5 1C853D6ED5D99DECE4BA098B5EF72467 · sequence length 3,392 · sequence source uniprot · assignments count 59 · predicted count 51 · sequence features count 17 · residue ranges count 37 · functional sites count 16
@@ -554,7 +415,7 @@
       <div class="pdbrow">
         <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 1.8 s
+          · 1.26 s
           · 2 requests
           
           <br>sequence length 3,392 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 15 · providers queried count 2 · providers with models count 2 · alphafold host queried yes · alphafold host served models no
@@ -563,7 +424,7 @@
       <div class="pdbrow">
         <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 2.06 s
+          · 3.64 s
           · 4 requests
           
           <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
@@ -578,7 +439,7 @@
       <div class="pdbrow">
         <span class="who">Search the literature<em>Europe PMC</em></span>
         <span class="ids">ok
-          · 25.17 s
+          · 9.19 s
           · 7 requests
           
           <br>subject kind term · scope title abstract · hit count 42 · returned 10 · hits with abstract 10 · preprints returned 0 · limitations count 8 · sources count 7
@@ -587,8 +448,8 @@
       <div class="pdbrow">
         <span class="who">Find relatives<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 20.26 s
-          · 7 requests
+          · 4.56 s
+          · 5 requests
           
           <br>resolution attempts count 1 · database ID swissprot · database name SwissProt · database version 2025 01 · database release date 2025-01-01 · declared databases not served count 0 · homologs count 50 · homolog count 50 · hits returned 50 · hits dropped by min identity 0
         </span>
@@ -596,7 +457,7 @@
       <div class="pdbrow">
         <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
-          · 13.6 s
+          · 6.12 s
           · 15 requests
           
           <br>protein name Genome polyprotein · organism Dengue virus type 1 (strain Brazil/97-11/1997) · sequence md5 1C853D6ED5D99DECE4BA098B5EF72467 · sequence length 3,392 · sequence source uniprot · assignments count 59 · predicted count 51 · sequence features count 17 · residue ranges count 37 · functional sites count 16
@@ -605,7 +466,7 @@
       <div class="pdbrow">
         <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 2.83 s
+          · 1.48 s
           · 2 requests
           
           <br>sequence length 3,392 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 15 · providers queried count 2 · providers with models count 2 · alphafold host queried yes · alphafold host served models no
@@ -614,7 +475,7 @@
       <div class="pdbrow">
         <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 2.11 s
+          · 10.9 s
           · 4 requests
           
           <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
@@ -629,7 +490,7 @@
       <div class="pdbrow none">
         <span class="who">Search the literature<em>Europe PMC</em></span>
         <span class="ids">empty
-          · 40.25 s
+          · 3.42 s
           · 7 requests
           <br>A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.
           
@@ -638,8 +499,8 @@
       <div class="pdbrow">
         <span class="who">Find relatives<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 121.5 s
-          · 25 requests
+          · 5.8 s
+          · 5 requests
           
           <br>resolution attempts count 1 · database ID swissprot · database name SwissProt · database version 2025 01 · database release date 2025-01-01 · declared databases not served count 0 · homologs count 50 · homolog count 50 · hits returned 50 · hits dropped by min identity 0
         </span>
@@ -647,7 +508,7 @@
       <div class="pdbrow">
         <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
-          · 13.99 s
+          · 6.07 s
           · 15 requests
           
           <br>protein name Genome polyprotein · organism Dengue virus type 1 (strain Brazil/97-11/1997) · sequence md5 1C853D6ED5D99DECE4BA098B5EF72467 · sequence length 3,392 · sequence source uniprot · assignments count 59 · predicted count 51 · sequence features count 17 · residue ranges count 37 · functional sites count 16
@@ -656,7 +517,7 @@
       <div class="pdbrow">
         <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 1.58 s
+          · 1.24 s
           · 2 requests
           
           <br>sequence length 3,392 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 15 · providers queried count 2 · providers with models count 2 · alphafold host queried yes · alphafold host served models no
@@ -665,7 +526,7 @@
       <div class="pdbrow">
         <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 2.93 s
+          · 13.99 s
           · 4 requests
           
           <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
