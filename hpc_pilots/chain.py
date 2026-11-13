@@ -1223,7 +1223,8 @@ MINIMUM_CHAIN_COVERAGE = 0.5
 
 # The residue length above which this stage does not send a SEQUENCE to the folding endpoint.
 # Named rather than left as a default argument because the record has to carry it and the site
-# has to read it: nine of the twenty chains on the SARS-CoV-2 holdout are longer than this,
+# has to read it: nine of the twenty chains the SARS-CoV-2 holdout ranked on 2026-11-12 were
+# longer than this, and eight of the twelve the gated run of 2026-11-13 ranks still are,
 # including the three spike chains and the polymerase, and a page that drew the line at a
 # hand-typed 400 would keep drawing it there after the ceiling moved.
 #

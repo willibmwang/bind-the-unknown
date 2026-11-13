@@ -2,26 +2,115 @@
   "experiment": "domain_inventory",
   "status": "complete",
   "question": "For the chains the folding ceiling refuses whole, does the curated annotation offer a functionally important region short enough to fold?",
-  "answer": "Yes, for 9 of the 9 chains over the 400-residue ceiling. Every chain the ceiling refuses whole has one.",
+  "answer": "Yes, for 8 of the 8 chains over the 400-residue ceiling. Every chain the ceiling refuses whole has one.",
   "genome_accession": "NC_045512.2",
   "case": "the pathogen deleted from the reference",
   "reference_excluded_organism": "severe acute respiratory syndrome coronavirus 2",
   "residue_ceiling": 400,
   "minimum_fold_unit_aa": 40,
   "summary": {
-    "chains": 20,
-    "chains_inventoried": 20,
+    "chains": 12,
+    "chains_inventoried": 12,
     "chains_without_a_curated_entry": 0,
-    "chains_over_the_ceiling": 9,
-    "chains_over_the_ceiling_with_a_foldable_region": 9,
+    "chains_over_the_ceiling": 8,
+    "chains_over_the_ceiling_with_a_foldable_region": 8,
     "chains_over_the_ceiling_with_none": 0,
-    "chains_with_no_annotated_site_residues": 3,
-    "regions_offered": 143,
-    "regions_foldable": 75
+    "chains_with_no_annotated_site_residues": 1,
+    "regions_offered": 97,
+    "regions_foldable": 54
   },
   "chains": [
     {
       "rank": 1,
+      "target": "3C-like proteinase nsp5",
+      "nearest_homolog": "P0C6X7",
+      "chain_range_on_the_relative": [
+        3241,
+        3546
+      ],
+      "span_in_this_genome": [
+        3264,
+        3569
+      ],
+      "length_aa": 306,
+      "sequence_recovered": true,
+      "whole_chain_inside_the_ceiling": true,
+      "regions_offered": 2,
+      "regions_foldable": 2,
+      "functional_site_residues": 4,
+      "regions": [
+        {
+          "type": "Domain",
+          "description": "Peptidase C30",
+          "entry_span_on_the_relative": [
+            3241,
+            3546
+          ],
+          "length_aa": 306,
+          "clipped_to_the_chain": false,
+          "site_residues_inside": 4,
+          "site_positions_inside_on_the_relative": [
+            3241,
+            3281,
+            3385,
+            3546
+          ],
+          "relevance_terms_matched": [
+            "peptidase"
+          ],
+          "describes_position_not_function": false,
+          "foldable": true,
+          "refused_because": null
+        },
+        {
+          "type": "Topological domain",
+          "description": "Cytoplasmic",
+          "entry_span_on_the_relative": [
+            3241,
+            3546
+          ],
+          "length_aa": 306,
+          "clipped_to_the_chain": true,
+          "site_residues_inside": 4,
+          "site_positions_inside_on_the_relative": [
+            3241,
+            3281,
+            3385,
+            3546
+          ],
+          "relevance_terms_matched": [],
+          "describes_position_not_function": true,
+          "foldable": true,
+          "refused_because": null
+        }
+      ],
+      "best_region": {
+        "type": "Domain",
+        "description": "Peptidase C30",
+        "entry_span_on_the_relative": [
+          3241,
+          3546
+        ],
+        "length_aa": 306,
+        "clipped_to_the_chain": false,
+        "site_residues_inside": 4,
+        "site_positions_inside_on_the_relative": [
+          3241,
+          3281,
+          3385,
+          3546
+        ],
+        "relevance_terms_matched": [
+          "peptidase"
+        ],
+        "describes_position_not_function": false,
+        "foldable": true,
+        "refused_because": null
+      },
+      "not_inventoried_because": null
+    },
+    {
+      "rank": 2,
       "target": "Spike protein S2'",
       "nearest_homolog": "Q3LZX1",
       "chain_range_on_the_relative": [
@@ -220,95 +309,6 @@
         "site_residues_inside": 0,
         "site_positions_inside_on_the_relative": [],
         "relevance_terms_matched": [],
-        "describes_position_not_function": false,
-        "foldable": true,
-        "refused_because": null
-      },
-      "not_inventoried_because": null
-    },
-    {
-      "rank": 2,
-      "target": "3C-like proteinase nsp5",
-      "nearest_homolog": "P0C6X7",
-      "chain_range_on_the_relative": [
-        3241,
-        3546
-      ],
-      "span_in_this_genome": [
-        3264,
-        3569
-      ],
-      "length_aa": 306,
-      "sequence_recovered": true,
-      "whole_chain_inside_the_ceiling": true,
-      "regions_offered": 2,
-      "regions_foldable": 2,
-      "functional_site_residues": 4,
-      "regions": [
-        {
-          "type": "Domain",
-          "description": "Peptidase C30",
-          "entry_span_on_the_relative": [
-            3241,
-            3546
-          ],
-          "length_aa": 306,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 4,
-          "site_positions_inside_on_the_relative": [
-            3241,
-            3281,
-            3385,
-            3546
-          ],
-          "relevance_terms_matched": [
-            "peptidase"
-          ],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            3241,
-            3546
-          ],
-          "length_aa": 306,
-          "clipped_to_the_chain": true,
-          "site_residues_inside": 4,
-          "site_positions_inside_on_the_relative": [
-            3241,
-            3281,
-            3385,
-            3546
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": true,
-          "refused_because": null
-        }
-      ],
-      "best_region": {
-        "type": "Domain",
-        "description": "Peptidase C30",
-        "entry_span_on_the_relative": [
-          3241,
-          3546
-        ],
-        "length_aa": 306,
-        "clipped_to_the_chain": false,
-        "site_residues_inside": 4,
-        "site_positions_inside_on_the_relative": [
-          3241,
-          3281,
-          3385,
-          3546
-        ],
-        "relevance_terms_matched": [
-          "peptidase"
-        ],
         "describes_position_not_function": false,
         "foldable": true,
         "refused_because": null
@@ -1739,46 +1739,39 @@
     },
     {
       "rank": 9,
-      "target": "AP3A_BC279 Protein 3",
-      "nearest_homolog": "Q0Q474",
-      "chain_range_on_the_relative": null,
-      "span_in_this_genome": null,
-      "length_aa": 275,
+      "target": "2'-O-methyltransferase nsp16",
+      "nearest_homolog": "P0C6X7",
+      "chain_range_on_the_relative": [
+        6776,
+        7073
+      ],
+      "span_in_this_genome": [
+        2298,
+        2595
+      ],
+      "length_aa": 298,
       "sequence_recovered": true,
       "whole_chain_inside_the_ceiling": true,
-      "regions_offered": 9,
-      "regions_foldable": 3,
-      "functional_site_residues": 1,
+      "regions_offered": 2,
+      "regions_foldable": 2,
+      "functional_site_residues": 5,
       "regions": [
         {
           "type": "Domain",
-          "description": "CoV 3a-like viroporin TM",
+          "description": "Nidovirus-type SAM-dependent 2'-O-MTase",
           "entry_span_on_the_relative": [
-            33,
-            141
+            6777,
+            7071
           ],
-          "length_aa": 109,
+          "length_aa": 295,
           "clipped_to_the_chain": false,
-          "site_residues_inside": 1,
+          "site_residues_inside": 4,
           "site_positions_inside_on_the_relative": [
-            133
+            6821,
+            6905,
+            6945,
+            6978
           ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Domain",
-          "description": "CoV 3a-like viroporin CD",
-          "entry_span_on_the_relative": [
-            145,
-            237
-          ],
-          "length_aa": 93,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
           "relevance_terms_matched": [],
           "describes_position_not_function": false,
           "foldable": true,
@@ -1788,129 +1781,40 @@
           "type": "Topological domain",
           "description": "Cytoplasmic",
           "entry_span_on_the_relative": [
-            126,
-            274
+            6776,
+            7073
           ],
-          "length_aa": 149,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 1,
+          "length_aa": 298,
+          "clipped_to_the_chain": true,
+          "site_residues_inside": 5,
           "site_positions_inside_on_the_relative": [
-            133
+            6776,
+            6821,
+            6905,
+            6945,
+            6978
           ],
           "relevance_terms_matched": [],
           "describes_position_not_function": true,
           "foldable": true,
           "refused_because": null
-        },
-        {
-          "type": "Topological domain",
-          "description": "Extracellular",
-          "entry_span_on_the_relative": [
-            1,
-            34
-          ],
-          "length_aa": 34,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "34 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            56,
-            78
-          ],
-          "length_aa": 23,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "23 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Transmembrane",
-          "description": "Helical",
-          "entry_span_on_the_relative": [
-            35,
-            55
-          ],
-          "length_aa": 21,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Transmembrane",
-          "description": "Helical",
-          "entry_span_on_the_relative": [
-            79,
-            99
-          ],
-          "length_aa": 21,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Transmembrane",
-          "description": "Helical",
-          "entry_span_on_the_relative": [
-            105,
-            125
-          ],
-          "length_aa": 21,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Topological domain",
-          "description": "Extracellular",
-          "entry_span_on_the_relative": [
-            100,
-            104
-          ],
-          "length_aa": 5,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "5 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
         }
       ],
       "best_region": {
         "type": "Domain",
-        "description": "CoV 3a-like viroporin TM",
+        "description": "Nidovirus-type SAM-dependent 2'-O-MTase",
         "entry_span_on_the_relative": [
-          33,
-          141
+          6777,
+          7071
         ],
-        "length_aa": 109,
+        "length_aa": 295,
         "clipped_to_the_chain": false,
-        "site_residues_inside": 1,
+        "site_residues_inside": 4,
         "site_positions_inside_on_the_relative": [
-          133
+          6821,
+          6905,
+          6945,
+          6978
         ],
         "relevance_terms_matched": [],
         "describes_position_not_function": false,
@@ -1921,6 +1825,183 @@
     },
     {
       "rank": 10,
+      "target": "Guanine-N7 methyltransferase nsp14",
+      "nearest_homolog": "P0C6X7",
+      "chain_range_on_the_relative": [
+        5903,
+        6429
+      ],
+      "span_in_this_genome": [
+        1425,
+        1951
+      ],
+      "length_aa": 527,
+      "sequence_recovered": true,
+      "whole_chain_inside_the_ceiling": false,
+      "regions_offered": 5,
+      "regions_foldable": 2,
+      "functional_site_residues": 26,
+      "regions": [
+        {
+          "type": "Domain",
+          "description": "ExoN",
+          "entry_span_on_the_relative": [
+            5974,
+            6189
+          ],
+          "length_aa": 216,
+          "clipped_to_the_chain": false,
+          "site_residues_inside": 13,
+          "site_positions_inside_on_the_relative": [
+            5992,
+            5994,
+            6093,
+            6109,
+            6112,
+            6128,
+            6131,
+            6159,
+            6163,
+            6166,
+            6170,
+            6175
+          ],
+          "relevance_terms_matched": [],
+          "describes_position_not_function": false,
+          "foldable": true,
+          "refused_because": null
+        },
+        {
+          "type": "Domain",
+          "description": "N7-MTase",
+          "entry_span_on_the_relative": [
+            6198,
+            6429
+          ],
+          "length_aa": 232,
+          "clipped_to_the_chain": false,
+          "site_residues_inside": 12,
+          "site_positions_inside_on_the_relative": [
+            6233,
+            6234,
+            6235,
+            6236,
+            6237,
+            6238,
+            6239,
+            6354,
+            6375,
+            6386,
+            6389,
+            6429
+          ],
+          "relevance_terms_matched": [],
+          "describes_position_not_function": false,
+          "foldable": true,
+          "refused_because": null
+        },
+        {
+          "type": "Domain",
+          "description": "(+)RNA virus helicase C-terminal",
+          "entry_span_on_the_relative": [
+            5903,
+            5909
+          ],
+          "length_aa": 7,
+          "clipped_to_the_chain": true,
+          "site_residues_inside": 1,
+          "site_positions_inside_on_the_relative": [
+            5903
+          ],
+          "relevance_terms_matched": [
+            "helicase",
+            "rna"
+          ],
+          "describes_position_not_function": false,
+          "foldable": false,
+          "refused_because": "7 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
+        },
+        {
+          "type": "Region",
+          "description": "GpppA-binding",
+          "entry_span_on_the_relative": [
+            6316,
+            6330
+          ],
+          "length_aa": 15,
+          "clipped_to_the_chain": false,
+          "site_residues_inside": 0,
+          "site_positions_inside_on_the_relative": [],
+          "relevance_terms_matched": [
+            "binding"
+          ],
+          "describes_position_not_function": false,
+          "foldable": false,
+          "refused_because": "15 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
+        },
+        {
+          "type": "Topological domain",
+          "description": "Cytoplasmic",
+          "entry_span_on_the_relative": [
+            5903,
+            6429
+          ],
+          "length_aa": 527,
+          "clipped_to_the_chain": true,
+          "site_residues_inside": 26,
+          "site_positions_inside_on_the_relative": [
+            5903,
+            5992,
+            5994,
+            6093,
+            6109,
+            6112,
+            6128,
+            6131,
+            6159,
+            6163,
+            6166,
+            6170
+          ],
+          "relevance_terms_matched": [],
+          "describes_position_not_function": true,
+          "foldable": false,
+          "refused_because": "527 residues, over the 400-residue ceiling the folding endpoint applies, so this region is no more foldable than the whole chain."
+        }
+      ],
+      "best_region": {
+        "type": "Domain",
+        "description": "ExoN",
+        "entry_span_on_the_relative": [
+          5974,
+          6189
+        ],
+        "length_aa": 216,
+        "clipped_to_the_chain": false,
+        "site_residues_inside": 13,
+        "site_positions_inside_on_the_relative": [
+          5992,
+          5994,
+          6093,
+          6109,
+          6112,
+          6128,
+          6131,
+          6159,
+          6163,
+          6166,
+          6170,
+          6175
+        ],
+        "relevance_terms_matched": [],
+        "describes_position_not_function": false,
+        "foldable": true,
+        "refused_because": null
+      },
+      "not_inventoried_because": null
+    },
+    {
+      "rank": 11,
       "target": "NCAP_BCRP3 Nucleoprotein",
       "nearest_homolog": "Q3I5I7",
       "chain_range_on_the_relative": null,
@@ -2100,181 +2181,44 @@
       "not_inventoried_because": null
     },
     {
-      "rank": 11,
-      "target": "Non-structural protein 10",
-      "nearest_homolog": "P0C6X7",
-      "chain_range_on_the_relative": [
-        4231,
-        4369
-      ],
-      "span_in_this_genome": [
-        4254,
-        4392
-      ],
-      "length_aa": 139,
+      "rank": 13,
+      "target": "AP3A_BC279 Protein 3",
+      "nearest_homolog": "Q0Q474",
+      "chain_range_on_the_relative": null,
+      "span_in_this_genome": null,
+      "length_aa": 275,
       "sequence_recovered": true,
       "whole_chain_inside_the_ceiling": true,
-      "regions_offered": 4,
-      "regions_foldable": 2,
-      "functional_site_residues": 10,
-      "regions": [
-        {
-          "type": "Domain",
-          "description": "ExoN/MTase coactivator",
-          "entry_span_on_the_relative": [
-            4231,
-            4369
-          ],
-          "length_aa": 139,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 10,
-          "site_positions_inside_on_the_relative": [
-            4231,
-            4304,
-            4307,
-            4313,
-            4320,
-            4347,
-            4350,
-            4358,
-            4360,
-            4369
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Zinc finger",
-          "description": "",
-          "entry_span_on_the_relative": [
-            4304,
-            4320
-          ],
-          "length_aa": 17,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 4,
-          "site_positions_inside_on_the_relative": [
-            4304,
-            4307,
-            4313,
-            4320
-          ],
-          "relevance_terms_matched": [
-            "zinc"
-          ],
-          "describes_position_not_function": false,
-          "foldable": false,
-          "refused_because": "17 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Zinc finger",
-          "description": "",
-          "entry_span_on_the_relative": [
-            4347,
-            4360
-          ],
-          "length_aa": 14,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 4,
-          "site_positions_inside_on_the_relative": [
-            4347,
-            4350,
-            4358,
-            4360
-          ],
-          "relevance_terms_matched": [
-            "zinc"
-          ],
-          "describes_position_not_function": false,
-          "foldable": false,
-          "refused_because": "14 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            4231,
-            4369
-          ],
-          "length_aa": 139,
-          "clipped_to_the_chain": true,
-          "site_residues_inside": 10,
-          "site_positions_inside_on_the_relative": [
-            4231,
-            4304,
-            4307,
-            4313,
-            4320,
-            4347,
-            4350,
-            4358,
-            4360,
-            4369
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": true,
-          "refused_because": null
-        }
-      ],
-      "best_region": {
-        "type": "Domain",
-        "description": "ExoN/MTase coactivator",
-        "entry_span_on_the_relative": [
-          4231,
-          4369
-        ],
-        "length_aa": 139,
-        "clipped_to_the_chain": false,
-        "site_residues_inside": 10,
-        "site_positions_inside_on_the_relative": [
-          4231,
-          4304,
-          4307,
-          4313,
-          4320,
-          4347,
-          4350,
-          4358,
-          4360,
-          4369
-        ],
-        "relevance_terms_matched": [],
-        "describes_position_not_function": false,
-        "foldable": true,
-        "refused_because": null
-      },
-      "not_inventoried_because": null
-    },
-    {
-      "rank": 12,
-      "target": "Host translation inhibitor nsp1",
-      "nearest_homolog": "P0C6X7",
-      "chain_range_on_the_relative": [
-        1,
-        180
-      ],
-      "span_in_this_genome": [
-        1,
-        180
-      ],
-      "length_aa": 180,
-      "sequence_recovered": true,
-      "whole_chain_inside_the_ceiling": true,
-      "regions_offered": 3,
-      "regions_foldable": 2,
+      "regions_offered": 9,
+      "regions_foldable": 3,
       "functional_site_residues": 1,
       "regions": [
         {
           "type": "Domain",
-          "description": "CoV Nsp1 globular",
+          "description": "CoV 3a-like viroporin TM",
           "entry_span_on_the_relative": [
-            12,
-            127
+            33,
+            141
           ],
-          "length_aa": 116,
+          "length_aa": 109,
+          "clipped_to_the_chain": false,
+          "site_residues_inside": 1,
+          "site_positions_inside_on_the_relative": [
+            133
+          ],
+          "relevance_terms_matched": [],
+          "describes_position_not_function": false,
+          "foldable": true,
+          "refused_because": null
+        },
+        {
+          "type": "Domain",
+          "description": "CoV 3a-like viroporin CD",
+          "entry_span_on_the_relative": [
+            145,
+            237
+          ],
+          "length_aa": 93,
           "clipped_to_the_chain": false,
           "site_residues_inside": 0,
           "site_positions_inside_on_the_relative": [],
@@ -2284,634 +2228,29 @@
           "refused_because": null
         },
         {
-          "type": "Domain",
-          "description": "BetaCoV Nsp1 C-terminal",
+          "type": "Topological domain",
+          "description": "Cytoplasmic",
           "entry_span_on_the_relative": [
-            148,
-            179
+            126,
+            274
           ],
-          "length_aa": 32,
+          "length_aa": 149,
           "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
+          "site_residues_inside": 1,
+          "site_positions_inside_on_the_relative": [
+            133
+          ],
           "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": false,
-          "refused_because": "32 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
+          "describes_position_not_function": true,
+          "foldable": true,
+          "refused_because": null
         },
         {
           "type": "Topological domain",
-          "description": "Cytoplasmic",
+          "description": "Extracellular",
           "entry_span_on_the_relative": [
             1,
-            180
-          ],
-          "length_aa": 180,
-          "clipped_to_the_chain": true,
-          "site_residues_inside": 1,
-          "site_positions_inside_on_the_relative": [
-            180
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": true,
-          "refused_because": null
-        }
-      ],
-      "best_region": {
-        "type": "Domain",
-        "description": "CoV Nsp1 globular",
-        "entry_span_on_the_relative": [
-          12,
-          127
-        ],
-        "length_aa": 116,
-        "clipped_to_the_chain": false,
-        "site_residues_inside": 0,
-        "site_positions_inside_on_the_relative": [],
-        "relevance_terms_matched": [],
-        "describes_position_not_function": false,
-        "foldable": true,
-        "refused_because": null
-      },
-      "not_inventoried_because": null
-    },
-    {
-      "rank": 13,
-      "target": "Non-structural protein 7",
-      "nearest_homolog": "P0C6X7",
-      "chain_range_on_the_relative": [
-        3837,
-        3919
-      ],
-      "span_in_this_genome": [
-        3860,
-        3942
-      ],
-      "length_aa": 83,
-      "sequence_recovered": true,
-      "whole_chain_inside_the_ceiling": true,
-      "regions_offered": 2,
-      "regions_foldable": 2,
-      "functional_site_residues": 2,
-      "regions": [
-        {
-          "type": "Domain",
-          "description": "RdRp Nsp7 cofactor",
-          "entry_span_on_the_relative": [
-            3837,
-            3919
-          ],
-          "length_aa": 83,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 2,
-          "site_positions_inside_on_the_relative": [
-            3837,
-            3919
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            3837,
-            3919
-          ],
-          "length_aa": 83,
-          "clipped_to_the_chain": true,
-          "site_residues_inside": 2,
-          "site_positions_inside_on_the_relative": [
-            3837,
-            3919
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": true,
-          "refused_because": null
-        }
-      ],
-      "best_region": {
-        "type": "Domain",
-        "description": "RdRp Nsp7 cofactor",
-        "entry_span_on_the_relative": [
-          3837,
-          3919
-        ],
-        "length_aa": 83,
-        "clipped_to_the_chain": false,
-        "site_residues_inside": 2,
-        "site_positions_inside_on_the_relative": [
-          3837,
-          3919
-        ],
-        "relevance_terms_matched": [],
-        "describes_position_not_function": false,
-        "foldable": true,
-        "refused_because": null
-      },
-      "not_inventoried_because": null
-    },
-    {
-      "rank": 14,
-      "target": "Non-structural protein 8",
-      "nearest_homolog": "P0C6X7",
-      "chain_range_on_the_relative": [
-        3920,
-        4117
-      ],
-      "span_in_this_genome": [
-        3943,
-        4140
-      ],
-      "length_aa": 198,
-      "sequence_recovered": true,
-      "whole_chain_inside_the_ceiling": true,
-      "regions_offered": 2,
-      "regions_foldable": 2,
-      "functional_site_residues": 2,
-      "regions": [
-        {
-          "type": "Domain",
-          "description": "RdRp Nsp8 cofactor",
-          "entry_span_on_the_relative": [
-            3920,
-            4117
-          ],
-          "length_aa": 198,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 2,
-          "site_positions_inside_on_the_relative": [
-            3920,
-            4117
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            3920,
-            4117
-          ],
-          "length_aa": 198,
-          "clipped_to_the_chain": true,
-          "site_residues_inside": 2,
-          "site_positions_inside_on_the_relative": [
-            3920,
-            4117
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": true,
-          "refused_because": null
-        }
-      ],
-      "best_region": {
-        "type": "Domain",
-        "description": "RdRp Nsp8 cofactor",
-        "entry_span_on_the_relative": [
-          3920,
-          4117
-        ],
-        "length_aa": 198,
-        "clipped_to_the_chain": false,
-        "site_residues_inside": 2,
-        "site_positions_inside_on_the_relative": [
-          3920,
-          4117
-        ],
-        "relevance_terms_matched": [],
-        "describes_position_not_function": false,
-        "foldable": true,
-        "refused_because": null
-      },
-      "not_inventoried_because": null
-    },
-    {
-      "rank": 15,
-      "target": "Viral protein genome-linked nsp9",
-      "nearest_homolog": "P0C6X7",
-      "chain_range_on_the_relative": [
-        4118,
-        4230
-      ],
-      "span_in_this_genome": [
-        4141,
-        4253
-      ],
-      "length_aa": 113,
-      "sequence_recovered": true,
-      "whole_chain_inside_the_ceiling": true,
-      "regions_offered": 2,
-      "regions_foldable": 2,
-      "functional_site_residues": 2,
-      "regions": [
-        {
-          "type": "Domain",
-          "description": "Nsp9 ssRNA-binding",
-          "entry_span_on_the_relative": [
-            4118,
-            4230
-          ],
-          "length_aa": 113,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 2,
-          "site_positions_inside_on_the_relative": [
-            4118,
-            4230
-          ],
-          "relevance_terms_matched": [
-            "binding",
-            "rna"
-          ],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            4118,
-            4230
-          ],
-          "length_aa": 113,
-          "clipped_to_the_chain": true,
-          "site_residues_inside": 2,
-          "site_positions_inside_on_the_relative": [
-            4118,
-            4230
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": true,
-          "refused_because": null
-        }
-      ],
-      "best_region": {
-        "type": "Domain",
-        "description": "Nsp9 ssRNA-binding",
-        "entry_span_on_the_relative": [
-          4118,
-          4230
-        ],
-        "length_aa": 113,
-        "clipped_to_the_chain": false,
-        "site_residues_inside": 2,
-        "site_positions_inside_on_the_relative": [
-          4118,
-          4230
-        ],
-        "relevance_terms_matched": [
-          "binding",
-          "rna"
-        ],
-        "describes_position_not_function": false,
-        "foldable": true,
-        "refused_because": null
-      },
-      "not_inventoried_because": null
-    },
-    {
-      "rank": 16,
-      "target": "Non-structural protein 2",
-      "nearest_homolog": "P0C6X7",
-      "chain_range_on_the_relative": [
-        181,
-        818
-      ],
-      "span_in_this_genome": [
-        181,
-        818
-      ],
-      "length_aa": 638,
-      "sequence_recovered": true,
-      "whole_chain_inside_the_ceiling": false,
-      "regions_offered": 7,
-      "regions_foldable": 4,
-      "functional_site_residues": 14,
-      "regions": [
-        {
-          "type": "Domain",
-          "description": "CoV Nsp2 N-terminal",
-          "entry_span_on_the_relative": [
-            183,
-            456
-          ],
-          "length_aa": 274,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 12,
-          "site_positions_inside_on_the_relative": [
-            200,
-            231,
-            234,
-            236,
-            323,
-            326,
-            341,
-            344,
-            370,
-            373,
-            382,
-            416
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Region",
-          "description": "C2HC",
-          "entry_span_on_the_relative": [
-            370,
-            416
-          ],
-          "length_aa": 47,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 4,
-          "site_positions_inside_on_the_relative": [
-            370,
-            373,
-            382,
-            416
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Region",
-          "description": "C2H2",
-          "entry_span_on_the_relative": [
-            200,
-            236
-          ],
-          "length_aa": 37,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 4,
-          "site_positions_inside_on_the_relative": [
-            200,
-            231,
-            234,
-            236
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": false,
-          "refused_because": "37 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Region",
-          "description": "C4",
-          "entry_span_on_the_relative": [
-            323,
-            344
-          ],
-          "length_aa": 22,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 4,
-          "site_positions_inside_on_the_relative": [
-            323,
-            326,
-            341,
-            344
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": false,
-          "refused_because": "22 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Domain",
-          "description": "CoV Nsp2 C-terminal",
-          "entry_span_on_the_relative": [
-            690,
-            818
-          ],
-          "length_aa": 129,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 1,
-          "site_positions_inside_on_the_relative": [
-            818
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Domain",
-          "description": "CoV Nsp2 middle",
-          "entry_span_on_the_relative": [
-            458,
-            688
-          ],
-          "length_aa": 231,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            181,
-            818
-          ],
-          "length_aa": 638,
-          "clipped_to_the_chain": true,
-          "site_residues_inside": 14,
-          "site_positions_inside_on_the_relative": [
-            181,
-            200,
-            231,
-            234,
-            236,
-            323,
-            326,
-            341,
-            344,
-            370,
-            373,
-            382
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "638 residues, over the 400-residue ceiling the folding endpoint applies, so this region is no more foldable than the whole chain."
-        }
-      ],
-      "best_region": {
-        "type": "Domain",
-        "description": "CoV Nsp2 N-terminal",
-        "entry_span_on_the_relative": [
-          183,
-          456
-        ],
-        "length_aa": 274,
-        "clipped_to_the_chain": false,
-        "site_residues_inside": 12,
-        "site_positions_inside_on_the_relative": [
-          200,
-          231,
-          234,
-          236,
-          323,
-          326,
-          341,
-          344,
-          370,
-          373,
-          382,
-          416
-        ],
-        "relevance_terms_matched": [],
-        "describes_position_not_function": false,
-        "foldable": true,
-        "refused_because": null
-      },
-      "not_inventoried_because": null
-    },
-    {
-      "rank": 17,
-      "target": "Non-structural protein 4",
-      "nearest_homolog": "P0C6X7",
-      "chain_range_on_the_relative": [
-        2741,
-        3240
-      ],
-      "span_in_this_genome": [
-        2764,
-        3263
-      ],
-      "length_aa": 500,
-      "sequence_recovered": true,
-      "whole_chain_inside_the_ceiling": false,
-      "regions_offered": 12,
-      "regions_foldable": 5,
-      "functional_site_residues": 2,
-      "regions": [
-        {
-          "type": "Domain",
-          "description": "Nsp4C",
-          "entry_span_on_the_relative": [
-            3142,
-            3240
-          ],
-          "length_aa": 99,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 1,
-          "site_positions_inside_on_the_relative": [
-            3240
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Region",
-          "description": "HD2",
-          "entry_span_on_the_relative": [
-            2755,
-            3125
-          ],
-          "length_aa": 371,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Domain",
-          "description": "4Ecto",
-          "entry_span_on_the_relative": [
-            2776,
-            3020
-          ],
-          "length_aa": 245,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            3126,
-            3240
-          ],
-          "length_aa": 115,
-          "clipped_to_the_chain": true,
-          "site_residues_inside": 1,
-          "site_positions_inside_on_the_relative": [
-            3240
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            2741,
-            2754
-          ],
-          "length_aa": 14,
-          "clipped_to_the_chain": true,
-          "site_residues_inside": 1,
-          "site_positions_inside_on_the_relative": [
-            2741
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "14 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Topological domain",
-          "description": "Lumenal",
-          "entry_span_on_the_relative": [
-            2776,
-            3021
-          ],
-          "length_aa": 246,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            3043,
-            3076
+            34
           ],
           "length_aa": 34,
           "clipped_to_the_chain": false,
@@ -2923,11 +2262,27 @@
           "refused_because": "34 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
         },
         {
+          "type": "Topological domain",
+          "description": "Cytoplasmic",
+          "entry_span_on_the_relative": [
+            56,
+            78
+          ],
+          "length_aa": 23,
+          "clipped_to_the_chain": false,
+          "site_residues_inside": 0,
+          "site_positions_inside_on_the_relative": [],
+          "relevance_terms_matched": [],
+          "describes_position_not_function": true,
+          "foldable": false,
+          "refused_because": "23 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
+        },
+        {
           "type": "Transmembrane",
           "description": "Helical",
           "entry_span_on_the_relative": [
-            2755,
-            2775
+            35,
+            55
           ],
           "length_aa": 21,
           "clipped_to_the_chain": false,
@@ -2942,8 +2297,8 @@
           "type": "Transmembrane",
           "description": "Helical",
           "entry_span_on_the_relative": [
-            3022,
-            3042
+            79,
+            99
           ],
           "length_aa": 21,
           "clipped_to_the_chain": false,
@@ -2958,24 +2313,8 @@
           "type": "Transmembrane",
           "description": "Helical",
           "entry_span_on_the_relative": [
-            3077,
-            3097
-          ],
-          "length_aa": 21,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Transmembrane",
-          "description": "Helical",
-          "entry_span_on_the_relative": [
-            3105,
-            3125
+            105,
+            125
           ],
           "length_aa": 21,
           "clipped_to_the_chain": false,
@@ -2988,482 +2327,34 @@
         },
         {
           "type": "Topological domain",
-          "description": "Lumenal",
+          "description": "Extracellular",
           "entry_span_on_the_relative": [
-            3098,
-            3104
+            100,
+            104
           ],
-          "length_aa": 7,
+          "length_aa": 5,
           "clipped_to_the_chain": false,
           "site_residues_inside": 0,
           "site_positions_inside_on_the_relative": [],
           "relevance_terms_matched": [],
           "describes_position_not_function": true,
           "foldable": false,
-          "refused_because": "7 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
+          "refused_because": "5 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
         }
       ],
       "best_region": {
         "type": "Domain",
-        "description": "Nsp4C",
+        "description": "CoV 3a-like viroporin TM",
         "entry_span_on_the_relative": [
-          3142,
-          3240
+          33,
+          141
         ],
-        "length_aa": 99,
+        "length_aa": 109,
         "clipped_to_the_chain": false,
         "site_residues_inside": 1,
         "site_positions_inside_on_the_relative": [
-          3240
+          133
         ],
-        "relevance_terms_matched": [],
-        "describes_position_not_function": false,
-        "foldable": true,
-        "refused_because": null
-      },
-      "not_inventoried_because": null
-    },
-    {
-      "rank": 18,
-      "target": "Non-structural protein 6",
-      "nearest_homolog": "P0C6X7",
-      "chain_range_on_the_relative": [
-        3547,
-        3836
-      ],
-      "span_in_this_genome": [
-        3573,
-        3859
-      ],
-      "length_aa": 287,
-      "sequence_recovered": true,
-      "whole_chain_inside_the_ceiling": true,
-      "regions_offered": 14,
-      "regions_foldable": 3,
-      "functional_site_residues": 2,
-      "regions": [
-        {
-          "type": "Region",
-          "description": "HD3",
-          "entry_span_on_the_relative": [
-            3564,
-            3776
-          ],
-          "length_aa": 213,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            3777,
-            3836
-          ],
-          "length_aa": 60,
-          "clipped_to_the_chain": true,
-          "site_residues_inside": 1,
-          "site_positions_inside_on_the_relative": [
-            3836
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            3547,
-            3563
-          ],
-          "length_aa": 17,
-          "clipped_to_the_chain": true,
-          "site_residues_inside": 1,
-          "site_positions_inside_on_the_relative": [
-            3547
-          ],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "17 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            3679,
-            3727
-          ],
-          "length_aa": 49,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Topological domain",
-          "description": "Lumenal",
-          "entry_span_on_the_relative": [
-            3633,
-            3657
-          ],
-          "length_aa": 25,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "25 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Transmembrane",
-          "description": "Helical",
-          "entry_span_on_the_relative": [
-            3564,
-            3584
-          ],
-          "length_aa": 21,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Transmembrane",
-          "description": "Helical",
-          "entry_span_on_the_relative": [
-            3586,
-            3606
-          ],
-          "length_aa": 21,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Transmembrane",
-          "description": "Helical",
-          "entry_span_on_the_relative": [
-            3612,
-            3632
-          ],
-          "length_aa": 21,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Transmembrane",
-          "description": "Helical",
-          "entry_span_on_the_relative": [
-            3658,
-            3678
-          ],
-          "length_aa": 21,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Transmembrane",
-          "description": "Helical",
-          "entry_span_on_the_relative": [
-            3728,
-            3748
-          ],
-          "length_aa": 21,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Transmembrane",
-          "description": "Helical",
-          "entry_span_on_the_relative": [
-            3756,
-            3776
-          ],
-          "length_aa": 21,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Topological domain",
-          "description": "Lumenal",
-          "entry_span_on_the_relative": [
-            3749,
-            3755
-          ],
-          "length_aa": 7,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "7 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Topological domain",
-          "description": "Cytoplasmic",
-          "entry_span_on_the_relative": [
-            3607,
-            3611
-          ],
-          "length_aa": 5,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "5 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Topological domain",
-          "description": "Lumenal",
-          "entry_span_on_the_relative": [
-            3585,
-            3585
-          ],
-          "length_aa": 1,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "1 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        }
-      ],
-      "best_region": {
-        "type": "Region",
-        "description": "HD3",
-        "entry_span_on_the_relative": [
-          3564,
-          3776
-        ],
-        "length_aa": 213,
-        "clipped_to_the_chain": false,
-        "site_residues_inside": 0,
-        "site_positions_inside_on_the_relative": [],
-        "relevance_terms_matched": [],
-        "describes_position_not_function": false,
-        "foldable": true,
-        "refused_because": null
-      },
-      "not_inventoried_because": null
-    },
-    {
-      "rank": 19,
-      "target": "Protein 7a",
-      "nearest_homolog": "Q3I5J0",
-      "chain_range_on_the_relative": [
-        16,
-        122
-      ],
-      "span_in_this_genome": [
-        16,
-        121
-      ],
-      "length_aa": 106,
-      "sequence_recovered": true,
-      "whole_chain_inside_the_ceiling": true,
-      "regions_offered": 5,
-      "regions_foldable": 2,
-      "functional_site_residues": 0,
-      "regions": [
-        {
-          "type": "Domain",
-          "description": "X4e",
-          "entry_span_on_the_relative": [
-            16,
-            81
-          ],
-          "length_aa": 66,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Motif",
-          "description": "Di-lysine motif",
-          "entry_span_on_the_relative": [
-            118,
-            122
-          ],
-          "length_aa": 5,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": false,
-          "refused_because": "5 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Topological domain",
-          "description": "Virion surface",
-          "entry_span_on_the_relative": [
-            16,
-            96
-          ],
-          "length_aa": 81,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Transmembrane",
-          "description": "Helical",
-          "entry_span_on_the_relative": [
-            97,
-            117
-          ],
-          "length_aa": 21,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "21 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        },
-        {
-          "type": "Topological domain",
-          "description": "Intravirion",
-          "entry_span_on_the_relative": [
-            118,
-            122
-          ],
-          "length_aa": 5,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": true,
-          "foldable": false,
-          "refused_because": "5 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        }
-      ],
-      "best_region": {
-        "type": "Domain",
-        "description": "X4e",
-        "entry_span_on_the_relative": [
-          16,
-          81
-        ],
-        "length_aa": 66,
-        "clipped_to_the_chain": false,
-        "site_residues_inside": 0,
-        "site_positions_inside_on_the_relative": [],
-        "relevance_terms_matched": [],
-        "describes_position_not_function": false,
-        "foldable": true,
-        "refused_because": null
-      },
-      "not_inventoried_because": null
-    },
-    {
-      "rank": 20,
-      "target": "ORF9B_SARS ORF9b protein",
-      "nearest_homolog": "P59636",
-      "chain_range_on_the_relative": null,
-      "span_in_this_genome": null,
-      "length_aa": 97,
-      "sequence_recovered": true,
-      "whole_chain_inside_the_ceiling": true,
-      "regions_offered": 2,
-      "regions_foldable": 1,
-      "functional_site_residues": 0,
-      "regions": [
-        {
-          "type": "Domain",
-          "description": "9b",
-          "entry_span_on_the_relative": [
-            9,
-            98
-          ],
-          "length_aa": 90,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": true,
-          "refused_because": null
-        },
-        {
-          "type": "Motif",
-          "description": "Nuclear export signal",
-          "entry_span_on_the_relative": [
-            46,
-            54
-          ],
-          "length_aa": 9,
-          "clipped_to_the_chain": false,
-          "site_residues_inside": 0,
-          "site_positions_inside_on_the_relative": [],
-          "relevance_terms_matched": [],
-          "describes_position_not_function": false,
-          "foldable": false,
-          "refused_because": "9 residues, under the 40-residue minimum for a fold unit. Its positions are still a site a macrocycle could be designed at; it is refused only as something to send to the endpoint."
-        }
-      ],
-      "best_region": {
-        "type": "Domain",
-        "description": "9b",
-        "entry_span_on_the_relative": [
-          9,
-          98
-        ],
-        "length_aa": 90,
-        "clipped_to_the_chain": false,
-        "site_residues_inside": 0,
-        "site_positions_inside_on_the_relative": [],
         "relevance_terms_matched": [],
         "describes_position_not_function": false,
         "foldable": true,
@@ -3494,11 +2385,11 @@
     "host": "Williams-MacBook-Pro-260.local",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "e8feaf56d10527ffa486c35f8fed1e9c96f70ca1",
+    "git_commit": "b2361ad322dddb581c7d097f94f0ad8279315ddb",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-11-12T08:45:06.054431+00:00"
+    "recorded_at_utc": "2026-11-13T14:02:40.358558+00:00"
   },
-  "content_sha256": "815e2057a548224c7922c1fc2f9916671698b3ecef0e7b380f9b8bdbd039e80a"
+  "content_sha256": "73bd205c6150a21d3d5c392dd01bf7e80e008b322c78532826fb82dae9695720"
 }
