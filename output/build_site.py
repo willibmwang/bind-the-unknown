@@ -342,6 +342,7 @@ def build_index():
     body = body.replace("<!--CANDIDATES-->", candidate_matrix(holdout))
     body = body.replace("<!--CHAINS-->", chain_matrix(holdout))
     body = body.replace("<!--PICKED-->", picked_table(holdout))
+    body = body.replace("<!--FOLD-TRACE-->", fold_trace())
     body = body.replace("<!--FOLD-LANE-->", fold_lane(holdout))
     body = body.replace("<!--LITERATURE-->", literature_block(holdout))
     body = body.replace("<!--SURFACE-LANE-->", surface_lane(holdout))
@@ -2835,6 +2836,313 @@ def build_fold_image():
         runs=tuple(tuple(r) for r in payload.get("low_confidence_runs", [])))
     fig.savefig(DOCS / "fold.png", facecolor=fig.get_facecolor(), bbox_inches="tight", dpi=150)
     print("wrote docs/fold.png")
+
+
+# The committed fold on the landing page, drawn as markup rather than pixels so a reader can
+# follow one residue through it: point at a letter of the sequence and the backbone and the
+# confidence trace both mark that residue, and pointing at either of those finds the letter.
+# The geometry is `panels.structure_figure`'s exactly -- the same PDB columns, the same
+# principal axes with the same pinned signs, the same bands -- so this and `fold.png` are one
+# drawing in two media, and the PNG stays as the static copy linked under it.
+#
+# The sequence printed is read back out of the PDB, never retyped, and is checked against
+# the record's own `sequence_sha256` before it is printed. A drifted file falls back to the
+# PNG rather than putting a sequence on the page that the fold was not run on.
+_AA_NAME = {"A": "Ala", "R": "Arg", "N": "Asn", "D": "Asp", "C": "Cys", "Q": "Gln",
+            "E": "Glu", "G": "Gly", "H": "His", "I": "Ile", "L": "Leu", "K": "Lys",
+            "M": "Met", "F": "Phe", "P": "Pro", "S": "Ser", "T": "Thr", "W": "Trp",
+            "Y": "Tyr", "V": "Val", "X": "unknown"}
+# Class suffix per band, in `panels.PLDDT_BANDS` order: very high, confident, low, very low.
+_BAND_KEYS = ("vh", "c", "l", "vl")
+
+_FOLD_IMG = """<img src="fold.png" alt="Left: the folded backbone of the main protease, 306 alpha-carbons drawn on its two principal axes and coloured by per-residue confidence. One compact well-predicted domain in blue sits beside a sprawling orange one. Right: confidence against residue position, with the stretches that never clear the threshold marked along the bottom.">"""
+
+
+def fold_trace():
+    """The fold, its confidence trace and its sequence, linked residue by residue."""
+    rec = RUNS / "folded_structure/mpro_nsp5.json"
+    pdb = RUNS / "folded_structure/mpro_nsp5.pdb"
+    if not (rec.exists() and pdb.exists()):
+        print("  no committed fold on this machine; the page keeps docs/fold.png")
+        return _FOLD_IMG
+    import hashlib
+    os.environ.setdefault("MPLCONFIGDIR", "/tmp/mpl-site")
+    os.environ.setdefault("MPLBACKEND", "Agg")
+    sys.path.insert(0, str(ROOT))
+    sys.path.insert(0, str(ROOT / "notebooks"))
+    import numpy as np
+    import panels                                                      # noqa: E402
+    payload = json.loads(rec.read_text())
+    text = pdb.read_text()
+    resnum, xyz, bfac = panels.ca_trace(text)
+    plddt, _ = panels.plddt_on_0_100(bfac)
+    seq = panels.folded_sequence(text)
+    want = payload.get("sequence_sha256")
+    if hashlib.sha256(seq.encode()).hexdigest() != want or len(seq) != len(resnum):
+        print("  folded sequence does not match the record's sequence_sha256; "
+              "the page keeps docs/fold.png")
+        return _FOLD_IMG
+    threshold = float(payload.get("confident_plddt") or 70.0)
+    runs = [tuple(r) for r in payload.get("low_confidence_runs", [])]
+
+    def band(v):
+        for key, (lo, hi, _, _) in zip(_BAND_KEYS, panels.PLDDT_BANDS):
+            if lo <= v < hi:
+                return key
+        return _BAND_KEYS[0]
+
+    bands = [band(v) for v in plddt]
+
+    # Backbone. Six viewBox units to the angstrom, which puts the stroke widths in the same
+    # proportion to the fold as the PNG's points. SVG's y runs down, so the second axis is
+    # negated to keep the PNG's orientation.
+    k = 6.0
+    centred = xyz - xyz.mean(0)
+    _, _, vt = np.linalg.svd(centred, full_matrices=False)
+    for i in range(2):
+        if vt[i, i] < 0:
+            vt[i] *= -1
+    proj = centred @ vt.T
+    px, py, depth = proj[:, 0] * k, -proj[:, 1] * k, proj[:, 2]
+    pad = 4 * k
+    x0, x1 = px.min() - pad, px.max() + pad
+    y0, y1 = py.min() - pad, py.max() + pad
+    seg_depth = (depth[:-1] + depth[1:]) / 2
+    near = (seg_depth - seg_depth.min()) / max(np.ptp(seg_depth), 1e-9)
+    order = np.argsort(seg_depth)
+    f = lambda v: f"{v:.1f}"
+    # All halos under all colour, as the PNG draws them: a halo laid between segments would
+    # bite a notch out of the chain at every joint.
+    halo = " ".join(f"M{f(px[s])} {f(py[s])}L{f(px[s+1])} {f(py[s+1])}" for s in order)
+    lines = "".join(
+        f'<line data-k="{s}" class="b-{bands[s]}" x1="{f(px[s])}" y1="{f(py[s])}" '
+        f'x2="{f(px[s+1])}" y2="{f(py[s+1])}" stroke-width="{2.2 + 2.6 * near[s]:.2f}"/>'
+        for s in order)
+    ends = "".join(
+        f'<circle class="ft-end" cx="{f(px[i])}" cy="{f(py[i])}" r="9"/>'
+        f'<text class="ft-endl" x="{f(px[i])}" y="{f(py[i])}">{lab}</text>'
+        for i, lab in ((0, "N"), (len(px) - 1, "C")))
+    bar_y = y1 - 3 * k
+    backbone = f"""
+      <figure class="ft-panel">
+        <figcaption>backbone, {len(resnum)} C&alpha;, orthographic on its two principal axes</figcaption>
+        <svg class="ft-bb" viewBox="{f(x0)} {f(y0)} {f(x1 - x0)} {f(y1 - y0)}" role="img"
+          aria-label="The folded backbone of the main protease, {len(resnum)} alpha-carbons coloured by per-residue confidence. Point at it to find a residue in the sequence below.">
+          <path class="ft-halo" d="{halo}"/>
+          <g class="ft-chain">{lines}</g>
+          {ends}
+          <line class="ft-scale" x1="{f(x1 - 22 * k)}" y1="{f(bar_y)}" x2="{f(x1 - 2 * k)}" y2="{f(bar_y)}"/>
+          <text class="ft-scalel" x="{f(x1 - 12 * k)}" y="{f(bar_y - 1.4 * k)}">20 &Aring;</text>
+          <g class="ft-mark" visibility="hidden"><circle r="11"/><circle class="ft-dot" r="3.5"/>
+            <text class="ft-tag" x="14" y="-12"></text></g>
+        </svg>
+      </figure>"""
+
+    # Confidence against position, on the same residue numbering.
+    W, H, L, R, T, B = 560.0, 300.0, 40.0, 10.0, 12.0, 34.0
+    n0, n1 = int(resnum[0]), int(resnum[-1])
+    sx = lambda n: L + (n - n0) / max(n1 - n0, 1) * (W - L - R)
+    sy = lambda v: T + (1 - v / 100.0) * (H - T - B)
+    shades = "".join(
+        f'<rect class="s-{key}" x="{L}" y="{f(sy(min(hi, 100)))}" width="{W - L - R}" '
+        f'height="{f(sy(lo) - sy(min(hi, 100)))}"/>'
+        for key, (lo, hi, _, _) in zip(_BAND_KEYS, panels.PLDDT_BANDS))
+    trace = "M" + "L".join(f"{f(sx(n))} {f(sy(v))}" for n, v in zip(resnum, plddt))
+    dots = "".join(f'<circle class="b-{b}" cx="{f(sx(n))}" cy="{f(sy(v))}" r="2.2"/>'
+                   for n, v, b in zip(resnum, plddt, bands))
+    yt = "".join(f'<line class="ft-grid" x1="{L}" x2="{W - R}" y1="{f(sy(v))}" y2="{f(sy(v))}"/>'
+                 f'<text class="ft-ax" x="{L - 6}" y="{f(sy(v) + 4)}" text-anchor="end">{v}</text>'
+                 for v in (0, 25, 50, 75, 100))
+    # Round fifties, plus both ends unless a fifty already sits within a label's width of one.
+    ticks = [n0] + [n for n in range(50, n1, 50) if n - n0 > 15 and n1 - n > 15] + [n1]
+    xt = "".join(f'<text class="ft-ax" x="{f(sx(n))}" y="{H - B + 15}" text-anchor="middle">{n}</text>'
+                 for n in ticks)
+    mean = float(plddt.mean())
+    run_marks = "".join(
+        f'<line class="ft-run" x1="{f(sx(a))}" x2="{f(sx(b))}" y1="{f(sy(4))}" y2="{f(sy(4))}"/>'
+        + (f'<text class="ft-runl" x="{f((sx(a) + sx(b)) / 2)}" y="{f(sy(7.5))}">{a}&ndash;{b}</text>'
+           if b - a > 12 else "")
+        for a, b in runs)
+    plot = f"""
+      <figure class="ft-panel">
+        <figcaption>per-residue confidence, and the stretches that never clear the threshold</figcaption>
+        <svg class="ft-pl" viewBox="0 0 {W:.0f} {H:.0f}" role="img"
+          aria-label="Confidence against residue position, mean {mean:.1f} of 100. Point at it to find a residue in the sequence below.">
+          {shades}{yt}{xt}
+          <text class="ft-ax" x="{f((L + W - R) / 2)}" y="{H - 4}" text-anchor="middle">residue position in the folded sequence</text>
+          <path class="ft-trace" d="{trace}"/>{dots}
+          <line class="ft-thr" x1="{L}" x2="{W - R}" y1="{f(sy(threshold))}" y2="{f(sy(threshold))}"/>
+          <text class="ft-ax" x="{W - R - 3}" y="{f(sy(threshold) - 5)}" text-anchor="end">threshold {threshold:.0f}</text>
+          <line class="ft-mean" x1="{L}" x2="{W - R}" y1="{f(sy(mean))}" y2="{f(sy(mean))}"/>
+          <text class="ft-ax ft-meanl" x="{L + 6}" y="{f(sy(mean) + 13)}">mean {mean:.1f}</text>
+          {run_marks}
+          <g class="ft-cur" visibility="hidden"><line y1="{T}" y2="{H - B}"/><circle r="4.5"/></g>
+        </svg>
+      </figure>"""
+
+    # The sequence, ten to a block, each block numbered by its first residue. The numbers are
+    # CSS-generated, and the gaps are margins, so selecting the strip copies the bare sequence.
+    blocks = []
+    for start in range(0, len(seq), 10):
+        letters = "".join(f'<span class="b-{bands[i]}" data-i="{i}">{seq[i]}</span>'
+                          for i in range(start, min(start + 10, len(seq))))
+        blocks.append(f'<span class="ft-blk" data-n="{int(resnum[start])}">{letters}</span>')
+    legend = "".join(f'<span><i class="b-{key}"></i>{esc(label)}</span>'
+                     for key, (_, _, _, label) in zip(_BAND_KEYS, panels.PLDDT_BANDS))
+    data = json.dumps({
+        "seq": seq, "num": [int(n) for n in resnum],
+        "pl": [round(float(v), 1) for v in plddt], "band": bands,
+        "x": [round(float(v), 1) for v in px], "y": [round(float(v), 1) for v in py],
+        "z": [round(float(v), 2) for v in depth],
+        "sx": [round(sx(n), 1) for n in resnum], "sy": [round(sy(v), 1) for v in plddt],
+        "runs": runs, "thr": threshold,
+        "names": _AA_NAME, "bandname": dict(zip(_BAND_KEYS, ("very high", "confident",
+                                                            "low", "very low"))),
+    }, separators=(",", ":"))
+    fasta_head = esc(f">{payload.get('target_name') or 'chain'} | ESMFold v1 input | "
+                     f"{len(seq)} aa")
+    return f"""
+    <div class="ftrace" id="ftrace">
+      <div class="ft-figs">{backbone}{plot}
+      </div>
+      <div class="ft-legend">{legend}</div>
+      <div class="ft-seqhead">
+        <span class="ft-h">The sequence that was folded</span>
+        <span class="ft-read" id="ft-read" aria-live="polite">Point at a residue here, on the backbone or on the trace; click to hold it, then step with the arrow keys.</span>
+        <button class="ft-copy" id="ft-copy" type="button" data-fasta="{fasta_head}">Copy FASTA</button>
+      </div>
+      <div class="ft-seq" id="ft-seq" tabindex="0" aria-label="The folded sequence, {len(seq)} residues. With a residue held, the arrow keys step through it.">{"".join(blocks)}</div>
+      <script type="application/json" id="ft-data">{data}</script>
+    </div>
+{FOLD_TRACE_JS}"""
+
+
+# Shared cursor for the three views above. One index `i` (0-based into the sequence) is the
+# whole state; every view only ever draws `i`, so they cannot disagree.
+FOLD_TRACE_JS = """
+<script>
+(function () {
+  var root = document.getElementById("ftrace");
+  if (!root) return;
+  var D = JSON.parse(document.getElementById("ft-data").textContent);
+  var bb = root.querySelector(".ft-bb"), pl = root.querySelector(".ft-pl");
+  var mark = bb.querySelector(".ft-mark"), tag = bb.querySelector(".ft-tag");
+  var cur = pl.querySelector(".ft-cur"), curDot = cur.querySelector("circle");
+  var curLine = cur.querySelector("line");
+  var seqBox = document.getElementById("ft-seq"), read = document.getElementById("ft-read");
+  var idle = read.textContent;
+  var letters = seqBox.querySelectorAll("[data-i]"), segs = [];
+  bb.querySelectorAll(".ft-chain line").forEach(function (el) { segs[+el.dataset.k] = el; });
+  var shown = -1, held = -1, lit = [];
+
+  function runOf(n) {
+    for (var r = 0; r < D.runs.length; r++)
+      if (n >= D.runs[r][0] && n <= D.runs[r][1]) return D.runs[r];
+    return null;
+  }
+  function draw(i, force) {
+    if (i === shown && !force) return;
+    if (shown >= 0) letters[shown].classList.remove("on");
+    lit.forEach(function (el) { el.classList.remove("on"); });
+    lit = [];
+    shown = i;
+    root.classList.toggle("tracing", i >= 0);
+    if (i < 0) {
+      mark.setAttribute("visibility", "hidden");
+      cur.setAttribute("visibility", "hidden");
+      read.textContent = idle;
+      return;
+    }
+    var n = D.num[i], aa = D.seq[i];
+    mark.setAttribute("transform", "translate(" + D.x[i] + " " + D.y[i] + ")");
+    tag.textContent = aa + n;
+    mark.setAttribute("visibility", "visible");
+    [i - 1, i].forEach(function (k) { if (segs[k]) { segs[k].classList.add("on"); lit.push(segs[k]); } });
+    curLine.setAttribute("x1", D.sx[i]); curLine.setAttribute("x2", D.sx[i]);
+    curDot.setAttribute("cx", D.sx[i]); curDot.setAttribute("cy", D.sy[i]);
+    cur.setAttribute("visibility", "visible");
+    letters[i].classList.add("on");
+    var run = runOf(n);
+    read.textContent = "Residue " + n + " \\u00b7 " + (D.names[aa] || aa) + " (" + aa + ")" +
+      " \\u00b7 confidence " + D.pl[i] + ", " + D.bandname[D.band[i]] +
+      (run ? " \\u00b7 inside " + run[0] + "\\u2013" + run[1] + ", which never clears " + D.thr : "") +
+      (i === held ? " \\u00b7 held" : "");
+  }
+  function rest() { draw(held); }
+  function hold(i) {
+    held = (i === held) ? -1 : i;
+    draw(held >= 0 ? held : i, true);   // forced, so the "held" note updates
+  }
+  function toLocal(svg, e) {
+    var p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+    var m = svg.getScreenCTM(); return m ? p.matrixTransform(m.inverse()) : null;
+  }
+  // Nearest alpha-carbon in the projection. Where two pass close in the picture, the one
+  // nearer the reader wins, since that is the one drawn on top -- but only as a tie-break:
+  // twenty angstroms of depth is worth five viewBox units, under one angstrom on screen.
+  function nearestCA(e) {
+    var q = toLocal(bb, e); if (!q) return -1;
+    var best = -1, bestScore = Infinity, reach = 36 * 36;
+    for (var i = 0; i < D.x.length; i++) {
+      var dx = D.x[i] - q.x, dy = D.y[i] - q.y, d2 = dx * dx + dy * dy;
+      if (d2 > reach) continue;
+      var score = Math.sqrt(d2) - D.z[i] * 0.25;
+      if (score < bestScore) { bestScore = score; best = i; }
+    }
+    return best;
+  }
+  function nearestPos(e) {
+    var q = toLocal(pl, e); if (!q) return -1;
+    var best = -1, bd = Infinity;
+    for (var i = 0; i < D.sx.length; i++) {
+      var d = Math.abs(D.sx[i] - q.x); if (d < bd) { bd = d; best = i; }
+    }
+    return bd < 12 ? best : -1;
+  }
+  function wire(el, pick) {
+    el.addEventListener("pointermove", function (e) { var i = pick(e); draw(i >= 0 ? i : held); });
+    el.addEventListener("pointerleave", rest);
+    el.addEventListener("click", function (e) { var i = pick(e); if (i >= 0) hold(i); });
+  }
+  wire(bb, nearestCA);
+  wire(pl, nearestPos);
+  function letterOf(e) { var t = e.target.closest && e.target.closest("[data-i]"); return t ? +t.dataset.i : -1; }
+  seqBox.addEventListener("pointerover", function (e) { var i = letterOf(e); if (i >= 0) draw(i); });
+  seqBox.addEventListener("pointerleave", rest);
+  seqBox.addEventListener("click", function (e) {
+    var i = letterOf(e);
+    // A drag that selected text is a copy, not a pick.
+    var sel = window.getSelection && String(window.getSelection());
+    if (i >= 0 && !sel) hold(i);
+  });
+  seqBox.addEventListener("keydown", function (e) {
+    var step = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 10, ArrowUp: -10 }[e.key];
+    if (e.key === "Home") step = -Infinity;
+    if (e.key === "End") step = Infinity;
+    if (e.key === "Escape" && held >= 0) { held = -1; draw(-1); return; }
+    if (step === undefined) return;
+    e.preventDefault();
+    var from = held >= 0 ? held : (step > 0 ? -1 : D.seq.length);
+    held = Math.max(0, Math.min(D.seq.length - 1, from + step));
+    draw(held, true);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && held >= 0) { held = -1; draw(-1); }
+  });
+  var copy = document.getElementById("ft-copy");
+  copy.addEventListener("click", function () {
+    var lines = D.seq.match(/.{1,60}/g).join("\\n");
+    var text = copy.dataset.fasta + "\\n" + lines + "\\n";
+    function done(ok) {
+      copy.textContent = ok ? "Copied" : "Copy failed";
+      setTimeout(function () { copy.textContent = "Copy FASTA"; }, 1600);
+    }
+    try { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); }
+    catch (err) { done(false); }
+  });
+})();
+</script>
+"""
 
 
 def build_notebook():
