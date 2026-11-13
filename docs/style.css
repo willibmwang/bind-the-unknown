@@ -57,7 +57,7 @@ html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 body{
   background:var(--bg); color:var(--fg);
-  font-family:var(--body); font-size:17px; line-height:1.62; margin:0;
+  font-family:var(--body); font-size:var(--fs-md); line-height:1.62; margin:0;
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-block:0 72px;
@@ -74,7 +74,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,[role="button"]:focus-v
   outline:2.5px solid var(--accent);outline-offset:2px;border-radius:3px}
 .skip{position:absolute;left:-9999px;top:0;background:var(--surface);color:var(--fg);
   border:1px solid var(--accent);border-radius:0 0 6px 0;padding:11px 18px;z-index:50;
-  font-size:15px;text-decoration:none}
+  font-size:var(--fs-base);text-decoration:none}
 .skip:focus{left:0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
@@ -98,21 +98,21 @@ header.hero{display:grid;grid-template-columns:1.32fr .68fr;align-items:center;g
   .hero-art{max-width:300px;justify-self:start;order:-1}
 }
 .strip.after-hero{margin-top:0;margin-bottom:8px}
-.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--fg-3)}
+.eyebrow{font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.13em;text-transform:uppercase;color:var(--fg-3)}
 h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,4.8vw,50px);line-height:1.12;letter-spacing:-.03em;margin-top:18px}
 /* A hyphen is a break opportunity, so "SARS-CoV-2" splits across lines on a phone.
    Wrap such a token in <span class="nb"> to keep it whole. */
 .nb{white-space:nowrap}
-.standfirst{color:var(--fg-2);font-size:21px;font-weight:300;line-height:1.5;max-width:52ch;margin-top:20px}
+.standfirst{color:var(--fg-2);font-size:var(--fs-xl);font-weight:300;line-height:1.5;max-width:52ch;margin-top:20px}
 .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:14px;overflow:hidden;margin-top:32px}
 .strip div{background:var(--surface);padding:15px 17px;min-width:0}
-.strip dt{font-size:13px;color:var(--fg-3);line-height:1.3}
-.strip dd{margin:6px 0 0;font-family:var(--mono);font-size:16px;font-weight:500;overflow-wrap:break-word;font-variant-numeric:tabular-nums}
+.strip dt{font-size:var(--fs-xs);color:var(--fg-3);line-height:1.3}
+.strip dd{margin:6px 0 0;font-family:var(--mono);font-size:var(--fs-base);font-weight:500;overflow-wrap:break-word;font-variant-numeric:tabular-nums}
 
 /* buttons, for the two things a visitor can actually do from the top of the page */
 .acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
 .btn{display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:var(--on-accent);
-  border:1px solid var(--accent);border-radius:8px;padding:14px 26px;font-size:16px;font-weight:600;
+  border:1px solid var(--accent);border-radius:8px;padding:14px 26px;font-size:var(--fs-base);font-weight:600;
   text-decoration:none;transition:filter .3s ease}
 .btn:hover{filter:brightness(1.12)}
 .btn.ghost{background:transparent;color:var(--accent);border-color:var(--rule)}
@@ -122,23 +122,23 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,4.8vw,50px);l
    this is `.opener`, and the two must not be merged. */
 .opener{margin-top:56px;padding:32px 34px;background:var(--surface);border:1px solid var(--rule);
   border-left:3px solid var(--brand);border-radius:14px}
-.opener .lbl{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--fg-3);margin-bottom:12px}
-.opener p{margin:0 0 13px;font-size:18px;line-height:1.6;max-width:66ch}
+.opener .lbl{font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.13em;text-transform:uppercase;color:var(--fg-3);margin-bottom:12px}
+.opener p{margin:0 0 13px;font-size:var(--fs-lg);line-height:1.6;max-width:66ch}
 .opener p:last-child{margin-bottom:0}
 .opener b{font-weight:600}
 
 /* contents: the same pattern as a research-group index — number, title, one plain line */
 .toc{margin-top:72px}
-.toc h2{font-family:var(--display);font-weight:700;font-size:25px;letter-spacing:-.025em}
-.toc .grp{font-family:var(--mono);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;
+.toc h2{font-family:var(--display);font-weight:700;font-size:var(--fs-2xl);letter-spacing:-.025em}
+.toc .grp{font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.13em;text-transform:uppercase;
   color:var(--accent);margin:28px 0 4px;padding-top:14px;border-top:1px solid var(--rule)}
 .toc .grp:first-of-type{margin-top:20px}
 .tocrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:18px;align-items:baseline;
   padding:15px 2px;border-bottom:1px solid var(--rule-2);text-decoration:none;color:inherit}
 .tocrow:last-child{border-bottom:0}
-.tocrow .n{font-family:var(--mono);font-size:13px;color:var(--fg-3);font-variant-numeric:tabular-nums}
-.tocrow .ti{font-size:17.5px;font-weight:500;min-width:0}
-.tocrow .ds{display:block;font-weight:400;font-size:15px;color:var(--fg-2);margin-top:3px}
+.tocrow .n{font-family:var(--mono);font-size:var(--fs-xs);color:var(--fg-3);font-variant-numeric:tabular-nums}
+.tocrow .ti{font-size:var(--fs-lg);font-weight:500;min-width:0}
+.tocrow .ds{display:block;font-weight:400;font-size:var(--fs-base);color:var(--fg-2);margin-top:3px}
 .tocrow .ar{color:var(--fg-3);flex:none;transition:transform .15s}
 .tocrow:hover .ti{color:var(--accent)}
 .tocrow:hover .ar{color:var(--accent);transform:translateX(3px)}
@@ -151,47 +151,47 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,4.8vw,50px);l
 section{padding-block:96px 0;counter-increment:sec}
 .sec-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:16px;row-gap:7px;
   align-items:baseline;border-bottom:1px solid var(--rule);padding-bottom:15px;margin-bottom:34px}
-.sec-head::before{content:counter(sec,decimal-leading-zero);font-family:var(--mono);font-size:13px;
+.sec-head::before{content:counter(sec,decimal-leading-zero);font-family:var(--mono);font-size:var(--fs-xs);
   font-weight:500;color:var(--accent);letter-spacing:.06em;font-variant-numeric:tabular-nums}
 .sec-head h2{font-family:var(--display);font-weight:700;font-size:clamp(23px,3vw,30px);line-height:1.18;letter-spacing:-.025em}
-.sec-head .tag{justify-self:end;font-size:13.5px;color:var(--fg-3)}
+.sec-head .tag{justify-self:end;font-size:var(--fs-xs);color:var(--fg-3)}
 @media(max-width:620px){
   .sec-head{grid-template-columns:auto minmax(0,1fr)}
   .sec-head .tag{grid-column:2;justify-self:start}
 }
-.cap{color:var(--fg-2);font-size:17px;line-height:1.6;max-width:66ch;margin:0 0 26px}
-.after{color:var(--fg-2);font-size:15.5px;line-height:1.6;max-width:66ch;margin:20px 0 0}
+.cap{color:var(--fg-2);font-size:var(--fs-md);line-height:1.6;max-width:66ch;margin:0 0 26px}
+.after{color:var(--fg-2);font-size:var(--fs-base);line-height:1.6;max-width:66ch;margin:20px 0 0}
 
 /* run-in bullets: a bold lead naming the point, then the point itself */
-.pts{color:var(--fg-2);font-size:16.5px;line-height:1.56;max-width:66ch;margin:0 0 26px;
+.pts{color:var(--fg-2);font-size:var(--fs-md);line-height:1.56;max-width:66ch;margin:0 0 26px;
   padding-left:20px;display:grid;gap:11px}
 .pts li{min-width:0;overflow-wrap:anywhere}
 .pts li::marker{color:var(--fg-3)}
 .pts b{color:var(--fg);font-weight:650}
 .pts i{font-style:italic}
-.pts.sm{font-size:15.5px;gap:9px;margin-bottom:0}
+.pts.sm{font-size:var(--fs-base);gap:9px;margin-bottom:0}
 .disc-b .pts{margin:0 0 16px}
-figcaption .pts{color:inherit;font-size:14px;margin:11px 0 0;gap:8px}
+figcaption .pts{color:inherit;font-size:var(--fs-sm);margin:11px 0 0;gap:8px}
 figcaption .pts b{color:var(--fg-2)}
 .fields .pts{margin:0}
 
 /* pictorial flow */
 figure{margin:0}
-figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
+figcaption{color:var(--fg-3);font-size:var(--fs-sm);margin-top:17px;max-width:66ch}
 .armband{border:1px solid var(--rule);border-left:3px solid var(--brand);border-radius:14px;background:var(--surface-2);padding:18px}
-.armlbl{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-3);margin-bottom:13px}
+.armlbl{font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.12em;text-transform:uppercase;color:var(--fg-3);margin-bottom:13px}
 .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
 .step{position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:17px 10px 15px;text-align:center;min-width:0}
 .step .ic{display:block;width:100%;max-width:90px;height:auto;margin:0 auto 12px}
 /* The step's number, so figure 1 and the five panels in section 03 are plainly the same five
    things. Absolute, in the corner, out of the icon's way. */
-.step .no{position:absolute;top:8px;left:9px;font-family:var(--mono);font-size:11px;
+.step .no{position:absolute;top:8px;left:9px;font-family:var(--mono);font-size:var(--fs-micro);
   font-weight:500;color:var(--fg-3);font-variant-numeric:tabular-nums}
 .ic .ac{fill:var(--brand)}
 .ic .acs{stroke:var(--brand)}
-.step .lbl{font-size:14.5px;font-weight:500;line-height:1.3}
-.step .val{font-family:var(--mono);font-size:22px;font-weight:500;letter-spacing:-.02em;margin-top:10px;line-height:1.1;font-variant-numeric:tabular-nums}
-.step .unit{font-size:12.5px;color:var(--fg-3);margin-top:5px;line-height:1.3}
+.step .lbl{font-size:var(--fs-sm);font-weight:500;line-height:1.3}
+.step .val{font-family:var(--mono);font-size:var(--fs-xl);font-weight:500;letter-spacing:-.02em;margin-top:10px;line-height:1.1;font-variant-numeric:tabular-nums}
+.step .unit{font-size:var(--fs-xs);color:var(--fg-3);margin-top:5px;line-height:1.3}
 @media(min-width:861px){
   .flow .step:not(:last-child)::after{content:"";position:absolute;right:-10px;top:50%;width:8px;height:8px;border-top:1.6px solid var(--fg-3);border-right:1.6px solid var(--fg-3);transform:translateY(-50%) rotate(45deg)}
 }
@@ -201,19 +201,19 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 /* steps */
 .stage{background:var(--surface);border:1px solid var(--rule);border-radius:14px;margin-bottom:13px;overflow:hidden}
 .stage-head{display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding:15px 17px;background:var(--surface-2);border-bottom:1px solid var(--rule)}
-.sn{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--on-accent);background:var(--accent);width:26px;height:26px;display:grid;place-items:center;border-radius:7px;flex:none}
+.sn{font-family:var(--mono);font-size:var(--fs-xs);font-weight:500;color:var(--on-accent);background:var(--accent);width:26px;height:26px;display:grid;place-items:center;border-radius:7px;flex:none}
 .stage-head .ic{width:52px;height:auto;flex:none;margin:0}
-.stage-head .what{font-size:17px;font-weight:500;min-width:0}
-.stage-head .secs{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--fg-3);flex:none}
+.stage-head .what{font-size:var(--fs-md);font-weight:500;min-width:0}
+.stage-head .secs{margin-left:auto;font-family:var(--mono);font-size:var(--fs-xs);color:var(--fg-3);flex:none}
 .io{display:grid;grid-template-columns:1fr 1.25fr;gap:1px;background:var(--rule-2)}
 .io>div{background:var(--surface);padding:16px 17px;min-width:0}
-.io h3{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-3);margin:0 0 10px}
+.io h3{font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.12em;text-transform:uppercase;color:var(--fg-3);margin:0 0 10px}
 .io .out h3{color:var(--accent)}
-.io ul{margin:0;padding:0;list-style:none;display:grid;gap:7px;font-size:15.5px}
+.io ul{margin:0;padding:0;list-style:none;display:grid;gap:7px;font-size:var(--fs-base)}
 .io li{min-width:0;overflow-wrap:anywhere;line-height:1.5}
 .io b{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
-.hands{padding:12px 17px;border-top:1px solid var(--rule-2);font-size:14.5px;color:var(--fg-2)}
-.hands b{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3);font-weight:500}
+.hands{padding:12px 17px;border-top:1px solid var(--rule-2);font-size:var(--fs-sm);color:var(--fg-2)}
+.hands b{font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3);font-weight:500}
 @media(max-width:620px){.io{grid-template-columns:1fr}}
 
 /* bar lists */
@@ -221,11 +221,11 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .bi{padding:12px 0;border-bottom:1px solid var(--rule-2)}
 .bi:last-child{border-bottom:0}
 .bi-top{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:7px}
-.bi-top .nm{font-size:15.5px;min-width:0;overflow-wrap:anywhere}
-.bi-top .vl{font-family:var(--mono);font-size:14.5px;font-weight:500;flex:none;font-variant-numeric:tabular-nums}
+.bi-top .nm{font-size:var(--fs-base);min-width:0;overflow-wrap:anywhere}
+.bi-top .vl{font-family:var(--mono);font-size:var(--fs-sm);font-weight:500;flex:none;font-variant-numeric:tabular-nums}
 .track{height:8px;background:var(--surface-2);border-radius:5px;overflow:hidden}
 .fill{height:100%;background:var(--brand);border-radius:5px}
-.bi .nm .cut{display:block;font-family:var(--mono);font-size:12.5px;color:var(--fg-3);margin-top:2px}
+.bi .nm .cut{display:block;font-family:var(--mono);font-size:var(--fs-xs);color:var(--fg-3);margin-top:2px}
 .bi.mark .nm{font-weight:600}
 .bi.mark .vl{color:var(--accent)}
 
@@ -242,7 +242,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
      so .cmxscroll scrolls sideways instead. It is focusable, or the table is unreachable for
      anyone scrolling by keyboard. */
 .substep{margin:30px 0 13px}
-.substep h3{font-family:var(--display);font-size:19.5px;font-weight:650;letter-spacing:-.015em;margin:0 0 10px}
+.substep h3{font-family:var(--display);font-size:var(--fs-lg);font-weight:650;letter-spacing:-.015em;margin:0 0 10px}
 .cmxscroll{overflow-x:auto;overscroll-behavior-x:contain;border:1px solid var(--rule);border-radius:14px;background:var(--surface)}
 .cmxscroll:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px}
 /* Eight columns do not fit the 920px prose column, so above 1040px the table breaks out of it
@@ -254,20 +254,19 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 @media (min-width:1040px){
   .cmxscroll{--cmx-w:min(1260px,calc(100vw - 52px));width:var(--cmx-w);margin-left:calc(50% - var(--cmx-w) / 2)}
 }
-.cmx{border-collapse:collapse;width:100%;min-width:1020px;font-size:15px}
-.cmx caption{caption-side:bottom;text-align:left;padding:15px 18px 16px;font-size:14.5px;line-height:1.55;color:var(--fg-3);border-top:1px solid var(--rule-2)}
+.cmx{border-collapse:collapse;width:100%;min-width:1020px;font-size:var(--fs-base)}
+.cmx caption{caption-side:bottom;text-align:left;padding:15px 18px 16px;font-size:var(--fs-sm);line-height:1.55;color:var(--fg-3);border-top:1px solid var(--rule-2)}
 .cmx th,.cmx td{padding:11px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--rule-2)}
 .cmx thead th{background:var(--surface-2);border-bottom:1px solid var(--rule);font-weight:600;line-height:1.3;vertical-align:bottom}
-.cmx thead th .cl{display:block;font-size:14px;max-width:15ch}
-.cmx thead th .ck{display:block;font-family:var(--mono);font-size:10.5px;color:var(--fg-3);font-weight:400;margin-top:3px;overflow-wrap:anywhere}
-.cmx thead th .cw{display:block;font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:500;margin-top:4px;white-space:nowrap}
-.cmx .rk{width:1%;font-family:var(--mono);font-size:13px;color:var(--fg-3);text-align:right;font-variant-numeric:tabular-nums}
+.cmx thead th .cl{display:block;font-size:var(--fs-sm);max-width:15ch}
+.cmx thead th .cw{display:block;font-family:var(--mono);font-size:var(--fs-micro);color:var(--accent);font-weight:500;margin-top:4px;white-space:nowrap}
+.cmx .rk{width:1%;font-family:var(--mono);font-size:var(--fs-xs);color:var(--fg-3);text-align:right;font-variant-numeric:tabular-nums}
 .cmx .nm{min-width:25ch}
 .cmx .nm .t{display:block;font-weight:600;overflow-wrap:anywhere}
-.cmx .nm .w{display:block;font-size:12.5px;color:var(--fg-3);font-family:var(--mono);margin-top:2px;overflow-wrap:anywhere}
+.cmx .nm .w{display:block;font-size:var(--fs-xs);color:var(--fg-3);font-family:var(--mono);margin-top:2px;overflow-wrap:anywhere}
 .cmx td.h{text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
-.cmx td.h .pt{display:block;font-family:var(--mono);font-size:15.5px;font-weight:500}
-.cmx td.h .rw{display:block;font-size:12px;opacity:.78;margin-top:3px}
+.cmx td.h .pt{display:block;font-family:var(--mono);font-size:var(--fs-base);font-weight:500}
+.cmx td.h .rw{display:block;font-size:var(--fs-micro);opacity:.78;margin-top:3px}
 .cmx td.h0{color:var(--fg-3)}
 .cmx td.h0 .pt{font-weight:400}
 /* Four tints carrying the page's own ink, then one saturated band carrying white. Checked
@@ -280,7 +279,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .cmx td.h4{background:#c48ff0}
 .cmx td.h5{background:#8f1ad8;color:#fff}
 .cmx .sc{width:1%;white-space:nowrap}
-.cmx .sc .v{display:block;font-family:var(--mono);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.cmx .sc .v{display:block;font-family:var(--mono);font-size:var(--fs-base);font-weight:600;font-variant-numeric:tabular-nums}
 .cmx .sc .tr{display:block;height:5px;width:62px;background:var(--surface-2);border-radius:4px;overflow:hidden;margin-top:5px}
 .cmx .sc .tr i{display:block;height:100%;background:var(--brand);border-radius:4px}
 .cmx thead .sc{text-align:left}
@@ -289,10 +288,10 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 /* The shortlist variant: four columns, not eight, so it needs none of the sideways room the
    score matrix does and must not inherit its 1020px floor. */
 .cmx.pick{min-width:0}
-.cmx .cut{font-size:14px;min-width:20ch}
+.cmx .cut{font-size:var(--fs-sm);min-width:20ch}
 .cmx .cut a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
-.cmx .cut .w{display:block;font-family:var(--mono);font-size:12px;color:var(--fg-3);margin-top:2px}
-.cmx .nm .w{display:inline-block;font-family:var(--mono);font-size:12px;color:var(--fg-3);margin-left:6px}
+.cmx .cut .w{display:block;font-family:var(--mono);font-size:var(--fs-micro);color:var(--fg-3);margin-top:2px}
+.cmx .nm .w{display:inline-block;font-family:var(--mono);font-size:var(--fs-micro);color:var(--fg-3);margin-left:6px}
 
 /* Following a "cut out of" link lands on a row of the score matrix, so that row has to say so
    — a jump that highlights nothing looks like a broken anchor. The accent goes on the rank and
@@ -324,7 +323,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
    own state rather than as `m`: a prediction measured is not a structure solved, and the
    strip is the first thing a reader counts. */
 .tile.p{border:1.6px solid var(--brand);background:color-mix(in srgb,var(--brand) 22%,transparent)}
-.legend{display:flex;gap:20px;flex-wrap:wrap;font-size:15px;color:var(--fg-2);margin-bottom:24px}
+.legend{display:flex;gap:20px;flex-wrap:wrap;font-size:var(--fs-base);color:var(--fg-2);margin-bottom:24px}
 .legend span{display:flex;align-items:center;gap:8px}
 .key{width:15px;height:15px;border-radius:4px;flex:none}
 .key.m{background:var(--brand)} .key.r{border:1.6px dashed var(--warn)}
@@ -348,8 +347,8 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .lane-grp{padding:13px clamp(17px,16%,230px) 13px 17px;background:var(--surface-2);
   border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
 .lane-grp:first-child{border-top:0}
-.lane-grp b{font-size:15px;font-weight:650;margin-right:11px}
-.lane-grp span{font-size:14px;color:var(--fg-2);line-height:1.55}
+.lane-grp b{font-size:var(--fs-base);font-weight:650;margin-right:11px}
+.lane-grp span{font-size:var(--fs-sm);color:var(--fg-2);line-height:1.55}
 /* The last column is a fixed width and not `auto`, which is the difference between a
    threshold a reader can sight down and one that wobbles. With `auto` the column takes its
    width from the longest value in that row -- "97 aa" against "1,945 aa" -- so the plot
@@ -359,13 +358,13 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
   align-items:center;padding:11px 17px;border-bottom:1px solid var(--rule-2)}
 .lr:last-of-type{border-bottom:0}
 .lr .who{min-width:0}
-.lr .who .t{display:block;font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.lr .who .t{display:block;font-size:var(--fs-base);font-weight:600;overflow-wrap:anywhere}
 /* The body face, not mono. This line is a sentence -- "2 deposited structures of the same
    domain, 3.0 % of its surface, annotated host endoplasmic reticulum-golgi intermediate
    compartment" -- and three wrapped lines of 12px monospace is the least readable thing a
    stylesheet can ask for. The figures inside it are few and short, and tabular numerals keep
    them aligned down the column without the whole sentence paying for it. */
-.lr .who .w{display:block;font-size:13px;color:var(--fg-3);margin-top:3px;line-height:1.5;
+.lr .who .w{display:block;font-size:var(--fs-xs);color:var(--fg-3);margin-top:3px;line-height:1.5;
   overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
 .lr .who .w i{font-style:normal;color:var(--fg-2)}
 .lr .plot{position:relative;display:block;height:20px;background:var(--surface-2);border-radius:5px}
@@ -409,16 +408,16 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
   box-shadow:0 0 0 1px var(--surface-2)}
 .lr .plot .whisk::before{left:0}
 .lr .plot .whisk::after{right:0}
-.lr .vl{font-family:var(--mono);font-size:14px;font-variant-numeric:tabular-nums;
+.lr .vl{font-family:var(--mono);font-size:var(--fs-sm);font-variant-numeric:tabular-nums;
   text-align:right;white-space:nowrap}
-.lr .vl .cf{display:block;font-size:11.5px;color:var(--fg-3);margin-top:2px}
+.lr .vl .cf{display:block;font-size:var(--fs-micro);color:var(--fg-3);margin-top:2px}
 /* A row with nothing to plot keeps its column so the rhythm holds, and loses the dashed box:
    eleven dashed empty rectangles down one lane read as marks and carry nothing. */
 .lr.none .plot{background:color-mix(in srgb,var(--surface-2) 45%,transparent);border:0}
 /* The gate's reason, as a tag in front of the place rather than a sentence after it. The
    sentence was identical on every refused row and three lines long in the mono face. */
 .oor{display:inline-block;margin-right:5px;padding:0 5px;border-radius:3px;
-  background:var(--warn-soft);color:var(--warn);font-size:10.5px;letter-spacing:.01em}
+  background:var(--warn-soft);color:var(--warn);font-size:var(--fs-micro);letter-spacing:.01em}
 
 /* The lane's shared scale, once, above the rows. Same grid as `.lr` so zero, the limit and
    the top of the scale sit exactly over the bars they describe -- the scale used to be a
@@ -429,7 +428,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .lane-axis .ax{position:relative;display:block;height:15px}
 .lane-axis .ax .lim{position:absolute;top:11px;bottom:-4px;width:0;
   border-left:1.5px solid var(--fg-2);opacity:.55}
-.lane-axis b{position:absolute;bottom:3px;font-family:var(--mono);font-size:10.5px;
+.lane-axis b{position:absolute;bottom:3px;font-family:var(--mono);font-size:var(--fs-micro);
   font-weight:400;color:var(--fg-3);white-space:nowrap}
 .lane-axis .l0{left:0}
 .lane-axis .lm{right:0}
@@ -440,7 +439,27 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .lane-axis .ll.r{transform:translateX(-100%);margin-left:-6px}
 .lane-foot{display:flex;flex-wrap:wrap;gap:5px 18px;justify-content:space-between;
   padding:11px 17px;border-top:1px solid var(--rule);background:var(--surface-2);
-  font-family:var(--mono);font-size:11.5px;color:var(--fg-3)}
+  font-family:var(--mono);font-size:var(--fs-micro);color:var(--fg-3)}
+
+
+/* ---------------------------------------------------------------------- the type scale
+   One ladder, so a new rule picks a step instead of inventing a size. The page had 23
+   distinct sizes between 10px and 31px; these are the nine that survived.
+
+   13px is for uppercase letterspaced labels ONLY -- at that size the letterspacing and the
+   caps are what make it readable, and sentence-case text needs 14px. Body text is 17px and
+   the figures hold the only smaller numbers, because those are viewBox units. */
+:root{
+  --fs-micro:13px;  /* uppercase, letterspaced: eyebrows, column heads, axis marks */
+  --fs-xs:14px;     /* chips, dense table cells, figure captions */
+  --fs-sm:15px;     /* secondary text beside a heading or a number */
+  --fs-base:16px;   /* controls, table body, compact prose */
+  --fs-md:17px;     /* body text and page captions */
+  --fs-lg:19px;     /* sub-headings, opener prose */
+  --fs-xl:21px;     /* standfirst, section numbers */
+  --fs-2xl:25px;    /* section headings */
+  --fs-3xl:31px;    /* the one big figure on a card */
+}
 
 /* ----------------------------------------------- the patch at the annotated site
    Two bars in one row on one scale: `faintp` is the unit's largest patch wherever it lies,
@@ -482,7 +501,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
    does, in the page's own small-caps mono; and the whole strip lights up on hover. */
 .lr:has(+ .dmns){border-bottom:0}
 .dmns>summary{display:flex;align-items:center;gap:10px;padding:9px 17px 9px 34px;
-  font-size:13.5px;color:var(--fg-2);cursor:pointer;position:relative;line-height:1.5;
+  font-size:var(--fs-xs);color:var(--fg-2);cursor:pointer;position:relative;line-height:1.5;
   box-shadow:inset 2.5px 0 0 color-mix(in srgb,var(--accent) 45%,transparent);
   transition:background .14s}
 .dmns>summary:hover{color:var(--fg);background:var(--accent-soft)}
@@ -492,7 +511,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 /* "open" / "close", in the mono face at the right edge. A disclosure whose state is carried
    only by a 5px triangle is a disclosure most readers never try. */
 .dmns>summary::after{content:"open";margin-left:auto;flex:none;font-family:var(--mono);
-  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+  font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
 .dmns[open]>summary::after{content:"close";color:var(--fg-3)}
 /* The marker is drawn rather than inherited: the platform triangle differs in size and
    colour between engines, and this one has to sit on a 13.5px line in both themes. */
@@ -506,25 +525,25 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .dmn,.dmn-hd{display:grid;
   grid-template-columns:minmax(0,1.35fr) 7ch 13ch minmax(0,1.5fr) minmax(0,.95fr);
   gap:14px;align-items:baseline;padding:8px 17px 8px 34px}
-.dmn-hd{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+.dmn-hd{font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.07em;text-transform:uppercase;
   color:var(--fg-3);border-top:1px solid var(--rule-2);border-bottom:1px solid var(--rule-2)}
-.dmn{border-bottom:1px solid var(--rule-2);font-size:13px}
+.dmn{border-bottom:1px solid var(--rule-2);font-size:var(--fs-xs)}
 .dmn:last-child{border-bottom:0}
 /* A refused region stays legible rather than being greyed to the edge of readable: its
    reason is the content, and a row nobody can read is a row that may as well be absent. */
 .dmn.x .dn,.dmn.x .dl{color:var(--fg-3)}
 .dmn .dn{font-weight:600;overflow-wrap:anywhere}
-.dmn .dt{display:block;font-family:var(--mono);font-size:10.5px;color:var(--fg-3);
+.dmn .dt{display:block;font-family:var(--mono);font-size:var(--fs-micro);color:var(--fg-3);
   font-weight:400;margin-top:2px}
-.dmn .dl,.dmn .dw{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+.dmn .dl,.dmn .dw{font-family:var(--mono);font-size:var(--fs-micro);font-variant-numeric:tabular-nums}
 .dmn .dw{color:var(--fg-2)}
-.dmn .dq{display:block;font-family:var(--mono);font-size:10.5px;color:var(--fg-3);
+.dmn .dq{display:block;font-family:var(--mono);font-size:var(--fs-micro);color:var(--fg-3);
   margin-top:2px;line-height:1.5;overflow-wrap:anywhere}
-.dmn .dy{font-size:12.5px;color:var(--fg-2);line-height:1.5}
+.dmn .dy{font-size:var(--fs-xs);color:var(--fg-2);line-height:1.5}
 /* Accent and not --ok. A region within the ceiling is not a test that passed, it is a route
    into the target, and the page already spends its accent on the things a reader is meant to
    follow. The green read as a verdict on the biology, which is a claim nothing here makes. */
-.dmn .dv{font-size:12.5px;color:var(--accent);font-weight:600}
+.dmn .dv{font-size:var(--fs-xs);color:var(--accent);font-weight:600}
 .dmn.x .dv{color:var(--fg-3);font-weight:400}
 /* A foldable region carries the accent down its left edge, so the ones that matter are
    findable by eye in a panel of twenty-seven rows without reading any of them. */
@@ -535,7 +554,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .dfold{padding:14px 17px 4px 34px;background:var(--surface)}
 .dfold img{display:block;width:100%;height:auto;border:1px solid var(--rule);
   border-radius:10px;background:var(--surface)}
-.dfold .cc{font-size:12.5px;color:var(--fg-2);line-height:1.6;margin:9px 0 12px}
+.dfold .cc{font-size:var(--fs-xs);color:var(--fg-2);line-height:1.6;margin:9px 0 12px}
 .dfold .cc b{color:var(--fg);font-weight:650}
 @media (max-width:760px){.dfold{padding:12px 13px 4px}}
 @media (max-width:760px){
@@ -544,7 +563,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
   .dmn .dw,.dmn .dy,.dmn .dv{grid-column:1/-1}
 }
 .chip-x{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:20px;
-  font-family:var(--mono);font-size:11px;font-weight:500;vertical-align:1px;
+  font-family:var(--mono);font-size:var(--fs-micro);font-weight:500;vertical-align:1px;
   border:1px solid var(--rule);color:var(--fg-2);background:var(--surface-2)}
 .chip-x.g-yes{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent);background:transparent}
 .chip-x.g-borderline{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent);
@@ -568,56 +587,56 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 @media(max-width:620px){.two{grid-template-columns:1fr}}
 .card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:22px}
 .card.acc{border-left:3px solid var(--accent)}
-.card .label{font-size:15.5px;color:var(--fg-2);line-height:1.5}
-.card .big{font-family:var(--mono);font-size:31px;font-weight:500;letter-spacing:-.02em;margin-top:12px;font-variant-numeric:tabular-nums}
+.card .label{font-size:var(--fs-base);color:var(--fg-2);line-height:1.5}
+.card .big{font-family:var(--mono);font-size:var(--fs-3xl);font-weight:500;letter-spacing:-.02em;margin-top:12px;font-variant-numeric:tabular-nums}
 .card.acc .big{color:var(--accent)}
-.card .sub{font-size:14px;color:var(--fg-3);margin-top:8px;line-height:1.55}
+.card .sub{font-size:var(--fs-sm);color:var(--fg-3);margin-top:8px;line-height:1.55}
 
 /* tool cards */
 .tool-card{background:var(--surface);border:1px solid var(--rule);border-radius:14px;margin-bottom:14px;overflow:hidden}
 .tc-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 17px;background:var(--surface-2);border-bottom:1px solid var(--rule)}
-.tc-head .tn{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--accent);min-width:0;overflow-wrap:anywhere}
+.tc-head .tn{font-family:var(--mono);font-size:var(--fs-base);font-weight:500;color:var(--accent);min-width:0;overflow-wrap:anywhere}
 .tc-head .tn i{font-style:normal;color:var(--fg-3)}
 /* The name the file's function is registered under in the tool table. The file path is the
    heading because that is what a reader can open; the registered name is what the records,
    the chain and section 05 call it, so it has to stay visible or the two cannot be matched. */
-.tc-head .reg{font-family:var(--mono);font-size:12.5px;color:var(--fg-3);border:1px solid var(--rule);border-radius:6px;padding:1px 7px;flex:none}
-.tc-head .plain{font-size:16.5px;font-weight:550;color:var(--fg);min-width:0}
-.tc-head .db{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--fg-3);flex:none}
+.tc-head .reg{font-family:var(--mono);font-size:var(--fs-xs);color:var(--fg-3);border:1px solid var(--rule);border-radius:6px;padding:1px 7px;flex:none}
+.tc-head .plain{font-size:var(--fs-md);font-weight:550;color:var(--fg);min-width:0}
+.tc-head .db{margin-left:auto;font-family:var(--mono);font-size:var(--fs-xs);color:var(--fg-3);flex:none}
 .tc-body{padding:17px}
 .ret{display:grid;grid-template-columns:repeat(auto-fit,minmax(172px,1fr));gap:14px 24px;margin:0}
 .ret div{min-width:0}
-.ret dt{font-size:14px;color:var(--fg-3);line-height:1.35}
-.ret dd{margin:4px 0 0;font-family:var(--mono);font-size:15px;font-weight:500;overflow-wrap:break-word;font-variant-numeric:tabular-nums}
-.fields{margin-top:17px;padding-top:15px;border-top:1px solid var(--rule-2);font-size:14.5px;color:var(--fg-2);line-height:1.6}
+.ret dt{font-size:var(--fs-sm);color:var(--fg-3);line-height:1.35}
+.ret dd{margin:4px 0 0;font-family:var(--mono);font-size:var(--fs-base);font-weight:500;overflow-wrap:break-word;font-variant-numeric:tabular-nums}
+.fields{margin-top:17px;padding-top:15px;border-top:1px solid var(--rule-2);font-size:var(--fs-sm);color:var(--fg-2);line-height:1.6}
 .fields .lead{display:block;margin-bottom:8px}
-.k{font-family:var(--mono);font-size:12.5px;color:var(--fg);background:var(--surface-2);border:1px solid var(--rule);padding:2px 7px;border-radius:4px;display:inline-block;margin:2px 2px 2px 0}
+.k{font-family:var(--mono);font-size:var(--fs-xs);color:var(--fg);background:var(--surface-2);border:1px solid var(--rule);padding:2px 7px;border-radius:4px;display:inline-block;margin:2px 2px 2px 0}
 .rowex{margin-top:16px;padding:14px 16px;background:var(--accent-soft);border-radius:6px}
-.rowex .h{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:9px}
-.rowex .v{font-family:var(--mono);font-size:13.5px;line-height:1.85;overflow-wrap:anywhere}
+.rowex .h{font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:9px}
+.rowex .v{font-family:var(--mono);font-size:var(--fs-xs);line-height:1.85;overflow-wrap:anywhere}
 .accs{margin-top:17px;padding-top:15px;border-top:1px solid var(--rule-2)}
-.accs .lead{font-size:14.5px;color:var(--fg-2);display:block;margin-bottom:11px;line-height:1.6}
-.acc{display:inline-flex;align-items:baseline;gap:8px;background:var(--surface-2);border:1px solid var(--rule);border-radius:5px;padding:5px 10px;margin:0 5px 7px 0;font-size:13.5px}
-.acc code{font-family:var(--mono);font-size:13.5px;font-weight:500;color:var(--accent)}
-.acc em{font-style:normal;color:var(--fg-3);font-size:12.5px}
-.pdbrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:16px;align-items:baseline;font-size:14px;padding:9px 0;border-bottom:1px solid var(--rule-2)}
+.accs .lead{font-size:var(--fs-sm);color:var(--fg-2);display:block;margin-bottom:11px;line-height:1.6}
+.acc{display:inline-flex;align-items:baseline;gap:8px;background:var(--surface-2);border:1px solid var(--rule);border-radius:5px;padding:5px 10px;margin:0 5px 7px 0;font-size:var(--fs-xs)}
+.acc code{font-family:var(--mono);font-size:var(--fs-xs);font-weight:500;color:var(--accent)}
+.acc em{font-style:normal;color:var(--fg-3);font-size:var(--fs-xs)}
+.pdbrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:16px;align-items:baseline;font-size:var(--fs-sm);padding:9px 0;border-bottom:1px solid var(--rule-2)}
 .pdbrow:last-child{border-bottom:0}
 .pdbrow .who{min-width:0;overflow-wrap:anywhere}
 /* On its own line. Inline, the accession and range run on from the chain's name and the
    pair wraps mid-phrase -- "median of" at the end of one line and "5 · a real
    measurement" at the start of the next. */
 .pdbrow .who em{display:block;margin-top:2px;font-style:normal;font-family:var(--mono);
-  font-size:12.5px;color:var(--fg-3)}
+  font-size:var(--fs-xs);color:var(--fg-3)}
 /* The plain-English gloss beside a chain's real name. The name is first because it is the
    string the record carries and the thing a reader can search the JSON for; the gloss only
    says what it does, and is omitted where there is nothing to say that the record supports. */
-.pdbrow .who i.gl{font-size:13px;color:var(--fg-3)}
-.pdbrow .ids{font-family:var(--mono);font-size:13px;color:var(--accent);min-width:0;overflow-wrap:anywhere}
+.pdbrow .who i.gl{font-size:var(--fs-xs);color:var(--fg-3)}
+.pdbrow .ids{font-family:var(--mono);font-size:var(--fs-xs);color:var(--accent);min-width:0;overflow-wrap:anywhere}
 .pdbrow.none .ids{color:var(--warn)}
 @media(max-width:560px){.pdbrow{grid-template-columns:1fr;gap:4px}}
 .foldimg{margin-top:17px}
 .foldimg img{display:block;width:100%;border:1px solid var(--rule);border-radius:14px;background:#fff}
-.foldimg .cc{font-size:14px;color:var(--fg-3);margin-top:11px;line-height:1.6;max-width:92ch}
+.foldimg .cc{font-size:var(--fs-sm);color:var(--fg-3);margin-top:11px;line-height:1.6;max-width:92ch}
 
 /* The fold, traced by residue. Band colours are the notebook's PLDDT_BANDS; the darkest blue
    is lifted in dark mode, where #133C8C on near-black all but disappears. */
@@ -630,7 +649,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .ft-figs{display:grid;grid-template-columns:1fr 1.08fr;gap:22px;align-items:start}
 @media (max-width:760px){.ft-figs{grid-template-columns:1fr}}
 .ft-panel{margin:0;min-width:0}
-.ft-panel figcaption{font-size:13.5px;color:var(--fg-2);margin:0 0 8px;max-width:none}
+.ft-panel figcaption{font-size:var(--fs-xs);color:var(--fg-2);margin:0 0 8px;max-width:none}
 .ft-panel svg{display:block;width:100%;height:auto;touch-action:manipulation;cursor:crosshair}
 .ft-bb{max-height:440px}
 .ft-halo{fill:none;stroke:var(--surface);stroke-width:8;stroke-linecap:round}
@@ -660,13 +679,13 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 .ft-runl{font:10.5px var(--body);fill:var(--fg-3);text-anchor:middle}
 .ft-cur line{stroke:var(--accent);stroke-width:1.4}
 .ft-cur circle{fill:var(--accent);stroke:var(--surface);stroke-width:1.5}
-.ft-legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--fg-2);margin:12px 0 0}
+.ft-legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:var(--fs-xs);color:var(--fg-2);margin:12px 0 0}
 .ft-legend span{display:inline-flex;align-items:center;gap:7px}
 .ft-legend i{display:inline-block;width:18px;height:5px;border-radius:3px;background:var(--b)}
 .ft-seqhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin:20px 0 8px;
   padding-top:14px;border-top:1px solid var(--rule-2)}
-.ft-h{font-family:var(--display);font-weight:650;font-size:15px}
-.ft-read{flex:1 1 300px;font-size:13.5px;color:var(--fg-3);min-height:1.5em}
+.ft-h{font-family:var(--display);font-weight:650;font-size:var(--fs-base)}
+.ft-read{flex:1 1 300px;font-size:var(--fs-xs);color:var(--fg-3);min-height:1.5em}
 .ftrace.tracing .ft-read{color:var(--fg)}
 .ft-copy{font:500 12.5px var(--body);color:var(--accent);background:none;border:1px solid var(--rule);
   border-radius:999px;padding:4px 12px;cursor:pointer}
@@ -684,19 +703,19 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
 
 /* chips */
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{display:flex;align-items:baseline;gap:8px;background:var(--surface);border:1px solid var(--rule);border-radius:22px;padding:8px 15px;font-size:14.5px}
-.chip b{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--fg-3)}
+.chip{display:flex;align-items:baseline;gap:8px;background:var(--surface);border:1px solid var(--rule);border-radius:22px;padding:8px 15px;font-size:var(--fs-sm)}
+.chip b{font-family:var(--mono);font-size:var(--fs-xs);font-weight:500;color:var(--fg-3)}
 
 /* notes */
 .note{display:flex;gap:13px;align-items:flex-start;background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--warn);border-radius:7px;padding:16px 18px;margin-bottom:12px}
-.note p{margin:0;font-size:15.5px;color:var(--fg-2);line-height:1.55}
+.note p{margin:0;font-size:var(--fs-base);color:var(--fg-2);line-height:1.55}
 .note b{color:var(--fg);font-weight:600}
 .good{display:flex;gap:13px;align-items:flex-start;background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--ok);border-radius:7px;padding:16px 18px;margin-bottom:22px}
-.good p{margin:0;font-size:15.5px;color:var(--fg-2);line-height:1.55}
+.good p{margin:0;font-size:var(--fs-base);color:var(--fg-2);line-height:1.55}
 .good b{color:var(--fg);font-weight:600}
 
-footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--rule);color:var(--fg-3);font-size:14px;line-height:1.85}
-footer code{font-family:var(--mono);font-size:13px;background:var(--surface-2);padding:2px 6px;border-radius:4px}
+footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--rule);color:var(--fg-3);font-size:var(--fs-sm);line-height:1.85}
+footer code{font-family:var(--mono);font-size:var(--fs-xs);background:var(--surface-2);padding:2px 6px;border-radius:4px}
 
 /* ---- site chrome ---- */
 .sitenav{position:sticky;top:0;z-index:20;border-bottom:1px solid var(--rule);
@@ -705,57 +724,57 @@ footer code{font-family:var(--mono);font-size:13px;background:var(--surface-2);p
   padding-inline:max(16px,env(safe-area-inset-left,0px))}
 @supports not (backdrop-filter:blur(2px)){.sitenav{background:var(--bg)}}
 .sitenav-in{max-width:920px;margin:0 auto;display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding-block:15px}
-.sitenav a{color:var(--fg-2);text-decoration:none;font-size:15px}
+.sitenav a{color:var(--fg-2);text-decoration:none;font-size:var(--fs-base)}
 .sitenav a:hover{color:var(--accent)}
 .sitenav a[aria-current="page"]{color:var(--fg);font-weight:500}
-.sitenav .brand{font-family:var(--mono);font-weight:500;font-size:15px;color:var(--fg);margin-right:auto}
+.sitenav .brand{font-family:var(--mono);font-weight:500;font-size:var(--fs-base);color:var(--fg);margin-right:auto}
 .themer{background:none;border:1px solid var(--rule);border-radius:6px;color:var(--fg-2);
-  font-family:var(--body);font-size:13.5px;padding:6px 12px;cursor:pointer;line-height:1.3}
+  font-family:var(--body);font-size:var(--fs-xs);padding:6px 12px;cursor:pointer;line-height:1.3}
 .themer:hover{border-color:var(--accent);color:var(--accent)}
 .sitefoot{background:var(--band);color:var(--band-fg);margin:72px calc(-1 * max(16px,env(safe-area-inset-left,0px))) -72px;
-  padding:30px max(16px,env(safe-area-inset-left,0px));font-size:14px;line-height:1.7}
-.sitefoot code{font-family:var(--mono);font-size:13px;background:rgba(255,255,255,.12);padding:2px 6px;border-radius:5px}
+  padding:30px max(16px,env(safe-area-inset-left,0px));font-size:var(--fs-sm);line-height:1.7}
+.sitefoot code{font-family:var(--mono);font-size:var(--fs-xs);background:rgba(255,255,255,.12);padding:2px 6px;border-radius:5px}
 a{color:var(--accent)}
 
 /* ---- run list ---- */
 .runlist{display:grid;gap:11px}
 .runrow{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:17px 19px;text-decoration:none;color:inherit}
 .runrow:hover{border-color:var(--accent)}
-.runrow .who{font-size:17px;font-weight:500;min-width:0;overflow-wrap:anywhere}
+.runrow .who{font-size:var(--fs-md);font-weight:500;min-width:0;overflow-wrap:anywhere}
 .runrow:hover .who{color:var(--accent)}
-.runrow .who em{font-style:normal;font-family:var(--mono);font-size:13.5px;color:var(--fg-3);display:block;margin-top:4px}
-.runrow .stat{font-family:var(--mono);font-size:13.5px;color:var(--fg-3);flex:none}
+.runrow .who em{font-style:normal;font-family:var(--mono);font-size:var(--fs-xs);color:var(--fg-3);display:block;margin-top:4px}
+.runrow .stat{font-family:var(--mono);font-size:var(--fs-xs);color:var(--fg-3);flex:none}
 
 /* ---- the submit form ---- */
 .submit{background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--brand);border-radius:14px;padding:26px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
 @media(max-width:620px){.frow{grid-template-columns:1fr}}
-.frow label{display:block;font-size:14.5px;color:var(--fg-2);margin-bottom:7px}
-.frow input{width:100%;font-family:var(--mono);font-size:16px;padding:12px 14px;border:1px solid var(--rule);border-radius:6px;background:var(--bg);color:var(--fg)}
+.frow label{display:block;font-size:var(--fs-sm);color:var(--fg-2);margin-bottom:7px}
+.frow input{width:100%;font-family:var(--mono);font-size:var(--fs-base);padding:12px 14px;border:1px solid var(--rule);border-radius:6px;background:var(--bg);color:var(--fg)}
 .frow input:focus{outline:2.5px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
-.go{display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:var(--on-accent);border:0;border-radius:8px;padding:14px 26px;font-family:var(--body);font-size:16px;font-weight:600;cursor:pointer;text-decoration:none}
+.go{display:inline-flex;align-items:center;gap:9px;background:var(--accent);color:var(--on-accent);border:0;border-radius:8px;padding:14px 26px;font-family:var(--body);font-size:var(--fs-base);font-weight:600;cursor:pointer;text-decoration:none}
 .go:hover{filter:brightness(1.12)}
 .go:disabled{opacity:.45;cursor:not-allowed}
-.hint{font-size:14.5px;color:var(--fg-3);margin-top:13px;line-height:1.6}
-.err{font-size:14.5px;color:var(--warn);margin-top:11px;min-height:1.2em}
+.hint{font-size:var(--fs-sm);color:var(--fg-3);margin-top:13px;line-height:1.6}
+.err{font-size:var(--fs-sm);color:var(--warn);margin-top:11px;min-height:1.2em}
 .steps3{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:22px}
 @media(max-width:620px){.steps3{grid-template-columns:1fr}}
-.steps3 div{background:var(--surface-2);border-radius:7px;padding:16px 18px;font-size:14.5px;color:var(--fg-2);line-height:1.55}
+.steps3 div{background:var(--surface-2);border-radius:7px;padding:16px 18px;font-size:var(--fs-sm);color:var(--fg-2);line-height:1.55}
 /* The leading kicker only, so a <b> inside the card's own sentence stays emphasis. */
-.steps3 div>b:first-child{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3);margin-bottom:7px}
+.steps3 div>b:first-child{display:block;font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3);margin-bottom:7px}
 .steps3 b{color:var(--fg);font-weight:650}
 
 /* ---- the record link on a result page ---- */
 .reclink{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;margin:20px 0 0;padding:16px 18px;background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:7px}
-.reclink a{font-family:var(--mono);font-size:15px;font-weight:500;text-decoration:none;flex:none}
+.reclink a{font-family:var(--mono);font-size:var(--fs-base);font-weight:500;text-decoration:none;flex:none}
 .reclink a:hover{text-decoration:underline}
-.reclink span{font-size:14px;color:var(--fg-3);min-width:0}
+.reclink span{font-size:var(--fs-sm);color:var(--fg-3);min-width:0}
 
 /* ---- arm separators ---- */
 .armsep{margin:112px 0 0;padding:32px 34px;border-radius:14px;background:var(--surface-2);border-left:3px solid var(--brand)}
-.armsep .n{font-family:var(--mono);font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent)}
+.armsep .n{font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.15em;text-transform:uppercase;color:var(--accent)}
 .armsep h2{font-family:var(--display);font-weight:700;font-size:clamp(25px,3.4vw,34px);line-height:1.14;letter-spacing:-.03em;margin-top:10px}
-.armsep p{margin:14px 0 0;color:var(--fg-2);font-size:17px;line-height:1.6;max-width:62ch}
+.armsep p{margin:14px 0 0;color:var(--fg-2);font-size:var(--fs-md);line-height:1.6;max-width:62ch}
 .armsep + section{padding-top:56px}
 
 /* ---- the flowchart page ----
@@ -769,9 +788,9 @@ a{color:var(--accent)}
 .fc{display:block;width:100%;min-width:470px;max-width:700px;height:auto;margin:0 auto}
 .fc .box{fill:var(--surface);stroke:var(--rule);stroke-width:1.5}
 .fc .io{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.8}
-.fc .t{fill:var(--fg);font-family:var(--body);font-size:14px;font-weight:500}
-.fc .sub{fill:var(--fg-3);font-family:var(--mono);font-size:10.5px}
-.fc .side{fill:var(--fg-3);font-family:var(--mono);font-size:10.5px}
+.fc .t{fill:var(--fg);font-family:var(--body);font-size:var(--fs-sm);font-weight:500}
+.fc .sub{fill:var(--fg-3);font-family:var(--mono);font-size:var(--fs-micro)}
+.fc .side{fill:var(--fg-3);font-family:var(--mono);font-size:var(--fs-micro)}
 /* Every box links to the tool card that shows what it returned. An <a> inside SVG takes a
    focus ring from the UA inconsistently, so the hover and focus states are drawn on the
    box itself. */
@@ -790,7 +809,7 @@ a{color:var(--accent)}
 .fc .ln{stroke:var(--fg-3);stroke-width:1.6;opacity:.55;fill:none}
 .fc .arrow{fill:var(--fg-3);opacity:.55}
 .fcnote{display:grid;gap:12px;margin-top:30px}
-.fcnote div{background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:16px 18px;font-size:15.5px;color:var(--fg-2);line-height:1.55}
+.fcnote div{background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:16px 18px;font-size:var(--fs-base);color:var(--fg-2);line-height:1.55}
 .fcnote b{color:var(--fg)}
 
 /* ---------------------------------------------------------------- literature
@@ -800,8 +819,8 @@ a{color:var(--accent)}
    retrieval module states about its own hit counts. */
 .lit{border:1px solid var(--rule);border-radius:14px;background:var(--surface);overflow:hidden}
 .lith{padding:13px 17px;background:var(--surface-2);border-bottom:1px solid var(--rule);
-  font-size:14.5px;font-weight:600}
-.lith span{display:block;margin-top:4px;font-size:13px;font-weight:400;color:var(--fg-2);
+  font-size:var(--fs-sm);font-weight:600}
+.lith span{display:block;margin-top:4px;font-size:var(--fs-xs);font-weight:400;color:var(--fg-2);
   line-height:1.55}
 /* Each target is a disclosure, shut by default. Opened all at once this section is longer
    than the four stages it sits between, and all of it is citations -- the thing a reader
@@ -814,19 +833,19 @@ a{color:var(--accent)}
 .lrh::marker,.lrh::-webkit-details-marker{content:"";display:none}
 .lrh:hover{background:var(--surface-2)}
 .lrow[open]>.lrh{background:var(--surface-2);border-bottom:1px solid var(--rule)}
-.lrh .t{display:block;font-size:15px;font-weight:650}
+.lrh .t{display:block;font-size:var(--fs-base);font-weight:650}
 .lrow[open]>.lrh .t,.lrh:hover .t{color:var(--accent)}
 /* The counts, in the page's body face rather than in mono. These are a sentence with three
    numbers in it, and eleven words of monospace at 11.5px is the hardest line on the page to
    read; the numbers keep the mono, which is what it is for. */
-.lrh .w{display:block;font-size:13px;color:var(--fg-2);margin-top:4px;line-height:1.55}
+.lrh .w{display:block;font-size:var(--fs-xs);color:var(--fg-2);margin-top:4px;line-height:1.55}
 .lrh .w b{font-family:var(--mono);font-weight:500;color:var(--fg);
   font-variant-numeric:tabular-nums}
-.lrh .w em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--fg-3);
+.lrh .w em{font-style:normal;font-family:var(--mono);font-size:var(--fs-micro);color:var(--fg-3);
   margin-right:7px}
 /* How this target's query was anchored, at the head of the open panel. It explains the
    queries below it, so it sits with them rather than on the shut row. */
-.lwhy{padding:11px 17px;font-size:13px;color:var(--fg-2);line-height:1.55;
+.lwhy{padding:11px 17px;font-size:var(--fs-xs);color:var(--fg-2);line-height:1.55;
   border-bottom:1px solid var(--rule-2)}
 /* The chevron, drawn: its position is fixed to the first line of the row rather than to the
    row's middle, so it does not drift down as the explanation under the title wraps. */
@@ -840,22 +859,22 @@ a{color:var(--accent)}
 .lq{padding:9px 17px 11px 34px;border-top:1px solid var(--rule-2);
   border-left:2.5px solid var(--accent);background:var(--accent-soft)}
 .lq.x{border-left-color:var(--rule);background:var(--surface-2)}
-.lqh{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;font-size:13.5px}
-.lqh .w{font-family:var(--mono);font-size:11.5px;color:var(--fg-3);font-weight:400}
-.lqn{font-family:var(--mono);font-size:11.5px;color:var(--fg-2)}
+.lqh{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;font-size:var(--fs-xs)}
+.lqh .w{font-family:var(--mono);font-size:var(--fs-micro);color:var(--fg-3);font-weight:400}
+.lqn{font-family:var(--mono);font-size:var(--fs-micro);color:var(--fg-2)}
 /* The query itself: monospace, wrapping, and allowed to be long. Truncating it would
    defeat the reason it is printed. */
-.lqq{font-family:var(--mono);font-size:11px;color:var(--fg-3);line-height:1.6;
+.lqq{font-family:var(--mono);font-size:var(--fs-micro);color:var(--fg-3);line-height:1.6;
   margin:5px 0 0;overflow-wrap:anywhere}
-.lqz{font-size:12.5px;color:var(--fg-2);margin-top:6px;line-height:1.55}
+.lqz{font-size:var(--fs-xs);color:var(--fg-2);margin-top:6px;line-height:1.55}
 .lh{list-style:none;margin:8px 0 0;padding:0}
 .lh li{padding:5px 0;border-top:1px solid var(--rule-2)}
 .lh li:first-child{border-top:0}
-.lt{display:block;font-size:13px;line-height:1.5}
+.lt{display:block;font-size:var(--fs-xs);line-height:1.5}
 .lt a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
 .lt a:hover{border-bottom-color:var(--accent)}
-.lm{display:block;font-family:var(--mono);font-size:11px;color:var(--fg-3);margin-top:2px}
-.pp{display:inline-block;margin-left:6px;padding:0 6px;border-radius:20px;font-size:10px;
+.lm{display:block;font-family:var(--mono);font-size:var(--fs-micro);color:var(--fg-3);margin-top:2px}
+.pp{display:inline-block;margin-left:6px;padding:0 6px;border-radius:20px;font-size:var(--fs-micro);
   border:1px solid var(--rule);color:var(--fg-2)}
 .pp.un{border-style:dashed}
 @media (max-width:760px){.lq{padding-left:17px}}
@@ -874,12 +893,12 @@ a{color:var(--accent)}
 .disc{border:1px solid var(--rule);border-radius:12px;background:var(--surface);
   margin:0 0 9px;overflow:hidden}
 .disc>summary{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;
-  font-size:15.5px;font-weight:600;color:var(--fg);background:var(--surface-2);
+  font-size:var(--fs-base);font-weight:600;color:var(--fg);background:var(--surface-2);
   list-style:none;line-height:1.4}
 .disc>summary::marker,.disc>summary::-webkit-details-marker{content:"";display:none}
 /* The hint always exists in the markup, empty where there is nothing to count, because its
    auto margin is what pushes the chevron to the right edge. */
-.disc>summary em{font-style:normal;font-weight:400;font-size:13.5px;color:var(--fg-3);
+.disc>summary em{font-style:normal;font-weight:400;font-size:var(--fs-xs);color:var(--fg-3);
   margin-left:auto;flex:none;text-align:right}
 /* Drawn, not inherited: the platform triangle differs in size and colour between engines. */
 .disc>summary::after{content:"";flex:none;width:8px;height:8px;margin-left:4px;
@@ -890,7 +909,7 @@ a{color:var(--accent)}
 .disc>summary:hover{color:var(--accent)}
 .disc>summary:hover::after{border-color:var(--accent)}
 .disc-b{padding:18px 20px 4px}
-.disc-b p{margin:0 0 15px;font-size:15.5px;line-height:1.62;color:var(--fg-2);max-width:66ch}
+.disc-b p{margin:0 0 15px;font-size:var(--fs-base);line-height:1.62;color:var(--fg-2);max-width:66ch}
 .disc-b p b{color:var(--fg);font-weight:650}
 .disc-b>:last-child{margin-bottom:16px}
 /* A stack of disclosures is one object, so it gets one outer margin rather than seven. */
@@ -903,14 +922,14 @@ a{color:var(--accent)}
    words, which is the slowest way to tell someone what a line means. */
 .howto{border:1px solid var(--rule);border-radius:14px;background:var(--surface);
   padding:4px 17px 14px;margin:0 0 16px}
-.howto .ht-ttl{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;
+.howto .ht-ttl{font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.12em;
   text-transform:uppercase;color:var(--fg-3);padding:13px 0 4px}
 .howto .lr{border-bottom:0;padding-left:0;padding-right:0}
 .howto .lr .who .t{color:var(--fg-3);font-weight:500}
 .ht-keys{list-style:none;margin:6px 0 0;padding:12px 0 0;border-top:1px solid var(--rule-2);
   display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:11px 22px}
 .ht-keys li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:11px;align-items:center;
-  font-size:14px;color:var(--fg-2);line-height:1.45}
+  font-size:var(--fs-sm);color:var(--fg-2);line-height:1.45}
 .ht-keys b{color:var(--fg);font-weight:600}
 /* Each swatch is a 34px length of track carrying one mark, drawn with the lane's own rules. */
 .sw{position:relative;display:block;height:18px;background:var(--surface-2);border-radius:4px}
@@ -940,13 +959,13 @@ a{color:var(--accent)}
 .oc .ico .acs{stroke:var(--brand)}
 /* Direct child only: the card's kicker is mono small-caps, and a <b> inside its prose is
    emphasis and must stay prose. */
-.oc>b{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.11em;
+.oc>b{display:block;font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.11em;
   text-transform:uppercase;color:var(--accent);margin-bottom:7px}
-.oc p{margin:0;font-size:15px;line-height:1.55;color:var(--fg-2)}
+.oc p{margin:0;font-size:var(--fs-base);line-height:1.55;color:var(--fg-2)}
 .oc p b{color:var(--fg);font-weight:650}
 .oc p+p{margin-top:9px}
-.oc-foot{margin:19px 0 0!important;font-size:16px!important;color:var(--fg-2)}
-.opener p.lead{font-size:20px;line-height:1.5;color:var(--fg);font-weight:500;margin-bottom:0}
+.oc-foot{margin:19px 0 0!important;font-size:var(--fs-base)!important;color:var(--fg-2)}
+.opener p.lead{font-size:var(--fs-xl);line-height:1.5;color:var(--fg);font-weight:500;margin-bottom:0}
 
 /* =============================================================== the step ledger
    Figure 1 says what the five steps do. This says what each one cost and what it handed on,
@@ -958,11 +977,11 @@ a{color:var(--accent)}
 @media(max-width:520px){.ledger{grid-template-columns:repeat(2,1fr)}}
 .ledger div{background:var(--surface);padding:12px 13px;min-width:0}
 .ledger dd{margin:0}
-.ledger .s{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+.ledger .s{font-family:var(--mono);font-size:var(--fs-micro);letter-spacing:.1em;text-transform:uppercase;
   color:var(--fg-3)}
-.ledger .v{display:block;font-family:var(--mono);font-size:17px;font-weight:500;margin-top:5px;
+.ledger .v{display:block;font-family:var(--mono);font-size:var(--fs-md);font-weight:500;margin-top:5px;
   font-variant-numeric:tabular-nums}
-.ledger .u{display:block;font-size:12.5px;color:var(--fg-3);margin-top:3px;line-height:1.35}
+.ledger .u{display:block;font-size:var(--fs-xs);color:var(--fg-3);margin-top:3px;line-height:1.35}
 
 /* ================================================================ the region map
    How a span annotated on another virus reaches this genome, drawn because the four
@@ -987,12 +1006,12 @@ a{color:var(--accent)}
 .xmap .ac{fill:var(--accent)}
 .xmap .acs{stroke:var(--accent)}
 /* The lane labels, the small print under them, and the text inside a bar. */
-.xmap .xl{font-size:13px;font-weight:600;fill:currentColor}
-.xmap .xu{font-family:var(--mono);font-size:10.5px;fill:var(--fg-3)}
-.xmap .xt{font-family:var(--mono);font-size:10.5px;fill:var(--fg-2)}
-.xmap .xk{font-size:12.5px;fill:var(--fg-2)}
+.xmap .xl{font-size:14px;font-weight:600;fill:currentColor}
+.xmap .xu{font-family:var(--mono);font-size:12px;fill:var(--fg-3)}
+.xmap .xt{font-family:var(--mono);font-size:12.5px;fill:var(--fg-2)}
+.xmap .xk{font-size:14px;fill:var(--fg-2)}
 .xmap .xkb{font-weight:650;fill:var(--fg)}
-.xmap .xn{font-size:11px;font-weight:600;fill:var(--on-accent)}
+.xmap .xn{font-size:12.5px;font-weight:600;fill:var(--on-accent)}
 .xmap .xnn{fill:var(--fg-3);font-weight:500}
 .xmap .xfn{fill:var(--fg)}
 /* The bars: a track is the full extent of something, a `.xc` box is the part of it this
@@ -1000,19 +1019,15 @@ a{color:var(--accent)}
 .xmap .xb{fill:currentColor;fill-opacity:.055;stroke:var(--rule)}
 .xmap .xc{fill:none;stroke-width:1.6}
 .xmap .xr{rx:3}
-.xmap .xrn{fill:currentColor;fill-opacity:.1;stroke:var(--rule);stroke-dasharray:3 3}
 /* The matched blocks. Tapered rather than vertical, because the taper IS the claim: the two
    ends of one span do not move by the same amount. */
-.xmap .xp{fill:var(--accent);fill-opacity:.14;stroke:var(--accent);stroke-opacity:.45}
-.xmap .xpg{fill-opacity:.07}
-.xmap .xg{font-family:var(--mono);font-size:10px;fill:var(--fg-3);text-anchor:middle}
+.xmap .xg{font-family:var(--mono);font-size:12px;fill:var(--fg-3);text-anchor:middle}
 .xmap .xd{stroke:var(--fg-3);stroke-width:1.4;stroke-dasharray:2 2}
 /* What is on the entry and never read. Ticks rather than boxes: they are numerous, short and
    not spans anyone folds, which is the whole reason they are excluded. */
 .xmap .xx rect{fill:currentColor;fill-opacity:.22}
 .xmap .xa{stroke:currentColor;stroke-width:1.5;color:var(--fg-3)}
 .xmap .xf{fill:var(--accent);fill-opacity:.12;stroke-width:1.4}
-.xmap .xfx{fill:currentColor;fill-opacity:.05;stroke:var(--rule);stroke-dasharray:3 3}
 @media (max-width:760px){
   .xmap svg{min-width:680px}
 }
@@ -1037,5 +1052,53 @@ a{color:var(--accent)}
 /* The band numbers. A filled disc rather than an outline, because at 11px an outlined digit
    on a busy figure reads as a bullet rather than as a step. */
 .xmap .xs1{fill:var(--accent)}
-.xmap .xsn{font-size:11.5px;font-weight:650;fill:var(--on-accent)}
+.xmap .xsn{font-size:13px;font-weight:650;fill:var(--on-accent)}
 .xmap .xrule{stroke:var(--rule)}
+
+/* ---------------------------------------------------------------- the region map's roles
+   Colour here carries a ROLE, which is the one idea worth taking from Chen Liu's
+   figures4papers (github.com/ChenLiu-1996/figures4papers) for a figure like this. Its skill
+   is matplotlib and says in as many words that it is not for hand-authored diagram work, so
+   what transfers is the thinking and one hex, not the code:
+
+     purple, the site's own accent  -- OUR virus, and everything derived from it
+     blue, its `blue_main` #0F4D92  -- the RELATIVE's entry, someone else's virus
+     grey, hatched                  -- read, and not usable here
+
+   That distinction is the whole claim of the figure -- a label written down for one virus is
+   carried onto another -- and before this it was invisible, because both ends were the same
+   purple. The matched blocks are filled with a gradient between the two for the same reason:
+   the block IS the conversion, so it is drawn as one.
+
+   `blue_main` is kept exactly in light mode, where it measures 7.84:1 on the page and 8.41:1
+   under white text. It cannot survive dark mode -- 2.24:1 on #111113 -- so dark gets the same
+   hue lifted to #7FB3E8, which is 8.55:1 both against the background and under the near-black
+   text that sits on it. That inversion is the pattern `--accent` and `--on-accent` already
+   follow here, so the two roles behave identically when the theme flips.
+
+   The hatch is the other borrowing: that repo reaches for `hatch='/'` so a figure survives
+   being printed in grayscale. The same mark does a second job on a screen, which is that the
+   difference between "kept" and "not usable" stops depending on colour alone. */
+:root{--fig-other:#0F4D92;--fig-other-fg:#ffffff}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--fig-other:#7FB3E8;--fig-other-fg:#111113}
+}
+:root[data-theme="dark"]{--fig-other:#7FB3E8;--fig-other-fg:#111113}
+.xmap .xo{fill:var(--fig-other)}
+.xmap .xos{stroke:var(--fig-other)}
+.xmap .xno{font-size:12.5px;font-weight:600;fill:var(--fig-other-fg)}
+.xmap .xog .xart{fill:var(--fig-other);fill-opacity:.17;stroke:var(--fig-other);
+  stroke-opacity:.5}
+.xmap .xog .xarts{stroke:var(--fig-other);stroke-opacity:.62}
+.xmap .xog .xcut{fill:var(--bg)}
+/* The gradient runs down the block, from the numbering it starts in to the one it lands in. */
+.xmap .xgrad-a{stop-color:var(--fig-other);stop-opacity:.22}
+.xmap .xgrad-b{stop-color:var(--accent);stop-opacity:.22}
+.xmap .xp{fill:url(#xgrad);stroke:var(--accent);stroke-opacity:.4}
+.xmap .xpg{fill:url(#xgrad);fill-opacity:.5}
+/* Hatched, so "not usable" reads without colour -- in grayscale, and to a reader who cannot
+   separate the grey from the purple. */
+.xmap .xrn{fill:url(#xhatch);stroke:var(--rule);stroke-dasharray:3 3}
+.xmap .xfx{fill:url(#xhatch);stroke:var(--rule);stroke-dasharray:3 3}
+.xmap .xhl{stroke:currentColor;stroke-opacity:.34;stroke-width:1.1}
+.xmap .xswn{fill:var(--fig-other-fg)}

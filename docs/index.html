@@ -650,6 +650,14 @@
             markerHeight="7" orient="auto-start-reverse">
             <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
           </marker>
+          <linearGradient id="xgrad" x1="0" y1="0" x2="0" y2="1">
+            <stop class="xgrad-a" offset="0"/>
+            <stop class="xgrad-b" offset="1"/>
+          </linearGradient>
+          <pattern id="xhatch" width="6" height="6" patternUnits="userSpaceOnUse"
+            patternTransform="rotate(45)">
+            <line class="xhl" x1="0" y1="0" x2="0" y2="6"/>
+          </pattern>
         </defs>
 
         <!-- ================================ 1: the virus, and what it could be making -->
@@ -699,29 +707,29 @@
         <text class="xu" x="42" y="236">where the labels live</text>
 
         <text class="xt" x="220" y="160">what each label marks</text>
-        <g transform="translate(400 156)">
+        <g class="xog" transform="translate(400 156)">
           <ellipse class="xart" rx="25" ry="12"/>
           <path class="xarts" d="M-16 4 q 7 -11 15 -4 q 6 5 13 -3"/>
         </g>
-        <g transform="translate(545 156)">
+        <g class="xog" transform="translate(545 156)">
           <ellipse class="xart" rx="25" ry="12"/>
           <circle class="xcut" cx="13" cy="-4" r="7"/>
           <path class="xarts" d="M-17 5 q 8 -9 16 -3"/>
         </g>
-        <g transform="translate(702 156)">
+        <g class="xog" transform="translate(702 156)">
           <path class="xarts" d="M-24 -6 q 8 12 16 0 t 16 0 t 16 0"/>
           <path class="xarts" d="M-24 6 q 8 -12 16 0 t 16 0 t 16 0"/>
         </g>
 
         <text class="xt" x="350" y="180">the matching chain, in the relative's numbering</text>
         <rect class="xb" x="220" y="186" width="720" height="30" rx="5"/>
-        <rect class="xc acs" x="350" y="186" width="440" height="30" rx="5"/>
-        <rect class="xr ac" x="364" y="193" width="72" height="16"/>
-        <rect class="xr ac" x="480" y="193" width="130" height="16"/>
-        <rect class="xr ac" x="654" y="193" width="96" height="16"/>
-        <text class="xn" x="372" y="205">Domain</text>
-        <text class="xn" x="488" y="205">Region &middot; RBD</text>
-        <text class="xn" x="662" y="205">Coiled coil</text>
+        <rect class="xc xos" x="350" y="186" width="440" height="30" rx="5"/>
+        <rect class="xr xo" x="364" y="193" width="72" height="16"/>
+        <rect class="xr xo" x="480" y="193" width="130" height="16"/>
+        <rect class="xr xo" x="654" y="193" width="96" height="16"/>
+        <text class="xno" x="372" y="205">Domain</text>
+        <text class="xno" x="488" y="205">Region &middot; RBD</text>
+        <text class="xno" x="662" y="205">Coiled coil</text>
         <g class="xx">
           <rect x="236" y="222" width="4" height="7" rx="1"/>
           <rect x="262" y="222" width="4" height="7" rx="1"/>
@@ -748,8 +756,8 @@
         <polygon class="xp" points="364,262 436,262 402,334 330,334"/>
         <polygon class="xp" points="480,262 610,262 580,334 450,334"/>
         <polygon class="xp xpg" points="654,262 750,262 722,334 626,334"/>
-        <text class="xu" x="790" y="292">each end crosses on its own,</text>
-        <text class="xu" x="790" y="305">so a block leans</text>
+        <text class="xu" x="700" y="292">each end crosses on its own,</text>
+        <text class="xu" x="700" y="305">so a block leans</text>
 
         <!-- ================================ 4: the labels, now on our virus -->
         <circle class="xs1" cx="22" cy="363" r="11"/>
@@ -765,8 +773,8 @@
         <text class="xn" x="338" y="367">Domain</text>
         <text class="xn" x="458" y="367">Region &middot; RBD</text>
         <text class="xn xnn" x="634" y="367">not here</text>
-        <text class="xu" x="750" y="362">the alignment never reached it,</text>
-        <text class="xu" x="750" y="375">so it gets no coordinates</text>
+        <text class="xu" x="730" y="362">the alignment never reached</text>
+        <text class="xu" x="730" y="375">it, so it gets no coordinates</text>
 
         <line class="xa" x1="370" y1="390" x2="370" y2="418" marker-end="url(#xar)"/>
         <text class="xk" x="386" y="410">long enough to be worth folding?</text>
@@ -803,22 +811,23 @@
 
         <!-- ================================ the key -->
         <line class="xrule" x1="220" y1="504" x2="940" y2="504"/>
-        <rect class="xr ac" x="220" y="522" width="26" height="13"/>
-        <text class="xu" x="254" y="533">kept, and carried down</text>
-        <rect class="xr xrn" x="420" y="522" width="26" height="13"/>
-        <text class="xu" x="454" y="533">not usable here</text>
-        <polygon class="xp" points="586,520 612,520 606,537 580,537"/>
-        <text class="xu" x="620" y="533">one matched block</text>
-        <g transform="translate(768 529)">
-          <ellipse class="xart" rx="11" ry="6"/>
-        </g>
-        <text class="xu" x="786" y="533">shapes are schematic</text>
+        <rect class="xr xo" x="220" y="520" width="26" height="16"/>
+        <text class="xsn xswn" x="233" y="532" text-anchor="middle">2</text>
+        <text class="xu" x="254" y="533">on the relative</text>
+        <rect class="xr ac" x="384" y="520" width="26" height="16"/>
+        <text class="xsn" x="397" y="532" text-anchor="middle">4</text>
+        <text class="xu" x="418" y="533">on our genome</text>
+        <polygon class="xp" points="548,520 574,520 568,536 542,536"/>
+        <text class="xu" x="582" y="533">carried across</text>
+        <rect class="xr xrn" x="712" y="520" width="26" height="16"/>
+        <text class="xu" x="746" y="533">read, not usable here</text>
       </svg>
       </div>
       <figcaption><b>How a region annotated on another virus becomes a span this pipeline can
-        fold.</b> The virus, the genome and the protein shapes above are schematic. Nothing in
-        this figure is drawn from coordinates, and the structures further down the page are the
-        measured ones.
+        fold.</b> Blue is the relative's, purple is ours, and a matched block is drawn as a
+        gradient between the two because the block is where one becomes the other. The virus,
+        the genome and the protein shapes above are schematic. Nothing in this figure is drawn
+        from coordinates, and the structures further down the page are the measured ones.
         <ul class="pts sm">
           <li><b>Cutting this genome at the relative's residue numbers fails quietly.</b>
           SARS-CoV's main protease starts at 3241 and SARS-CoV-2's at 3264, so the same cut
