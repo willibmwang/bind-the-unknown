@@ -400,7 +400,14 @@
       out of reach.</li>
       <li><b>A drug is rarely aimed at a whole chain.</b> It is aimed at a pocket or a
       catalytic site inside one, and the relative's entry already says where those are.</li>
-      <li><b>So each over-the-ceiling row below opens onto the regions its relative
+      <li><b>So the length test is applied to each unit, and not to the chain that holds
+      them.</b> Asked in the other order &mdash; is this chain {{fold_ceiling}} residues or
+      fewer? &mdash; one answer decides a whole protein, and every region inside a long one is
+      discarded along with it. That is what put {{fold_over}} of the {{fold_located}} located
+      chains beyond reach: not the hard ones, the long ones. The regions are therefore read
+      off the relative first and measured against the ceiling one at a time afterwards, so a
+      target is refused only when nothing inside it fits either.</li>
+      <li><b>Each over-the-ceiling row below opens onto the regions its relative
       annotates.</b> {{domain_rescued}} of {{domain_over}} have at least one region short
       enough to fold.</li>
     </ul>
@@ -478,22 +485,22 @@
         <text class="xu" x="42" y="223">a virus already studied,</text>
         <text class="xu" x="42" y="236">where the labels live</text>
 
-        <text class="xt" x="220" y="160">what each label marks</text>
-        <g class="xog" transform="translate(400 156)">
+        <text class="xt" x="220" y="154">what they mark</text>
+        <g class="xog" transform="translate(400 150)">
           <ellipse class="xart" rx="25" ry="12"/>
           <path class="xarts" d="M-16 4 q 7 -11 15 -4 q 6 5 13 -3"/>
         </g>
-        <g class="xog" transform="translate(545 156)">
+        <g class="xog" transform="translate(545 150)">
           <ellipse class="xart" rx="25" ry="12"/>
           <circle class="xcut" cx="13" cy="-4" r="7"/>
           <path class="xarts" d="M-17 5 q 8 -9 16 -3"/>
         </g>
-        <g class="xog" transform="translate(702 156)">
+        <g class="xog" transform="translate(702 150)">
           <path class="xarts" d="M-24 -6 q 8 12 16 0 t 16 0 t 16 0"/>
           <path class="xarts" d="M-24 6 q 8 -12 16 0 t 16 0 t 16 0"/>
         </g>
 
-        <text class="xt" x="350" y="180">the matching chain, in the relative's numbering</text>
+        <text class="xt" x="350" y="181">the matching chain, in the relative's numbering</text>
         <rect class="xb" x="220" y="186" width="720" height="30" rx="5"/>
         <rect class="xc xos" x="350" y="186" width="440" height="30" rx="5"/>
         <rect class="xr xo" x="364" y="193" width="72" height="16"/>
@@ -524,12 +531,11 @@
         <text class="xsn" x="22" y="302" text-anchor="middle">3</text>
         <text class="xl" x="42" y="302">The matched blocks</text>
         <text class="xu" x="42" y="320">the only thing that</text>
-        <text class="xu" x="42" y="333">carries a label across</text>
+        <text class="xu" x="42" y="333">carries a label across;</text>
+        <text class="xu" x="42" y="346">each end crosses alone</text>
         <polygon class="xp" points="364,262 436,262 402,334 330,334"/>
         <polygon class="xp" points="480,262 610,262 580,334 450,334"/>
         <polygon class="xp xpg" points="654,262 750,262 722,334 626,334"/>
-        <text class="xu" x="700" y="292">each end crosses on its own,</text>
-        <text class="xu" x="700" y="305">so a block leans</text>
 
         <!-- ================================ 4: the labels, now on our virus -->
         <circle class="xs1" cx="22" cy="363" r="11"/>
@@ -545,8 +551,8 @@
         <text class="xn" x="338" y="367">Domain</text>
         <text class="xn" x="458" y="367">Region &middot; RBD</text>
         <text class="xn xnn" x="634" y="367">not here</text>
-        <text class="xu" x="730" y="362">the alignment never reached</text>
-        <text class="xu" x="730" y="375">it, so it gets no coordinates</text>
+        <text class="xu" x="620" y="396">the alignment never reached it,</text>
+        <text class="xu" x="620" y="409">so it gets no coordinates</text>
 
         <line class="xa" x1="370" y1="390" x2="370" y2="418" marker-end="url(#xar)"/>
         <text class="xk" x="386" y="410">long enough to be worth folding?</text>
@@ -569,14 +575,14 @@
           <circle class="xart" cx="-13" cy="6" r="2.6"/><circle class="xart" cx="13" cy="0" r="2.6"/>
         </g>
         <text class="xn xfn" x="454" y="448">Domain</text>
-        <text class="xu" x="454" y="462">mapped, long enough</text>
+        <text class="xu" x="454" y="462">mapped and long</text>
         <rect class="xf acs" x="592" y="432" width="170" height="40" rx="8"/>
         <g transform="translate(618 452)">
           <path class="xarts" d="M-13 6 q 5 -13 10 -3 q 4 9 9 -2 q 3 -7 7 -1"/>
           <circle class="xart" cx="-13" cy="6" r="2.6"/><circle class="xart" cx="13" cy="0" r="2.6"/>
         </g>
         <text class="xn xfn" x="640" y="448">Region &middot; RBD</text>
-        <text class="xu" x="640" y="462">mapped, long enough</text>
+        <text class="xu" x="640" y="462">mapped and long</text>
         <rect class="xf xfx" x="778" y="432" width="162" height="40" rx="8"/>
         <text class="xn xnn" x="792" y="448">under {{domain_minimum_aa}} aa</text>
         <text class="xu" x="792" y="462">offered, not folded</text>
