@@ -36,50 +36,50 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">1</span>
       <span class="what">Genome to candidate proteins</span>
-      <span class="secs">intake.rank_targets · 47.71 s</span></div>
+      <span class="secs">47.71 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><span class="k">genome_accession</span> NC_019843.3</li><li><span class="k">reference_excluded_organism</span> Middle East respiratory syndrome-related coronavirus</li><li><span class="k">reference_scope</span> viral</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><span class="k">genome_length_nt</span> 30,119</li><li><span class="k">segments</span> 1</li><li><span class="k">orfs_found</span> 40</li><li><span class="k">orfs_ranked</span> 12</li><li><span class="k">reference_entries</span> 17,519</li><li><span class="k">reference_entries_removed</span> 10</li><li><span class="k">identified</span> 8</li><li><span class="k">unidentified</span> 4</li></ul></div>
+      <div><h3>In</h3><ul><li><b>genome accession</b> NC_019843.3</li><li><b>reference excluded organism</b> Middle East respiratory syndrome-related coronavirus</li><li><b>reference scope</b> viral</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>genome length in nucleotides</b> 30,119</li><li><b>segments</b> 1</li><li><b>ORFs found</b> 40</li><li><b>ORFs ranked</b> 12</li><li><b>reference entries</b> 17,519</li><li><b>reference entries removed</b> 10</li><li><b>identified</b> 8</li><li><b>unidentified</b> 4</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;one reviewed accession and one residue range per candidate</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">2</span>
       <span class="what">Polyproteins to mature chains, and the score for each</span>
-      <span class="secs">intake.decompose + intake.rank_score · 39.62 s</span></div>
+      <span class="secs">39.62 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><span class="k">candidates_in</span> 12</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><span class="k">chains_out</span> 19</li><li><span class="k">all_decompositions_reproduce_the_score</span> yes</li></ul></div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 12</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>chains out</b> 19</li><li><b>every score re-adds from its parts</b> yes</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;every chain, with the accession and range its surface is measured on</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">3</span>
       <span class="what">Every chain to a measured surface, or a stated reason</span>
-      <span class="secs">geometry.surface_markers · 18.99 s</span></div>
+      <span class="secs">18.99 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><span class="k">candidates_in</span> 19</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><span class="k">rows_out</span> 19</li><li><span class="k">measured</span> 2</li><li><span class="k">unmeasured</span> 17</li><li><span class="k">nothing_dropped</span> yes</li><li><span class="k">gate_yes</span> 0</li><li><span class="k">gate_borderline</span> 1</li><li><span class="k">gate_no</span> 1</li></ul></div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 19</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>rows out</b> 19</li><li><b>measured</b> 2</li><li><b>unmeasured</b> 17</li><li><b>nothing dropped</b> yes</li><li><b>gate yes</b> 0</li><li><b>gate borderline</b> 1</li><li><b>gate no</b> 1</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;a patch median and range per chain; nothing downstream reads it yet</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">4</span>
       <span class="what">A chain to coordinates, the one lane a novel target has</span>
-      <span class="secs">structures.folded · 16.17 s</span></div>
+      <span class="secs">16.17 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><span class="k">candidates_in</span> 19</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><span class="k">foldable</span> 19</li><li><span class="k">not_foldable</span> 0</li><li><span class="k">folded_target</span> 3C-like proteinase nsp5</li><li><span class="k">residues</span> 306</li><li><span class="k">mean_plddt</span> 68.33</li><li><span class="k">at_or_above_70</span> 0.5359</li><li><span class="k">sequence_sha256</span> c1ed4cf3c5000655ba21dd67e6b92323c92af92640d54c1cd5dceebaa1e6ca04</li><li><span class="k">error</span> —</li></ul></div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 19</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>foldable</b> 19</li><li><b>not foldable</b> 0</li><li><b>folded target</b> 3C-like proteinase nsp5</li><li><b>residues</b> 306</li><li><b>mean confidence, out of 100</b> 68.33</li><li><b>at or above 70</b> 0.5359</li><li><b>sequence sha256</b> c1ed4cf3c5000655ba21dd67e6b92323c92af92640d54c1cd5dceebaa1e6ca04</li><li><b>error</b> —</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;coordinates. Nothing downstream reads them yet: the surface stage measures deposited structures, not predicted ones</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">5</span>
       <span class="what">A library definition over the randomised region</span>
-      <span class="secs">chemistry.library_spec · 0 s</span></div>
+      <span class="secs">0 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li>nothing from upstream</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><span class="k">initiator</span> ClAc-D-Tyr</li><li><span class="k">closure_residue</span> C</li><li><span class="k">alphabet_size</span> 25</li><li><span class="k">theoretical_diversity</span> 158,945,703,125</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>initiator</b> ClAc-D-Tyr</li><li><b>closure residue</b> C</li><li><b>building blocks per position</b> 25</li><li><b>possible molecules</b> 158,945,703,125</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;the position count the go/no-go test in arm 2 reads</div>
   </div>
 </section>
@@ -87,10 +87,13 @@
 <section>
   <div class="sec-head"><h2>The shortlist</h2>
     <span class="tag">8 identified ORFs cut into 19 chains</span></div>
-  <p class="cap">A different list from the stage-1 candidates above, not a shorter one. Stage
-  1 ranks whole ORFs. Stage 2 cuts the long proteins among them into the shorter chains a
-  virus folds, which is what a drug is aimed at. Each row names the ORF it was cut out of, and
-  carries its score split into what each of the five fixed weights paid it.</p>
+  <ul class="pts">
+    <li><b>A different list from the stage-1 candidates above, not a shorter one.</b> Stage 1
+    ranks whole ORFs; stage 2 cuts the long proteins among them into the shorter chains a
+    virus folds, which is what a drug is aimed at.</li>
+    <li><b>Each row names the ORF it was cut out of</b>, and carries its score split into what
+    each of the five fixed weights paid it.</li>
+  </ul>
   
   <div class="cmxscroll" tabindex="0" role="region" aria-label="Every mature chain and its score">
   <table class="cmx">
@@ -104,7 +107,7 @@
         <th scope="col" class="rk">#</th>
         <th scope="col" class="nm">Mature chain &mdash; what a binder would be aimed at</th>
         <th scope="col" class="cut">Cut out of</th>
-        <th scope="col" title="Share of the five-residue runs in the protein it comes from that its nearest curated relative also has. 1.0 would be the same sequence, and under 0.12 is not kept as a match at all. Rows with only a distant relative carry a different measure, labelled in the cell as a bit score, because the two are not one scale."><span class="cl">Match to a known relative</span><span class="ck">conservation</span><span class="cw">× 3 → max 3</span></th><th scope="col" title="Whether a binder could reach most of the places its relatives are recorded as sitting in without crossing a membrane, scored all or nothing."><span class="cl">On the outside</span><span class="ck">surface_exposed</span><span class="cw">× 2 → max 2</span></th><th scope="col" title="Whether the protein&#x27;s name or keywords put it in a class the virus cannot replicate without, such as a polymerase, a protease, a capsid or an entry protein. All or nothing."><span class="cl">The virus needs it</span><span class="ck">essential_class</span><span class="cw">× 1.5 → max 1.5</span></th><th scope="col" title="A 0–3 class read off the words in its annotations. Proteases and polymerases score 3, surface glycoproteins and helicases 2, because that is where approved antivirals have historically landed."><span class="cl">Class that gets drugged</span><span class="ck">druggable_class</span><span class="cw">× 0.8 → max 2.4</span></th><th scope="col" title="Deposited structures across its relatives, capped at 50. It carries the smallest weight, because a count like that measures how much a protein has been studied as much as how easy it is to work with."><span class="cl">Structures already solved</span><span class="ck">structures_in_family</span><span class="cw">× 0.5 → max 0.5</span></th>
+        <th scope="col" title="Share of the five-residue runs in the protein it comes from that its nearest curated relative also has. 1.0 would be the same sequence, and under 0.12 is not kept as a match at all. Rows with only a distant relative carry a different measure, labelled in the cell as a bit score, because the two are not one scale."><span class="cl">Match to a known relative</span><span class="cw">× 3 → max 3</span></th><th scope="col" title="Whether a binder could reach most of the places its relatives are recorded as sitting in without crossing a membrane, scored all or nothing."><span class="cl">On the outside</span><span class="cw">× 2 → max 2</span></th><th scope="col" title="Whether the protein&#x27;s name or keywords put it in a class the virus cannot replicate without, such as a polymerase, a protease, a capsid or an entry protein. All or nothing."><span class="cl">The virus needs it</span><span class="cw">× 1.5 → max 1.5</span></th><th scope="col" title="A 0–3 class read off the words in its annotations. Proteases and polymerases score 3, surface glycoproteins and helicases 2, because that is where approved antivirals have historically landed."><span class="cl">Class that gets drugged</span><span class="cw">× 0.8 → max 2.4</span></th><th scope="col" title="Deposited structures across its relatives, capped at 50. It carries the smallest weight, because a count like that measures how much a protein has been studied as much as how easy it is to work with."><span class="cl">Structures already solved</span><span class="cw">× 0.5 → max 0.5</span></th>
         <th scope="col" class="sc">Composite<span class="cw">of 9.4</span></th>
       </tr>
     </thead>
@@ -308,7 +311,7 @@
   <div class="sec-head"><h2>Surfaces</h2><span class="tag">one row per ranked chain</span></div>
   <div class="good"><p><b>19 answers for
   19 chains.</b> A chain can be refused, but it cannot
-  disappear.</p></div>
+  disappear from the list.</p></div>
   
   <div class="tiles" aria-hidden="true"><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile m"></span><span class="tile r"></span><span class="tile r"></span><span class="tile m"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span></div>
   <div class="legend">
@@ -450,7 +453,7 @@
       <span>the line across a bar is how far that domain&rsquo;s structures
       disagree</span></div>
   </div>
-  <p class="after">All 1 of those verdicts are decided on where the protein sits, which the gate reads before it reads area. Every one of these is annotated somewhere a macrocycle cannot reach, either inside the cell or inside the virus particle. Several of their patches clear the footprint line comfortably and are refused anyway, which makes the gate a statement about this class of molecule rather than about the target.</p>
+  <ul class="pts sm" style="margin:20px 0 0"><li><b>All 1 of those verdicts are decided on where the protein sits</b>, which the gate reads before it reads area. Every one of these is annotated somewhere a macrocycle cannot reach, either inside the cell or inside the virus particle.</li><li><b>Several of their patches clear the footprint line comfortably and are refused anyway.</b> That makes the gate a statement about this class of molecule rather than about the target.</li></ul>
 </section>
 
 <section>
@@ -472,10 +475,13 @@
         a definition only — no binding or antiviral property is predicted</div>
     </div>
   </div>
-  <p class="cap" style="margin-top:26px">That is the one chain the record reports in full. The
-  lane below is every candidate this stage was handed, with how its own sequence was found in
-  this genome and where it fell against the residue ceiling, which decides whether the stage
-  after it has coordinates to measure.</p>
+  <ul class="pts" style="margin-top:26px">
+    <li><b>That is the one chain the record reports in full.</b> The lane below is every
+    candidate this stage was handed.</li>
+    <li><b>Each row says how its own sequence was found in this genome</b>, and where it fell
+    against the residue ceiling, which decides whether the stage after it has coordinates to
+    measure.</li>
+  </ul>
   
   <div class="lane"><div class="lane-grp"><b>Inside the ceiling &middot; 10</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
     <div class="lane-axis" aria-hidden="true">
@@ -636,8 +642,8 @@
 </section>
 </main>
 <footer class="sitefoot"><div class="wrap">
-  Built from the records in <code>runs/</code> by <code>output/build_site.py</code>.
-  Every number on this site is read from a record, not retyped.
+  Built from the recorded runs. Every number on this site is read from a record, not
+  retyped.
 </div></footer>
 
 <script>

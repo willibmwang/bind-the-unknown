@@ -36,60 +36,60 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">1</span>
       <span class="what">Genome to candidate proteins</span>
-      <span class="secs">intake.rank_targets · 27.61 s</span></div>
+      <span class="secs">27.61 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><span class="k">genome_accession</span> NC_001477.1</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><span class="k">genome_length_nt</span> 10,735</li><li><span class="k">segments</span> 1</li><li><span class="k">orfs_found</span> 23</li><li><span class="k">orfs_ranked</span> 12</li><li><span class="k">reference_entries</span> 17,541</li><li><span class="k">reference_entries_removed</span> —</li><li><span class="k">identified</span> 1</li><li><span class="k">unidentified</span> 11</li></ul></div>
+      <div><h3>In</h3><ul><li><b>genome accession</b> NC_001477.1</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>genome length in nucleotides</b> 10,735</li><li><b>segments</b> 1</li><li><b>ORFs found</b> 23</li><li><b>ORFs ranked</b> 12</li><li><b>reference entries</b> 17,541</li><li><b>reference entries removed</b> —</li><li><b>identified</b> 1</li><li><b>unidentified</b> 11</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;one reviewed accession and one residue range per candidate</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">2</span>
       <span class="what">Polyproteins to mature chains, and the score for each</span>
-      <span class="secs">intake.decompose + intake.rank_score · 5.78 s</span></div>
+      <span class="secs">5.78 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><span class="k">candidates_in</span> 12</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><span class="k">chains_out</span> 13</li><li><span class="k">all_decompositions_reproduce_the_score</span> yes</li></ul></div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 12</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>chains out</b> 13</li><li><b>every score re-adds from its parts</b> yes</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;every chain, with the accession and range its surface is measured on</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">3</span>
       <span class="what">Every chain inside the ceiling to coordinates, the one lane a novel target has</span>
-      <span class="secs">structures.folded · 270.4 s</span></div>
+      <span class="secs">270.4 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><span class="k">candidates_in</span> 13</li><li><span class="k">identified_in</span> 13</li><li><span class="k">residue_ceiling</span> 400</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><span class="k">foldable</span> 13</li><li><span class="k">not_foldable</span> 0</li><li><span class="k">unidentified_foldable</span> 0</li><li><span class="k">chains_folded</span> 4</li><li><span class="k">folds_attempted</span> 8</li><li><span class="k">folds_refused</span> 4</li><li><span class="k">chains_not_folded_by_limit</span> 0</li><li><span class="k">chains_not_folded_by_budget</span> 2</li><li><span class="k">seconds_spent_on_refused_folds</span> 152</li><li><span class="k">chains_over_the_ceiling</span> 3</li><li><span class="k">changes_any_rank</span> no</li><li><span class="k">folded_target</span> Serine protease subunit NS2B</li><li><span class="k">residues</span> 130</li><li><span class="k">mean_plddt</span> 43.26</li><li><span class="k">at_or_above_70</span> 0</li><li><span class="k">sequence_sha256</span> e2c8d2d4bf745d9af488603ce80a7586f4e46d133d411a24763f4d4b7783ce88</li><li><span class="k">error</span> —</li></ul></div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 13</li><li><b>identified in</b> 13</li><li><b>residue ceiling</b> 400</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>foldable</b> 13</li><li><b>not foldable</b> 0</li><li><b>unidentified foldable</b> 0</li><li><b>chains folded</b> 4</li><li><b>folds attempted</b> 8</li><li><b>folds refused</b> 4</li><li><b>chains not folded by limit</b> 0</li><li><b>chains not folded by budget</b> 2</li><li><b>seconds spent on refused folds</b> 152</li><li><b>chains over the ceiling</b> 3</li><li><b>changes any rank</b> no</li><li><b>folded target</b> Serine protease subunit NS2B</li><li><b>residues</b> 130</li><li><b>mean confidence, out of 100</b> 43.26</li><li><b>at or above 70</b> 0</li><li><b>sequence sha256</b> e2c8d2d4bf745d9af488603ce80a7586f4e46d133d411a24763f4d4b7783ce88</li><li><b>error</b> —</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;coordinates for every chain inside the ceiling, and nothing at all for the 3 over it. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart. It reorders nothing: the ranking was final at the end of stage 2</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">4</span>
       <span class="what">Every chain to a measured surface, or a stated reason</span>
-      <span class="secs">geometry.surface_markers · 0.11 s</span></div>
+      <span class="secs">0.11 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><span class="k">candidates_in</span> 13</li><li><span class="k">predicted_coordinates_in</span> 4</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><span class="k">rows_out</span> 13</li><li><span class="k">measured</span> 0</li><li><span class="k">unmeasured</span> 13</li><li><span class="k">nothing_dropped</span> yes</li><li><span class="k">predicted_coordinates_offered</span> 4</li><li><span class="k">measured_on_predicted_coordinates</span> 4</li><li><span class="k">predicted_was_the_only_route</span> 4</li><li><span class="k">no_surface_by_either_route</span> 9</li><li><span class="k">no_surface_over_the_folding_ceiling</span> 3</li><li><span class="k">gate_yes</span> 0</li><li><span class="k">gate_borderline</span> 0</li><li><span class="k">gate_no</span> 0</li><li><span class="k">changes_any_rank</span> no</li></ul></div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 13</li><li><b>predicted coordinates in</b> 4</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>rows out</b> 13</li><li><b>measured</b> 0</li><li><b>unmeasured</b> 13</li><li><b>nothing dropped</b> yes</li><li><b>predicted coordinates offered</b> 4</li><li><b>measured on predicted coordinates</b> 4</li><li><b>predicted was the only route</b> 4</li><li><b>no surface by either route</b> 9</li><li><b>no surface over the folding ceiling</b> 3</li><li><b>gate yes</b> 0</li><li><b>gate borderline</b> 0</li><li><b>gate no</b> 0</li><li><b>changes any rank</b> no</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;a patch median and range per chain, and nothing downstream reads any of it. `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`: stage 5 defines the same library whatever this stage found. Moving the fold ahead of this stage gave stage 3 a consumer and left this one without any</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">5</span>
       <span class="what">A library definition over the randomised region</span>
-      <span class="secs">chemistry.library_spec · 0 s</span></div>
+      <span class="secs">0 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><span class="k">would_read_if_connected</span> [&#x27;patch_median_a2&#x27;, &#x27;patch_fraction_of_surface&#x27;, &#x27;sequons_near_patch&#x27;]</li><li><span class="k">not_connected_because</span> library_spec takes an initiator, a randomised-region length range and a set of elongator classes, all three properties of the display platform rather than of a target. No stated rule turns a measured patch area into any of them, and inventing one would publish a conversion as a result.</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><span class="k">initiator</span> ClAc-D-Tyr</li><li><span class="k">closure_residue</span> C</li><li><span class="k">alphabet_size</span> 25</li><li><span class="k">theoretical_diversity</span> 158,945,703,125</li></ul></div>
+      <div><h3>In</h3><ul><li><b>would read if connected</b> patch median square angstroms, patch fraction of surface, sequons near patch</li><li><b>not connected because</b> library_spec takes an initiator, a randomised-region length range and a set of elongator classes, all three properties of the display platform rather than of a target. No stated rule turns a measured patch area into any of them, and inventing one would publish a conversion as a result.</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>initiator</b> ClAc-D-Tyr</li><li><b>closure residue</b> C</li><li><b>building blocks per position</b> 25</li><li><b>possible molecules</b> 158,945,703,125</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;the position count the go/no-go test in arm 2 reads</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">6</span>
       <span class="what">Evidence on the highest-ranked targets</span>
-      <span class="secs">literature.search + similarity.homologs + families.entries + structures.predicted + bioactivity.prior_binders · 334.6 s</span></div>
+      <span class="secs">334.6 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><span class="k">targets_in</span> 3</li><li><span class="k">ranked_available</span> 13</li><li><span class="k">wall_budget_seconds</span> 700</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><span class="k">targets_covered</span> 3</li><li><span class="k">calls_made</span> 15</li><li><span class="k">ok</span> 13</li><li><span class="k">not_ok</span> 2</li><li><span class="k">network_calls</span> 127</li><li><span class="k">changes_any_rank</span> no</li><li><span class="k">every_target_has_every_tool</span> yes</li></ul></div>
+      <div><h3>In</h3><ul><li><b>targets in</b> 3</li><li><b>ranked available</b> 13</li><li><b>wall budget seconds</b> 700</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>targets covered</b> 3</li><li><b>calls made</b> 15</li><li><b>OK</b> 13</li><li><b>not OK</b> 2</li><li><b>network calls</b> 127</li><li><b>changes any rank</b> no</li><li><b>every target has every tool</b> yes</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;nothing. This annotates the shortlist and never reorders it</div>
   </div>
 </section>
@@ -97,10 +97,13 @@
 <section>
   <div class="sec-head"><h2>The shortlist</h2>
     <span class="tag">1 identified ORF cut into 13 chains</span></div>
-  <p class="cap">A different list from the stage-1 candidates above, not a shorter one. Stage
-  1 ranks whole ORFs. Stage 2 cuts the long proteins among them into the shorter chains a
-  virus folds, which is what a drug is aimed at. Each row names the ORF it was cut out of, and
-  carries its score split into what each of the five fixed weights paid it.</p>
+  <ul class="pts">
+    <li><b>A different list from the stage-1 candidates above, not a shorter one.</b> Stage 1
+    ranks whole ORFs; stage 2 cuts the long proteins among them into the shorter chains a
+    virus folds, which is what a drug is aimed at.</li>
+    <li><b>Each row names the ORF it was cut out of</b>, and carries its score split into what
+    each of the five fixed weights paid it.</li>
+  </ul>
   
   <div class="cmxscroll" tabindex="0" role="region" aria-label="Every mature chain and its score">
   <table class="cmx">
@@ -114,7 +117,7 @@
         <th scope="col" class="rk">#</th>
         <th scope="col" class="nm">Mature chain &mdash; what a binder would be aimed at</th>
         <th scope="col" class="cut">Cut out of</th>
-        <th scope="col" title="Share of the five-residue runs in the protein it comes from that its nearest curated relative also has. 1.0 would be the same sequence, and under 0.12 is not kept as a match at all. Rows with only a distant relative carry a different measure, labelled in the cell as a bit score, because the two are not one scale."><span class="cl">Match to a known relative</span><span class="ck">conservation</span><span class="cw">× 3 → max 3</span></th><th scope="col" title="Whether a binder could reach most of the places its relatives are recorded as sitting in without crossing a membrane, scored all or nothing."><span class="cl">On the outside</span><span class="ck">surface_exposed</span><span class="cw">× 2 → max 2</span></th><th scope="col" title="Whether the protein&#x27;s name or keywords put it in a class the virus cannot replicate without, such as a polymerase, a protease, a capsid or an entry protein. All or nothing."><span class="cl">The virus needs it</span><span class="ck">essential_class</span><span class="cw">× 1.5 → max 1.5</span></th><th scope="col" title="A 0–3 class read off the words in its annotations. Proteases and polymerases score 3, surface glycoproteins and helicases 2, because that is where approved antivirals have historically landed."><span class="cl">Class that gets drugged</span><span class="ck">druggable_class</span><span class="cw">× 0.8 → max 2.4</span></th><th scope="col" title="Deposited structures across its relatives, capped at 50. It carries the smallest weight, because a count like that measures how much a protein has been studied as much as how easy it is to work with."><span class="cl">Structures already solved</span><span class="ck">structures_in_family</span><span class="cw">× 0.5 → max 0.5</span></th>
+        <th scope="col" title="Share of the five-residue runs in the protein it comes from that its nearest curated relative also has. 1.0 would be the same sequence, and under 0.12 is not kept as a match at all. Rows with only a distant relative carry a different measure, labelled in the cell as a bit score, because the two are not one scale."><span class="cl">Match to a known relative</span><span class="cw">× 3 → max 3</span></th><th scope="col" title="Whether a binder could reach most of the places its relatives are recorded as sitting in without crossing a membrane, scored all or nothing."><span class="cl">On the outside</span><span class="cw">× 2 → max 2</span></th><th scope="col" title="Whether the protein&#x27;s name or keywords put it in a class the virus cannot replicate without, such as a polymerase, a protease, a capsid or an entry protein. All or nothing."><span class="cl">The virus needs it</span><span class="cw">× 1.5 → max 1.5</span></th><th scope="col" title="A 0–3 class read off the words in its annotations. Proteases and polymerases score 3, surface glycoproteins and helicases 2, because that is where approved antivirals have historically landed."><span class="cl">Class that gets drugged</span><span class="cw">× 0.8 → max 2.4</span></th><th scope="col" title="Deposited structures across its relatives, capped at 50. It carries the smallest weight, because a count like that measures how much a protein has been studied as much as how easy it is to work with."><span class="cl">Structures already solved</span><span class="cw">× 0.5 → max 0.5</span></th>
         <th scope="col" class="sc">Composite<span class="cw">of 9.4</span></th>
       </tr>
     </thead>
@@ -273,10 +276,13 @@
         a definition only — no binding or antiviral property is predicted</div>
     </div>
   </div>
-  <p class="cap" style="margin-top:26px">That is the one chain the record reports in full. The
-  lane below is every candidate this stage was handed, with how its own sequence was found in
-  this genome and where it fell against the residue ceiling, which decides whether the stage
-  after it has coordinates to measure.</p>
+  <ul class="pts" style="margin-top:26px">
+    <li><b>That is the one chain the record reports in full.</b> The lane below is every
+    candidate this stage was handed.</li>
+    <li><b>Each row says how its own sequence was found in this genome</b>, and where it fell
+    against the residue ceiling, which decides whether the stage after it has coordinates to
+    measure.</li>
+  </ul>
   
   <div class="lane"><div class="lane-grp"><b>Folded &middot; 10</b><span>at or under 400 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
     <div class="lane-axis" aria-hidden="true">
@@ -387,7 +393,7 @@
   <div class="sec-head"><h2>Surfaces</h2><span class="tag">one row per ranked chain</span></div>
   <div class="good"><p><b>13 answers for
   13 chains.</b> A chain can be refused, but it cannot
-  disappear.</p></div>
+  disappear from the list.</p></div>
   
   <div class="tiles" aria-hidden="true"><span class="tile p"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile p"></span><span class="tile p"></span><span class="tile r"></span><span class="tile r"></span><span class="tile p"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span><span class="tile r"></span></div>
   <div class="legend">
@@ -501,14 +507,17 @@
 <section id="evidence">
   <div class="sec-head"><h2>Evidence on the top targets</h2>
     <span class="tag">15 calls</span></div>
-  <p class="cap">Five tools the chain itself never calls, run on the highest-ranked targets
-  after the ranking was already final. Nothing refuses them. The cost gate admits all five,
-  because it turns a tool away only when its declared worst case is greater than the budget,
-  and the default budget is 600 seconds, so
-  <span class="mono">bioactivity.prior_binders</span>, declaring exactly 600, is admitted. What
-  keeps them off the path is the cost they actually run up, about 210 seconds for one
-  target across the five, against a chain that finishes in 639 seconds.
-  Nothing they return changes a rank.</p>
+  <ul class="pts">
+    <li><b>Five tools the chain itself never calls</b>, run on the highest-ranked targets
+    after the ranking was already final.</li>
+    <li><b>Nothing refuses them.</b> The cost gate turns a tool away only when its declared
+    worst case is greater than the budget, and the default budget is 600 seconds, so the one
+    tool declaring exactly 600 is admitted.</li>
+    <li><b>What keeps them off the path is the cost they actually run up</b>, about 210
+    seconds for one target across the five, against a chain that finishes in
+    639 seconds.</li>
+    <li><b>Nothing they return changes a rank.</b></li>
+  </ul>
   
   <div class="tool-card">
     <div class="tc-head"><span class="sn">1</span>
@@ -516,48 +525,48 @@
       <span class="db">P27909</span></div>
     <div class="tc-body"><div class="accs">
       <div class="pdbrow none">
-        <span class="who">literature.search<em>Europe PMC</em></span>
+        <span class="who">Search the literature<em>Europe PMC</em></span>
         <span class="ids">empty
           · 33.59 s
           · 7 requests
-          <br>{&#x27;subject_zero&#x27;: True, &#x27;axes_zero&#x27;: (&#x27;assay_availability&#x27;, &#x27;conservation&#x27;, &#x27;essentiality&#x27;, &#x27;precedent&#x27;, &#x27;public_labels&#x27;), &#x27;means&#x27;: &#x27;A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.&#x27;}
+          <br>A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.
           
         </span>
       </div>
       <div class="pdbrow">
-        <span class="who">similarity.homologs<em>EBI HMMER</em></span>
+        <span class="who">Find relatives<em>EBI HMMER</em></span>
         <span class="ids">ok
           · 38.32 s
           · 11 requests
           
-          <br>resolution_attempts_count 1 · database_id swissprot · database_name SwissProt · database_version 2025_01 · database_release_date 2025-01-01 · declared_databases_not_served_count 0 · homologs_count 50 · homolog_count 50 · hits_returned 50 · hits_dropped_by_min_identity 0
+          <br>resolution attempts count 1 · database ID swissprot · database name SwissProt · database version 2025 01 · database release date 2025-01-01 · declared databases not served count 0 · homologs count 50 · homolog count 50 · hits returned 50 · hits dropped by min identity 0
         </span>
       </div>
       <div class="pdbrow">
-        <span class="who">families.entries<em>InterPro</em></span>
+        <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
           · 14.65 s
           · 15 requests
           
-          <br>protein_name Genome polyprotein · organism Dengue virus type 1 (strain Brazil/97-11/1997) · sequence_md5 1C853D6ED5D99DECE4BA098B5EF72467 · sequence_length 3,392 · sequence_source uniprot · assignments_count 59 · predicted_count 51 · sequence_features_count 17 · residue_ranges_count 37 · functional_sites_count 16
+          <br>protein name Genome polyprotein · organism Dengue virus type 1 (strain Brazil/97-11/1997) · sequence md5 1C853D6ED5D99DECE4BA098B5EF72467 · sequence length 3,392 · sequence source uniprot · assignments count 59 · predicted count 51 · sequence features count 17 · residue ranges count 37 · functional sites count 16
         </span>
       </div>
       <div class="pdbrow">
-        <span class="who">structures.predicted<em>AlphaFold DB, 3D-Beacons</em></span>
+        <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
           · 1.8 s
           · 2 requests
           
-          <br>sequence_length 3,392 · confident_plddt 70 · plddt_bands_count 4 · residue_detail no · any_prediction_exists yes · predicted_model_count 15 · providers_queried_count 2 · providers_with_models_count 2 · alphafold_host_queried yes · alphafold_host_served_models no
+          <br>sequence length 3,392 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 15 · providers queried count 2 · providers with models count 2 · alphafold host queried yes · alphafold host served models no
         </span>
       </div>
       <div class="pdbrow">
-        <span class="who">bioactivity.prior_binders<em>ChEMBL, IEDB, MaveDB</em></span>
+        <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
           · 2.06 s
           · 4 requests
           
-          <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 0 · network_calls 4 · calls_count 4 · sources_count 3 · urls_hit_count 4 · limitations_count 13
+          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
         </span>
       </div></div></div>
   </div>
@@ -567,48 +576,48 @@
       <span class="db">P27909</span></div>
     <div class="tc-body"><div class="accs">
       <div class="pdbrow">
-        <span class="who">literature.search<em>Europe PMC</em></span>
+        <span class="who">Search the literature<em>Europe PMC</em></span>
         <span class="ids">ok
           · 25.17 s
           · 7 requests
           
-          <br>subject_kind term · scope title_abstract · hit_count 42 · returned 10 · hits_with_abstract 10 · preprints_returned 0 · limitations_count 8 · sources_count 7
+          <br>subject kind term · scope title abstract · hit count 42 · returned 10 · hits with abstract 10 · preprints returned 0 · limitations count 8 · sources count 7
         </span>
       </div>
       <div class="pdbrow">
-        <span class="who">similarity.homologs<em>EBI HMMER</em></span>
+        <span class="who">Find relatives<em>EBI HMMER</em></span>
         <span class="ids">ok
           · 20.26 s
           · 7 requests
           
-          <br>resolution_attempts_count 1 · database_id swissprot · database_name SwissProt · database_version 2025_01 · database_release_date 2025-01-01 · declared_databases_not_served_count 0 · homologs_count 50 · homolog_count 50 · hits_returned 50 · hits_dropped_by_min_identity 0
+          <br>resolution attempts count 1 · database ID swissprot · database name SwissProt · database version 2025 01 · database release date 2025-01-01 · declared databases not served count 0 · homologs count 50 · homolog count 50 · hits returned 50 · hits dropped by min identity 0
         </span>
       </div>
       <div class="pdbrow">
-        <span class="who">families.entries<em>InterPro</em></span>
+        <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
           · 13.6 s
           · 15 requests
           
-          <br>protein_name Genome polyprotein · organism Dengue virus type 1 (strain Brazil/97-11/1997) · sequence_md5 1C853D6ED5D99DECE4BA098B5EF72467 · sequence_length 3,392 · sequence_source uniprot · assignments_count 59 · predicted_count 51 · sequence_features_count 17 · residue_ranges_count 37 · functional_sites_count 16
+          <br>protein name Genome polyprotein · organism Dengue virus type 1 (strain Brazil/97-11/1997) · sequence md5 1C853D6ED5D99DECE4BA098B5EF72467 · sequence length 3,392 · sequence source uniprot · assignments count 59 · predicted count 51 · sequence features count 17 · residue ranges count 37 · functional sites count 16
         </span>
       </div>
       <div class="pdbrow">
-        <span class="who">structures.predicted<em>AlphaFold DB, 3D-Beacons</em></span>
+        <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
           · 2.83 s
           · 2 requests
           
-          <br>sequence_length 3,392 · confident_plddt 70 · plddt_bands_count 4 · residue_detail no · any_prediction_exists yes · predicted_model_count 15 · providers_queried_count 2 · providers_with_models_count 2 · alphafold_host_queried yes · alphafold_host_served_models no
+          <br>sequence length 3,392 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 15 · providers queried count 2 · providers with models count 2 · alphafold host queried yes · alphafold host served models no
         </span>
       </div>
       <div class="pdbrow">
-        <span class="who">bioactivity.prior_binders<em>ChEMBL, IEDB, MaveDB</em></span>
+        <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
           · 2.11 s
           · 4 requests
           
-          <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 0 · network_calls 4 · calls_count 4 · sources_count 3 · urls_hit_count 4 · limitations_count 13
+          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
         </span>
       </div></div></div>
   </div>
@@ -618,57 +627,56 @@
       <span class="db">P27909</span></div>
     <div class="tc-body"><div class="accs">
       <div class="pdbrow none">
-        <span class="who">literature.search<em>Europe PMC</em></span>
+        <span class="who">Search the literature<em>Europe PMC</em></span>
         <span class="ids">empty
           · 40.25 s
           · 7 requests
-          <br>{&#x27;subject_zero&#x27;: True, &#x27;axes_zero&#x27;: (&#x27;assay_availability&#x27;, &#x27;conservation&#x27;, &#x27;essentiality&#x27;, &#x27;precedent&#x27;, &#x27;public_labels&#x27;), &#x27;means&#x27;: &#x27;A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.&#x27;}
+          <br>A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.
           
         </span>
       </div>
       <div class="pdbrow">
-        <span class="who">similarity.homologs<em>EBI HMMER</em></span>
+        <span class="who">Find relatives<em>EBI HMMER</em></span>
         <span class="ids">ok
           · 121.5 s
           · 25 requests
           
-          <br>resolution_attempts_count 1 · database_id swissprot · database_name SwissProt · database_version 2025_01 · database_release_date 2025-01-01 · declared_databases_not_served_count 0 · homologs_count 50 · homolog_count 50 · hits_returned 50 · hits_dropped_by_min_identity 0
+          <br>resolution attempts count 1 · database ID swissprot · database name SwissProt · database version 2025 01 · database release date 2025-01-01 · declared databases not served count 0 · homologs count 50 · homolog count 50 · hits returned 50 · hits dropped by min identity 0
         </span>
       </div>
       <div class="pdbrow">
-        <span class="who">families.entries<em>InterPro</em></span>
+        <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
           · 13.99 s
           · 15 requests
           
-          <br>protein_name Genome polyprotein · organism Dengue virus type 1 (strain Brazil/97-11/1997) · sequence_md5 1C853D6ED5D99DECE4BA098B5EF72467 · sequence_length 3,392 · sequence_source uniprot · assignments_count 59 · predicted_count 51 · sequence_features_count 17 · residue_ranges_count 37 · functional_sites_count 16
+          <br>protein name Genome polyprotein · organism Dengue virus type 1 (strain Brazil/97-11/1997) · sequence md5 1C853D6ED5D99DECE4BA098B5EF72467 · sequence length 3,392 · sequence source uniprot · assignments count 59 · predicted count 51 · sequence features count 17 · residue ranges count 37 · functional sites count 16
         </span>
       </div>
       <div class="pdbrow">
-        <span class="who">structures.predicted<em>AlphaFold DB, 3D-Beacons</em></span>
+        <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
           · 1.58 s
           · 2 requests
           
-          <br>sequence_length 3,392 · confident_plddt 70 · plddt_bands_count 4 · residue_detail no · any_prediction_exists yes · predicted_model_count 15 · providers_queried_count 2 · providers_with_models_count 2 · alphafold_host_queried yes · alphafold_host_served_models no
+          <br>sequence length 3,392 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 15 · providers queried count 2 · providers with models count 2 · alphafold host queried yes · alphafold host served models no
         </span>
       </div>
       <div class="pdbrow">
-        <span class="who">bioactivity.prior_binders<em>ChEMBL, IEDB, MaveDB</em></span>
+        <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
           · 2.93 s
           · 4 requests
           
-          <br>max_molecules_requested 50 · max_molecules_applied 50 · max_molecules_clamped no · lanes_unavailable_count 0 · network_calls 4 · calls_count 4 · sources_count 3 · urls_hit_count 4 · limitations_count 13
+          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
         </span>
       </div></div></div>
   </div>
   <div class="tool-card" id="predicted-provenance">
-    <div class="tc-head"><span class="tn">What &#8220;AlphaFold DB&#8221; served</span>
-      <span class="plain">where the counts above came from</span>
+    <div class="tc-head">      <span class="plain">What &#8220;AlphaFold DB&#8221; served, and where the counts above came from</span>
       <span class="db">54 models · 0 from AlphaFold</span></div>
     <div class="tc-body">
-      <p class="cap" style="margin:0 0 18px">Every <span class="mono">structures.predicted</span> row above is labelled <span class="mono">AlphaFold DB · 3D-Beacons</span> and reports a bare <span class="mono">predicted_model_count</span>, which reads as though AlphaFold modelled these proteins. It did not. The tool reports the host that <i>served</i> each model separately from the tool that <i>computed</i> it, and for these accessions the two disagree. Of 54 predicted models, 35 were served by the AlphaFold host and <b>0 were computed by AlphaFold</b>. The models it served are ColabFold v1.5.2, which runs the same weights behind a different alignment pipeline. The chain record cannot carry this, because its summariser reduces the model list to a count on purpose. The figures here are read from <span class="mono">runs/predicted_models.json</span>.</p>
+      <ul class="pts sm" style="margin:0 0 18px"><li><b>Every predicted-structure row above is labelled AlphaFold DB, and reports a bare count of models.</b> That reads as though AlphaFold modelled these proteins. It did not.</li><li><b>The host that served a model is recorded separately from the tool that computed it</b>, and for these accessions the two disagree. Of 54 predicted models, 35 were served by the AlphaFold host and <b>0 were computed by AlphaFold</b>.</li><li><b>The rest are ColabFold v1.5.2</b>, which runs the same weights behind a different alignment pipeline.</li><li><b>The chain record cannot carry this</b>, because it reduces the model list to a count on purpose. The figures here are read from the separate record of predicted models.</li></ul>
       <div class="accs"><span class="lead"><b>P0C6X7</b> — 7,073 residues, asked about for #1 3C-like proteinase nsp5. 50 predicted models, and the AlphaFold host served 35 of them, every one computed by ColabFold v1.5.2 — <b>0 were computed by AlphaFold</b>.</span><div class="pdbrow"><span class="who">served by</span><span class="ids">AlphaFold DB 35 · SWISS-MODEL 10 · PED 5</span></div><div class="pdbrow"><span class="who">computed by</span><span class="ids">ColabFold v1.5.2 35 · not stated by the host 15</span></div><div class="pdbrow"><span class="who">3241-3546 <i>306 res</i></span><span class="ids">best pLDDT 95.56 median, 39.19 min · AF-0000000365772815 (ColabFold v1.5.2)</span></div></div><div class="accs"><span class="lead"><b>Q3LZX1</b> — 1,242 residues, asked about for #2 Spike protein S2&#x27;, #3 Spike protein S2. 4 predicted models, and the AlphaFold host was asked and holds nothing for it, an absence the tool measured.</span><div class="pdbrow"><span class="who">served by</span><span class="ids">SWISS-MODEL 4</span></div><div class="pdbrow"><span class="who">computed by</span><span class="ids">not stated by the host 4</span></div><div class="pdbrow none"><span class="who">785-1242 <i>458 res</i></span><span class="ids">no pLDDT at all · no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply</span></div><div class="pdbrow none"><span class="who">655-1242 <i>588 res</i></span><span class="ids">no pLDDT at all · no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply</span></div></div>
     </div>
   </div>
@@ -683,8 +691,8 @@
 </section>
 </main>
 <footer class="sitefoot"><div class="wrap">
-  Built from the records in <code>runs/</code> by <code>output/build_site.py</code>.
-  Every number on this site is read from a record, not retyped.
+  Built from the recorded runs. Every number on this site is read from a record, not
+  retyped.
 </div></footer>
 
 <script>

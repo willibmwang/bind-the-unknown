@@ -295,28 +295,37 @@
 
   <div class="substep">
     <h3>The {{identified}} it ranked, and why each one scored what it did</h3>
-    <p class="cap">Nothing is read off an existing annotation of this genome. The sequence is
-    translated in all six reading frames. Every stretch between stop codons of at least
-    {{minimum_orf_aa}} residues is kept, and the {{orfs_ranked}} longest are searched against
-    {{reference_entries}} reviewed viral proteins, with SARS-CoV-2 deleted from them.</p>
+    <ul class="pts">
+      <li><b>Nothing is read off an existing annotation of this genome.</b> The sequence is
+      translated in all six reading frames, and every stretch between stop codons of at least
+      {{minimum_orf_aa}} residues is kept.</li>
+      <li><b>The {{orfs_ranked}} longest are searched against relatives:</b>
+      {{reference_entries}} reviewed viral proteins, with SARS-CoV-2 deleted from them.</li>
+    </ul>
     <details class="disc" style="margin-bottom:22px">
       <summary>How a relative is matched, and what happens when there is none<em>two tiers,
         then a fallback</em></summary>
       <div class="disc-b">
-        <p>A close relative is found from shared five-residue runs, which takes milliseconds
-        and is what the match column reports. A slower pass groups residues by chemical type
-        to catch fainter resemblances, and reports a bit score instead.</p>
-        <p>A protein that reaches no relative at either tier is classed by how water-repelling
-        its residues are. That returns a class rather than a name, and cannot outrank a real
-        match.</p>
+        <ul class="pts sm">
+          <li><b>A close relative, in milliseconds.</b> Found from runs of five residues that
+          the two sequences share. This is what the match column reports.</li>
+          <li><b>A fainter resemblance, more slowly.</b> A second pass groups residues by
+          chemical type, and reports a score of its own instead.</li>
+          <li><b>No relative at either tier.</b> The protein is classed by how water-repelling
+          its residues are. That returns a class rather than a name, and cannot outrank a real
+          match.</li>
+        </ul>
       </div>
     </details>
     <!--CANDIDATES-->
-    <p class="after">The spike and the replicase finish within a few hundredths of each other,
-    by opposite routes: the spike scores for sitting on the outside of the virus, the replicase
-    for matching a known relative. Only the match is measured against this genome. The other
-    four columns are read off whichever relative was matched, which is why holding the pathogen
-    out lowers the scores rather than emptying the list.</p>
+    <ul class="pts sm" style="margin:20px 0 0">
+      <li><b>The spike and the replicase finish within a few hundredths of each other</b>, by
+      opposite routes: the spike scores for sitting on the outside of the virus, the replicase
+      for matching a known relative.</li>
+      <li><b>Only the match is measured against this genome.</b> The other four columns are
+      read off whichever relative was matched, which is why holding the pathogen out lowers the
+      scores rather than emptying the list.</li>
+    </ul>
   </div>
 
   <div class="stage">
@@ -338,13 +347,15 @@
 
   <div class="substep">
     <h3>The {{chains}} chains it produced, and what each one scored</h3>
-    <p class="cap">A virus often makes one long protein and then cuts it into shorter chains
-    with its own enzymes. Those chains are what it folds, and what a drug is aimed at. The cut
-    points are annotated on the curated relative each ORF matched, and every row links back to
-    the ORF it came out of.</p>
-    <p class="cap">The weights are the five used in step 1. The match to a relative is
-    inherited from the parent, so chains cut from one ORF share that number, while the
-    structure count and the two class terms are read again for each chain.</p>
+    <ul class="pts">
+      <li><b>A virus often makes one long protein and cuts it into shorter chains</b> with its
+      own enzymes. Those chains are what it folds, and what a drug is aimed at.</li>
+      <li><b>The cut points come from the relative</b>, annotated on the curated entry each ORF
+      matched. Every row links back to the ORF it came out of.</li>
+      <li><b>The weights are the five used in step 1.</b> The match to a relative is inherited
+      from the parent, so chains cut from one ORF share that number, while the structure count
+      and the two class terms are read again for each chain.</li>
+    </ul>
     <!--CHAINS-->
   </div>
 
@@ -367,7 +378,7 @@
 
   <div class="substep" id="fold-out">
     <h3>What the fold returned</h3>
-    <p class="cap">Returned by <span class="mono">structures.folded</span>, the ESMFold call listed in <a href="#t-fold">section 04</a>.</p>
+    <p class="cap">Returned by the folding call listed in <a href="#t-fold">section 04</a>.</p>
     <dl class="ret">
       <div><dt>Model</dt><dd>ESMFold v1 (2022-10-18)</dd></div>
       <div><dt>Chains folded</dt><dd>all {{fold_inside}} inside the {{fold_ceiling}}-residue ceiling</dd></div>
@@ -379,17 +390,20 @@
     </dl>
     <div class="foldimg">
       <!--FOLD-TRACE-->
-      <div class="cc">Drawn from the stored coordinates in <span class="mono">runs/folded_structure/mpro_nsp5.pdb</span>. The sequence is read back out of that same file and checked against the record's hash, never retyped. Pointing at a residue in any of the three views marks it in the other two. The blue domain is predicted confidently; the orange half is not. The stretches marked along the bottom never clear the threshold: residues 1–11, 45–64, 166–170 and <b>183–306</b>. The last of those runs 124 residues, 40 % of the chain. The tool's own payload states that a predicted structure is not an experimental one, and that the two must not be pooled. <a href="fold.png">The same drawing as a static image.</a></div>
+      <div class="cc">Drawn from the stored coordinates for this fold. The sequence is read back out of that same file and checked against the record's checksum, never retyped. Pointing at a residue in any of the three views marks it in the other two. The blue domain is predicted confidently; the orange half is not. The stretches marked along the bottom never clear the threshold: residues 1–11, 45–64, 166–170 and <b>183–306</b>. The last of those runs 124 residues, 40 % of the chain. The tool's own payload states that a predicted structure is not an experimental one, and that the two must not be pooled. <a href="fold.png">The same drawing as a static image.</a></div>
     </div>
     <p class="cap" style="margin-top:30px">That is the one chain the record reports in full.
     Below is every chain this step was handed, with where its sequence was found in this genome
     and where it fell against the ceiling.</p>
-    <p class="cap">A chain over the ceiling cannot be folded whole. That does not put the
-    target out of reach. A drug is rarely aimed at a whole chain. It is aimed at a pocket or a
-    catalytic site inside one, and the relative's entry already says where those are. So each
-    over-the-ceiling row below opens onto the regions its relative annotates, and
-    <b>{{domain_rescued}}</b> of <b>{{domain_over}}</b> have at least one region short enough
-    to fold.</p>
+    <ul class="pts">
+      <li><b>A chain over the ceiling cannot be folded whole.</b> That does not put the target
+      out of reach.</li>
+      <li><b>A drug is rarely aimed at a whole chain.</b> It is aimed at a pocket or a
+      catalytic site inside one, and the relative's entry already says where those are.</li>
+      <li><b>So each over-the-ceiling row below opens onto the regions its relative
+      annotates.</b> {{domain_rescued}} of {{domain_over}} have at least one region short
+      enough to fold.</li>
+    </ul>
 
     <figure class="xmap">
       <div class="xmap-scroll" tabindex="0" role="region"
@@ -574,48 +588,68 @@
       </svg>
       </div>
       <figcaption><b>How a region annotated on another virus becomes a span this pipeline can
-        fold.</b> The virus, the genome and the protein shapes above are schematic: nothing in
+        fold.</b> The virus, the genome and the protein shapes above are schematic. Nothing in
         this figure is drawn from coordinates, and the structures further down the page are the
-        measured ones. Cutting this genome at the relative's residue numbers fails quietly &mdash;
-        SARS-CoV's main protease starts at 3241 and SARS-CoV-2's at 3264, so the same cut
-        returns 306 residues, the right length, 23 residues into the wrong window. Each chain
-        is aligned instead, against every called ORF rather than only the one that matched it.
-        The alignment is then kept, not just the window it pointed at, which is what lets each
-        end of each region be walked across on its own: the blocks above are drawn tapering
-        because an insertion between the two species moves one end and not the other. An end
-        landing in a gap walks inward, so the span returned is always inside what the curator
-        annotated, and a region the alignment never reached returns nothing rather than its
-        nearest neighbour &mdash; only the second can be seen to be wrong.</figcaption>
-      <p class="cap"><b>Nine kinds of annotation are read</b>, named rather than inferred:
-      <b>Domain</b>, <b>Region</b>, <b>Motif</b>, <b>Zinc finger</b>, <b>DNA binding</b>,
-      <b>Coiled coil</b>, <b>Repeat</b>, <b>Topological domain</b> and <b>Transmembrane</b>.
-      The list is a whitelist, so a type nobody considered is excluded by default rather than
-      admitted, and <b>Region</b> is on it because UniProt files the spike's receptor-binding
-      domain as a Region and not a Domain. The ticks marked <i>never read</i> are secondary
-      structure, single-residue observations and signal peptides: one replicase entry carries
-      <b>191</b> beta strands against 36 domains, a six-residue strand is not a piece of
-      protein anyone folds, a variant is a fact about a residue rather than a span, and a
-      signal peptide is cut off before the protein exists to be bound. Active, ligand-binding
-      and cleavage sites are read too, but kept apart and never offered as something to fold
-      &mdash; a two-residue site is a place to aim at, not a thing to fold.</p>
-      <p class="cap"><b>Which region a row offers first</b> is decided by how many of those
-      curated sites fall inside it, and only where that does not separate two regions by a
-      list of words we chose. It orders rows and nothing else: it refuses no region and
-      changes no rank. {{domain_richest_chain}} is the clearest case here &mdash;
-      <b>{{domain_richest_whole}}</b> residues whole, <b>{{domain_richest_count}}</b> regions
-      inside it that are not, and the first offered is <i>{{domain_richest_best}}</i> at
-      <b>{{domain_richest_best_aa}}</b> residues.</p>
+        measured ones.
+        <ul class="pts sm">
+          <li><b>Cutting this genome at the relative's residue numbers fails quietly.</b>
+          SARS-CoV's main protease starts at 3241 and SARS-CoV-2's at 3264, so the same cut
+          returns 306 residues: the right length, 23 residues into the wrong window.</li>
+          <li><b>Each chain is aligned instead</b>, against every called ORF rather than only
+          the one that matched it.</li>
+          <li><b>The alignment is kept, not just the window it pointed at.</b> That is what
+          lets each end of a region cross on its own, and it is why the blocks above taper: an
+          insertion between the two species moves one end and not the other.</li>
+          <li><b>An end that lands in a gap walks inward</b>, so the span returned is always
+          inside what the curator annotated.</li>
+          <li><b>A region the alignment never reached returns nothing</b>, rather than its
+          nearest neighbour. Nothing is visibly an absence, where a nearest-neighbour answer
+          would look exactly like a correct one.</li>
+        </ul>
+      </figcaption>
+      <ul class="pts">
+        <li><b>Nine kinds of annotation are read</b>, named rather than inferred: Domain,
+        Region, Motif, Zinc finger, DNA binding, Coiled coil, Repeat, Topological domain and
+        Transmembrane. The list is a whitelist, so a type nobody considered is excluded by
+        default rather than admitted.</li>
+        <li><b>Region is on the list</b> because UniProt files the spike's receptor-binding
+        domain as a Region and not a Domain.</li>
+        <li><b>Secondary structure is never read.</b> One replicase entry carries <b>191</b>
+        beta strands against 36 domains, and a six-residue strand is not a piece of protein
+        anyone folds.</li>
+        <li><b>Single-residue observations and signal peptides are never read either.</b> A
+        variant is a fact about a residue rather than a span, and a signal peptide is cut off
+        before the protein exists to be bound.</li>
+        <li><b>Active, ligand-binding and cleavage sites are read, but kept apart</b> and never
+        offered as something to fold. A two-residue site is a place to aim at, and far too
+        short to fold.</li>
+      </ul>
+      <ul class="pts">
+        <li><b>Which region a row offers first</b> is decided by how many of those curated
+        sites fall inside it, and, only where that does not separate two regions, by a list of
+        words we chose.</li>
+        <li><b>The ordering does nothing else.</b> It refuses no region and changes no
+        rank.</li>
+        <li><b>{{domain_richest_chain}} is the clearest case here:</b>
+        <b>{{domain_richest_whole}}</b> residues whole, <b>{{domain_richest_count}}</b> regions
+        inside it that are not, and the first offered is <i>{{domain_richest_best}}</i> at
+        <b>{{domain_richest_best_aa}}</b> residues.</li>
+      </ul>
     </figure>
     <!--FOLD-LANE-->
   </div>
 
   <div class="substep" id="literature">
     <h3>What has been published on these domains</h3>
-    <p class="cap">The question is asked here, between steps 3 and 4, because this is where it
-    becomes answerable: before step 3 a domain is a span on somebody else's entry, and after
-    it the domain has coordinates. Open a target to see the query composed for it and the
-    records that came back. A hit count measures how much attention a domain has had and
-    nothing more, so every count is printed beside the question that produced it.</p>
+    <ul class="pts">
+      <li><b>The question is asked here, between steps 3 and 4</b>, because this is where it
+      becomes answerable: before step 3 a domain is a span on somebody else's entry, and after
+      it the domain has coordinates.</li>
+      <li><b>Open a target</b> to see the query composed for it and the records that came
+      back.</li>
+      <li><b>A hit count measures attention and nothing more</b>, so every count is printed
+      beside the question that produced it.</li>
+    </ul>
     <!--LITERATURE-->
   </div>
 
@@ -641,10 +675,13 @@
 
   <div class="substep" id="surface-out">
     <h3>What the measurement returned, chain by chain</h3>
-    <p class="cap">One row for every chain, each answering one question: is there anywhere on
-    this protein for a molecule to bind? A patch is a continuous stretch of water-repelling
-    surface, measured in square angstroms, and it is the part a molecule of this class grips.
-    A refused chain still gets a row, and the row says why it was refused.</p>
+    <ul class="pts">
+      <li><b>One row for every chain</b>, each answering one question: is there anywhere on
+      this protein for a molecule to bind?</li>
+      <li><b>A patch is a continuous stretch of water-repelling surface</b>, measured in square
+      angstroms. It is the part a molecule of this class grips.</li>
+      <li><b>A refused chain still gets a row</b>, and the row says why it was refused.</li>
+    </ul>
 
     <div class="howto">
       <div class="ht-ttl">How to read a row</div>
@@ -676,34 +713,40 @@
         <summary>Why the predicted group is kept apart, when the sum is the same
           arithmetic<em>4 notes</em></summary>
         <div class="disc-b">
-          <p>A deposited structure is something that happened: a protein was purified,
-          crystallised or frozen, put in a beam, and coordinates were fitted to what came
-          back. A predicted structure is a claim a model makes from the sequence, with no one
-          having looked at the molecule.</p>
-          <p>The deposited patch comes with a spread, because the same chain has been solved
-          several times and the structures disagree. A prediction has no such bar — the same
-          sequence returns the same coordinates — only a confidence per residue,
-          <b>{{mean_plddt}}</b> out of 100 for the main protease.</p>
-          <p>A predicted chain is also folded alone, with no partner and no membrane around
-          it, so faces that are buried in life sit out in the open and the patch inflates.
-          That is the likeliest reason the main protease's predicted patch comes out several
-          times larger than its deposited one. It cannot be separated from ordinary prediction
-          error, so the record states the ratio and names no cause.</p>
-          <p>That gate is a statement about this class of molecule and not about the target,
-          so it never becomes a term in the ranking.</p>
+          <ul class="pts sm">
+            <li><b>A deposited structure is something that happened.</b> A protein was
+            purified, crystallised or frozen, put in a beam, and coordinates were fitted to
+            what came back.</li>
+            <li><b>A predicted structure is a claim a model makes from the sequence</b>, with
+            nobody having looked at the molecule.</li>
+            <li><b>Only the deposited patch comes with a spread.</b> The same chain has been
+            solved several times and the structures disagree. A prediction returns the same
+            coordinates for the same sequence, and carries a confidence per residue instead,
+            <b>{{mean_plddt}}</b> out of 100 for the main protease.</li>
+            <li><b>A predicted chain is folded alone</b>, with no partner and no membrane
+            around it, so faces that are buried in life sit out in the open and the patch
+            inflates. That is the likeliest reason the main protease's predicted patch comes
+            out several times larger than its deposited one. It cannot be separated from
+            ordinary prediction error, so the record states the ratio and names no cause.</li>
+            <li><b>The gate is a statement about this class of molecule, not about the
+            target</b>, so it never becomes a term in the ranking.</li>
+          </ul>
         </div>
       </details>
       <details class="disc">
         <summary>Why a predicted surface earns its place at all<em>2 notes</em></summary>
         <div class="disc-b">
-          <p>A deposited structure exists only where somebody already did the work, which
-          tracks attention rather than importance: the two enzymes approved antivirals hit
-          have several structures apiece, while the membrane and accessory proteins have none
-          anywhere.</p>
-          <p>A pipeline that can only measure deposited structures answers best on the targets
-          that need it least, and says nothing at all about a genuinely new pathogen, which is
-          the case this project exists for. A prediction does not replace a measurement. It
-          replaces no answer with an answer that states where it came from.</p>
+          <ul class="pts sm">
+            <li><b>A deposited structure exists only where somebody already did the work</b>,
+            which tracks attention rather than importance. The two enzymes approved antivirals
+            hit have several structures apiece, while the membrane and accessory proteins have
+            none anywhere.</li>
+            <li><b>A pipeline that can only measure deposited structures answers best on the
+            targets that need it least</b>, and says nothing at all about a genuinely new
+            pathogen, which is the case this project exists for.</li>
+            <li><b>A prediction does not replace a measurement.</b> It replaces no answer with
+            an answer that states where it came from.</li>
+          </ul>
         </div>
       </details>
     </div>
@@ -711,11 +754,14 @@
 
   <div class="substep" id="site-patch">
     <h3>Is the patch where the chemistry is?</h3>
-    <p class="cap">Everything above measures the largest water-repelling patch anywhere on a
-    structure. That answers whether the protein could hold a molecule of this class at all.
-    The next question is where on the protein to put one. The curators have already marked the
-    residues that do the work, the catalytic and ligand-binding ones, so the same arithmetic
-    can be run at those residues instead of at the chain's best patch.</p>
+    <ul class="pts">
+      <li><b>Everything above measures the largest water-repelling patch anywhere on a
+      structure.</b> That answers whether the protein could hold a molecule of this class at
+      all.</li>
+      <li><b>The next question is where on the protein to put one.</b> The curators have
+      already marked the residues that do the work, the catalytic and ligand-binding ones, so
+      the same arithmetic can be run there instead of at the chain's best patch.</li>
+    </ul>
     <div class="steps3" style="margin:0 0 26px">
       <div><b>1 · mark</b> Take the residues the curated entry marks as doing the work.</div>
       <div><b>2 · reach</b> Collect everything within <b>{{site_reach}}</b> Å of them. A
@@ -725,55 +771,64 @@
       <b>{{site_measured}}</b> of <b>{{site_units}}</b> folded units have at least one marked
       residue inside the coordinates. The rest state which of four absences applies.</div>
     </div>
-    <p class="cap">Step 4's question has a yes-or-no answer: does the unit's best patch reach
-    the marked residues at all? <b>{{site_patch_at_site}}</b> of <b>{{site_measured}}</b>
-    units say yes, which is too coarse to act on. The share of the patch that sits at those
-    residues says how much. <i>{{site_high_unit}}</i> holds <b>{{site_high_share}} %</b> of
-    its unit's patch there, and <i>{{site_low_unit}}</i> holds <b>{{site_low_share}} %</b>, so
-    most of the surface that second unit was scored on is somewhere else. Both count as a
-    yes.</p>
+    <ul class="pts">
+      <li><b>Step 4's question has a yes-or-no answer:</b> does the unit's best patch reach the
+      marked residues at all? <b>{{site_patch_at_site}}</b> of <b>{{site_measured}}</b> units
+      say yes, which is too coarse to act on.</li>
+      <li><b>The share of the patch that sits at those residues says how much.</b>
+      <i>{{site_high_unit}}</i> holds <b>{{site_high_share}} %</b> of its unit's patch there,
+      and <i>{{site_low_unit}}</i> holds <b>{{site_low_share}} %</b>, so most of the surface
+      that second unit was scored on is somewhere else. Both count as a yes.</li>
+    </ul>
     <div class="discs">
       <details class="disc">
         <summary>Not every marked residue is a place to put a binder<em>why two figures are
           reported</em></summary>
         <div class="disc-b">
-          <p>On a coronavirus polyprotein, most plain site annotations mark the points where
-          an enzyme cuts the chain. A cut point sits at the end of a finished chain by
-          construction, so a neighbourhood drawn around one is a neighbourhood of a loose end.
-          Both measurements are therefore reported.</p>
-          <p><i>{{site_drop_unit}}</i> is where it costs the most: <b>{{site_drop_full}}</b>
-          Å² of its <b>{{site_drop_whole}}</b> Å² patch at all its marked residues,
-          <b>{{site_drop_full_share}} %</b> — and <b>{{site_drop_chem}}</b> Å²,
-          <b>{{site_drop_chem_share}} %</b>, over the residues that do chemistry once its
-          {{site_drop_dropped}} cleavage site{{site_drop_plural}} are dropped.</p>
+          <ul class="pts sm">
+            <li><b>Most plain site annotations on one of these long proteins mark where an
+            enzyme cuts the chain.</b> A cut point sits at the end of a finished chain by
+            construction, so a neighbourhood drawn around one is a neighbourhood of a loose
+            end. Both measurements are therefore reported.</li>
+            <li><b><i>{{site_drop_unit}}</i> is where it costs the most.</b> Of its
+            <b>{{site_drop_whole}}</b> Å² patch, <b>{{site_drop_full}}</b> Å² sits at all
+            its marked residues, <b>{{site_drop_full_share}} %</b>; over the residues that do
+            chemistry, once its {{site_drop_dropped}} cleavage site{{site_drop_plural}} are
+            dropped, <b>{{site_drop_chem}}</b> Å², <b>{{site_drop_chem_share}} %</b>.</li>
+          </ul>
         </div>
       </details>
       <details class="disc">
         <summary>Read the confidence first<em>these are predicted coordinates</em></summary>
         <div class="disc-b">
-          <p><b>{{site_anchors_low}}</b> of the <b>{{site_anchors}}</b> marked residues sit
-          below the folding tool's own confidence threshold. Many of them are cut points, and
-          are disordered because they are chain ends rather than because of anything about the
-          chemistry.</p>
-          <p><b>{{site_processing_only}}</b> units have nothing but cleavage boundaries in
-          them, and they are grouped apart below.</p>
+          <ul class="pts sm">
+            <li><b>{{site_anchors_low}} of the {{site_anchors}} marked residues sit below the
+            folding tool's own confidence threshold.</b> Many are cut points, disordered
+            because they are chain ends rather than because of anything about the
+            chemistry.</li>
+            <li><b>{{site_processing_only}} units hold nothing but cut points</b>, and are
+            grouped apart below.</li>
+          </ul>
         </div>
       </details>
       <details class="disc">
         <summary>How a curated position was carried into these coordinates<em>and what is
           withheld if it did not land</em></summary>
         <div class="disc-b">
-          <p>A marked position is curated on the relative's entry, carried through the
-          alignment into one reading frame of this genome, then into coordinates numbered from
-          one. Each row was checked against the residue the relative's entry actually carries
-          at that position, and <b>{{site_at_annotated}}</b> of <b>{{site_measured}}</b> land
-          on it.</p>
-          <p>A row that did not land on it would have its figures withheld, because a patch
-          measured at the wrong residues looks exactly like one measured at the right
-          ones.</p>
-          <p>The rows run along <b>{{site_frames}}</b> different reading frames.
-          <b>{{site_overlaps}}</b> pairs of them carry spans that overlap as numbers while
-          sharing no residue, so every row names its frame.</p>
+          <ul class="pts sm">
+            <li><b>Three mappings deep.</b> A marked position is curated on the relative's
+            entry, carried through the alignment into one reading frame of this genome, then
+            into coordinates numbered from one.</li>
+            <li><b>Every row was checked against the residue the relative's entry carries at
+            that position</b>, and <b>{{site_at_annotated}}</b> of <b>{{site_measured}}</b>
+            land on it.</li>
+            <li><b>A row that did not land would have its figures withheld</b>, because a patch
+            measured at the wrong residues looks exactly like one measured at the right
+            ones.</li>
+            <li><b>The rows run along {{site_frames}} different reading frames.</b>
+            <b>{{site_overlaps}}</b> pairs of them carry spans that overlap as numbers while
+            sharing no residue, so every row names its frame.</li>
+          </ul>
         </div>
       </details>
     </div>
@@ -804,11 +859,17 @@
 </section>
 
 <section id="tools">
-  <div class="sec-head"><h2>The tools each step called</h2><span class="tag">file, databases, return</span></div>
-  <p class="cap">Six tool calls run the five steps. Each one is a named function with a declared cost and a recorded return, not a prompt and not a model deciding what to do next. Each card is headed by the file and function that ran it.</p>
+  <div class="sec-head"><h2>The tools each step called</h2><span class="tag">what each call returned</span></div>
+  <ul class="pts">
+    <li><b>Six calls run the five steps.</b> Each one has a cost declared before it runs and a
+    return recorded after. None of them is a prompt, and no model decides what to call
+    next.</li>
+    <li><b>Each card names what the call did</b>, which databases it reached, how long it took,
+    and what came back.</li>
+  </ul>
 
   <div class="tool-card" id="t-intake">
-    <div class="tc-head"><span class="sn">1</span><span class="tn">hpc_pilots/intake.py<i>:</i>run_intake</span><span class="reg">intake.rank_targets</span><span class="plain">Read the genome, find the proteins</span><span class="db">NCBI · UniProt · {{intake_exact}} s · 2 requests</span></div>
+    <div class="tc-head"><span class="sn">1</span><span class="plain">Read the genome, find the proteins</span><span class="db">NCBI · UniProt · {{intake_exact}} s · 2 requests</span></div>
     <div class="tc-body">
       <dl class="ret">
         <div><dt>Genome read</dt><dd>{{genome_nt}} nt · {{segments}} segment</dd></div>
@@ -818,14 +879,14 @@
         <div><dt>Matched to a relative</dt><dd>{{identified}}</dd></div>
         <div><dt>Unrecognised, reported</dt><dd>{{unidentified}}</dd></div>
       </dl>
-      <div class="fields"><span class="lead">Per candidate, the four facts every later tool needs:</span>
-        <span class="k">target_name</span><span class="k">protein_accession</span><span class="k">residue_ranges</span><span class="k">protein_sequence</span>
-      </div>
+      <div class="fields"><span class="lead">Per candidate it returns the four facts every
+      later step needs: a name, the reviewed entry it was identified through, where it sits in
+      this genome, and its sequence.</span></div>
     </div>
   </div>
 
   <div class="tool-card" id="t-score">
-    <div class="tc-head"><span class="sn">2</span><span class="tn">hpc_pilots/intake.py<i>:</i>decompose → rank_score</span><span class="reg">intake.decompose + intake.rank_score</span><span class="plain">Cut polyproteins apart, then score</span><span class="db">UniProt · {{score_exact}} s</span></div>
+    <div class="tc-head"><span class="sn">2</span><span class="plain">Cut the long proteins apart, then score</span><span class="db">UniProt · {{score_exact}} s</span></div>
     <div class="tc-body">
       <dl class="ret">
         <div><dt>Chains out</dt><dd>{{chains}}</dd></div>
@@ -833,16 +894,19 @@
         <div><dt>Scores that re-add from their parts</dt><dd>{{chains}} of {{chains}}</dd></div>
         <div><dt>Highest / lowest score</dt><dd>6.906 / 0.913</dd></div>
       </dl>
-      <div class="fields"><span class="lead">Per chain:</span>
-        <span class="k">rank</span><span class="k">target</span><span class="k">parent</span><span class="k">nearest_homolog</span><span class="k">chain_range</span><span class="k">conservation</span><span class="k">surface_exposed</span><span class="k">essential_class</span><span class="k">druggable_class</span><span class="k">structures_in_family</span><span class="k">score_terms</span><span class="k">score</span>
+      <div class="fields"><span class="lead">Per chain it returns the rank and the name, the
+      ORF it was cut out of, the reviewed entry it was identified through, where it sits in
+      this genome, each of the five scoring terms, and the score they add to.</span></div>
+      <div class="fields"><span class="lead">One row as it came back, rank 5:</span>
+        <ul class="pts sm">
+          <li>The RNA polymerase, cut out of the replicase and identified through a SARS-CoV
+          entry.</li>
+          <li>Residues 4,370 to 5,301 of this genome.</li>
+          <li>Conservation 0.8348, and not exposed on the outside of the virus.</li>
+          <li>Its five terms, 2.5044 + 0.0 + 1.5 + 0.02 + 2.4, add to a score of 6.4244.</li>
+        </ul>
       </div>
-      <div class="rowex"><div class="h">one row as returned — rank 5</div>
-        <div class="v">target: RNA-directed RNA polymerase nsp12<br>
-        parent: R1AB_SARS Replicase polyprotein 1ab · nearest_homolog: P0C6X7<br>
-        chain_range: 4370–5301 · conservation: 0.8348 · surface_exposed: false<br>
-        score_terms: 2.5044 + 0.0 + 1.5 + 0.02 + 2.4 → score 6.4244</div>
-      </div>
-      <div class="accs"><span class="lead">Every chain was identified through one of these reviewed entries, returned as <span class="k">nearest_homolog</span>. SARS-CoV-2's own were removed before the run, so each belongs to a different virus:</span>
+      <div class="accs"><span class="lead">Every chain was identified through one of these reviewed entries. SARS-CoV-2's own were removed before the run, so each belongs to a different virus:</span>
         <span class="acc"><code>P0C6X7</code><em>R1AB_SARS · 12 chains</em></span>
         <span class="acc"><code>Q3LZX1</code><em>SPIKE_BCHK3 · 3 chains</em></span>
         <span class="acc"><code>Q0Q472</code><em>VME1_BC279 · 1</em></span>
@@ -855,14 +919,14 @@
   </div>
 
   <div class="tool-card" id="t-fold">
-    <div class="tc-head"><span class="sn">3</span><span class="tn">hpc_pilots/folded_structure.py<i>:</i>fold</span><span class="reg">structures.folded</span><span class="plain">Predict a 3-D shape from sequence alone</span><span class="db">ESM Atlas · {{fold_exact}} s · 1 request</span></div>
+    <div class="tc-head"><span class="sn">3</span><span class="plain">Predict a 3-D shape from sequence alone</span><span class="db">ESM Atlas · {{fold_exact}} s · 1 request</span></div>
     <div class="tc-body">
       <p class="cap" style="margin:0">What this call returned, and the drawing of the fold, are under <a href="#fold-out">step 3 in section 03</a>.</p>
     </div>
   </div>
 
   <div class="tool-card" id="t-surface">
-    <div class="tc-head"><span class="sn">4</span><span class="tn">hpc_pilots/geometry.py<i>:</i>surface_for_accession</span><span class="reg">geometry.surface_markers</span><span class="plain">Measure the surface a drug would grip</span><span class="db">PDBe · RCSB · UniProt · {{surface_exact}} s</span></div>
+    <div class="tc-head"><span class="sn">4</span><span class="plain">Measure the surface a drug would grip</span><span class="db">PDBe · RCSB · UniProt · {{surface_exact}} s</span></div>
     <div class="tc-body">
       <dl class="ret">
         <div><dt>Rows returned</dt><dd>{{rows_out}} for {{chains}} chains</dd></div>
@@ -870,21 +934,37 @@
         <div><dt>Refused, with reason</dt><dd>{{unmeasured}}</dd></div>
         <div><dt>Largest patch seen</dt><dd>858 Å²</dd></div>
       </dl>
-      <div class="fields"><span class="lead">Per chain, when measured:</span>
-        <span class="k">patch_median_a2</span><span class="k">patch_range_a2</span><span class="k">structures_measured</span><span class="k">structures_used</span><span class="k">surface_score</span><span class="k">patch_fraction_of_surface</span><span class="k">exposed</span><span class="k">locations</span><span class="k">gate</span><span class="k">available_from</span>
-        <span class="lead" style="margin-top:8px">and when not:</span><span class="k">measured: false</span><span class="k">unmeasured_because</span>
-        <span class="lead" style="margin-top:8px">and on a chain step 3 folded, under its own key so it can never be mistaken for a measurement:</span><span class="k">predicted_surface.patch_a2</span><span class="k">ratio_to_deposited_median</span><span class="k">only_route_to_a_surface</span><span class="k">is_deposited_measurement: false</span><span class="k">in_the_ranking: false</span>
+      <div class="fields"><span class="lead">What comes back per chain:</span>
+        <ul class="pts sm">
+          <li><b>When it was measured:</b> the patch, how far repeat structures disagree about
+          it, how many deposited structures were used and which ones, what share of the
+          chain's surface the patch is, where the protein sits, and whether the gate let it
+          through.</li>
+          <li><b>When it was not:</b> a flag saying so, and the reason.</li>
+          <li><b>When step 3 had folded the chain:</b> the patch measured on those predicted
+          coordinates, how it compares with the deposited figure, and whether this was the
+          only route to a surface. It is kept under a heading of its own, marked as neither a
+          deposited measurement nor part of the ranking, so it cannot be mistaken for
+          one.</li>
+        </ul>
       </div>
-      <div class="rowex"><div class="h">one row as returned — <span class="mono">RNA-directed RNA polymerase nsp12</span></div>
-        <div class="v">patch_median: 733.1 Å² · range 665.5–800.8 · 2.5 % of the domain's surface<br>
-        measured on 2 deposited structures: 6nur:A, 6nus:A · available since 2019-02-01<br>
-        locations: host cytoplasm, endosome, membrane → exposed: false<br>
-        gate: no — measured, then set aside because it sits inside the cell</div>
+      <div class="fields"><span class="lead">One row as it came back, for the RNA
+      polymerase:</span>
+        <ul class="pts sm">
+          <li>A patch of 733.1 Å², ranging 665.5 to 800.8 across repeats, 2.5 % of the
+          domain's surface.</li>
+          <li>Measured on 2 deposited structures, 6nur:A and 6nus:A, available since
+          2019-02-01.</li>
+          <li>Annotated in the cell's cytoplasm, in endosomes and in membrane, so not exposed
+          on the outside of the virus.</li>
+          <li>Refused by the gate: measured, then set aside because it sits inside the
+          cell.</li>
+        </ul>
       </div>
       <details class="disc" style="margin-top:17px">
         <summary>The deposited structures it measured on<em>9 chains · 35 entries</em></summary>
         <div class="disc-b accs" style="margin-top:0;padding-top:16px;border-top:0">
-        <span class="lead">Returned as <span class="k">structures_used</span>. Every one is a real PDB entry and chain, and none is SARS-CoV-2's. Each chain is named as the record names it, so the raw JSON can be searched by name:</span>
+        <span class="lead">Every one is a real PDB entry and chain, and none is SARS-CoV-2's. Each chain is named here as the run record names it, so the record can be searched by name:</span>
         <div class="pdbrow"><span class="who">3C-like proteinase nsp5 <i class="gl">the main protease</i> <em>P0C6X7 · 3241–3546</em></span><span class="ids">6w79:A · 6wco:A · 5c5o:A · 5c5o:B · 3tnt:A</span></div>
         <div class="pdbrow"><span class="who">RNA-directed RNA polymerase nsp12 <i class="gl">copies the genome</i> <em>P0C6X7 · 4370–5301</em></span><span class="ids">6nur:A · 6nus:A</span></div>
         <div class="pdbrow"><span class="who">Helicase nsp13 <i class="gl">unwinds RNA</i> <em>P0C6X7 · 5302–5902</em></span><span class="ids">6jyt:A · 6jyt:B</span></div>
@@ -906,7 +986,7 @@
   </div>
 
   <div class="tool-card" id="t-library">
-    <div class="tc-head"><span class="sn">5</span><span class="tn">hpc_pilots/chemistry.py<i>:</i>library_spec</span><span class="reg">chemistry.library_spec</span><span class="plain">Define a library to screen</span><span class="db">local tables · instant · 0 requests</span></div>
+    <div class="tc-head"><span class="sn">5</span><span class="plain">Define a library to screen</span><span class="db">local tables · instant · 0 requests</span></div>
     <div class="tc-body">
       <dl class="ret">
         <div><dt>Starter unit</dt><dd>ClAc-D-Tyr</dd></div>
@@ -923,30 +1003,35 @@
 
   <!--OFFCHAIN-->
 
-  <p class="after">The call records in <span class="mono">runs/toolcalls/</span> log each tool's cost, request count and failure modes, but keep no payload: everything above is read from the run record and the stored fold.</p>
+  <p class="after">The call records log each tool's cost, how many requests it made and how it failed, but keep no payload. Everything above is read from the run record and the stored fold.</p>
 </section>
 
 <section id="picked">
   <div class="sec-head"><h2>The shortlist</h2><span class="tag">{{identified}} identified ORFs cut into {{chains}} chains</span></div>
-  <p class="cap">This is the output. It is a different list from step 1's, not a shorter
-  version of it: step 1 ranks whole stretches of genome, and step 2 cuts them into the chains
-  a drug is aimed at. Only the {{identified}} ORFs that matched a relative can be cut, since
-  the cut points come from that relative, so the {{unidentified}} unrecognised ones end here.
-  Those {{identified}} become {{chains}} chains, {{biggest_cut}} of which come out of a single
-  ORF: the replicase, step 1's second row.</p>
+  <ul class="pts">
+    <li><b>This is the output, and a different list from step 1's rather than a shorter version
+    of it.</b> Step 1 ranks whole stretches of genome; step 2 cuts them into the chains a drug
+    is aimed at.</li>
+    <li><b>Only the {{identified}} ORFs that matched a relative can be cut</b>, since the cut
+    points come from that relative, so the {{unidentified}} unrecognised ones end here.</li>
+    <li><b>Those {{identified}} become {{chains}} chains</b>, {{biggest_cut}} of which come out
+    of a single ORF: the replicase, step 1's second row.</li>
+  </ul>
   <!--PICKED-->
-  <p class="after">The two chains that approved antivirals already hit are not ORFs at all.
-  The main protease (<span class="mono">nsp5</span>), which nirmatrelvir inhibits, is rank
-  {{mpro_rank}} here; the polymerase (<span class="mono">nsp12</span>), which remdesivir
-  inhibits, is rank {{rdrp_rank}}. Both sit inside that one replicase row, so a
-  pipeline that stopped at step 1 could not have found either. With SARS-CoV-2 deleted from
-  the reference library, both still land in the top five, scored only against relatives and
-  never against the virus itself.</p>
+  <ul class="pts sm" style="margin:20px 0 0">
+    <li><b>Neither chain that an approved antiviral hits is an ORF.</b> The main protease,
+    nsp5, which nirmatrelvir inhibits, is rank {{mpro_rank}} here; the polymerase, nsp12, which
+    remdesivir inhibits, is rank {{rdrp_rank}}.</li>
+    <li><b>Both sit inside that one replicase row</b>, so a pipeline that stopped at step 1
+    could not have found either.</li>
+    <li><b>Both still land in the top five with SARS-CoV-2 deleted from the reference
+    library</b>, scored only against relatives and never against the virus itself.</li>
+  </ul>
 </section>
 
 <footer>
-  Run record: <code>runs/onset_chain.json</code> · reproduce with <code>python -m hpc_pilots chain</code><br>
-  Full technical diagram: <code>output/fig_pipeline_holdout.png</code>
+  Every number on this page is read from the recorded run, never retyped. The repository holds
+  that record, the command that reproduces it, and the full technical diagram.
 </footer>
 
 </main>

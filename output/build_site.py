@@ -45,6 +45,87 @@ REPO = "willibmwang/bind-the-unknown"
 # The record the hand-written landing page describes. It is excluded from the generated
 # result listing, because the landing page is its page and two routes to one run would
 # disagree the moment one of them is edited.
+# The four gate terms, named for a reader rather than for the record. The page never prints
+# a field name, so every term that reaches prose goes through here; an unmapped key falls back
+# to its own spelling with the underscores taken out, which is wrong-but-readable rather than
+# silently missing.
+PLAIN_TERM = {
+    "surface_exposed": "exposure on the outside of the virus",
+    "essential_class": "essentiality",
+    "druggable_class": "druggability",
+    "structures_in_family": "structures in the family",
+    "conservation": "conservation",
+}
+
+
+def plain_term(key):
+    return PLAIN_TERM.get(key, str(key).replace("_", " "))
+
+
+# Record field names, said out loud. `plain_key` spells a key as words; the word map fixes
+# the pieces that would otherwise read as an abbreviation, and the whole-key map fixes the
+# handful that are still awkward a word at a time.
+KEY_WORDS = {"orfs": "ORFs", "orf": "ORF", "nt": "nucleotides", "aa": "residues",
+             "plddt": "confidence", "id": "ID", "url": "URL", "urls": "URLs",
+             "ok": "OK", "rna": "RNA", "pdb": "PDB", "a2": "square angstroms"}
+KEY_OVERRIDE = {
+    "genome_length_nt": "genome length in nucleotides",
+    "mean_plddt": "mean confidence, out of 100",
+    "confident_plddt": "confidence threshold",
+    "theoretical_diversity": "possible molecules",
+    "all_decompositions_reproduce_the_score": "every score re-adds from its parts",
+    "alphabet_size": "building blocks per position",
+    "not_ok": "not OK",
+}
+
+
+def plain_key(key):
+    if key in KEY_OVERRIDE:
+        return KEY_OVERRIDE[key]
+    return " ".join(KEY_WORDS.get(w, w) for w in str(key).replace("-", "_").split("_"))
+
+
+def plain_value(value):
+    """A recorded value as words. A field name can arrive as a value, not only as a key."""
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    if isinstance(value, (list, tuple)):
+        return ", ".join(plain_value(v) for v in value) or "none"
+    if isinstance(value, str) and re.fullmatch(r"[a-z0-9]+(_[a-z0-9]+)+", value):
+        return plain_key(value)
+    return num(value)
+
+
+def plain_note(note):
+    """A recorded note as prose.
+
+    Some tools record the note as a mapping rather than a sentence, and `esc()` on a mapping
+    prints its Python repr -- braces, quotes and field names -- straight onto the page. That
+    shipped on two result pages. Where such a mapping carries a written explanation, that
+    sentence is the note; otherwise its fields are read out as words.
+    """
+    if isinstance(note, str) and note.startswith("{") and note.endswith("}"):
+        # A mapping that reached the record already stringified. `literature_stage` replaces
+        # this note with a sentence, but the evidence loop in `chain.py` records the
+        # dispatcher's envelope directly and never passes through that rewrite, so two result
+        # pages published the repr. Parsed back here so the page prints the finding; the
+        # record keeps whatever it holds.
+        try:
+            import ast
+            note = ast.literal_eval(note)
+        except (ValueError, SyntaxError):
+            return note
+    if isinstance(note, dict):
+        for key in ("means", "note", "reason", "detail", "because"):
+            text = note.get(key)
+            if isinstance(text, str) and text.strip():
+                return text.strip()
+        return "; ".join(f"{plain_key(k)}: {plain_value(v)}" for k, v in note.items())
+    if isinstance(note, (list, tuple)):
+        return "; ".join(plain_note(n) for n in note)
+    return str(note or "")
+
+
 LANDING_RECORD = "onset_chain.json"
 
 # Stage 1's own rows. The chain record keeps that stage as five counts, and records written
@@ -120,7 +201,6 @@ def term_head_cells(rubric, ceiling):
                         else key]
         cells.append(
             f'<th scope="col" title="{esc(note)}"><span class="cl">{esc(label)}</span>'
-            f'<span class="ck">{esc(key)}</span>'
             f'<span class="cw">× {num(weight)} → max {num(ceiling[key])}</span></th>')
     return "".join(cells)
 
@@ -260,8 +340,8 @@ THEME_JS = """
 
 FOOT = """
 <footer class="sitefoot"><div class="wrap">
-  Built from the records in <code>runs/</code> by <code>output/build_site.py</code>.
-  Every number on this site is read from a record, not retyped.
+  Built from the recorded runs. Every number on this site is read from a record, not
+  retyped.
 </div></footer>
 """ + THEME_JS + """</body>
 </html>
@@ -295,6 +375,14 @@ TOOLKIT = [
 ]
 
 
+def tool_label(tool):
+    """A registered tool's plain name, for a page that never prints the registered one."""
+    for _stem, name, label, _dbs, _on_chain in TOOLKIT:
+        if name == tool:
+            return label
+    return str(tool or "").replace(".", " ").replace("_", " ")
+
+
 def build_offchain():
     """One generated block for section 04: the registered tools the five steps do not call.
 
@@ -317,15 +405,15 @@ def build_offchain():
         rec = json.loads(path.read_text())
         calls += rec.get("calls") or 0
         tools += 1
-        chips.append(f'<span class="k">{esc(tool)} · {dbs}</span>')
+        chips.append(f'<li><b>{esc(label)}.</b> {dbs}</li>')
     if not chips:
         return ""
-    return (f'<div class="fields"><span class="lead">The other {num(tools)} registered tools '
-            f'reach further databases, and none of them is on this path. They were exercised '
-            f'on a grid of their own, {num(calls)} calls recorded under '
-            f'<span class="mono">runs/toolcalls/</span> with the arguments each was given. '
-            f'Those records keep what a call cost and how it failed. They hold no payload, '
-            f'so nothing the tools returned is in the result above:</span>{"".join(chips)}</div>')
+    return (f'<div class="fields"><span class="lead">The other {num(tools)} tools the '
+            f'project registers reach further databases, and none of them is on this path. '
+            f'They were exercised on a grid of their own, {num(calls)} calls recorded with '
+            f'the arguments each was given. Those records keep what a call cost and how it '
+            f'failed, and hold no payload, so nothing these tools returned is in the result '
+            f'above.</span><ul class="pts sm">{"".join(chips)}</ul></div>')
 
 
 # --------------------------------------------------------------------- the landing page
@@ -405,14 +493,20 @@ def coverage_strip(case):
 
 
 def stage_cards(case):
-    """Each stage's own input and output dicts, rendered as they were recorded."""
+    """Each stage's own input and output, rendered as it was recorded.
+
+    The record stores these as field names, and the page does not print field names, so every
+    one goes through `plain_key`. The stage's registered tool name is left off the header for
+    the same reason: the stage already carries the plain name the record gives it, and the
+    seconds beside it are the part a reader can act on.
+    """
     out = []
     for st in case.get("stages", []):
-        ins = "".join(f"<li><span class=\"k\">{esc(k)}</span> {num(v)}</li>"
+        ins = "".join(f"<li><b>{esc(plain_key(k))}</b> {esc(plain_value(v))}</li>"
                       for k, v in (st.get("input") or {}).items()
                       if v not in (None, [], {}))
         ins = ins or "<li>nothing from upstream</li>"
-        outs = "".join(f"<li><span class=\"k\">{esc(k)}</span> {num(v)}</li>"
+        outs = "".join(f"<li><b>{esc(plain_key(k))}</b> {esc(plain_value(v))}</li>"
                        for k, v in (st.get("output") or {}).items()
                        if not isinstance(v, (dict, list)))
         hands = st.get("hands_to_next")
@@ -422,7 +516,7 @@ def stage_cards(case):
   <div class="stage">
     <div class="stage-head"><span class="sn">{esc(st.get('stage'))}</span>
       <span class="what">{esc(st.get('name'))}</span>
-      <span class="secs">{esc(st.get('tool'))} · {num(round(st.get('seconds') or 0, 2))} s</span></div>
+      <span class="secs">{num(round(st.get('seconds') or 0, 2))} s</span></div>
     <div class="io">
       <div><h3>In</h3><ul>{ins}</ul></div>
       <div class="out"><h3>Out</h3><ul>{outs}</ul></div>
@@ -476,16 +570,20 @@ def gate_note(case, tool, noun):
         return ""
     dropped = block["dropped"]
     named = ", ".join(esc(row["name"]) for row in dropped if row.get("name"))
-    terms = ", ".join(f'<span class="mono">{esc(t)}</span>' for t in block["terms"])
-    return (f'<p class="after">{len(dropped)} more {esc(noun)} were scored and are not in '
-            f'this table. A row is kept when at least one of {terms} pays '
+    terms = ", ".join(esc(plain_term(t)) for t in block["terms"])
+    return (f'<ul class="pts sm" style="margin:20px 0 0">'
+            f'<li><b>{len(dropped)} more {esc(noun)} were scored and are not in this '
+            f'table.</b> A row is kept when at least one of {terms} pays '
             f'{num(block["floor"])} points or more, and these paid under that on all '
-            f'{len(block["terms"])}. They leave the pipeline here: nothing after this stage '
-            f'folds them, measures a surface on them or reads literature for them. '
-            f'Conservation is not one of the four, because it says how well this genome was '
-            f'recognised rather than whether what was recognised is worth aiming at. The '
-            f'numbering keeps each row its place in the full ranking, so a gap in the # column '
-            f'is one of these. They are: {named}.</p>')
+            f'{len(block["terms"])}.</li>'
+            f'<li><b>They leave the pipeline here.</b> Nothing after this stage folds them, '
+            f'measures a surface on them or reads literature for them.</li>'
+            f'<li><b>Conservation is not one of the four</b>, because it says how well this '
+            f'genome was recognised rather than whether what was recognised is worth aiming '
+            f'at.</li>'
+            f'<li><b>The numbering keeps each row its place in the full ranking</b>, so a gap '
+            f'in the # column is one of these: {named}.</li>'
+            f'</ul>')
 
 
 def candidate_rows(case):
@@ -626,11 +724,10 @@ def candidate_matrix(case):
     note = ""
     if record is not None:
         note = (f'<p class="after">The five weights and every number in this table are read '
-                f'from <span class="mono">runs/{esc(CANDIDATES_RECORD)}</span>, which is '
-                f'this same stage run on its own. The chain record keeps stage 1 as counts, '
-                f'and the build refuses to ship this table unless those counts match. '
-                f'The later sections are from '
-                f'<span class="mono">runs/{esc(LANDING_RECORD)}</span>.</p>')
+                f'from a record of this stage run on its own. The full chain record keeps '
+                f'stage 1 only as counts, and the build refuses to ship this table unless '
+                f'those counts match. Every later section is read from that full '
+                f'record.</p>')
 
     # Only when these rows are the gated run's own. On the fallback path the table is read
     # from a separate stage-1 record that was never gated, so quoting the chain record's gate
@@ -1919,16 +2016,16 @@ def surface_lane(case):
     refused, on_location = turned_away, by_location
     verdicts = ""
     if refused:
-        verdicts = (f"All {len(refused)} of those verdicts are decided on where the protein "
-                    f"sits, which the gate reads before it reads area. Every one of these is "
-                    f"annotated somewhere a macrocycle cannot reach, either inside the cell "
-                    f"or inside the virus particle. Several of their patches clear the "
-                    f"footprint line comfortably and are refused anyway, which makes the gate "
-                    f"a statement about this class of molecule rather than about the "
-                    f"target."
+        verdicts = (f"<li><b>All {len(refused)} of those verdicts are decided on where the "
+                    f"protein sits</b>, which the gate reads before it reads area. Every one "
+                    f"of these is annotated somewhere a macrocycle cannot reach, either "
+                    f"inside the cell or inside the virus particle.</li>"
+                    f"<li><b>Several of their patches clear the footprint line comfortably "
+                    f"and are refused anyway.</b> That makes the gate a statement about this "
+                    f"class of molecule rather than about the target.</li>"
                     if len(on_location) == len(refused) else
-                    f"{len(on_location)} of {len(refused)} refusals are decided on where "
-                    f"the protein sits. The rest fail on area.")
+                    f"<li><b>{len(on_location)} of {len(refused)} refusals are decided on "
+                    f"where the protein sits.</b> The rest fail on area.</li>")
     return f"""
   <div class="lane">
     {"".join(body)}
@@ -1937,7 +2034,7 @@ def surface_lane(case):
       <span>the line across a bar is how far that domain&rsquo;s structures
       disagree</span></div>
   </div>
-  {f'<p class="after">{verdicts}</p>' if verdicts else ''}"""
+  {f'<ul class="pts sm" style="margin:20px 0 0">{verdicts}</ul>' if verdicts else ''}"""
 
 
 # The patch at the functional site rather than at the chain's best address. Written by
@@ -2213,9 +2310,9 @@ def site_patch_block(case):
     frames = summary.get("reading_frames_the_rows_are_numbered_along")
     overlapping = summary.get("unit_pairs_overlapping_in_different_reading_frames")
     pairs = ("" if not overlapping else
-             f" Each row names the reading frame its span is numbered along, because "
-             f"{overlapping} pairs of these rows carry spans that overlap as numbers while "
-             f"sharing no residue.")
+             f" Each row names the frame its span is numbered along, because {overlapping} "
+             f"pairs of these rows carry spans that overlap as numbers while sharing no "
+             f"residue.")
     return f"""
   <div class="lane">
     {"".join(body)}
@@ -2224,14 +2321,18 @@ def site_patch_block(case):
       <span>areas are in the figures, not the bars, because the units are not one
       size</span></div>
   </div>
-  <p class="after">An annotated position is curated on the relative&rsquo;s entry, the
-  residues here are numbered along one reading frame of this genome, and the coordinates are
-  numbered from one, so a figure given at the active site is three mappings deep. Each row was
-  checked against the residue the relative&rsquo;s entry carries at the annotated position:
-  {num(summary.get('units_measured_at_the_annotated_residues'))} of
-  {num(summary.get('units_measured'))} measured units land on it,
-  {num(summary.get('units_not_measured_at_the_annotated_residues'))} do not and are withheld
-  above.{pairs} The rows run along {num(frames)} frames in all.</p>"""
+  <ul class="pts sm" style="margin:20px 0 0">
+    <li><b>A figure given at the active site is three mappings deep.</b> The position is
+    curated on the relative&rsquo;s entry, the residues here are numbered along one reading
+    frame of this genome, and the coordinates are numbered from one.</li>
+    <li><b>Every row was checked against the residue the relative&rsquo;s entry carries at the
+    annotated position.</b>
+    {num(summary.get('units_measured_at_the_annotated_residues'))} of
+    {num(summary.get('units_measured'))} measured units land on it, and
+    {num(summary.get('units_not_measured_at_the_annotated_residues'))} do not and are withheld
+    above.</li>
+    <li><b>The rows run along {num(frames)} reading frames in all.</b>{pairs}</li>
+  </ul>"""
 
 
 def _site_examples(payload):
@@ -2537,24 +2638,26 @@ def build_predicted():
     authored = rec.get("alphafold_authored_model_count")
     return (
         f'<div class="tool-card" id="predicted-provenance">\n'
-        f'    <div class="tc-head"><span class="tn">What &#8220;AlphaFold DB&#8221; '
-        f'served</span>\n'
-        f'      <span class="plain">where the counts above came from</span>\n'
+        f'    <div class="tc-head">'
+        f'      <span class="plain">What &#8220;AlphaFold DB&#8221; served, and where the '
+        f'counts above came from</span>\n'
         f'      <span class="db">{num(total)} models · {num(authored)} from '
         f'AlphaFold</span></div>\n'
         f'    <div class="tc-body">\n'
-        f'      <p class="cap" style="margin:0 0 18px">Every <span class="mono">'
-        f'structures.predicted</span> row above is labelled <span class="mono">AlphaFold DB '
-        f'· 3D-Beacons</span> and reports a bare <span class="mono">'
-        f'predicted_model_count</span>, which reads as though AlphaFold modelled these '
-        f'proteins. It did not. The tool reports the host that <i>served</i> each model '
-        f'separately from the tool that <i>computed</i> it, and for these accessions the two '
-        f'disagree. Of {num(total)} predicted models, {num(by_host)} were served by the '
-        f'AlphaFold host and <b>{num(authored)} were computed by AlphaFold</b>. The models '
-        f'it served are ColabFold v1.5.2, which runs the same weights behind a different '
-        f'alignment pipeline. The chain record cannot carry this, because its summariser '
-        f'reduces the model list to a count on purpose. The figures here are read from '
-        f'<span class="mono">runs/predicted_models.json</span>.</p>\n'
+        f'      <ul class="pts sm" style="margin:0 0 18px">'
+        f'<li><b>Every predicted-structure row above is labelled AlphaFold DB, and reports a '
+        f'bare count of models.</b> That reads as though AlphaFold modelled these proteins. '
+        f'It did not.</li>'
+        f'<li><b>The host that served a model is recorded separately from the tool that '
+        f'computed it</b>, and for these accessions the two disagree. Of {num(total)} '
+        f'predicted models, {num(by_host)} were served by the AlphaFold host and '
+        f'<b>{num(authored)} were computed by AlphaFold</b>.</li>'
+        f'<li><b>The rest are ColabFold v1.5.2</b>, which runs the same weights behind a '
+        f'different alignment pipeline.</li>'
+        f'<li><b>The chain record cannot carry this</b>, because it reduces the model list to '
+        f'a count on purpose. The figures here are read from the separate record of predicted '
+        f'models.</li>'
+        f'</ul>\n'
         f'      {"".join(rows)}\n'
         f'    </div>\n'
         f'  </div>')
@@ -2668,12 +2771,12 @@ def evidence_block(case):
     for row in rows:
         calls = "".join(f"""
       <div class="pdbrow{'' if c.get('status') == 'ok' else ' none'}">
-        <span class="who">{esc(c.get('tool'))}<em>{esc(c.get('endpoint'))}</em></span>
+        <span class="who">{esc(tool_label(c.get('tool')))}<em>{esc(c.get('endpoint'))}</em></span>
         <span class="ids">{esc(c.get('status'))}
           {('\u00b7 ' + num(c.get('seconds')) + ' s') if c.get('seconds') is not None else ''}
           {('\u00b7 ' + num(c.get('network_calls')) + ' requests') if c.get('network_calls') else ''}
-          {('<br>' + esc(c.get('note'))) if c.get('note') and c.get('status') != 'ok' else ''}
-          {('<br>' + ' \u00b7 '.join(esc(k) + ' ' + num(v) for k, v in (c.get('returned') or {}).items())) if c.get('returned') else ''}
+          {('<br>' + esc(plain_note(c.get('note')))) if c.get('note') and c.get('status') != 'ok' else ''}
+          {('<br>' + ' \u00b7 '.join(esc(plain_key(k)) + ' ' + esc(plain_value(v)) for k, v in (c.get('returned') or {}).items())) if c.get('returned') else ''}
         </span>
       </div>""" for c in row.get("calls", []))
         cards.append(f"""
@@ -2702,14 +2805,17 @@ def evidence_block(case):
 <section id="evidence">
   <div class="sec-head"><h2>Evidence on the top targets</h2>
     <span class="tag">{num(cov.get('evidence_calls'))} calls</span></div>
-  <p class="cap">Five tools the chain itself never calls, run on the highest-ranked targets
-  after the ranking was already final. Nothing refuses them. The cost gate admits all five,
-  because it turns a tool away only when its declared worst case is greater than the budget,
-  and the default budget is 600 seconds, so
-  <span class="mono">bioactivity.prior_binders</span>, declaring exactly 600, is admitted. What
-  keeps them off the path is the cost they actually run up, about 210 seconds for one
-  target across the five, against a chain that finishes in {num(round(case.get('seconds') or 0))} seconds.
-  Nothing they return changes a rank.{whose}</p>
+  <ul class="pts">
+    <li><b>Five tools the chain itself never calls</b>, run on the highest-ranked targets
+    after the ranking was already final.</li>
+    <li><b>Nothing refuses them.</b> The cost gate turns a tool away only when its declared
+    worst case is greater than the budget, and the default budget is 600 seconds, so the one
+    tool declaring exactly 600 is admitted.</li>
+    <li><b>What keeps them off the path is the cost they actually run up</b>, about 210
+    seconds for one target across the five, against a chain that finishes in
+    {num(round(case.get('seconds') or 0))} seconds.</li>
+    <li><b>Nothing they return changes a rank.</b>{whose}</li>
+  </ul>
   {"".join(cards)}
   {build_predicted()}
 </section>"""
@@ -2756,10 +2862,13 @@ def result_page(case, stem):
         a definition only — no binding or antiviral property is predicted</div>
     </div>
   </div>
-  <p class="cap" style="margin-top:26px">That is the one chain the record reports in full. The
-  lane below is every candidate this stage was handed, with how its own sequence was found in
-  this genome and where it fell against the residue ceiling, which decides whether the stage
-  after it has coordinates to measure.</p>
+  <ul class="pts" style="margin-top:26px">
+    <li><b>That is the one chain the record reports in full.</b> The lane below is every
+    candidate this stage was handed.</li>
+    <li><b>Each row says how its own sequence was found in this genome</b>, and where it fell
+    against the residue ceiling, which decides whether the stage after it has coordinates to
+    measure.</li>
+  </ul>
   {fold_lane(case)}
 </section>"""
 
@@ -2785,10 +2894,13 @@ def result_page(case, stem):
 <section>
   <div class="sec-head"><h2>The shortlist</h2>
     <span class="tag">{_cut_summary(case)}</span></div>
-  <p class="cap">A different list from the stage-1 candidates above, not a shorter one. Stage
-  1 ranks whole ORFs. Stage 2 cuts the long proteins among them into the shorter chains a
-  virus folds, which is what a drug is aimed at. Each row names the ORF it was cut out of, and
-  carries its score split into what each of the five fixed weights paid it.</p>
+  <ul class="pts">
+    <li><b>A different list from the stage-1 candidates above, not a shorter one.</b> Stage 1
+    ranks whole ORFs; stage 2 cuts the long proteins among them into the shorter chains a
+    virus folds, which is what a drug is aimed at.</li>
+    <li><b>Each row names the ORF it was cut out of</b>, and carries its score split into what
+    each of the five fixed weights paid it.</li>
+  </ul>
   {chain_matrix(case, link_orfs=False)}
 </section>
 
@@ -2797,7 +2909,7 @@ def result_page(case, stem):
   <div class="sec-head"><h2>Surfaces</h2><span class="tag">one row per ranked chain</span></div>
   <div class="good"><p><b>{num(cov.get('surface_rows'))} answers for
   {num(cov.get('chains_ranked'))} chains.</b> A chain can be refused, but it cannot
-  disappear.</p></div>
+  disappear from the list.</p></div>
   {surface_block(case)}
   {surface_lane(case)}
 </section>

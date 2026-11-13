@@ -2785,7 +2785,8 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
         "input": {"reads_from_upstream": list(LIBRARY_READS_FROM_SURFACE),
                   "would_read_if_connected": list(LIBRARY_WOULD_READ),
                   "not_connected_because":
-                      "library_spec takes an initiator, a randomised-region length range and "
+                      "the library definition takes an initiator, a randomised-region "
+                      "length range and "
                       "a set of elongator classes, all three properties of the display "
                       "platform rather than of a target. No stated rule turns a measured "
                       "patch area into any of them, and inventing one would publish a "

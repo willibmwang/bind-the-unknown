@@ -162,6 +162,19 @@ section{padding-block:96px 0;counter-increment:sec}
 .cap{color:var(--fg-2);font-size:17px;line-height:1.6;max-width:66ch;margin:0 0 26px}
 .after{color:var(--fg-2);font-size:15.5px;line-height:1.6;max-width:66ch;margin:20px 0 0}
 
+/* run-in bullets: a bold lead naming the point, then the point itself */
+.pts{color:var(--fg-2);font-size:16.5px;line-height:1.56;max-width:66ch;margin:0 0 26px;
+  padding-left:20px;display:grid;gap:11px}
+.pts li{min-width:0;overflow-wrap:anywhere}
+.pts li::marker{color:var(--fg-3)}
+.pts b{color:var(--fg);font-weight:650}
+.pts i{font-style:italic}
+.pts.sm{font-size:15.5px;gap:9px;margin-bottom:0}
+.disc-b .pts{margin:0 0 16px}
+figcaption .pts{color:inherit;font-size:14px;margin:11px 0 0;gap:8px}
+figcaption .pts b{color:var(--fg-2)}
+.fields .pts{margin:0}
+
 /* pictorial flow */
 figure{margin:0}
 figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
@@ -569,7 +582,7 @@ figcaption{color:var(--fg-3);font-size:14px;margin-top:17px;max-width:66ch}
    heading because that is what a reader can open; the registered name is what the records,
    the chain and section 05 call it, so it has to stay visible or the two cannot be matched. */
 .tc-head .reg{font-family:var(--mono);font-size:12.5px;color:var(--fg-3);border:1px solid var(--rule);border-radius:6px;padding:1px 7px;flex:none}
-.tc-head .plain{font-size:15px;color:var(--fg-2);min-width:0}
+.tc-head .plain{font-size:16.5px;font-weight:550;color:var(--fg);min-width:0}
 .tc-head .db{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--fg-3);flex:none}
 .tc-body{padding:17px}
 .ret{display:grid;grid-template-columns:repeat(auto-fit,minmax(172px,1fr));gap:14px 24px;margin:0}

@@ -735,9 +735,9 @@ def _absence(sites, outside, unmapped, kind, label):
     if unmapped and not outside:
         each = "it falls" if carried == 1 else "every one of them falls"
         return (f"none of the {noun} this chain carries has a counterpart in this genome -- "
-                f"{each} in an alignment gap. The positions are recorded under "
-                f"`anchors_unmapped` on the relative's numbering; substituting the nearest "
-                f"mapped neighbour would name a residue the curator did not annotate.")
+                f"{each} in an alignment gap. The record keeps those positions in the "
+                f"relative's own numbering; substituting the nearest mapped neighbour would "
+                f"name a residue the curator did not annotate.")
     where = "this domain" if kind == "domain" else "this chain's folded window"
     verb = "lies" if carried == 1 else "lie"
     gaps = (f" {len(unmapped)} of them "
