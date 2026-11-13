@@ -2566,6 +2566,9 @@ def site_patch_facts(case):
 
     marked = [(_span(r), _frame(r)) for r in rows]
     processing_only = [r for r in rows if r.get("anchors_are_processing_sites_only")]
+    low_at_cut_points = sum(
+        (r.get("anchor_confidence") or {}).get("below_the_confident_threshold") or 0
+        for r in processing_only)
     return _site_examples(payload, rows) | {
         "site_units": len(rows),
         "site_measured": len(measured),
@@ -2577,6 +2580,16 @@ def site_patch_facts(case):
         # On the shortlist it is one, so the subject and the verb travel with the number
         # rather than being baked into the sentence -- the same reason `site_drop_plural`
         # exists next door.
+        # "Many are cut points" was prose, and the record does not support it: 1 of the 35
+        # low-confidence anchors on the shortlist sits in a processing-only unit, 3 per cent.
+        # It was never well supported -- 10 of 70, 14 per cent, over the unfiltered record --
+        # and the filter is what made it checkable rather than what made it wrong. Replaced
+        # by the count, so the claim cannot drift from the measurement again.
+        "site_low_cut_phrase": (
+            f"{low_at_cut_points} of those is at a cut point, disordered because it sits at "
+            f"a chain end" if low_at_cut_points == 1 else
+            f"{low_at_cut_points} of those are at cut points, disordered because they sit at "
+            f"chain ends"),
         "site_processing_phrase": (
             f"{len(processing_only)} unit{'' if len(processing_only) == 1 else 's'} "
             f"{'holds' if len(processing_only) == 1 else 'hold'}"),
