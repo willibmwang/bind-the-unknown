@@ -1077,6 +1077,92 @@ def score_terms(features, rubric=None):
     return {"terms": terms, "total": round(sum(terms.values()), 4)}
 
 
+# ---------------------------------------------------------------------------
+# The evidence gate: which candidates are worth anything further.
+#
+# Four of the five terms are evidence that the thing scored is a TARGET -- it sits where a
+# binder can reach it, the virus cannot replicate without it, its class is one antivirals
+# have landed on, and its family has been solved before. A row paying under the floor on all
+# four is a protein with none of those four things said about it by any annotation the
+# pipeline could find.
+#
+# Conservation is deliberately not gated on, and that is the one decision in this block worth
+# arguing with. It says how well this genome was RECOGNISED, not whether what was recognised
+# is worth aiming at: every chain cut from a well-matched polyprotein inherits its parent's
+# conservation, so on a close reference it is the term every row pays and it would wave the
+# whole list through. Gating on the other four means a highly conserved protein with no
+# exposure, no essentiality, no drugged class and no solved relatives is dropped. That is the
+# intended reading and not an oversight.
+#
+# The floor reads the POINTS a term paid, not the raw measurement underneath it, because the
+# points are the only scale the four share. `surface_exposed` pays 2.0 or nothing,
+# `essential_class` 1.5 or nothing, `druggable_class` 0.8 per class, and the structure count
+# is divided by its 50 cap before the 0.5 weight, so that term clears the floor only at the
+# cap. Read on the raw measurements instead, a single deposited structure anywhere in a family
+# would clear 0.5 and the fourth term would gate nothing at all.
+GATE_TERMS = ("surface_exposed", "essential_class", "druggable_class", "structures_in_family")
+GATE_FLOOR = 0.5
+
+
+def gate_verdict(features, rubric=None):
+    """What the four evidence terms paid one row, and whether any of them cleared the floor."""
+    terms = score_terms(features, rubric)["terms"]
+    paid = {key: terms[key] for key in GATE_TERMS}
+    best = max(paid, key=paid.get)
+    # Named only where something was actually paid. A row that pays zero on all four has no
+    # highest term -- `max` would hand back whichever key is first in the dict, and a record
+    # reading "highest term: surface_exposed, 0.0" invites the reader to think exposure was
+    # the term that nearly carried it when nothing was measured on any of the four.
+    return {"terms": paid, "highest_term": best if paid[best] > 0 else None,
+            "highest": paid[best],
+            "floor": GATE_FLOOR, "kept": paid[best] >= GATE_FLOOR}
+
+
+def gate_rows(rows, rubric=None, spare=(), spare_because=None):
+    """Split scored rows into the ones that clear the gate and the ones that do not.
+
+    Returns `(kept, dropped)`. A dropped row is not thrown away silently: the second list
+    carries its name, its rank in the ranking it was dropped from, its composite score and
+    all four terms it failed to pay, which is what lets a record say which candidates the
+    gate removed and on what numbers rather than merely how many.
+
+    **A row with no features is not gated.** It was never scored, so the floor has no reading
+    on it -- an unidentified ORF with no relative at either homology tier and no topology
+    signal has not failed the four terms, it has never been measured against them. Those rows
+    are already off the scored tables (`candidate_matrix` drops every row whose score is
+    None) and they are the only lane a genuinely novel protein has through the folding stage,
+    which needs a sequence and nothing else. Gating them here would close it.
+
+    `spare` names rows to keep whatever they paid, with `spare_because` written onto each one
+    that the sparing saved. It exists for one case: an ORF is scored on its own annotation,
+    and the mature chains cut out of it are scored on theirs, so a polyprotein can pay nothing
+    on all four terms while carrying an envelope chain that pays the full exposure term. The
+    parent is the only row the stage-1 table has for that chain, and dropping it would remove
+    the chain's origin from the page while the chain itself goes forward.
+    """
+    spare = {name for name in spare if name}
+    kept, dropped = [], []
+    for row in rows:
+        features = row.get("features")
+        if not features:
+            kept.append(row)
+            continue
+        verdict = gate_verdict(features, rubric)
+        if verdict["kept"]:
+            kept.append(row)
+            continue
+        if row.get("name") in spare:
+            kept.append({**row, "gated_out_but_kept_because": spare_because} if spare_because
+                        else row)
+            continue
+        dropped.append({"rank": row.get("rank"), "name": row.get("name"),
+                        "parent": row.get("parent"), "score": row.get("score"),
+                        "terms": verdict["terms"],
+                        "highest_term": verdict["highest_term"],
+                        "highest": verdict["highest"]})
+    return kept, dropped
+
+
 def candidate_table(payload):
     """The ORFs one intake run ranked, one flat row each, with the score split five ways.
 

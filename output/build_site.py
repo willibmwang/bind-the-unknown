@@ -448,6 +448,44 @@ def _cut_summary(case):
     return f"{chains} chains" if chains else "no chains ranked"
 
 
+def gate_block(case, tool):
+    """One stage's gate block, or None for a record written before the gate existed.
+
+    Every caller treats None as "this run had no gate" and prints nothing, which is what
+    keeps the pages built from the records already on disk identical to what they were. A
+    note asserting a floor the run never applied would be the page inventing a stage.
+    """
+    stage = {s["tool"]: s for s in case.get("stages", [])}.get(tool)
+    return ((stage or {}).get("output") or {}).get("gate")
+
+
+def gate_note(case, tool, noun):
+    """What the gate removed from the table above, named and with the rule it applied.
+
+    The table is the kept rows, and a table that is quietly shorter than the count in the
+    stage block beside it is the page hiding a filter. So the rows are named here. Naming
+    them is also the only form of this note worth printing: "six chains were dropped" cannot
+    be argued with, and "Protein C, prM, NS2A, NS2A-alpha, NS4A and NS4B were dropped, none
+    paying anything on any of the four" can be -- by a reader who thinks the capsid belongs
+    in the list, which is the disagreement the floor is there to provoke.
+    """
+    block = gate_block(case, tool)
+    if not block or not block.get("gated_out"):
+        return ""
+    dropped = block["dropped"]
+    named = ", ".join(esc(row["name"]) for row in dropped if row.get("name"))
+    terms = ", ".join(f'<span class="mono">{esc(t)}</span>' for t in block["terms"])
+    return (f'<p class="after"><b>{len(dropped)} more {esc(noun)}</b> were scored and are not '
+            f'in this table. A row is kept when at least one of {terms} pays '
+            f'{num(block["floor"])} points or more; these paid under it on all '
+            f'{len(block["terms"])}, so they are off the table and out of the pipeline — '
+            f'nothing after this stage folds them, measures a surface on them or reads '
+            f'literature for them. Conservation is not one of the four: it says how well this '
+            f'genome was recognised, not whether what was recognised is worth aiming at. The '
+            f'numbering keeps each row its place in the full ranking, so a gap in the # column '
+            f'is one of these. They are: {named}.</p>')
+
+
 def candidate_rows(case):
     """Stage 1's rows, and the record they came from, with the counts cross-checked.
 
@@ -532,6 +570,12 @@ def candidate_matrix(case):
       ranked and three came back unrecognised and off the table. If that block is ever
       rewritten, the three stop being reported anywhere on the page, which is the one outcome
       this filter must not produce.
+    * And, since 13 Nov 2026, only the ORFs that cleared the evidence gate. That is a second
+      and narrower filter than the one above: these rows WERE scored, and were dropped for
+      paying under half a point on all four of exposure, essentiality, drugged class and
+      solved relatives. They are named under the table rather than counted, for the same
+      reason the three unidentified ones are counted beside it -- a row removed from a ranking
+      has to be findable on the page that published the ranking.
     """
     rows, record = candidate_rows(case)
     rows = [r for r in rows if r.get("score") is not None]
@@ -578,10 +622,17 @@ def candidate_matrix(case):
                 f'The later sections are from '
                 f'<span class="mono">runs/{esc(LANDING_RECORD)}</span>.</p>')
 
+    # Only when these rows are the gated run's own. On the fallback path the table is read
+    # from a separate stage-1 record that was never gated, so quoting the chain record's gate
+    # beside it would caption one run's rows with another run's filter.
+    gated = gate_note(case, "intake.rank_targets", "identified ORFs") if record is None else ""
+    note += gated
+    kept = " and the gate kept" if gated else ""
+
     return f"""
   <div class="cmxscroll" tabindex="0" role="region" aria-label="The ranked ORFs and their scores">
   <table class="cmx">
-    <caption>Every ORF stage 1 identified, highest composite score first. Each cell is the points
+    <caption>Every ORF stage 1 identified{kept}, highest composite score first. Each cell is the points
       that weight paid, with the measurement it was computed from underneath; the shading is
       the share of that column's maximum. Nothing here is fitted — the five weights were
       fixed before the run.</caption>
@@ -681,10 +732,12 @@ def chain_matrix(case, link_orfs=True):
       </tr>""")
 
     linked = (" and links to its row in the table above" if link_orfs else "")
+    note = gate_note(case, "intake.decompose + intake.rank_score", "mature chains")
+    kept = " and the gate kept" if note else ""
     return f"""
   <div class="cmxscroll" tabindex="0" role="region" aria-label="Every mature chain and its score">
   <table class="cmx">
-    <caption>Every mature chain stage 2 produced, highest composite score first. Each cell is
+    <caption>Every mature chain stage 2 produced{kept}, highest composite score first. Each cell is
       the points that weight paid, with the measurement it was computed from underneath; the
       shading is the share of that column's maximum. &ldquo;Cut out of&rdquo; names the ORF the
       chain was taken from{linked}, so a chain's score can be read against its parent's.
@@ -700,7 +753,7 @@ def chain_matrix(case, link_orfs=True):
     </thead>
     <tbody>{"".join(body)}</tbody>
   </table>
-  </div>"""
+  </div>{note}"""
 
 
 def chain_facts(case):

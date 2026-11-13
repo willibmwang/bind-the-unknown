@@ -2314,28 +2314,15 @@ def evidence_stage(scored, top=3, budget=EVIDENCE_BUDGET_SECONDS):
 def _case(accession, exclude_organism, top, replicates, fold, label, evidence_top=3):
     """Every stage of the onset arm, once, against one reference."""
     from . import chemistry
-    from .intake import candidate_table, decompose, rank_score, run_intake
+    from .intake import (GATE_FLOOR, GATE_TERMS, candidate_table, decompose, gate_rows,
+                         rank_score, run_intake)
 
     stages, clock = [], time.time()
 
     started = time.time()
     intake = run_intake(accession, exclude_organism=exclude_organism, top=top, record=False)
-    stages.append({
-        "stage": 1, "name": "Genome to candidate proteins", "tool": "intake.rank_targets",
-        "endpoints": ["NCBI efetch", "UniProt"],
-        "input": {"genome_accession": accession,
-                  "reference_excluded_organism": exclude_organism},
-        "output": {"genome_length_nt": intake["genome_length_nt"],
-                   "segments": intake["segments"],
-                   "orfs_found": intake["orfs_found"],
-                   "orfs_ranked": intake["orfs_ranked"],
-                   "reference_entries": intake["reference_entries"],
-                   "reference_entries_removed": intake["reference_entries_removed"],
-                   "identified": sum(1 for r in intake["targets"] if r.get("identified")),
-                   "unidentified": intake["unidentified"]},
-        "seconds": round(time.time() - started, 2),
-        "hands_to_next": "one reviewed accession and one residue range per candidate"})
-    # The rows behind those counts, kept rather than discarded. This stage used to publish
+    intake_seconds = round(time.time() - started, 2)
+    # The rows behind stage 1's counts, kept rather than discarded. This stage used to publish
     # five integers, so a reader could learn that nine of twelve ORFs were identified and had
     # no way to ask which nine, what any of them scored, or what the other three were. The
     # table is the same rows `candidates` flattens for `intake.candidate_record`, so the page
@@ -2345,11 +2332,34 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
     started = time.time()
     ranked = decompose(intake["targets"])
     rubric = intake["rubric"]
-    scored = []
+    # Position in the ranking BEFORE the gate, written while the whole list is still here. A
+    # kept row's rank is therefore its place among everything the rubric scored, and a gap in
+    # the numbering on the page is a row the gate removed rather than a numbering fault.
+    # Renumbering the survivors 1..n would have hidden the removal in the one column a reader
+    # checks first.
     for position, row in enumerate(ranked, 1):
+        if row.get("identified"):
+            row["rank"] = position
+    # The gate. Everything below this line -- the shortlist, the folding stage, the surface
+    # stage, the evidence sweep and both scored tables on the page -- sees the kept rows and
+    # not the dropped ones, which is the whole point of putting it here rather than hiding the
+    # rows at the end: a candidate with no exposure, no essentiality, no drugged class and no
+    # solved relatives should not be costing an ESM Atlas call.
+    #
+    # Stage 2 is gated first and stage 1 second, in that order and not the reverse, because an
+    # ORF is scored on its own annotation while the chains cut out of it are scored on theirs.
+    # A polyprotein can pay nothing on all four terms and still carry a chain that pays the
+    # full exposure term, so gating stage 1 on its own row would drop that chain before stage 2
+    # ever scored it. The survivors' parents are spared for exactly that reason.
+    ranked, gated_out = gate_rows(ranked, rubric)
+    candidates, candidates_gated_out = gate_rows(
+        candidates, rubric, spare={row.get("parent") for row in ranked},
+        spare_because="a mature chain cut out of it cleared the gate")
+    scored = []
+    for row in ranked:
         if not row.get("identified"):
             continue
-        row["rank"] = position
+        position = row["rank"]
         split = _decomposed_score(row["features"], rubric)
         # The decomposition has to reproduce the score the ranker computed, or it is a second
         # rubric dressed as an explanation of the first.
@@ -2373,16 +2383,56 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
             "score_terms": split["terms"],
             "score": recomputed,
             "decomposition_reproduces_score": abs(split["total"] - recomputed) < 5e-4})
+    # The gate, in the one block both stages publish it in. Named rather than counted alone:
+    # "six chains dropped" and "Protein C, prM, NS2A, NS2A-alpha, NS4A, NS4B dropped, none of
+    # them paying more than 0.0 on any of the four" are different statements to a reader
+    # deciding whether the floor is set right, and only the second can be argued with.
+    def gate_block(dropped, kept):
+        return {"terms": list(GATE_TERMS), "floor": GATE_FLOOR,
+                "rule": (f"a row is kept when at least one of {len(GATE_TERMS)} evidence "
+                         f"terms pays {GATE_FLOOR} points or more. Conservation is not among "
+                         f"them: it says how well this genome was recognised, not whether "
+                         f"what was recognised is worth aiming at"),
+                "kept": len(kept), "gated_out": len(dropped), "dropped": dropped}
+
+    stages.append({
+        "stage": 1, "name": "Genome to candidate proteins", "tool": "intake.rank_targets",
+        "endpoints": ["NCBI efetch", "UniProt"],
+        "input": {"genome_accession": accession,
+                  "reference_excluded_organism": exclude_organism},
+        "output": {"genome_length_nt": intake["genome_length_nt"],
+                   "segments": intake["segments"],
+                   "orfs_found": intake["orfs_found"],
+                   "orfs_ranked": intake["orfs_ranked"],
+                   "reference_entries": intake["reference_entries"],
+                   "reference_entries_removed": intake["reference_entries_removed"],
+                   "identified": sum(1 for r in intake["targets"] if r.get("identified")),
+                   "unidentified": intake["unidentified"],
+                   # `identified` counts what the stage recognised and is unchanged by the
+                   # gate, which runs after it. The table beside it is the kept rows, so the
+                   # two numbers differ by this one and a reader is told why rather than left
+                   # to find a table shorter than its own headline count.
+                   "gate": gate_block(candidates_gated_out, candidates)},
+        "seconds": intake_seconds,
+        "hands_to_next": "one reviewed accession and one residue range per candidate"})
     stages.append({
         "stage": 2, "name": "Polyproteins to mature chains, and the score for each",
         "tool": "intake.decompose + intake.rank_score",
         "endpoints": ["UniProt"],
         "input": {"candidates_in": len(intake["targets"])},
         "output": {"chains_out": len(scored), "rubric": rubric,
+                   # Counted over every row the gate was offered, identified or not, which is
+                   # the denominator `gated_out` is a fraction of. `chains_out` counts the
+                   # identified survivors and is therefore not that denominator.
+                   "chains_scored_before_the_gate": len(ranked) + len(gated_out),
+                   "gate": gate_block(gated_out, ranked),
                    "all_decompositions_reproduce_the_score":
                        all(r["decomposition_reproduces_score"] for r in scored)},
         "seconds": round(time.time() - started, 2),
-        "hands_to_next": "every chain, with the accession and range its surface is measured on"})
+        "hands_to_next": (
+            f"every chain that cleared the gate, with the accession and range its surface is "
+            f"measured on. {len(gated_out)} did not clear it and go no further: nothing below "
+            f"this line folds them, measures them or looks for literature on them")})
 
     # Folding runs BEFORE the surface stage, and the order is the pipeline's answer to the
     # case it exists for. A deposited structure is what the surface stage would rather
@@ -2410,11 +2460,21 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
     # what these stages were handed rather than a restatement of what they returned. A stage
     # that reports its own output as its input can never be caught covering less than it was
     # given.
+    #
+    # `ranked` is the gated list, so the exhaustiveness the surface stage rests on is
+    # exhaustiveness over what the gate kept, and the rows the gate removed are named in stage
+    # 2's record rather than being absent from both ends of the pipeline.
     handed = [r for r in ranked if r.get("identified")]
 
     folded, fold_rows, folds, over_ceiling = None, None, [], []
     if fold:
         started = time.time()
+        # Every called ORF, gated or not, and deliberately so. The pool is a SEARCH CORPUS and
+        # not a fold list: `fold_stage` aligns each kept chain against it to find where that
+        # chain's residues actually sit in this genome, and a coronavirus chain past the
+        # ribosomal frameshift lives in an ORF that is not the one that named it. Gating the
+        # pool would hide a survivor's own sequence from the stage that has to fold it.
+        # Nothing is folded for being in here; only `ranked` decides that.
         pool = [(f"ORF {i} of the ranked set, {len(t['orf']['protein'])} aa", t["orf"]["protein"])
                 for i, t in enumerate(intake["targets"], 1)
                 if (t.get("orf") or {}).get("protein")]
@@ -2447,6 +2507,11 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
             # the line from a literal of its own.
             "input": {"candidates_in": len(ranked),
                       "identified_in": len(handed),
+                      # What this stage was NOT handed, which is the number the gate exists
+                      # to move. `candidates_in` counts what reached the endpoint's queue;
+                      # without this beside it a reader comparing stage 2's chain count with
+                      # stage 3's input would read the difference as a stage losing rows.
+                      "gated_out_before_this_stage": len(gated_out),
                       "residue_ceiling": FOLD_CEILING,
                       # The per-chain budget on the domain route, in the record because the
                       # page states it and because it is the reason an offered region can go

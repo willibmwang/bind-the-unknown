@@ -5653,6 +5653,70 @@ def test_the_intake_gates_do_not_reject_the_case_the_module_exists_for(monkeypat
     assert membrane_topology("M" + "LVILVILVIL" * 250)["likely_surface"] is False
 
 
+def test_the_evidence_gate_drops_only_what_pays_nothing_for_being_a_target():
+    """The four-term floor, at the four edges it has to hold at.
+
+    The gate decides what the rest of the onset chain spends anything on -- a dropped row is
+    never folded, never measured and never searched for literature -- so what it must not do
+    is drop a row for the wrong reason. Three of these are that: conservation is not evidence
+    of a target and must not carry a row through on its own, any one of the four IS and must,
+    and a row nothing identified was never measured against the four at all and is therefore
+    not the gate's to refuse. The fourth is the one arithmetic edge in the rule: the structure
+    count is the only term that can pay something and still fail.
+    """
+    from hpc_pilots.intake import GATE_FLOOR, gate_rows, gate_verdict, rank_score
+
+    def row(name, **over):
+        features = {"conservation": 0.9, "surface_exposed": False, "essential_class": False,
+                    "druggable_class": 0, "structures_in_family": 0} | over
+        return {"name": name, "features": features, "score": rank_score(features)}
+
+    # 1. A well-matched protein with nothing said about it goes. It scores 2.7 of a possible
+    # 3.0 on conservation, which is what makes this the edge worth pinning: the gate has to
+    # drop a row the composite score ranks respectably, because a near-perfect match to a
+    # relative says the genome was recognised and says nothing about whether the thing
+    # recognised is worth aiming a binder at.
+    conserved = row("a well-matched nothing")
+    assert conserved["score"] > 2.5
+    assert gate_verdict(conserved["features"])["kept"] is False
+    assert gate_verdict(conserved["features"])["highest_term"] is None, \
+        "a row that paid nothing on all four must not name one of them as its highest"
+
+    # 2. And any one of the four, alone, keeps it.
+    for key, value in (("surface_exposed", True), ("essential_class", True),
+                       ("druggable_class", 1), ("structures_in_family", 50)):
+        assert gate_verdict(row("one term", **{key: value})["features"])["kept"] is True, key
+
+    # 3. The structure count is divided by its 50 cap before its 0.5 weight, so it reaches the
+    # floor only at the cap and 49 deposited structures pay 0.49. That is deliberate -- read
+    # on the raw count instead, one structure anywhere in a family would clear 0.5 and the
+    # term would gate nothing -- and it is the one place the floor is not a yes/no.
+    assert gate_verdict(row("at the cap", structures_in_family=50)["features"]) \
+        ["terms"]["structures_in_family"] == GATE_FLOOR
+    assert gate_verdict(row("one short", structures_in_family=49)["features"])["kept"] is False
+
+    # 4. A row with no features was never scored, so the floor has no reading on it. It is the
+    # only lane a genuinely novel protein has through the folding stage, which needs a
+    # sequence and nothing else, and closing it here would shut the case the arm exists for.
+    kept, dropped = gate_rows([{"name": "unidentified ORF", "features": None}, conserved])
+    assert [r["name"] for r in kept] == ["unidentified ORF"]
+    assert [r["name"] for r in dropped] == ["a well-matched nothing"]
+    # Dropped rows are named and carry the four numbers they failed on, so a record can say
+    # which candidates went and on what evidence rather than only how many.
+    assert set(dropped[0]["terms"]) == {"surface_exposed", "essential_class",
+                                        "druggable_class", "structures_in_family"}
+
+    # 5. The parent rescue. An ORF is scored on its own annotation and the chains cut out of
+    # it on theirs, so a polyprotein can pay nothing while carrying an exposed chain that
+    # pays the full term. Dropping the parent would take the chain's origin off the page
+    # while the chain itself goes forward.
+    kept, dropped = gate_rows([conserved], spare={"a well-matched nothing"},
+                              spare_because="a mature chain cut out of it cleared the gate")
+    assert dropped == []
+    assert kept[0]["gated_out_but_kept_because"] == \
+        "a mature chain cut out of it cleared the gate"
+
+
 def test_folding_is_offered_to_candidates_nothing_identified():
     """The one stage that needs no relative used to refuse to look at a protein without one.
 
