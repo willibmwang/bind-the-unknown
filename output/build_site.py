@@ -477,13 +477,13 @@ def gate_note(case, tool, noun):
     dropped = block["dropped"]
     named = ", ".join(esc(row["name"]) for row in dropped if row.get("name"))
     terms = ", ".join(f'<span class="mono">{esc(t)}</span>' for t in block["terms"])
-    return (f'<p class="after"><b>{len(dropped)} more {esc(noun)}</b> were scored and are not '
-            f'in this table. A row is kept when at least one of {terms} pays '
-            f'{num(block["floor"])} points or more; these paid under it on all '
-            f'{len(block["terms"])}, so they are off the table and out of the pipeline — '
-            f'nothing after this stage folds them, measures a surface on them or reads '
-            f'literature for them. Conservation is not one of the four: it says how well this '
-            f'genome was recognised, not whether what was recognised is worth aiming at. The '
+    return (f'<p class="after">{len(dropped)} more {esc(noun)} were scored and are not in '
+            f'this table. A row is kept when at least one of {terms} pays '
+            f'{num(block["floor"])} points or more, and these paid under that on all '
+            f'{len(block["terms"])}. They leave the pipeline here: nothing after this stage '
+            f'folds them, measures a surface on them or reads literature for them. '
+            f'Conservation is not one of the four, because it says how well this genome was '
+            f'recognised rather than whether what was recognised is worth aiming at. The '
             f'numbering keeps each row its place in the full ranking, so a gap in the # column '
             f'is one of these. They are: {named}.</p>')
 
@@ -1920,12 +1920,12 @@ def surface_lane(case):
     verdicts = ""
     if refused:
         verdicts = (f"All {len(refused)} of those verdicts are decided on where the protein "
-                    f"sits, which the gate reads before it reads area at all. Every one of "
-                    f"these is annotated somewhere a macrocycle cannot arrive, inside the "
-                    f"cell or inside the virion, the virus particle itself. Several of their "
-                    f"patches clear the footprint line comfortably and are refused anyway. "
-                    f"That is the gate saying something about this class of molecule, not "
-                    f"about the target."
+                    f"sits, which the gate reads before it reads area. Every one of these is "
+                    f"annotated somewhere a macrocycle cannot reach, either inside the cell "
+                    f"or inside the virus particle. Several of their patches clear the "
+                    f"footprint line comfortably and are refused anyway, which makes the gate "
+                    f"a statement about this class of molecule rather than about the "
+                    f"target."
                     if len(on_location) == len(refused) else
                     f"{len(on_location)} of {len(refused)} refusals are decided on where "
                     f"the protein sits. The rest fail on area.")
@@ -2221,13 +2221,13 @@ def site_patch_block(case):
     {"".join(body)}
     <div class="lane-foot"><span>each bar is one unit&rsquo;s whole patch; the fill is the
       part of it the marked residues reach</span>
-      <span>areas are in the figures, not the bars &mdash; the units are not one size</span></div>
+      <span>areas are in the figures, not the bars, because the units are not one
+      size</span></div>
   </div>
-  <p class="after"><b>What had to be true before any of these numbers could be printed.</b>
-  An annotated position is curated on the relative&rsquo;s entry, the residues here are
-  numbered along one reading frame of this genome, and the coordinates are numbered from one,
-  so a figure at &ldquo;the active site&rdquo; is three mappings deep. Each row was checked
-  against the residue the relative&rsquo;s entry carries at the annotated position:
+  <p class="after">An annotated position is curated on the relative&rsquo;s entry, the
+  residues here are numbered along one reading frame of this genome, and the coordinates are
+  numbered from one, so a figure given at the active site is three mappings deep. Each row was
+  checked against the residue the relative&rsquo;s entry carries at the annotated position:
   {num(summary.get('units_measured_at_the_annotated_residues'))} of
   {num(summary.get('units_measured'))} measured units land on it,
   {num(summary.get('units_not_measured_at_the_annotated_residues'))} do not and are withheld
@@ -2704,12 +2704,12 @@ def evidence_block(case):
     <span class="tag">{num(cov.get('evidence_calls'))} calls</span></div>
   <p class="cap">Five tools the chain itself never calls, run on the highest-ranked targets
   after the ranking was already final. Nothing refuses them. The cost gate admits all five,
-  because it turns a tool away only when its declared worst case is <em>strictly greater</em>
-  than the budget, and the default budget is 600 seconds, so
+  because it turns a tool away only when its declared worst case is greater than the budget,
+  and the default budget is 600 seconds, so
   <span class="mono">bioactivity.prior_binders</span>, declaring exactly 600, is admitted. What
   keeps them off the path is the cost they actually run up, about 210 seconds for one
   target across the five, against a chain that finishes in {num(round(case.get('seconds') or 0))} seconds.
-  <b>Nothing they return changes a rank.</b>{whose}</p>
+  Nothing they return changes a rank.{whose}</p>
   {"".join(cards)}
   {build_predicted()}
 </section>"""
@@ -2785,9 +2785,9 @@ def result_page(case, stem):
 <section>
   <div class="sec-head"><h2>The shortlist</h2>
     <span class="tag">{_cut_summary(case)}</span></div>
-  <p class="cap">A different list from the stage-1 candidates above, not a shorter one. Stage 1
-  ranks whole ORFs; stage 2 cuts the polyproteins among them into the mature chains a virus
-  folds, and a binder is aimed at a chain. Each row names the ORF it was cut out of, and
+  <p class="cap">A different list from the stage-1 candidates above, not a shorter one. Stage
+  1 ranks whole ORFs. Stage 2 cuts the long proteins among them into the shorter chains a
+  virus folds, which is what a drug is aimed at. Each row names the ORF it was cut out of, and
   carries its score split into what each of the five fixed weights paid it.</p>
   {chain_matrix(case, link_orfs=False)}
 </section>
@@ -2796,7 +2796,8 @@ def result_page(case, stem):
 <section>
   <div class="sec-head"><h2>Surfaces</h2><span class="tag">one row per ranked chain</span></div>
   <div class="good"><p><b>{num(cov.get('surface_rows'))} answers for
-  {num(cov.get('chains_ranked'))} chains.</b> A chain can be refused. It cannot disappear.</p></div>
+  {num(cov.get('chains_ranked'))} chains.</b> A chain can be refused, but it cannot
+  disappear.</p></div>
   {surface_block(case)}
   {surface_lane(case)}
 </section>
