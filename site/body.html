@@ -325,6 +325,11 @@
       <li><b>Only the match is measured against this genome.</b> The other four columns are
       read off whichever relative was matched, which is why holding the pathogen out lowers the
       scores rather than emptying the list.</li>
+      <li><b>The nucleotide range is where the caller read, not what an annotation says.</b>
+      Each ORF begins at the first ATG after the preceding stop codon. Five of the six land on
+      the annotated start exactly; the spike begins nine codons above it, at 21,536 against an
+      annotated 21,563, because an earlier ATG sits in the same frame. Every range stops three
+      nucleotides short of the annotated end, where the stop codon is.</li>
     </ul>
   </div>
 

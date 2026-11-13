@@ -639,6 +639,45 @@ def candidate_facts(case):
     return {k: v for k, v in out.items() if v is not None}
 
 
+def orf_span(row):
+    """The stretch of genome an ORF was translated from, in coordinates a reader can check.
+
+    The record keeps the two numbers the caller works in: `nt_start`, a 0-based offset into
+    the strand the ORF was read on, and `length_aa`, a residue count. Printed as they stand
+    -- "nt 21,535 · 1,282 aa" -- they are correct and unverifiable, because neither is in the
+    form the genome is published in. The same two numbers as a 1-based inclusive range are,
+    and the check then costs a reader nothing: the spike row reads 21,536-25,381 against an
+    annotated CDS of 21,563-25,384. Both differences are explainable and worth being able to
+    see. The end is 3 short because the annotation counts the stop codon and the protein that
+    was scored does not. The start is 27 nucleotides early because this caller takes the
+    first ATG after the preceding stop, and here that is nine codons upstream of the one
+    SARS-CoV-2 actually uses -- the cost of calling genes with a regex, already stated in the
+    stage's limitations, and now visible in the table rather than only described under it.
+    The other five rows land on the annotated start exactly.
+
+    A range also makes one relationship legible that two separate starts did not: rows 2 and
+    3 read 266-13,480 and 13,768-21,552, which is the ribosomal frameshift splitting one
+    polyprotein into two ORFs, the single largest thing six-frame calling gets wrong here.
+
+    `frame` is dropped on the way through, for two reasons. It is `nt_start % 3` on every row
+    of every record, so it adds nothing to a position that is now printed in full. And
+    written against the strand it rendered as "+0", "+1", "+2", which reads as the standard
+    +1/+2/+3 frame notation and is not it -- so a third of the rows advertised a reading
+    frame that does not exist in the notation they appeared to be using.
+
+    Minus-strand ORFs keep the offset they were called at, which runs along the reverse
+    complement rather than the genome, and say so rather than pretending to a genome
+    coordinate. Converting one needs the length of its own segment, which a multi-segment
+    record does not carry per segment. No row on the minus strand has ever scored, and only
+    scored rows reach this table, so this branch is a guard rather than a display.
+    """
+    start, span_nt = row["nt_start"], row["length_aa"] * 3
+    where = f'nt {start + 1:,}&ndash;{start + span_nt:,}'
+    if row["strand"] != "+":
+        where += ' on the reverse strand'
+    return f'{row["length_aa"]:,} aa &middot; {where}'
+
+
 def candidate_matrix(case):
     """Every ORF stage 1 ranked, with the score split into what each weight paid it.
 
@@ -698,8 +737,7 @@ def candidate_matrix(case):
 
     body = []
     for row in rows:
-        where = (f'{esc(row["strand"])}{esc(row["frame"])} · nt {row["nt_start"]:,} '
-                 f'· {row["length_aa"]:,} aa')
+        where = orf_span(row)
         cells = term_cells(row["features"], row["terms"], ceiling,
                            row.get("conservation_scale"))
         route = row.get("identification_route")
@@ -739,10 +777,11 @@ def candidate_matrix(case):
     return f"""
   <div class="cmxscroll" tabindex="0" role="region" aria-label="The ranked ORFs and their scores">
   <table class="cmx">
-    <caption>Every ORF stage 1 identified{kept}, highest composite score first. Each cell is the points
-      that weight paid, with the measurement it was computed from underneath; the shading is
-      the share of that column's maximum. Nothing here is fitted — the five weights were
-      fixed before the run.</caption>
+    <caption>Every ORF stage 1 identified{kept}, highest composite score first. Under each name are the
+      relative it matched and the stretch of genome it was translated from, in the genome's
+      own numbering. Each cell is the points that weight paid, with the measurement it was
+      computed from underneath; the shading is the share of that column's maximum. Nothing
+      here is fitted — the five weights were fixed before the run.</caption>
     <thead>
       <tr>
         <th scope="col" class="rk">#</th>
