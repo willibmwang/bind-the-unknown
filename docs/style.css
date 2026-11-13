@@ -1003,3 +1003,26 @@ a{color:var(--accent)}
 @media (max-width:760px){
   .xmap svg{min-width:680px}
 }
+
+/* The schematic biology, and the band numbering. Added so a reader who has never seen the
+   platform can tell what KIND of thing each band holds before reading a word of it: a virus,
+   a genome, a fold, a fold with a pocket, two helices wound together, a ribbon.
+
+   Every shape here is schematic and none is drawn from coordinates -- the caption says so in
+   as many words, because this page's whole argument is that a measured structure and a drawn
+   one are different objects, and a figure that blurred them here would undercut the figures
+   below that are measured. They are drawn in the accent at low opacity for that reason: they
+   read as diagram, not as data. */
+.xmap .xart{fill:var(--accent);fill-opacity:.17;stroke:var(--accent);stroke-opacity:.5;
+  stroke-width:1.2}
+.xmap .xarts{stroke:var(--accent);stroke-opacity:.62;stroke-width:1.6;fill:none;
+  stroke-linecap:round}
+/* The pocket in the receptor-binding shape is a hole, so it is filled with the page itself
+   rather than a grey that would read as a second material. */
+.xmap .xcut{fill:var(--bg)}
+.xmap .xgen{stroke:var(--accent);stroke-opacity:.55;stroke-width:1.8;fill:none}
+/* The band numbers. A filled disc rather than an outline, because at 11px an outlined digit
+   on a busy figure reads as a bullet rather than as a step. */
+.xmap .xs1{fill:var(--accent)}
+.xmap .xsn{font-size:11.5px;font-weight:650;fill:var(--on-accent)}
+.xmap .xrule{stroke:var(--rule)}
