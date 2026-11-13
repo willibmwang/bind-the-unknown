@@ -950,3 +950,56 @@ a{color:var(--accent)}
 .ledger .v{display:block;font-family:var(--mono);font-size:17px;font-weight:500;margin-top:5px;
   font-variant-numeric:tabular-nums}
 .ledger .u{display:block;font-size:12.5px;color:var(--fg-3);margin-top:3px;line-height:1.35}
+
+/* ================================================================ the region map
+   How a span annotated on another virus reaches this genome, drawn because the four
+   disclosures it replaces each held one link of a single chain and a reader had to open all
+   four and hold them in their head to see it. Four lanes, top to bottom, in the order the
+   pipeline runs: the ORFs this genome gives, the relative's entry where the regions are
+   written down, those regions carried back here through the alignment's matched blocks, and
+   what is left to fold.
+
+   Everything is `currentColor` except the one hue that carries meaning: `--brand` marks what
+   the pipeline is tracking -- the chain, its regions, and the units that reach the folder --
+   so a reader scanning the figure can follow one colour down four lanes. Greyed marks are
+   what is deliberately not read or not usable. No second accent is introduced, because a
+   second hue here would have to mean something and nothing else in the figure needs saying
+   in colour. */
+.xmap{margin:24px 0 28px}
+.xmap-scroll{overflow-x:auto;overflow-y:hidden}
+/* A floor under the drawing, so the 10.5px labels inside the bars do not shrink below
+   legibility on a phone. Under that width the figure scrolls sideways, which is what the
+   wide tables on this page already do. */
+.xmap svg{display:block;width:100%;min-width:720px;height:auto;color:var(--fg)}
+.xmap .ac{fill:var(--accent)}
+.xmap .acs{stroke:var(--accent)}
+/* The lane labels, the small print under them, and the text inside a bar. */
+.xmap .xl{font-size:13px;font-weight:600;fill:currentColor}
+.xmap .xu{font-family:var(--mono);font-size:10.5px;fill:var(--fg-3)}
+.xmap .xt{font-family:var(--mono);font-size:10.5px;fill:var(--fg-2)}
+.xmap .xk{font-size:12.5px;fill:var(--fg-2)}
+.xmap .xkb{font-weight:650;fill:var(--fg)}
+.xmap .xn{font-size:11px;font-weight:600;fill:var(--on-accent)}
+.xmap .xnn{fill:var(--fg-3);font-weight:500}
+.xmap .xfn{fill:var(--fg)}
+/* The bars: a track is the full extent of something, a `.xc` box is the part of it this
+   pipeline is holding on to. */
+.xmap .xb{fill:currentColor;fill-opacity:.055;stroke:var(--rule)}
+.xmap .xc{fill:none;stroke-width:1.6}
+.xmap .xr{rx:3}
+.xmap .xrn{fill:currentColor;fill-opacity:.1;stroke:var(--rule);stroke-dasharray:3 3}
+/* The matched blocks. Tapered rather than vertical, because the taper IS the claim: the two
+   ends of one span do not move by the same amount. */
+.xmap .xp{fill:var(--accent);fill-opacity:.14;stroke:var(--accent);stroke-opacity:.45}
+.xmap .xpg{fill-opacity:.07}
+.xmap .xg{font-family:var(--mono);font-size:10px;fill:var(--fg-3);text-anchor:middle}
+.xmap .xd{stroke:var(--fg-3);stroke-width:1.4;stroke-dasharray:2 2}
+/* What is on the entry and never read. Ticks rather than boxes: they are numerous, short and
+   not spans anyone folds, which is the whole reason they are excluded. */
+.xmap .xx rect{fill:currentColor;fill-opacity:.22}
+.xmap .xa{stroke:currentColor;stroke-width:1.5;color:var(--fg-3)}
+.xmap .xf{fill:var(--accent);fill-opacity:.12;stroke-width:1.4}
+.xmap .xfx{fill:currentColor;fill-opacity:.05;stroke:var(--rule);stroke-dasharray:3 3}
+@media (max-width:760px){
+  .xmap svg{min-width:680px}
+}

@@ -391,84 +391,137 @@
     <b>{{domain_rescued}}</b> of <b>{{domain_over}}</b> have at least one region short enough
     to fold.</p>
 
-    <div class="discs">
-      <details class="disc">
-        <summary>Where did each chain's sequence come from?<em></em></summary>
-        <div class="disc-b">
-          <p>Boundaries are annotated on the relative, not here, and slicing this genome at
-          them fails silently: SARS-CoV's main protease starts at residue 3241 and
-          SARS-CoV-2's at 3264, so the same cut returns 306 residues — the right length, 23
-          residues into the wrong window.</p>
-          <p>Each chain is aligned instead, against every called ORF rather than only the one
-          it matched, so the span comes back in this genome's own numbering.</p>
-        </div>
-      </details>
-      <details class="disc">
-        <summary>What counts as a region here?<em>and what is left out</em></summary>
-        <div class="disc-b">
-          <p>Nine kinds of annotation on the relative's entry are read, named rather than
-          inferred:
-          <b>Domain</b>, <b>Region</b>, <b>Motif</b>, <b>Zinc finger</b>, <b>DNA binding</b>,
-          <b>Coiled coil</b>, <b>Repeat</b>, <b>Topological domain</b> and
-          <b>Transmembrane</b>. Nothing else is read. The list is deliberately a whitelist, so
-          an annotation type nobody considered is excluded by default rather than
-          admitted.</p>
-          <p><b>Region</b> is on it because UniProt files the spike's receptor-binding domain
-          as a Region and not a Domain. Leaving the type out would lose the best-known
-          antiviral target in the set.</p>
-          <p>What is left out, and why. Secondary structure is excluded because one replicase
-          entry carries <b>191</b> beta strands, 171 helices and 44 turns against 36 domains
-          and 21 regions, and a six-residue strand is not a piece of protein anyone folds or
-          binds. Single-residue observations, such as natural variants and mutagenesis, are
-          excluded because they are facts about residues rather than spans. Modifications are
-          excluded because a glycosylation site is something done to a span, not a span itself.
-          Signal peptides are excluded because they are cut off before the protein exists to be
-          bound.</p>
-          <p>Active sites, ligand-binding sites and cleavage sites are read too, but kept
-          apart and never offered as something to fold. A two-residue site is a place to aim
-          at, and is far too short to fold.</p>
-        </div>
-      </details>
-      <details class="disc">
-        <summary>How a span on the relative becomes a span here<em>and when nothing is
-          returned</em></summary>
-        <div class="disc-b">
-          <p>The alignment that found the chain is kept, not just the window it pointed at.
-          Each end of each annotated region is walked through its matched blocks into this
-          genome's own numbering, so an insertion or deletion between the two species moves
-          one end without dragging the other.</p>
-          <p>A position with no counterpart returns nothing, rather than its nearest
-          neighbour. Where one species has residues the other deleted, the region's edge is
-          not in this genome at all. Reporting it at the wrong residue would be worse than
-          reporting it as unmappable, because only the second can be seen to be wrong. An end
-          that lands in such a gap walks inward until it finds a residue, so the span returned
-          is always inside what the curator annotated.</p>
-          <p>A region whose whole span falls outside the alignment gets no coordinates at all
-          and says so. That does not mean the region is absent here, only that this alignment
-          never reached it.</p>
-        </div>
-      </details>
-      <details class="disc">
-        <summary>Which annotated region does a row offer first?<em>and what the ordering does
-          not change</em></summary>
-        <div class="disc-b">
-          <p>Two things decide it, and the panel says which did the work. The first is how
-          many residues the curators marked as active, ligand-binding or cleavage sites fall
-          inside the region. That settles it for enzymes: the polymerase's catalytic domain
-          holds six, against two for the domain beside it. The second, used only where the
-          first does not separate them, is a list of words we chose
-          (<i>receptor-binding</i>, <i>catalytic</i>, <i>interface</i> and about twenty more),
-          matched against the description.</p>
-          <p>That list orders rows and nothing else. It refuses no region and changes no rank.
-          Regions under <b>{{domain_minimum_aa}}</b> residues are not folded at all, since
-          coordinates for a fragment that short describe nothing.</p>
-          <p>{{domain_richest_chain}} is the clearest case: <b>{{domain_richest_whole}}</b>
-          residues whole, with <b>{{domain_richest_count}}</b> regions inside it that are not
-          — the first offered is <i>{{domain_richest_best}}</i>, at
-          <b>{{domain_richest_best_aa}}</b> residues.</p>
-        </div>
-      </details>
-    </div>
+    <figure class="xmap">
+      <div class="xmap-scroll" tabindex="0" role="region"
+        aria-label="How an annotated region reaches this genome">
+      <svg viewBox="0 0 920 436" role="img" aria-label="Four lanes, top to bottom. The genome
+        gives unnamed ORFs in six frames. The chain is found by aligning the relative's
+        sequence against every ORF, not by cutting this genome at the relative's residue
+        numbers. The relative's entry is where the annotated regions are written down, in its
+        own numbering, alongside features that are never read. The alignment's matched blocks
+        carry each region's two ends across independently, so one end can move further than
+        the other and a region the alignment never reached arrives with no counterpart. What
+        is left, and long enough, is folded.">
+
+        <!-- lane 1: what this genome gives us, before anything is named -->
+        <text class="xl" x="132" y="34" text-anchor="end">Proteins in</text>
+        <text class="xl" x="132" y="49" text-anchor="end">the ORFs</text>
+        <rect class="xb" x="150" y="24" width="430" height="17" rx="4"/>
+        <rect class="xb" x="420" y="46" width="370" height="17" rx="4"/>
+        <rect class="xb" x="670" y="68" width="230" height="17" rx="4"/>
+        <text class="xt" x="158" y="37">ORF 1a</text>
+        <text class="xt" x="428" y="59">ORF 1b</text>
+        <text class="xt" x="678" y="81">ORF S</text>
+
+        <line class="xa" x1="300" y1="96" x2="300" y2="126" marker-end="url(#xar)"/>
+        <text class="xk" x="316" y="115">aligned against <tspan class="xkb">every</tspan> ORF</text>
+
+        <!-- lane 2: the relative's entry, the only place the regions exist -->
+        <text class="xl" x="132" y="156" text-anchor="end">The relative's</text>
+        <text class="xl" x="132" y="171" text-anchor="end">entry</text>
+        <text class="xt" x="300" y="136">the chain the hit named</text>
+        <rect class="xb" x="150" y="146" width="750" height="30" rx="5"/>
+        <rect class="xc acs" x="296" y="146" width="438" height="30" rx="5"/>
+        <rect class="xr ac" x="310" y="153" width="100" height="16"/>
+        <rect class="xr ac" x="430" y="153" width="150" height="16"/>
+        <rect class="xr ac" x="604" y="153" width="116" height="16"/>
+        <text class="xn" x="318" y="165">Domain</text>
+        <text class="xn" x="438" y="165">Region &middot; RBD</text>
+        <text class="xn" x="612" y="165">Coiled coil</text>
+        <g class="xx">
+          <rect x="166" y="182" width="4" height="7" rx="1"/>
+          <rect x="192" y="182" width="4" height="7" rx="1"/>
+          <rect x="228" y="182" width="4" height="7" rx="1"/>
+          <rect x="264" y="182" width="4" height="7" rx="1"/>
+          <rect x="352" y="182" width="4" height="7" rx="1"/>
+          <rect x="408" y="182" width="4" height="7" rx="1"/>
+          <rect x="488" y="182" width="4" height="7" rx="1"/>
+          <rect x="556" y="182" width="4" height="7" rx="1"/>
+          <rect x="640" y="182" width="4" height="7" rx="1"/>
+          <rect x="708" y="182" width="4" height="7" rx="1"/>
+          <rect x="792" y="182" width="4" height="7" rx="1"/>
+          <rect x="856" y="182" width="4" height="7" rx="1"/>
+        </g>
+        <text class="xu" x="150" y="204">never read</text>
+
+        <!-- the matched blocks, tapered because that taper is the claim -->
+        <text class="xl" x="132" y="242" text-anchor="end">The alignment's</text>
+        <text class="xl" x="132" y="257" text-anchor="end">matched blocks</text>
+        <text class="xu" x="132" y="274" text-anchor="end">each end on its own</text>
+        <polygon class="xp" points="310,214 410,214 376,286 276,286"/>
+        <polygon class="xp" points="430,214 580,214 550,286 400,286"/>
+        <polygon class="xp xpg" points="604,214 720,214 692,286 576,286"/>
+
+        <!-- lane 3: the same regions, now in this genome's own numbering -->
+        <text class="xl" x="132" y="306" text-anchor="end">Carried into</text>
+        <text class="xl" x="132" y="321" text-anchor="end">this genome</text>
+        <text class="xu" x="132" y="338" text-anchor="end">the same chain</text>
+        <rect class="xb" x="150" y="296" width="750" height="30" rx="5"/>
+        <rect class="xc acs" x="276" y="296" width="416" height="30" rx="5"/>
+        <rect class="xr ac" x="276" y="303" width="100" height="16"/>
+        <rect class="xr ac" x="400" y="303" width="150" height="16"/>
+        <rect class="xr xrn" x="576" y="303" width="116" height="16"/>
+        <text class="xn" x="284" y="315">Domain</text>
+        <text class="xn" x="408" y="315">Region &middot; RBD</text>
+        <text class="xn xnn" x="584" y="315">no counterpart</text>
+
+        <line class="xa" x1="330" y1="336" x2="330" y2="364" marker-end="url(#xar)"/>
+        <text class="xk" x="346" y="354">sent to the folder</text>
+
+        <!-- lane 4: the units that actually reach ESMFold -->
+        <text class="xl" x="132" y="396" text-anchor="end">Folded</text>
+        <rect class="xf acs" x="150" y="378" width="176" height="36" rx="8"/>
+        <text class="xn xfn" x="164" y="394">the whole chain</text>
+        <text class="xu" x="164" y="407">if it fits the ceiling</text>
+        <rect class="xf acs" x="340" y="378" width="176" height="36" rx="8"/>
+        <text class="xn xfn" x="354" y="394">Domain</text>
+        <text class="xu" x="354" y="407">mapped, long enough</text>
+        <rect class="xf acs" x="530" y="378" width="176" height="36" rx="8"/>
+        <text class="xn xfn" x="544" y="394">Region &middot; RBD</text>
+        <text class="xu" x="544" y="407">mapped, long enough</text>
+        <rect class="xf xfx" x="720" y="378" width="180" height="36" rx="8"/>
+        <text class="xn xnn" x="734" y="394">under {{domain_minimum_aa}} aa</text>
+        <text class="xu" x="734" y="407">offered, not folded</text>
+
+        <defs>
+          <marker id="xar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7"
+            markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+      </svg>
+      </div>
+      <figcaption><b>How a region annotated on another virus becomes a span this pipeline can
+        fold.</b> Cutting this genome at the relative's residue numbers fails quietly &mdash;
+        SARS-CoV's main protease starts at 3241 and SARS-CoV-2's at 3264, so the same cut
+        returns 306 residues, the right length, 23 residues into the wrong window. Each chain
+        is aligned instead, against every called ORF rather than only the one that matched it.
+        The alignment is then kept, not just the window it pointed at, which is what lets each
+        end of each region be walked across on its own: the blocks above are drawn tapering
+        because an insertion between the two species moves one end and not the other. An end
+        landing in a gap walks inward, so the span returned is always inside what the curator
+        annotated, and a region the alignment never reached returns nothing rather than its
+        nearest neighbour &mdash; only the second can be seen to be wrong.</figcaption>
+      <p class="cap"><b>Nine kinds of annotation are read</b>, named rather than inferred:
+      <b>Domain</b>, <b>Region</b>, <b>Motif</b>, <b>Zinc finger</b>, <b>DNA binding</b>,
+      <b>Coiled coil</b>, <b>Repeat</b>, <b>Topological domain</b> and <b>Transmembrane</b>.
+      The list is a whitelist, so a type nobody considered is excluded by default rather than
+      admitted, and <b>Region</b> is on it because UniProt files the spike's receptor-binding
+      domain as a Region and not a Domain. The ticks marked <i>never read</i> are secondary
+      structure, single-residue observations and signal peptides: one replicase entry carries
+      <b>191</b> beta strands against 36 domains, a six-residue strand is not a piece of
+      protein anyone folds, a variant is a fact about a residue rather than a span, and a
+      signal peptide is cut off before the protein exists to be bound. Active, ligand-binding
+      and cleavage sites are read too, but kept apart and never offered as something to fold
+      &mdash; a two-residue site is a place to aim at, not a thing to fold.</p>
+      <p class="cap"><b>Which region a row offers first</b> is decided by how many of those
+      curated sites fall inside it, and only where that does not separate two regions by a
+      list of words we chose. It orders rows and nothing else: it refuses no region and
+      changes no rank. {{domain_richest_chain}} is the clearest case here &mdash;
+      <b>{{domain_richest_whole}}</b> residues whole, <b>{{domain_richest_count}}</b> regions
+      inside it that are not, and the first offered is <i>{{domain_richest_best}}</i> at
+      <b>{{domain_richest_best_aa}}</b> residues.</p>
+    </figure>
     <!--FOLD-LANE-->
   </div>
 
