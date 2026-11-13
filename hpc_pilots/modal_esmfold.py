@@ -75,16 +75,27 @@ image = (
 cache = modal.Volume.from_name("esmfold-weights", create_if_missing=True)
 app = modal.App("esmfold")
 
-SECRETS = ([modal.Secret.from_name(os.environ["ESMFOLD_MODAL_SECRET"])]
-           if os.environ.get("ESMFOLD_MODAL_SECRET") else [])
-"""The shared secret holding `ESMFOLD_TOKEN`, when one has been created.
+SECRETS = [modal.Secret.from_name("esmfold-auth")]
+"""The shared secret holding `ESMFOLD_TOKEN`. Attached unconditionally, and that is the
+whole point.
 
-Optional on purpose. A deployment with no secret serves anyone who has the URL, which is what
-a first bring-up produces and is fine while the only caller is a test; a deployment with one
-refuses every request that does not carry the token. Making it optional means the lock can be
-added later without a code change, and means this file does not fail to deploy for a secret
-that does not exist yet. Set `ESMFOLD_MODAL_SECRET=esmfold-auth` at deploy time to switch it
-on. The token itself is never in this repository.
+**This was a crash loop, and the shape of the mistake is worth keeping.** It used to read
+`[Secret.from_name(...)] if os.environ.get("ESMFOLD_MODAL_SECRET") else []`, so the secret
+was attached only when a variable was set at deploy time. That is a Modal object graph that
+depends on the local environment -- and the container re-imports this module WITHOUT that
+variable, so the deploy registered three objects (secret, image, volume) while the container
+computed two. Modal refuses that mismatch at startup, every container, forever:
+
+    Function has 2 dependencies but container got 3 object ids.
+
+The lesson is general: a Modal object must never be created under a condition that can differ
+between the machine that deploys and the container that runs. Optionality has to live in the
+VALUE, not in the graph. So the secret is always attached, and whether it is enforced is
+decided inside the handler by whether `ESMFOLD_TOKEN` has a value.
+
+A deployment without this secret now fails at deploy time, with a message naming the missing
+secret. That is strictly better than a crash loop: it is loud, it happens on the machine of
+the person who can fix it, and it happens before any container starts.
 """
 
 
@@ -95,6 +106,12 @@ on. The token itself is never in this repository.
     secrets=SECRETS,
     timeout=TIMEOUT,
     scaledown_window=SCALEDOWN,
+    # A hard ceiling on how many H100s this can hold at once. Without it the class
+    # autoscales on demand, so N genomes folding in parallel can mean N warm GPUs, each
+    # cold-starting an 11 GB model -- an unbounded bill discovered after the fact rather
+    # than a budget decided in advance. Three matches the three genome workers; a fourth
+    # container would have nothing to serve.
+    max_containers=3,
 )
 class Folder:
     """One warm ESMFold per container."""
@@ -164,16 +181,40 @@ class Folder:
         async def app(scope, receive, send):
             if scope["type"] != "http":                       # pragma: no cover
                 return
+            # A GET returns a FINGERPRINT of the configured token: the first twelve hex
+            # characters of its SHA-256, and nothing else. It exists because diagnosing "the
+            # client and the server disagree about a shared secret" otherwise means printing
+            # one of them, and a credential that reaches a terminal or a transcript is a
+            # credential to re-mint. A 12-hex prefix of a hash over a 43-character urlsafe
+            # token identifies the value for comparison and does not reveal it.
+            if scope.get("method") == "GET":
+                import hashlib
+                tok = (os.environ.get("ESMFOLD_TOKEN") or "").strip()
+                body = (f"auth={'on' if tok else 'off'} "
+                        f"fingerprint={hashlib.sha256(tok.encode()).hexdigest()[:12] if tok else '-'}")
+                payload = body.encode()
+                await send({"type": "http.response.start", "status": 200,
+                            "headers": [(b"content-type", b"text/plain; charset=utf-8"),
+                                        (b"content-length", str(len(payload)).encode())]})
+                await send({"type": "http.response.body", "body": payload})
+                return
             body, more = b"", True
             while more:
                 message = await receive()
                 body += message.get("body", b"")
                 more = message.get("more_body", False)
-            wanted = os.environ.get("ESMFOLD_TOKEN")
+            # Stripped on both sides. A secret created through a shell picks up a trailing
+            # newline embarrassingly easily -- `echo` adds one, and the value then never
+            # matches a cleanly-sent header while looking identical in any UI that shows it.
+            # The failure is a 401 that the fold lane records as a refusal, so an invisible
+            # newline would become a run of false absences. Comparison stays exact after the
+            # strip; this tolerates whitespace, not a wrong token.
+            wanted = (os.environ.get("ESMFOLD_TOKEN") or "").strip()
             if wanted:
                 headers = {k.decode().lower(): v.decode()
                            for k, v in scope.get("headers") or ()}
-                if headers.get("authorization") != f"Bearer {wanted}":
+                offered = (headers.get("authorization") or "").strip()
+                if offered.removeprefix("Bearer").strip() != wanted:
                     status, text = 401, "missing or wrong bearer token"
                 else:
                     status, text = self._fold(body)

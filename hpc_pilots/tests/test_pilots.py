@@ -5717,6 +5717,67 @@ def test_the_evidence_gate_drops_only_what_pays_nothing_for_being_a_target():
         "a mature chain cut out of it cleared the gate"
 
 
+def test_a_run_that_broke_is_not_recorded_as_a_pathogen_that_cannot_be_folded():
+    """The three absences that are results, against the two that are failures of the run.
+
+    On 13 Nov 2026 a module was briefly broken while a 47-genome sweep was running, and
+    Human cytomegalovirus went to disk with sixteen refused folds, nineteen chains with no
+    coordinates and `NameError: name '_fallback_for' is not defined` in its stage-3 error.
+    Separately, a 45-second timeout meant for one host was applied to another whose cold
+    start is thirty seconds, and four more genomes recorded `TimeoutError` the same way.
+
+    Both are complete, plausible records of a pipeline that did not run. Nothing downstream
+    could tell them from a pathogen whose chains genuinely will not fold: the coverage
+    counts, the runs matrix and every later stage read them as biology. This is the test
+    that keeps the two apart.
+    """
+    from hpc_pilots.chain import fold_integrity
+
+    def case(*absences, stage_error=None):
+        units = [{"target_name": f"unit {i}", "absence": a}
+                 for i, a in enumerate(absences)]
+        return {"stages": [{"tool": "structures.folded",
+                            "output": {"error": stage_error}}],
+                "folded": units[0] if units else None,
+                "folded_also": units[1:]}
+
+    # Results. A ceiling is a real limit on the lane and a real zero for the chain; a host
+    # that refused THIS sequence has answered the question; an unreadable response is a fact
+    # about what came back. None of them means the run failed.
+    for reason in ("sequence_too_long", "endpoint_refused_sequence", "unparseable_response"):
+        verdict = fold_integrity(case({"reason": reason, "detail": "..."}))
+        assert verdict["trustworthy"] is True, reason
+        assert verdict["infrastructure_failures"] == 0
+
+    # Failures of the run. A timeout and a 5xx are statements about reachability, and the
+    # record's own note says so -- "not a statement about the target".
+    outage = fold_integrity(case({"reason": "endpoint_unavailable",
+                                  "detail": "TimeoutError: The read operation timed out"}))
+    assert outage["trustworthy"] is False
+    assert "did not finish" in outage["means"]
+
+    # A Python fault has no reason code at all: it arrives as the exception's own text, in
+    # the stage error or in an absence, and must be caught on either path.
+    assert fold_integrity(case(stage_error="NameError: name '_x' is not defined")
+                          )["trustworthy"] is False
+    assert fold_integrity(case("RuntimeError: boom"))["trustworthy"] is False
+
+    # A clean run with no absences at all is trustworthy, and says why in words a reader of
+    # the record can check against the rows.
+    clean = fold_integrity(case())
+    assert clean["trustworthy"] is True and clean["infrastructure_failures"] == 0
+    assert "are results" in clean["means"]
+
+    # And the whole point: a broken run is never written. `one` raises instead, so a batch
+    # runner retries the genome rather than banking a record of an outage.
+    import inspect
+
+    from hpc_pilots import chain
+    source = inspect.getsource(chain.one)
+    assert "fold_integrity" in source and "raise RuntimeError" in source, (
+        "one() must refuse to write a run whose folds failed for infrastructure reasons")
+
+
 def test_folding_is_offered_to_candidates_nothing_identified():
     """The one stage that needs no relative used to refuse to look at a protein without one.
 

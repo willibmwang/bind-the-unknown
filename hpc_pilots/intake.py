@@ -74,6 +74,7 @@ claim.
 """
 import concurrent.futures
 import json
+import os
 import re
 import time
 import urllib.error
@@ -83,6 +84,26 @@ import urllib.request
 from .common import ROOT, content_digest, provenance, write_json
 
 EFETCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+
+NCBI_API_KEY = (os.environ.get("NCBI_API_KEY") or "").strip() or None
+"""An NCBI E-utilities key, which raises the shared rate limit from 3 requests a second to 10.
+
+It is read from the environment and never stored here. The limit is the reason it matters:
+every NCBI call this module makes counts against one per-source budget, so the ceiling is not
+per-process and running genomes in parallel divides it rather than multiplying it. Without a
+key, two concurrent genome runs put the aggregate over three a second and NCBI answers the
+excess with 429 -- which this lane retries and, if the retries run out, records as an absence.
+A rate limit therefore does not look like a rate limit downstream; it looks like a protein
+nobody could fetch.
+
+Absent is supported and is the honest default for a clone with no key: the pacing below stays
+at the unauthenticated rate and the run stays sequential.
+"""
+
+
+def _ncbi(params):
+    """One E-utilities parameter dict with the key attached when there is one."""
+    return dict(params, api_key=NCBI_API_KEY) if NCBI_API_KEY else dict(params)
 BLAST = "https://www.ebi.ac.uk/Tools/services/rest/ncbiblast"
 
 # The standard genetic code, built rather than tabulated so the ordering is checkable.
@@ -145,8 +166,8 @@ def fetch_genome(accession):
     separately rather than concatenated: joining them would create reading frames across a
     junction that does not exist in any molecule, and those frames would be called as ORFs.
     """
-    query = urllib.parse.urlencode({"db": "nuccore", "id": accession,
-                                    "rettype": "fasta", "retmode": "text"})
+    query = urllib.parse.urlencode(_ncbi({"db": "nuccore", "id": accession,
+                                          "rettype": "fasta", "retmode": "text"}))
     text = _fetch(f"{EFETCH}?{query}", timeout=180).decode()
     records = fasta_records(text)
     if not records:
@@ -2055,8 +2076,8 @@ def lineages(taxids, chunk=200, cache=None):
         batch = missing[start:start + chunk]
         # POSTed, not in the URL. A few hundred ids exceeds what a GET query string carries
         # comfortably, and NCBI answers an over-long one with a 414 or silently truncates.
-        body = urllib.parse.urlencode({"db": "taxonomy", "id": ",".join(batch),
-                                       "retmode": "xml"}).encode()
+        body = urllib.parse.urlencode(_ncbi({"db": "taxonomy", "id": ",".join(batch),
+                                             "retmode": "xml"})).encode()
         # NCBI permits three requests a second without a key and answers a burst with 429.
         # Retried with backoff rather than failed, because a lineage fetch is thousands of
         # taxa and losing the run to one throttle is avoidable; the sleep between batches
@@ -2071,7 +2092,7 @@ def lineages(taxids, chunk=200, cache=None):
                 if error.code not in (429, 500, 502, 503) or attempt == 5:
                     raise
                 time.sleep(2 ** attempt)
-        time.sleep(0.4)
+        time.sleep(0.12 if NCBI_API_KEY else 0.4)
         for taxon in tree.findall("Taxon"):
             identifier = taxon.findtext("TaxId")
             ranks = {}

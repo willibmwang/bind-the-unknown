@@ -26,6 +26,7 @@ SASA backend). `candidates_in` equals `rows_out` in the record, and a test pins 
 registered tool dispatches, so a number in this record is the number that tool returns and not
 a second implementation of it. The chain is the composition, written down.
 """
+import os
 import re
 import time
 
@@ -1235,7 +1236,29 @@ MINIMUM_CHAIN_COVERAGE = 0.5
 # one annotated region at or under 400 residues (measured against UniProt on 2026-11-12). What
 # the ceiling still decides is which units reach the endpoint, which is a statement about
 # lengths rather than about chains.
-FOLD_CEILING = 400
+def _fold_ceiling():
+    """The longest whole chain this stage will offer the folding lane, from what that lane
+    can actually serve rather than from a constant written when it had one host.
+
+    **This was the bug that made the GPU invisible.** `folded_structure` learned to route a
+    long chain to a second host, and this stage never sent it one: it decided "inside the
+    ceiling" against a literal 400 and marked everything longer as over it, so HIV-1's gp120
+    at 492, its reverse transcriptase at 560 and p51 at 440 were all refused here, before the
+    routing could see them. Two ceilings, one of them stale, and the symptom was a GPU that
+    answered no requests while the records said three chains were over the ceiling.
+
+    So the number is asked of the lane. With no second host it is the public host's 400 and
+    nothing changes; with one it is what that host can return inside a request.
+    """
+    from .folded_structure import LONG_ENDPOINT, LONG_MAX_RESIDUES, MAX_RESIDUES
+
+    override = os.environ.get("FOLD_CEILING")
+    if override:
+        return int(override)
+    return LONG_MAX_RESIDUES if LONG_ENDPOINT else MAX_RESIDUES
+
+
+FOLD_CEILING = _fold_ceiling()
 
 # Annotated functional regions folded per chain whose whole sequence is over the ceiling, in
 # the relevance order `domain_inventory` establishes. STATED as a budget, not fitted: nothing
@@ -2979,6 +3002,80 @@ def _predicted_inventory(payload, stem=None):
         return None
 
 
+# Absence reasons that are facts about THIS TARGET, and may be recorded as results. A
+# sequence longer than the host will take is a real limit on the lane and a real zero for the
+# chain; a response the parser could not read is a fact about what came back.
+DECLARED_ABSENCES = frozenset({"sequence_too_long", "endpoint_refused_sequence",
+                               "unparseable_response"})
+
+# And the substrings that mean a Python-level fault reached the absence field rather than a
+# refusal from a host. `endpoint_unavailable` already covers transport, but a bug inside the
+# fold path is reported as the exception's own text and has no reason code at all.
+CODE_FAULTS = ("Error", "Exception", "Traceback", "not defined")
+
+
+def fold_integrity(case):
+    """Whether this run's missing structures are results or failures, counted apart.
+
+    **Why this exists, dated 13 Nov 2026.** A session editing `folded_structure` left the
+    module briefly broken while a 47-genome sweep was running, and Human cytomegalovirus was
+    written to disk with sixteen refused folds, nineteen chains with no coordinates, and this
+    as its stage-3 error:
+
+        NameError: name '_fallback_for' is not defined
+
+    Nothing downstream could tell that from a pathogen whose chains genuinely cannot be
+    folded. The same afternoon, a 45-second timeout meant for one host was applied to another
+    whose cold start is thirty seconds, and four more genomes recorded `TimeoutError` in the
+    same field. Both produced records that are plausible, complete, and wrong, which is the
+    one failure this project cannot catch after the fact: every later stage, every count on
+    the page and every column of the runs matrix reads them as biology.
+
+    So an absence is classified rather than counted. A host that refused this sequence, or a
+    sequence over a declared ceiling, is a result. A timeout, a 5xx, a transport error or a
+    Python exception is a failure OF THE RUN, and a run with any of them is not a record of
+    what the pipeline found -- it is a record of a pipeline that did not finish.
+
+    Returns a block for the record. `trustworthy` is the field callers gate on.
+    """
+    failures = []
+    stages = {s.get("tool"): s for s in case.get("stages") or ()}
+    stage3 = (stages.get("structures.folded") or {}).get("output") or {}
+    error = stage3.get("error")
+    if error and any(mark in str(error) for mark in CODE_FAULTS):
+        failures.append({"where": "stage 3", "detail": str(error)[:200]})
+
+    def inspect(unit, where):
+        absence = (unit or {}).get("absence")
+        if not absence:
+            return
+        if isinstance(absence, str):
+            if any(mark in absence for mark in CODE_FAULTS):
+                failures.append({"where": where, "detail": absence[:200]})
+            return
+        reason = absence.get("reason")
+        if reason not in DECLARED_ABSENCES:
+            failures.append({"where": where, "reason": reason,
+                             "detail": str(absence.get("detail"))[:200]})
+
+    inspect(case.get("folded"), "primary fold")
+    for unit in case.get("folded_also") or ():
+        inspect(unit, unit.get("target_name") or "fold unit")
+
+    return {
+        "trustworthy": not failures,
+        "infrastructure_failures": len(failures),
+        "failures": failures[:12],
+        "means": ("every missing structure on this run is a declared refusal -- a sequence "
+                  "over a ceiling, or a host that refused this sequence -- so the absences "
+                  "are results" if not failures else
+                  "this run did not finish: at least one structure is missing because the "
+                  "fold path failed, not because the target could not be folded. The "
+                  "coverage figures below understate what this pipeline reaches and must "
+                  "not be read as a property of the pathogen"),
+    }
+
+
 def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
         cases=((None, "identified through its own curated entries"),
                (HOLDOUT, "the pathogen deleted from the reference"))):
@@ -3136,8 +3233,21 @@ def one(accession, pathogen=None, holdout=None, top=12, replicates=5,
                                  else "nothing held out of the reference"),
                  evidence_top=evidence_top)
     case["pathogen"] = label
+    # Classified before the record is written, and on the record whether it passes or not: a
+    # run that did not finish must say so in the file, not only in the exception.
+    case["fold_integrity"] = fold_integrity(case)
     if record:
         stem = re.sub(r"[^A-Za-z0-9]+", "_", accession.split(",")[0]).strip("_")
+        if not case["fold_integrity"]["trustworthy"]:
+            # Refused rather than written. A batch runner sees a non-zero exit and retries
+            # the genome; the alternative is a plausible record of a pipeline that broke,
+            # which is what put a NameError on disk as nineteen unfoldable chains.
+            raise RuntimeError(
+                f"{label}: refusing to write a record whose folds failed for infrastructure "
+                f"reasons rather than declared ones -- "
+                f"{case['fold_integrity']['infrastructure_failures']} failure(s), first: "
+                f"{(case['fold_integrity']['failures'] or [{}])[0].get('detail')}. "
+                f"Re-run this genome; nothing was written.")
         write_json(ROOT / f"runs/onset_chain_{stem}.json", case)
         # `one` records a single case rather than the two `run` compares, so it is handed
         # that case directly instead of being left to pick one out of a `cases` list.

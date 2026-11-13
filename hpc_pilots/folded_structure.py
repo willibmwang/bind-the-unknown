@@ -169,6 +169,19 @@ RETRIES = 2
 rather than a malformed request, and more than one would push the declared worst case past what
 a wall budget can sensibly admit."""
 
+FIRST_HOST_ATTEMPTS = 1
+"""Attempts against the public host before falling back, when a second host is configured.
+
+The retry in `RETRIES` exists to absorb a host that is flaky. A 504 on a novel sequence is not
+flakiness -- it is the gateway cutting a fold that was never going to finish inside 30 s, and
+asking again takes another 29 seconds to learn the same thing. Across a twelve-chain shortlist
+that is six minutes spent re-confirming a no. When there is somewhere else to go, going there
+is both faster and far more likely to produce a structure than repeating the question.
+
+With no second host configured this is not consulted and `RETRIES` stands, so nothing about
+single-host behaviour changes: the retry still absorbs a genuine blip exactly as before.
+"""
+
 RETRY_PAUSE = 3.0
 """Backoff between attempts, and the inter-request pause this module owes a free host."""
 
@@ -200,7 +213,7 @@ that a POST cannot follow. So this is a WALL-CLOCK ceiling wearing a length's cl
 raising it without making the host faster converts a local refusal into a lost fold. nsp3 at
 1,922 residues stays above it and keeps the domain route."""
 
-LONG_TOKEN = os.environ.get("ESMFOLD_LONG_TOKEN")
+LONG_TOKEN = (os.environ.get("ESMFOLD_LONG_TOKEN") or "").strip() or None
 """Bearer token for the second host, when it is deployed behind one. Absent is allowed so the
 lane works against an open deployment, which is what a first bring-up produces."""
 
@@ -221,6 +234,68 @@ def route(length):
     return None, (f"{length} residues is over the public host's {MAX_RESIDUES}"
                   + (f" and over the second host's {LONG_MAX_RESIDUES}" if LONG_ENDPOINT
                      else " and no second host is configured"))
+
+
+def fallback_for(endpoint, length):
+    """Where to go when `endpoint` did not answer, or None if there is nowhere.
+
+    **Routing on length alone was sending every novel sequence to the one host that cannot
+    fold it.** Measured against api.esmatlas.com on 13 Nov 2026: the recorded main protease,
+    306 residues, came back in 1.26 s; a SHUFFLE of that same sequence -- same length, same
+    composition, same residues in a different order -- came back HTTP 504 after 29.25 s. The
+    only thing separating them is that one had been folded before. The host sits behind a
+    gateway that cuts near 30 s, and it is serving its cache inside that window while timing
+    out on anything it has to actually fold.
+
+    That turns `route`'s length test into the wrong question. A 306-residue novel chain is
+    "inside the public host's ceiling" and is therefore sent to a host that will spend 29
+    seconds and refuse it, while a GPU that folds 932 residues in 37 s is never asked --
+    because nothing in the path ever asked anything but the length. The lane exists for novel
+    targets, so this was not an edge case: it was the main case, recorded as an absence.
+
+    **A fallback rather than a reroute, and that distinction is the whole design.** Sending
+    everything to the GPU would have fixed the 504s and silently ended a reproduction: the
+    same weights on different hardware put the main protease 0.841 angstrom from
+    `runs/folded_structure/mpro_nsp5.pdb`, so the committed artifact would stop reproducing
+    byte for byte. So the public host is still asked FIRST for everything inside its ceiling.
+    A sequence it has cached still comes from it, at the recorded mean pLDDT of 62.57. Only a
+    sequence it could not answer for moves, which is exactly the set that used to be lost.
+
+    Returns None when the second host is the one that just failed, when none is configured,
+    or when the sequence is past what the second host can return inside one request -- in
+    that last case the structure is genuinely unavailable and the record says so.
+    """
+    if not LONG_ENDPOINT or endpoint == LONG_ENDPOINT:
+        return None
+    return LONG_ENDPOINT if length <= LONG_MAX_RESIDUES else None
+
+
+def _apply_route(payload, endpoint, why):
+    """Write the host onto the record: which one, why, whose citation, whose ceiling.
+
+    One function because those four fields have to move together. When a fold falls back to
+    the second host, a citation still crediting the Atlas would be a provenance error of the
+    worst kind -- crediting a host that never saw the sequence -- and `max_residues` left at
+    400 would describe a ceiling that did not apply to this call.
+    """
+    payload["endpoint"] = endpoint or ENDPOINT
+    payload["routed_because"] = why
+    payload["citation"] = (CITATION if endpoint in (None, ENDPOINT) else
+                           CITATION.replace(_served_by(ENDPOINT), _served_by(endpoint)))
+    payload["max_residues"] = (MAX_RESIDUES if endpoint in (None, ENDPOINT)
+                               else LONG_MAX_RESIDUES)
+
+
+def _is_ours(endpoint):
+    """Whether this host is a deployment of ours, and so may be sent our bearer token.
+
+    Defined as "not the public Atlas" rather than by listing our own hosts, because the cost
+    of the two mistakes is not symmetric: failing to send the token to our own host produces
+    a 401 that is loud and recorded, while sending it to somebody else's host leaks a
+    credential silently and permanently.
+    """
+    host = re.sub(r"^https?://([^/]+).*$", r"\1", endpoint or ENDPOINT)
+    return host != "api.esmatlas.com"
 
 
 def _served_by(endpoint=None):
@@ -328,14 +403,24 @@ def _attempt(body, endpoint=None):
     """One POST of the raw sequence. Never raises for an HTTP status; records it."""
     endpoint = endpoint or ENDPOINT
     headers = {"User-Agent": USER_AGENT, "Content-Type": "text/plain", "Accept": "*/*"}
-    # Only to the second host, and only when one is configured. Sending a bearer token to
-    # the public Atlas would be leaking a credential to a third party for no purpose.
-    if LONG_TOKEN and endpoint == LONG_ENDPOINT:
+    # To our own deployment, never to the public Atlas. Keying this on `LONG_ENDPOINT` was
+    # wrong the moment every fold was routed through `ESMFOLD_ENDPOINT` instead: the token
+    # stopped being sent, the locked host answered 401, and 401 is a status this lane records
+    # as a refusal -- so a locked endpoint would have written a false absence for every chain
+    # of every genome. The rule is about WHO the host is, not which variable named it.
+    if LONG_TOKEN and _is_ours(endpoint):
         headers["Authorization"] = f"Bearer {LONG_TOKEN}"
     request = urllib.request.Request(
         endpoint, data=body.encode("ascii"), method="POST", headers=headers)
-    timeout = (LONG_REQUEST_TIMEOUT if LONG_ENDPOINT and endpoint == LONG_ENDPOINT
-               else REQUEST_TIMEOUT)
+    # Keyed on WHO the host is, not on which variable named it -- the same rule the bearer
+    # token follows two lines up, and for the same reason. Keyed on `LONG_ENDPOINT` this was
+    # wrong the moment every fold was pointed at the GPU through `ESMFOLD_ENDPOINT` instead:
+    # `LONG_ENDPOINT` was then unset, so the GPU inherited the Atlas's 45 seconds against a
+    # host whose cold start alone is about thirty. Four genomes recorded
+    # `endpoint_unavailable: TimeoutError` on 13 Nov 2026 before this was found, and a
+    # timeout is written into a record as an absence -- so the bug did not look like a bug,
+    # it looked like four pathogens whose chains could not be folded.
+    timeout = LONG_REQUEST_TIMEOUT if _is_ours(endpoint) else REQUEST_TIMEOUT
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return _Opened(body=response.read().decode("utf-8", "replace"),
@@ -352,15 +437,18 @@ def _attempt(body, endpoint=None):
         return _Opened(transport=f"{type(error).__name__}: {error}")
 
 
-def _post(sequence, sources, endpoint=None):
+def _post(sequence, sources, endpoint=None, retries=None):
     """Fetch the predicted PDB, retrying only a transport failure or a retryable status.
 
     Returns `(pdb_text, attempts, absence)`. `absence` is None on success and otherwise the
     recorded refusal, never an exception: whether this lane could reach the host is a fact about
     the lane, and a caller that has already spent an action on it needs that fact recorded.
+
+    `retries` is the attempt budget for THIS host, defaulting to `RETRIES`. The caller lowers
+    it for a first host that has a fallback behind it; see `FIRST_HOST_ATTEMPTS`.
     """
     attempts, last = 0, None
-    for attempt in range(1, RETRIES + 1):
+    for attempt in range(1, (retries or RETRIES) + 1):
         if attempt > 1:
             time.sleep(RETRY_PAUSE)
         attempts += 1
@@ -383,10 +471,10 @@ def _post(sequence, sources, endpoint=None):
     return None, attempts, {
         "reason": reason, "detail": detail, "http_status": last.status,
         "attempts": attempts,
+        "endpoint": endpoint or ENDPOINT,
         "note": "No structure was obtained. This is a statement about this endpoint on this "
                 "call and not a statement about the target: it must not be read as the "
-                "sequence being unfoldable, and no fallback keyless ESMFold host exists to "
-                "retry against."}
+                "sequence being unfoldable."}
 
 
 def _parse_pdb(text):
@@ -513,11 +601,7 @@ def fold(sequence, target_name="", neighbour_cutoff=10.0, confident_plddt=70.0, 
     # anything is sent. The citation follows the host that actually answered rather than the
     # one this module usually uses, so a GPU fold is never cited to the Atlas.
     endpoint, why = route(len(cleaned))
-    payload["endpoint"] = endpoint or ENDPOINT
-    payload["routed_because"] = why
-    payload["citation"] = (CITATION if endpoint in (None, ENDPOINT) else
-                           CITATION.replace(_served_by(ENDPOINT), _served_by(endpoint)))
-    payload["max_residues"] = MAX_RESIDUES if endpoint in (None, ENDPOINT) else LONG_MAX_RESIDUES
+    _apply_route(payload, endpoint, why)
 
     if endpoint is None:
         payload["absence"] = {
@@ -535,14 +619,62 @@ def fold(sequence, target_name="", neighbour_cutoff=10.0, confident_plddt=70.0, 
         payload["provenance"] = provenance()
         return _finish(payload, None, target_name, record)
 
-    text, attempts, absence = _post(cleaned, sources, endpoint)
-    payload["network_calls"] = attempts
-    payload["sources"] = list(dict.fromkeys(sources))
+    # Asked of the first host and, only if that host could not answer, of the second.
+    # `fallback_for` carries why this is a fallback and not a reroute.
+    second = fallback_for(endpoint, len(cleaned))
+    text, attempts, absence = _post(cleaned, sources, endpoint,
+                                    retries=FIRST_HOST_ATTEMPTS if second else RETRIES)
+    payload["hosts_tried"] = [endpoint]
+
+    if absence is not None and absence["reason"] == "endpoint_unavailable" and second:
+        first_absence = absence
+        text, more, absence = _post(cleaned, sources, second)
+        attempts += more
+        payload["hosts_tried"] = [endpoint, second]
+        payload["first_host_absence"] = first_absence
+        if absence is None:
+            # The structure is real and the other host made it, so every field naming a
+            # host moves with it. The first host's failure stays on the record: a fold that
+            # exists only because the Atlas timed out must not read as the Atlas's work.
+            endpoint = second
+            _apply_route(payload, endpoint,
+                         f"{why}, but that host did not answer ({first_absence['detail']}), "
+                         f"so the sequence was folded on the second host instead")
+        else:
+            absence = {
+                "reason": "endpoint_unavailable",
+                "detail": (f"{first_absence['endpoint']} -> {first_absence['detail']}; "
+                           f"{second} -> {absence['detail']}"),
+                "http_status": absence["http_status"], "attempts": attempts,
+                "hosts_tried": [first_absence["endpoint"], second],
+                "note": "Both configured hosts were asked and neither returned a structure. "
+                        "This is a statement about two endpoints on this call and not about "
+                        "the target: it must not be read as the sequence being unfoldable."}
+
     if absence is not None:
+        if not second and absence["reason"] == "endpoint_unavailable":
+            # Nowhere to fall back to, which for a novel sequence is now the ORDINARY
+            # outcome rather than a surprising one. The record says so and names the
+            # variable that would have prevented it, because the alternative is a run full
+            # of absences that read as facts about the proteins.
+            absence = dict(absence, note=(
+                absence["note"] + " No second host is configured, so there was nowhere to "
+                "retry: measured on 13 Nov 2026 the public host answered a sequence it had "
+                "folded before in 1.26 s and a shuffle of that same sequence with HTTP 504 "
+                "after 29.25 s, so an unavailable public host is the ordinary answer to a "
+                "novel sequence and not an outage. Set ESMFOLD_LONG_ENDPOINT to a second "
+                "ESMFold deployment and this sequence becomes foldable."))
         payload["absence"] = absence
+        payload["network_calls"] = attempts
+        payload["sources"] = list(dict.fromkeys(sources))
         payload["seconds"] = round(time.perf_counter() - started, 3)
         payload["provenance"] = provenance()
         return _finish(payload, None, target_name, record)
+
+    # Both hosts appear here in the order they were asked when a fold fell back, so the
+    # count of calls a record reports is the count the lane actually spent.
+    payload["network_calls"] = attempts
+    payload["sources"] = list(dict.fromkeys(sources))
 
     rows, model_date = _parse_pdb(text)
     payload["model_date"] = model_date or MODEL_DATE_FALLBACK
