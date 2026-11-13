@@ -2149,6 +2149,41 @@ def _frame_note(row):
     return where or (f"reading frame {esc(label)}" if label else "")
 
 
+def _shortlisted(case, payload):
+    """The record's rows cut to this run's shortlist, with the mismatch returned beside them.
+
+    This record is a run of its own and can be a generation behind the chain record the rest
+    of the page renders. It is today: it was written over a 20-chain run, and stage 2's
+    evidence gate has since cut the shortlist to 12. The fold store survives the same mismatch
+    harmlessly because it is keyed by target and never asked for a chain that is not on the
+    shortlist; the site-patch section draws every row it is handed, so unfiltered it prints
+    ten chains the run no longer ranks under a heading saying it measures the shortlist's
+    chemistry. That is worse than a coverage gap -- not a reader seeing less than the run
+    holds, but a reader seeing candidates that are not candidates.
+
+    Filtered rather than regenerated, because regenerating is not a build step: these rows are
+    measured on stored folds, so an honest record is downstream of an ESM Atlas spend. The
+    project lead chose this over refusing the section outright, knowing the surviving figures
+    are still a pre-gate run's.
+
+    **It returns the mismatch rather than swallowing it, and that is the whole design.** The
+    obvious shape -- filter inside `site_patch_record`, so every caller gets clean rows -- was
+    tried and is wrong: by the time the section runs there is nothing left to compare against,
+    `off_shortlist` comes back empty, and the sentence that tells the reader a filter fired
+    loses the half that names what it dropped. A filter nobody can see is a filter nobody can
+    check. So both halves travel with the rows: the chains dropped, and the shortlisted chains
+    this record has no row for at all.
+    """
+    rows = payload.get("rows") or []
+    shortlist = {r.get("target") for r in (case.get("scores") or []) if r.get("target")}
+    if not shortlist:
+        return rows, [], []
+    have = {r.get("target") for r in rows}
+    off_shortlist = sorted(name for name in have if name and name not in shortlist)
+    absent = sorted(name for name in shortlist if name not in have)
+    return ([r for r in rows if r.get("target") in shortlist], off_shortlist, absent)
+
+
 def site_patch_block(case):
     """The patch at the annotated site, beside the patch stage 4 scored the unit on.
 
@@ -2187,28 +2222,7 @@ def site_patch_block(case):
     if not rows:
         return ""
 
-    # This record is a run of its own and can be a generation behind the chain record the
-    # rest of the page is rendering. It is today: it was written over a 20-chain run, and
-    # stage 2's evidence gate has since cut the shortlist to 12. The fold store survives the
-    # same mismatch harmlessly because it is keyed by target and never asked for a chain that
-    # is not on the shortlist -- this block draws every row it is handed, so unfiltered it
-    # prints ten chains the run no longer ranks under a heading that says it is measuring the
-    # shortlist's chemistry. That is the one failure mode worse than a gap: not a reader
-    # seeing less than the run holds, but a reader seeing candidates that are not candidates.
-    #
-    # Filtered here rather than regenerated, because regenerating is not a build step: these
-    # rows are measured on stored folds, so an honest record is downstream of an ESM Atlas
-    # spend. What a filter must not do is hide that it fired, so both halves of the mismatch
-    # are named under the table -- the chains dropped, and the shortlist chains this record
-    # has no row for.
-    shortlist = {r.get("target") for r in (case.get("scores") or []) if r.get("target")}
-    off_shortlist, absent = [], []
-    if shortlist:
-        have = {r.get("target") for r in rows}
-        off_shortlist = sorted(t for t in {r.get("target") for r in rows}
-                               if t and t not in shortlist)
-        absent = sorted(t for t in shortlist if t not in have)
-        rows = [r for r in rows if r.get("target") in shortlist]
+    rows, off_shortlist, absent = _shortlisted(case, payload)
     if not rows:
         return ""
 
@@ -2442,7 +2456,7 @@ def site_patch_block(case):
   </ul>"""
 
 
-def _site_examples(payload):
+def _site_examples(payload, rows=None):
     """The three worked examples the prose quotes, each picked by a stated rule.
 
     Picked by rule and not by name, for the reason `_richest_facts` gives: a sentence written
@@ -2465,7 +2479,12 @@ def _site_examples(payload):
         patch = ((block or row).get("site_patch") or {})
         return patch.get("site_share_of_the_largest_patch")
 
-    rows = [r for r in payload.get("rows") or ()
+    # `rows` is the shortlisted set where a caller has one. Falling back to the record's own
+    # rows keeps this usable from a context that has no case, but a worked example naming a
+    # chain the table does not draw is the failure this parameter exists to prevent -- today's
+    # three are shortlisted by luck, not by construction.
+    pool = payload.get("rows") or () if rows is None else rows
+    rows = [r for r in pool
             if r.get("measured") and not r.get("anchors_are_processing_sites_only")
             and (r.get("site_patch") or {}).get("site_shares_the_patch")]
     if not rows:
@@ -2473,7 +2492,7 @@ def _site_examples(payload):
     low = min(rows, key=lambda r: share(r) or 0)
     high = max(rows, key=lambda r: share(r) or 0)
 
-    moved = [r for r in payload.get("rows") or ()
+    moved = [r for r in pool
              if (r.get("chemistry_only") or {}).get("measured")
              and not r["chemistry_only"].get("same_as_the_full_set")
              and share(r) is not None and share(r, r["chemistry_only"]) is not None]
@@ -2522,17 +2541,55 @@ def site_patch_facts(case):
     payload = site_patch_record(case)
     if not payload or payload.get("status") != "complete":
         return {}
-    summary = payload.get("summary") or {}
-    return _site_examples(payload) | {
-        "site_units": summary.get("units"),
-        "site_measured": summary.get("units_measured"),
-        "site_at_annotated": summary.get("units_measured_at_the_annotated_residues"),
-        "site_patch_at_site": summary.get("units_whose_largest_patch_is_at_the_site"),
-        "site_processing_only": summary.get("units_whose_anchors_are_processing_sites_only"),
-        "site_anchors": summary.get("anchors_in_the_folds"),
-        "site_anchors_low": summary.get("anchors_below_the_confident_threshold"),
-        "site_frames": summary.get("reading_frames_the_rows_are_numbered_along"),
-        "site_overlaps": summary.get("unit_pairs_overlapping_in_different_reading_frames"),
+    # Counted off the shortlisted rows rather than read from the record's `summary`, which is
+    # over every row the record holds. This prose sits directly above the filtered table, so
+    # taking its figures from the unfiltered record would have the page say "23 of 37 folded
+    # units" above a table that draws 23 rows in total -- the same defect the filter exists to
+    # remove, one paragraph up, and the more damaging half because a reader checks prose
+    # against a table rather than against a file.
+    #
+    # Every derivation below was checked against the record's own summary over the unfiltered
+    # rows before being used on the filtered ones: all seven reproduce it exactly (37, 23, 23,
+    # 21, 8, 106, 70). A recount that does not agree with the record on the record's own set
+    # is a second definition of the quantity, not a recount of it.
+    rows, _off, _absent = _shortlisted(case, payload)
+    measured = [r for r in rows if r.get("measured")]
+    at_site = [r for r in measured
+               if ((r.get("site_patch") or {}).get("site_share_of_the_largest_patch") or 0) > 0]
+
+    def _frame(row):
+        return (row.get("reading_frame") or {}).get("reading_frame")
+
+    def _span(row):
+        span = row.get("span_in_this_genome") or []
+        return tuple(span) if len(span) == 2 else None
+
+    marked = [(_span(r), _frame(r)) for r in rows]
+    processing_only = [r for r in rows if r.get("anchors_are_processing_sites_only")]
+    return _site_examples(payload, rows) | {
+        "site_units": len(rows),
+        "site_measured": len(measured),
+        "site_at_annotated": len([r for r in measured
+                                  if r.get("measured_at_the_annotated_residues") is True]),
+        "site_patch_at_site": len(at_site),
+        "site_processing_only": len(processing_only),
+        # The count was always plural in the prose because the unfiltered record had eight.
+        # On the shortlist it is one, so the subject and the verb travel with the number
+        # rather than being baked into the sentence -- the same reason `site_drop_plural`
+        # exists next door.
+        "site_processing_phrase": (
+            f"{len(processing_only)} unit{'' if len(processing_only) == 1 else 's'} "
+            f"{'holds' if len(processing_only) == 1 else 'hold'}"),
+        "site_anchors": sum(len(r.get("anchors") or []) for r in rows),
+        "site_anchors_low": sum(
+            (r.get("anchor_confidence") or {}).get("below_the_confident_threshold") or 0
+            for r in rows),
+        "site_frames": len({_frame(r) for r in rows if _frame(r)}),
+        "site_overlaps": sum(
+            1
+            for i, (sa, fa) in enumerate(marked)
+            for sb, fb in marked[i + 1:]
+            if sa and sb and fa and fb and fa != fb and sa[0] <= sb[1] and sb[0] <= sa[1]),
         "site_reach": f"{payload.get('reach_a') or 0:.1f}",
     }
 
