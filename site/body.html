@@ -288,13 +288,14 @@
       <div class="out"><h3>Out</h3><ul>
         <li><b>{{orfs_found}}</b> open reading frames: stretches of genome that could code for a protein</li>
         <li><b>{{orfs_ranked}}</b> worth ranking</li>
-        <li><b>{{identified}}</b> matched to a known relative and scored in the table below; <b>{{unidentified}}</b> matched nothing at either tier and are off it</li>
+        <li><b>{{identified}}</b> matched to a known relative; <b>{{unidentified}}</b> matched nothing at either tier and are off the table below</li>
+        <li><b>{{identified_kept}}</b> of those matches are scored in the table below. The other <b>{{orfs_gated}}</b> pay nothing on any of the four evidence terms and leave the pipeline here, named under the table</li>
       </ul></div>
     </div>
   </div>
 
   <div class="substep">
-    <h3>The {{identified}} it ranked, and why each one scored what it did</h3>
+    <h3>The {{identified_kept}} it ranked, and why each one scored what it did</h3>
     <ul class="pts">
       <li><b>Nothing is read off an existing annotation of this genome.</b> The sequence is
       translated in all six reading frames, and every stretch between stop codons of at least
@@ -341,9 +342,9 @@
             <rect x="16" y="56" width="26" height="8" rx="4" fill="currentColor" opacity=".26"/>
           </svg><span class="what">Score and rank them</span><span class="secs">{{score_seconds}} s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>{{orfs_ranked}}</b> candidates</li></ul></div>
+      <div><h3>In</h3><ul><li><b>{{identified_kept}}</b> candidates: the ORFs that matched a relative and cleared step 1's gate</li></ul></div>
       <div class="out"><h3>Out</h3><ul>
-        <li><b>{{chains}}</b> protein chains out of the <b>{{identified}}</b> identified ORFs — <b>{{cut_chains}}</b> cut out of a larger parent, <b>{{whole_chains}}</b> already whole</li>
+        <li><b>{{chains_before_gate}}</b> mature chains cut out of those <b>{{identified_kept}}</b> ORFs, of which <b>{{chains}}</b> clear the same gate and go on — <b>{{cut_chains}}</b> cut out of a larger parent, <b>{{whole_chains}}</b> already whole. The <b>{{chains_gated}}</b> dropped here are named under the table</li>
         <li>Start and stop come from the matched relative's annotation, so an ORF that reached no relative is cut into nothing and leaves the list here</li>
         <li>Scored on the same five weights as the ORFs above, <b>{{score_high}}</b> down to <b>{{score_low}}</b> of a possible <b>{{score_ceiling}}</b>. The <b>{{biggest_cut}}</b> chains from one ORF alone span <b>{{cut_high}}</b> to <b>{{cut_low}}</b>, a spread the parent's single score hides</li>
       </ul></div>
@@ -1021,14 +1022,16 @@
 </section>
 
 <section id="picked">
-  <div class="sec-head"><h2>The shortlist</h2><span class="tag">{{identified}} identified ORFs cut into {{chains}} chains</span></div>
+  <div class="sec-head"><h2>The shortlist</h2><span class="tag">{{identified_kept}} identified ORFs cut into {{chains}} chains</span></div>
   <ul class="pts">
     <li><b>This is the output, and a different list from step 1's rather than a shorter version
     of it.</b> Step 1 ranks whole stretches of genome; step 2 cuts them into the chains a drug
     is aimed at.</li>
-    <li><b>Only the {{identified}} ORFs that matched a relative can be cut</b>, since the cut
-    points come from that relative, so the {{unidentified}} unrecognised ones end here.</li>
-    <li><b>Those {{identified}} become {{chains}} chains</b>, {{biggest_cut}} of which come out
+    <li><b>Only an ORF that matched a relative can be cut</b>, since the cut points come from
+    that relative, so the {{unidentified}} unrecognised ones end here. Of the {{identified}}
+    that matched, {{identified_kept}} also cleared step 1's evidence gate and are the ones
+    cut.</li>
+    <li><b>Those {{identified_kept}} become {{chains}} chains</b>, {{biggest_cut}} of which come out
     of a single ORF: the replicase, step 1's second row.</li>
   </ul>
   <!--PICKED-->

@@ -536,7 +536,11 @@ def _cut_summary(case):
     which is the clearest statement of what this stage does on the whole site.
     """
     by_tool = {s["tool"]: s for s in case.get("stages", [])}
-    orfs = (by_tool.get("intake.rank_targets", {}).get("output") or {}).get("identified")
+    # The kept count where the run has a gate, because the tag sits on the section that
+    # draws the table and `identified` counts rows the gate removed from it. On the held-out
+    # run that is 6 cut into 12 and not 9 cut into 12; a reader who counts the rows gets 6.
+    orfs = (_gated_counts(case).get("identified_kept")
+            or (by_tool.get("intake.rank_targets", {}).get("output") or {}).get("identified"))
     chains = len(case.get("scores") or [])
     if orfs and chains:
         return (f"{orfs} identified ORF{'' if orfs == 1 else 's'} "
@@ -553,6 +557,45 @@ def gate_block(case, tool):
     """
     stage = {s["tool"]: s for s in case.get("stages", [])}.get(tool)
     return ((stage or {}).get("output") or {}).get("gate")
+
+
+def _gated_counts(case):
+    """Stage 1's and stage 2's counts as the tables below them actually stand.
+
+    **The counters in a stage's `output` are what it produced, not what survived it.** Both
+    stages end in a gate, both gates record what they dropped, and the page prints the kept
+    rows -- so a bullet filled from `identified` describes a table that no longer has that
+    many rows in it. Measured on the held-out run: stage 1 identified 9 ORFs, its gate
+    removed 3 that paid nothing on any evidence term, and the table draws 6 under a heading
+    that read "The 9 it ranked". Stage 2 cut and scored 23 chains and kept 12.
+
+    Both numbers are returned, never one. The pre-gate figure is the stage's own work and
+    the post-gate figure is what a reader can see, and a sentence usually wants to say both
+    -- nine were identified, three of them pay nothing, six are in the table. Replacing the
+    first with the second would hide the gate exactly as thoroughly as the old prose did,
+    which is the failure this repair exists to undo rather than to re-point.
+
+    A record written before the gates existed yields no extra keys at all, so the page built
+    from it is unchanged. `fill` then refuses any token that needs one, which is the correct
+    failure: a count of what a gate kept cannot be inferred from a run that had no gate.
+    """
+    out = {}
+    stage1 = gate_block(case, "intake.rank_targets")
+    by_tool = {s["tool"]: s for s in case.get("stages", [])}
+    out1 = (by_tool.get("intake.rank_targets", {}).get("output") or {})
+    if stage1 and out1.get("identified") is not None:
+        # Subtracted rather than read off `kept`, which counts every row the gate let
+        # through INCLUDING the unidentified ones -- 9 on this run, the same integer as
+        # `identified` and not the same quantity. Taking it for the number of scored rows
+        # would reproduce the bug one level deeper and agree with the old prose by accident.
+        out["orfs_gated"] = stage1.get("gated_out") or 0
+        out["identified_kept"] = out1["identified"] - out["orfs_gated"]
+    stage2 = gate_block(case, "intake.decompose + intake.rank_score")
+    out2 = (by_tool.get("intake.decompose + intake.rank_score", {}).get("output") or {})
+    if stage2 and out2.get("chains_scored_before_the_gate") is not None:
+        out["chains_before_gate"] = out2["chains_scored_before_the_gate"]
+        out["chains_gated"] = stage2.get("gated_out") or 0
+    return out
 
 
 def gate_note(case, tool, noun):
@@ -2882,6 +2925,16 @@ def facts(case):
         "identified": out1["identified"],
         "unidentified": out1["unidentified"],
         "chains": out2["chains_out"],
+        # The same two stages counted AFTER their gates, because the tables the prose points
+        # at are the kept rows and the counters above are not. `identified` is 9 on the
+        # held-out run and the ORF table draws 6: the stage-1 gate removed three rows that
+        # had matched a relative, so a bullet saying "9 ... scored in the table below" was
+        # describing a table with six rows in it, and the heading over that table said "The 9
+        # it ranked". Reported alongside the pre-gate figure rather than instead of it --
+        # nine ORFs really were identified, and dropping that would hide the gate as surely
+        # as quoting it alone misreports the table. Stage 2 is the same shape one step on: 23
+        # chains were cut and scored, 12 survive, and only the 12 were ever on the page.
+        **_gated_counts(case),
         "rows_out": out3["rows_out"],
         "measured": out3["measured"],
         "unmeasured": out3["unmeasured"],
