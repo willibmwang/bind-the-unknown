@@ -58,6 +58,42 @@ in the same commit and say in the message that the structures moved.
 SCALEDOWN = 300
 TIMEOUT = 1800
 
+ACCEPTED = frozenset("ACDEFGHIKLMNPQRSTVWY" "BJXZ")
+"""What this handler will fold, and it must be the CLIENT's alphabet rather than the strict
+twenty.
+
+**This was a false absence published as biology, which is the costliest error this project can
+make.** The handler used to refuse anything outside `ACDEFGHIKLMNPQRSTVWY` with a 422, while
+`folded_structure.ACCEPTED` permits `BJXZ` because the public Atlas does. Six-frame translation
+of a real genome produces `X` routinely -- a run of Ns in the deposited sequence becomes one --
+so the client sent sequences it had every reason to believe were acceptable and this host
+refused them. Measured on the records of 13 Nov 2026: nineteen units of Enterovirus A71
+(`NC_038306.1`) and five of Rhinovirus A (`NC_038311.1`) came back `HTTP 422: sequence holds
+'X', which ESMFold does not accept`.
+
+The damage is in how that 422 is classified downstream, not in the refusal itself. A 422 maps
+to `endpoint_refused_sequence`, which `chain.DECLARED_ABSENCES` counts as a RESULT rather than
+an infrastructure failure, so `fold_integrity` marked both runs trustworthy and both published
+pages reported no coordinates for those chains as a fact about the virus. An absence with a
+stated reason is this project's most valuable artifact and that is exactly why a host-contract
+mismatch must never be able to wear one as a disguise.
+
+**X is dropped from the model here, exactly as the Atlas drops it, and the numbering of
+everything else survives.** Measured against this deployment on 19 Nov 2026, because the first
+version of this note asserted the opposite and was wrong: a 98-residue sequence carrying one X
+at position 46 returns HTTP 200 with 755 ATOM records, no atom at all for residue 46, and a
+final `resSeq` of 98. So the ambiguous residue is absent from the coordinates while every
+residue after it keeps its own index. That is the behaviour the client already handles --
+`_parse_pdb` keys on `resSeq` and never on arrival order, and `unmodelled_positions` is where
+the gap is recorded -- so the two hosts agree here and this fix is only about not refusing the
+request.
+
+`J` has no token of its own in the ESM-2 vocabulary and needs no special case: the tokenizer
+carries an `<unk>` token and maps anything it does not know onto it. `U` and `O` stay out,
+because they are outside the client's alphabet too, and a host accepting more than any client
+will send is a capability nothing can reach.
+"""
+
 image = (
     modal.Image.debian_slim(python_version="3.11")
     # Pinned, because an unpinned transformers is a silent change to what the folds are.
@@ -107,11 +143,19 @@ the person who can fix it, and it happens before any container starts.
     timeout=TIMEOUT,
     scaledown_window=SCALEDOWN,
     # A hard ceiling on how many H100s this can hold at once. Without it the class
-    # autoscales on demand, so N genomes folding in parallel can mean N warm GPUs, each
+    # autoscales on demand, so N sequences folding in parallel can mean N warm GPUs, each
     # cold-starting an 11 GB model -- an unbounded bill discovered after the fact rather
-    # than a budget decided in advance. Three matches the three genome workers; a fourth
-    # container would have nothing to serve.
-    max_containers=3,
+    # than a budget decided in advance.
+    #
+    # Twelve, raised from three, and the unit of parallelism changed underneath it. Three
+    # matched three genome workers folding one sequence each at a time. The offline panel run
+    # does the opposite -- one genome at a time, because NCBI's rate limit is per-source and
+    # parallel genomes divide it rather than multiplying it, with that genome's units folded
+    # concurrently. The work is the same either way: GPU-seconds are set by the sequences, not
+    # by the container count, so this number buys wall clock and not capacity. A panel of
+    # roughly 1,600 units at a mean near 25 s is about eleven GPU-hours however it is sliced;
+    # twelve containers spend them in about an hour instead of eleven.
+    max_containers=12,
 )
 class Folder:
     """One warm ESMFold per container."""
@@ -150,7 +194,7 @@ class Folder:
         ceiling = int(os.environ.get("ESMFOLD_MODAL_CEILING") or 2700)
         if len(sequence) > ceiling:
             return 413, f"Sequence is longer than {ceiling}."
-        bad = sorted(set(sequence) - set("ACDEFGHIKLMNPQRSTVWY"))
+        bad = sorted(set(sequence) - ACCEPTED)
         if bad:
             return 422, f"sequence holds {''.join(bad)!r}, which ESMFold does not accept"
         try:
