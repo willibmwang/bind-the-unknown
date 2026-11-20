@@ -461,13 +461,26 @@ def build_flowchart():
     it is that it is not.
     """
     body = (ROOT / "site" / "flowchart.html").read_text()
-    # Filled from the pipeline's own constants rather than from a run. This page is about the
-    # shape of the chain on any virus, so the record of one genome is the wrong source -- but
-    # the residue ceiling and the macrocycle footprint are properties of the code, identical
-    # on every genome, and typed into this page as literals they would go on drawing the old
-    # line after either one moved. Both are passed whether or not today's copy asks for them,
-    # because `fill` refuses a token it has no value for and the page is hand-written.
-    body = fill(body, {"fold_ceiling": FOLD_CEILING,
+    # The footprint is a constant of the code. The ceiling is NOT, and used to be read off
+    # `FOLD_CEILING` here on the argument that it is "a property of the code, identical on
+    # every genome". That argument held while the only folding host was the public one and
+    # stopped holding the moment a second host could be configured: `chain.FOLD_CEILING` is
+    # 400 against api.esmatlas.com and 1,200 when `ESMFOLD_LONG_ENDPOINT` names a GPU
+    # deployment, so the number this page drew became a property of whichever machine last
+    # ran the builder. A page whose ceiling disagrees with the record it describes is the
+    # defect the whole site is laid out to avoid, and it was reachable from one export.
+    #
+    # So the ceiling comes from the landing record, through the same `_ceiling` the result
+    # pages use, which reads what stage 3 actually applied and falls back to the constant only
+    # for a record written before the stage recorded it. The page is still about any virus:
+    # the ceiling is a property of the run and not of the genome, and the landing record is
+    # the run this site is about.
+    landing = json.loads((RUNS / LANDING_RECORD).read_text())
+    case = next((c for c in landing["cases"] if c.get("reference_excluded_organism")),
+                landing["cases"][0])
+    # Both are passed whether or not today's copy asks for them, because `fill` refuses a
+    # token it has no value for and the page is hand-written.
+    body = fill(body, {"fold_ceiling": _ceiling(case),
                        "footprint": f"{MACROCYCLE_FOOTPRINT_A2:,.0f}"})
     out = (head(f"From an accession to ranked targets · {SITE}",
                 "The shape of the pipeline for any virus: one accession in, ranked targets "

@@ -95,7 +95,24 @@ import time
 import urllib.error
 import urllib.request
 
-from .common import ROOT, content_digest, provenance, write_json
+from .common import ROOT, content_digest, provenance, load_env, write_json
+
+load_env()
+"""Read the gitignored `.env` before this module decides what it can reach.
+
+**Every constant below is evaluated at import, so a variable set after the import has no
+effect, and that made the GPU lane invisible to everything that did not export it by hand.**
+`grep -rIl ESMFOLD_LONG` named exactly one file in this repository: this one. Not the workflow
+that serves a visitor, not the batch runners, not `.env`. So the published pipeline asked the
+public host, took a 504 on anything novel -- the measurement in `fallback_for` is that a
+sequence the Atlas has not cached times out where the recorded main protease returns in 1.26 s
+-- and wrote an absence carrying a note about the variable that would have prevented it.
+
+`load_env` fills only what is unset, so a real environment variable still wins and a shell
+export keeps working exactly as before. What changes is that a clone with the endpoint in its
+`.env` now folds the chains the public host refuses, instead of needing somebody to remember
+two exports in the same shell that runs the pipeline.
+"""
 
 ENDPOINT = (os.environ.get("ESMFOLD_ENDPOINT")
             or "https://api.esmatlas.com/foldSequence/v1/pdb/")

@@ -5224,16 +5224,25 @@ def test_the_rescue_counts_are_derived_from_the_record_and_not_typed():
     cases = json.loads(record.read_text())["cases"]
     case = next(c for c in cases if c.get("reference_excluded_organism"))
 
+    # The ceiling this RECORD was made under, not the one this process happens to have.
+    # `chain.FOLD_CEILING` is 400 against the public folding host and 1,200 when
+    # `ESMFOLD_LONG_ENDPOINT` names a GPU deployment, so comparing a recorded figure against
+    # the live constant made this test pass or fail on whether the machine running it had a
+    # GPU configured -- which is a fact about the machine and not about whether the page reads
+    # its record. `build_site._ceiling` is the same derivation the pages use.
+    ceiling = build_site._ceiling(case)
+    assert ceiling, "the record states no residue ceiling and no fallback was available"
+
     foldable = {f["target"]: f for f in case["foldable"]}
     measured = [r for r in case["surfaces"] if r["measured"]]
     inside = [r for r in case["surfaces"]
               if not r["measured"]
               and (foldable.get(r["target"]) or {}).get("sequence_recovered")
               and 0 < ((foldable.get(r["target"]) or {}).get("recovered_length_aa") or 0)
-              <= FOLD_CEILING]
+              <= ceiling]
 
     facts = build_site.lane_facts(case)
-    assert facts["fold_ceiling"] == FOLD_CEILING
+    assert facts["fold_ceiling"] == ceiling
     assert facts["surface_predicted"] == len(inside), facts
     assert facts["surface_any"] == len(measured) + len(inside), facts
     assert facts["surface_none"] == len(case["surfaces"]) - len(measured) - len(inside), facts
