@@ -1756,22 +1756,80 @@ def _chains_of(accession):
     # it came from as a child of itself.
     whole = payload["sequence"]["length"]
     chains = [c for c in chains if c["length"] < whole * 0.95]
-    kept, contained = [], []
+    # The containment FOREST, parented on the SMALLEST strictly-containing chain rather than
+    # the largest. The parent choice is what makes the rule below able to see the difference
+    # between a precursor and a re-cut: parented on the largest, every one of poliovirus's
+    # twelve mature products hangs directly off P1/P2/P3 and the nesting that distinguishes
+    # `Protein 3CD` from `Protease 3C` is invisible.
+    #
+    # Strictly longer, so two chains annotated over identical bounds cannot delete each other
+    # and leave the parent with no products at all.
+    children = {id(c): [] for c in chains}
+    parent = {}
     for chain in chains:
-        # Strictly longer, so two chains annotated over identical bounds cannot delete each
-        # other and leave the parent with no products at all. Where a chain sits inside
-        # several, the longest is named: a nesting three deep is reported against the chain
-        # that actually survived it, not against a middle one that was dropped too.
         containers = [other for other in chains
                       if other["length"] > chain["length"]
                       and other["start"] <= chain["start"]
                       and other["end"] >= chain["end"]]
-        container = max(containers, key=lambda c: c["length"], default=None)
-        if container is None:
-            kept.append(chain)
-        else:
+        smallest = min(containers, key=lambda c: c["length"], default=None)
+        if smallest is not None:
+            parent[id(chain)] = smallest
+            children[id(smallest)].append(chain)
+
+    # **Why a count of children and not a coverage fraction.** The first version of this
+    # filter dropped every contained chain, and that destroyed an entire virus family: on
+    # poliovirus's relative P22055 it kept `P1`, `P2` and `P3` and dropped all twelve mature
+    # products, `Protease 3C` and `RNA-directed RNA polymerase` among them -- the two proteins
+    # the approved and candidate antivirals actually act on. Poliovirus, Enterovirus A71 and
+    # Rhinovirus A went from twelve, thirteen and thirteen ranked chains to three, five and
+    # four, and from a best ground-truth rank of 7 each to no scoreable hit at all.
+    #
+    # A coverage fraction was the obvious repair and does not work. Measured over every
+    # contained/container pair the panel's relatives produce, the fractions run continuously
+    # from 0.12 to 0.996 with no gap: `Protein 3CD` covers 0.855 of P3 and must be resolved
+    # into its products, while `Spike glycoprotein E2` covers 0.869 of its precursor and must
+    # not be. A threshold anywhere between them is a number fitted to whichever example was
+    # looked at last.
+    #
+    # The child count separates them exactly, on every pair in that measurement. A chain the
+    # annotation partitions into two or more products is a PRECURSOR: the products tile it,
+    # they are the species a binder would be designed against, and the precursor exists in the
+    # entry because the cleavage is ordered rather than because it is a target. A chain with
+    # exactly one annotated product inside it is being RE-CUT at one end -- spike S2 to S2'
+    # across the second cleavage, `Precursor of protein E3/E2` to E2, GP2 to GP2-delta -- and
+    # the product offers no residue, no surface and no annotated site the container did not
+    # already offer.
+    #
+    # So: two or more children, drop the parent and keep the children. Exactly one child, keep
+    # the parent and drop the child. No children, keep it. Applied over the whole forest, which
+    # is what resolves the nested case correctly: P3 has children 3AB and 3CD, so P3 goes; 3CD
+    # has children 3C and 3D, so 3CD goes and both proteases survive; 3AB has the single child
+    # 3A, so 3AB stays and 3A goes. `Protease 3C` and `RNA-directed RNA polymerase` are kept,
+    # which is the outcome the whole filter is for.
+    dropped_as_a_precursor, dropped_as_a_recut = set(), set()
+    for chain in chains:
+        mine = children[id(chain)]
+        if len(mine) >= 2:
+            dropped_as_a_precursor.add(id(chain))
+        elif len(mine) == 1:
+            dropped_as_a_recut.add(id(mine[0]))
+
+    kept, contained = [], []
+    for chain in chains:
+        if id(chain) in dropped_as_a_precursor:
+            # Reported with the products that replaced it, because "the entry offers this
+            # chain and it was not ranked" is a fact about the decomposition that an absent
+            # row cannot state, and a reader looking for `P1` needs to find out where it went.
+            contained.append({**chain, "contained_in": None, "contained_in_range": None,
+                              "dropped_because": "precursor",
+                              "resolved_into": [c["description"] for c in children[id(chain)]]})
+        elif id(chain) in dropped_as_a_recut:
+            container = parent[id(chain)]
             contained.append({**chain, "contained_in": container["description"],
-                              "contained_in_range": [container["start"], container["end"]]})
+                              "contained_in_range": [container["start"], container["end"]],
+                              "dropped_because": "recut", "resolved_into": None})
+        else:
+            kept.append(chain)
     return kept, contained
 
 
@@ -2091,9 +2149,17 @@ def decompose(ranked, limit=None):
                 # this line a spike that offers S1, S2 and S2' reports two chains and no
                 # reason, which reads as an entry that annotates two. `contained_chains`
                 # holds the argument for dropping them.
+                # `dropped_because` and not only `contained_in`, because the two rules say
+                # different things and a reader has to be able to tell them apart. A `recut`
+                # names the container that kept its place; a `precursor` names the products
+                # that replaced it and carries no container at all, and a bare null there
+                # would read as "contained in nothing", which is the opposite of what
+                # happened.
                 "chains_contained_in_another": [
                     {"description": c["description"], "range": [c["start"], c["end"]],
-                     "contained_in": c["contained_in"]} for c in nested],
+                     "dropped_because": c["dropped_because"],
+                     "contained_in": c["contained_in"],
+                     "resolved_into": c["resolved_into"]} for c in nested],
                 "parent": row["name"], "chain_range": [chain["start"], chain["end"]],
                 "length_aa": chain["length"],
                 "hits": row["hits"], "features": features,

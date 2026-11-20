@@ -6793,11 +6793,16 @@ def test_a_chain_inside_another_chain_is_not_ranked_as_a_second_target():
     785-1242, the second a strict suffix of the first. Ranked separately they scored 6.8637
     and 6.8437 -- the gap is `structures_in_family` alone, 42 against 40 -- so the contained
     chain outranked its container, and the run spent a second fold to predict a sub-interval
-    of a structure it had already predicted. The same shape is in SIV Gag-Pol, where `p51 RT`
-    at 598-1036 shares a start with `Reverse transcriptase/ribonuclease H` at 598-1156.
+    of a structure it had already predicted.
 
-    The two rules that stop this from deleting real targets are both asserted below: equal
-    spans never delete each other, and what is dropped is reported rather than vanishing.
+    **But containment alone is the wrong test, and this asserts the rule that replaced it.**
+    Dropping every contained chain destroyed a whole virus family: on poliovirus's relative
+    P22055 it kept `P1`, `P2` and `P3` and dropped all twelve mature products, `Protease 3C`
+    and `RNA-directed RNA polymerase` among them. The rule is a child count over the
+    containment forest -- a chain the annotation partitions into two or more products is a
+    precursor and gives way to them; a chain with exactly one product inside it is being
+    re-cut at one end and keeps its place. Both halves are asserted below, and so is the
+    nesting that only the forest resolves.
     """
     from hpc_pilots.intake import contained_chains, mature_chains
 
@@ -6805,6 +6810,7 @@ def test_a_chain_inside_another_chain_is_not_ranked_as_a_second_target():
         return {"type": "Chain", "description": description,
                 "location": {"start": {"value": start}, "end": {"value": end}}}
 
+    # One product inside its container: a re-cut. The container stays, the product goes.
     payload = {"sequence": {"length": 1242},
                "features": [feature(14, 1242, "Spike glycoprotein"),
                             feature(14, 654, "Spike protein S1"),
@@ -6814,18 +6820,17 @@ def test_a_chain_inside_another_chain_is_not_ranked_as_a_second_target():
         kept = [c["description"] for c in mature_chains("Q3LZX1")]
         dropped = contained_chains("Q3LZX1")
 
-    # `Spike glycoprotein` goes to the 0.95 rule, S2' to containment, and the two chains that
-    # between them tile the protein without overlapping are what is ranked.
+    # `Spike glycoprotein` goes to the 0.95 rule, S2' to the re-cut rule, and the two chains
+    # that between them tile the protein without overlapping are what is ranked.
     assert kept == ["Spike protein S1", "Spike protein S2"], kept
     assert [c["description"] for c in dropped] == ["Spike protein S2'"]
+    assert dropped[0]["dropped_because"] == "recut"
     assert dropped[0]["contained_in"] == "Spike protein S2"
     assert dropped[0]["contained_in_range"] == [655, 1242]
 
-    # Nested three deep: p51 RT inside RT/RNase H, and p15 inside both. Each dropped chain
-    # names the longest chain that contains it, so neither is reported against a row that was
-    # itself dropped. p15 is the RNase H subunit and a real inhibitor target; it survives as
-    # `Domain 1030-1153 RNase H type-1` on the chain that was kept, which is where the domain
-    # layer ranks it by the four binding-site residues inside it.
+    # Two products inside their container: a precursor. It gives way to both of them, which is
+    # what keeps `p15` -- the RNase H subunit, and a genuine inhibitor target. The first
+    # version of this filter kept the container and dropped both.
     payload = {"sequence": {"length": 1449},
                "features": [feature(502, 597, "Protease"),
                             feature(598, 1156, "Reverse transcriptase/ribonuclease H"),
@@ -6834,11 +6839,47 @@ def test_a_chain_inside_another_chain_is_not_ranked_as_a_second_target():
     with mock.patch("hpc_pilots.intake._entry", return_value=payload):
         kept = [c["description"] for c in mature_chains("P19505")]
         dropped = contained_chains("P19505")
-    assert kept == ["Protease", "Reverse transcriptase/ribonuclease H"], kept
-    assert {c["contained_in"] for c in dropped} == {"Reverse transcriptase/ribonuclease H"}
+    assert kept == ["Protease", "p51 RT", "p15"], kept
+    assert [c["description"] for c in dropped] == ["Reverse transcriptase/ribonuclease H"]
+    assert dropped[0]["dropped_because"] == "precursor"
+    assert dropped[0]["resolved_into"] == ["p51 RT", "p15"]
 
-    # Two chains annotated over identical bounds -- the containment test is strict on length,
-    # so neither deletes the other and the parent keeps both rather than none.
+    # The regression that forced the rule, in the shape P22055 actually has it. `P3` carries
+    # `3AB` and `3CD`; `3CD` carries `3C` and `3D`; `3AB` carries only `3A`. Parented on the
+    # LARGEST container every product would hang off P3 and the two levels would be invisible,
+    # which is why the forest is parented on the smallest.
+    payload = {"sequence": {"length": 2209},
+               "features": [feature(1, 881, "P1"),
+                            feature(1, 341, "Capsid protein VP0"),
+                            feature(70, 341, "Capsid protein VP2"),
+                            feature(342, 579, "Capsid protein VP3"),
+                            feature(580, 881, "Capsid protein VP1"),
+                            feature(1467, 2209, "P3"),
+                            feature(1467, 1576, "Protein 3AB"),
+                            feature(1467, 1545, "Protein 3A"),
+                            feature(1577, 2209, "Protein 3CD"),
+                            feature(1577, 1759, "Protease 3C"),
+                            feature(1760, 2209, "RNA-directed RNA polymerase")]}
+    with mock.patch("hpc_pilots.intake._entry", return_value=payload):
+        kept = [c["description"] for c in mature_chains("P22055")]
+        dropped = {c["description"]: c["dropped_because"]
+                   for c in contained_chains("P22055")}
+
+    # The two proteins the antivirals act on are ranked, which is the whole point.
+    assert "Protease 3C" in kept, kept
+    assert "RNA-directed RNA polymerase" in kept, kept
+    # Every precursor gave way, at both levels of the nesting.
+    assert dropped["P1"] == "precursor"
+    assert dropped["P3"] == "precursor"
+    assert dropped["Protein 3CD"] == "precursor"
+    # And the two single-product containers kept their place instead.
+    assert dropped["Capsid protein VP2"] == "recut"
+    assert dropped["Protein 3A"] == "recut"
+    assert "Capsid protein VP0" in kept
+    assert "Protein 3AB" in kept
+
+    # Two chains annotated over identical bounds -- containment is strict on length, so neither
+    # deletes the other and the parent keeps both rather than none.
     payload = {"sequence": {"length": 900},
                "features": [feature(1, 400, "Capsid protein"),
                             feature(1, 400, "Capsid protein, alternative name")]}
