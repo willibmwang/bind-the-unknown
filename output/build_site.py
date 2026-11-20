@@ -3158,27 +3158,175 @@ def result_page(case, stem):
 
 
 # --------------------------------------------------------------------- the results index
+# The matrix's columns, in the order the pipeline produces them: what was scored, what the
+# gate kept, what got coordinates, what got a surface, where the chemistry was measured. Each
+# is a COUNT shaded against its own row's chain count, because a genome with 30 chains and one
+# with 5 are not comparable on an absolute scale and the whole point of a matrix is comparing
+# down a column.
+RUN_COLUMNS = (
+    ("chains_ranked", "Chains", "chains",
+     "Mature chains the gate kept, which is what every later stage was handed."),
+    ("gated_out", "Gate dropped", "scored",
+     "Chains that paid under half a point on all four evidence terms and went no further, "
+     "as a share of every chain the cut produced rather than of the ones that survived."),
+    ("chains_with_coordinates", "Got a shape", "chains",
+     "Chains with coordinates, folded whole or by their annotated regions."),
+    ("chains_rescued_by_the_domain_route", "By regions", "chains",
+     "Of those, the ones too long to fold whole that were rescued by folding a region."),
+    ("chains_with_any_surface", "Surface", "chains",
+     "Chains with a measured surface, from a deposition or from a prediction."),
+    ("site_patch_measured_on_a_prediction", "Patch at the site", "chains",
+     "Chains where the patch at the residues curators marked was measurable."),
+)
+
+
+def _run_value(run, key):
+    """One column's count for one run, derived where the record states the complement.
+
+    `chains_with_coordinates` is on the landing record and not on a per-genome one, which
+    carries `chains_with_no_coordinates` instead. Deriving it keeps the column populated
+    rather than printing a dash on every row, which is what it did before -- a column of
+    dashes reads as "this stage does nothing" rather than "this figure has another name".
+    """
+    value = run.get(key)
+    if value is None and key == "chains_with_coordinates":
+        ranked, missing = run.get("chains_ranked"), run.get("chains_with_no_coordinates")
+        if ranked is not None and missing is not None:
+            return ranked - missing
+    return value
+
+
+def _run_cell(value, total):
+    """One count, shaded by its share of that column's own population."""
+    if value is None:
+        return '<td class="h h0"><span class="pt">&mdash;</span></td>'
+    share = (value / total) if total else 0
+    return (f'<td class="h h{heat(share, 1.0)}"><span class="pt">{num(value)}</span>'
+            f'<span class="rw">{share * 100:.0f}%</span></td>')
+
+
 def results_index(entries):
-    if entries:
-        rows = "".join(f"""
-    <a class="runrow" href="{esc(stem)}.html">
-      <span class="who">{esc(label)}<em>{esc(acc)}</em></span>
-      <span class="stat">{num(ranked)} chains · {num(measured)} measured · {num(round(secs))} s</span>
-    </a>""" for stem, label, acc, ranked, measured, secs in entries)
-        body = f'<div class="runlist">{rows}</div>'
-    else:
+    """Every run as one row of a matrix, so the columns can be read down.
+
+    **Why a matrix and not the list this replaces.** The list printed pathogen, accession,
+    chains and seconds, which is readable at four runs and is a wall at forty-seven. It also
+    answered the wrong question: a reader scrolling it learns that each genome was run, and
+    cannot learn the thing a panel of this size exists to show -- whether the pipeline gets a
+    structure for the chains it ranks, and whether that holds away from the four genomes it
+    was built on.
+
+    So each row is a run and each column is a stage's yield, shaded by its share of that row's
+    chains. Absolute counts are printed because they are what the record says; the shading is
+    the share, because a genome with thirty chains and one with five cannot be compared on a
+    count. A column read downward is the finding.
+
+    The totals row is a sum and not a mean: means over genomes of different sizes weight a
+    five-chain virus the same as a thirty-chain one, which is the error this layout is meant
+    to avoid making visually.
+    """
+    if not entries:
         body = ('<div class="good"><p>No runs have been submitted yet. Yours would be the '
                 'first, and the form is on the front page.</p></div>')
-    return (head(f"Runs · {SITE}", "Every pathogen genome this system has been run on.",
-                 depth=1, current="runs") + f"""
+        return (head(f"Runs · {SITE}", "Every pathogen genome this system has been run on.",
+                     depth=1, current="runs") + f"""
 <main class="wrap" id="main">
 <header class="top">
   <div class="eyebrow">generated · one page per record</div>
   <h1>Every genome this has been run on</h1>
-  <p class="standfirst">Each page below is generated from a chain record. Submit an
-  accession on the <a href="../index.html">front page</a> and yours joins the list.</p>
 </header>
 <section>{body}</section>
+</main>""" + FOOT)
+
+    def _reached(run):
+        """Share of this run's chains that ended with coordinates, for ordering."""
+        got, total = _run_value(run, "chains_with_coordinates"), run.get("chains_ranked") or 0
+        return (got or 0) / total if total else -1
+
+    # Ordered by the share of chains that got a structure, descending: the matrix exists to
+    # show how far the pipeline gets, so the rows where it got furthest come first and the
+    # genomes it could do nothing for sort to the bottom where they are a visible block
+    # rather than scattered. Chain count breaks ties, because among equal shares the larger
+    # genome is the stronger evidence.
+    rows = sorted(entries, key=lambda e: (-_reached(e), -(e.get("chains_ranked") or 0)))
+    head_cells = "".join(
+        f'<th scope="col" title="{esc(note)}"><span class="cl">{esc(label)}</span></th>'
+        for _key, label, _den, note in RUN_COLUMNS)
+    body_rows = []
+    for run in rows:
+        population = {"chains": run.get("chains_ranked") or 0,
+                      "scored": run.get("scored") or run.get("chains_ranked") or 0}
+        cells = "".join(_run_cell(_run_value(run, key), population[den])
+                        for key, _l, den, _n in RUN_COLUMNS)
+        # A run that did not finish is marked on its own row rather than dropped. Dropping
+        # it would make the matrix shorter for a reason a reader cannot see, which is the
+        # defect the gate note on the front page exists to avoid one section over.
+        broken = run.get("trustworthy") is False
+        mark = ('<span class="w broke">did not finish &middot; '
+                f'{num(run.get("infrastructure_failures"))} fold failure(s), '
+                'figures below understate the pipeline</span>' if broken else "")
+        body_rows.append(f"""
+      <tr{' class="unfinished"' if broken else ''}>
+        <td class="nm"><a href="{esc(run['stem'])}.html">{esc(run['label'])}</a>
+          <span class="w">{esc(run.get('accession') or '')}</span>{mark}</td>
+        {cells}
+        <td class="sc"><span class="v">{num(round(run.get('seconds') or 0))} s</span></td>
+      </tr>""")
+
+    sound = [r for r in rows if r.get("trustworthy") is not False]
+
+    def total_of(key):
+        # Summed over the runs that finished. A run whose folds failed for infrastructure
+        # reasons has coverage figures that are a property of the outage, not the pathogen,
+        # and adding them to a column total would move the one number this page exists for.
+        return sum(_run_value(r, key) or 0 for r in sound)
+
+    population = {"chains": total_of("chains_ranked"),
+                  "scored": sum(r.get("scored") or r.get("chains_ranked") or 0
+                                for r in sound)}
+    totals = "".join(
+        f'<td class="h h0"><span class="pt">{num(total_of(key))}</span>'
+        f'<span class="rw">'
+        f'{(total_of(key) / population[den] * 100) if population[den] else 0:.0f}%</span></td>'
+        for key, _l, den, _n in RUN_COLUMNS)
+
+    return (head(f"Runs · {SITE}", "Every pathogen genome this system has been run on.",
+                 depth=1, current="runs") + f"""
+<main class="wrap" id="main">
+<header class="top">
+  <div class="eyebrow">generated · one row per record</div>
+  <h1>Every genome this has been run on</h1>
+  <p class="standfirst">One row per run, one column per stage, shaded by the share of that
+  run&rsquo;s chains the stage reached. Read a column downward and it says how far the
+  pipeline gets across {len(rows)} genome{'' if len(rows) == 1 else 's'}, which is the
+  question a single run cannot answer. Every figure is read from that run&rsquo;s own record;
+  the pathogen name opens it.</p>
+</header>
+<section>
+  <div class="cmxscroll runmxscroll" tabindex="0" role="region"
+    aria-label="Every run and what each stage returned">
+  <table class="cmx runmx">
+    <caption>Counts as the record states them, shaded by their share of the row&rsquo;s
+      chains. A dash is a record written before that figure was kept, not a zero.</caption>
+    <thead>
+      <tr>
+        <th scope="col" class="nm">Pathogen</th>
+        {head_cells}
+        <th scope="col" class="sc">Wall</th>
+      </tr>
+    </thead>
+    <tbody>{"".join(body_rows)}</tbody>
+    <tfoot>
+      <tr>
+        <td class="nm"><b>{len(sound)} finished run{'' if len(sound) == 1 else 's'}</b>
+          {f'<span class="w broke">{len(rows) - len(sound)} unfinished, excluded from these '
+             f'totals</span>' if len(sound) != len(rows) else ''}</td>
+        {totals}
+        <td class="sc"><span class="v">{num(round(total_of('seconds') / 60))} min</span></td>
+      </tr>
+    </tfoot>
+  </table>
+  </div>
+</section>
 </main>""" + FOOT)
 
 
@@ -3207,11 +3355,31 @@ def build_results():
         (RESULTS / f"{stem}.html").write_text(result_page(case, stem))
         shutil.copyfile(path, RESULTS / f"{stem}.json")
         cov = case.get("coverage", {})
-        entries.append((stem,
-                        case.get("pathogen") or case.get("case") or stem,
-                        case.get("genome_accession"),
-                        cov.get("chains_ranked"), cov.get("surface_measured"),
-                        case.get("seconds") or 0))
+        # The whole coverage block, not five scalars. The index is a matrix now and a matrix
+        # that can only show what someone remembered to tuple up is a matrix that goes stale
+        # the first time a column is worth adding.
+        stage2 = {s["tool"]: s for s in case["stages"]}.get(
+            "intake.decompose + intake.rank_score", {})
+        gate = (stage2.get("output") or {}).get("gate") or {}
+        integrity = case.get("fold_integrity") or {}
+        entries.append({
+            "stem": stem,
+            # None for a record written before the guard existed: unknown is not the same
+            # claim as sound, and the row says which.
+            "trustworthy": integrity.get("trustworthy"),
+            "infrastructure_failures": integrity.get("infrastructure_failures"),
+            "label": case.get("pathogen") or case.get("case") or stem,
+            "accession": case.get("genome_accession"),
+            "seconds": case.get("seconds") or 0,
+            "gated_out": gate.get("gated_out"),
+            "scored": (gate.get("kept") or 0) + (gate.get("gated_out") or 0) or None,
+            **{k: cov.get(k) for k in
+               ("chains_ranked", "chains_with_coordinates", "chains_with_no_coordinates",
+                "chains_rescued_by_the_domain_route", "chains_with_any_surface",
+                "surface_measured", "chains_over_the_folding_ceiling",
+                "site_patch_measured_on_a_prediction",
+                "site_patch_measured_on_a_deposition")},
+        })
         print(f"  wrote docs/results/{stem}.html")
     (RESULTS / "index.html").write_text(results_index(entries))
     print(f"wrote docs/results/index.html  ({len(entries)} run(s))")

@@ -1102,3 +1102,58 @@ a{color:var(--accent)}
 .xmap .xfx{fill:url(#xhatch);stroke:var(--rule);stroke-dasharray:3 3}
 .xmap .xhl{stroke:currentColor;stroke-opacity:.34;stroke-width:1.1}
 .xmap .xswn{fill:var(--fig-other-fg)}
+
+/* The runs matrix. It reuses `.cmx` wholesale -- same shaded cells, same scroller, same
+   column heads -- because it is the same kind of object as the score tables on the front
+   page: a grid whose point is reading down a column. A second visual language for the same
+   idea would make the site look like two sites. Only the things `.cmx` cannot know are set
+   here: this table's first column is a link rather than a rank, and its cells carry a count
+   over a share rather than points over a measurement. */
+.runmx td.nm a{font-weight:650;color:var(--fg);text-decoration:none}
+.runmx td.nm a:hover{color:var(--accent);text-decoration:underline}
+.runmx td.nm .w{display:block;font-family:var(--mono);font-size:11px;color:var(--fg-3);
+  margin-top:2px}
+.runmx .pt{font-variant-numeric:tabular-nums}
+/* The totals row is a sum, so it is deliberately unshaded: shading it would invite reading
+   it as another genome rather than as the column's total. */
+.runmx tfoot td{border-top:2px solid var(--rule);background:var(--surface-2)}
+.runmx tfoot .pt{font-weight:650}
+/* Legibility at forty-seven rows, which is a different problem from legibility at six.
+   Everything here is scoped to `.runmx` so the score tables on the front page keep the
+   `.cmx` behaviour they were tuned for. */
+
+/* The header travels. Scrolling past row ten with the column names gone turns a matrix into
+   a grid of unlabelled numbers, and this table is tall by design. */
+.runmx thead th{position:sticky;top:0;z-index:2;background:var(--surface);
+  box-shadow:inset 0 -1px 0 var(--rule)}
+/* And the totals stay in view at the bottom edge for the same reason: a column's total is
+   the thing a reader compares a row against, and it is useless forty rows away. */
+.runmx tfoot td{position:sticky;bottom:0;z-index:2}
+/* The pathogen column anchors horizontally, so a row stays identifiable when the matrix is
+   scrolled sideways on a narrow screen. */
+.runmx td.nm,.runmx th.nm{position:sticky;left:0;z-index:1;background:var(--surface)}
+.runmx thead th.nm{z-index:3}
+.runmx tfoot td.nm{z-index:3;background:var(--surface-2)}
+/* Banding, because the eye loses its row somewhere around the fourth column. Kept very
+   faint: it is a tracking aid, and anything stronger competes with the heat shading, which
+   is the column that carries meaning. */
+.runmx tbody tr:nth-child(even) td.nm{background:var(--surface-2)}
+.runmx tbody tr:hover td{outline:1px solid var(--accent);outline-offset:-1px}
+.runmx tbody tr:hover td.nm{background:var(--accent-soft)}
+/* Tighter rows: forty-seven of them at the front page's spacing is three screens of
+   scrolling for a table whose point is comparison. */
+.runmx tbody td{padding-block:7px}
+.runmx .rw{font-size:10px}
+@media (max-width:760px){
+  .runmx td.nm,.runmx th.nm{min-width:150px}
+}
+/* A viewport for the matrix rather than a table that runs the length of the page. Tall
+   enough to show roughly a dozen rows, which is enough to read a column as a distribution
+   and short enough that the totals row stays on screen while doing it. */
+.runmxscroll{max-height:70vh;overflow:auto}
+/* A run that did not finish. Marked, not hidden: the row stays so the reader can see that
+   a genome was attempted, and the totals exclude it so a broken run cannot move the one
+   figure this page is evidence for. */
+.runmx tr.unfinished td{opacity:.55}
+.runmx .broke{display:block;color:var(--warn,#b64342);font-family:var(--mono);font-size:10px;
+  margin-top:3px;opacity:1}
