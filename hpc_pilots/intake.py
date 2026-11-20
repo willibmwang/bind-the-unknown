@@ -1681,7 +1681,65 @@ def mature_chains(accession):
     the polyprotein, which has an inhibitor in clinical use. The entry already carries those
     boundaries, so the decomposition is read rather than inferred -- the same mechanism the
     structural evidence table uses to assign deposited structures to a domain.
+
+    A chain another kept chain contains is not returned; `contained_chains` reports it instead.
+    The reason is in that function.
     """
+    return _chains_of(accession)[0]
+
+
+def contained_chains(accession):
+    """The chains dropped from `mature_chains` because a kept chain contains them.
+
+    A polyprotein cleaved twice at the same end annotates the intermediate and the final
+    product as separate `Chain` features, and the second is a sub-interval of the first rather
+    than a sibling of it. Bat coronavirus HKU3 (Q3LZX1), the relative SARS-CoV-2's spike is
+    read through when the virus itself is held out, is the case that forced this:
+
+        Chain  655 1242   588 aa   Spike protein S2
+        Chain  785 1242   458 aa   Spike protein S2'
+        Site   784  785            Cleavage
+
+    S2' is S2 with its first 130 residues removed at the second cleavage, so it offers no
+    residue, no surface and no annotated site that S2 did not already offer. Published as its
+    own target it scored 6.8637 against S2's 6.8437 -- a gap made entirely of
+    `structures_in_family`, 42 against 40, because the two descriptions match different
+    deposited titles -- and so was ranked *above* the chain that contains it, second against
+    third on the SARS-CoV-2 run. It then spent one of the run's bounded folds: ESMFold returned
+    S2 at 588 aa and mean pLDDT 46.8 and S2' at 458 aa and mean pLDDT 45.7, two low-confidence
+    monomer predictions of one metastable trimer, the second a strict suffix of the first.
+
+    Not peculiar to the spike. SIV Gag-Pol (P19505) annotates `Reverse transcriptase/
+    ribonuclease H` at 598-1156 and `p51 RT` at 598-1036, sharing a start; on the HIV-2 run
+    they placed fourth and fifth with the identical score, 5.3892.
+
+    The objection worth stating is that these are real molecular species and not annotation
+    artifacts: S2' adopts the post-fusion conformation and exposes a fusion peptide that intact
+    S2 buries, and p51 is a distinct subunit with a fold of its own. Both are true, and neither
+    is reachable from here -- this pipeline folds a sequence, so a sub-interval hands it nothing
+    its container did not, and the container carries the larger binding surface. Revisit the
+    filter if a later stage ever models conformational state, which none does today.
+
+    What makes the drop cheap rather than merely defensible is that the binding part survives
+    one level down, where the domain layer already handles it. Every region Q3LZX1 annotates
+    inside S2' -- `Fusion peptide 1` at 785-806, `Fusion peptide 2` at 804-824, `Heptad repeat
+    1` at 889-939, `Heptad repeat 2` at 1132-1171, both coiled coils, the transmembrane helix
+    -- lies inside S2 as well, because S2 contains S2'. S2' offered no region of its own, not
+    one. P19505 is the sharper case: dropping `p51 RT` also drops `p15`, the RNase H subunit at
+    1037-1156, and RNase H is a genuine inhibitor target that it would be wrong to lose. It is
+    not lost. The entry annotates `Domain 1030-1153 RNase H type-1` holding four binding-site
+    residues, inside the chain that was kept, and `domain_inventory` orders regions by exactly
+    that count. The target moves from a duplicated chain row to a region row that says why it
+    matters.
+
+    Dropped chains are reported rather than discarded, because "the entry offers four chains
+    and three were ranked" is a fact about the decomposition that an absent row cannot state.
+    """
+    return _chains_of(accession)[1]
+
+
+def _chains_of(accession):
+    """`(kept, contained)` -- the split `mature_chains` and `contained_chains` each take from."""
     payload = _entry(accession)
     chains = []
     for feature in payload.get("features", []):
@@ -1698,7 +1756,23 @@ def mature_chains(accession):
     # it came from as a child of itself.
     whole = payload["sequence"]["length"]
     chains = [c for c in chains if c["length"] < whole * 0.95]
-    return chains
+    kept, contained = [], []
+    for chain in chains:
+        # Strictly longer, so two chains annotated over identical bounds cannot delete each
+        # other and leave the parent with no products at all. Where a chain sits inside
+        # several, the longest is named: a nesting three deep is reported against the chain
+        # that actually survived it, not against a middle one that was dropped too.
+        containers = [other for other in chains
+                      if other["length"] > chain["length"]
+                      and other["start"] <= chain["start"]
+                      and other["end"] >= chain["end"]]
+        container = max(containers, key=lambda c: c["length"], default=None)
+        if container is None:
+            kept.append(chain)
+        else:
+            contained.append({**chain, "contained_in": container["description"],
+                              "contained_in_range": [container["start"], container["end"]]})
+    return kept, contained
 
 
 def _entry(accession, _cache={}):
@@ -1850,6 +1924,7 @@ def decompose(ranked, limit=None):
             row = {**row, "decompose_refused_hits": refused}
         try:
             chains = mature_chains(accession)
+            nested = contained_chains(accession)
         except Exception as error:                        # noqa: BLE001
             row = {**row, "decompose_error": f"{type(error).__name__}: {error}"}
             expanded.append(row)
@@ -2011,6 +2086,14 @@ def decompose(ranked, limit=None):
                 # RSV B's twelve published candidates wrong, and no artifact carried it.
                 "chains_outside_aligned_span": unlicensed,
                 "aligned_span_on_homolog": span,
+                # Which of the entry's chains were dropped for sitting inside another, and
+                # what contains each. `chains_in_parent` counts what was ranked, so without
+                # this line a spike that offers S1, S2 and S2' reports two chains and no
+                # reason, which reads as an entry that annotates two. `contained_chains`
+                # holds the argument for dropping them.
+                "chains_contained_in_another": [
+                    {"description": c["description"], "range": [c["start"], c["end"]],
+                     "contained_in": c["contained_in"]} for c in nested],
                 "parent": row["name"], "chain_range": [chain["start"], chain["end"]],
                 "length_aa": chain["length"],
                 "hits": row["hits"], "features": features,

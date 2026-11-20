@@ -6626,15 +6626,78 @@ def test_the_page_withholds_a_site_patch_measured_at_the_wrong_residues():
         assert build_site.site_patch_block(case) == ""
 
 
+def test_a_chain_inside_another_chain_is_not_ranked_as_a_second_target():
+    """Spike S2' is S2's C-terminal 458 residues, and was being published as its own target.
+
+    UniProt annotates each product of each cleavage, so a chain cut twice at the same end
+    appears twice: on Q3LZX1 as `Spike protein S2` at 655-1242 and `Spike protein S2'` at
+    785-1242, the second a strict suffix of the first. Ranked separately they scored 6.8637
+    and 6.8437 -- the gap is `structures_in_family` alone, 42 against 40 -- so the contained
+    chain outranked its container, and the run spent a second fold to predict a sub-interval
+    of a structure it had already predicted. The same shape is in SIV Gag-Pol, where `p51 RT`
+    at 598-1036 shares a start with `Reverse transcriptase/ribonuclease H` at 598-1156.
+
+    The two rules that stop this from deleting real targets are both asserted below: equal
+    spans never delete each other, and what is dropped is reported rather than vanishing.
+    """
+    from hpc_pilots.intake import contained_chains, mature_chains
+
+    def feature(start, end, description):
+        return {"type": "Chain", "description": description,
+                "location": {"start": {"value": start}, "end": {"value": end}}}
+
+    payload = {"sequence": {"length": 1242},
+               "features": [feature(14, 1242, "Spike glycoprotein"),
+                            feature(14, 654, "Spike protein S1"),
+                            feature(655, 1242, "Spike protein S2"),
+                            feature(785, 1242, "Spike protein S2'")]}
+    with mock.patch("hpc_pilots.intake._entry", return_value=payload):
+        kept = [c["description"] for c in mature_chains("Q3LZX1")]
+        dropped = contained_chains("Q3LZX1")
+
+    # `Spike glycoprotein` goes to the 0.95 rule, S2' to containment, and the two chains that
+    # between them tile the protein without overlapping are what is ranked.
+    assert kept == ["Spike protein S1", "Spike protein S2"], kept
+    assert [c["description"] for c in dropped] == ["Spike protein S2'"]
+    assert dropped[0]["contained_in"] == "Spike protein S2"
+    assert dropped[0]["contained_in_range"] == [655, 1242]
+
+    # Nested three deep: p51 RT inside RT/RNase H, and p15 inside both. Each dropped chain
+    # names the longest chain that contains it, so neither is reported against a row that was
+    # itself dropped. p15 is the RNase H subunit and a real inhibitor target; it survives as
+    # `Domain 1030-1153 RNase H type-1` on the chain that was kept, which is where the domain
+    # layer ranks it by the four binding-site residues inside it.
+    payload = {"sequence": {"length": 1449},
+               "features": [feature(502, 597, "Protease"),
+                            feature(598, 1156, "Reverse transcriptase/ribonuclease H"),
+                            feature(598, 1036, "p51 RT"),
+                            feature(1037, 1156, "p15")]}
+    with mock.patch("hpc_pilots.intake._entry", return_value=payload):
+        kept = [c["description"] for c in mature_chains("P19505")]
+        dropped = contained_chains("P19505")
+    assert kept == ["Protease", "Reverse transcriptase/ribonuclease H"], kept
+    assert {c["contained_in"] for c in dropped} == {"Reverse transcriptase/ribonuclease H"}
+
+    # Two chains annotated over identical bounds -- the containment test is strict on length,
+    # so neither deletes the other and the parent keeps both rather than none.
+    payload = {"sequence": {"length": 900},
+               "features": [feature(1, 400, "Capsid protein"),
+                            feature(1, 400, "Capsid protein, alternative name")]}
+    with mock.patch("hpc_pilots.intake._entry", return_value=payload):
+        assert len(mature_chains("FAKE01")) == 2
+        assert contained_chains("FAKE01") == []
+
+
 def test_a_fold_units_filename_cannot_collide_with_another_chains():
-    """`_unit_slug` is qualified by rank, and the collision it exists for is in this data.
+    """`_unit_slug` is qualified by rank, and the collision it is written for is in this data.
 
     Slugging the name alone collapsed `Spike protein S2'` and `Spike protein S2` onto one
     string -- the apostrophe is not alphanumeric and is stripped -- so ranks 1 and 3 wrote the
     same file, the second fold overwrote the first, and the page would have drawn one chain's
-    structure under both rows. Both chains genuinely offer a `Heptad repeat 1`, because S2' is
-    a cleavage product of S2 and they share it, so the collision is a property of this data
-    rather than a freak name.
+    structure under both rows. Those two chains no longer reach a ranking together, because
+    S2' is contained in S2 and `intake.contained_chains` now drops it, but the guard stays: it
+    is a property of the slug, the pair above is what proved it, and nothing stops the next
+    entry from annotating `nsp3'` beside `nsp3`.
     """
     from hpc_pilots.domain_folds import _region_label, _slug, _unit_slug
     from hpc_pilots.domains import label_for
