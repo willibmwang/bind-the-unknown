@@ -3,7 +3,7 @@
 **What this measures.** For each virus the organism's own curated entries are deleted from
 the reference before identification, so every protein has to be named through a relative.
 Then: does the ranker put a protein an approved antiviral actually acts on near the top?
-Recall@k over 46 genomes, rather than the three the project had before.
+Recall@k over 47 genomes, rather than the three the project had before.
 
 **Why it runs the ranking stages and not the chain.** The question is about the ordering, and
 the ordering is settled by the end of stage 2. The surface stage costs about thirty seconds a
@@ -100,7 +100,7 @@ def hits(result, patterns):
     return found
 
 
-def report():
+def report(with_families=False):
     files = sorted(OUT.glob("*.json"))
     if not files:
         print("nothing in runs/benchmark yet")
@@ -116,8 +116,8 @@ def report():
             continue
         found = hits(res, entry["targets"])
         best = min((h["rank"] for h in found), default=None)
-        row = {"pathogen": res["pathogen"], "chains": len(res["chains"]),
-               "matching": len(found),
+        row = {"pathogen": res["pathogen"], "accession": res["accession"],
+               "chains": len(res["chains"]), "matching": len(found),
                "removed": res["reference_entries_removed"], "best": best,
                "applied": res["holdout_applied"], "seconds": res["seconds"],
                "top": res["chains"][0]["target"] if res["chains"] else None}
@@ -162,15 +162,127 @@ def report():
               f"reported separately and NOT counted above:")
         for r in leaked:
             print(f"    {r['pathogen']:<42} best rank {r['best']}")
+    if with_families:
+        # Only the rows whose hold-out applied, for the reason the split above exists: a
+        # self-identified genome makes the ranker look good for the wrong reason, and
+        # re-weighting by family would not make it look good for a better one.
+        families_report({r["accession"]: r for r in rows})
+
+
+FAMILIES = ROOT / "data/benchmark_families.json"
+
+
+def families_report(rows_by_accession):
+    """Recall@k with the family as the unit of analysis, and an interval on the lift.
+
+    **The defect this answers is already written down.** `benchmarks/README.md`: "26 of 46
+    genomes sit in a pattern-identical group. Five coronaviruses share one pattern list; five
+    biologically unrelated viruses share RdRp / Glycoprotein / Nucleoprotein. Only ~20 rows have
+    a unique list, so an aggregate over 46 independent instances is inflated. Combine within
+    family first, then across families." A per-genome mean over 47 genomes counts the five
+    coronaviruses as five draws, when the hold-out makes each of them name its proteins through
+    a relative that is usually another coronavirus and scores them against the same three target
+    names. They are closer to one draw than to five.
+
+    **Mean of family means, not a weighted mean.** Weighting each family by its genome count
+    reproduces the per-genome figure exactly and answers nothing. So each of the 21 families
+    carries one vote: Flaviviridae's eight genomes are averaged into one number before that
+    number is averaged with Hepadnaviridae's single one. Eleven families hold exactly one
+    genome, so this is a re-weighting rather than a variance reduction, and the re-weighting is
+    the correction -- the panel's largest families are also its best-curated ones.
+
+    **The interval is over families, bootstrapped, because that is the unit being claimed.**
+    Resampling genomes would put the dependence back. 10,000 draws, seeded, so the number is
+    reproducible rather than merely plausible; percentile interval, because a proportion near
+    its ceiling has no business with a symmetric one.
+
+    **Read the lift, not the recall.** `null_at` already explains why recall@k alone can look
+    like a pass by chance: with m matching chains among n candidates a random ranking scores
+    most of it. The lift is observed minus that hypergeometric null, family-combined the same
+    way, and its interval is the one that says whether there is a result here at all.
+    """
+    import random
+    from math import comb
+
+    if not FAMILIES.exists():
+        print("\n  data/benchmark_families.json is absent, so no family-combined figure")
+        return
+    payload = json.loads(FAMILIES.read_text())
+    assignment = payload["families"]
+
+    def null_for(row, k):
+        n, m = row["chains"], row["matching"]
+        if not n or not m:
+            return None
+        miss = comb(n - m, k) / comb(n, k) if n - m >= k else 0.0
+        return 1.0 - miss
+
+    # One bucket per family, holding its genomes' (hit, null) at each k.
+    groups = {}
+    unscoreable = []
+    for accession, row in rows_by_accession.items():
+        family = assignment.get(accession)
+        if family is None:
+            continue
+        if null_for(row, 1) is None:
+            # No matching chain among the candidates, so there is no ranking to score. The
+            # panel's own `unscoreable_note` says this is a finding about reach and belongs in
+            # its own tier rather than in a recall denominator, and a zero here would be a
+            # claim that the ranker put the target low rather than that it never had one.
+            unscoreable.append((family, row["pathogen"]))
+            continue
+        groups.setdefault(family, []).append(row)
+
+    print(f"\n  Unit of analysis: FAMILY. {sum(len(v) for v in groups.values())} scoreable "
+          f"genome(s) in {len(groups)} family(ies); the per-genome table above treats each "
+          f"genome as independent and this does not.")
+    if unscoreable:
+        for family, pathogen in unscoreable:
+            print(f"    dropped as unscoreable (no matching chain among its candidates): "
+                  f"{pathogen} [{family}]")
+
+    rng = random.Random(20261119)
+    names = sorted(groups)
+    print(f"\n  {'':9}{'observed':>10}{'random':>10}{'lift':>9}"
+          f"{'95% CI on the lift':>22}")
+    for k in (1, 3, 5, 10):
+        # Each family collapses to one observed proportion and one null proportion.
+        per_family = []
+        for family in names:
+            members = groups[family]
+            obs = sum(1.0 for r in members
+                      if r["best"] is not None and r["best"] <= k) / len(members)
+            null = sum(null_for(r, k) for r in members) / len(members)
+            per_family.append((obs, null))
+        observed = 100.0 * sum(o for o, _ in per_family) / len(per_family)
+        random_at = 100.0 * sum(n for _, n in per_family) / len(per_family)
+        draws = []
+        for _ in range(10000):
+            sample = [per_family[rng.randrange(len(per_family))]
+                      for _ in range(len(per_family))]
+            draws.append(100.0 * sum(o - n for o, n in sample) / len(sample))
+        draws.sort()
+        low, high = draws[int(0.025 * len(draws))], draws[int(0.975 * len(draws)) - 1]
+        print(f"  recall@{k:<3}{observed:>9.1f}%{random_at:>9.1f}%"
+              f"{observed - random_at:>+8.1f}{f'[{low:+.1f}, {high:+.1f}]':>22}")
+    print(f"\n  An interval that excludes zero is a lift this panel supports at the family "
+          f"level. One that includes it is a lift the per-genome table may still show, which "
+          f"is the whole reason for printing both.")
+    print(f"  Families, and how many genomes each carries: "
+          + ", ".join(f"{f} {len(groups[f])}" for f in names))
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--report", action="store_true", help="summarise what is on disk")
+    ap.add_argument("--families", action="store_true",
+                    help="also combine within family before combining across families, with a "
+                         "bootstrap interval over families. The per-genome aggregate treats 47 "
+                         "genomes as 47 independent draws and they are not")
     ap.add_argument("--limit", type=int, default=0, help="stop after this many new genomes")
     args = ap.parse_args()
     if args.report:
-        return report()
+        return report(with_families=args.families)
 
     OUT.mkdir(parents=True, exist_ok=True)
     panel = json.loads(PANEL.read_text())["panel"]
@@ -184,7 +296,7 @@ def main():
         try:
             result = rank_one(entry)
         except Exception as broke:
-            # One unreachable endpoint must not cost the other forty-five genomes -- and must
+            # One unreachable endpoint must not cost the other forty-six genomes -- and must
             # not cost THIS one either. A failure is written beside the result path, never to
             # it: `path.exists()` is the resume check, so persisting an error row here made a
             # transient timeout drop that genome permanently and silently.
@@ -206,7 +318,7 @@ def main():
         done += 1
         if args.limit and done >= args.limit:
             break
-    report()
+    report(with_families=args.families)
 
 
 if __name__ == "__main__":
