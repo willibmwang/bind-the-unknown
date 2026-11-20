@@ -6785,6 +6785,91 @@ def test_the_page_withholds_a_site_patch_measured_at_the_wrong_residues():
         assert build_site.site_patch_block(case) == ""
 
 
+def test_the_region_rmsd_superposes_and_refuses_to_fit_a_mirror_image():
+    """Kabsch, and the reflection guard that is the only subtle part of it.
+
+    The two folds being compared come from separate predictions, so each is in its own
+    arbitrary frame and a raw coordinate difference between them measures the orientation
+    rather than the shape. Superposing first is what makes the number mean anything, and the
+    first assertion is that a rotated and translated copy comes back at zero.
+
+    **The guard matters more than it looks.** An SVD solution to the superposition is free to
+    return an improper rotation -- one with determinant -1, which is a reflection -- and a
+    reflection fits a left-handed helix onto a right-handed one perfectly. Without the
+    correction the comparison would report mirror-image structures as identical, which for
+    protein backbones is the one difference that can never be real: every residue here is
+    L-alpha and the helices are right-handed. So the second assertion builds a chiral
+    arrangement, mirrors it, and requires the RMSD to stay well away from zero.
+    """
+    from hpc_pilots.region_fidelity import kabsch_rmsd
+
+    # A rotation by 90 degrees about z, then a translation. Same shape, different frame.
+    shape = {1: (0.0, 0.0, 0.0), 2: (1.0, 0.0, 0.0), 3: (1.0, 1.0, 0.0),
+             4: (1.0, 1.0, 1.0), 5: (2.0, 1.0, 1.0)}
+    moved = {k: (-y + 7.0, x - 3.0, z + 11.0) for k, (x, y, z) in shape.items()}
+    rmsd, compared = kabsch_rmsd(shape, moved)
+    assert compared == 5
+    assert rmsd == 0.0, rmsd
+
+    # The same points reflected through the xy plane. A proper rotation cannot bring a chiral
+    # set onto its mirror, so the fit must stay poor; an unguarded SVD would return 0.0 here.
+    mirrored = {k: (x, y, -z) for k, (x, y, z) in shape.items()}
+    rmsd, _compared = kabsch_rmsd(shape, mirrored)
+    assert rmsd is not None and rmsd > 0.3, (rmsd, "a mirror image was fitted as a rotation")
+
+    # Displacing one atom of five cannot move the RMSD by the whole displacement, because the
+    # superposition spreads it; it must be positive and smaller than the shift itself.
+    nudged = dict(shape)
+    nudged[5] = (2.0, 1.0, 3.0)
+    rmsd, _compared = kabsch_rmsd(shape, nudged)
+    assert 0.0 < rmsd < 2.0, rmsd
+
+    # Under three shared residues there is no superposition to speak of, and the count is
+    # still reported so a caller can say why rather than printing a bare None.
+    assert kabsch_rmsd({1: (0.0, 0.0, 0.0), 2: (1.0, 0.0, 0.0)},
+                       {1: (0.0, 0.0, 0.0), 2: (1.0, 0.0, 0.0)}) == (None, 2)
+    assert kabsch_rmsd({1: (0.0, 0.0, 0.0)}, {9: (0.0, 0.0, 0.0)}) == (None, 0)
+
+
+def test_the_region_comparison_shifts_a_fragment_into_its_chains_numbering():
+    """A region's own fold is numbered from 1 and must be read against the chain's numbering.
+
+    ESMFold numbers whatever it is given from residue 1, so a 90-residue region folded alone
+    comes back as residues 1 to 90 whether it sits at the start of its chain or at the end.
+    Intersecting those numbers with the whole-chain fold unshifted would superpose the region's
+    first residue onto the CHAIN's first residue -- a different residue entirely, and usually a
+    different amino acid -- and report an RMSD between two unrelated stretches as though it
+    were the cost of folding a fragment. Both readers are pinned here on hand-written ATOM
+    records, because this is arithmetic and not a measurement.
+    """
+    from hpc_pilots.region_fidelity import _ca_coordinates, _plddt
+
+    def atom(number, x, y, z, b):
+        return (f"ATOM  {number:>5}  CA  ALA A{number:>4}    "
+                f"{x:>8.3f}{y:>8.3f}{z:>8.3f}  1.00{b:>6.2f}           C")
+
+    # A "chain" of six residues, and a "region" covering its residues 3 to 5.
+    chain = "\n".join(atom(n, n, 0, 0, 0.5 + n / 100) for n in range(1, 7))
+    region = "\n".join(atom(n, n + 2, 0, 0, 0.9) for n in range(1, 4))
+
+    in_chain = _ca_coordinates(chain, 3, 5)
+    assert sorted(in_chain) == [3, 4, 5]
+    # Unshifted the region is 1, 2, 3 and shares only residue 3 with the window above.
+    assert sorted(_ca_coordinates(region)) == [1, 2, 3]
+    shifted = {number + 3 - 1: point for number, point in _ca_coordinates(region).items()}
+    assert sorted(shifted) == [3, 4, 5]
+    # And once shifted the two describe the same three residues in the same place.
+    assert shifted == in_chain
+
+    # pLDDT is restricted to the same window, and the 0-1 column is read onto the 0-100 scale
+    # the rest of this project reports, which `folded_structure` records as `plddt_scale`.
+    assert _plddt(chain, 3, 5) == round(((0.53 + 0.54 + 0.55) / 3) * 100, 2)
+    # A file already on the 0-100 scale is not multiplied a second time into nonsense.
+    hundreds = "\n".join(atom(n, n, 0, 0, 70.0) for n in range(1, 4))
+    assert _plddt(hundreds) == 70.0
+    assert _plddt(chain, 99, 120) is None
+
+
 def test_combining_by_family_is_not_the_per_genome_mean_and_its_interval_is_seeded():
     """The family-combined figure must re-weight, and must be reproducible.
 
