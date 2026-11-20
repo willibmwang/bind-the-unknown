@@ -1,0 +1,2936 @@
+{
+  "case": "Human respiratory syncytial virus B, Human respiratory syncytial virus held out",
+  "genome_accession": "NC_001781.1",
+  "reference_excluded_organism": "Human respiratory syncytial virus",
+  "stages": [
+    {
+      "stage": 1,
+      "name": "Genome to candidate proteins",
+      "tool": "intake.rank_targets",
+      "endpoints": [
+        "NCBI efetch",
+        "UniProt"
+      ],
+      "input": {
+        "genome_accession": "NC_001781.1",
+        "reference_excluded_organism": "Human respiratory syncytial virus"
+      },
+      "output": {
+        "genome_length_nt": 15225,
+        "segments": 1,
+        "orfs_found": 18,
+        "orfs_ranked": 12,
+        "reference_entries": 17477,
+        "reference_entries_removed": 52,
+        "identified": 10,
+        "unidentified": 2,
+        "gate": {
+          "terms": [
+            "surface_exposed",
+            "essential_class",
+            "druggable_class",
+            "structures_in_family"
+          ],
+          "floor": 0.5,
+          "rule": "a row is kept when at least one of 4 evidence terms pays 0.5 points or more. Conservation is not among them: it says how well this genome was recognised, not whether what was recognised is worth aiming at",
+          "kept": 7,
+          "gated_out": 5,
+          "dropped": [
+            {
+              "rank": 6,
+              "name": "MATRX_ORSVW Matrix protein",
+              "parent": null,
+              "score": 1.8606,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 7,
+              "name": "PHOSP_ORSVW Phosphoprotein",
+              "parent": null,
+              "score": 1.557,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 8,
+              "name": "M21_ORSVW Protein M2-1",
+              "parent": null,
+              "score": 1.4292,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 9,
+              "name": "NS2_BRSVA Non-structural protein 2",
+              "parent": null,
+              "score": 1.2999,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 10,
+              "name": "NS1_ORSVW Non-structural protein 1",
+              "parent": null,
+              "score": 0.6888,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            }
+          ]
+        }
+      },
+      "seconds": 11.61,
+      "hands_to_next": "one reviewed accession and one residue range per candidate"
+    },
+    {
+      "stage": 2,
+      "name": "Polyproteins to mature chains, and the score for each",
+      "tool": "intake.decompose + intake.rank_score",
+      "endpoints": [
+        "UniProt"
+      ],
+      "input": {
+        "candidates_in": 12
+      },
+      "output": {
+        "chains_out": 6,
+        "rubric": {
+          "conservation": 3.0,
+          "surface_exposed": 2.0,
+          "essential_class": 1.5,
+          "druggable_class": 0.8,
+          "structures_in_family_capped": 0.5
+        },
+        "chains_scored_before_the_gate": 11,
+        "gate": {
+          "terms": [
+            "surface_exposed",
+            "essential_class",
+            "druggable_class",
+            "structures_in_family"
+          ],
+          "floor": 0.5,
+          "rule": "a row is kept when at least one of 4 evidence terms pays 0.5 points or more. Conservation is not among them: it says how well this genome was recognised, not whether what was recognised is worth aiming at",
+          "kept": 6,
+          "gated_out": 5,
+          "dropped": [
+            {
+              "rank": 7,
+              "name": "MATRX_ORSVW Matrix protein",
+              "parent": null,
+              "score": 1.8606,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 8,
+              "name": "PHOSP_ORSVW Phosphoprotein",
+              "parent": null,
+              "score": 1.557,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 9,
+              "name": "M21_ORSVW Protein M2-1",
+              "parent": null,
+              "score": 1.4292,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 10,
+              "name": "NS2_BRSVA Non-structural protein 2",
+              "parent": null,
+              "score": 1.2999,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 11,
+              "name": "NS1_ORSVW Non-structural protein 1",
+              "parent": null,
+              "score": 0.6888,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            }
+          ]
+        },
+        "all_decompositions_reproduce_the_score": true
+      },
+      "seconds": 4.34,
+      "hands_to_next": "every chain that cleared the gate, with the accession and range its surface is measured on. 5 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them"
+    },
+    {
+      "stage": 3,
+      "name": "Every chain to coordinates, whole where it fits and by its functional regions where it does not",
+      "tool": "structures.folded",
+      "endpoints": [
+        "ESM Atlas"
+      ],
+      "input": {
+        "candidates_in": 6,
+        "identified_in": 6,
+        "gated_out_before_this_stage": 5,
+        "residue_ceiling": 1200,
+        "domain_units_per_chain": 3,
+        "fold_requests_per_run": 40,
+        "folding_budget_seconds": 240.0
+      },
+      "output": {
+        "foldable": 5,
+        "not_foldable": 1,
+        "unidentified_foldable": 0,
+        "chains_folded": 4,
+        "folds_attempted": 4,
+        "folds_refused": 0,
+        "also_folded": [
+          "Fusion glycoprotein F1",
+          "NCAP_BRSVR Nucleoprotein",
+          "unidentified probable surface antigen"
+        ],
+        "units_offered": 13,
+        "units_inside_the_ceiling": 6,
+        "units_recorded": 5,
+        "units_folded": 4,
+        "domain_units_offered": 8,
+        "domain_units_inside_the_ceiling": 2,
+        "domain_units_recorded": 0,
+        "domain_units_folded": 0,
+        "domain_units_attempted": 0,
+        "domains_folded": [],
+        "chains_offered_a_domain_route": 2,
+        "chains_rescued_by_the_domain_route": 0,
+        "chains_with_coordinates": 4,
+        "chains_with_no_coordinates": 2,
+        "domain_units_not_folded_by_limit": 0,
+        "domain_units_not_folded_by_budget": 0,
+        "chains_not_folded_by_limit": 0,
+        "chains_not_folded_by_budget": 0,
+        "seconds_spent_on_refused_folds": 0,
+        "chains_over_the_ceiling": 1,
+        "over_the_ceiling": [
+          "L_BRSVA RNA-directed RNA polymerase L"
+        ],
+        "changes_any_rank": false,
+        "folded_target": "Fusion glycoprotein F2",
+        "residues": 84,
+        "mean_plddt": 54.89,
+        "at_or_above_70": 0.2262,
+        "sequence_sha256": "dc1df080764ab62d2bba445a2301fd7087fd473273e019eb8a2f50f573efaf48",
+        "error": null
+      },
+      "seconds": 16.54,
+      "hands_to_next": "coordinates for 4 of the 6 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 1 chains over it. Plus the functional site positions, carried through the alignment into this genome's numbering, which the surface stage anchors the patch arithmetic on. 2 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region's surface goes under its chain's row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2"
+    },
+    {
+      "stage": 4,
+      "name": "Every chain to a measured surface, and the patch at the residues that do the chemistry",
+      "tool": "geometry.surface_markers",
+      "endpoints": [
+        "PDBe",
+        "RCSB",
+        "UniProt"
+      ],
+      "input": {
+        "candidates_in": 6,
+        "predicted_coordinates_in": 4,
+        "predicted_region_coordinates_in": 0,
+        "chains_with_functional_site_positions_in": 3,
+        "macrocycle_reach_a": 13.81976597885342
+      },
+      "output": {
+        "rows_out": 6,
+        "measured": 2,
+        "unmeasured": 4,
+        "nothing_dropped": true,
+        "predicted_coordinates_offered": 4,
+        "measured_on_predicted_coordinates": 4,
+        "predicted_was_the_only_route": 2,
+        "no_surface_by_either_route": 2,
+        "no_surface_over_the_folding_ceiling": 1,
+        "region_surfaces_offered": 0,
+        "region_surfaces_measured": 0,
+        "chains_with_a_region_surface": 0,
+        "chains_with_no_surface_and_no_region_surface": 2,
+        "chains_with_functional_sites": 4,
+        "functional_site_positions": 19,
+        "functional_site_positions_mapped_into_this_genome": 2,
+        "site_patch_measured_on_a_deposition": 1,
+        "site_patch_measured_on_a_prediction": 2,
+        "site_patch_on_a_deposition_not_at_the_annotated_residues": 1,
+        "site_patch_on_a_prediction_not_at_the_annotated_residues": 0,
+        "gate_yes": 1,
+        "gate_borderline": 1,
+        "gate_no": 0,
+        "changes_any_rank": false,
+        "read_by_later_stages": []
+      },
+      "seconds": 1.36,
+      "hands_to_next": "a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 1 chains through a deposition and 2 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage's product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one"
+    },
+    {
+      "stage": 5,
+      "name": "A library definition over the randomised region",
+      "tool": "chemistry.library_spec",
+      "endpoints": [
+        "local tables"
+      ],
+      "input": {
+        "reads_from_upstream": [],
+        "would_read_if_connected": [
+          "patch_median_a2",
+          "patch_fraction_of_surface",
+          "sequons_near_patch"
+        ],
+        "not_connected_because": "the library definition takes an initiator, a randomised-region length range and a set of elongator classes, all three properties of the display platform rather than of a target. No stated rule turns a measured patch area into any of them, and inventing one would publish a conversion as a result."
+      },
+      "output": {
+        "initiator": "ClAc-D-Tyr",
+        "closure_residue": "C",
+        "random_region": [
+          4,
+          8
+        ],
+        "alphabet_size": 25,
+        "theoretical_diversity": 158945703125
+      },
+      "seconds": 0.0,
+      "hands_to_next": "the position count the go/no-go test in arm 2 reads"
+    },
+    {
+      "stage": 6,
+      "name": "Evidence on the highest-ranked targets",
+      "tool": "literature.search + similarity.homologs + families.entries + structures.predicted + bioactivity.prior_binders",
+      "endpoints": [
+        "Europe PMC",
+        "EBI HMMER",
+        "InterPro",
+        "AlphaFold DB",
+        "3D-Beacons",
+        "ChEMBL",
+        "IEDB",
+        "MaveDB"
+      ],
+      "input": {
+        "targets_in": 3,
+        "ranked_available": 6,
+        "wall_budget_seconds": 700.0
+      },
+      "output": {
+        "targets_covered": 3,
+        "calls_made": 15,
+        "ok": 12,
+        "not_ok": 3,
+        "network_calls": 61,
+        "changes_any_rank": false,
+        "every_target_has_every_tool": true
+      },
+      "seconds": 43.72,
+      "hands_to_next": "nothing. This annotates the shortlist and never reorders it"
+    }
+  ],
+  "candidates": [
+    {
+      "rank": 1,
+      "identified": true,
+      "name": "FUS_BRSVC Fusion glycoprotein F0",
+      "identification_route": "exact",
+      "nearest_homolog": "P22167",
+      "nearest_organism": "Bovine respiratory syncytial virus (strain Copenhagen)",
+      "strand": "+",
+      "frame": 1,
+      "nt_start": 5665,
+      "length_aa": 574,
+      "segment": 0,
+      "features": {
+        "conservation": 0.5641,
+        "surface_exposed": true,
+        "essential_class": true,
+        "druggable_class": 2,
+        "structures_in_family": 1
+      },
+      "terms": {
+        "conservation": 1.6923,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.01,
+        "druggable_class": 1.6
+      },
+      "score": 6.8023,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "fus_brsva fusion glycoprotein f0",
+        "fus_brsvc fusion glycoprotein f0",
+        "fus_brsvr fusion glycoprotein f0",
+        "fusion of virus membrane with host cell membrane",
+        "fusion of virus membrane with host membrane",
+        "glycoprotein",
+        "viral attachment to host cell",
+        "viral attachment to host entry receptor"
+      ],
+      "locations": [
+        "host cell membrane",
+        "host golgi apparatus membrane",
+        "virion membrane"
+      ],
+      "exposed_fraction_of_locations": 0.667,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 2,
+      "identified": true,
+      "name": "L_BRSVA RNA-directed RNA polymerase L",
+      "identification_route": "exact",
+      "nearest_homolog": "O91940",
+      "nearest_organism": "Bovine respiratory syncytial virus (strain A51908)",
+      "strand": "+",
+      "frame": 0,
+      "nt_start": 8442,
+      "length_aa": 2188,
+      "segment": 0,
+      "features": {
+        "conservation": 0.5307,
+        "surface_exposed": false,
+        "essential_class": true,
+        "druggable_class": 3,
+        "structures_in_family": 0
+      },
+      "terms": {
+        "conservation": 1.5921,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "score": 5.4921,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "hydrolase",
+        "l_brsva rna-directed rna polymerase l",
+        "l_mpv15 rna-directed rna polymerase l",
+        "methyltransferase",
+        "nucleotidyltransferase",
+        "rna-directed rna polymerase",
+        "transferase"
+      ],
+      "locations": [
+        "host cytoplasm",
+        "virion"
+      ],
+      "exposed_fraction_of_locations": 0.0,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 3,
+      "identified": true,
+      "name": "R1A_WBV24 Replicase polyprotein 1a",
+      "identification_route": "remote",
+      "nearest_homolog": "Q008X5",
+      "nearest_organism": "White bream virus (isolate Blicca bjoerkna L./Germany/DF24/00)",
+      "strand": "+",
+      "frame": 0,
+      "nt_start": 4689,
+      "length_aa": 299,
+      "segment": 0,
+      "features": {
+        "conservation": 0.2099,
+        "surface_exposed": false,
+        "essential_class": true,
+        "druggable_class": 3,
+        "structures_in_family": 2
+      },
+      "terms": {
+        "conservation": 0.6297,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.02,
+        "druggable_class": 2.4
+      },
+      "score": 4.5497,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "endonuclease",
+        "exonuclease",
+        "helicase",
+        "hydrolase",
+        "methyltransferase",
+        "nucleotidyltransferase",
+        "protease",
+        "rna-directed rna polymerase"
+      ],
+      "locations": [
+        "host membrane"
+      ],
+      "exposed_fraction_of_locations": 0.0,
+      "conservation_scale": "bits_over_200",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 4,
+      "identified": true,
+      "name": "NCAP_BRSVR Nucleoprotein",
+      "identification_route": "exact",
+      "nearest_homolog": "Q65708",
+      "nearest_organism": "Bovine respiratory syncytial virus (strain Rb94)",
+      "strand": "+",
+      "frame": 2,
+      "nt_start": 1139,
+      "length_aa": 391,
+      "segment": 0,
+      "features": {
+        "conservation": 0.7649,
+        "surface_exposed": false,
+        "essential_class": true,
+        "druggable_class": 0,
+        "structures_in_family": 0
+      },
+      "terms": {
+        "conservation": 2.2947,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 3.7947,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "capsid protein",
+        "helical capsid protein",
+        "ncap_brsv3 nucleoprotein",
+        "ncap_brsvr nucleoprotein",
+        "ncap_orsvw nucleoprotein",
+        "ribonucleoprotein",
+        "viral nucleoprotein"
+      ],
+      "locations": [
+        "host cytoplasm",
+        "virion"
+      ],
+      "exposed_fraction_of_locations": 0.0,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 5,
+      "identified": true,
+      "name": "unidentified probable surface antigen",
+      "identification_route": "topology",
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 1,
+      "nt_start": 2791,
+      "length_aa": 177,
+      "segment": 0,
+      "features": {
+        "conservation": 0.0,
+        "surface_exposed": true,
+        "essential_class": false,
+        "druggable_class": 2,
+        "structures_in_family": 0
+      },
+      "terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "score": 3.6,
+      "terms_sum_to_score": true,
+      "keywords_matched": [],
+      "locations": [
+        "predicted surface, from hydropathy"
+      ],
+      "exposed_fraction_of_locations": null,
+      "conservation_scale": null,
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 11,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "+",
+      "frame": 1,
+      "nt_start": 5170,
+      "length_aa": 96,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 0,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 12,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 0,
+      "nt_start": 8355,
+      "length_aa": 96,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 1,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    }
+  ],
+  "minimum_orf_aa": 60,
+  "minimum_hit_score": 0.12,
+  "scores": [
+    {
+      "rank": 1,
+      "target": "Fusion glycoprotein F2",
+      "parent": "FUS_BRSVC Fusion glycoprotein F0",
+      "tier": "exact",
+      "nearest_homolog": "P22167",
+      "chain_range": [
+        26,
+        109
+      ],
+      "conservation": 0.5641,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false,
+      "surface_exposed": true,
+      "essential_class": true,
+      "druggable_class": 2,
+      "structures_in_family": 1,
+      "score_terms": {
+        "conservation": 1.6923,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.01,
+        "druggable_class": 1.6
+      },
+      "score": 6.8023,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 2,
+      "target": "Fusion glycoprotein F1",
+      "parent": "FUS_BRSVC Fusion glycoprotein F0",
+      "tier": "exact",
+      "nearest_homolog": "P22167",
+      "chain_range": [
+        137,
+        574
+      ],
+      "conservation": 0.5641,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false,
+      "surface_exposed": true,
+      "essential_class": true,
+      "druggable_class": 2,
+      "structures_in_family": 1,
+      "score_terms": {
+        "conservation": 1.6923,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.01,
+        "druggable_class": 1.6
+      },
+      "score": 6.8023,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 3,
+      "target": "L_BRSVA RNA-directed RNA polymerase L",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "O91940",
+      "chain_range": null,
+      "conservation": 0.5307,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false,
+      "surface_exposed": false,
+      "essential_class": true,
+      "druggable_class": 3,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 1.5921,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "score": 5.4921,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 4,
+      "target": "N7-guanine methyltransferase",
+      "parent": "R1A_WBV24 Replicase polyprotein 1a",
+      "tier": "remote",
+      "nearest_homolog": "Q008X6",
+      "chain_range": [
+        1,
+        3071
+      ],
+      "conservation": 0.2099,
+      "conservation_scale": "bits_over_200",
+      "conservation_at_ceiling": false,
+      "surface_exposed": false,
+      "essential_class": true,
+      "druggable_class": 3,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.6297,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "score": 4.5297,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 5,
+      "target": "NCAP_BRSVR Nucleoprotein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q65708",
+      "chain_range": null,
+      "conservation": 0.7649,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false,
+      "surface_exposed": false,
+      "essential_class": true,
+      "druggable_class": 0,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 2.2947,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 3.7947,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 6,
+      "target": "unidentified probable surface antigen",
+      "parent": null,
+      "tier": "topology",
+      "nearest_homolog": null,
+      "chain_range": null,
+      "conservation": 0.0,
+      "conservation_scale": null,
+      "conservation_at_ceiling": false,
+      "surface_exposed": true,
+      "essential_class": false,
+      "druggable_class": 2,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "score": 3.6,
+      "decomposition_reproduces_score": true
+    }
+  ],
+  "surfaces": [
+    {
+      "target": "Fusion glycoprotein F2",
+      "rank": 1,
+      "identified": true,
+      "measured_on_accession": "P22167",
+      "chain_range": [
+        26,
+        109
+      ],
+      "measured": true,
+      "unmeasured_because": null,
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host furin-like protease",
+          "ligand": null,
+          "positions_on_the_relative": [
+            109
+          ],
+          "positions": [
+            109
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        109
+      ],
+      "site_surface": {
+        "measured": true,
+        "anchors_asked": [
+          84
+        ],
+        "anchors_numbering": "author numbering of the deposited chain, taken as 1-based within the mature chain the relative's entry delimits",
+        "anchors_found": [
+          84
+        ],
+        "anchors_missing": [],
+        "measured_on": "5tdl:A",
+        "reach_a": 13.81976597885342,
+        "positions_within_reach": [
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          199,
+          220,
+          223,
+          224,
+          227,
+          228,
+          230,
+          231,
+          234
+        ],
+        "residues_within_reach": 33,
+        "hydrophobic_within_reach": 16,
+        "exposed_within_reach": 18,
+        "site_patch_area_a2": 0.0,
+        "site_patch_positions": [],
+        "site_patch_fraction_of_the_site": 0.0,
+        "site_shares_the_patch": false,
+        "not_measured_because": null,
+        "anchors_agreeing_with_the_annotation": 0,
+        "anchors_disagreeing_with_the_annotation": 1,
+        "anchors_not_checked_against_the_annotation": 0,
+        "anchors_at_the_wrong_residue": [
+          {
+            "anchor": 84,
+            "on_the_relative": 109,
+            "expected_residue": "R",
+            "residue_found": "E"
+          }
+        ],
+        "measured_at_the_annotated_residues": false,
+        "not_the_annotated_residues_because": "1 of the 1 anchors this measurement was taken at do not carry the residue the annotation names there -- 84 carries E where the relative's entry has R at 109. An annotated position is offered to a structure as `position - chain_start + 1`, which is right for a deposition of the mature chain and wrong for a construct numbered from its own first residue or for a chain deposited in the parent polyprotein's numbering; a deliberately mutated construct and a substitution across the species gap read the same way from here. The figures in this block were measured at the residues named above and are reported rather than withheld so that they can be seen to be the wrong ones, but they are not the annotated site.",
+        "residues_not_checked_because": null
+      },
+      "seconds": 0.74,
+      "patch_median_a2": 389.7,
+      "patch_range_a2": [
+        389.7,
+        389.7
+      ],
+      "patch_spread_a2": 0.0,
+      "structures_measured": 1,
+      "structures_used": [
+        "5tdl:A"
+      ],
+      "surface_score": 3.3985,
+      "patch_fraction_of_surface": 0.095,
+      "structures_clipped_to_domain": 1,
+      "residues_in_range": 80,
+      "exposed_fraction_of_residues": 0.5,
+      "sequons_near_patch": 0,
+      "available_from": "2016-09-19",
+      "patch_positions": [
+        97,
+        98,
+        102,
+        104
+      ],
+      "patch_residue_names": [
+        "M",
+        "C",
+        "A",
+        "F"
+      ],
+      "patch_positions_measured_on": "5tdl:A",
+      "locations": [
+        "Virion membrane",
+        "Host cell membrane"
+      ],
+      "location_scope": "chain",
+      "exposed": true,
+      "exposed_fraction_of_locations": 1.0,
+      "gate": "borderline",
+      "predicted_surface": {
+        "measured": true,
+        "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
+        "model": "ESMFold v1",
+        "mean_plddt": 54.89,
+        "confident_fraction": 0.2262,
+        "residues": 84,
+        "patch_a2": 3197.2,
+        "patch_fraction_of_surface": 0.341,
+        "patch_positions": [
+          3,
+          7,
+          8,
+          12,
+          14,
+          15,
+          19,
+          20,
+          22,
+          23,
+          27,
+          28,
+          31,
+          32,
+          34,
+          36,
+          39,
+          51,
+          53,
+          54,
+          61,
+          64,
+          65,
+          68,
+          70,
+          71,
+          72,
+          77,
+          78,
+          82
+        ],
+        "patch_residue_names": [
+          "I",
+          "F",
+          "Y",
+          "C",
+          "A",
+          "V",
+          "Y",
+          "F",
+          "A",
+          "L",
+          "W",
+          "Y",
+          "V",
+          "I",
+          "I",
+          "L",
+          "I",
+          "V",
+          "L",
+          "I",
+          "Y",
+          "A",
+          "V",
+          "L",
+          "L",
+          "L",
+          "M",
+          "A",
+          "A",
+          "A"
+        ],
+        "exposed_fraction_of_residues": 0.988,
+        "sequons_near_patch": 2,
+        "site_surface": {
+          "measured": true,
+          "anchors_asked": [
+            84
+          ],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [
+            84
+          ],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 Fusion glycoprotein F2",
+          "reach_a": 13.81976597885342,
+          "positions_within_reach": [
+            26,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84
+          ],
+          "residues_within_reach": 10,
+          "hydrophobic_within_reach": 3,
+          "exposed_within_reach": 10,
+          "site_patch_area_a2": 225.7,
+          "site_patch_positions": [
+            77,
+            78,
+            82
+          ],
+          "site_patch_fraction_of_the_site": 0.183,
+          "site_shares_the_patch": true,
+          "not_measured_because": null,
+          "anchors_agreeing_with_the_annotation": 1,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": true,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
+        "seconds": 0.01,
+        "only_route_to_a_surface": false,
+        "deposited_patch_median_a2": 389.7,
+        "ratio_to_deposited_median": 8.2,
+        "not_compared_because": null,
+        "is_deposited_measurement": false,
+        "in_the_ranking": false,
+        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
+      }
+    },
+    {
+      "target": "Fusion glycoprotein F1",
+      "rank": 2,
+      "identified": true,
+      "measured_on_accession": "P22167",
+      "chain_range": [
+        137,
+        574
+      ],
+      "measured": true,
+      "unmeasured_because": null,
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host furin-like protease",
+          "ligand": null,
+          "positions_on_the_relative": [
+            137
+          ],
+          "positions": [
+            137
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        137
+      ],
+      "site_surface": {
+        "measured": false,
+        "anchors_asked": [
+          1
+        ],
+        "anchors_numbering": "author numbering of the deposited chain, taken as 1-based within the mature chain the relative's entry delimits",
+        "anchors_found": [],
+        "anchors_missing": [
+          1
+        ],
+        "measured_on": "5tdl:A",
+        "reach_a": 13.81976597885342,
+        "positions_within_reach": [],
+        "residues_within_reach": 0,
+        "hydrophobic_within_reach": 0,
+        "exposed_within_reach": 0,
+        "site_patch_area_a2": null,
+        "site_patch_positions": null,
+        "site_patch_fraction_of_the_site": null,
+        "site_shares_the_patch": null,
+        "not_measured_because": "none of the 1 anchor residues asked for in author numbering of the deposited chain, taken as 1-based within the mature chain the relative's entry delimits exists in the structure that was measured. A catalytic residue can be disordered in a deposition, and author numbering is frequently not the numbering an annotation arrives in; the figures are withheld rather than reported as an empty neighbourhood.",
+        "anchors_agreeing_with_the_annotation": 0,
+        "anchors_disagreeing_with_the_annotation": 0,
+        "anchors_not_checked_against_the_annotation": 0,
+        "anchors_at_the_wrong_residue": null,
+        "measured_at_the_annotated_residues": null,
+        "not_the_annotated_residues_because": null,
+        "residues_not_checked_because": null
+      },
+      "seconds": 0.2,
+      "patch_median_a2": 758.3,
+      "patch_range_a2": [
+        758.3,
+        758.3
+      ],
+      "patch_spread_a2": 0.0,
+      "structures_measured": 1,
+      "structures_used": [
+        "5tdl:A"
+      ],
+      "surface_score": 3.555,
+      "patch_fraction_of_surface": 0.04,
+      "structures_clipped_to_domain": 1,
+      "residues_in_range": 370,
+      "exposed_fraction_of_residues": 0.53,
+      "sequons_near_patch": 1,
+      "available_from": "2016-09-19",
+      "patch_positions": [
+        381,
+        387,
+        481,
+        493,
+        497,
+        503,
+        504,
+        505,
+        506
+      ],
+      "patch_residue_names": [
+        "L",
+        "F",
+        "L",
+        "A",
+        "A",
+        "L",
+        "A",
+        "F",
+        "I"
+      ],
+      "patch_positions_measured_on": "5tdl:A",
+      "locations": [
+        "Virion membrane",
+        "Host cell membrane"
+      ],
+      "location_scope": "chain",
+      "exposed": true,
+      "exposed_fraction_of_locations": 1.0,
+      "gate": "yes",
+      "predicted_surface": {
+        "measured": true,
+        "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
+        "model": "ESMFold v1",
+        "mean_plddt": 61.0,
+        "confident_fraction": 0.3151,
+        "residues": 438,
+        "patch_a2": 3729.5,
+        "patch_fraction_of_surface": 0.116,
+        "patch_positions": [
+          95,
+          114,
+          367,
+          368,
+          369,
+          370,
+          376,
+          377,
+          380,
+          389,
+          391,
+          394,
+          395,
+          396,
+          397,
+          398,
+          399,
+          400,
+          401,
+          402,
+          403,
+          405,
+          406,
+          407,
+          408,
+          410,
+          411,
+          412,
+          413,
+          414,
+          416,
+          421,
+          423,
+          428,
+          431,
+          434,
+          435,
+          436
+        ],
+        "patch_residue_names": [
+          "L",
+          "Y",
+          "L",
+          "A",
+          "F",
+          "I",
+          "L",
+          "L",
+          "V",
+          "I",
+          "I",
+          "I",
+          "I",
+          "I",
+          "V",
+          "I",
+          "I",
+          "V",
+          "V",
+          "L",
+          "L",
+          "L",
+          "I",
+          "A",
+          "I",
+          "L",
+          "L",
+          "L",
+          "Y",
+          "C",
+          "A",
+          "V",
+          "L",
+          "L",
+          "I",
+          "I",
+          "A",
+          "F"
+        ],
+        "exposed_fraction_of_residues": 0.726,
+        "sequons_near_patch": 1,
+        "site_surface": {
+          "measured": true,
+          "anchors_asked": [
+            1
+          ],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [
+            1
+          ],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 Fusion glycoprotein F1",
+          "reach_a": 13.81976597885342,
+          "positions_within_reach": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            155,
+            156,
+            157,
+            158
+          ],
+          "residues_within_reach": 12,
+          "hydrophobic_within_reach": 8,
+          "exposed_within_reach": 10,
+          "site_patch_area_a2": 0.0,
+          "site_patch_positions": [],
+          "site_patch_fraction_of_the_site": 0.0,
+          "site_shares_the_patch": false,
+          "not_measured_because": null,
+          "anchors_agreeing_with_the_annotation": 1,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": true,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
+        "seconds": 0.08,
+        "only_route_to_a_surface": false,
+        "deposited_patch_median_a2": 758.3,
+        "ratio_to_deposited_median": 4.92,
+        "not_compared_because": null,
+        "is_deposited_measurement": false,
+        "in_the_ranking": false,
+        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
+      }
+    },
+    {
+      "target": "L_BRSVA RNA-directed RNA polymerase L",
+      "rank": 3,
+      "identified": true,
+      "measured_on_accession": "O91940",
+      "chain_range": null,
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to O91940 at all. The protein may be well solved under another accession; this entry is not it.",
+      "functional_sites": [
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mg(2+)",
+          "positions_on_the_relative": [
+            697
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mg(2+)",
+          "positions_on_the_relative": [
+            808
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Active site",
+          "description": "Nucleophile; for GDP polyribonucleotidyltransferase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1335
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Active site",
+          "description": "For mRNA (guanine-N(7)-)-methyltransferase and mRNA (nucleoside-2'-O-)-methyltransferase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1827
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "substrate",
+          "positions_on_the_relative": [
+            1849,
+            1850,
+            1851,
+            1852,
+            1853
+          ],
+          "positions": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "positions_unmapped": 5
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            1919
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Active site",
+          "description": "For mRNA (guanine-N(7)-)-methyltransferase and mRNA (nucleoside-2'-O-)-methyltransferase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1932
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            1951
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            1955
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            1958
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Active site",
+          "description": "For mRNA (guanine-N(7)-)-methyltransferase and mRNA (nucleoside-2'-O-)-methyltransferase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1969
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Active site",
+          "description": "For mRNA (guanine-N(7)-)-methyltransferase and mRNA (nucleoside-2'-O-)-methyltransferase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2000
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [],
+      "site_surface": null,
+      "seconds": 0.11,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0,
+      "no_surface_because": {
+        "deposited": "PDBe maps no deposited chain to O91940 at all. The protein may be well solved under another accession; this entry is not it.",
+        "predicted": "2188 residues, over the 1200-residue ceiling this stage sends to the folding endpoint. No coordinates are predicted for it, so a deposited structure covering the chain is the only surface it can have.",
+        "the_folding_ceiling_closed_the_only_route": true,
+        "but_a_region_of_it_was_measured": null
+      }
+    },
+    {
+      "target": "N7-guanine methyltransferase",
+      "rank": 4,
+      "identified": true,
+      "measured_on_accession": "Q008X6",
+      "chain_range": [
+        1,
+        3071
+      ],
+      "measured": false,
+      "unmeasured_because": "2 chains map to Q008X6 and none covers 1-3071",
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by 3C-like serine proteinase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            3071
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [],
+      "site_surface": null,
+      "seconds": 0.0,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 2,
+      "no_surface_because": {
+        "deposited": "2 chains map to Q008X6 and none covers 1-3071",
+        "predicted": "the best alignment over 12 ranked ORFs accounted for only 7% of the relative's 3071-residue chain, under the 50% this stage requires, so the window it points at is not that chain in this genome.",
+        "the_folding_ceiling_closed_the_only_route": false,
+        "but_a_region_of_it_was_measured": null
+      }
+    },
+    {
+      "target": "NCAP_BRSVR Nucleoprotein",
+      "rank": 5,
+      "identified": true,
+      "measured_on_accession": "Q65708",
+      "chain_range": null,
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to Q65708 at all. The protein may be well solved under another accession; this entry is not it.",
+      "functional_sites": [],
+      "functional_sites_absent_because": "Q65708 carries no Active site, Binding site or Site annotation inside this chain's range, so there is no marked residue to aim at. An absence in the annotation, not in the protein.",
+      "site_positions_in_this_genome": [],
+      "site_surface": null,
+      "seconds": 0.1,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0,
+      "predicted_surface": {
+        "measured": true,
+        "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
+        "model": "ESMFold v1",
+        "mean_plddt": 36.95,
+        "confident_fraction": 0.0,
+        "residues": 391,
+        "patch_a2": 4441.7,
+        "patch_fraction_of_surface": 0.158,
+        "patch_positions": [
+          69,
+          71,
+          138,
+          139,
+          142,
+          145,
+          146,
+          149,
+          156,
+          158,
+          160,
+          161,
+          162,
+          166,
+          171,
+          172,
+          173,
+          181,
+          183,
+          189,
+          190,
+          200,
+          209,
+          210,
+          213,
+          229,
+          239,
+          242,
+          243,
+          247,
+          248,
+          251,
+          256,
+          257,
+          264,
+          267,
+          271,
+          272,
+          311,
+          312,
+          324,
+          329,
+          331,
+          333,
+          334,
+          337,
+          346,
+          347,
+          349,
+          352,
+          362,
+          365,
+          367,
+          368,
+          370,
+          372,
+          375,
+          377
+        ],
+        "patch_residue_names": [
+          "Y",
+          "M",
+          "M",
+          "L",
+          "M",
+          "V",
+          "A",
+          "Y",
+          "C",
+          "M",
+          "I",
+          "L",
+          "C",
+          "L",
+          "L",
+          "A",
+          "A",
+          "A",
+          "I",
+          "V",
+          "L",
+          "L",
+          "F",
+          "Y",
+          "F",
+          "A",
+          "V",
+          "I",
+          "F",
+          "F",
+          "M",
+          "Y",
+          "V",
+          "M",
+          "A",
+          "V",
+          "M",
+          "L",
+          "L",
+          "L",
+          "V",
+          "A",
+          "L",
+          "I",
+          "M",
+          "Y",
+          "L",
+          "Y",
+          "A",
+          "A",
+          "V",
+          "Y",
+          "V",
+          "L",
+          "L",
+          "A",
+          "L",
+          "A"
+        ],
+        "exposed_fraction_of_residues": 0.716,
+        "sequons_near_patch": 2,
+        "site_surface": {
+          "measured": false,
+          "anchors_asked": [],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 NCAP_BRSVR Nucleoprotein",
+          "reach_a": null,
+          "positions_within_reach": null,
+          "residues_within_reach": null,
+          "hydrophobic_within_reach": null,
+          "exposed_within_reach": null,
+          "site_patch_area_a2": null,
+          "site_patch_positions": null,
+          "site_patch_fraction_of_the_site": null,
+          "site_shares_the_patch": null,
+          "not_measured_because": "Q65708 carries no Active site, Binding site or Site annotation inside this chain's range, so there is no marked residue to aim at. An absence in the annotation, not in the protein.",
+          "anchors_agreeing_with_the_annotation": 0,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": null,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
+        "seconds": 0.07,
+        "only_route_to_a_surface": true,
+        "deposited_patch_median_a2": null,
+        "ratio_to_deposited_median": null,
+        "not_compared_because": null,
+        "is_deposited_measurement": false,
+        "in_the_ranking": false,
+        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
+      }
+    },
+    {
+      "target": "unidentified probable surface antigen",
+      "rank": 6,
+      "identified": true,
+      "measured_on_accession": null,
+      "chain_range": null,
+      "measured": false,
+      "unmeasured_because": "no reviewed homolog accession, so there is no deposited structure to resolve. A sequence-only candidate reaches the folding stage and not this one.",
+      "functional_sites": [],
+      "functional_sites_absent_because": "no reviewed homolog accession, so no curated annotation exists to read. A sequence-only candidate has no site positions to carry over.",
+      "site_positions_in_this_genome": [],
+      "site_surface": null,
+      "predicted_surface": {
+        "measured": true,
+        "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
+        "model": "ESMFold v1",
+        "mean_plddt": 47.21,
+        "confident_fraction": 0.0,
+        "residues": 177,
+        "patch_a2": 8404.0,
+        "patch_fraction_of_surface": 0.556,
+        "patch_positions": [
+          1,
+          5,
+          6,
+          8,
+          10,
+          11,
+          16,
+          17,
+          21,
+          22,
+          24,
+          25,
+          26,
+          27,
+          28,
+          32,
+          33,
+          34,
+          37,
+          39,
+          40,
+          43,
+          50,
+          51,
+          54,
+          58,
+          60,
+          63,
+          64,
+          65,
+          67,
+          69,
+          71,
+          72,
+          73,
+          74,
+          76,
+          78,
+          79,
+          80,
+          83,
+          86,
+          87,
+          90,
+          101,
+          103,
+          105,
+          106,
+          107,
+          110,
+          112,
+          121,
+          124,
+          125,
+          131,
+          132,
+          133,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          144,
+          145,
+          146,
+          147,
+          148,
+          150,
+          151,
+          153,
+          154,
+          157,
+          160,
+          161,
+          162,
+          163,
+          165,
+          166,
+          169,
+          171,
+          173,
+          174,
+          176,
+          177
+        ],
+        "patch_residue_names": [
+          "M",
+          "L",
+          "L",
+          "M",
+          "A",
+          "Y",
+          "F",
+          "A",
+          "I",
+          "W",
+          "L",
+          "C",
+          "F",
+          "L",
+          "V",
+          "L",
+          "L",
+          "Y",
+          "I",
+          "F",
+          "F",
+          "V",
+          "L",
+          "V",
+          "L",
+          "V",
+          "L",
+          "L",
+          "Y",
+          "F",
+          "I",
+          "I",
+          "L",
+          "A",
+          "I",
+          "V",
+          "V",
+          "Y",
+          "L",
+          "M",
+          "V",
+          "I",
+          "L",
+          "V",
+          "L",
+          "L",
+          "Y",
+          "L",
+          "L",
+          "V",
+          "L",
+          "L",
+          "L",
+          "L",
+          "I",
+          "L",
+          "I",
+          "V",
+          "I",
+          "F",
+          "F",
+          "L",
+          "I",
+          "V",
+          "A",
+          "L",
+          "L",
+          "I",
+          "V",
+          "V",
+          "I",
+          "A",
+          "F",
+          "I",
+          "L",
+          "V",
+          "M",
+          "F",
+          "V",
+          "I",
+          "L",
+          "I",
+          "F",
+          "A",
+          "L"
+        ],
+        "exposed_fraction_of_residues": 0.859,
+        "sequons_near_patch": 3,
+        "site_surface": {
+          "measured": false,
+          "anchors_asked": [],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 unidentified probable surface antigen",
+          "reach_a": null,
+          "positions_within_reach": null,
+          "residues_within_reach": null,
+          "hydrophobic_within_reach": null,
+          "exposed_within_reach": null,
+          "site_patch_area_a2": null,
+          "site_patch_positions": null,
+          "site_patch_fraction_of_the_site": null,
+          "site_shares_the_patch": null,
+          "not_measured_because": "no reviewed homolog accession, so no curated annotation exists to read. A sequence-only candidate has no site positions to carry over.",
+          "anchors_agreeing_with_the_annotation": 0,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": null,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
+        "seconds": 0.03,
+        "only_route_to_a_surface": true,
+        "deposited_patch_median_a2": null,
+        "ratio_to_deposited_median": null,
+        "not_compared_because": null,
+        "is_deposited_measurement": false,
+        "in_the_ranking": false,
+        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
+      }
+    }
+  ],
+  "library": {
+    "initiator": "ClAc-D-Tyr",
+    "closure_residue": "C",
+    "random_region": [
+      4,
+      8
+    ],
+    "elongator_classes": [
+      "canonical",
+      "N-methyl",
+      "D-alpha-amino"
+    ],
+    "elongator_alphabet": [
+      "A",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "K",
+      "L",
+      "M",
+      "N",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "V",
+      "W",
+      "Y",
+      "NMe-Gly",
+      "NMe-Ala",
+      "NMe-Phe",
+      "D-Ala",
+      "D-Phe",
+      "D-Ser"
+    ],
+    "cyclisation": "spontaneous thioether between chloroacetyl initiator and downstream Cys",
+    "theoretical_diversity": 158945703125,
+    "endpoint_note": "A library definition only; no binding, enrichment, inhibition or antiviral property is predicted for any member."
+  },
+  "folded": {
+    "target_name": "Fusion glycoprotein F2",
+    "sequence_length": 84,
+    "sequence_sha256": "dc1df080764ab62d2bba445a2301fd7087fd473273e019eb8a2f50f573efaf48",
+    "mean_plddt": 54.89,
+    "confident_fraction": 0.2262,
+    "pdb_sha256": "17f30678cd8c8cdb4bb12d89de367ed1c0c642a5a08dc7716a5b795775c314ef",
+    "absence": null
+  },
+  "folded_also": [
+    {
+      "target_name": "Fusion glycoprotein F1",
+      "unit": {
+        "kind": "whole_chain",
+        "chain": "Fusion glycoprotein F1",
+        "label": "Fusion glycoprotein F1",
+        "type": "Chain",
+        "span_in_this_genome": [
+          137,
+          574
+        ],
+        "entry_span_on_the_relative": [
+          137,
+          574
+        ],
+        "length_aa": 438
+      },
+      "sequence_length": 438,
+      "sequence_sha256": "555639b870f4b624752b0fdf96b5fc45c6b434ab91c04181f3f98e9e0514fbad",
+      "mean_plddt": 61.0,
+      "confident_fraction": 0.3151,
+      "pdb_sha256": "b57a42e10fbcb95b55840e6bbf494fc719d5d332fa1e982adf648d6247dca518",
+      "absence": null
+    },
+    {
+      "target_name": "NCAP_BRSVR Nucleoprotein",
+      "unit": {
+        "kind": "whole_chain",
+        "chain": "NCAP_BRSVR Nucleoprotein",
+        "label": "NCAP_BRSVR Nucleoprotein",
+        "type": "ORF",
+        "span_in_this_genome": [
+          1,
+          391
+        ],
+        "entry_span_on_the_relative": null,
+        "length_aa": 391
+      },
+      "sequence_length": 391,
+      "sequence_sha256": "2f3fc9bb4ad183011b49561679ada428b807d98428473e7a2f5097c1ae2de367",
+      "mean_plddt": 36.95,
+      "confident_fraction": 0.0,
+      "pdb_sha256": "02a3432636103f1fdd33dc731cad53984562ab28b87c0522bf137d807953ad42",
+      "absence": null
+    },
+    {
+      "target_name": "unidentified probable surface antigen",
+      "unit": {
+        "kind": "whole_chain",
+        "chain": "unidentified probable surface antigen",
+        "label": "unidentified probable surface antigen",
+        "type": "ORF",
+        "span_in_this_genome": [
+          1,
+          177
+        ],
+        "entry_span_on_the_relative": null,
+        "length_aa": 177
+      },
+      "sequence_length": 177,
+      "sequence_sha256": "a22c496699635e74b05ac7e73ae409709b645aa17a47047e5246e296c63ddd60",
+      "mean_plddt": 47.21,
+      "confident_fraction": 0.0,
+      "pdb_sha256": "9030c19beb6013a14e1deb59c48f4422aeb46c79aea65a0b6b9ddc737ec1a576",
+      "absence": null
+    }
+  ],
+  "foldable": [
+    {
+      "target": "Fusion glycoprotein F2",
+      "rank": 1,
+      "identified": true,
+      "identification_route": null,
+      "chain_range_on_the_relative": [
+        26,
+        109
+      ],
+      "declared_length_aa": 84,
+      "parent_orf_length_aa": 574,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 84,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        26,
+        109
+      ],
+      "recovered_length_aa": 84,
+      "chain_covered_by_alignment": 1.0,
+      "identity_over_aligned_columns": 0.7619,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 76% identity",
+      "inside_the_ceiling": true,
+      "domain_units_offered": 2,
+      "domain_units_inside_the_ceiling": 1,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 2 annotated regions, 1 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "Fusion glycoprotein F2",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            26,
+            109
+          ],
+          "entry_span": [
+            26,
+            109
+          ],
+          "entry_span_mapped": [
+            26,
+            109
+          ],
+          "entry_length_mapped": 84,
+          "length": 84,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 26,
+            "end": 109,
+            "length": 84,
+            "entry_span": [
+              26,
+              109
+            ],
+            "entry_length": 84,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": true,
+          "folded": true,
+          "target_name": "Fusion glycoprotein F2",
+          "mean_plddt": 54.89,
+          "confident_fraction": 0.2262,
+          "pdb_sha256": "17f30678cd8c8cdb4bb12d89de367ed1c0c642a5a08dc7716a5b795775c314ef"
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host furin-like protease",
+          "ligand": null,
+          "positions_on_the_relative": [
+            109
+          ],
+          "positions": [
+            109
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "folded": true,
+      "mean_plddt": 54.89,
+      "units_folded": 1,
+      "domain_route": false
+    },
+    {
+      "target": "Fusion glycoprotein F1",
+      "rank": 2,
+      "identified": true,
+      "identification_route": null,
+      "chain_range_on_the_relative": [
+        137,
+        574
+      ],
+      "declared_length_aa": 438,
+      "parent_orf_length_aa": 574,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 438,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        137,
+        574
+      ],
+      "recovered_length_aa": 438,
+      "chain_covered_by_alignment": 1.0,
+      "identity_over_aligned_columns": 0.8973,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 90% identity",
+      "inside_the_ceiling": true,
+      "domain_units_offered": 6,
+      "domain_units_inside_the_ceiling": 1,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 6 annotated regions, 1 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "Fusion glycoprotein F1",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            137,
+            574
+          ],
+          "entry_span": [
+            137,
+            574
+          ],
+          "entry_span_mapped": [
+            137,
+            574
+          ],
+          "entry_length_mapped": 438,
+          "length": 438,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 137,
+            "end": 574,
+            "length": 438,
+            "entry_span": [
+              137,
+              574
+            ],
+            "entry_length": 438,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": true,
+          "folded": true,
+          "target_name": "Fusion glycoprotein F1",
+          "mean_plddt": 61.0,
+          "confident_fraction": 0.3151,
+          "pdb_sha256": "b57a42e10fbcb95b55840e6bbf494fc719d5d332fa1e982adf648d6247dca518"
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host furin-like protease",
+          "ligand": null,
+          "positions_on_the_relative": [
+            137
+          ],
+          "positions": [
+            137
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "folded": true,
+      "mean_plddt": 61.0,
+      "units_folded": 1,
+      "domain_route": false
+    },
+    {
+      "target": "L_BRSVA RNA-directed RNA polymerase L",
+      "rank": 3,
+      "identified": true,
+      "identification_route": "exact",
+      "chain_range_on_the_relative": null,
+      "declared_length_aa": null,
+      "parent_orf_length_aa": 2188,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "recovered_length_aa": 2188,
+      "recovered_by": "the ORF translation is the candidate",
+      "inside_the_ceiling": false,
+      "domain_units_offered": 0,
+      "domain_units_inside_the_ceiling": 0,
+      "domain_units_set_aside_because": null,
+      "not_folded_because": "2188 residues, over the 1200-residue ceiling this stage sends to the folding endpoint. No coordinates are predicted for it, so a deposited structure covering the chain is the only surface it can have.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "L_BRSVA RNA-directed RNA polymerase L",
+          "type": "ORF",
+          "description": "the whole called ORF; no mature-chain boundaries were read",
+          "span": [
+            1,
+            2188
+          ],
+          "entry_span": null,
+          "entry_span_mapped": null,
+          "entry_length_mapped": null,
+          "length": 2188,
+          "inside_the_ceiling": false,
+          "refused_because": "2188 residues, over the 1200-residue ceiling this stage sends to the folding endpoint.",
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": null,
+          "mapping_reproduces_the_span": null
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mg(2+)",
+          "positions_on_the_relative": [
+            697
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mg(2+)",
+          "positions_on_the_relative": [
+            808
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Active site",
+          "description": "Nucleophile; for GDP polyribonucleotidyltransferase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1335
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Active site",
+          "description": "For mRNA (guanine-N(7)-)-methyltransferase and mRNA (nucleoside-2'-O-)-methyltransferase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1827
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "substrate",
+          "positions_on_the_relative": [
+            1849,
+            1850,
+            1851,
+            1852,
+            1853
+          ],
+          "positions": [
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "positions_unmapped": 5
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            1919
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Active site",
+          "description": "For mRNA (guanine-N(7)-)-methyltransferase and mRNA (nucleoside-2'-O-)-methyltransferase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1932
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            1951
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            1955
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            1958
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Active site",
+          "description": "For mRNA (guanine-N(7)-)-methyltransferase and mRNA (nucleoside-2'-O-)-methyltransferase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1969
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Active site",
+          "description": "For mRNA (guanine-N(7)-)-methyltransferase and mRNA (nucleoside-2'-O-)-methyltransferase",
+          "ligand": null,
+          "positions_on_the_relative": [
+            2000
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "units_folded": 0,
+      "domain_route": false
+    },
+    {
+      "target": "N7-guanine methyltransferase",
+      "rank": 4,
+      "identified": true,
+      "identification_route": null,
+      "chain_range_on_the_relative": [
+        1,
+        3071
+      ],
+      "declared_length_aa": 3071,
+      "parent_orf_length_aa": 299,
+      "sequence_recovered": false,
+      "not_recovered_because": "the best alignment over 12 ranked ORFs accounted for only 7% of the relative's 3071-residue chain, under the 50% this stage requires, so the window it points at is not that chain in this genome.",
+      "reference_chain_length_aa": 3071,
+      "orfs_searched": 12,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        86,
+        292
+      ],
+      "recovered_length_aa": 207,
+      "chain_covered_by_alignment": 0.0658,
+      "identity_over_aligned_columns": 0.2525,
+      "units_folded": 0,
+      "domain_route": false
+    },
+    {
+      "target": "NCAP_BRSVR Nucleoprotein",
+      "rank": 5,
+      "identified": true,
+      "identification_route": "exact",
+      "chain_range_on_the_relative": null,
+      "declared_length_aa": null,
+      "parent_orf_length_aa": 391,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "recovered_length_aa": 391,
+      "recovered_by": "the ORF translation is the candidate",
+      "inside_the_ceiling": true,
+      "domain_units_offered": 0,
+      "domain_units_inside_the_ceiling": 0,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling, and the relative's entry annotates no functional region inside this chain in any case, so there is none to set aside. An absence in the annotation, not in the protein.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "NCAP_BRSVR Nucleoprotein",
+          "type": "ORF",
+          "description": "the whole called ORF; no mature-chain boundaries were read",
+          "span": [
+            1,
+            391
+          ],
+          "entry_span": null,
+          "entry_span_mapped": null,
+          "entry_length_mapped": null,
+          "length": 391,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": null,
+          "mapping_reproduces_the_span": null,
+          "folded": true,
+          "target_name": "NCAP_BRSVR Nucleoprotein",
+          "mean_plddt": 36.95,
+          "confident_fraction": 0.0,
+          "pdb_sha256": "02a3432636103f1fdd33dc731cad53984562ab28b87c0522bf137d807953ad42"
+        }
+      ],
+      "functional_sites": [],
+      "functional_sites_absent_because": "Q65708 carries no Active site, Binding site or Site annotation inside this chain's range, so there is no marked residue to aim at. An absence in the annotation, not in the protein.",
+      "folded": true,
+      "mean_plddt": 36.95,
+      "units_folded": 1,
+      "domain_route": false
+    },
+    {
+      "target": "unidentified probable surface antigen",
+      "rank": 6,
+      "identified": true,
+      "identification_route": "topology",
+      "chain_range_on_the_relative": null,
+      "declared_length_aa": null,
+      "parent_orf_length_aa": 177,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "recovered_length_aa": 177,
+      "recovered_by": "the ORF translation is the candidate",
+      "inside_the_ceiling": true,
+      "domain_units_offered": 0,
+      "domain_units_inside_the_ceiling": 0,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling, and the relative's entry annotates no functional region inside this chain in any case, so there is none to set aside. An absence in the annotation, not in the protein.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "unidentified probable surface antigen",
+          "type": "ORF",
+          "description": "the whole called ORF; no mature-chain boundaries were read",
+          "span": [
+            1,
+            177
+          ],
+          "entry_span": null,
+          "entry_span_mapped": null,
+          "entry_length_mapped": null,
+          "length": 177,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": null,
+          "mapping_reproduces_the_span": null,
+          "folded": true,
+          "target_name": "unidentified probable surface antigen",
+          "mean_plddt": 47.21,
+          "confident_fraction": 0.0,
+          "pdb_sha256": "9030c19beb6013a14e1deb59c48f4422aeb46c79aea65a0b6b9ddc737ec1a576"
+        }
+      ],
+      "functional_sites": [],
+      "functional_sites_absent_because": "no reviewed homolog accession, so no curated annotation exists to read. A sequence-only candidate has no site positions to carry over.",
+      "folded": true,
+      "mean_plddt": 47.21,
+      "units_folded": 1,
+      "domain_route": false
+    }
+  ],
+  "evidence": [
+    {
+      "rank": 1,
+      "target": "Fusion glycoprotein F2",
+      "nearest_homolog": "P22167",
+      "chain_range": [
+        26,
+        109
+      ],
+      "sequence_available": true,
+      "calls": [
+        {
+          "tool": "literature.search",
+          "endpoint": "Europe PMC",
+          "status": "empty",
+          "note": "{'subject_zero': True, 'axes_zero': ('assay_availability', 'conservation', 'essentiality', 'precedent', 'public_labels'), 'means': 'A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.'}",
+          "seconds": 3.14,
+          "network_calls": 7,
+          "returned": {}
+        },
+        {
+          "tool": "similarity.homologs",
+          "endpoint": "EBI HMMER",
+          "status": "ok",
+          "note": null,
+          "seconds": 1.19,
+          "network_calls": 3,
+          "returned": {
+            "resolution_attempts_count": 1,
+            "database_id": "swissprot",
+            "database_name": "SwissProt",
+            "database_version": "2025_01",
+            "database_release_date": "2025-01-01",
+            "declared_databases_not_served_count": 0,
+            "homologs_count": 17,
+            "homolog_count": 17,
+            "hits_returned": 17,
+            "hits_dropped_by_min_identity": 0
+          }
+        },
+        {
+          "tool": "families.entries",
+          "endpoint": "InterPro",
+          "status": "ok",
+          "note": null,
+          "seconds": 1.76,
+          "network_calls": 4,
+          "returned": {
+            "protein_name": "Fusion glycoprotein F0",
+            "organism": "Bovine respiratory syncytial virus (strain Copenhagen)",
+            "sequence_md5": "A7B5886FEB2F12C1AB0B0E575091DC61",
+            "sequence_length": 574,
+            "sequence_source": "uniprot",
+            "assignments_count": 6,
+            "predicted_count": 5,
+            "sequence_features_count": 9,
+            "residue_ranges_count": 1,
+            "functional_sites_count": 0
+          }
+        },
+        {
+          "tool": "structures.predicted",
+          "endpoint": "AlphaFold DB, 3D-Beacons",
+          "status": "ok",
+          "note": null,
+          "seconds": 1.38,
+          "network_calls": 2,
+          "returned": {
+            "sequence_length": 574,
+            "confident_plddt": 70.0,
+            "plddt_bands_count": 4,
+            "residue_detail": false,
+            "any_prediction_exists": true,
+            "predicted_model_count": 3,
+            "providers_queried_count": 2,
+            "providers_with_models_count": 1,
+            "alphafold_host_queried": true,
+            "alphafold_host_served_models": false
+          }
+        },
+        {
+          "tool": "bioactivity.prior_binders",
+          "endpoint": "ChEMBL, IEDB, MaveDB",
+          "status": "ok",
+          "note": null,
+          "seconds": 2.8,
+          "network_calls": 4,
+          "returned": {
+            "max_molecules_requested": 50,
+            "max_molecules_applied": 50,
+            "max_molecules_clamped": false,
+            "lanes_unavailable_count": 0,
+            "network_calls": 4,
+            "calls_count": 4,
+            "sources_count": 3,
+            "urls_hit_count": 4,
+            "limitations_count": 13
+          }
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "target": "Fusion glycoprotein F1",
+      "nearest_homolog": "P22167",
+      "chain_range": [
+        137,
+        574
+      ],
+      "sequence_available": true,
+      "calls": [
+        {
+          "tool": "literature.search",
+          "endpoint": "Europe PMC",
+          "status": "ok",
+          "note": null,
+          "seconds": 6.54,
+          "network_calls": 7,
+          "returned": {
+            "subject_kind": "term",
+            "scope": "title_abstract",
+            "hit_count": 2,
+            "returned": 2,
+            "hits_with_abstract": 2,
+            "preprints_returned": 0,
+            "limitations_count": 8,
+            "sources_count": 7
+          }
+        },
+        {
+          "tool": "similarity.homologs",
+          "endpoint": "EBI HMMER",
+          "status": "ok",
+          "note": null,
+          "seconds": 1.27,
+          "network_calls": 3,
+          "returned": {
+            "resolution_attempts_count": 1,
+            "database_id": "swissprot",
+            "database_name": "SwissProt",
+            "database_version": "2025_01",
+            "database_release_date": "2025-01-01",
+            "declared_databases_not_served_count": 0,
+            "homologs_count": 31,
+            "homolog_count": 31,
+            "hits_returned": 31,
+            "hits_dropped_by_min_identity": 0
+          }
+        },
+        {
+          "tool": "families.entries",
+          "endpoint": "InterPro",
+          "status": "ok",
+          "note": null,
+          "seconds": 1.71,
+          "network_calls": 4,
+          "returned": {
+            "protein_name": "Fusion glycoprotein F0",
+            "organism": "Bovine respiratory syncytial virus (strain Copenhagen)",
+            "sequence_md5": "A7B5886FEB2F12C1AB0B0E575091DC61",
+            "sequence_length": 574,
+            "sequence_source": "uniprot",
+            "assignments_count": 6,
+            "predicted_count": 5,
+            "sequence_features_count": 9,
+            "residue_ranges_count": 1,
+            "functional_sites_count": 0
+          }
+        },
+        {
+          "tool": "structures.predicted",
+          "endpoint": "AlphaFold DB, 3D-Beacons",
+          "status": "ok",
+          "note": null,
+          "seconds": 1.67,
+          "network_calls": 2,
+          "returned": {
+            "sequence_length": 574,
+            "confident_plddt": 70.0,
+            "plddt_bands_count": 4,
+            "residue_detail": false,
+            "any_prediction_exists": true,
+            "predicted_model_count": 3,
+            "providers_queried_count": 2,
+            "providers_with_models_count": 1,
+            "alphafold_host_queried": true,
+            "alphafold_host_served_models": false
+          }
+        },
+        {
+          "tool": "bioactivity.prior_binders",
+          "endpoint": "ChEMBL, IEDB, MaveDB",
+          "status": "ok",
+          "note": null,
+          "seconds": 2.83,
+          "network_calls": 4,
+          "returned": {
+            "max_molecules_requested": 50,
+            "max_molecules_applied": 50,
+            "max_molecules_clamped": false,
+            "lanes_unavailable_count": 0,
+            "network_calls": 4,
+            "calls_count": 4,
+            "sources_count": 3,
+            "urls_hit_count": 4,
+            "limitations_count": 13
+          }
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "target": "L_BRSVA RNA-directed RNA polymerase L",
+      "nearest_homolog": "O91940",
+      "chain_range": null,
+      "sequence_available": false,
+      "calls": [
+        {
+          "tool": "literature.search",
+          "endpoint": "Europe PMC",
+          "status": "empty",
+          "note": "{'subject_zero': True, 'axes_zero': ('assay_availability', 'conservation', 'essentiality', 'precedent', 'public_labels'), 'means': 'A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.'}",
+          "seconds": 11.34,
+          "network_calls": 7,
+          "returned": {}
+        },
+        {
+          "tool": "similarity.homologs",
+          "endpoint": "EBI HMMER",
+          "status": "not_asked",
+          "note": "the chain holds no argument this tool requires",
+          "seconds": null,
+          "network_calls": null,
+          "returned": {}
+        },
+        {
+          "tool": "families.entries",
+          "endpoint": "InterPro",
+          "status": "ok",
+          "note": null,
+          "seconds": 3.3,
+          "network_calls": 8,
+          "returned": {
+            "protein_name": "RNA-directed RNA polymerase L",
+            "organism": "Bovine respiratory syncytial virus (strain A51908)",
+            "sequence_md5": "68AD6650C30CF8BE41C7CAA40FE95094",
+            "sequence_length": 2162,
+            "sequence_source": "uniprot",
+            "assignments_count": 6,
+            "predicted_count": 7,
+            "sequence_features_count": 3,
+            "residue_ranges_count": 5,
+            "functional_sites_count": 0
+          }
+        },
+        {
+          "tool": "structures.predicted",
+          "endpoint": "AlphaFold DB, 3D-Beacons",
+          "status": "ok",
+          "note": null,
+          "seconds": 1.79,
+          "network_calls": 2,
+          "returned": {
+            "sequence_length": 2162,
+            "confident_plddt": 70.0,
+            "plddt_bands_count": 4,
+            "residue_detail": false,
+            "any_prediction_exists": true,
+            "predicted_model_count": 3,
+            "providers_queried_count": 2,
+            "providers_with_models_count": 2,
+            "alphafold_host_queried": true,
+            "alphafold_host_served_models": true
+          }
+        },
+        {
+          "tool": "bioactivity.prior_binders",
+          "endpoint": "ChEMBL, IEDB, MaveDB",
+          "status": "ok",
+          "note": null,
+          "seconds": 2.99,
+          "network_calls": 4,
+          "returned": {
+            "max_molecules_requested": 50,
+            "max_molecules_applied": 50,
+            "max_molecules_clamped": false,
+            "lanes_unavailable_count": 0,
+            "network_calls": 4,
+            "calls_count": 4,
+            "sources_count": 3,
+            "urls_hit_count": 4,
+            "limitations_count": 13
+          }
+        }
+      ]
+    }
+  ],
+  "seconds": 77.56,
+  "coverage": {
+    "chains_ranked": 6,
+    "surface_rows": 6,
+    "surface_measured": 2,
+    "surface_refused": 4,
+    "surface_covers_every_chain": true,
+    "surface_on_predicted_coordinates": 4,
+    "surface_predicted_was_the_only_route": 2,
+    "chains_with_any_surface": 4,
+    "chains_with_no_surface": 2,
+    "chains_with_no_surface_over_the_ceiling": 1,
+    "chains_over_the_folding_ceiling": 1,
+    "fold_rows": 6,
+    "fold_rows_unidentified": 0,
+    "fold_sequence_recovered": 5,
+    "fold_sequence_recovered_unidentified": 0,
+    "fold_covers_every_chain": true,
+    "fold_units_offered": 13,
+    "fold_units_folded": 4,
+    "domain_units_offered": 8,
+    "domain_units_folded": 0,
+    "chains_rescued_by_the_domain_route": 0,
+    "chains_with_no_coordinates": 2,
+    "chains_with_a_region_surface": 0,
+    "region_surfaces_measured": 0,
+    "chains_with_functional_sites": 4,
+    "site_patch_measured_on_a_deposition": 1,
+    "site_patch_measured_on_a_prediction": 2,
+    "site_patch_on_a_deposition_not_at_the_annotated_residues": 1,
+    "site_patch_on_a_prediction_not_at_the_annotated_residues": 0,
+    "evidence_targets": 3,
+    "evidence_calls": 15
+  },
+  "pathogen": "Human respiratory syncytial virus B",
+  "fold_integrity": {
+    "trustworthy": true,
+    "infrastructure_failures": 0,
+    "failures": [],
+    "means": "every missing structure on this run is a declared refusal -- a sequence over a ceiling, or a host that refused this sequence -- so the absences are results"
+  }
+}

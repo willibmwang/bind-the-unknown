@@ -1,0 +1,1203 @@
+{
+  "case": "Rift Valley fever virus, Rift Valley fever virus held out",
+  "genome_accession": "NC_014397.1",
+  "reference_excluded_organism": "Rift Valley fever virus",
+  "stages": [
+    {
+      "stage": 1,
+      "name": "Genome to candidate proteins",
+      "tool": "intake.rank_targets",
+      "endpoints": [
+        "NCBI efetch",
+        "UniProt"
+      ],
+      "input": {
+        "genome_accession": "NC_014397.1",
+        "reference_excluded_organism": "Rift Valley fever virus"
+      },
+      "output": {
+        "genome_length_nt": 6404,
+        "segments": 1,
+        "orfs_found": 9,
+        "orfs_ranked": 9,
+        "reference_entries": 17522,
+        "reference_entries_removed": 7,
+        "identified": 1,
+        "unidentified": 8,
+        "gate": {
+          "terms": [
+            "surface_exposed",
+            "essential_class",
+            "druggable_class",
+            "structures_in_family"
+          ],
+          "floor": 0.5,
+          "rule": "a row is kept when at least one of 4 evidence terms pays 0.5 points or more. Conservation is not among them: it says how well this genome was recognised, not whether what was recognised is worth aiming at",
+          "kept": 9,
+          "gated_out": 0,
+          "dropped": []
+        }
+      },
+      "seconds": 11.26,
+      "hands_to_next": "one reviewed accession and one residue range per candidate"
+    },
+    {
+      "stage": 2,
+      "name": "Polyproteins to mature chains, and the score for each",
+      "tool": "intake.decompose + intake.rank_score",
+      "endpoints": [
+        "UniProt"
+      ],
+      "input": {
+        "candidates_in": 9
+      },
+      "output": {
+        "chains_out": 1,
+        "rubric": {
+          "conservation": 3.0,
+          "surface_exposed": 2.0,
+          "essential_class": 1.5,
+          "druggable_class": 0.8,
+          "structures_in_family_capped": 0.5
+        },
+        "chains_scored_before_the_gate": 1,
+        "gate": {
+          "terms": [
+            "surface_exposed",
+            "essential_class",
+            "druggable_class",
+            "structures_in_family"
+          ],
+          "floor": 0.5,
+          "rule": "a row is kept when at least one of 4 evidence terms pays 0.5 points or more. Conservation is not among them: it says how well this genome was recognised, not whether what was recognised is worth aiming at",
+          "kept": 1,
+          "gated_out": 0,
+          "dropped": []
+        },
+        "all_decompositions_reproduce_the_score": true
+      },
+      "seconds": 0.05,
+      "hands_to_next": "every chain that cleared the gate, with the accession and range its surface is measured on. 0 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them"
+    },
+    {
+      "stage": 3,
+      "name": "Every chain to coordinates, whole where it fits and by its functional regions where it does not",
+      "tool": "structures.folded",
+      "endpoints": [
+        "ESM Atlas"
+      ],
+      "input": {
+        "candidates_in": 1,
+        "identified_in": 1,
+        "gated_out_before_this_stage": 0,
+        "residue_ceiling": 1200,
+        "domain_units_per_chain": 3,
+        "fold_requests_per_run": 40,
+        "folding_budget_seconds": 240.0
+      },
+      "output": {
+        "foldable": 1,
+        "not_foldable": 0,
+        "unidentified_foldable": 0,
+        "chains_folded": 0,
+        "folds_attempted": 0,
+        "folds_refused": 0,
+        "also_folded": [],
+        "units_offered": 1,
+        "units_inside_the_ceiling": 0,
+        "units_recorded": 1,
+        "units_folded": 0,
+        "domain_units_offered": 0,
+        "domain_units_inside_the_ceiling": 0,
+        "domain_units_recorded": 0,
+        "domain_units_folded": 0,
+        "domain_units_attempted": 0,
+        "domains_folded": [],
+        "chains_offered_a_domain_route": 0,
+        "chains_rescued_by_the_domain_route": 0,
+        "chains_with_coordinates": 0,
+        "chains_with_no_coordinates": 1,
+        "domain_units_not_folded_by_limit": 0,
+        "domain_units_not_folded_by_budget": 0,
+        "chains_not_folded_by_limit": 0,
+        "chains_not_folded_by_budget": 0,
+        "seconds_spent_on_refused_folds": 0,
+        "chains_over_the_ceiling": 1,
+        "over_the_ceiling": [
+          "L_TOSV RNA-directed RNA polymerase L"
+        ],
+        "changes_any_rank": false,
+        "folded_target": null,
+        "residues": null,
+        "mean_plddt": null,
+        "at_or_above_70": null,
+        "sequence_sha256": null,
+        "error": "no unit of any ranked candidate was inside the residue ceiling of 1200: neither a whole chain nor any annotated functional region of one"
+      },
+      "seconds": 0.0,
+      "hands_to_next": "coordinates for 0 of the 1 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 1 chains over it. Plus the functional site positions, carried through the alignment into this genome's numbering, which the surface stage anchors the patch arithmetic on. 1 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region's surface goes under its chain's row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2"
+    },
+    {
+      "stage": 4,
+      "name": "Every chain to a measured surface, and the patch at the residues that do the chemistry",
+      "tool": "geometry.surface_markers",
+      "endpoints": [
+        "PDBe",
+        "RCSB",
+        "UniProt"
+      ],
+      "input": {
+        "candidates_in": 1,
+        "predicted_coordinates_in": 0,
+        "predicted_region_coordinates_in": 0,
+        "chains_with_functional_site_positions_in": 1,
+        "macrocycle_reach_a": 13.81976597885342
+      },
+      "output": {
+        "rows_out": 1,
+        "measured": 1,
+        "unmeasured": 0,
+        "nothing_dropped": true,
+        "predicted_coordinates_offered": 0,
+        "measured_on_predicted_coordinates": 0,
+        "predicted_was_the_only_route": 0,
+        "no_surface_by_either_route": 0,
+        "no_surface_over_the_folding_ceiling": 0,
+        "region_surfaces_offered": 0,
+        "region_surfaces_measured": 0,
+        "chains_with_a_region_surface": 0,
+        "chains_with_no_surface_and_no_region_surface": 0,
+        "chains_with_functional_sites": 1,
+        "functional_site_positions": 10,
+        "functional_site_positions_mapped_into_this_genome": 0,
+        "site_patch_measured_on_a_deposition": 1,
+        "site_patch_measured_on_a_prediction": 0,
+        "site_patch_on_a_deposition_not_at_the_annotated_residues": 0,
+        "site_patch_on_a_prediction_not_at_the_annotated_residues": 0,
+        "gate_yes": 0,
+        "gate_borderline": 0,
+        "gate_no": 1,
+        "changes_any_rank": false,
+        "read_by_later_stages": []
+      },
+      "seconds": 2.72,
+      "hands_to_next": "a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 1 chains through a deposition and 0 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage's product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one"
+    },
+    {
+      "stage": 5,
+      "name": "A library definition over the randomised region",
+      "tool": "chemistry.library_spec",
+      "endpoints": [
+        "local tables"
+      ],
+      "input": {
+        "reads_from_upstream": [],
+        "would_read_if_connected": [
+          "patch_median_a2",
+          "patch_fraction_of_surface",
+          "sequons_near_patch"
+        ],
+        "not_connected_because": "the library definition takes an initiator, a randomised-region length range and a set of elongator classes, all three properties of the display platform rather than of a target. No stated rule turns a measured patch area into any of them, and inventing one would publish a conversion as a result."
+      },
+      "output": {
+        "initiator": "ClAc-D-Tyr",
+        "closure_residue": "C",
+        "random_region": [
+          4,
+          8
+        ],
+        "alphabet_size": 25,
+        "theoretical_diversity": 158945703125
+      },
+      "seconds": 0.0,
+      "hands_to_next": "the position count the go/no-go test in arm 2 reads"
+    },
+    {
+      "stage": 6,
+      "name": "Evidence on the highest-ranked targets",
+      "tool": "literature.search + similarity.homologs + families.entries + structures.predicted + bioactivity.prior_binders",
+      "endpoints": [
+        "Europe PMC",
+        "EBI HMMER",
+        "InterPro",
+        "AlphaFold DB",
+        "3D-Beacons",
+        "ChEMBL",
+        "IEDB",
+        "MaveDB"
+      ],
+      "input": {
+        "targets_in": 1,
+        "ranked_available": 1,
+        "wall_budget_seconds": 700.0
+      },
+      "output": {
+        "targets_covered": 1,
+        "calls_made": 5,
+        "ok": 3,
+        "not_ok": 2,
+        "network_calls": 25,
+        "changes_any_rank": false,
+        "every_target_has_every_tool": true
+      },
+      "seconds": 21.81,
+      "hands_to_next": "nothing. This annotates the shortlist and never reorders it"
+    }
+  ],
+  "candidates": [
+    {
+      "rank": 1,
+      "identified": true,
+      "name": "L_TOSV RNA-directed RNA polymerase L",
+      "identification_route": "exact",
+      "nearest_homolog": "P37800",
+      "nearest_organism": "Toscana virus",
+      "strand": "+",
+      "frame": 0,
+      "nt_start": 18,
+      "length_aa": 2092,
+      "segment": 0,
+      "features": {
+        "conservation": 0.1351,
+        "surface_exposed": false,
+        "essential_class": true,
+        "druggable_class": 3,
+        "structures_in_family": 3
+      },
+      "terms": {
+        "conservation": 0.4053,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.03,
+        "druggable_class": 2.4
+      },
+      "score": 4.3353,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "hydrolase",
+        "l_tosv rna-directed rna polymerase l",
+        "nucleotidyltransferase",
+        "rna-directed rna polymerase",
+        "transferase"
+      ],
+      "locations": [
+        "host endoplasmic reticulum",
+        "host endoplasmic reticulum-golgi intermediate compartment",
+        "host golgi apparatus",
+        "virion"
+      ],
+      "exposed_fraction_of_locations": 0.0,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 2,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "+",
+      "frame": 1,
+      "nt_start": 4153,
+      "length_aa": 104,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 0,
+        "plausible_antigen_length": true,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 3,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 0,
+      "nt_start": 3324,
+      "length_aa": 82,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 0,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 4,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 0,
+      "nt_start": 4359,
+      "length_aa": 78,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 4,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 5,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 2,
+      "nt_start": 5876,
+      "length_aa": 76,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 1,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 6,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 0,
+      "nt_start": 2871,
+      "length_aa": 72,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 0,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 7,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 0,
+      "nt_start": 6186,
+      "length_aa": 72,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 0,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 8,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 2,
+      "nt_start": 3116,
+      "length_aa": 65,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 0,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 9,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 2,
+      "nt_start": 3473,
+      "length_aa": 63,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 1,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    }
+  ],
+  "minimum_orf_aa": 60,
+  "minimum_hit_score": 0.12,
+  "scores": [
+    {
+      "rank": 1,
+      "target": "L_TOSV RNA-directed RNA polymerase L",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P37800",
+      "chain_range": null,
+      "conservation": 0.1351,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false,
+      "surface_exposed": false,
+      "essential_class": true,
+      "druggable_class": 3,
+      "structures_in_family": 3,
+      "score_terms": {
+        "conservation": 0.4053,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.03,
+        "druggable_class": 2.4
+      },
+      "score": 4.3353,
+      "decomposition_reproduces_score": true
+    }
+  ],
+  "surfaces": [
+    {
+      "target": "L_TOSV RNA-directed RNA polymerase L",
+      "rank": 1,
+      "identified": true,
+      "measured_on_accession": "P37800",
+      "chain_range": null,
+      "measured": true,
+      "unmeasured_because": null,
+      "functional_sites": [
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mn(2+)",
+          "positions_on_the_relative": [
+            78
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mn(2+)",
+          "positions_on_the_relative": [
+            113
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mn(2+)",
+          "positions_on_the_relative": [
+            113
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mn(2+)",
+          "positions_on_the_relative": [
+            127
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Active site",
+          "description": "For endonuclease activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            145
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mg(2+)",
+          "positions_on_the_relative": [
+            1135
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Site",
+          "description": "Interaction with the cap substrate",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1711
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Site",
+          "description": "Interaction with the cap substrate",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1715
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Site",
+          "description": "Interaction with the cap substrate",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1726
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Site",
+          "description": "Interaction with the cap substrate",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1780
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [],
+      "site_surface": {
+        "measured": true,
+        "anchors_asked": [
+          78,
+          113,
+          127,
+          145,
+          1135,
+          1711,
+          1715,
+          1726,
+          1780
+        ],
+        "anchors_numbering": "author numbering of the deposited chain, taken as 1-based within the mature chain the relative's entry delimits",
+        "anchors_found": [
+          78,
+          113,
+          127,
+          145
+        ],
+        "anchors_missing": [
+          1135,
+          1711,
+          1715,
+          1726,
+          1780
+        ],
+        "measured_on": "6qw0:A",
+        "reach_a": 13.81976597885342,
+        "positions_within_reach": [
+          17,
+          18,
+          19,
+          20,
+          68,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          81,
+          82,
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          95,
+          96,
+          109,
+          110,
+          111,
+          112,
+          113,
+          115,
+          116,
+          117,
+          123,
+          124,
+          125,
+          126,
+          127,
+          128,
+          129,
+          130,
+          131,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          148,
+          149,
+          150,
+          151,
+          152,
+          153,
+          162,
+          163,
+          164,
+          165,
+          166,
+          167,
+          168,
+          169,
+          170,
+          171,
+          174,
+          175,
+          176,
+          177,
+          178,
+          187,
+          188,
+          189,
+          190,
+          191,
+          192,
+          193,
+          194,
+          195,
+          196,
+          197,
+          198,
+          199,
+          200
+        ],
+        "residues_within_reach": 92,
+        "hydrophobic_within_reach": 49,
+        "exposed_within_reach": 39,
+        "site_patch_area_a2": 202.0,
+        "site_patch_positions": [
+          17,
+          147,
+          151
+        ],
+        "site_patch_fraction_of_the_site": 0.059,
+        "site_shares_the_patch": true,
+        "not_measured_because": null,
+        "anchors_agreeing_with_the_annotation": 4,
+        "anchors_disagreeing_with_the_annotation": 0,
+        "anchors_not_checked_against_the_annotation": 0,
+        "anchors_at_the_wrong_residue": null,
+        "measured_at_the_annotated_residues": true,
+        "not_the_annotated_residues_because": null,
+        "residues_not_checked_because": null
+      },
+      "seconds": 2.72,
+      "patch_median_a2": 820.3,
+      "patch_range_a2": [
+        617.1,
+        900.7
+      ],
+      "patch_spread_a2": 283.6,
+      "structures_measured": 5,
+      "structures_used": [
+        "6qw0:A",
+        "6qw0:B",
+        "6qw5:A",
+        "6qw5:B",
+        "6qvv:A"
+      ],
+      "surface_score": 4.322,
+      "patch_fraction_of_surface": 0.077,
+      "structures_clipped_to_domain": 0,
+      "residues_in_range": 195,
+      "exposed_fraction_of_residues": 0.552,
+      "sequons_near_patch": 0,
+      "available_from": "2019-03-05",
+      "patch_positions": [
+        10,
+        12,
+        14,
+        17,
+        99,
+        100,
+        104,
+        147,
+        151,
+        154,
+        158,
+        159
+      ],
+      "patch_residue_names": [
+        "A",
+        "V",
+        "A",
+        "I",
+        "V",
+        "L",
+        "A",
+        "A",
+        "I",
+        "L",
+        "A",
+        "I"
+      ],
+      "patch_positions_measured_on": "6qw0:A",
+      "locations": [
+        "Host Golgi apparatus",
+        "Host endoplasmic reticulum",
+        "Host endoplasmic reticulum-Golgi intermediate compartment",
+        "Virion"
+      ],
+      "location_scope": "entry",
+      "exposed": false,
+      "exposed_fraction_of_locations": 0.0,
+      "gate": "no"
+    }
+  ],
+  "library": {
+    "initiator": "ClAc-D-Tyr",
+    "closure_residue": "C",
+    "random_region": [
+      4,
+      8
+    ],
+    "elongator_classes": [
+      "canonical",
+      "N-methyl",
+      "D-alpha-amino"
+    ],
+    "elongator_alphabet": [
+      "A",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "K",
+      "L",
+      "M",
+      "N",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "V",
+      "W",
+      "Y",
+      "NMe-Gly",
+      "NMe-Ala",
+      "NMe-Phe",
+      "D-Ala",
+      "D-Phe",
+      "D-Ser"
+    ],
+    "cyclisation": "spontaneous thioether between chloroacetyl initiator and downstream Cys",
+    "theoretical_diversity": 158945703125,
+    "endpoint_note": "A library definition only; no binding, enrichment, inhibition or antiviral property is predicted for any member."
+  },
+  "folded": {
+    "absence": "no unit of any ranked candidate was inside the residue ceiling of 1200: neither a whole chain nor any annotated functional region of one"
+  },
+  "folded_also": null,
+  "foldable": [
+    {
+      "target": "L_TOSV RNA-directed RNA polymerase L",
+      "rank": 1,
+      "identified": true,
+      "identification_route": "exact",
+      "chain_range_on_the_relative": null,
+      "declared_length_aa": null,
+      "parent_orf_length_aa": 2092,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "recovered_length_aa": 2092,
+      "recovered_by": "the ORF translation is the candidate",
+      "inside_the_ceiling": false,
+      "domain_units_offered": 0,
+      "domain_units_inside_the_ceiling": 0,
+      "domain_units_set_aside_because": null,
+      "not_folded_because": "2092 residues, over the 1200-residue ceiling this stage sends to the folding endpoint. No coordinates are predicted for it, so a deposited structure covering the chain is the only surface it can have.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "L_TOSV RNA-directed RNA polymerase L",
+          "type": "ORF",
+          "description": "the whole called ORF; no mature-chain boundaries were read",
+          "span": [
+            1,
+            2092
+          ],
+          "entry_span": null,
+          "entry_span_mapped": null,
+          "entry_length_mapped": null,
+          "length": 2092,
+          "inside_the_ceiling": false,
+          "refused_because": "2092 residues, over the 1200-residue ceiling this stage sends to the folding endpoint.",
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": null,
+          "mapping_reproduces_the_span": null
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mn(2+)",
+          "positions_on_the_relative": [
+            78
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mn(2+)",
+          "positions_on_the_relative": [
+            113
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mn(2+)",
+          "positions_on_the_relative": [
+            113
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mn(2+)",
+          "positions_on_the_relative": [
+            127
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Active site",
+          "description": "For endonuclease activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            145
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mg(2+)",
+          "positions_on_the_relative": [
+            1135
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Site",
+          "description": "Interaction with the cap substrate",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1711
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Site",
+          "description": "Interaction with the cap substrate",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1715
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Site",
+          "description": "Interaction with the cap substrate",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1726
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Site",
+          "description": "Interaction with the cap substrate",
+          "ligand": null,
+          "positions_on_the_relative": [
+            1780
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        }
+      ],
+      "functional_sites_absent_because": null
+    }
+  ],
+  "evidence": [
+    {
+      "rank": 1,
+      "target": "L_TOSV RNA-directed RNA polymerase L",
+      "nearest_homolog": "P37800",
+      "chain_range": null,
+      "sequence_available": false,
+      "calls": [
+        {
+          "tool": "literature.search",
+          "endpoint": "Europe PMC",
+          "status": "empty",
+          "note": "{'subject_zero': True, 'axes_zero': ('assay_availability', 'conservation', 'essentiality', 'precedent', 'public_labels'), 'means': 'A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.'}",
+          "seconds": 9.67,
+          "network_calls": 7,
+          "returned": {}
+        },
+        {
+          "tool": "similarity.homologs",
+          "endpoint": "EBI HMMER",
+          "status": "not_asked",
+          "note": "the chain holds no argument this tool requires",
+          "seconds": null,
+          "network_calls": null,
+          "returned": {}
+        },
+        {
+          "tool": "families.entries",
+          "endpoint": "InterPro",
+          "status": "ok",
+          "note": null,
+          "seconds": 3.45,
+          "network_calls": 8,
+          "returned": {
+            "protein_name": "RNA-directed RNA polymerase L",
+            "organism": "Toscana virus",
+            "sequence_md5": "44E39994EF6F0AE1E9E6EF18634E3937",
+            "sequence_length": 2095,
+            "sequence_source": "uniprot",
+            "assignments_count": 7,
+            "predicted_count": 5,
+            "sequence_features_count": 0,
+            "residue_ranges_count": 5,
+            "functional_sites_count": 0
+          }
+        },
+        {
+          "tool": "structures.predicted",
+          "endpoint": "AlphaFold DB, 3D-Beacons",
+          "status": "ok",
+          "note": null,
+          "seconds": 1.31,
+          "network_calls": 2,
+          "returned": {
+            "sequence_length": 2095,
+            "confident_plddt": 70.0,
+            "plddt_bands_count": 4,
+            "residue_detail": false,
+            "any_prediction_exists": true,
+            "predicted_model_count": 12,
+            "providers_queried_count": 2,
+            "providers_with_models_count": 2,
+            "alphafold_host_queried": true,
+            "alphafold_host_served_models": true
+          }
+        },
+        {
+          "tool": "bioactivity.prior_binders",
+          "endpoint": "ChEMBL, IEDB, MaveDB",
+          "status": "ok",
+          "note": null,
+          "seconds": 7.37,
+          "network_calls": 8,
+          "returned": {
+            "max_molecules_requested": 50,
+            "max_molecules_applied": 50,
+            "max_molecules_clamped": false,
+            "lanes_unavailable_count": 0,
+            "earliest_evidence_year": "2024",
+            "network_calls": 8,
+            "calls_count": 8,
+            "sources_count": 3,
+            "urls_hit_count": 8,
+            "limitations_count": 13
+          }
+        }
+      ]
+    }
+  ],
+  "seconds": 35.83,
+  "coverage": {
+    "chains_ranked": 1,
+    "surface_rows": 1,
+    "surface_measured": 1,
+    "surface_refused": 0,
+    "surface_covers_every_chain": true,
+    "surface_on_predicted_coordinates": 0,
+    "surface_predicted_was_the_only_route": 0,
+    "chains_with_any_surface": 1,
+    "chains_with_no_surface": 0,
+    "chains_with_no_surface_over_the_ceiling": 0,
+    "chains_over_the_folding_ceiling": 1,
+    "fold_rows": 1,
+    "fold_rows_unidentified": 0,
+    "fold_sequence_recovered": 1,
+    "fold_sequence_recovered_unidentified": 0,
+    "fold_covers_every_chain": true,
+    "fold_units_offered": 1,
+    "fold_units_folded": 0,
+    "domain_units_offered": 0,
+    "domain_units_folded": 0,
+    "chains_rescued_by_the_domain_route": 0,
+    "chains_with_no_coordinates": 1,
+    "chains_with_a_region_surface": 0,
+    "region_surfaces_measured": 0,
+    "chains_with_functional_sites": 1,
+    "site_patch_measured_on_a_deposition": 1,
+    "site_patch_measured_on_a_prediction": 0,
+    "site_patch_on_a_deposition_not_at_the_annotated_residues": 0,
+    "site_patch_on_a_prediction_not_at_the_annotated_residues": 0,
+    "evidence_targets": 1,
+    "evidence_calls": 5
+  },
+  "pathogen": "Rift Valley fever virus",
+  "fold_integrity": {
+    "trustworthy": true,
+    "infrastructure_failures": 0,
+    "failures": [],
+    "means": "every missing structure on this run is a declared refusal -- a sequence over a ceiling, or a host that refused this sequence -- so the absences are results"
+  }
+}

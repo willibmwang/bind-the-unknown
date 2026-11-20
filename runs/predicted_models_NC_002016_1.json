@@ -1,0 +1,102 @@
+{
+  "experiment": "predicted-model-inventory",
+  "status": "complete",
+  "case": "Influenza A PR8, Influenza A virus (strain A/Puerto Rico/8/1934 H1N1) held out",
+  "genome_accession": "NC_002016.1,NC_002017.1,NC_002018.1,NC_002019.1,NC_002020.1,NC_002021.1,NC_002022.1,NC_002023.1",
+  "reference_excluded_organism": "Influenza A virus (strain A/Puerto Rico/8/1934 H1N1)",
+  "accessions": [
+    {
+      "accession": "A4GCI6",
+      "uniprot_entry_id": "HEMA_I36A0",
+      "sequence_length": 566,
+      "asked_about": [
+        {
+          "rank": 2,
+          "target": "Hemagglutinin HA1 chain",
+          "range": "18-343"
+        },
+        {
+          "rank": 3,
+          "target": "Hemagglutinin HA2 chain",
+          "range": "345-566"
+        }
+      ],
+      "requested_ranges": [
+        "18-343",
+        "345-566"
+      ],
+      "predicted_model_count": 1,
+      "any_prediction_exists": true,
+      "providers_with_models": [
+        "SWISS-MODEL"
+      ],
+      "models_by_provider": {
+        "SWISS-MODEL": 1
+      },
+      "models_by_tool_used": {
+        "not stated by the host": 1
+      },
+      "models_by_category": {
+        "TEMPLATE-BASED": 1
+      },
+      "alphafold_host_queried": true,
+      "alphafold_host_served_models": false,
+      "alphafold_host_model_count": 0,
+      "alphafold_host_models_by_tool_used": {},
+      "alphafold_authored_model_count": 0,
+      "tools_used": [],
+      "models_found_only_by_alphafold_host": [],
+      "mean_confidence_by_metric": {
+        "QMEANDisCo": 0.75
+      },
+      "ranges": [
+        {
+          "range": "18-343",
+          "width": 326,
+          "models_overlapping": 1,
+          "modelled": true,
+          "best_plddt_model": null,
+          "no_plddt_because": "no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply"
+        },
+        {
+          "range": "345-566",
+          "width": 222,
+          "models_overlapping": 1,
+          "modelled": true,
+          "best_plddt_model": null,
+          "no_plddt_because": "no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply"
+        }
+      ],
+      "excluded_experimental_count": 0,
+      "per_residue_refusals": [],
+      "network_calls": 2,
+      "bytes_received": 1157,
+      "content_sha256": "901c025c18e7e1163d57a8bb12249efa5b997169534d326b331c315368d06261"
+    }
+  ],
+  "predicted_model_count": 1,
+  "alphafold_host_model_count": 0,
+  "alphafold_authored_model_count": 0,
+  "headline": "1 predicted models across 1 accessions. 0 were served by the AlphaFold host and 0 were computed by AlphaFold.",
+  "interpretation": "The provenance of the `structures.predicted` scalars on the landing page. Each accession's predicted models are counted three ways that the page's single `predicted_model_count` collapses into one: by the provider that served the model, by the tool that computed it, and by model category. Nothing here is a new capability and nothing here changes a rank; it re-asks one tool already in the toolkit for the same accessions the held-out run reached, and keeps the list that the chain record reduces to a count.",
+  "limitations": [
+    "The AlphaFold host's name is not the provenance of what it serves. Every model provider `AlphaFold DB` returned for these accessions was computed by ColabFold v1.5.2, so `alphafold_host_served_models: true` must not be read as 'AlphaFold modelled this protein'. `alphafold_authored_model_count` is counted from each model's `tool_used`, which is the only field that answers that.",
+    "ColabFold is counted apart from AlphaFold rather than folded into it. It runs the same network weights behind a different MSA pipeline, which makes it AlphaFold-derived and still not an AlphaFold DB model.",
+    "A predicted model is not experimental evidence that the protein adopts the modelled conformation, and a high pLDDT is a statement about the predictor's confidence rather than an observation of the fold.",
+    "pLDDT (0-100) and QMEANDisCo (0-1) are different quantities, not one quantity rescaled. Averages are grouped by metric and never merged. An accession whose models are all template-based carries no pLDDT at all, so the `confident_plddt` threshold the page prints does not apply to it.",
+    "A predicted-model count is not an attention proxy and must never be pooled with deposited-structure counts. Experimentally determined entries are partitioned out here and counted in `excluded_experimental_count` only.",
+    "Absence is recorded, not inferred. `alphafold_host_served_models: false` on Q3LZX1 is a measured absence -- the host was asked unconditionally and holds nothing -- and not a request that was skipped.",
+    "The accessions are read out of the landing record's held-out case rather than written here, so this inventory covers the relatives the chain actually reached. It says nothing about SARS-CoV-2's own P0DTD1, whose curated entries that case deletes before the run."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "96cf82d7cf34512bb1b5d65d37418f58f4311e6c",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-13T18:10:12.688643+00:00"
+  },
+  "content_sha256": "e90fe101b0f90966d12df6c3b11109bbe22f7c829d47f9f7eb67d7939390469d"
+}

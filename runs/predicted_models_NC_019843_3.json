@@ -19,17 +19,11 @@
           "rank": 2,
           "target": "Spike protein S2",
           "range": "750-1235"
-        },
-        {
-          "rank": 3,
-          "target": "Spike protein S2'",
-          "range": "885-1350"
         }
       ],
       "requested_ranges": [
         "13-749",
-        "750-1235",
-        "885-1350"
+        "750-1235"
       ],
       "predicted_model_count": 4,
       "any_prediction_exists": true,
@@ -53,7 +47,7 @@
       "tools_used": [],
       "models_found_only_by_alphafold_host": [],
       "mean_confidence_by_metric": {
-        "QMEANDisCo": 0.6827
+        "QMEANDisCo": 0.6815
       },
       "ranges": [
         {
@@ -71,27 +65,86 @@
           "modelled": true,
           "best_plddt_model": null,
           "no_plddt_because": "no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply"
-        },
-        {
-          "range": "885-1350",
-          "width": 466,
-          "models_overlapping": 4,
-          "modelled": true,
-          "best_plddt_model": null,
-          "no_plddt_because": "no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply"
         }
       ],
       "excluded_experimental_count": 1,
       "per_residue_refusals": [],
       "network_calls": 2,
       "bytes_received": 4533,
-      "content_sha256": "70282e249712838b07fa1a8ffda169b7e685e39a2a92edfff5be322194c1fde9"
+      "content_sha256": "7f685505447dbe3b4758cca280f6959954d69480f848a065e2f0c9eeb69f779a"
+    },
+    {
+      "accession": "P0C6W4",
+      "uniprot_entry_id": "R1AB_BCHK5",
+      "sequence_length": 7182,
+      "asked_about": [
+        {
+          "rank": 3,
+          "target": "3C-like proteinase nsp5",
+          "range": "3339-3644"
+        }
+      ],
+      "requested_ranges": [
+        "3339-3644"
+      ],
+      "predicted_model_count": 34,
+      "any_prediction_exists": true,
+      "providers_with_models": [
+        "AlphaFold DB"
+      ],
+      "models_by_provider": {
+        "AlphaFold DB": 34
+      },
+      "models_by_tool_used": {
+        "ColabFold v1.5.2": 34
+      },
+      "models_by_category": {
+        "AB-INITIO": 34
+      },
+      "alphafold_host_queried": true,
+      "alphafold_host_served_models": true,
+      "alphafold_host_model_count": 34,
+      "alphafold_host_models_by_tool_used": {
+        "ColabFold v1.5.2": 34
+      },
+      "alphafold_authored_model_count": 0,
+      "tools_used": [
+        "ColabFold v1.5.2"
+      ],
+      "models_found_only_by_alphafold_host": [],
+      "mean_confidence_by_metric": {
+        "pLDDT": 88.2874
+      },
+      "ranges": [
+        {
+          "range": "3339-3644",
+          "width": 306,
+          "models_overlapping": 1,
+          "modelled": true,
+          "best_plddt_model": {
+            "model_identifier": "AF-0000000365783782",
+            "provider": "AlphaFold DB",
+            "tool_used": "ColabFold v1.5.2",
+            "median_plddt": 95.06,
+            "min_plddt": 52.59,
+            "fraction_at_or_above_threshold": 0.9731,
+            "longest_run_below_threshold": 7,
+            "fraction_of_range_covered": 0.9706
+          },
+          "no_plddt_because": null
+        }
+      ],
+      "excluded_experimental_count": 3,
+      "per_residue_refusals": [],
+      "network_calls": 3,
+      "bytes_received": 97296,
+      "content_sha256": "450b931089c0e56cb9e5508468719435a727a2dd184d86689e525e379cc0d55d"
     }
   ],
-  "predicted_model_count": 4,
-  "alphafold_host_model_count": 0,
+  "predicted_model_count": 38,
+  "alphafold_host_model_count": 34,
   "alphafold_authored_model_count": 0,
-  "headline": "4 predicted models across 1 accessions. 0 were served by the AlphaFold host and 0 were computed by AlphaFold.",
+  "headline": "38 predicted models across 2 accessions. 34 were served by the AlphaFold host and 0 were computed by AlphaFold.",
   "interpretation": "The provenance of the `structures.predicted` scalars on the landing page. Each accession's predicted models are counted three ways that the page's single `predicted_model_count` collapses into one: by the provider that served the model, by the tool that computed it, and by model category. Nothing here is a new capability and nothing here changes a rank; it re-asks one tool already in the toolkit for the same accessions the held-out run reached, and keeps the list that the chain record reduces to a count.",
   "limitations": [
     "The AlphaFold host's name is not the provenance of what it serves. Every model provider `AlphaFold DB` returned for these accessions was computed by ColabFold v1.5.2, so `alphafold_host_served_models: true` must not be read as 'AlphaFold modelled this protein'. `alphafold_authored_model_count` is counted from each model's `tool_used`, which is the only field that answers that.",
@@ -106,11 +159,11 @@
     "host": "Williams-MacBook-Pro-260.local",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "161f2223fe4c87205556d65162bd4a1256a22abe",
+    "git_commit": "0c3067376d32efc18e93d5aefaf4542de329e2a5",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-11-13T15:09:43.945756+00:00"
+    "recorded_at_utc": "2026-11-20T02:06:05.339723+00:00"
   },
-  "content_sha256": "41c45e627dd751e2b1c2f75e7d48a3fcef5a24003529d1292bef4dcad69de502"
+  "content_sha256": "2b3d979545f5be65922738de810f570f7f12179cfc5ff6532aa4948b4e97d3c9"
 }
