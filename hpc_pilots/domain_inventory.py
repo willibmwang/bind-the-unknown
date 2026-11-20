@@ -144,6 +144,7 @@ def _region_row(region, site_positions, ceiling):
     inside = sorted(p for p in site_positions if start <= p <= end)
     terms = _relevance_terms(region.get("description"), region.get("type"))
     positional = region["type"] in POSITIONAL_TYPES
+    lone_helix = domains.is_a_lone_helix(region)
     row = {
         "type": region["type"],
         "description": region.get("description") or "",
@@ -157,10 +158,21 @@ def _region_row(region, site_positions, ceiling):
         "site_positions_inside_on_the_relative": inside[:12],
         "relevance_terms_matched": terms,
         "describes_position_not_function": positional,
+        # One helix, not a fold. Recorded per row for the same reason
+        # `describes_position_not_function` is: it decides where the row sorts and whether it
+        # is offered, and a reader who disagrees with the call should be able to see it made.
+        # `domains.LONE_HELIX_TYPES` holds the measurement behind it.
+        "is_one_helix_not_a_fold": lone_helix,
         "foldable": False,
         "refused_because": None,
     }
-    if region["length"] < domains.MINIMUM_DOMAIN_AA:
+    if lone_helix:
+        row["refused_because"] = (
+            f"one helix. A {domains.label_for(region).lower()} has no monomeric structure to "
+            f"predict -- what holds its shape is the bundle its partners complete. Its "
+            f"positions are still a site a macrocycle could be designed at; it is refused "
+            f"only as something to send to the endpoint.")
+    elif region["length"] < domains.MINIMUM_DOMAIN_AA:
         row["refused_because"] = (
             f"{region['length']} residues, under the {domains.MINIMUM_DOMAIN_AA}-residue "
             f"minimum for a fold unit. Its positions are still a site a macrocycle could be "
@@ -177,13 +189,22 @@ def _region_row(region, site_positions, ceiling):
 def _order(rows):
     """Functional relevance first, length only as the tie-break.
 
-    The four keys, in order, and each is a correction of what length alone did: a span that
-    describes position rather than function sorts last; then the data signal, contained
-    annotated site residues; then the authored term list; then length, which between two
-    otherwise equivalent spans is still the right tie-break because the longer one carries
-    more structural context.
+    The five keys, in order, and each is a correction of what length alone did: a span that is
+    one helix sorts last, then one that describes position rather than function; then the data
+    signal, contained annotated site residues; then the authored term list; then length, which
+    between two otherwise equivalent spans is still the right tie-break because the longer one
+    carries more structural context.
+
+    The helix key is last-added and outermost, because on the spike it is the one that decides
+    what the chain is seen to offer. Spike S2's only three regions inside the fold window are
+    `Heptad repeat 1`, `Coiled coil 918-962` and `Heptad repeat 2`; with those sorting above
+    everything, the chain's stated first offer was a helix and the page drew three straight
+    rods under it. Sorted last, the chain offers its fusion peptides and its extracellular
+    span first -- both refused as fold units for their own stated reasons, which is the honest
+    answer for this chain and a different sentence from offering a rod.
     """
-    return sorted(rows, key=lambda r: (r["describes_position_not_function"],
+    return sorted(rows, key=lambda r: (r["is_one_helix_not_a_fold"],
+                                       r["describes_position_not_function"],
                                        -r["site_residues_inside"],
                                        -len(r["relevance_terms_matched"]),
                                        -r["length_aa"]))
@@ -292,12 +313,19 @@ def run(case=None, path=None, record=True, landing=None):
         },
         "chains": chains,
         "ordering": {
-            "keys": ["describes_position_not_function ascending",
+            "keys": ["is_one_helix_not_a_fold ascending",
+                     "describes_position_not_function ascending",
                      "site_residues_inside descending",
                      "relevance_terms_matched descending",
                      "length_aa descending"],
             "site_residues_inside": "data: counted from the entry's own Active site, "
                                     "Binding site and Site annotations.",
+            "is_one_helix_not_a_fold": "a stated rule, not a measurement: a coiled coil or a "
+                                       "heptad repeat is a single helix whose structure is "
+                                       "the bundle its partners complete, so there is no "
+                                       "monomer of it to predict. It sorts last and is "
+                                       "refused as a fold unit; its positions stay available "
+                                       "as a site.",
             "relevance_terms_matched": "an authored heuristic, validated against no labelled "
                                        "corpus, in the sense literature.AXIS_TERMS is one. "
                                        "It orders a list and nothing else.",

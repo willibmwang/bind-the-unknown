@@ -5896,6 +5896,59 @@ def _located_with_a_gap():
             "covered": 0.93, "identity": 0.88}
 
 
+def test_a_coiled_coil_is_kept_as_a_site_and_refused_as_a_fold():
+    """One helix is not a fold, and the two halves of that sentence are both asserted.
+
+    Spike S2's only three regions inside the 40-to-400 fold window are `Heptad repeat 1` at
+    51 aa, `Coiled coil 918-962` at 45 and `Heptad repeat 2` at 40, so every unit the chain
+    offered was a single helix and the page drew three straight rods. ESMFold returned them at
+    mean pLDDT 93.8, 93.0 and 74.8, against 62.6 for the main protease, which is a real fold:
+    read as structural confidence, the ranking is exactly inverted.
+
+    The refusal is of the fold and not of the target. `FUNCTIONAL_REGIONS` keeps `Coiled coil`
+    deliberately -- it is the shape a macrocycle reaches and a small molecule does not, which
+    is why enfuvirtide is a peptide -- so the positions must survive as a site.
+    """
+    from hpc_pilots import domains
+    from hpc_pilots.domain_inventory import _order, _region_row
+
+    # Both shapes the predicate is called on, and the two ways a lone helix is annotated: the
+    # type carries it for a coiled coil, the description for a heptad repeat.
+    assert domains.is_a_lone_helix({"type": "Coiled coil", "description": ""})
+    assert domains.is_a_lone_helix({"region_type": "Coiled coil", "description": ""})
+    assert domains.is_a_lone_helix({"type": "Region", "description": "Heptad repeat 2"})
+    # And what it must not catch: the RBD is a Region too, and a helical transmembrane span
+    # has its own refusal that says something different.
+    assert not domains.is_a_lone_helix(
+        {"type": "Region", "description": "Receptor-binding domain (RBD)"})
+    assert not domains.is_a_lone_helix({"type": "Domain", "description": "Peptidase C30"})
+
+    def region(kind, start, end, description=""):
+        return {"type": kind, "description": description, "start": start, "end": end,
+                "length": end - start + 1, "clipped": False}
+
+    rbd = _region_row(region("Region", 1, 223, "Receptor-binding domain (RBD)"), set(), 400)
+    hr1 = _region_row(region("Region", 889, 939, "Heptad repeat 1"), set(), 400)
+    coil = _region_row(region("Coiled coil", 918, 962), set(), 400)
+    short_coil = _region_row(region("Coiled coil", 1144, 1172), set(), 400)
+
+    assert rbd["foldable"] and not rbd["is_one_helix_not_a_fold"]
+    for row in (hr1, coil, short_coil):
+        assert row["is_one_helix_not_a_fold"], row["description"] or row["type"]
+        assert not row["foldable"]
+        assert row["refused_because"].startswith("one helix.")
+        # The site survives the refusal, and the row says so in the words the short-region
+        # refusal already uses. A reader must not read this as "not a target".
+        assert "still a site a macrocycle could be designed at" in row["refused_because"]
+    # The 29-residue coiled coil is under the length minimum as well, and reports the helix
+    # reason rather than the length one: one annotation, one finding.
+    assert "under the" not in short_coil["refused_because"]
+
+    # And they sort last, so no chain's stated first offer is a rod.
+    assert [r["description"] or r["type"] for r in _order([hr1, coil, rbd, short_coil])][0] \
+        == "Receptor-binding domain (RBD)"
+
+
 def test_one_annotated_region_has_one_name_whatever_shape_it_arrives_in():
     """`domains.label_for` is the only fallback, and the collision it exists for is here.
 

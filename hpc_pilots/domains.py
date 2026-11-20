@@ -125,6 +125,33 @@ FUNCTIONAL_SITES = ("Active site", "Binding site", "Site")
 # macrocycle is designed at. It is refused only as a thing to send to the folding endpoint.
 MINIMUM_DOMAIN_AA = 40
 
+# Spans that are one helix. These clear the length window and must still not be folded, which
+# is a different refusal from either bound and is stated separately for that reason.
+#
+# A coiled coil and a heptad repeat are not folds. Each is a single helix whose structure is
+# the bundle its partners complete, and the partner is another copy of the same chain: spike's
+# HR1 is one strand of a trimeric core, and there is no monomeric object for a folding tool to
+# return. ESMFold returns one anyway, and returns it confidently -- measured on the committed
+# SARS-CoV-2 run, `Heptad repeat 1` came back at mean pLDDT 93.8 over 51 residues, `Coiled coil
+# 918-962` at 93.0 over 45, against 62.6 for the main protease, which is an actual fold and the
+# best-predicted real structure in that run. The spike's three units were the three
+# best-scoring predictions on the page and all three were straight rods. That number is
+# confidence that the residues are helical, which they are; read as confidence in a structure,
+# it ranks a prediction of nothing above every prediction of something.
+#
+# Refused as fold units only. `FUNCTIONAL_REGIONS` keeps `Coiled coil` on purpose -- "the
+# shallow, extended shape macrocycles reach and small molecules do not" -- and that is still
+# true, and is why enfuvirtide is a peptide against gp41's HR1 rather than a small molecule.
+# The positions stay available as a site, exactly as they do under MINIMUM_DOMAIN_AA. What is
+# withdrawn is the claim that a predicted monomer of one of them is a structure.
+#
+# Matched on the feature type, and on a description term for the repeats, because UniProt
+# annotates HR1 and HR2 as `Region` with the name carrying the fact: on Q3LZX1 `Region
+# 889-939 Heptad repeat 1` and `Region 1132-1171 Heptad repeat 2`, beside `Coiled coil
+# 918-962`, which overlaps HR1 and says the same thing in the type instead.
+LONE_HELIX_TYPES = ("Coiled coil",)
+LONE_HELIX_TERMS = ("heptad repeat",)
+
 # How much of the whole chain a domain has to cover before it is reported as coincident with
 # it. Not a new number: `intake.mature_chains` already states 0.95 for the mirror-image
 # judgement, where a Chain feature spanning that much of its entry is taken to be the whole
@@ -387,6 +414,23 @@ def label_for(region):
 _label = label_for
 
 
+def is_a_lone_helix(region):
+    """Is this region one helix rather than a fold? `LONE_HELIX_TYPES` states the argument.
+
+    Reads the same three dict shapes `label_for` reads, and for the same reason: the page, the
+    inventory and the fold units each hold the annotation in their own shape, and a predicate
+    only one of them can call is a predicate two of them will reimplement differently. The
+    type is taken from either key; the description is matched on a substring because UniProt
+    numbers the repeats -- `Heptad repeat 1`, `Heptad repeat 2` -- and an exact match would
+    catch neither.
+    """
+    kind = region.get("type") or region.get("region_type") or ""
+    if kind in LONE_HELIX_TYPES:
+        return True
+    described = (region.get("description") or "").lower()
+    return any(term in described for term in LONE_HELIX_TERMS)
+
+
 def fold_units(row, located, accession, ceiling):
     """Every unit of one chain that stage 3 could fold, longest-first within each kind.
 
@@ -493,7 +537,20 @@ def fold_units(row, located, accession, ceiling):
         unit["entry_span_mapped"] = list(mapping["entry_span"])
         unit["entry_length_mapped"] = mapping["entry_length"]
         unit["coincides_with_the_whole_chain"] = _coincides(unit["span"], whole["span"])
-        if unit["length"] < MINIMUM_DOMAIN_AA:
+        if is_a_lone_helix(region):
+            # Checked before the two length bounds, so every coiled coil and heptad repeat
+            # gives the same reason whatever its length. The alternative reported the 45-aa
+            # coiled coil as a lone helix and the 29-aa one as too short, which reads as two
+            # findings about one annotation and invites a reader to conclude the longer one
+            # would have been folded.
+            unit["refused_because"] = (
+                f"one helix. A {label_for(region).lower()} has no monomeric structure to "
+                f"predict -- what holds its shape is the bundle its partners complete -- so a "
+                f"fold of it on its own reports helical propensity and not a structure. It "
+                f"stays available as a site, which carries its positions without claiming a "
+                f"fold, and those positions are the shallow extended shape this project "
+                f"targets with macrocycles rather than with small molecules.")
+        elif unit["length"] < MINIMUM_DOMAIN_AA:
             unit["refused_because"] = (
                 f"{unit['length']} residues, under the {MINIMUM_DOMAIN_AA}-residue minimum "
                 f"this stage requires of a fold unit. It stays available as a site, which "
