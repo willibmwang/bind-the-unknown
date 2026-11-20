@@ -145,6 +145,41 @@ class _Budget:
         self.urls = []
 
 
+def _decompressed(handle):
+    """The response body, decompressed if the host compressed it unasked.
+
+    **This was losing a whole artifact to a decode error.** Nothing here sends
+    `Accept-Encoding`, so a compressed body is the host's own doing, and `json.loads` on gzip
+    bytes raises `UnicodeDecodeError: 'utf-8' codec can't decode byte 0x8b in position 1` --
+    0x1f 0x8b being the gzip magic. Observed 19 Nov 2026 on a Hepatitis B run: the caller
+    catches it, prints "predicted-model inventory not written", and the chain record is
+    complete while `runs/predicted_models_<accession>.json` simply does not exist. That
+    sidecar is the record separating which HOST served a model from what COMPUTED it -- the
+    distinction behind the finding that of 54 predicted models the held-out run carries, 35
+    are served by the AlphaFold host and none was computed by AlphaFold. Losing it to a
+    transport detail is the wrong way to lose it.
+
+    Keyed on the header the host actually sent rather than on sniffing the bytes, and silent
+    about an identity encoding, which is almost every response. `gzip` and `deflate` are the
+    two any of these hosts have been seen to use; anything else is returned untouched so the
+    failure stays a loud decode error naming the encoding rather than a guess at it.
+    """
+    import gzip
+    import zlib
+
+    raw = handle.read()
+    encoding = (handle.headers.get("Content-Encoding") or "").strip().lower()
+    if encoding == "gzip":
+        return gzip.decompress(raw)
+    if encoding == "deflate":
+        # Raw deflate and zlib-wrapped deflate are both seen in the wild under this one name.
+        try:
+            return zlib.decompress(raw)
+        except zlib.error:
+            return zlib.decompress(raw, -zlib.MAX_WBITS)
+    return raw
+
+
 def _get(url, budget, timeout=TIMEOUT):
     """One GET with a descriptive agent. Returns None on 404; every other status raises.
 
@@ -161,7 +196,7 @@ def _get(url, budget, timeout=TIMEOUT):
     start = time.perf_counter()
     try:
         with urllib.request.urlopen(request, timeout=timeout) as handle:
-            raw = handle.read()
+            raw = _decompressed(handle)
             status = handle.status
     except urllib.error.HTTPError as error:
         budget.calls += 1
