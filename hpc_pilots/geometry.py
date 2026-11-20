@@ -281,7 +281,7 @@ def surface_markers(pdb_id, chain=None, keep=None, verify=None, anchors=None):
     return _markers(residues, pdb_id, chain, keep, verify, anchors)
 
 
-def markers_from_coordinates(text, label="predicted coordinates", anchors=None):
+def markers_from_coordinates(text, label="predicted coordinates", anchors=None, keep=None):
     """The same measurement, on coordinates a model emitted rather than a deposited file.
 
     This is the only route to a surface for a target nothing has solved, and it is the lane a
@@ -290,6 +290,13 @@ def markers_from_coordinates(text, label="predicted coordinates", anchors=None):
     the same freesasa accessibility, the same contact-linked hydrophobic patch, the same
     footprint comparison -- because the quantity is a property of coordinates and does not ask
     where they came from.
+
+    `keep` carries the same meaning it has on `surface_markers` and is here for one question
+    that cannot be asked without it: what a region's patch looks like while the region is
+    still inside its chain. Accessibility is computed over everything in the file and only the
+    patch SEARCH is restricted, so passing a region's range against a whole-chain prediction
+    measures that region in context, and folding the region alone and measuring it with no
+    `keep` measures it out of context. The two numbers are what `region_fidelity` compares.
 
     What differs is its standing, and the return says so rather than leaving a reader to infer
     it. `on_predicted_coordinates` and `is_deposited_measurement` travel with the numbers, and
@@ -344,7 +351,7 @@ def markers_from_coordinates(text, label="predicted coordinates", anchors=None):
             return {"pdb_id": label, "chain": None, "residues": 0,
                     "error": "no residues read from the predicted coordinates",
                     "on_predicted_coordinates": True, "is_deposited_measurement": False}
-        markers = _markers(residues, label, None, None, None, anchors)
+        markers = _markers(residues, label, None, keep, None, anchors)
     markers["on_predicted_coordinates"] = True
     markers["is_deposited_measurement"] = False
     return markers
