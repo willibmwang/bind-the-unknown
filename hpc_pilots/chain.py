@@ -1414,6 +1414,119 @@ def _set_aside_sentence(regions, inside):
             f"unit of its own.")
 
 
+def _record_fold(payload, target, entry, unit):
+    """Write one fold's outcome onto its payload, its unit and -- for a whole chain -- its row.
+
+    Factored out of the fold loop so the serial path and the concurrent one cannot drift. There
+    is no behaviour here that either path gets to choose: a reader comparing a run folded one
+    sequence at a time against the same run folded twelve at a time has to be comparing folds
+    and not two transcriptions of them.
+    """
+    # What this fold was of, carried on the payload so the stage after this one can tell a
+    # chain's coordinates from a region's without re-deriving it from the name. A region's
+    # `target_name` is `"<chain> · <region>"`, which is a key and not a target: the surface
+    # stage reports it under the chain's own row, because a region is a closer look at a
+    # target and not a new one.
+    payload["unit"] = {"kind": unit["kind"], "chain": entry["target"],
+                       "label": unit["label"], "type": unit["type"],
+                       "span_in_this_genome": unit["span"],
+                       "entry_span_on_the_relative": unit["entry_span"],
+                       "length_aa": unit["length"]}
+    # Stated on the row as well as in the payload, so a reader of `foldable` can see which
+    # chains have coordinates without holding the fold payloads beside it. A row's own
+    # `folded` stays the whole chain's answer; a region's is on the region.
+    unit["folded"] = bool(payload.get("folded"))
+    unit["target_name"] = target
+    unit["mean_plddt"] = payload.get("mean_plddt")
+    unit["confident_fraction"] = payload.get("confident_fraction")
+    unit["pdb_sha256"] = payload.get("pdb_sha256")
+    if unit["kind"] == "whole_chain":
+        entry["folded"] = bool(payload.get("folded"))
+        entry["mean_plddt"] = payload.get("mean_plddt")
+    if payload.get("absence"):
+        absence = (payload["absence"].get("reason")
+                   if isinstance(payload["absence"], dict) else payload["absence"])
+        unit["fold_absence"] = absence
+        if unit["kind"] == "whole_chain":
+            entry["fold_absence"] = absence
+
+
+def _fold_queue_concurrently(queue, folds, workers):
+    """Fold every unit in `queue`, `workers` at a time, and append in queue order.
+
+    **This exists because the two bounds are a visitor's bounds and a panel is not a visitor.**
+    `FOLD_BUDGET_SECONDS` keeps one run inside the wall-clock cap on the workflow that serves
+    somebody waiting on a page, and it is right for that. Summed over the forty-seven genomes
+    of the panel it means 1,198 fold units offered and 333 folded, and 827 annotated domain
+    units offered against 28 folded -- so the published coverage of the whole panel is a
+    statement about a web request's patience rather than about what the pipeline can reach.
+    Taking the bounds off and folding serially trades that for a night; folding concurrently
+    against a GPU deployment that autoscales trades it for an hour.
+
+    **Only with both bounds off, and that is checked by the caller rather than negotiated
+    here.** A wall budget checked before each fold has a worst case of "one fold in flight when
+    the budget expires", and with twelve folds in flight the phrase means nothing and the drop
+    accounting stops being reproducible. The record's own arithmetic -- chains inside the
+    ceiling equals folds attempted plus the two bounds' drops -- is asserted in the suite, so
+    the honest options are an exact serial bound or no bound, and a concurrent run takes the
+    second.
+
+    **Two waves, because the contingency decision is a real dependency and not a race.** A
+    region held back behind its chain is skipped when the chain's own fold succeeded: its
+    residues are inside coordinates the chain already has. Serially that is known by the time
+    the region comes up, because the order folds every whole chain before any region. Here it
+    is not, so wave one is every unit nothing is contingent on, wave two is only the held-back
+    regions whose chain still has no fold, and the annotations of wave one are applied before
+    wave two is chosen. Dispatching both at once would fold several hundred regions this stage
+    is built to skip.
+
+    `folds` is appended in queue order and not completion order. `folds[0]` is `primary`, the
+    pick this repository reproduces byte for byte, and ordering it by whichever GPU answered
+    first would make the committed artifact a function of the weather.
+    """
+    import concurrent.futures
+
+    from .folded_structure import fold
+
+    refused_calls, refused_seconds = 0, 0.0
+    outcomes = {}
+
+    def call(item):
+        index, (target, sequence, _entry, _unit, _contingent) = item
+        started = time.time()
+        try:
+            payload = fold(sequence, target_name=target or "", record=False)
+        except Exception as failure:                      # noqa: BLE001
+            payload = {"absence": f"{type(failure).__name__}: {str(failure)[:160]}",
+                       "target_name": target}
+        return index, payload, time.time() - started
+
+    def run(items):
+        nonlocal refused_calls, refused_seconds
+        if not items:
+            return
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+            for index, payload, seconds in pool.map(call, items):
+                outcomes[index] = payload
+                if not payload.get("folded"):
+                    refused_calls += 1
+                    refused_seconds += seconds
+        # In queue order, so a wave's annotations land in the order the serial path would have
+        # written them. `entry["folded"]` is read by the next wave's filter and by the
+        # contingency resolution after this function returns.
+        for index, (target, _sequence, entry, unit, _contingent) in items:
+            _record_fold(outcomes[index], target, entry, unit)
+
+    indexed = list(enumerate(queue))
+    run([item for item in indexed if not item[1][4]])
+    run([item for item in indexed
+         if item[1][4] and not item[1][2].get("folded")])
+    for index, _item in indexed:
+        if index in outcomes:
+            folds.append(outcomes[index])
+    return len(outcomes), refused_calls, refused_seconds
+
+
 def _still_waiting(tail):
     """The queued units a bound really dropped, which is not every unit behind it.
 
@@ -1588,13 +1701,21 @@ def unit_counts(fold_rows):
 
 
 def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=FOLD_REQUESTS_PER_RUN,
-               budget=FOLD_BUDGET_SECONDS):
+               budget=FOLD_BUDGET_SECONDS, workers=1):
     """Every ranked chain whose own sequence the chain can locate, folded.
 
     Returns `(primary, rows, folds)`. `primary` is the first fold in pick order and is the
     one the record and the page report in full; `folds` is every fold this stage made, which
     the surface stage reads. `limit` caps the number of folding requests one run will spend
     and a unit it drops is named in the record rather than quietly left out.
+
+    `workers` above one folds the queue concurrently and is legal only with both bounds off.
+    A wall budget checked before each fold has a worst case of "one fold in flight when the
+    budget expires"; with twelve in flight that phrase means nothing, and the record's own
+    arithmetic -- chains inside the ceiling equals folds attempted plus the two bounds' drops
+    -- is asserted in the suite against it. So the choice is an exact serial bound or no bound,
+    and asking for both is refused here rather than silently reinterpreted. See
+    `_fold_queue_concurrently` for what the offline panel run buys by taking the second.
 
     **Why this is not simply "fold the top candidate".** The folding endpoint takes an
     amino-acid sequence, and the only pathogen sequence this chain holds is the six-frame
@@ -1672,6 +1793,12 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=FOLD_REQUESTS_PER_RU
     it is true. A consumer reads the flag; it never has to infer a whole chain from a silence.
     It cannot arise on this genome, where nsp5 is always inside the ceiling.
     """
+    if workers > 1 and not (limit is None and budget is None):
+        raise ValueError(
+            "folding concurrently is legal only with both bounds off: a budget checked before "
+            "each fold cannot describe a run with several folds in flight, and the record's "
+            "arithmetic over its own drop counters is asserted against that description. Pass "
+            "limit=None and budget=None, or workers=1.")
     from . import domains
     from .folded_structure import fold
     from .intake import _aligner
@@ -1983,7 +2110,15 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=FOLD_REQUESTS_PER_RU
     refused_calls, refused_seconds = 0, 0.0
     attempted = 0
     folding_started = time.time()
-    for index, (target, sequence, entry, unit, contingent) in enumerate(queue):
+    if workers > 1:
+        attempted, refused_calls, refused_seconds = _fold_queue_concurrently(
+            queue, folds, workers)
+    # Emptied rather than branched around, so the bounded path below keeps its indentation and
+    # a diff of this function stays readable as the one change it is. Neither bound can fire on
+    # an empty queue, so the drop counters stay at zero and the record's arithmetic holds with
+    # nothing dropped -- which is the truth about a run that folded everything it was offered.
+    bounded = () if workers > 1 else queue
+    for index, (target, sequence, entry, unit, contingent) in enumerate(bounded):
         # A contingency whose chain was folded whole is not work this run declined, it is work
         # this run does not need: the region's residues are inside the coordinates the chain
         # already has. Skipped before either bound is consulted, and deliberately not counted
@@ -1998,7 +2133,7 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=FOLD_REQUESTS_PER_RU
         # them differ, and reading the position would spend the cap on units nothing was sent
         # for.
         if limit is not None and attempted >= limit:
-            late = _still_waiting(queue[index:])
+            late = _still_waiting(bounded[index:])
             dropped_limit = sum(1 for _, _, _, late_unit, _ in late
                                 if late_unit["kind"] == "whole_chain")
             dropped_limit_units = len(late) - dropped_limit
@@ -2012,7 +2147,7 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=FOLD_REQUESTS_PER_RU
                             f"chain before any region.")
             break
         if attempted and budget is not None and time.time() - folding_started >= budget:
-            late = _still_waiting(queue[index:])
+            late = _still_waiting(bounded[index:])
             dropped_budget = sum(1 for _, _, _, late_unit, _ in late
                                  if late_unit["kind"] == "whole_chain")
             dropped_budget_units = len(late) - dropped_budget
@@ -2034,33 +2169,7 @@ def fold_stage(ranked, ceiling=FOLD_CEILING, pool=(), limit=FOLD_REQUESTS_PER_RU
         if not payload.get("folded"):
             refused_calls += 1
             refused_seconds += time.time() - call_started
-        # What this fold was of, carried on the payload so the stage after this one can tell a
-        # chain's coordinates from a region's without re-deriving it from the name. A region's
-        # `target_name` is `"<chain> · <region>"`, which is a key and not a target: the surface
-        # stage reports it under the chain's own row, because a region is a closer look at a
-        # target and not a new one.
-        payload["unit"] = {"kind": unit["kind"], "chain": entry["target"],
-                           "label": unit["label"], "type": unit["type"],
-                           "span_in_this_genome": unit["span"],
-                           "entry_span_on_the_relative": unit["entry_span"],
-                           "length_aa": unit["length"]}
-        # Stated on the row as well as in the payload, so a reader of `foldable` can see which
-        # chains have coordinates without holding the fold payloads beside it. A row's own
-        # `folded` stays the whole chain's answer; a region's is on the region.
-        unit["folded"] = bool(payload.get("folded"))
-        unit["target_name"] = target
-        unit["mean_plddt"] = payload.get("mean_plddt")
-        unit["confident_fraction"] = payload.get("confident_fraction")
-        unit["pdb_sha256"] = payload.get("pdb_sha256")
-        if unit["kind"] == "whole_chain":
-            entry["folded"] = bool(payload.get("folded"))
-            entry["mean_plddt"] = payload.get("mean_plddt")
-        if payload.get("absence"):
-            absence = (payload["absence"].get("reason")
-                       if isinstance(payload["absence"], dict) else payload["absence"])
-            unit["fold_absence"] = absence
-            if unit["kind"] == "whole_chain":
-                entry["fold_absence"] = absence
+        _record_fold(payload, target, entry, unit)
         folds.append(payload)
     # The held-back regions, resolved now that the whole chain's own fold has an outcome. This
     # is the decision that used to be taken 150 lines above this point off `inside_the_ceiling`,
@@ -2335,7 +2444,9 @@ def evidence_stage(scored, top=3, budget=EVIDENCE_BUDGET_SECONDS):
     return stage, rows
 
 
-def _case(accession, exclude_organism, top, replicates, fold, label, evidence_top=3):
+def _case(accession, exclude_organism, top, replicates, fold, label, evidence_top=3,
+          fold_workers=1, fold_limit=FOLD_REQUESTS_PER_RUN,
+          fold_budget=FOLD_BUDGET_SECONDS):
     """Every stage of the onset arm, once, against one reference."""
     from . import chemistry
     from .intake import (GATE_FLOOR, GATE_TERMS, candidate_table, decompose, gate_rows,
@@ -2502,7 +2613,9 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
         pool = [(f"ORF {i} of the ranked set, {len(t['orf']['protein'])} aa", t["orf"]["protein"])
                 for i, t in enumerate(intake["targets"], 1)
                 if (t.get("orf") or {}).get("protein")]
-        folded, fold_rows, folds = fold_stage(ranked, pool=pool)
+        folded, fold_rows, folds = fold_stage(ranked, pool=pool, limit=fold_limit,
+                                              budget=fold_budget,
+                                              workers=fold_workers)
         # The chains whose WHOLE SEQUENCE this stage declined on length, named once and read
         # three times below: as a count, as a list, and in what the stage says it hands on.
         # Named here rather than recomputed at each of those because the three must agree.
@@ -3201,7 +3314,8 @@ def run(accession="NC_045512.2", top=12, replicates=5, fold=True, record=True,
 
 
 def one(accession, pathogen=None, holdout=None, top=12, replicates=5,
-        fold=True, record=False, evidence_top=3):
+        fold=True, record=False, evidence_top=3, fold_workers=1,
+        fold_limit=FOLD_REQUESTS_PER_RUN, fold_budget=FOLD_BUDGET_SECONDS):
     """The whole chain on one genome the caller names. The entry point for a new pathogen.
 
     **Everything above this is a worked example; this is the thing itself.** The records in
@@ -3226,12 +3340,19 @@ def one(accession, pathogen=None, holdout=None, top=12, replicates=5,
     Writes nothing by default. The committed records are the three validated pathogens, and a
     exploratory run should not quietly overwrite them; pass `record=True` to write
     `runs/onset_chain_<accession>.json` when a run is worth keeping.
+
+    `fold_workers` above one, with `fold_limit=None` and `fold_budget=None`, folds every unit
+    the genome offers concurrently instead of as much as a web request's patience allows. That
+    is the offline setting and it is not the default, because the default has to stay the thing
+    a stranger's request through the site actually runs. `fold_stage` refuses a worker count
+    above one while either bound is set rather than reinterpreting it.
     """
     label = pathogen or accession
     case = _case(accession, holdout, top, replicates, fold,
                  f"{label}, " + (f"{holdout} held out" if holdout
                                  else "nothing held out of the reference"),
-                 evidence_top=evidence_top)
+                 evidence_top=evidence_top, fold_workers=fold_workers,
+                 fold_limit=fold_limit, fold_budget=fold_budget)
     case["pathogen"] = label
     # Classified before the record is written, and on the record whether it passes or not: a
     # run that did not finish must say so in the file, not only in the exception.

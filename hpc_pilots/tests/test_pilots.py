@@ -4997,6 +4997,103 @@ def test_every_chain_inside_the_ceiling_is_folded_and_the_pick_is_unchanged():
         folded_structure.fold = original
 
 
+def test_folding_concurrently_gives_the_same_record_as_folding_one_at_a_time():
+    """Twelve folds in flight must produce the record one fold at a time produces.
+
+    The panel run takes the two bounds off and folds a genome's units concurrently, which is
+    the only reason the whole panel's coverage is reachable at all -- bounded, it is 333 of
+    1,198 offered units. That is worth nothing if the concurrent path writes a different record,
+    so the two are compared here on one ranked set with the folding call stubbed.
+
+    The stub sleeps LONGER for the units that come EARLIER in the queue. So completion order is
+    the reverse of queue order, and a `folds` list assembled as results arrive would fail the
+    ordering assertion below rather than pass it by luck. That ordering is not cosmetic:
+    `folds[0]` is `primary`, the fold this repository reproduces byte for byte, and ordering it
+    by whichever GPU answered first would make the committed artifact a function of the weather.
+    """
+    import time as _time
+
+    from hpc_pilots import chain as chain_module
+    from hpc_pilots import folded_structure
+
+    def slow_fold(sequence, target_name="", record=True, **kw):
+        # Longer for shorter sequences, and the queue is longest-first within a kind, so the
+        # last unit dispatched is the first one finished.
+        _time.sleep(0.05 * (1 + (400 - min(len(sequence), 400)) / 100.0))
+        return {"target_name": target_name, "folded": True, "pdb": "ATOM\n",
+                "sequence_length": len(sequence), "mean_plddt": 70.0,
+                "model": "stub", "confident_fraction": 1.0}
+
+    def row(name, length, identified=True):
+        return {"name": name, "identified": identified, "rank": length,
+                "orf": {"protein": "M" + "A" * (length - 1)}}
+
+    def ranked():
+        return [row("first inside", 380), row("second inside", 300),
+                row("third inside", 220), row("unnamed", 150, identified=False)]
+
+    def readable(rows, folds):
+        """Everything either path is supposed to have decided, in one comparable shape."""
+        return {
+            "folds": [(f["target_name"], f["sequence_length"]) for f in folds],
+            "rows": [(r["target"], r.get("folded"), r.get("mean_plddt"),
+                      r.get("units_folded"), r.get("domain_route"),
+                      r.get("not_folded_because")) for r in rows],
+        }
+
+    original = folded_structure.fold
+    folded_structure.fold = slow_fold
+    try:
+        serial_started = _time.time()
+        _, serial_rows, serial_folds = chain_module.fold_stage(
+            ranked(), ceiling=400, limit=None, budget=None)
+        serial_seconds = _time.time() - serial_started
+
+        concurrent_started = _time.time()
+        primary, rows, folds = chain_module.fold_stage(
+            ranked(), ceiling=400, limit=None, budget=None, workers=4)
+        concurrent_seconds = _time.time() - concurrent_started
+
+        assert readable(rows, folds) == readable(serial_rows, serial_folds)
+        # Queue order, not completion order, despite the stub finishing them backwards.
+        assert [f["target_name"] for f in folds] == [
+            "first inside", "second inside", "third inside", "unnamed"]
+        assert primary is folds[0]
+        assert primary["target_name"] == "first inside"
+        # With no bound set, neither bound reports anything at all -- the counts are absent
+        # rather than zero, which is the convention the bounded tests above assert from the
+        # other side ("chains_not_folded_by_limit" not in primary when the budget is the bound
+        # that fired). An absent count and a count of zero are different claims: one says no
+        # bound was in force, the other says a bound was and spared everything.
+        assert "chains_not_folded_by_limit" not in primary
+        assert "chains_not_folded_by_budget" not in primary
+        assert all(r.get("not_folded_because") is None for r in rows)
+        # And it is actually concurrent. Four units at four workers against a stub whose total
+        # serial sleep is ~0.74 s; the margin is wide enough not to flake on a loaded laptop.
+        assert concurrent_seconds < serial_seconds, (concurrent_seconds, serial_seconds)
+    finally:
+        folded_structure.fold = original
+
+
+def test_folding_concurrently_under_a_bound_is_refused_rather_than_reinterpreted():
+    """A bound and a worker count above one cannot both be honoured, so asking is an error.
+
+    `FOLD_BUDGET_SECONDS` is checked before each fold and its stated worst case is "one fold in
+    flight when the budget expires". With twelve in flight the sentence describes nothing, and
+    the drop counts it writes are asserted elsewhere in this suite as an exact identity against
+    the chains inside the ceiling. Reinterpreting the bound would make those counts a function
+    of how many workers happened to be free, so the combination is refused at the door and the
+    message names both ways out.
+    """
+    import pytest
+
+    from hpc_pilots import chain as chain_module
+
+    for kwargs in ({}, {"limit": None}, {"budget": None}, {"limit": 5, "budget": None}):
+        with pytest.raises(ValueError, match="only with both bounds off"):
+            chain_module.fold_stage([], workers=2, **kwargs)
+
+
 def test_a_budget_spent_on_refusals_is_distinguishable_from_a_budget_too_tight():
     """Why the folding budget ran out, not only that it did.
 
