@@ -6785,6 +6785,116 @@ def test_the_page_withholds_a_site_patch_measured_at_the_wrong_residues():
         assert build_site.site_patch_block(case) == ""
 
 
+def test_combining_by_family_is_not_the_per_genome_mean_and_its_interval_is_seeded():
+    """The family-combined figure must re-weight, and must be reproducible.
+
+    Two assertions, and the first is the whole reason the statistic exists. A mean over genomes
+    counts a five-genome family five times; a mean of family means counts it once. If those two
+    numbers came out equal the correction would be doing nothing, so the test builds a panel
+    where they cannot be: one family of four genomes that the ranker gets wrong, and one family
+    of a single genome it gets right. Per genome that is 1 of 5, or 20%. Per family it is one
+    family of two, or 50%. The direction matters too -- re-weighting here RAISES the figure,
+    because the badly-served family is the large one, which is the opposite of the flattering
+    direction and the reason this is not a dressing-up exercise.
+
+    The second is that the bootstrap is seeded. An interval that moves between two runs of the
+    same data is not a result anybody can check, and this module's whole argument is that a
+    reported number should be recomputable from the record rather than quoted.
+    """
+    import contextlib
+    import io
+    import json
+    import pathlib
+    import re
+    import sys
+
+    sys.path.insert(0, str(ROOT / "output"))
+    import run_benchmark                                       # noqa: PLC0415
+
+    # Four genomes in one family, each with the matching chain ranked 9th of 10, and one
+    # genome in another family with it ranked 1st. `matching`/`chains` drive the
+    # hypergeometric null, and are identical across all five so the null cannot explain the
+    # gap between the two weightings.
+    rows = {}
+    for index in range(4):
+        rows[f"ACC_BIG_{index}"] = {"pathogen": f"big {index}", "accession": f"ACC_BIG_{index}",
+                                    "chains": 10, "matching": 1, "best": 9}
+    rows["ACC_SOLO"] = {"pathogen": "solo", "accession": "ACC_SOLO",
+                        "chains": 10, "matching": 1, "best": 1}
+    assignment = {f"ACC_BIG_{i}": "Bigfamilyviridae" for i in range(4)}
+    assignment["ACC_SOLO"] = "Soloviridae"
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / "families.json"
+        path.write_text(json.dumps({"families": assignment}))
+        with mock.patch.object(run_benchmark, "FAMILIES", path):
+            first = io.StringIO()
+            with contextlib.redirect_stdout(first):
+                run_benchmark.families_report(rows)
+            second = io.StringIO()
+            with contextlib.redirect_stdout(second):
+                run_benchmark.families_report(rows)
+
+    report = first.getvalue()
+    assert first.getvalue() == second.getvalue(), "the bootstrap interval is not seeded"
+    assert "5 scoreable genome(s) in 2 family(ies)" in report, report
+
+    # recall@1: one of five genomes, but one of two families.
+    at_one = next(line for line in report.splitlines() if line.strip().startswith("recall@1"))
+    observed = float(re.search(r"(\d+\.\d+)%", at_one).group(1))
+    assert observed == 50.0, (at_one, "expected the mean of family means, not 20%")
+
+    # recall@10 catches every genome in both families, so the re-weighting cannot change it --
+    # which is the control: a difference that appears at every k would be a bug in the
+    # weighting rather than the dependence it is meant to correct for.
+    at_ten = next(line for line in report.splitlines() if line.strip().startswith("recall@10"))
+    assert float(re.search(r"(\d+\.\d+)%", at_ten).group(1)) == 100.0, at_ten
+
+
+def test_a_genome_with_no_matching_chain_leaves_the_family_aggregate_rather_than_scoring_zero():
+    """An unscoreable genome is a finding about reach and not a ranking failure.
+
+    The panel's own `unscoreable_note` says so about Human parvovirus B19, which returns eight
+    ORFs and no identified chain: it "has no ranking to score ... it is a finding about reach,
+    not a panel error, and belongs in its own tier rather than in a recall denominator." A zero
+    would claim the ranker put the target low when it never had a target to put anywhere, and
+    with the family as the unit one such genome can sink a whole singleton family to zero.
+    """
+    import contextlib
+    import io
+    import json
+    import pathlib
+    import sys
+
+    sys.path.insert(0, str(ROOT / "output"))
+    import run_benchmark                                       # noqa: PLC0415
+
+    rows = {"ACC_OK": {"pathogen": "scoreable", "accession": "ACC_OK",
+                       "chains": 10, "matching": 1, "best": 1},
+            # No matching chain among the candidates, so `null_for` is undefined and there is
+            # no ranking to score.
+            "ACC_NONE": {"pathogen": "unscoreable", "accession": "ACC_NONE",
+                         "chains": 8, "matching": 0, "best": None}}
+    assignment = {"ACC_OK": "Keptviridae", "ACC_NONE": "Droppedviridae"}
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = pathlib.Path(directory) / "families.json"
+        path.write_text(json.dumps({"families": assignment}))
+        with mock.patch.object(run_benchmark, "FAMILIES", path):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                run_benchmark.families_report(rows)
+
+    report = out.getvalue()
+    assert "1 scoreable genome(s) in 1 family(ies)" in report, report
+    assert "dropped as unscoreable" in report and "unscoreable" in report
+    # The surviving family is the only vote, so the figure is its own and has not been halved
+    # by a family that could not be scored at all.
+    at_one = next(line for line in report.splitlines() if line.strip().startswith("recall@1"))
+    assert "100.0%" in at_one, at_one
+    assert "Droppedviridae" not in report.split("Families, and how many")[-1]
+
+
 def test_a_chain_inside_another_chain_is_not_ranked_as_a_second_target():
     """Spike S2' is S2's C-terminal 458 residues, and was being published as its own target.
 
