@@ -166,13 +166,13 @@ def report(with_families=False):
         # Only the rows whose hold-out applied, for the reason the split above exists: a
         # self-identified genome makes the ranker look good for the wrong reason, and
         # re-weighting by family would not make it look good for a better one.
-        families_report({r["accession"]: r for r in rows})
+        families_report({r["accession"]: r for r in rows}, record=with_families)
 
 
 FAMILIES = ROOT / "data/benchmark_families.json"
 
 
-def families_report(rows_by_accession):
+def families_report(rows_by_accession, record=False):
     """Recall@k with the family as the unit of analysis, and an interval on the lift.
 
     **The defect this answers is already written down.** `benchmarks/README.md`: "26 of 46
@@ -243,6 +243,31 @@ def families_report(rows_by_accession):
 
     rng = random.Random(20261119)
     names = sorted(groups)
+    recorded = {
+        "what": "Recall@k for the genome-to-ranked-targets stage with the ICTV family as the "
+                "unit of analysis, and a bootstrap interval on the lift over a "
+                "hypergeometric null.",
+        "why": "benchmarks/README.md states the defect this answers: 26 of the panel's genomes "
+               "sit in a pattern-identical group, so an aggregate over them as independent "
+               "instances is inflated, and the prescription is to combine within family first "
+               "and then across families. The per-genome figure is reported beside this one "
+               "and is not replaced by it.",
+        "unit_of_analysis": "family",
+        "weighting": "mean of family means; each family carries one vote whatever its genome "
+                     "count, because weighting by count reproduces the per-genome figure",
+        "interval": "percentile bootstrap over FAMILIES, 10,000 draws, seeded 20261119",
+        "null": "hypergeometric probability that a random ranking puts at least one matching "
+                "chain in the top k, averaged within family before across families",
+        "genomes_scoreable": sum(len(v) for v in groups.values()),
+        "families": {name: [r["pathogen"] for r in groups[name]] for name in names},
+        "dropped_as_unscoreable": [
+            {"pathogen": pathogen, "family": family,
+             "because": "no matching chain among its candidates, so there is no ranking to "
+                        "score; a zero would claim the ranker put the target low when it "
+                        "never had one to put anywhere"}
+            for family, pathogen in unscoreable],
+        "recall": {},
+    }
     print(f"\n  {'':9}{'observed':>10}{'random':>10}{'lift':>9}"
           f"{'95% CI on the lift':>22}")
     for k in (1, 3, 5, 10):
@@ -265,11 +290,33 @@ def families_report(rows_by_accession):
         low, high = draws[int(0.025 * len(draws))], draws[int(0.975 * len(draws)) - 1]
         print(f"  recall@{k:<3}{observed:>9.1f}%{random_at:>9.1f}%"
               f"{observed - random_at:>+8.1f}{f'[{low:+.1f}, {high:+.1f}]':>22}")
+        recorded["recall"][f"at_{k}"] = {
+            "observed_percent": round(observed, 2),
+            "random_percent": round(random_at, 2),
+            "lift_percentage_points": round(observed - random_at, 2),
+            "lift_ci95": [round(low, 2), round(high, 2)],
+            "excludes_zero": bool(low > 0),
+            "per_family": {name: {"observed": round(o, 4), "random": round(n, 4)}
+                           for name, (o, n) in zip(names, per_family)},
+        }
     print(f"\n  An interval that excludes zero is a lift this panel supports at the family "
           f"level. One that includes it is a lift the per-genome table may still show, which "
           f"is the whole reason for printing both.")
     print(f"  Families, and how many genomes each carries: "
           + ", ".join(f"{f} {len(groups[f])}" for f in names))
+    if record:
+        # Written to the tree, not only printed. `runs/benchmark/` is a directory of 47
+        # per-genome files that nothing tracks, so until now the panel-level figure existed
+        # only in whatever terminal last ran `--report`. This project's standing rule is that
+        # a number on a page or in a document is checkable against a record in the tree, and a
+        # headline statistic kept nowhere is the case that rule exists for.
+        sys.path.insert(0, str(ROOT))
+        from hpc_pilots.common import provenance, write_json
+
+        recorded["provenance"] = provenance()
+        write_json(ROOT / "runs/benchmark_families.json", recorded)
+        print(f"\n  wrote runs/benchmark_families.json")
+    return recorded
 
 
 def main():

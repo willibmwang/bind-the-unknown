@@ -1,0 +1,484 @@
+{
+  "what": "Recall@k for the genome-to-ranked-targets stage with the ICTV family as the unit of analysis, and a bootstrap interval on the lift over a hypergeometric null.",
+  "why": "benchmarks/README.md states the defect this answers: 26 of the panel's genomes sit in a pattern-identical group, so an aggregate over them as independent instances is inflated, and the prescription is to combine within family first and then across families. The per-genome figure is reported beside this one and is not replaced by it.",
+  "unit_of_analysis": "family",
+  "weighting": "mean of family means; each family carries one vote whatever its genome count, because weighting by count reproduces the per-genome figure",
+  "interval": "percentile bootstrap over FAMILIES, 10,000 draws, seeded 20261119",
+  "null": "hypergeometric probability that a random ranking puts at least one matching chain in the top k, averaged within family before across families",
+  "genomes_scoreable": 46,
+  "families": {
+    "Adenoviridae": [
+      "Human adenovirus 2"
+    ],
+    "Arenaviridae": [
+      "Lassa virus"
+    ],
+    "Caliciviridae": [
+      "Norwalk virus"
+    ],
+    "Coronaviridae": [
+      "HCoV-229E",
+      "SARS-CoV",
+      "HCoV-OC43",
+      "MERS-CoV",
+      "SARS-CoV-2"
+    ],
+    "Filoviridae": [
+      "Marburg virus",
+      "Ebola virus Zaire"
+    ],
+    "Flaviviridae": [
+      "Japanese encephalitis virus",
+      "Dengue virus 2",
+      "Tick-borne encephalitis virus",
+      "Yellow fever virus",
+      "Powassan virus",
+      "Hepatitis C virus",
+      "West Nile virus",
+      "Zika virus"
+    ],
+    "Hantaviridae": [
+      "Hantaan virus"
+    ],
+    "Hepadnaviridae": [
+      "Hepatitis B virus"
+    ],
+    "Nairoviridae": [
+      "Crimean-Congo hemorrhagic fever virus"
+    ],
+    "Orthoherpesviridae": [
+      "Varicella-zoster virus",
+      "Herpes simplex virus 2",
+      "Herpes simplex virus 1",
+      "Human cytomegalovirus",
+      "Epstein-Barr virus"
+    ],
+    "Orthomyxoviridae": [
+      "Influenza A PR8"
+    ],
+    "Papillomaviridae": [
+      "Human papillomavirus 16"
+    ],
+    "Paramyxoviridae": [
+      "Measles virus",
+      "Hendra virus",
+      "Mumps virus",
+      "Nipah virus"
+    ],
+    "Phenuiviridae": [
+      "Rift Valley fever virus"
+    ],
+    "Picornaviridae": [
+      "Poliovirus",
+      "Enterovirus A71",
+      "Rhinovirus A"
+    ],
+    "Pneumoviridae": [
+      "Human respiratory syncytial virus B",
+      "Human metapneumovirus"
+    ],
+    "Poxviridae": [
+      "Vaccinia virus",
+      "Monkeypox virus"
+    ],
+    "Retroviridae": [
+      "HIV-2",
+      "HIV-1"
+    ],
+    "Rhabdoviridae": [
+      "Rabies virus"
+    ],
+    "Togaviridae": [
+      "Venezuelan equine encephalitis virus",
+      "Sindbis virus",
+      "Chikungunya virus"
+    ]
+  },
+  "dropped_as_unscoreable": [
+    {
+      "pathogen": "Human parvovirus B19",
+      "family": "Parvoviridae",
+      "because": "no matching chain among its candidates, so there is no ranking to score; a zero would claim the ranker put the target low when it never had one to put anywhere"
+    }
+  ],
+  "recall": {
+    "at_1": {
+      "observed_percent": 62.42,
+      "random_percent": 37.92,
+      "lift_percentage_points": 24.5,
+      "lift_ci95": [
+        7.52,
+        41.06
+      ],
+      "excludes_zero": true,
+      "per_family": {
+        "Adenoviridae": {
+          "observed": 1.0,
+          "random": 0.1875
+        },
+        "Arenaviridae": {
+          "observed": 1.0,
+          "random": 0.8
+        },
+        "Caliciviridae": {
+          "observed": 1.0,
+          "random": 0.2222
+        },
+        "Coronaviridae": {
+          "observed": 0.4,
+          "random": 0.1744
+        },
+        "Filoviridae": {
+          "observed": 0.0,
+          "random": 0.2361
+        },
+        "Flaviviridae": {
+          "observed": 0.75,
+          "random": 0.3594
+        },
+        "Hantaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Hepadnaviridae": {
+          "observed": 1.0,
+          "random": 0.25
+        },
+        "Nairoviridae": {
+          "observed": 1.0,
+          "random": 0.5714
+        },
+        "Orthoherpesviridae": {
+          "observed": 0.0,
+          "random": 0.0459
+        },
+        "Orthomyxoviridae": {
+          "observed": 1.0,
+          "random": 0.1818
+        },
+        "Papillomaviridae": {
+          "observed": 1.0,
+          "random": 0.5714
+        },
+        "Paramyxoviridae": {
+          "observed": 1.0,
+          "random": 0.4416
+        },
+        "Phenuiviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Picornaviridae": {
+          "observed": 0.3333,
+          "random": 0.302
+        },
+        "Pneumoviridae": {
+          "observed": 1.0,
+          "random": 0.2864
+        },
+        "Poxviridae": {
+          "observed": 0.0,
+          "random": 0.04
+        },
+        "Retroviridae": {
+          "observed": 0.0,
+          "random": 0.1484
+        },
+        "Rhabdoviridae": {
+          "observed": 0.0,
+          "random": 0.4
+        },
+        "Togaviridae": {
+          "observed": 0.0,
+          "random": 0.3651
+        }
+      }
+    },
+    "at_3": {
+      "observed_percent": 92.5,
+      "random_percent": 68.85,
+      "lift_percentage_points": 23.65,
+      "lift_ci95": [
+        14.64,
+        32.93
+      ],
+      "excludes_zero": true,
+      "per_family": {
+        "Adenoviridae": {
+          "observed": 1.0,
+          "random": 0.4893
+        },
+        "Arenaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Caliciviridae": {
+          "observed": 1.0,
+          "random": 0.5833
+        },
+        "Coronaviridae": {
+          "observed": 1.0,
+          "random": 0.4521
+        },
+        "Filoviridae": {
+          "observed": 1.0,
+          "random": 0.6667
+        },
+        "Flaviviridae": {
+          "observed": 1.0,
+          "random": 0.7677
+        },
+        "Hantaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Hepadnaviridae": {
+          "observed": 1.0,
+          "random": 0.75
+        },
+        "Nairoviridae": {
+          "observed": 1.0,
+          "random": 0.9714
+        },
+        "Orthoherpesviridae": {
+          "observed": 0.0,
+          "random": 0.1378
+        },
+        "Orthomyxoviridae": {
+          "observed": 1.0,
+          "random": 0.4909
+        },
+        "Papillomaviridae": {
+          "observed": 1.0,
+          "random": 0.9714
+        },
+        "Paramyxoviridae": {
+          "observed": 1.0,
+          "random": 0.8627
+        },
+        "Phenuiviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Picornaviridae": {
+          "observed": 1.0,
+          "random": 0.7103
+        },
+        "Pneumoviridae": {
+          "observed": 1.0,
+          "random": 0.6845
+        },
+        "Poxviridae": {
+          "observed": 0.5,
+          "random": 0.12
+        },
+        "Retroviridae": {
+          "observed": 1.0,
+          "random": 0.4093
+        },
+        "Rhabdoviridae": {
+          "observed": 1.0,
+          "random": 0.9
+        },
+        "Togaviridae": {
+          "observed": 1.0,
+          "random": 0.8032
+        }
+      }
+    },
+    "at_5": {
+      "observed_percent": 98.0,
+      "random_percent": 82.94,
+      "lift_percentage_points": 15.06,
+      "lift_ci95": [
+        7.0,
+        24.72
+      ],
+      "excludes_zero": true,
+      "per_family": {
+        "Adenoviridae": {
+          "observed": 1.0,
+          "random": 0.7054
+        },
+        "Arenaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Caliciviridae": {
+          "observed": 1.0,
+          "random": 0.8333
+        },
+        "Coronaviridae": {
+          "observed": 1.0,
+          "random": 0.6514
+        },
+        "Filoviridae": {
+          "observed": 1.0,
+          "random": 0.9167
+        },
+        "Flaviviridae": {
+          "observed": 1.0,
+          "random": 0.9327
+        },
+        "Hantaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Hepadnaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Nairoviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Orthoherpesviridae": {
+          "observed": 0.6,
+          "random": 0.2296
+        },
+        "Orthomyxoviridae": {
+          "observed": 1.0,
+          "random": 0.7273
+        },
+        "Papillomaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Paramyxoviridae": {
+          "observed": 1.0,
+          "random": 0.9867
+        },
+        "Phenuiviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Picornaviridae": {
+          "observed": 1.0,
+          "random": 0.9159
+        },
+        "Pneumoviridae": {
+          "observed": 1.0,
+          "random": 0.8977
+        },
+        "Poxviridae": {
+          "observed": 1.0,
+          "random": 0.2
+        },
+        "Retroviridae": {
+          "observed": 1.0,
+          "random": 0.6227
+        },
+        "Rhabdoviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Togaviridae": {
+          "observed": 1.0,
+          "random": 0.9683
+        }
+      }
+    },
+    "at_10": {
+      "observed_percent": 100.0,
+      "random_percent": 93.42,
+      "lift_percentage_points": 6.58,
+      "lift_ci95": [
+        0.52,
+        15.13
+      ],
+      "excludes_zero": true,
+      "per_family": {
+        "Adenoviridae": {
+          "observed": 1.0,
+          "random": 0.9643
+        },
+        "Arenaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Caliciviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Coronaviridae": {
+          "observed": 1.0,
+          "random": 0.9133
+        },
+        "Filoviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Flaviviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Hantaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Hepadnaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Nairoviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Orthoherpesviridae": {
+          "observed": 1.0,
+          "random": 0.4593
+        },
+        "Orthomyxoviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Papillomaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Paramyxoviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Phenuiviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Picornaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Pneumoviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Poxviridae": {
+          "observed": 1.0,
+          "random": 0.4
+        },
+        "Retroviridae": {
+          "observed": 1.0,
+          "random": 0.9478
+        },
+        "Rhabdoviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        },
+        "Togaviridae": {
+          "observed": 1.0,
+          "random": 1.0
+        }
+      }
+    }
+  },
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "8f7b0fa3b4cbe28033fec45d9e5476aebaae4339",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-20T02:00:58.306764+00:00"
+  }
+}

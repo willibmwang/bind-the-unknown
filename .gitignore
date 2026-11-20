@@ -59,6 +59,22 @@ runs/improve/
 !runs/identification_cascade.json
 
 
+# Recall@k for the ranking with the ICTV FAMILY as the unit of analysis, and a bootstrap
+# interval on the lift. runs/ is otherwise untracked, and `runs/benchmark/` -- the 47
+# per-genome files this is computed from -- is not tracked either, so without this file the
+# panel-level figure exists only in whichever terminal last ran `--report`. It is the record
+# behind the claim that the ranking beats chance at the family level rather than only across
+# genomes treated as independent, which they are not: 26 of the panel's genomes share a
+# pattern-identical label list, five coronaviruses among them, and `benchmarks/README.md` had
+# already written down that an aggregate over them is inflated.
+#
+# It carries the two things the printed table cannot. Every family's own observed and random
+# figure at each k, so a reader can see which families carry the result rather than taking the
+# mean on trust; and `excludes_zero` per k, which is the only claim here worth making -- the
+# recall alone has a high null and the lift's interval is what says whether there is anything
+# to report. Written by `python3 output/run_benchmark.py --report --families`.
+!runs/benchmark_families.json
+
 # Drug-target ranks against pathogen genome input, one row per target, with the denominator
 # and the rank-sum probability on every row. runs/ is otherwise untracked, but this is the
 # deliverable the collaborator reads and the record that the ranking beats chance on three of
