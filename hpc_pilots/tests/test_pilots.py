@@ -7290,3 +7290,862 @@ def test_every_bar_on_a_lane_starts_at_zero_against_one_labelled_line():
     assert build_site._whisker(0, 0, 1186) == ""
     whisker = build_site._whisker(287.0, 1186.0, 1186.0)
     assert 'left:24.20%' in whisker and 'width:75.80%' in whisker, whisker
+
+
+# ---------------------------------------------------------------------------
+# Fitting the five ranking weights
+# ---------------------------------------------------------------------------
+def _fit_genomes():
+    from hpc_pilots import rubric_fit
+
+    genomes, skipped = rubric_fit.panel_matrix(tier="all")
+    if not genomes:
+        pytest.skip("runs/benchmark/ holds no panel record on this machine")
+    return genomes, skipped
+
+
+def test_the_normalised_rubric_reproduces_the_shipped_score_on_every_panel_row():
+    """The fit's basis change must be a change of basis and not a second rubric.
+
+    Every feature is divided by the most its term can pay, so a weight becomes points out of
+    that ceiling and the stated rubric becomes `intake.TERM_CEILING`. That is only a reading of
+    `intake.rank_score` if the dot product reproduces it exactly. If it does not, `fitted` and
+    `stated` are being compared on two different scorers and every margin between them is an
+    artefact of the normalisation.
+
+    Checked on the panel's own rows rather than on invented ones, because the two features that
+    actually divide -- the integer druggable class and the capped structure count -- only take
+    their awkward values on real records.
+    """
+    from hpc_pilots import intake, rubric_fit
+
+    genomes, _ = _fit_genomes()
+    rows = 0
+    for genome in genomes:
+        for row, x in zip(genome["rows"], genome["x"]):
+            restated = sum(rubric_fit.STATED[name] * value
+                           for name, value in zip(rubric_fit.FEATURES, x))
+            assert abs(restated - intake.rank_score(row["features"])) < 5e-4, row.get("target")
+            rows += 1
+    assert rows > 500, rows
+    # And the stated vector is read off the ceilings rather than retyped beside them.
+    assert rubric_fit.STATED == {name: float(intake.TERM_CEILING[name])
+                                 for name in rubric_fit.FEATURES}
+
+
+def test_a_fitted_weight_is_never_negative_and_the_scale_carries_no_information():
+    """The projection holds, and rescaling to the stated total changes no ranking.
+
+    A negative weight on conservation would assert that a protein less like its relatives is a
+    better target. The five terms are evidence *for* a target and a fit free to flip one is
+    fitting the label set rather than learning a weighting, so the projection is a constraint on
+    the hypothesis space and not a numerical convenience.
+
+    The rescaling is asserted to be inert because the record publishes rescaled weights: if the
+    rescaled vector ranked differently from the raw one, every held-out figure would belong to a
+    vector the record does not print.
+    """
+    from hpc_pilots import rubric_fit
+
+    genomes, _ = _fit_genomes()
+    fitted = rubric_fit.fit_weights(genomes, epochs=400)
+    assert all(value >= 0.0 for value in fitted["weights"].values()), fitted["weights"]
+    assert all(value >= 0.0 for value in fitted["rescaled"].values()), fitted["rescaled"]
+    assert abs(sum(fitted["rescaled"].values())
+               - sum(rubric_fit.STATED.values())) < 1e-3, fitted["rescaled"]
+    for genome in genomes:
+        raw = [row.get("target") for row in rubric_fit.rerank(genome, fitted["weights"])]
+        scaled = [row.get("target") for row in rubric_fit.rerank(genome, fitted["rescaled"])]
+        assert raw == scaled, genome["pathogen"]
+
+
+def test_the_weights_move_and_then_stop_moving():
+    """A trajectory is recorded, it starts where it says it starts, and it settles.
+
+    `settled` is the field a reader uses to decide whether the final vector is a resting point
+    or wherever the epoch budget happened to leave it. A fit still travelling at the last step
+    has a final weight that is an artefact of `--epochs`, so the record states the comparison
+    rather than leaving it to be inferred from the path.
+    """
+    from hpc_pilots import rubric_fit
+
+    genomes, _ = _fit_genomes()
+    fitted = rubric_fit.fit_weights(genomes, epochs=8000, record_every=100)
+    path = fitted["trajectory"]
+    assert len(path) > 20, len(path)
+    assert path[0]["epoch"] == 0 and path[-1]["epoch"] == 8000
+    # Equal footing at the start, which is what makes the path a story about the labels rather
+    # than about the rubric it would otherwise have been initialised from.
+    assert set(path[0]["weights"].values()) == {1.0}, path[0]["weights"]
+    assert path[-1]["weights"] == fitted["weights"]
+    # Descent, not a walk.
+    assert path[-1]["loss"] < path[0]["loss"], (path[0]["loss"], path[-1]["loss"])
+    assert fitted["loss_fell_by"] > 0
+    assert fitted["movement"]["settled"] is True, fitted["movement"]
+    assert fitted["movement"]["final_step"] < fitted["movement"]["largest_step"]
+
+
+def test_a_masked_feature_stays_at_zero_for_the_whole_fit():
+    """The no-conservation arm is the heaviest term switched off, not down-weighted.
+
+    That term mixes two incomparable scales, which is `intake`'s own recorded defect, so an arm
+    that removes it is the check that the result does not rest on the artefact. A mask that
+    merely started at zero would be undone by the first gradient step.
+    """
+    from hpc_pilots import rubric_fit
+
+    genomes, _ = _fit_genomes()
+    index = rubric_fit.FEATURES.index("conservation")
+    mask = [1.0] * len(rubric_fit.FEATURES)
+    mask[index] = 0.0
+    fitted = rubric_fit.fit_weights(genomes, epochs=400, mask=mask)
+    assert fitted["weights"]["conservation"] == 0.0
+    assert fitted["masked_features"] == ["conservation"]
+    assert all(step["weights"]["conservation"] == 0.0 for step in fitted["trajectory"])
+    assert any(value > 0 for name, value in fitted["weights"].items()
+               if name != "conservation")
+
+
+def test_no_pair_is_formed_between_two_different_viruses():
+    """The loss asks one genome's candidates about each other and never two genomes.
+
+    The ranker ranks one genome's proteins against each other and is never asked whether Lassa's
+    nucleoprotein outranks influenza's polymerase. A pair spanning two genomes would put that
+    question into the loss, and its answer is not defined by anything the pipeline does.
+    """
+    from hpc_pilots import rubric_fit
+
+    genomes, _ = _fit_genomes()
+    pairs = rubric_fit._pairs(genomes)
+    assert pairs
+    for index, i, j in pairs:
+        assert genomes[index]["y"][i] is True
+        assert genomes[index]["y"][j] is False
+        assert 0 <= i < genomes[index]["candidates"]
+        assert 0 <= j < genomes[index]["candidates"]
+    # Every genome carrying both a label and a non-label contributes, so the loss is not quietly
+    # reading four families.
+    expected = sum(sum(g["y"]) * (len(g["y"]) - sum(g["y"])) for g in genomes)
+    assert len(pairs) == expected, (len(pairs), expected)
+
+
+def test_leave_one_family_out_never_scores_a_family_it_trained_on():
+    """The split is by family because 26 of the panel's genomes share a sibling's label list.
+
+    Five coronaviruses carry one target pattern list between them, so a genome-level split fits
+    the weights on four of them and tests on the fifth while calling the result held out.
+    `benchmarks` corrected this for its own aggregate; here the leak would be larger, because
+    the weights would be fitted on the leaked rows rather than averaged over them.
+    """
+    from hpc_pilots import rubric_fit
+
+    genomes, _ = _fit_genomes()
+    crossed = rubric_fit.leave_one_family_out(genomes, epochs=200)
+    families = {genome["family"] for genome in genomes}
+    assert crossed["families"] == len(families)
+    assert crossed["folds"]
+    by_family = {}
+    for genome in genomes:
+        by_family.setdefault(genome["family"], []).append(genome["pathogen"])
+    for fold in crossed["folds"]:
+        assert sorted(fold["genomes"]) == sorted(by_family[fold["family"]]), fold["family"]
+        if fold.get("fitted") is None:
+            assert fold.get("unfittable_because")
+            continue
+        assert fold["training_genomes"] == len(genomes) - len(fold["genomes"])
+    # Every genome is held out exactly once, so the aggregate is over the whole panel and not
+    # over whichever families happened to fit.
+    scored = [row["pathogen"] for row in crossed["per_genome"]["stated"]]
+    assert sorted(scored) == sorted(g["pathogen"] for g in genomes)
+
+
+def test_a_recall_figure_never_travels_without_its_chance_value():
+    """Every reported recall carries the chance baseline for the same genome and depth.
+
+    With a dozen candidates a random ranking already puts a label in the top five most of the
+    time, so a recall figure read alone is close to meaningless. The baseline is per genome
+    because the panel's candidate counts differ, and it is a property of the candidate count and
+    the matched-label count rather than of the ordering -- which is why the identical value is
+    correct for every arm.
+    """
+    from hpc_pilots import rubric_fit
+
+    genomes, _ = _fit_genomes()
+    crossed = rubric_fit.leave_one_family_out(genomes, epochs=100)
+    for arm, rows in crossed["per_genome"].items():
+        assert rows, arm
+        for row in rows:
+            assert set(row["recall_at_k"]) == set(row["chance_at_k"]), (arm, row["pathogen"])
+            for depth, value in row["recall_at_k"].items():
+                assert value in (0.0, 1.0)
+                assert row["chance_at_k"][depth] is not None, (arm, row["pathogen"], depth)
+    for arm, totals in crossed["held_out"].items():
+        assert set(totals["recall_at_k"]) == set(totals["chance_at_k"]), arm
+        assert set(totals["lift_at_k"]) == set(totals["recall_at_k"]), arm
+    # The baseline cannot differ between arms, because no arm changes a candidate count.
+    chances = [tuple(sorted(totals["chance_at_k"].items()))
+               for totals in crossed["held_out"].values()]
+    assert len(set(chances)) == 1, chances
+
+
+def test_the_shuffled_label_control_is_run_and_the_verdict_reads_it():
+    """A gain the control can match is reported as no gain.
+
+    The permuted arm is fitted on labels shuffled within each training genome, so it has nothing
+    to learn and must fall. As measured on this panel it does not fall at rank 1, and that is
+    precisely the case the verdict has to get right: the fitted arm's margin over the shipped
+    rubric is smaller than one genome, and a margin a shuffled-label fit can match is not
+    evidence that anything was learned.
+    """
+    from hpc_pilots import rubric_fit
+
+    genomes, _ = _fit_genomes()
+    crossed = rubric_fit.leave_one_family_out(genomes, epochs=400)
+    comparison = rubric_fit.compare_arms(crossed)
+    assert "permuted" in comparison["recall_by_arm"]
+    assert isinstance(comparison["control_fell"], bool)
+    assert set(comparison["fitted_minus_permuted"]) == set(comparison["depths"])
+    verdict = rubric_fit._verdict(comparison)
+    if comparison["control_fell"]:
+        assert "the control falls" in verdict
+    else:
+        assert "does not improve" in verdict
+        assert "shuffled" in verdict
+    # Whatever the arms do, the sentence says the shipped rubric is untouched, because that is
+    # the fact a reader of a fitted weight most needs.
+    assert "intake.RUBRIC` is unchanged" in verdict
+    # The control's own weights are reported, so a reader can see what a fit with nothing to
+    # learn leans on.
+    for fold in crossed["folds"]:
+        if fold.get("fitted") is not None:
+            assert set(fold["permuted"]) == set(rubric_fit.FEATURES)
+
+
+def test_a_permuted_control_keeps_every_genomes_shape_and_only_moves_the_labels():
+    """Shuffling happens within a genome, so only which row is labelled is destroyed."""
+    from hpc_pilots import rubric_fit
+
+    genomes, _ = _fit_genomes()
+    shuffled = rubric_fit.permute_labels(genomes, seed=7)
+    assert len(shuffled) == len(genomes)
+    for before, after in zip(genomes, shuffled):
+        assert after["pathogen"] == before["pathogen"]
+        assert after["candidates"] == before["candidates"]
+        assert sum(after["y"]) == sum(before["y"])
+        assert after["x"] is before["x"]
+        # The evaluation labels are untouched: an arm graded against shuffled labels would be
+        # answering a different question from the one the other arms answer.
+        assert after["labels"] is before["labels"]
+    assert any(a["y"] != b["y"] for a, b in zip(genomes, shuffled))
+
+
+def test_a_genome_whose_labels_match_no_candidate_is_skipped_with_its_reason():
+    """An unscoreable genome is named, not dropped and not scored as a failure to rank.
+
+    A label that matches nothing means the pipeline never identified that protein at all, which
+    is a statement about identification. Counting it as a ranking that found nothing would
+    attribute it to the weights, and the two are different claims.
+    """
+    from hpc_pilots import rubric_fit
+
+    genomes, skipped = _fit_genomes()
+    for entry in skipped:
+        assert entry["pathogen"] and entry["because"]
+        assert entry["pathogen"] not in {g["pathogen"] for g in genomes}
+    for genome in genomes:
+        assert genome["matched_labels"] >= 1
+        assert sum(genome["y"]) >= 1
+        assert sum(genome["y"]) < genome["candidates"], genome["pathogen"]
+
+
+def test_fitting_does_not_install_a_weight_anywhere():
+    """`intake.RUBRIC` is a constant and a fit does not make it a variable.
+
+    The labels are proteins that already carry an approved antiviral, so they are the
+    best-characterised proteins of the best-characterised viruses and a novel pathogen's real
+    target is by construction absent. A held-out win on that set would still not be a reason to
+    stake the pipeline's ranking on it, so the fitted vector is reported and never written back.
+    """
+    from hpc_pilots import intake, rubric_fit
+
+    before = dict(intake.RUBRIC)
+    ceilings = dict(intake.TERM_CEILING)
+    genomes, _ = _fit_genomes()
+    rubric_fit.fit_weights(genomes, epochs=50)
+    rubric_fit.leave_one_family_out(genomes, epochs=50)
+    assert intake.RUBRIC == before
+    assert intake.TERM_CEILING == ceilings
+    assert intake.rank_score.__defaults__ in (None, ())
+    # And the record says so in words, because a reader finding a fitted vector in a file is
+    # entitled to know whether the pipeline is using it.
+    payload = json.loads((common.ROOT / "runs/rubric_fit.json").read_text())
+    assert "unchanged by this run" in payload["weights_are_not_installed"]
+    assert payload["stated_weights_as_shipped"] == before
+
+
+def test_the_sign_test_is_exact_and_two_sided():
+    """The paired readout's p-value, pinned on cases whose answers are arithmetic.
+
+    Recall at k moves in whole genomes, so on 45 genomes it cannot resolve anything smaller than
+    2.2 points. The paired count over best ranks is the sensitive readout, and it is only worth
+    having if its p-value is right.
+    """
+    from hpc_pilots import rubric_fit
+
+    assert rubric_fit._sign_test(0, 0) is None
+    assert rubric_fit._sign_test(5, 10) == 1.0
+    assert rubric_fit._sign_test(10, 10) == 0.002
+    assert rubric_fit._sign_test(0, 10) == 0.002
+    assert rubric_fit._sign_test(9, 10) == 0.0215
+    # Symmetric, because the test is two-sided and neither direction is privileged.
+    for successes in range(11):
+        assert rubric_fit._sign_test(successes, 10) == rubric_fit._sign_test(10 - successes, 10)
+
+
+# ---------------------------------------------------------------------------
+# What the library model learned
+# ---------------------------------------------------------------------------
+def test_the_ridge_arm_is_registered_without_displacing_the_forest():
+    """A second surrogate exists, declares what its spread is, and changes no default.
+
+    The forest has no coefficients, so a linear arm is the only way to answer "which residue at
+    which position does the model favour". Registering it is only safe if the default path is
+    untouched: every config on disk omits the key, so every one of them still resolves to the
+    forest, which is what `test_naming_the_surrogate_leaves_the_recorded_replay_bit_identical`
+    depends on.
+    """
+    ridge = surrogates.surrogate("ridge")
+    assert ridge.name == "ridge"
+    assert ridge.takes_design_matrix is True
+    # A point predictor has no dispersion, and the note says so rather than leaving ucb_beta
+    # looking like it multiplies a confidence interval.
+    assert ridge.spread_is_posterior is False
+    assert "point predictor" in ridge.spread_note
+    assert surrogates.DEFAULT == "forest"
+    assert surrogates.surrogate(None).name == "forest"
+
+
+def test_the_ridge_surrogate_returns_a_zero_spread_so_ucb_reduces_to_greedy():
+    """With no dispersion to add, the exploring policy must become the greedy one exactly.
+
+    Not an approximation: `ucb` computes `mean + ucb_beta * sigma` and sigma is identically
+    zero, so the two policies see the same acquisition vector and must pick the same batch at
+    the same seed. If they ever differ, the spread is not zero and the note on the surrogate is
+    wrong.
+    """
+    rng = np.random.default_rng(11)
+    features = rng.integers(0, 20, size=(120, 4))
+    outcomes = rng.normal(size=120)
+    observed = np.arange(16)
+    block = {"ucb_beta": 1.0, "surrogate": "ridge", "forest_trees": 8}
+    mean, spread = binding_module.predictions(features, observed, outcomes[observed], 3,
+                                              None, block, "ridge")
+    assert np.allclose(spread, 0.0)
+    assert mean.shape == (120,)
+    available = np.setdiff1d(np.arange(120), observed)
+    greedy, _ = pick_batch(features, observed, outcomes[observed], available, "greedy", 8, 5,
+                           surrogate=block, round_number=1)
+    explore, _ = pick_batch(features, observed, outcomes[observed], available, "ucb", 8, 5,
+                            surrogate=block, round_number=1)
+    np.testing.assert_array_equal(greedy, explore)
+
+
+def test_a_coefficient_map_names_the_position_and_the_residue_it_belongs_to():
+    """The reshape from 80 columns to 4 positions of 20 residues, pinned.
+
+    `design_matrix` concatenates the positions in order, each a full twenty-residue block, so
+    column `p * 20 + r` is residue `r` at position `p`. A figure drawn from a transposed map
+    would be wrong and would still look plausible, so the mapping is asserted on a vector whose
+    answer is arithmetic rather than on a fitted one.
+    """
+    from hpc_pilots import weights as weights_module
+
+    sites = [265, 266, 267, 280]
+    vector = np.zeros(80)
+    vector[0 * 20 + weights_module.ALPHABET.index("A")] = 1.0     # A at 265
+    vector[2 * 20 + weights_module.ALPHABET.index("G")] = 2.0     # G at 267
+    vector[3 * 20 + weights_module.ALPHABET.index("Y")] = -3.0    # Y at 280
+    drawn = weights_module.as_map(vector, sites)
+    assert [row["position"] for row in drawn] == sites
+    assert drawn[0]["residues"]["A"] == 1.0
+    assert drawn[2]["residues"]["G"] == 2.0
+    assert drawn[3]["residues"]["Y"] == -3.0
+    assert sum(1 for row in drawn for v in row["residues"].values() if v != 0) == 3
+    assert all(len(row["residues"]) == 20 for row in drawn)
+    # Round trip, so `movement` is differencing the vector it thinks it is.
+    np.testing.assert_allclose(weights_module._flat(drawn), vector)
+    # A vector that does not reshape raises rather than quietly truncating.
+    with pytest.raises(ValueError, match="does not reshape"):
+        weights_module.as_map(np.zeros(79), sites)
+    # The extremes are read off the same vector and keep their signs apart.
+    top = weights_module.extremes(vector, sites, count=2)
+    assert top["most_favourable"][0] == {"position": 267, "residue": "G", "weight": 2.0}
+    assert top["most_unfavourable"][0] == {"position": 280, "residue": "Y", "weight": -3.0}
+
+
+def test_an_importance_is_never_reported_as_a_weight():
+    """The forest arm is non-negative and says in the record that it carries no direction.
+
+    An unsigned quantity presented as a signed one is the error this repository guards against
+    elsewhere, and it would be invisible in a figure: an importance map and a coefficient map
+    are the same shape.
+    """
+    from hpc_pilots import weights as weights_module
+
+    payload = json.loads((ROOT / "runs/weights/binding.json").read_text())
+    assert "Only the first is a weight" in payload["the_two_arms_are_not_the_same_quantity"]
+    for name, arm in payload["arms"].items():
+        for step in arm["steps"]:
+            values = [v for row in step["forest"]["importances"]
+                      for v in row["residues"].values()]
+            assert all(value >= 0 for value in values), name
+            assert "not weights" in step["forest"]["note"]
+            # The signed arm does use both signs, or it is not telling a reader anything an
+            # importance could not have told them.
+            if step["labels"] >= 64:
+                signed = [v for row in step["ridge"]["coefficients"]
+                          for v in row["residues"].values()]
+                assert any(v < 0 for v in signed) and any(v > 0 for v in signed), name
+    assert weights_module.ALPHABET == "ACDEFGHIKLMNPQRSTVWY"
+
+
+def test_training_moves_the_weights_and_a_shuffled_outcome_does_not_buy_prediction():
+    """The trained arm learns, the permuted arm does not, and both are in the record.
+
+    This is the module's whole claim. The permuted arm shares the code path, the seed, the
+    policy and the label budget; only the relationship between features and outcome is gone. It
+    still produces a coefficient vector of comparable magnitude, which is why magnitude alone
+    is not the evidence -- the held-out correlation is.
+    """
+    payload = json.loads((ROOT / "runs/weights/binding.json").read_text())
+    trained = payload["arms"]["greedy_pool00"]
+    control = payload["arms"]["greedy_pool00_permuted"]
+    assert trained["control"] is None
+    assert control["control"] == "permuted"
+    assert "nothing to learn" in control["control_note"]
+
+    steps = trained["steps"]
+    assert [s["labels"] for s in steps] == trained["checkpoints"]
+    first, last = steps[0], steps[-1]
+    # Prediction improves on candidates the model has never been shown.
+    assert last["ridge"]["skill"]["spearman_pred_truth"] \
+        > first["ridge"]["skill"]["spearman_pred_truth"]
+    # And the vector grew while doing it.
+    assert last["ridge"]["l2_norm"] > first["ridge"]["l2_norm"]
+    # The control ends near zero correlation, which is the number the trained arm is read
+    # against. Generous bound: this asserts the control fell, not where exactly it landed.
+    assert abs(control["steps"][-1]["ridge"]["skill"]["spearman_pred_truth"]) < 0.1
+    assert last["ridge"]["skill"]["spearman_pred_truth"] > 0.2
+    # Every skill figure is computed off the held-out complement, never the revealed labels.
+    for arm in payload["arms"].values():
+        for step in arm["steps"]:
+            assert step["ridge"]["skill"]["n_eval"] == arm_pool_size(arm) - step["labels"]
+
+
+def arm_pool_size(arm):
+    """The pool's candidate count, recovered from a step's own evaluation denominator."""
+    step = arm["steps"][0]
+    return step["ridge"]["skill"]["n_eval"] + step["labels"]
+
+
+def test_a_surrogate_free_policy_is_recorded_as_consulting_nothing():
+    """`random` reveals labels without asking a model, which is what separates the two effects.
+
+    A gain can come from what the model learned or from which labels the policy chose, and the
+    record has to say which arm is which or the coefficient maps cannot be compared.
+    """
+    payload = json.loads((ROOT / "runs/weights/binding.json").read_text())
+    assert payload["arms"]["random_pool00"]["surrogate_consulted"] is False
+    assert payload["arms"]["random_pool00"]["surrogate_the_path_consulted"] is None
+    assert payload["arms"]["greedy_pool00"]["surrogate_consulted"] is True
+    assert payload["arms"]["greedy_pool00"]["surrogate_the_path_consulted"] == "forest"
+    # The default is unchanged by any of this, and the record says so where a reader will look.
+    assert "forest is still what" in payload["default_surrogate_unchanged"]
+
+
+def test_the_unseen_column_caveat_is_stated_because_zero_does_not_mean_no_effect():
+    """At eight labels most of the eighty columns were never observed and read as zero.
+
+    A reader looking at an early map sees a mostly flat table and would otherwise conclude the
+    model found nothing, when in fact it was shown nothing. The limitation is in the record
+    because the figure cannot carry it.
+    """
+    payload = json.loads((ROOT / "runs/weights/binding.json").read_text())
+    text = " ".join(payload["limitations"])
+    assert "not seen" in text
+    assert "no effect" in text
+    # The penalty that picks one solution out of the one-hot family is recorded per checkpoint,
+    # because which solution it selects depends on it.
+    assert "identifiable" in text
+    for arm in payload["arms"].values():
+        for step in arm["steps"]:
+            assert step["ridge"]["alpha_chosen_by_leave_one_out"] > 0
+
+
+# ---------------------------------------------------------------------------
+# Where the residues sit, and the handoff that carries them
+# ---------------------------------------------------------------------------
+def _sars_case():
+    payload = json.loads((ROOT / "runs/onset_chain.json").read_text())
+    held = [c for c in payload["cases"] if c.get("reference_excluded_organism")]
+    return held[0]
+
+
+def test_the_main_proteases_residues_land_where_the_reference_annotation_puts_them():
+    """The one check on this arithmetic that does not come from the record it is checking.
+
+    SARS-CoV-2's main protease is nucleotides 10,055 to 10,972 of NC_045512.2, and its
+    catalytic dyad is His41 and Cys145. Those are facts about the genome, published long before
+    this pipeline existed, so reproducing them from a reading frame the fold stage recorded and
+    a span the alignment produced tests the whole path at once: the frame resolution, the
+    chain-local conversion and the codon arithmetic.
+
+    A test that only checked internal consistency would pass on a frame that was wrong by a
+    constant, which is exactly the failure mode here -- the first join I tried placed this
+    protein 13,000 nucleotides away and every internal check it had was satisfied.
+    """
+    from hpc_pilots import annotate
+
+    payload = annotate.run_annotate(path=ROOT / "runs/onset_chain.json", record=False)
+    rows = {row["target"]: row for row in payload["chains"]}
+    mpro = rows["3C-like proteinase nsp5"]
+    assert mpro["reading_frame"]["verified"] is True
+    assert mpro["chain_span_nt"] == [10055, 10972], mpro["chain_span_nt"]
+    assert mpro["reading_frame"]["strand"] == "+"
+    # Both ends confirmed against the relative's own residues, not just one.
+    assert mpro["reading_frame"]["residue_agreement"]["confirmed_at_both_ends"] is True
+
+    # The catalytic dyad. Positions are 1-based in the chain; the record numbers them along the
+    # reading frame, so the span's start is subtracted exactly as the handoff does it.
+    surface = {r["target"]: r for r in _sars_case()["surfaces"]}["3C-like proteinase nsp5"]
+    fold = {r["target"]: r for r in _sars_case()["foldable"]}["3C-like proteinase nsp5"]
+    span = fold["span_in_this_genome"]
+    local = [p - span[0] + 1 for p in surface["site_positions_in_this_genome"]]
+    assert 41 in local and 145 in local, local
+    frame, length = mpro["reading_frame"], mpro["segment_length_nt"]
+    his41 = annotate.residue_to_nt(span[0] + 41 - 1, frame, length)
+    cys145 = annotate.residue_to_nt(span[0] + 145 - 1, frame, length)
+    assert his41 == [10175, 10177], his41
+    assert cys145 == [10487, 10489], cys145
+    # Each codon is three bases and lies inside the chain.
+    for codon in (his41, cys145):
+        assert codon[1] - codon[0] == 2
+        assert mpro["chain_span_nt"][0] <= codon[0] <= mpro["chain_span_nt"][1]
+
+
+def test_a_codon_on_the_minus_strand_is_read_back_along_the_genome():
+    """The strand `build_site` records as not converted, converted, and pinned by arithmetic.
+
+    A minus-strand ORF's offset runs along the reverse complement, so offset `i` of that
+    sequence is offset `L - 1 - i` of the genome and a codon occupies the three positions
+    ending there. Getting this wrong produces a coordinate that is plausible, inside the
+    genome, and reflected about its midpoint.
+    """
+    from hpc_pilots import annotate
+
+    length = 1000
+    plus = {"verified": True, "strand": "+", "nt_start": 0}
+    minus = {"verified": True, "strand": "-", "nt_start": 0}
+    # Residue 1 of a plus-strand ORF starting at offset 0 is the first three bases.
+    assert annotate.residue_to_nt(1, plus, length) == [1, 3]
+    assert annotate.residue_to_nt(2, plus, length) == [4, 6]
+    # Residue 1 of a minus-strand ORF starting at offset 0 is the LAST three bases, because
+    # offset 0 of the reverse complement is the genome's last base.
+    assert annotate.residue_to_nt(1, minus, length) == [998, 1000]
+    assert annotate.residue_to_nt(2, minus, length) == [995, 997]
+    # The range is always reported low coordinate first, on either strand, so it cannot be
+    # read as a direction.
+    for position in (1, 5, 50):
+        for frame in (plus, minus):
+            start, end = annotate.residue_to_nt(position, frame, length)
+            assert start < end
+            assert 1 <= start and end <= length
+    # An unverified frame yields nothing rather than a guess, and so does one that runs off
+    # the end of the segment.
+    assert annotate.residue_to_nt(1, {"verified": False, "strand": "+", "nt_start": 0},
+                                  length) is None
+    assert annotate.residue_to_nt(400, plus, length) is None
+    # A minus-strand coordinate needs the segment length and refuses without it.
+    assert annotate.residue_to_nt(1, minus, None) is None
+
+
+def test_a_reading_frame_whose_residues_disagree_is_refused_rather_than_used():
+    """The check that separates a plausible frame from the right one.
+
+    A chain's span fitting inside a reading frame is necessary and nowhere near sufficient:
+    SARS-CoV-2's polymerase spans residues 1 to 823 and its parent frame is 2,595 residues, so
+    the span fits and the frame is still the wrong one, because the polymerase lies past the
+    ribosomal frameshift. The residues are therefore read out of the frame and compared with
+    the relative's own chain, and a frame that disagrees at both ends is refused.
+    """
+    from hpc_pilots import annotate
+
+    case = _sars_case()
+    payload = annotate.run_annotate(path=ROOT / "runs/onset_chain.json", record=False)
+    for row in payload["chains"]:
+        frame = row["reading_frame"]
+        if frame.get("verified"):
+            agreement = frame["residue_agreement"]
+            # Something was compared, and it agreed at one end or both.
+            assert agreement["checked"] is True
+            assert agreement["agrees"] is True
+            assert agreement["confirmed_at"], row["target"]
+            assert agreement["residues_compared"] >= 1
+        else:
+            # Every refusal names its cause, and none of them emits a coordinate anyway.
+            assert frame.get("because"), row["target"]
+            assert row["chain_span_nt"] is None, row["target"]
+
+    # The polymerase is the worked case: exact at one end, wrong at the other, and the record
+    # says which rather than suppressing the row or trusting it whole.
+    rows = {row["target"]: row for row in payload["chains"]}
+    polymerase = rows.get("RNA-directed RNA polymerase nsp12")
+    if polymerase and polymerase["reading_frame"].get("verified"):
+        agreement = polymerase["reading_frame"]["residue_agreement"]
+        assert agreement["confirmed_at_both_ends"] is False
+        assert "frameshift" in agreement["one_end_only_note"]
+        assert polymerase["chain_span_nt_confirmed_at"] == ["the end of the chain"]
+
+
+def test_an_interaction_belongs_to_one_mature_chain_and_not_to_the_polyprotein():
+    """A polyprotein's products must not all inherit the entry's whole partner list.
+
+    The first version of this returned every interaction on the entry for every chain of it, so
+    the main protease and the polymerase came back with identical partner lists. An interaction
+    is attributed through the `PRO_` identifier UniProt gives the mature chain, which the
+    entry's own Chain features carry beside the description this pipeline knows it by.
+    """
+    from hpc_pilots import annotate
+
+    payload = json.loads((ROOT / "runs/annotation/NC_045512_2.json").read_text())
+    partners = {}
+    for row in payload["chains"]:
+        interactions = ((row.get("annotation") or {}).get("interactions") or {})
+        partners[row["target"]] = (interactions.get("host_partners"),
+                                   interactions.get("viral_partners"))
+    sharing = [t for t, row in
+               {r["target"]: r for r in payload["chains"]}.items()
+               if (r0 := (row.get("annotation") or {})).get("accession")]
+    assert sharing
+    # Two chains of the one polyprotein entry do not report the same partner counts, which is
+    # what attribution by chain buys over attribution by entry.
+    from_one_entry = [t for t in ("3C-like proteinase nsp5", "Papain-like protease nsp3")
+                      if t in partners]
+    if len(from_one_entry) == 2:
+        assert partners[from_one_entry[0]] != partners[from_one_entry[1]], partners
+    # A host partner is one from another organism, which is what makes it a host factor.
+    for row in payload["chains"]:
+        interactions = ((row.get("annotation") or {}).get("interactions") or {})
+        assert interactions.get("host_partners", 0) == len(
+            interactions.get("with_a_host_protein") or ())
+        assert "second database" in interactions.get("source", "").lower()
+
+
+def test_every_target_reaches_the_handoff_measured_or_refused():
+    """A chain can be refused. It cannot disappear from the export.
+
+    The same invariant the surface lane already holds to, applied to the file another platform
+    reads. A target that reached no bindable site gets a row saying so with the reason, because
+    a table whose length depends on how the run went is a table nobody can audit.
+    """
+    import csv as csv_module
+
+    from hpc_pilots import handoff
+
+    payload = json.loads((ROOT / "runs/handoff/NC_045512_2.json").read_text())
+    # Read the record the export names rather than assuming which one it used. SARS-CoV-2 has
+    # two on disk -- the panel's per-genome record and the landing page's -- and the export
+    # takes one per genome, so a test that hard-coded the other would be testing a file nobody
+    # exported.
+    source = json.loads((ROOT / payload["source_record"]).read_text())
+    cases = source.get("cases")
+    case = (([c for c in cases if c.get("reference_excluded_organism")] or cases)[0]
+            if isinstance(cases, list) else source)
+    assert len(payload["targets"]) == len(case["scores"])
+    assert [t["target"] for t in payload["targets"]] == [
+        s["target"] for s in sorted(case["scores"], key=lambda r: r["rank"])]
+    for target in payload["targets"]:
+        assert target["sites"] or target["no_site_because"], target["target"]
+        for site in target["sites"]:
+            assert site["site_kind"] in handoff.SITE_KINDS
+            assert site["residue_count"] >= 1
+            # Every residue list says which numbering it is in. A bare list of integers is the
+            # thing this export exists to stop shipping.
+            assert set(site["numbering"]) >= {"residues_in_the_chain",
+                                              "residues_in_the_reading_frame", "residues_nt"}
+
+    rows = list(csv_module.DictReader((ROOT / "runs/handoff/targets.csv").open()))
+    assert rows
+    assert list(rows[0]) == list(handoff.COLUMNS)
+    here = [r for r in rows if r["accession"] == "NC_045512.2"]
+    expected = sum(len(t["sites"]) or 1 for t in payload["targets"])
+    assert len(here) == expected, (len(here), expected)
+    # The CSV and the JSON agree on which targets exist.
+    assert {r["target"] for r in here} == {t["target"] for t in payload["targets"]}
+    # Every row carries its caveat, because a residue list without one is the misuse this
+    # export is most likely to be put to.
+    for row in here:
+        assert row["caveat"], row["target"]
+
+
+def test_the_handoff_says_which_coordinates_were_confirmed_and_never_guesses_one():
+    """A nucleotide column is present only where the frame was checked against the residues."""
+    import csv as csv_module
+
+    rows = list(csv_module.DictReader((ROOT / "runs/handoff/targets.csv").open()))
+    assert rows
+    for row in rows:
+        if row["residues_nt"]:
+            assert row["reading_frame"], row["target"]
+            assert row["nt_confirmed_at"], row["target"]
+            # Every emitted codon is three bases.
+            for codon in row["residues_nt"].split():
+                start, end = (int(part) for part in codon.split("-"))
+                assert end - start == 2, codon
+        if not row["reading_frame"]:
+            assert not row["residues_nt"], row["target"]
+            assert not row["chain_span_nt"], row["target"]
+
+
+# ---------------------------------------------------------------------------
+# The residue track on the page
+# ---------------------------------------------------------------------------
+def test_every_mark_the_record_carries_reaches_the_residue_track():
+    """What the record says is on the chain is what the figure draws, and in the right place."""
+    import sys as _sys
+
+    _sys.path.insert(0, str(ROOT / "output"))
+    import build_site                                       # noqa: PLC0415
+
+    case = _sars_case()
+    target = "3C-like proteinase nsp5"
+    marks = build_site._track_marks(case, target)
+    drawn = build_site.feature_track(case, target)
+    assert drawn and marks
+    # One mark per marked residue and one per patch residue, at the coordinate the scale puts
+    # them at. Checked by counting rather than by eye, because a figure that silently drops a
+    # residue looks exactly like one that has none.
+    assert drawn.count('class="ftk"') == len(marks["marked"])
+    assert drawn.count('class="ftp"') == len(marks["patch"])
+    assert drawn.count('class="ftq"') == len(marks["predicted_patch"])
+    assert drawn.count('class="ftr"') + drawn.count('class="ftr ftx"') == len(marks["regions"])
+    for position in marks["marked"]:
+        assert f'x="{build_site._x(position, marks["length"]) - 1:.1f}"' in drawn
+    # The legend names every region by the number printed in its box.
+    for region in marks["regions"]:
+        assert f'<b>{region["n"]}</b>' in drawn
+    # The nucleotide line only appears where the annotation record confirmed the frame.
+    assert "10,055" in drawn and "10,972" in drawn
+
+
+def test_a_track_is_empty_rather_than_partial_where_the_record_cannot_support_one():
+    """No length, no figure. A reader seeing a track may assume every mark was measured."""
+    import sys as _sys
+
+    _sys.path.insert(0, str(ROOT / "output"))
+    import build_site                                       # noqa: PLC0415
+
+    case = _sars_case()
+    assert build_site.feature_track(case, "a chain that does not exist") == ""
+    assert build_site._track_marks(case, "a chain that does not exist") is None
+    # A chain whose record carries no length draws nothing, rather than drawing an axis with
+    # no residues on it.
+    empty = {"surfaces": [{"target": "x", "rank": 1}], "foldable": [{"target": "x"}],
+             "genome_accession": None, "reference_excluded_organism": None}
+    assert build_site.feature_track(empty, "x") == ""
+    assert build_site.feature_track({"surfaces": [], "foldable": []}) == ""
+    # A position the alignment could not carry is dropped, not drawn at residue zero.
+    assert build_site._chain_local([5, None, 9], [3, 20]) == [3, 7]
+    assert build_site._chain_local([5], None) is None
+
+
+def test_the_track_packs_overlapping_regions_onto_separate_rows():
+    """A domain inside a chain must not be drawn on top of the chain."""
+    import sys as _sys
+
+    _sys.path.insert(0, str(ROOT / "output"))
+    import build_site                                       # noqa: PLC0415
+
+    spans = [{"from": 1, "to": 100}, {"from": 10, "to": 40}, {"from": 50, "to": 90},
+             {"from": 200, "to": 260}]
+    rows = build_site._pack(spans)
+    assert len(rows) == 2, rows
+    # The longest goes first, and nothing on a row touches anything else on it.
+    assert {"from": 1, "to": 100} in rows[0]
+    for row in rows:
+        ordered = sorted(row, key=lambda s: s["from"])
+        for first, second in zip(ordered, ordered[1:]):
+            assert first["to"] < second["from"]
+    # Every span is placed exactly once.
+    assert sorted((s["from"], s["to"]) for row in rows for s in row) == \
+        sorted((s["from"], s["to"]) for s in spans)
+
+
+def test_the_page_shows_what_fitting_the_weights_found_including_that_it_did_not_help():
+    """The section states the null, and the control row is on the figure rather than in a note.
+
+    A page that printed the fitted weights beside the stated ones and stopped would read as a
+    claim that fitting improved the ranking. It did not, and the row fitted on shuffled labels
+    is drawn in the same lane at the same scale so a reader can see why the margin above it
+    means nothing.
+    """
+    import sys as _sys
+
+    _sys.path.insert(0, str(ROOT / "output"))
+    import build_site                                       # noqa: PLC0415
+
+    drawn = build_site.rubric_block()
+    assert drawn
+    record = build_site.rubric_fit_record()
+    for name in record["features"]:
+        assert esc_text(build_site.plain_key(name)) in drawn
+        # Both weights on the row, stated then fitted, and neither retyped into the page.
+        assert f'{build_site.num(record["stated_weights"][name])} &rarr; ' \
+               f'{build_site.num(record["fitted_weights"][name])}' in drawn
+    for arm in ("stated", "uniform", "fitted", "permuted"):
+        assert build_site.ARM_NAME[arm] in drawn
+    # Chance travels with every recall figure on this lane, as it does in the record.
+    assert "by chance" in drawn
+    assert "shuffled labels" in drawn
+
+
+def esc_text(value):
+    """The page escapes everything it prints, so a test comparing against it must too."""
+    import sys as _sys
+
+    _sys.path.insert(0, str(ROOT / "output"))
+    import build_site                                       # noqa: PLC0415
+
+    return build_site.esc(value)
+
+
+def test_the_weight_map_is_diverging_and_the_control_is_drawn_beside_it():
+    """A coefficient has a sign and the figure has to carry it.
+
+    A one-sided ramp would put a strongly unfavourable residue in the same pale cell as one the
+    model has no opinion about, which on this figure is the difference between the two things a
+    reader is there to tell apart.
+    """
+    import sys as _sys
+
+    _sys.path.insert(0, str(ROOT / "output"))
+    import build_site                                       # noqa: PLC0415
+
+    drawn = build_site.weights_block()
+    assert drawn
+    record = build_site.weights_record()
+    rows = record["arms"]["greedy_pool00"]["steps"][-1]["ridge"]["coefficients"]
+    for row in rows:
+        assert f'<th scope="row">{row["position"]}</th>' in drawn
+    for residue in record["alphabet"]:
+        assert f"<th>{residue}</th>" in drawn
+    # Both directions are used, and the zero band exists for the cells in between.
+    assert 'class="p4"' in drawn and 'class="n' in drawn and 'class="z0"' in drawn
+    # The shuffled-answer arm is on the page, not described in a sentence.
+    assert "nothing to learn" in drawn
+    assert drawn.count("<table class=\"wmap\">") == 2
+    # The band function puts the sign in the class and the magnitude in the number.
+    assert build_site._weight_band(0.5, 0.5) == "p4"
+    assert build_site._weight_band(-0.5, 0.5) == "n4"
+    assert build_site._weight_band(0.0, 0.5) == "z0"
+    assert build_site._weight_band(0.01, 0.5) == "z0"

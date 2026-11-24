@@ -81,7 +81,7 @@
           ]
         }
       },
-      "seconds": 11.89,
+      "seconds": 13.65,
       "hands_to_next": "one reviewed accession and one residue range per candidate"
     },
     {
@@ -95,7 +95,7 @@
         "candidates_in": 12
       },
       "output": {
-        "chains_out": 8,
+        "chains_out": 7,
         "rubric": {
           "conservation": 3.0,
           "surface_exposed": 2.0,
@@ -103,7 +103,7 @@
           "druggable_class": 0.8,
           "structures_in_family_capped": 0.5
         },
-        "chains_scored_before_the_gate": 14,
+        "chains_scored_before_the_gate": 13,
         "gate": {
           "terms": [
             "surface_exposed",
@@ -113,11 +113,11 @@
           ],
           "floor": 0.5,
           "rule": "a row is kept when at least one of 4 evidence terms pays 0.5 points or more. Conservation is not among them: it says how well this genome was recognised, not whether what was recognised is worth aiming at",
-          "kept": 8,
+          "kept": 7,
           "gated_out": 6,
           "dropped": [
             {
-              "rank": 9,
+              "rank": 8,
               "name": "TAT_SIVM2 Protein Tat",
               "parent": null,
               "score": 1.866,
@@ -131,7 +131,7 @@
               "highest": 0.0
             },
             {
-              "rank": 10,
+              "rank": 9,
               "name": "Matrix protein p17",
               "parent": "GAG_SIVS4 Gag polyprotein",
               "score": 1.6668,
@@ -145,7 +145,7 @@
               "highest": 0.0
             },
             {
-              "rank": 11,
+              "rank": 10,
               "name": "p15",
               "parent": "POL_SIVSP Gag-Pol polyprotein",
               "score": 1.4892,
@@ -159,7 +159,7 @@
               "highest": 0.0
             },
             {
-              "rank": 12,
+              "rank": 11,
               "name": "Integrase",
               "parent": "POL_SIVSP Gag-Pol polyprotein",
               "score": 1.4892,
@@ -173,7 +173,7 @@
               "highest": 0.0
             },
             {
-              "rank": 13,
+              "rank": 12,
               "name": "VPX_SIVMK Protein Vpx",
               "parent": null,
               "score": 1.3179,
@@ -187,7 +187,7 @@
               "highest": 0.0
             },
             {
-              "rank": 14,
+              "rank": 13,
               "name": "VIF_SIVSP Virion infectivity factor",
               "parent": null,
               "score": 0.7536,
@@ -204,7 +204,7 @@
         },
         "all_decompositions_reproduce_the_score": true
       },
-      "seconds": 8.96,
+      "seconds": 14.9,
       "hands_to_next": "every chain that cleared the gate, with the accession and range its surface is measured on. 6 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them"
     },
     {
@@ -215,8 +215,8 @@
         "ESM Atlas"
       ],
       "input": {
-        "candidates_in": 8,
-        "identified_in": 8,
+        "candidates_in": 7,
+        "identified_in": 7,
         "gated_out_before_this_stage": 6,
         "residue_ceiling": 1200,
         "domain_units_per_chain": 3,
@@ -224,34 +224,33 @@
         "folding_budget_seconds": 240.0
       },
       "output": {
-        "foldable": 8,
+        "foldable": 7,
         "not_foldable": 0,
         "unidentified_foldable": 0,
-        "chains_folded": 8,
-        "folds_attempted": 8,
+        "chains_folded": 7,
+        "folds_attempted": 7,
         "folds_refused": 0,
         "also_folded": [
           "Transmembrane protein gp41",
           "Protease",
-          "Reverse transcriptase/ribonuclease H",
           "p51 RT",
           "Capsid protein p24",
           "NEF_SIVS4 Protein Nef",
           "NEF_SIVM1 Protein Nef"
         ],
-        "units_offered": 34,
-        "units_inside_the_ceiling": 17,
-        "units_recorded": 8,
-        "units_folded": 8,
-        "domain_units_offered": 26,
-        "domain_units_inside_the_ceiling": 9,
+        "units_offered": 29,
+        "units_inside_the_ceiling": 14,
+        "units_recorded": 7,
+        "units_folded": 7,
+        "domain_units_offered": 22,
+        "domain_units_inside_the_ceiling": 7,
         "domain_units_recorded": 0,
         "domain_units_folded": 0,
         "domain_units_attempted": 0,
         "domains_folded": [],
-        "chains_offered_a_domain_route": 5,
+        "chains_offered_a_domain_route": 4,
         "chains_rescued_by_the_domain_route": 0,
-        "chains_with_coordinates": 8,
+        "chains_with_coordinates": 7,
         "chains_with_no_coordinates": 0,
         "domain_units_not_folded_by_limit": 0,
         "domain_units_not_folded_by_budget": 0,
@@ -268,8 +267,8 @@
         "sequence_sha256": "1cd25a9ed06254ed796623e76ea5b65432dc80a6fb35a9422fe666411a2425a9",
         "error": null
       },
-      "seconds": 51.52,
-      "hands_to_next": "coordinates for 8 of the 8 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 0 chains over it. Plus the functional site positions, carried through the alignment into this genome's numbering, which the surface stage anchors the patch arithmetic on. 0 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region's surface goes under its chain's row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2"
+      "seconds": 28.3,
+      "hands_to_next": "coordinates for 7 of the 7 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 0 chains over it. Plus the functional site positions, carried through the alignment into this genome's numbering, which the surface stage anchors the patch arithmetic on. 0 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region's surface goes under its chain's row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2"
     },
     {
       "stage": 4,
@@ -281,31 +280,31 @@
         "UniProt"
       ],
       "input": {
-        "candidates_in": 8,
-        "predicted_coordinates_in": 8,
+        "candidates_in": 7,
+        "predicted_coordinates_in": 7,
         "predicted_region_coordinates_in": 0,
-        "chains_with_functional_site_positions_in": 6,
+        "chains_with_functional_site_positions_in": 5,
         "macrocycle_reach_a": 13.81976597885342
       },
       "output": {
-        "rows_out": 8,
+        "rows_out": 7,
         "measured": 1,
-        "unmeasured": 7,
+        "unmeasured": 6,
         "nothing_dropped": true,
-        "predicted_coordinates_offered": 8,
-        "measured_on_predicted_coordinates": 8,
-        "predicted_was_the_only_route": 7,
+        "predicted_coordinates_offered": 7,
+        "measured_on_predicted_coordinates": 7,
+        "predicted_was_the_only_route": 6,
         "no_surface_by_either_route": 0,
         "no_surface_over_the_folding_ceiling": 0,
         "region_surfaces_offered": 0,
         "region_surfaces_measured": 0,
         "chains_with_a_region_surface": 0,
         "chains_with_no_surface_and_no_region_surface": 0,
-        "chains_with_functional_sites": 6,
-        "functional_site_positions": 26,
-        "functional_site_positions_mapped_into_this_genome": 25,
+        "chains_with_functional_sites": 5,
+        "functional_site_positions": 13,
+        "functional_site_positions_mapped_into_this_genome": 12,
         "site_patch_measured_on_a_deposition": 0,
-        "site_patch_measured_on_a_prediction": 6,
+        "site_patch_measured_on_a_prediction": 5,
         "site_patch_on_a_deposition_not_at_the_annotated_residues": 0,
         "site_patch_on_a_prediction_not_at_the_annotated_residues": 0,
         "gate_yes": 1,
@@ -314,8 +313,8 @@
         "changes_any_rank": false,
         "read_by_later_stages": []
       },
-      "seconds": 2.69,
-      "hands_to_next": "a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 6 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage's product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one"
+      "seconds": 4.14,
+      "hands_to_next": "a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 5 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage's product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one"
     },
     {
       "stage": 5,
@@ -362,19 +361,19 @@
       ],
       "input": {
         "targets_in": 3,
-        "ranked_available": 8,
+        "ranked_available": 7,
         "wall_budget_seconds": 700.0
       },
       "output": {
         "targets_covered": 3,
         "calls_made": 15,
-        "ok": 15,
-        "not_ok": 0,
-        "network_calls": 76,
+        "ok": 12,
+        "not_ok": 3,
+        "network_calls": 66,
         "changes_any_rank": false,
         "every_target_has_every_tool": true
       },
-      "seconds": 80.89,
+      "seconds": 285.01,
       "hands_to_next": "nothing. This annotates the shortlist and never reorders it"
     }
   ],
@@ -775,33 +774,6 @@
     },
     {
       "rank": 4,
-      "target": "Reverse transcriptase/ribonuclease H",
-      "parent": "POL_SIVSP Gag-Pol polyprotein",
-      "tier": "exact",
-      "nearest_homolog": "P19505",
-      "chain_range": [
-        598,
-        1156
-      ],
-      "conservation": 0.4964,
-      "conservation_scale": "shared_kmer_fraction_of_query",
-      "conservation_at_ceiling": false,
-      "surface_exposed": false,
-      "essential_class": true,
-      "druggable_class": 3,
-      "structures_in_family": 0,
-      "score_terms": {
-        "conservation": 1.4892,
-        "surface_exposed": 0.0,
-        "essential_class": 1.5,
-        "structures_in_family": 0.0,
-        "druggable_class": 2.4
-      },
-      "score": 5.3892,
-      "decomposition_reproduces_score": true
-    },
-    {
-      "rank": 5,
       "target": "p51 RT",
       "parent": "POL_SIVSP Gag-Pol polyprotein",
       "tier": "exact",
@@ -828,7 +800,7 @@
       "decomposition_reproduces_score": true
     },
     {
-      "rank": 6,
+      "rank": 5,
       "target": "Capsid protein p24",
       "parent": "GAG_SIVS4 Gag polyprotein",
       "tier": "exact",
@@ -855,7 +827,7 @@
       "decomposition_reproduces_score": true
     },
     {
-      "rank": 7,
+      "rank": 6,
       "target": "NEF_SIVS4 Protein Nef",
       "parent": null,
       "tier": "exact",
@@ -879,7 +851,7 @@
       "decomposition_reproduces_score": true
     },
     {
-      "rank": 8,
+      "rank": 7,
       "target": "NEF_SIVM1 Protein Nef",
       "parent": null,
       "tier": "exact",
@@ -962,7 +934,7 @@
         "not_the_annotated_residues_because": null,
         "residues_not_checked_because": null
       },
-      "seconds": 1.98,
+      "seconds": 2.78,
       "patch_median_a2": 2046.9,
       "patch_range_a2": [
         2045.8,
@@ -1436,7 +1408,7 @@
           "not_the_annotated_residues_because": null,
           "residues_not_checked_because": null
         },
-        "seconds": 0.08,
+        "seconds": 0.1,
         "only_route_to_a_surface": false,
         "deposited_patch_median_a2": 2046.9,
         "ratio_to_deposited_median": 7.89,
@@ -1789,7 +1761,7 @@
           "not_the_annotated_residues_because": null,
           "residues_not_checked_because": null
         },
-        "seconds": 0.06,
+        "seconds": 0.07,
         "only_route_to_a_surface": true,
         "deposited_patch_median_a2": null,
         "ratio_to_deposited_median": null,
@@ -1951,547 +1923,8 @@
       }
     },
     {
-      "target": "Reverse transcriptase/ribonuclease H",
-      "rank": 4,
-      "identified": true,
-      "measured_on_accession": "P19505",
-      "chain_range": [
-        598,
-        1156
-      ],
-      "measured": false,
-      "unmeasured_because": "3 chains map to P19505 and none covers 598-1156",
-      "functional_sites": [
-        {
-          "type": "Site",
-          "description": "Cleavage; by viral protease",
-          "ligand": null,
-          "positions_on_the_relative": [
-            598
-          ],
-          "positions": [
-            25
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            707
-          ],
-          "positions": [
-            134
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            782
-          ],
-          "positions": [
-            209
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            783
-          ],
-          "positions": [
-            210
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Essential for RT p66/p51 heterodimerization",
-          "ligand": null,
-          "positions_on_the_relative": [
-            997
-          ],
-          "positions": [
-            424
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Essential for RT p66/p51 heterodimerization",
-          "ligand": null,
-          "positions_on_the_relative": [
-            1010
-          ],
-          "positions": [
-            437
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Cleavage; by viral protease",
-          "ligand": null,
-          "positions_on_the_relative": [
-            1036,
-            1037
-          ],
-          "positions": [
-            463,
-            464
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            1039
-          ],
-          "positions": [
-            466
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            1074
-          ],
-          "positions": [
-            501
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            1094
-          ],
-          "positions": [
-            521
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            1145
-          ],
-          "positions": [
-            572
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Cleavage; by viral protease",
-          "ligand": null,
-          "positions_on_the_relative": [
-            1156
-          ],
-          "positions": [
-            583
-          ],
-          "positions_unmapped": 0
-        }
-      ],
-      "functional_sites_absent_because": null,
-      "site_positions_in_this_genome": [
-        25,
-        134,
-        209,
-        210,
-        424,
-        437,
-        463,
-        464,
-        466,
-        501,
-        521,
-        572,
-        583
-      ],
-      "site_surface": null,
-      "seconds": 0.0,
-      "structures_offered": [],
-      "chains_mapped_to_accession": 3,
-      "predicted_surface": {
-        "measured": true,
-        "measured_on": "coordinates from the fold stage, not a deposition",
-        "unit": null,
-        "model": "ESMFold v1",
-        "mean_plddt": 86.76,
-        "confident_fraction": 0.8891,
-        "residues": 559,
-        "patch_a2": 807.7,
-        "patch_fraction_of_surface": 0.025,
-        "patch_positions": [
-          8,
-          92,
-          94,
-          162,
-          184,
-          230,
-          379,
-          380,
-          381,
-          385
-        ],
-        "patch_residue_names": [
-          "I",
-          "L",
-          "I",
-          "Y",
-          "M",
-          "M",
-          "L",
-          "V",
-          "I",
-          "I"
-        ],
-        "exposed_fraction_of_residues": 0.54,
-        "sequons_near_patch": 0,
-        "site_surface": {
-          "measured": true,
-          "anchors_asked": [
-            1,
-            110,
-            185,
-            186,
-            400,
-            413,
-            439,
-            440,
-            442,
-            477,
-            497,
-            548,
-            559
-          ],
-          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
-          "anchors_found": [
-            1,
-            110,
-            185,
-            186,
-            400,
-            413,
-            439,
-            440,
-            442,
-            477,
-            497,
-            548,
-            559
-          ],
-          "anchors_missing": [],
-          "measured_on": "ESMFold v1 \u00b7 Reverse transcriptase/ribonuclease H",
-          "reach_a": 13.81976597885342,
-          "positions_within_reach": [
-            1,
-            2,
-            3,
-            4,
-            5,
-            40,
-            41,
-            42,
-            43,
-            44,
-            45,
-            46,
-            47,
-            94,
-            95,
-            97,
-            106,
-            107,
-            108,
-            109,
-            110,
-            111,
-            112,
-            113,
-            114,
-            115,
-            116,
-            117,
-            118,
-            119,
-            120,
-            147,
-            148,
-            149,
-            150,
-            151,
-            152,
-            153,
-            154,
-            155,
-            156,
-            157,
-            158,
-            159,
-            160,
-            161,
-            162,
-            163,
-            164,
-            165,
-            168,
-            179,
-            180,
-            181,
-            182,
-            183,
-            184,
-            185,
-            186,
-            187,
-            188,
-            189,
-            190,
-            202,
-            203,
-            205,
-            206,
-            209,
-            210,
-            211,
-            212,
-            213,
-            214,
-            215,
-            216,
-            217,
-            218,
-            219,
-            220,
-            221,
-            222,
-            223,
-            227,
-            228,
-            229,
-            230,
-            231,
-            232,
-            328,
-            329,
-            330,
-            331,
-            361,
-            362,
-            363,
-            364,
-            365,
-            366,
-            367,
-            368,
-            369,
-            370,
-            371,
-            372,
-            389,
-            390,
-            391,
-            392,
-            393,
-            394,
-            395,
-            396,
-            397,
-            398,
-            399,
-            400,
-            401,
-            402,
-            403,
-            404,
-            405,
-            406,
-            407,
-            409,
-            410,
-            411,
-            412,
-            413,
-            414,
-            415,
-            416,
-            417,
-            418,
-            420,
-            421,
-            422,
-            423,
-            424,
-            425,
-            426,
-            428,
-            432,
-            433,
-            434,
-            435,
-            436,
-            437,
-            438,
-            439,
-            440,
-            441,
-            442,
-            443,
-            444,
-            445,
-            446,
-            447,
-            448,
-            449,
-            450,
-            451,
-            452,
-            453,
-            454,
-            455,
-            456,
-            457,
-            458,
-            459,
-            460,
-            461,
-            462,
-            463,
-            464,
-            465,
-            466,
-            467,
-            468,
-            469,
-            470,
-            471,
-            472,
-            473,
-            474,
-            475,
-            476,
-            477,
-            478,
-            479,
-            480,
-            481,
-            482,
-            483,
-            484,
-            485,
-            486,
-            487,
-            488,
-            489,
-            490,
-            491,
-            492,
-            493,
-            494,
-            495,
-            496,
-            497,
-            498,
-            499,
-            500,
-            501,
-            502,
-            503,
-            504,
-            505,
-            506,
-            507,
-            508,
-            514,
-            515,
-            516,
-            517,
-            519,
-            520,
-            529,
-            530,
-            531,
-            532,
-            533,
-            534,
-            535,
-            536,
-            537,
-            538,
-            539,
-            540,
-            541,
-            542,
-            543,
-            544,
-            545,
-            546,
-            547,
-            548,
-            549,
-            550,
-            551,
-            552,
-            553,
-            554,
-            555,
-            556,
-            557,
-            558,
-            559
-          ],
-          "residues_within_reach": 255,
-          "hydrophobic_within_reach": 116,
-          "exposed_within_reach": 123,
-          "site_patch_area_a2": 329.3,
-          "site_patch_positions": [
-            94,
-            162,
-            184,
-            230
-          ],
-          "site_patch_fraction_of_the_site": 0.025,
-          "site_shares_the_patch": true,
-          "not_measured_because": null,
-          "anchors_agreeing_with_the_annotation": 13,
-          "anchors_disagreeing_with_the_annotation": 0,
-          "anchors_not_checked_against_the_annotation": 0,
-          "anchors_at_the_wrong_residue": null,
-          "measured_at_the_annotated_residues": true,
-          "not_the_annotated_residues_because": null,
-          "residues_not_checked_because": null
-        },
-        "seconds": 0.11,
-        "only_route_to_a_surface": true,
-        "deposited_patch_median_a2": null,
-        "ratio_to_deposited_median": null,
-        "not_compared_because": null,
-        "is_deposited_measurement": false,
-        "in_the_ranking": false,
-        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
-      }
-    },
-    {
       "target": "p51 RT",
-      "rank": 5,
+      "rank": 4,
       "identified": true,
       "measured_on_accession": "P19505",
       "chain_range": [
@@ -2840,7 +2273,7 @@
     },
     {
       "target": "Capsid protein p24",
-      "rank": 6,
+      "rank": 5,
       "identified": true,
       "measured_on_accession": "P12496",
       "chain_range": [
@@ -2985,7 +2418,7 @@
     },
     {
       "target": "NEF_SIVS4 Protein Nef",
-      "rank": 7,
+      "rank": 6,
       "identified": true,
       "measured_on_accession": "P12482",
       "chain_range": null,
@@ -2995,7 +2428,7 @@
       "functional_sites_absent_because": "P12482 carries no Active site, Binding site or Site annotation inside this chain's range, so there is no marked residue to aim at. An absence in the annotation, not in the protein.",
       "site_positions_in_this_genome": [],
       "site_surface": null,
-      "seconds": 0.12,
+      "seconds": 0.55,
       "structures_offered": [],
       "chains_mapped_to_accession": 4,
       "predicted_surface": {
@@ -3143,7 +2576,7 @@
     },
     {
       "target": "NEF_SIVM1 Protein Nef",
-      "rank": 8,
+      "rank": 7,
       "identified": true,
       "measured_on_accession": "P05862",
       "chain_range": null,
@@ -3153,7 +2586,7 @@
       "functional_sites_absent_because": "P05862 carries no Active site, Binding site or Site annotation inside this chain's range, so there is no marked residue to aim at. An absence in the annotation, not in the protein.",
       "site_positions_in_this_genome": [],
       "site_surface": null,
-      "seconds": 0.12,
+      "seconds": 0.43,
       "structures_offered": [],
       "chains_mapped_to_accession": 0,
       "predicted_surface": {
@@ -3373,30 +2806,6 @@
       "mean_plddt": 55.98,
       "confident_fraction": 0.0,
       "pdb_sha256": "a3c7303259dc9379ed6073475d1e3c20640f247fcf8495913419104c582ce0f6",
-      "absence": null
-    },
-    {
-      "target_name": "Reverse transcriptase/ribonuclease H",
-      "unit": {
-        "kind": "whole_chain",
-        "chain": "Reverse transcriptase/ribonuclease H",
-        "label": "Reverse transcriptase/ribonuclease H",
-        "type": "Chain",
-        "span_in_this_genome": [
-          25,
-          583
-        ],
-        "entry_span_on_the_relative": [
-          598,
-          1156
-        ],
-        "length_aa": 559
-      },
-      "sequence_length": 559,
-      "sequence_sha256": "01e2ca089216a72877481ec81d0a91e774fcbb92236276ff3bf4d668e294f71a",
-      "mean_plddt": 86.76,
-      "confident_fraction": 0.8891,
-      "pdb_sha256": "74acc6172ef36a3b6989612036170b322a0750335b375998ae24767e1da33bc8",
       "absence": null
     },
     {
@@ -3792,234 +3201,8 @@
       "domain_route": false
     },
     {
-      "target": "Reverse transcriptase/ribonuclease H",
-      "rank": 4,
-      "identified": true,
-      "identification_route": null,
-      "chain_range_on_the_relative": [
-        598,
-        1156
-      ],
-      "declared_length_aa": 559,
-      "parent_orf_length_aa": 963,
-      "sequence_recovered": true,
-      "not_recovered_because": null,
-      "reference_chain_length_aa": 559,
-      "orfs_searched": 12,
-      "found_in": "the ORF that matched",
-      "span_in_this_genome": [
-        25,
-        583
-      ],
-      "recovered_length_aa": 559,
-      "chain_covered_by_alignment": 1.0,
-      "identity_over_aligned_columns": 0.8784,
-      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 88% identity",
-      "inside_the_ceiling": true,
-      "domain_units_offered": 4,
-      "domain_units_inside_the_ceiling": 2,
-      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 4 annotated regions, 2 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
-      "fold_units": [
-        {
-          "kind": "whole_chain",
-          "label": "Reverse transcriptase/ribonuclease H",
-          "type": "Chain",
-          "description": "the whole mature chain, as the relative's entry delimits it",
-          "span": [
-            25,
-            583
-          ],
-          "entry_span": [
-            598,
-            1156
-          ],
-          "entry_span_mapped": [
-            598,
-            1156
-          ],
-          "entry_length_mapped": 559,
-          "length": 559,
-          "inside_the_ceiling": true,
-          "refused_because": null,
-          "clipped": false,
-          "coincides_with_the_whole_chain": true,
-          "mapping": {
-            "start": 25,
-            "end": 583,
-            "length": 559,
-            "entry_span": [
-              598,
-              1156
-            ],
-            "entry_length": 559,
-            "ends_adjusted": false,
-            "unmapped_ends": 0
-          },
-          "mapping_reproduces_the_span": true,
-          "folded": true,
-          "target_name": "Reverse transcriptase/ribonuclease H",
-          "mean_plddt": 86.76,
-          "confident_fraction": 0.8891,
-          "pdb_sha256": "74acc6172ef36a3b6989612036170b322a0750335b375998ae24767e1da33bc8"
-        }
-      ],
-      "functional_sites": [
-        {
-          "type": "Site",
-          "description": "Cleavage; by viral protease",
-          "ligand": null,
-          "positions_on_the_relative": [
-            598
-          ],
-          "positions": [
-            25
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            707
-          ],
-          "positions": [
-            134
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            782
-          ],
-          "positions": [
-            209
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            783
-          ],
-          "positions": [
-            210
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Essential for RT p66/p51 heterodimerization",
-          "ligand": null,
-          "positions_on_the_relative": [
-            997
-          ],
-          "positions": [
-            424
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Essential for RT p66/p51 heterodimerization",
-          "ligand": null,
-          "positions_on_the_relative": [
-            1010
-          ],
-          "positions": [
-            437
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Cleavage; by viral protease",
-          "ligand": null,
-          "positions_on_the_relative": [
-            1036,
-            1037
-          ],
-          "positions": [
-            463,
-            464
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            1039
-          ],
-          "positions": [
-            466
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            1074
-          ],
-          "positions": [
-            501
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            1094
-          ],
-          "positions": [
-            521
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Binding site",
-          "description": "",
-          "ligand": "Mg(2+)",
-          "positions_on_the_relative": [
-            1145
-          ],
-          "positions": [
-            572
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Cleavage; by viral protease",
-          "ligand": null,
-          "positions_on_the_relative": [
-            1156
-          ],
-          "positions": [
-            583
-          ],
-          "positions_unmapped": 0
-        }
-      ],
-      "functional_sites_absent_because": null,
-      "folded": true,
-      "mean_plddt": 86.76,
-      "units_folded": 1,
-      "domain_route": false
-    },
-    {
       "target": "p51 RT",
-      "rank": 5,
+      "rank": 4,
       "identified": true,
       "identification_route": null,
       "chain_range_on_the_relative": [
@@ -4183,7 +3366,7 @@
     },
     {
       "target": "Capsid protein p24",
-      "rank": 6,
+      "rank": 5,
       "identified": true,
       "identification_route": null,
       "chain_range_on_the_relative": [
@@ -4275,7 +3458,7 @@
     },
     {
       "target": "NEF_SIVS4 Protein Nef",
-      "rank": 7,
+      "rank": 6,
       "identified": true,
       "identification_route": "exact",
       "chain_range_on_the_relative": null,
@@ -4325,7 +3508,7 @@
     },
     {
       "target": "NEF_SIVM1 Protein Nef",
-      "rank": 8,
+      "rank": 7,
       "identified": true,
       "identification_route": "exact",
       "chain_range_on_the_relative": null,
@@ -4388,28 +3571,19 @@
         {
           "tool": "literature.search",
           "endpoint": "Europe PMC",
-          "status": "ok",
-          "note": null,
-          "seconds": 3.75,
-          "network_calls": 7,
-          "returned": {
-            "subject_kind": "term",
-            "scope": "title_abstract",
-            "hit_count": 21,
-            "returned": 10,
-            "hits_with_abstract": 10,
-            "preprints_returned": 0,
-            "limitations_count": 8,
-            "sources_count": 7
-          }
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 91.02,
+          "network_calls": 5,
+          "returned": {}
         },
         {
           "tool": "similarity.homologs",
           "endpoint": "EBI HMMER",
           "status": "ok",
           "note": null,
-          "seconds": 3.6,
-          "network_calls": 4,
+          "seconds": 14.53,
+          "network_calls": 7,
           "returned": {
             "resolution_attempts_count": 1,
             "database_id": "swissprot",
@@ -4428,7 +3602,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 2.43,
+          "seconds": 6.97,
           "network_calls": 6,
           "returned": {
             "protein_name": "Envelope glycoprotein gp160",
@@ -4448,7 +3622,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 2.22,
+          "seconds": 1.74,
           "network_calls": 2,
           "returned": {
             "sequence_length": 885,
@@ -4468,7 +3642,7 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 3.33,
+          "seconds": 15.77,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -4497,27 +3671,18 @@
         {
           "tool": "literature.search",
           "endpoint": "Europe PMC",
-          "status": "ok",
-          "note": null,
-          "seconds": 4.06,
-          "network_calls": 7,
-          "returned": {
-            "subject_kind": "term",
-            "scope": "title_abstract",
-            "hit_count": 104,
-            "returned": 10,
-            "hits_with_abstract": 10,
-            "preprints_returned": 0,
-            "limitations_count": 8,
-            "sources_count": 7
-          }
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 30.28,
+          "network_calls": 1,
+          "returned": {}
         },
         {
           "tool": "similarity.homologs",
           "endpoint": "EBI HMMER",
           "status": "ok",
           "note": null,
-          "seconds": 1.24,
+          "seconds": 2.57,
           "network_calls": 3,
           "returned": {
             "resolution_attempts_count": 1,
@@ -4537,7 +3702,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 2.66,
+          "seconds": 9.28,
           "network_calls": 6,
           "returned": {
             "protein_name": "Envelope glycoprotein gp160",
@@ -4557,7 +3722,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 1.13,
+          "seconds": 2.45,
           "network_calls": 2,
           "returned": {
             "sequence_length": 885,
@@ -4577,7 +3742,7 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 32.6,
+          "seconds": 11.34,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -4606,27 +3771,18 @@
         {
           "tool": "literature.search",
           "endpoint": "Europe PMC",
-          "status": "ok",
-          "note": null,
-          "seconds": 4.59,
-          "network_calls": 7,
-          "returned": {
-            "subject_kind": "term",
-            "scope": "title_abstract",
-            "hit_count": 166889,
-            "returned": 10,
-            "hits_with_abstract": 10,
-            "preprints_returned": 1,
-            "limitations_count": 8,
-            "sources_count": 7
-          }
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 53.34,
+          "network_calls": 2,
+          "returned": {}
         },
         {
           "tool": "similarity.homologs",
           "endpoint": "EBI HMMER",
           "status": "ok",
           "note": null,
-          "seconds": 1.02,
+          "seconds": 3.94,
           "network_calls": 3,
           "returned": {
             "resolution_attempts_count": 1,
@@ -4646,7 +3802,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 11.03,
+          "seconds": 32.44,
           "network_calls": 15,
           "returned": {
             "protein_name": "Gag-Pol polyprotein",
@@ -4666,7 +3822,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 1.19,
+          "seconds": 1.42,
           "network_calls": 2,
           "returned": {
             "sequence_length": 1449,
@@ -4686,7 +3842,7 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 6.04,
+          "seconds": 7.94,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -4703,39 +3859,45 @@
       ]
     }
   ],
-  "seconds": 155.95,
+  "seconds": 346.01,
   "coverage": {
-    "chains_ranked": 8,
-    "surface_rows": 8,
+    "chains_ranked": 7,
+    "surface_rows": 7,
     "surface_measured": 1,
-    "surface_refused": 7,
+    "surface_refused": 6,
     "surface_covers_every_chain": true,
-    "surface_on_predicted_coordinates": 8,
-    "surface_predicted_was_the_only_route": 7,
-    "chains_with_any_surface": 8,
+    "surface_on_predicted_coordinates": 7,
+    "surface_predicted_was_the_only_route": 6,
+    "chains_with_any_surface": 7,
     "chains_with_no_surface": 0,
     "chains_with_no_surface_over_the_ceiling": 0,
     "chains_over_the_folding_ceiling": 0,
-    "fold_rows": 8,
+    "fold_rows": 7,
     "fold_rows_unidentified": 0,
-    "fold_sequence_recovered": 8,
+    "fold_sequence_recovered": 7,
     "fold_sequence_recovered_unidentified": 0,
     "fold_covers_every_chain": true,
-    "fold_units_offered": 34,
-    "fold_units_folded": 8,
-    "domain_units_offered": 26,
+    "fold_units_offered": 29,
+    "fold_units_folded": 7,
+    "domain_units_offered": 22,
     "domain_units_folded": 0,
     "chains_rescued_by_the_domain_route": 0,
     "chains_with_no_coordinates": 0,
     "chains_with_a_region_surface": 0,
     "region_surfaces_measured": 0,
-    "chains_with_functional_sites": 6,
+    "chains_with_functional_sites": 5,
     "site_patch_measured_on_a_deposition": 0,
-    "site_patch_measured_on_a_prediction": 6,
+    "site_patch_measured_on_a_prediction": 5,
     "site_patch_on_a_deposition_not_at_the_annotated_residues": 0,
     "site_patch_on_a_prediction_not_at_the_annotated_residues": 0,
     "evidence_targets": 3,
     "evidence_calls": 15
   },
-  "pathogen": "HIV-2"
+  "pathogen": "HIV-2",
+  "fold_integrity": {
+    "trustworthy": true,
+    "infrastructure_failures": 0,
+    "failures": [],
+    "means": "every missing structure on this run is a declared refusal -- a sequence over a ceiling, or a host that refused this sequence -- so the absences are results"
+  }
 }

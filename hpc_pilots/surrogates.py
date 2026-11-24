@@ -67,6 +67,45 @@ class Surrogate:
         return [name for name in self.requires if importlib.util.find_spec(name) is None]
 
 
+def _ridge(design, raw, observed_indices, observed_values, seed, block):
+    """A linear model over the same one-hot columns, which is the arm that has coefficients.
+
+    Registered because a forest has none. The acquisition result is reported as a gain over
+    random and a Spearman correlation, and neither says what the model learned; a reader asking
+    "which residue at which position does it favour" cannot be answered by a tree ensemble,
+    whose answer is spread over sixty-four trees and a few thousand splits. One coefficient per
+    (position, residue) column answers it directly, and on the four-site library that is a
+    4 x 20 table a reader can look at.
+
+    **The forest remains the default and nothing here changes it.** This arm exists to be
+    inspected and to be compared against, not to replace the model every recorded replay was
+    produced by. `calibration.surrogate_skill` has compared a `RidgeCV` against the forest at
+    matched budget since before this registry existed and finds the two close on this assay, so
+    reading the linear model's coefficients is not reading a much worse model's opinion.
+
+    The penalty is selected over a log-spaced grid by leave-one-out on the revealed labels, the
+    same grid and the same reason as `monomers.fit`: a fixed penalty would suit one label count
+    and not another, and this surrogate is refitted from eight labels up to a hundred and
+    twenty-eight.
+
+    **The spread it returns is zeros, and `spread_is_posterior` is False for a second reason.**
+    A point predictor has no dispersion at all, so there is nothing for `ucb_beta` to multiply.
+    `ucb` with this surrogate therefore reduces exactly to `greedy`, which is a true statement
+    about a linear model and not a defect to paper over with an invented interval --
+    `calibration` already records `nan` rather than a number for the same quantity. Returning
+    zeros rather than raising keeps the policy code free of a special case, and the note below
+    travels into every result that used it.
+    """
+    from sklearn.linear_model import RidgeCV
+
+    alphas = (block or {}).get("ridge_alphas") or np.logspace(-3, 4, 29)
+    model = RidgeCV(alphas=alphas)
+    observed = np.asarray(observed_indices)
+    model.fit(design[observed], observed_values)
+    predictions = model.predict(design)
+    return predictions, np.zeros_like(predictions)
+
+
 def _forest(design, raw, observed_indices, observed_values, seed, block):
     """The pilot's surrogate, unchanged.
 
@@ -90,6 +129,14 @@ SURROGATES = {
         spread_note="Dispersion of the per-tree predictions. Not a predictive standard "
                     "deviation, so ucb_beta multiplies a heuristic rather than a confidence "
                     "interval."),
+    "ridge": Surrogate(
+        name="ridge", fit_predict=_ridge, takes_design_matrix=True,
+        spread_is_posterior=False,
+        spread_note="Zero everywhere. A ridge regression is a point predictor and supplies no "
+                    "dispersion, so ucb_beta multiplies nothing and the ucb policy reduces "
+                    "exactly to greedy. That is a property of the model and not a missing "
+                    "feature; `calibration` records the same quantity as nan for the same "
+                    "reason."),
 }
 
 

@@ -1,0 +1,158 @@
+{
+  "experiment": "predicted-model-inventory",
+  "status": "complete",
+  "case": "Hepatitis C virus, Hepatitis C virus held out",
+  "genome_accession": "NC_004102.1",
+  "reference_excluded_organism": "Hepatitis C virus",
+  "accessions": [
+    {
+      "accession": "Q69422",
+      "uniprot_entry_id": "POLG_GBVB",
+      "sequence_length": 2864,
+      "asked_about": [
+        {
+          "rank": 1,
+          "target": "RNA-directed RNA polymerase",
+          "range": "2275-2864"
+        },
+        {
+          "rank": 2,
+          "target": "Protease NS2",
+          "range": "733-940"
+        },
+        {
+          "rank": 3,
+          "target": "Serine protease/helicase NS3",
+          "range": "941-1564"
+        }
+      ],
+      "requested_ranges": [
+        "2275-2864",
+        "733-940",
+        "941-1564"
+      ],
+      "predicted_model_count": 25,
+      "any_prediction_exists": true,
+      "providers_with_models": [
+        "AlphaFold DB",
+        "PED",
+        "SWISS-MODEL"
+      ],
+      "models_by_provider": {
+        "AlphaFold DB": 17,
+        "PED": 5,
+        "SWISS-MODEL": 3
+      },
+      "models_by_tool_used": {
+        "ColabFold v1.6.2 / AlphaFold-PTM": 12,
+        "not stated by the host": 8,
+        "ColabFold v1.5.2": 5
+      },
+      "models_by_category": {
+        "AB-INITIO": 17,
+        "CONFORMATIONAL ENSEMBLE": 5,
+        "TEMPLATE-BASED": 3
+      },
+      "alphafold_host_queried": true,
+      "alphafold_host_served_models": true,
+      "alphafold_host_model_count": 17,
+      "alphafold_host_models_by_tool_used": {
+        "ColabFold v1.6.2 / AlphaFold-PTM": 12,
+        "ColabFold v1.5.2": 5
+      },
+      "alphafold_authored_model_count": 12,
+      "tools_used": [
+        "ColabFold v1.5.2",
+        "ColabFold v1.6.2 / AlphaFold-PTM"
+      ],
+      "models_found_only_by_alphafold_host": [],
+      "mean_confidence_by_metric": {
+        "QMEANDisCo": 0.66,
+        "pLDDT": 77.1876
+      },
+      "ranges": [
+        {
+          "range": "2275-2864",
+          "width": 590,
+          "models_overlapping": 4,
+          "modelled": true,
+          "best_plddt_model": {
+            "model_identifier": "AF-0000000212011896",
+            "provider": "AlphaFold DB",
+            "tool_used": "ColabFold v1.6.2 / AlphaFold-PTM",
+            "median_plddt": 95.31,
+            "min_plddt": 42.28,
+            "fraction_at_or_above_threshold": 0.9559,
+            "longest_run_below_threshold": 19,
+            "fraction_of_range_covered": 1.0
+          },
+          "no_plddt_because": null
+        },
+        {
+          "range": "733-940",
+          "width": 208,
+          "models_overlapping": 1,
+          "modelled": true,
+          "best_plddt_model": {
+            "model_identifier": "AF-0000000212011891",
+            "provider": "AlphaFold DB",
+            "tool_used": "ColabFold v1.6.2 / AlphaFold-PTM",
+            "median_plddt": 79.06,
+            "min_plddt": 44.19,
+            "fraction_at_or_above_threshold": 0.7019,
+            "longest_run_below_threshold": 26,
+            "fraction_of_range_covered": 1.0
+          },
+          "no_plddt_because": null
+        },
+        {
+          "range": "941-1564",
+          "width": 624,
+          "models_overlapping": 5,
+          "modelled": true,
+          "best_plddt_model": {
+            "model_identifier": "AF-0000000212011892",
+            "provider": "AlphaFold DB",
+            "tool_used": "ColabFold v1.6.2 / AlphaFold-PTM",
+            "median_plddt": 90.06,
+            "min_plddt": 26.3,
+            "fraction_at_or_above_threshold": 0.9054,
+            "longest_run_below_threshold": 17,
+            "fraction_of_range_covered": 1.0
+          },
+          "no_plddt_because": null
+        }
+      ],
+      "excluded_experimental_count": 3,
+      "per_residue_refusals": [],
+      "network_calls": 9,
+      "bytes_received": 87175,
+      "content_sha256": "692b140112e8a4fd03bf84edaaf145cc5835874fa64f4bc775e3f5894d20a302"
+    }
+  ],
+  "predicted_model_count": 25,
+  "alphafold_host_model_count": 17,
+  "alphafold_authored_model_count": 12,
+  "headline": "25 predicted models across 1 accessions. 17 were served by the AlphaFold host and 12 were computed by AlphaFold.",
+  "interpretation": "The provenance of the `structures.predicted` scalars on the landing page. Each accession's predicted models are counted three ways that the page's single `predicted_model_count` collapses into one: by the provider that served the model, by the tool that computed it, and by model category. Nothing here is a new capability and nothing here changes a rank; it re-asks one tool already in the toolkit for the same accessions the held-out run reached, and keeps the list that the chain record reduces to a count.",
+  "limitations": [
+    "The AlphaFold host's name is not the provenance of what it serves. Every model provider `AlphaFold DB` returned for these accessions was computed by ColabFold v1.5.2, so `alphafold_host_served_models: true` must not be read as 'AlphaFold modelled this protein'. `alphafold_authored_model_count` is counted from each model's `tool_used`, which is the only field that answers that.",
+    "ColabFold is counted apart from AlphaFold rather than folded into it. It runs the same network weights behind a different MSA pipeline, which makes it AlphaFold-derived and still not an AlphaFold DB model.",
+    "A predicted model is not experimental evidence that the protein adopts the modelled conformation, and a high pLDDT is a statement about the predictor's confidence rather than an observation of the fold.",
+    "pLDDT (0-100) and QMEANDisCo (0-1) are different quantities, not one quantity rescaled. Averages are grouped by metric and never merged. An accession whose models are all template-based carries no pLDDT at all, so the `confident_plddt` threshold the page prints does not apply to it.",
+    "A predicted-model count is not an attention proxy and must never be pooled with deposited-structure counts. Experimentally determined entries are partitioned out here and counted in `excluded_experimental_count` only.",
+    "Absence is recorded, not inferred. `alphafold_host_served_models: false` on Q3LZX1 is a measured absence -- the host was asked unconditionally and holds nothing -- and not a request that was skipped.",
+    "The accessions are read out of the landing record's held-out case rather than written here, so this inventory covers the relatives the chain actually reached. It says nothing about SARS-CoV-2's own P0DTD1, whose curated entries that case deletes before the run."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-20T16:06:58.749992+00:00"
+  },
+  "content_sha256": "f949996ccc414a0ec10e1d439cf28cd4a650ee573988bb24199ed748a8d4bd82"
+}

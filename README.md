@@ -363,7 +363,37 @@ python -m hpc_pilots emergency --family coronaviridae --policy agent
 python -m hpc_pilots calibration
 python -m hpc_pilots summarize
 python -m hpc_pilots.submit --with-agent                  # the SLURM chain
+
+python -m hpc_pilots rubric-fit                           # fit the five ranking weights, held out by family
+python -m hpc_pilots weights                              # what the library model learned, per residue
+python -m hpc_pilots annotate                             # what each chain does, and where its residues sit
+python -m hpc_pilots handoff                              # the target list, as JSON per genome and one CSV
+python3 output/build_site.py                              # rebuild the pages
+python3 output/measure_track_labels.py --all              # check no figure label collides, in a real browser
 ```
+
+**What comes out of the last four.** `runs/rubric_fit.json` answers a question
+`intake.rank_score` had closed: it refused to fit the five weights because no labelled set of
+correct target rankings existed, and the 46-genome panel is now that set. Fitted under
+leave-one-family-out, the weights gain 2.2 points at rank 1 over the ones the pipeline ships,
+which is one genome of 44, and the same fit on shuffled labels scores in the same band, so
+nothing was learned. Every weighting beats chance by more than twenty points, so the ranking
+rests on the five terms rather than on their weighting, and `intake.RUBRIC` is unchanged.
+
+`runs/weights/binding.json` is the other weight vector, and that one does learn. A `ridge`
+surrogate joins the registry so there are coefficients to inspect at all, with the forest still
+the default so every recorded replay reproduces. On the four-site GB1 library the design matrix
+is 4 positions by 20 residues, so the fitted vector is a table: glycine at position 267 reads
++0.47 from 128 measurements, agreement with held-back answers rises from 0.17 to 0.36, and the
+same procedure on permuted outcomes ends at −0.01.
+
+`runs/handoff/targets.csv` is the export: 396 targets over 46 genomes, 641 rows, one per
+proposed binding site. Each row carries the residues in the chain's own numbering, the reading
+frame they are numbered along, the genome coordinates where the frame was confirmed by reading
+its residues back, what the protein does, what it interacts with, and whether an approved
+antiviral already acts on it. SARS-CoV-2's main protease comes out at nucleotides
+10,055–10,972 with its catalytic dyad at 10,175 and 10,487, which is where the reference
+annotation puts them.
 
 ## Documents
 

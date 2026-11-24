@@ -435,6 +435,10 @@ def build_index():
     body = body.replace("<!--LITERATURE-->", literature_block(holdout))
     body = body.replace("<!--SURFACE-LANE-->", surface_lane(holdout))
     body = body.replace("<!--SITE-PATCH-->", site_patch_block(holdout))
+    body = body.replace("<!--TRACK-->", feature_track(holdout))
+    body = body.replace("<!--HANDOFF-->", handoff_block())
+    body = body.replace("<!--RUBRIC-->", rubric_block())
+    body = body.replace("<!--WEIGHTS-->", weights_block())
     body = body.replace("<!--OFFCHAIN-->", build_offchain())
     # Last, so a {{token}} introduced by any generated block above is filled too. The
     # landing page is the held-out case throughout, so its numbers come from that case.
@@ -1681,6 +1685,617 @@ def domain_block(chain, fold_chain=None):
       </div>
       {_region_rows(chain, fold_chain)}
     </details>"""
+
+
+# ---------------------------------------------------------------------------
+# The residue track
+#
+# One protein on one axis of its own residues: how long it is, which parts of it the pipeline
+# folded, which residues a curator marked, and where the greasy patch a macrocycle would lie
+# across actually sits. Every other figure on this page draws one quantity per chain; this one
+# draws one chain in full, which is the view a reader needs before any area means anything.
+#
+# Drawn server-side, unlike the fold trace. That figure ships coordinates for 38 folds and would
+# add a megabyte if it were rendered here; a track is a dozen boxes and a few dozen ticks, so
+# the JavaScript would buy nothing and would cost the figure its ability to be tested as a
+# string and read with scripting off.
+#
+# **Text in the figure is only ever a number.** Region names go in a list under it, keyed by the
+# number in the box, because a long label inside a 40-pixel box either overflows or has to be
+# measured, and the measurement is the thing this repository has got wrong before. Lane labels
+# sit in a fixed left gutter and are right-aligned against it, so their width cannot collide
+# with anything. The axis prints the first and last residue and drops any tick that lands near
+# either.
+#
+# Colour carries the roles the region map already established, and no new one is introduced:
+# `--accent` is this virus and everything measured on it, `--fig-other` is the relative's entry
+# where the annotation was written down, and a grey hatch is what was read and is not usable.
+# ---------------------------------------------------------------------------
+TRACK_WIDTH = 960
+# The gutter was 128 and the lane names did not fit in it: measured in the browser, "residues a
+# curator marked" is 161 units wide at this size and ran to -33, off the left edge of the
+# viewBox. The names below are shorter and the gutter is wider, and `measure_track_labels.py`
+# is what says so rather than an estimate of glyph widths.
+TRACK_GUTTER = 150
+TRACK_LEFT = 162
+TRACK_RIGHT = 20
+TRACK_ROW = 15
+TRACK_GAP = 8
+
+# Which marked-residue types get which label. A cleavage site is where the protein is cut, not
+# somewhere to bind, and the figure says so rather than drawing all three alike.
+SITE_LABEL = {"Active site": "active site", "Binding site": "binding site",
+              "Site": "cleavage or other marked site"}
+
+
+def annotation_record(case):
+    """The annotation side record for this case, or None.
+
+    Guarded on the same two keys as the inventory, the folds, the literature and the site
+    patches, and for the same reason: these rows are keyed by target, so a record of another
+    genome -- or of this genome identified through its own curated entries rather than held out
+    of them -- would join cleanly and silently.
+    """
+    stem = (case.get("genome_accession") or "").replace(".", "_")
+    path = RUNS / "annotation" / f"{stem}.json"
+    if not stem or not path.exists():
+        return None
+    payload = json.loads(path.read_text())
+    if (payload.get("genome_accession") != case.get("genome_accession")
+            or payload.get("reference_excluded_organism")
+            != case.get("reference_excluded_organism")):
+        return None
+    return payload
+
+
+def _chain_local(positions, span):
+    """Reading-frame positions as positions within the mature chain, 1-based.
+
+    One subtraction, and the difference between a residue number a reader can check against a
+    structure and one that points at another protein entirely. None where the span is unknown,
+    because the figure must draw nothing rather than draw an offset it guessed.
+    """
+    if not positions or not span or len(span) != 2 or span[0] is None:
+        return None
+    # A position the alignment could not carry across arrives as None, which the record counts
+    # under `positions_unmapped`. Dropped here rather than drawn at residue zero: the record
+    # already says how many there were, and a mark at an invented place is worse than no mark.
+    return [int(p) - int(span[0]) + 1 for p in positions if p is not None]
+
+
+def _pack(spans):
+    """Lay spans out in as few rows as possible without two of them touching.
+
+    Regions overlap -- a domain contains a motif, and the whole chain is itself a unit -- so
+    drawing them on one row would stack them on top of each other. Longest first, so the chain
+    and its domains settle into the upper rows and short motifs fill in below.
+    """
+    rows = []
+    for item in sorted(spans, key=lambda s: (-(s["to"] - s["from"]), s["from"])):
+        for row in rows:
+            if all(item["to"] < other["from"] - 1 or item["from"] > other["to"] + 1
+                   for other in row):
+                row.append(item)
+                break
+        else:
+            rows.append([item])
+    return rows
+
+
+def _track_marks(case, target):
+    """Everything the track draws for one chain, in the chain's own 1-based numbering.
+
+    Returns None where the chain has no length to draw against, which is the one thing the
+    figure cannot do without. Every other lane is allowed to be empty and says so in the
+    legend rather than being faked.
+    """
+    folds = {row.get("target"): row for row in case.get("foldable") or ()}
+    surfaces = {row.get("target"): row for row in case.get("surfaces") or ()}
+    fold, surface = folds.get(target) or {}, surfaces.get(target) or {}
+    length = fold.get("declared_length_aa") or surface.get("residues_in_range")
+    if not length or int(length) < 2:
+        return None
+    length = int(length)
+    span = fold.get("span_in_this_genome")
+
+    regions = []
+    for index, unit in enumerate(fold.get("fold_units") or (), 1):
+        local = _chain_local(unit.get("span"), span) if unit.get("span") else None
+        if not local or len(local) != 2:
+            continue
+        start, end = max(1, local[0]), min(length, local[1])
+        if end < start:
+            continue
+        regions.append({
+            "n": index, "from": start, "to": end,
+            "label": unit.get("label") or unit.get("type") or "region",
+            "type": unit.get("type"), "length": unit.get("length"),
+            "folded": bool(unit.get("folded")),
+            "refused": unit.get("refused_because"),
+            "plddt": unit.get("mean_plddt"),
+            "whole": bool(unit.get("coincides_with_the_whole_chain")),
+        })
+
+    marked = _chain_local(surface.get("site_positions_in_this_genome"), span) or []
+    kinds = {}
+    for site in surface.get("functional_sites") or ():
+        local = _chain_local(site.get("positions"), span) or []
+        for position in local:
+            kinds[position] = site.get("type")
+
+    predicted = surface.get("predicted_surface") or {}
+    site_surface = surface.get("site_surface") or {}
+    return {
+        "target": target,
+        "length": length,
+        "rank": surface.get("rank") or fold.get("rank"),
+        "regions": regions,
+        "marked": sorted(p for p in marked if 1 <= p <= length),
+        "marked_kinds": kinds,
+        "patch": sorted(p for p in (surface.get("patch_positions") or ())
+                        if 1 <= p <= length),
+        "patch_on": surface.get("patch_positions_measured_on"),
+        "patch_area": surface.get("patch_median_a2"),
+        "patch_spread": surface.get("patch_spread_a2"),
+        "predicted_patch": sorted(p for p in (predicted.get("patch_positions") or ())
+                                  if 1 <= p <= length),
+        "predicted_on": predicted.get("measured_on") or predicted.get("model"),
+        "predicted_area": predicted.get("patch_a2"),
+        "predicted_plddt": predicted.get("mean_plddt"),
+        "reachable": sorted(p for p in (site_surface.get("site_patch_positions") or ())
+                            if 1 <= p <= length),
+        "reachable_area": site_surface.get("site_patch_area_a2"),
+        "at_the_annotated_residues": site_surface.get("measured_at_the_annotated_residues"),
+        "mean_plddt": fold.get("mean_plddt"),
+        "gate": surface.get("gate"),
+        "unmeasured_because": surface.get("unmeasured_because"),
+    }
+
+
+def _x(position, length):
+    """Residue number to a horizontal coordinate, residue 1 at the left edge."""
+    inner = TRACK_WIDTH - TRACK_LEFT - TRACK_RIGHT
+    return TRACK_LEFT + (position - 1) / max(1, length - 1) * inner
+
+
+def _track_axis(length, y):
+    """Residue numbers along the top, with any tick that crowds an end dropped.
+
+    `_lane_axis` drops a round tick that lands within a label's width of an end, approximated
+    there as a fraction of the span. Here the labels are short numbers at known positions, so
+    the rule is in residues: a tick inside a twelfth of the chain from either end would print
+    under the 1 or the length.
+    """
+    inner = TRACK_WIDTH - TRACK_LEFT - TRACK_RIGHT
+    step = 10 ** max(0, len(str(length // 5)) - 1)
+    while length / step > 8:
+        step *= 2 if length / (step * 2) >= 4 else 5
+    margin = max(1, length // 12)
+    ticks = [t for t in range(step, length, step) if margin < t < length - margin]
+    marks = [f'<line class="ftg" x1="{_x(1, length):.1f}" y1="{y + 6}" '
+             f'x2="{_x(length, length):.1f}" y2="{y + 6}"/>']
+    for tick in [1] + ticks + [length]:
+        at = _x(tick, length)
+        anchor = "start" if tick == 1 else ("end" if tick == length else "middle")
+        marks.append(f'<line class="ftg" x1="{at:.1f}" y1="{y + 2}" x2="{at:.1f}" '
+                     f'y2="{y + 6}"/>')
+        marks.append(f'<text class="ftn" x="{at:.1f}" y="{y}" text-anchor="{anchor}">'
+                     f'{tick:,}</text>')
+    return "".join(marks), inner
+
+
+def _lane_label(text, y):
+    """A lane's name in the fixed left gutter, right-aligned so it cannot reach the plot.
+
+    One line per lane and no small print under it. A name with a note stacked thirteen units
+    below put two boxes in one column that touch at this font size, which the browser
+    measurement reported on every page; the counts and areas those notes carried are in the
+    legend under the figure, which holds the rest of each lane's detail anyway.
+    """
+    return (f'<text class="ftl" x="{TRACK_GUTTER}" y="{y}" '
+            f'text-anchor="end">{esc(text)}</text>')
+
+
+def _ticks(positions, length, y, height, cls):
+    """One mark per residue, never thinner than a mark a reader can see.
+
+    A single residue of a 1,900-residue chain is under half a pixel wide at this scale, so the
+    marks are widened to two and may touch where residues are adjacent. That is the right
+    trade: the lane says WHERE, the count beside it says how many, and a mark too thin to see
+    would say neither.
+    """
+    out = []
+    for position in positions:
+        at = _x(position, length)
+        out.append(f'<rect class="{cls}" x="{at - 1:.1f}" y="{y}" width="2.4" '
+                   f'height="{height}" rx="1"/>')
+    return "".join(out)
+
+
+def feature_track(case, target=None, compact=False):
+    """One chain drawn along its own residues, from the record. Empty where it cannot be.
+
+    `target` names the chain; omitted, the best-ranked chain carrying a length is drawn. The
+    figure returns the empty string rather than a partial figure wherever the record does not
+    support one, which is the rule every lane on this page follows: a reader who sees a figure
+    is entitled to assume every mark on it came from a measurement.
+    """
+    rows = sorted((r for r in case.get("surfaces") or () if r.get("rank")),
+                  key=lambda r: r["rank"])
+    if target is None:
+        for row in rows:
+            marks = _track_marks(case, row.get("target"))
+            if marks:
+                target = row.get("target")
+                break
+    if target is None:
+        return ""
+    marks = _track_marks(case, target)
+    if not marks:
+        return ""
+
+    length = marks["length"]
+    annotation = annotation_record(case) or {}
+    extra = next((row for row in annotation.get("chains") or ()
+                  if row.get("target") == target), {})
+    frame = (extra.get("reading_frame") or {})
+
+    y = 16
+    svg, _inner = _track_axis(length, y)
+    svg = [svg, _lane_label("residue", y)]
+    y += 16
+
+    # The chain itself, full width, so every lane below is read against a visible whole.
+    svg.append(_lane_label("the chain", y + 11))
+    svg.append(f'<rect class="ftb" x="{TRACK_LEFT}" y="{y}" '
+               f'width="{TRACK_WIDTH - TRACK_LEFT - TRACK_RIGHT}" height="{TRACK_ROW}" '
+               f'rx="3"/>')
+    y += TRACK_ROW + TRACK_GAP
+
+    legend = []
+    if marks["regions"]:
+        packed = _pack(marks["regions"])
+        svg.append(_lane_label("folded parts", y + 11))
+        for row in packed:
+            for region in sorted(row, key=lambda r: r["from"]):
+                left = _x(region["from"], length)
+                width = max(3.0, _x(region["to"], length) - left)
+                shade = "ftr" if region["folded"] else "ftr ftx"
+                svg.append(f'<rect class="{shade}" x="{left:.1f}" y="{y}" '
+                           f'width="{width:.1f}" height="{TRACK_ROW}" rx="3"/>')
+                if width > 15:
+                    svg.append(f'<text class="ftm" x="{left + width / 2:.1f}" '
+                               f'y="{y + 11}" text-anchor="middle">{region["n"]}</text>')
+            y += TRACK_ROW + 3
+        y += TRACK_GAP - 3
+        legend.append(
+            f'<li><b class="ftkey ftkey-r"></b> {sum(1 for r in marks["regions"] if r["folded"])}'
+            f' of {len(marks["regions"])} parts of this chain reached the folder. '
+            f'The chain is {marks["length"]:,} residues long.</li>')
+        for region in sorted(marks["regions"], key=lambda r: r["n"]):
+            detail = (f'folded, confidence {num(region["plddt"])} out of 100'
+                      if region["folded"] and region["plddt"] is not None
+                      else "folded" if region["folded"]
+                      else f'not folded: {region["refused"]}' if region["refused"]
+                      else "not folded")
+            legend.append(
+                f'<li><b>{region["n"]}</b> {esc(region["label"])} '
+                f'<span class="ftd">residues {region["from"]:,}&ndash;{region["to"]:,} '
+                f'&middot; {detail}</span></li>')
+
+    if marks["marked"]:
+        kinds = sorted({SITE_LABEL.get(marks["marked_kinds"].get(p), "marked site")
+                        for p in marks["marked"]})
+        svg.append(_lane_label("marked residues", y + 11))
+        svg.append(_ticks(marks["marked"], length, y, TRACK_ROW, "ftk"))
+        y += TRACK_ROW + TRACK_GAP
+        legend.append(
+            f'<li><b class="ftkey ftkey-o"></b> {len(marks["marked"])} residues of '
+            f'{marks["length"]:,} are marked on the nearest relative and carried here through '
+            f'the alignment: {esc(", ".join(kinds))}. This is where the chemistry happens.</li>')
+
+    if marks["patch"]:
+        svg.append(_lane_label("patch, measured", y + 11))
+        svg.append(_ticks(marks["patch"], length, y, TRACK_ROW, "ftp"))
+        if marks["reachable"]:
+            svg.append(_ticks(marks["reachable"], length, y - 3, TRACK_ROW + 6, "ftp ftpr"))
+        y += TRACK_ROW + TRACK_GAP
+        legend.append(
+            '<li><b class="ftkey ftkey-a"></b> the largest unbroken water-repelling patch on a '
+            f'deposited structure of this part ({esc(str(marks["patch_on"]))}), which is the '
+            f'surface a macrocyclic peptide has to lie across. '
+            f'{num(marks["patch_area"])} &Aring;&sup2;'
+            + (f', moving by {num(marks["patch_spread"])} &Aring;&sup2; between structures'
+               if marks["patch_spread"] else "") + '</li>')
+        if marks["reachable"]:
+            legend.append(
+                '<li><b class="ftkey ftkey-t"></b> the part of that patch within reach of the '
+                f'marked residues: {len(marks["reachable"])} residues, '
+                f'{num(marks["reachable_area"])} &Aring;&sup2;. A macrocycle here would lie on '
+                'the surface and cover the chemistry.</li>')
+
+    if marks["predicted_patch"]:
+        svg.append(_lane_label("patch, predicted", y + 11))
+        svg.append(_ticks(marks["predicted_patch"], length, y, TRACK_ROW, "ftq"))
+        y += TRACK_ROW + TRACK_GAP
+        legend.append(
+            '<li><b class="ftkey ftkey-p"></b> the same measurement on coordinates a predictor '
+            'emitted, which is the only route to a surface where nothing has been solved. '
+            f'{num(marks["predicted_area"])} &Aring;&sup2; at a mean confidence of '
+            f'{num(marks["predicted_plddt"])} out of 100. An area from a prediction compares '
+            'with another prediction and not with a deposition.</li>')
+
+    height = y + 6
+    where = ""
+    if frame.get("verified") and extra.get("chain_span_nt"):
+        low, high = extra["chain_span_nt"]
+        ends = extra.get("chain_span_nt_confirmed_at") or []
+        caveat = ("" if len(ends) == 2 else
+                  " Only one end of this range is confirmed against the relative, so the other "
+                  "is not quoted as exact.")
+        where = (f'<p class="ftw">In the genome this chain sits at nucleotides '
+                 f'{low:,}&ndash;{high:,}, read {esc(frame.get("reading_frame") or "")}.'
+                 f'{caveat}</p>')
+
+    return f"""
+    <figure class="ftrack">
+      <div class="ftrack-scroll" tabindex="0" role="group"
+           aria-label="Residue map of {esc(target)}">
+        <svg viewBox="0 0 {TRACK_WIDTH} {height}" role="img"
+             aria-label="{esc(target)}, {length} residues, with the parts folded, the residues
+             a curator marked and the measured patch drawn along the chain">
+          <defs>
+            <pattern id="fthatch" width="6" height="6" patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)">
+              <line class="fthl" x1="0" y1="0" x2="0" y2="6"/>
+            </pattern>
+          </defs>
+          {''.join(svg)}
+        </svg>
+      </div>
+      {where}
+      <ul class="ftkeys">{''.join(legend)}</ul>
+      <figcaption>Every mark is drawn from the run record at the residue it was measured or
+        annotated at. Purple is this virus and what was measured on it; blue is what a curator
+        wrote down for the nearest relative; a hatched box was offered to the folder and
+        refused, with the reason beside its number.</figcaption>
+    </figure>"""
+
+
+# ---------------------------------------------------------------------------
+# What the models learned
+#
+# Two different things are called weights in this project and they are kept apart here, because
+# only one of them is fitted to anything.
+#
+# `intake.RUBRIC` is five constants chosen by hand, and the page has always printed them off the
+# record. `runs/rubric_fit.json` now asks whether fitting them against the proteins approved
+# antivirals already act on would rank a held-out virus family better. It does not, and the
+# section says so: the point of running it was to find out.
+#
+# `runs/weights/binding.json` is the other one. The library model has a coefficient for every
+# residue at every randomised position, and that is a weight in the ordinary sense -- it says
+# which residue helps. Nothing on this site has ever shown it.
+# ---------------------------------------------------------------------------
+def rubric_fit_record():
+    """The weight-fitting record, or None. No join guard: it is one record over the panel."""
+    path = RUNS / "rubric_fit.json"
+    return json.loads(path.read_text()) if path.exists() else None
+
+
+def weights_record():
+    """The library model's coefficient record, or None."""
+    path = RUNS / "weights" / "binding.json"
+    return json.loads(path.read_text()) if path.exists() else None
+
+
+def handoff_index():
+    """What the handoff export covers, or None."""
+    path = RUNS / "handoff" / "index.json"
+    return json.loads(path.read_text()) if path.exists() else None
+
+
+def rubric_block():
+    """Stated weights against fitted ones, and what each one recovers on a held-out family.
+
+    The bars are anchored at zero and drawn against one scale for the weights and another for
+    the recall, because the two are not the same quantity and sharing an axis would invite the
+    comparison the record says cannot be made.
+    """
+    record = rubric_fit_record()
+    if not record:
+        return ""
+    stated, fitted = record["stated_weights"], record["fitted_weights"]
+    scale = max(list(stated.values()) + list(fitted.values())) or 1.0
+    rows = []
+    for name in record["features"]:
+        rows.append(f"""
+      <div class="wr">
+        <span class="who">{esc(plain_key(name))}</span>
+        <span class="plot">
+          {_bar(stated[name] / scale * 100, cls="b")}
+          {_bar(fitted[name] / scale * 100, cls="b pred")}
+        </span>
+        <span class="vl">{num(stated[name])} &rarr; {num(fitted[name])}</span>
+      </div>""")
+
+    comparison = record["comparison"]
+    arms = []
+    for arm in ("stated", "uniform", "fitted", "fitted_without_conservation", "permuted"):
+        recall = comparison["recall_by_arm"].get(arm, {})
+        if not recall:
+            continue
+        chance = comparison["chance"]["top1"]
+        arms.append(f"""
+      <div class="wr">
+        <span class="who">{esc(ARM_NAME.get(arm, arm))}</span>
+        <span class="plot">
+          {_bar(recall["top1"], cls="b" if arm != "permuted" else "b pred")}
+          {_tick(chance, 100)}
+        </span>
+        <span class="vl">{recall["top1"]:.0f}%</span>
+      </div>""")
+
+    return f"""
+    <div class="lane">
+      <div class="lane-grp"><span class="gl">The five weights, as the pipeline states them and
+        as fitting would set them</span></div>
+      <div class="lane-axis" aria-hidden="true"><span></span>
+        <span class="ax"><b class="l0">0</b>
+          <b class="lm">{num(scale)} points</b></span><span></span></div>
+      {''.join(rows)}
+      <div class="lane-foot"><p>The solid bar is the weight the pipeline uses. The outlined bar
+        is what fitting sets it to. Fitting moves weight off how conserved a protein is and
+        onto whether the virus can replicate without it.</p></div>
+    </div>
+    <div class="lane">
+      <div class="lane-grp"><span class="gl">How often each weighting puts a drugged target
+        first, on a virus family it was not fitted on</span></div>
+      <div class="lane-axis" aria-hidden="true"><span></span>
+        <span class="ax"><i class="lim" style="left:{comparison['chance']['top1']:.1f}%"></i>
+          <b class="l0">0</b>
+          <b class="ll l" style="left:{comparison['chance']['top1']:.1f}%">
+            {comparison['chance']['top1']:.0f}% by chance</b>
+          <b class="lm">100%</b></span><span></span></div>
+      {''.join(arms)}
+      <div class="lane-foot"><p>Every weighting beats chance by more than twenty points, and the
+        whole spread between them is {comparison['spread_across_arms']['top1']:.0f} points, which
+        is {comparison['one_genome_is_worth']:.1f} points per genome. The last row was fitted on
+        shuffled labels and scores in the same band, which is why none of the differences above
+        it is evidence of learning.</p></div>
+    </div>"""
+
+
+ARM_NAME = {
+    "stated": "the five weights it ships",
+    "uniform": "every term weighted alike",
+    "fitted": "fitted on the other families",
+    "fitted_without_conservation": "fitted, conservation dropped",
+    "permuted": "fitted on shuffled labels",
+}
+
+
+def _weight_band(value, scale):
+    """Which of nine diverging bands a coefficient falls in, four each way plus zero."""
+    if not scale or abs(value) < scale * 0.06:
+        return "z0"
+    share = min(1.0, abs(value) / scale)
+    band = min(4, int(share * 4) + 1)
+    return f"{'p' if value > 0 else 'n'}{band}"
+
+
+def weights_block():
+    """The library model's coefficient per residue per position, and the control beside it.
+
+    A table rather than a figure, because the quantity is one number per cell on a grid that
+    is already four rows of twenty and a reader wants to find a particular residue in it. The
+    shading is diverging, since the sign is the whole content: a positive coefficient says that
+    residue at that position raises the predicted score.
+    """
+    record = weights_record()
+    if not record:
+        return ""
+    arms = record["arms"]
+    trained = arms.get("greedy_pool00")
+    control = arms.get("greedy_pool00_permuted")
+    if not trained:
+        return ""
+
+    def grid(arm, caption):
+        last = arm["steps"][-1]
+        rows = last["ridge"]["coefficients"]
+        scale = max((abs(v) for row in rows for v in row["residues"].values()), default=1.0)
+        head = "".join(f"<th>{esc(a)}</th>" for a in record["alphabet"])
+        body = []
+        for row in rows:
+            cells = "".join(
+                f'<td class="{_weight_band(value, scale)}" '
+                f'title="{esc(residue)} at position {row["position"]}: '
+                f'{value:+.3f}">{value:+.2f}</td>'
+                for residue, value in row["residues"].items())
+            body.append(f'<tr><th scope="row">{row["position"]}</th>{cells}</tr>')
+        return f"""
+      <div class="wmapscroll" tabindex="0" role="group" aria-label="{esc(caption)}">
+        <table class="wmap">
+          <caption>{esc(caption)}</caption>
+          <thead><tr><th scope="col">position</th>{head}</tr></thead>
+          <tbody>{''.join(body)}</tbody>
+        </table>
+      </div>"""
+
+    # The bar is how well the model predicts molecules it has never been shown, because that is
+    # the quantity worth watching rise. The size of the weights rides along as a figure: it
+    # grows too, and on its own it would be the wrong thing to draw -- the shuffled-answer arm
+    # below produces weights of comparable size and predicts nothing.
+    steps, control_steps = [], {s["labels"]: s for s in (control or {}).get("steps") or ()}
+    skills = [s["ridge"]["skill"]["spearman_pred_truth"] or 0 for s in trained["steps"]]
+    top = max(skills + [0.4]) or 1.0
+    for step in trained["steps"]:
+        skill = step["ridge"]["skill"]["spearman_pred_truth"] or 0.0
+        shuffled = control_steps.get(step["labels"], {}).get("ridge", {}).get(
+            "skill", {}).get("spearman_pred_truth")
+        steps.append(f"""
+      <div class="bi">
+        <div class="bi-top"><span class="nm">{step['labels']} measurements
+          <span class="cut">weights now {num(step['ridge']['l2_norm'])} long</span></span>
+          <span class="vl">{skill:+.2f}{f' &nbsp;vs&nbsp; {shuffled:+.2f} shuffled'
+                                        if shuffled is not None else ''}</span></div>
+        <div class="track"><div class="fill"
+          style="width:{max(0.0, min(1.0, skill / top)) * 100:.1f}%"></div></div>
+      </div>""")
+
+    return f"""
+    {grid(trained, "What the model learned from 128 measurements")}
+    <div class="bars">
+      <div class="bi"><div class="bi-top"><span class="nm"><b>How well it ranks molecules it
+        has never been shown</b><span class="cut">1.00 would be a perfect ordering, 0.00 no
+        better than guessing</span></span></div></div>
+      {''.join(steps)}
+    </div>
+    {grid(control, "The same procedure on shuffled answers, where there is nothing to learn")
+     if control else ""}"""
+
+
+def handoff_block():
+    """What the export covers, and the two files to take away."""
+    index = handoff_index()
+    if not index:
+        return ""
+    kinds = index["rows_by_site_kind"]
+    # The step ledger's own markup, not an approximation of it: `.v` is the figure and `.u` the
+    # unit under it, and a bare `<b><span>` put the number and its label on one line.
+    return f"""
+    <dl class="ledger">
+      <div><dt class="s">genomes</dt>
+        <dd><span class="v">{num(index['genomes'])}</span><span class="u">run end to end</span></dd></div>
+      <div><dt class="s">targets</dt>
+        <dd><span class="v">{num(index['targets'])}</span><span class="u">ranked and kept</span></dd></div>
+      <div><dt class="s">places to bind</dt>
+        <dd><span class="v">{num(index['site_rows'])}</span><span class="u">rows in the file</span></dd></div>
+      <div><dt class="s">what it does</dt>
+        <dd><span class="v">{num(index['targets_with_a_function'])}</span><span class="u">targets described</span></dd></div>
+      <div><dt class="s">genome coordinates</dt>
+        <dd><span class="v">{num(index['targets_with_nucleotide_coordinates'])}</span><span class="u">targets located</span></dd></div>
+    </dl>
+    <ul class="pts">
+      <li><b>{num(kinds.get('hydrophobic_patch', 0) + kinds.get('hydrophobic_patch_predicted', 0))}
+      rows name a water-repelling patch</b>, which is the surface a ring-shaped peptide lies
+      across. {num(kinds.get('hydrophobic_patch', 0))} of them are measured on a solved
+      structure and the rest on a predicted one, and every row says which.</li>
+      <li><b>{num(kinds.get('functional_site', 0))} rows name residues a curator marked</b> as an
+      active site, a binding site or a cut point.
+      {num(kinds.get('site_patch', 0))} rows are the places where the patch and those residues
+      meet, which is where one molecule could do both.</li>
+      <li><b>{num(kinds.get('none', 0))} rows say no site was found</b>, with the reason. A
+      target that reached nothing stays in the table.</li>
+      <li><b>{num(index['targets_already_drugged'])} targets already carry an approved
+      antiviral.</b> That column is how the list reads as a check on itself rather than only as
+      a proposal.</li>
+    </ul>
+    <p class="acts">
+      <a class="btn" href="handoff/targets.csv">Download the target list (CSV)</a>
+      <a class="btn" href="handoff/index.json">What the columns mean (JSON)</a>
+    </p>"""
 
 
 def _bar(width, left=0.0, cls="b"):
@@ -3080,6 +3695,23 @@ def result_page(case, stem):
     surface_step = (by_tool.get("geometry.surface_markers") or {}).get("stage")
     fold_tag = f"step {fold_step}" if fold_step else "the folding stage"
 
+    # The best-ranked chain the record can draw in full, after the surfaces it is read against.
+    # One per page rather than one per chain: twenty tracks is the wall of figures the runs
+    # matrix was built to replace, and the shortlist above already says what the others are.
+    drawn = feature_track(case)
+    track_html = f"""
+<section>
+  <div class="sec-head"><h2>Where on the protein a drug would go</h2>
+    <span class="tag">the best-ranked chain, in full</span></div>
+  <ul class="pts">
+    <li><b>One chain along an axis of its own residues.</b> The boxes are the parts the
+    pipeline could fold, the blue marks are residues a curator wrote down for the nearest
+    relative, and the solid marks are the water-repelling patch a ring-shaped peptide would
+    have to lie across.</li>
+  </ul>
+  {drawn}
+</section>""" if drawn else ""
+
     fold_html = ""
     if folded.get("sequence_length"):
         also = case.get("folded_also") or []
@@ -3156,6 +3788,7 @@ def result_page(case, stem):
   {surface_block(case)}
   {surface_lane(case)}
 </section>
+{track_html}
 {fold_html if (fold_step or 99) >= (surface_step or 0) else ""}
 
 {evidence_block(case)}
@@ -3341,6 +3974,28 @@ def results_index(entries):
   </div>
 </section>
 </main>""" + FOOT)
+
+
+def build_handoff():
+    """Copy the export next to the page that links it, the way the records are copied.
+
+    Same argument as `build_results`: the record is the committed thing and `docs/` holds a
+    copy, rather than a web output directory being the only home of a result. The per-genome
+    objects are copied too, so a reader following one target from the table can open the file
+    the row came out of.
+    """
+    source = RUNS / "handoff"
+    if not source.exists():
+        return 0
+    target = DOCS / "handoff"
+    target.mkdir(parents=True, exist_ok=True)
+    copied = 0
+    for path in sorted(source.iterdir()):
+        if path.suffix in (".json", ".csv"):
+            shutil.copyfile(path, target / path.name)
+            copied += 1
+    print(f"wrote docs/handoff/  ({copied} file(s))")
+    return copied
 
 
 def build_results():
@@ -3891,6 +4546,7 @@ def main():
     # these are written beside the committed fold's figure rather than before the page.
     build_domain_fold_images()
     build_results()
+    build_handoff()
     if args.notebook:
         build_notebook()
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")

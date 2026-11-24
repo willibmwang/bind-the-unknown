@@ -1,0 +1,2924 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_002058.3",
+  "pathogen": "Poliovirus",
+  "reference_excluded_organism": "Poliovirus",
+  "source_record": "runs/onset_chain_NC_002058_3.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "Protease 2A",
+      "parent": "POLG_CXA21 Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P22055",
+      "score": 5.3427,
+      "score_terms": {
+        "conservation": 1.4427,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.875,
+          "confirmed_at": [
+            "the start of the chain",
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": true,
+          "one_end_only_note": null,
+          "leading_identity": 0.75,
+          "trailing_identity": 0.875,
+          "residues_compared": 40,
+          "frame_span_residues": 149,
+          "relative_chain_residues": 149,
+          "lengths_differ": false,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain",
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": true,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 742,
+        "orf_length_aa": 2209,
+        "segment": 0,
+        "orf_name": "POLG_CXA21 Genome polyprotein",
+        "reading_frame": "+1 at nt 743",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        880,
+        1028
+      ],
+      "chain_span_in_this_genome": [
+        882,
+        1030
+      ],
+      "chain_span_nt": [
+        3386,
+        3832
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "segment_length_nt": 7440,
+      "annotation": {
+        "accession": "P22055",
+        "entry_id": "POLG_CXA21",
+        "protein_name": "Genome polyprotein",
+        "organism": "Coxsackievirus A21 (strain Coe)",
+        "reviewed": true,
+        "molecule_asked_for": "Protease 2A",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein VP0",
+          "Capsid protein VP1",
+          "Capsid protein VP2",
+          "Capsid protein VP3",
+          "Capsid protein VP4",
+          "Genome polyprotein",
+          "Protease 2A",
+          "Protease 3C",
+          "Protein 2B",
+          "Protein 2C",
+          "Protein 3A",
+          "Protein 3AB",
+          "Protein 3CD",
+          "RNA-directed RNA polymerase",
+          "Viral protein genome-linked"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Cysteine protease that cleaves viral polyprotein and specific host proteins (By similarity). It is responsible for the autocatalytic cleavage between the P1 and P2 regions, which is the first cleavage occurring in the polyprotein (By similarity). Also cleaves the host translation initiation factor EIF4G1, in order to shut down the capped cellular mRNA translation (By similarity). Inhibits the host nucleus-cytoplasm protein and RNA trafficking by cleaving host members of the nuclear pores (By similarity). Counteracts stress granule formation probably by antagonizing its assembly or promoting its disassembly (By similarity). Cleaves and inhibits host IFIH1/MDA5, thereby inhibiting the type-I IFN production and the establishment of the antiviral state (By similarity). Cleaves and inhibits host MAVS, thereby inhibiting the type-I IFN production and the establishment of the antiviral state (By similarity). Counteracts stress granule formation probably by antagonizing its assembly or promoting its disassembly (PubMed:30867299)"
+          ],
+          "SUBUNIT": [
+            "Homodimer"
+          ]
+        },
+        "about_the_whole_entry": {},
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000039540",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd23213",
+              "name": "Enterovirus_RdRp"
+            },
+            {
+              "id": "cd00205",
+              "name": "rhv_like"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.20.960.20",
+              "name": "-"
+            },
+            {
+              "id": "2.60.120.20",
+              "name": "-"
+            },
+            {
+              "id": "3.30.70.270",
+              "name": "-"
+            },
+            {
+              "id": "6.10.20.20",
+              "name": "Poliovirus 3A protein-like"
+            },
+            {
+              "id": "4.10.880.10",
+              "name": "Poliovirus 3D polymerase Domain 1 (Nucleotidyltransferase)"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000605",
+              "name": "Helicase_SF3_ssDNA/RNA_vir"
+            },
+            {
+              "id": "IPR014759",
+              "name": "Helicase_SF3_ssRNA_vir"
+            },
+            {
+              "id": "IPR014838",
+              "name": "P3A"
+            },
+            {
+              "id": "IPR036203",
+              "name": "P3A_soluble_dom"
+            },
+            {
+              "id": "IPR044067",
+              "name": "PCV_3C_PRO"
+            },
+            {
+              "id": "IPR000081",
+              "name": "Peptidase_C3"
+            },
+            {
+              "id": "IPR000199",
+              "name": "Peptidase_C3A/C3B_picornavir"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR003138",
+              "name": "Pico_P1A"
+            },
+            {
+              "id": "IPR002527",
+              "name": "Pico_P2B"
+            },
+            {
+              "id": "IPR001676",
+              "name": "Picornavirus_capsid"
+            },
+            {
+              "id": "IPR043128",
+              "name": "Rev_trsase/Diguanyl_cyclase"
+            },
+            {
+              "id": "IPR033703",
+              "name": "Rhv-like"
+            },
+            {
+              "id": "IPR001205",
+              "name": "RNA-dir_pol_C"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR029053",
+              "name": "Viral_coat"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF08727",
+              "name": "P3A"
+            },
+            {
+              "id": "PF00548",
+              "name": "Peptidase_C3"
+            },
+            {
+              "id": "PF02226",
+              "name": "Pico_P1A"
+            },
+            {
+              "id": "PF00947",
+              "name": "Pico_P2A"
+            },
+            {
+              "id": "PF01552",
+              "name": "Pico_P2B"
+            },
+            {
+              "id": "PF00680",
+              "name": "RdRP_1"
+            },
+            {
+              "id": "PF00073",
+              "name": "Rhv"
+            },
+            {
+              "id": "PF00910",
+              "name": "RNA_helicase"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF88633",
+              "name": "Positive stranded ssRNA viruses"
+            },
+            {
+              "id": "SSF89043",
+              "name": "Soluble domain of poliovirus core protein 3a"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51874",
+              "name": "PCV_3C_PRO"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51218",
+              "name": "SF3_HELICASE_2"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044162",
+              "term": "host cell cytoplasmic vesicle membrane"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0039618",
+              "term": "T=pseudo3 icosahedral viral capsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0015267",
+              "term": "channel activity"
+            },
+            {
+              "id": "GO:0004197",
+              "term": "cysteine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0017111",
+              "term": "ribonucleoside triphosphate phosphatase activity"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            },
+            {
+              "id": "GO:0008270",
+              "term": "zinc ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006260",
+              "term": "DNA replication"
+            },
+            {
+              "id": "GO:0006351",
+              "term": "DNA-templated transcription"
+            },
+            {
+              "id": "GO:0075509",
+              "term": "endocytosis involved in viral entry into host cell"
+            },
+            {
+              "id": "GO:0034220",
+              "term": "monoatomic ion transmembrane transport"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0044694",
+              "term": "symbiont genome entry into host cell via pore formation in plasma membrane"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0039540",
+              "term": "symbiont-mediated suppression of host cytoplasmic pattern recognition receptor signaling pathway via inhibition of RIG-I activity"
+            },
+            {
+              "id": "GO:0039522",
+              "term": "symbiont-mediated suppression of host mRNA export from nucleus"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Autocatalytic cleavage",
+          "Capsid protein",
+          "Covalent protein-RNA linkage",
+          "DNA replication",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Helicase",
+          "Host cytoplasm",
+          "Host cytoplasmic vesicle",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host mRNA suppression by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host mRNA nuclear export by virus",
+          "Inhibition of host RIG-I by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Ion channel",
+          "Ion transport",
+          "Lipoprotein",
+          "Magnesium",
+          "Membrane",
+          "Metal-binding",
+          "Myristate",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Pore-mediated penetration of viral genome into host cell",
+          "Protease",
+          "Repeat",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "T=pseudo3 icosahedral capsid protein",
+          "Thiol protease",
+          "Transferase",
+          "Transport",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral ion channel",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell",
+          "Zinc",
+          "Zinc-finger"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Host cytoplasm",
+          "Host cytoplasmic vesicle",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host mRNA suppression by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host mRNA nuclear export by virus",
+          "Inhibition of host RIG-I by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Pore-mediated penetration of viral genome into host cell",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 5,
+        "source": "https://rest.uniprot.org/uniprotkb/P22055.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 2,
+      "target": "Protease 3C",
+      "parent": "POLG_CXA21 Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P22055",
+      "score": 5.3427,
+      "score_terms": {
+        "conservation": 1.4427,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.975,
+          "confirmed_at": [
+            "the start of the chain",
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": true,
+          "one_end_only_note": null,
+          "leading_identity": 0.975,
+          "trailing_identity": 0.95,
+          "residues_compared": 40,
+          "frame_span_residues": 183,
+          "relative_chain_residues": 183,
+          "lengths_differ": false,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain",
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": true,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 742,
+        "orf_length_aa": 2209,
+        "segment": 0,
+        "orf_name": "POLG_CXA21 Genome polyprotein",
+        "reading_frame": "+1 at nt 743",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        1563,
+        1745
+      ],
+      "chain_span_in_this_genome": [
+        1566,
+        1748
+      ],
+      "chain_span_nt": [
+        5438,
+        5986
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "segment_length_nt": 7440,
+      "annotation": {
+        "accession": "P22055",
+        "entry_id": "POLG_CXA21",
+        "protein_name": "Genome polyprotein",
+        "organism": "Coxsackievirus A21 (strain Coe)",
+        "reviewed": true,
+        "molecule_asked_for": "Protease 3C",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein VP0",
+          "Capsid protein VP1",
+          "Capsid protein VP2",
+          "Capsid protein VP3",
+          "Capsid protein VP4",
+          "Genome polyprotein",
+          "Protease 2A",
+          "Protease 3C",
+          "Protein 2B",
+          "Protein 2C",
+          "Protein 3A",
+          "Protein 3AB",
+          "Protein 3CD",
+          "RNA-directed RNA polymerase",
+          "Viral protein genome-linked"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Major viral protease that mediates proteolytic processing of the polyprotein (By similarity). Cleaves host EIF5B, contributing to host translation shutoff (By similarity). Also cleaves host PABPC1, contributing to host translation shutoff (By similarity). Cleaves host NLRP1, triggers host N-glycine-mediated degradation of the autoinhibitory NLRP1 N-terminal fragment (By similarity)"
+          ]
+        },
+        "about_the_whole_entry": {},
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000426219",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd23213",
+              "name": "Enterovirus_RdRp"
+            },
+            {
+              "id": "cd00205",
+              "name": "rhv_like"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.20.960.20",
+              "name": "-"
+            },
+            {
+              "id": "2.60.120.20",
+              "name": "-"
+            },
+            {
+              "id": "3.30.70.270",
+              "name": "-"
+            },
+            {
+              "id": "6.10.20.20",
+              "name": "Poliovirus 3A protein-like"
+            },
+            {
+              "id": "4.10.880.10",
+              "name": "Poliovirus 3D polymerase Domain 1 (Nucleotidyltransferase)"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000605",
+              "name": "Helicase_SF3_ssDNA/RNA_vir"
+            },
+            {
+              "id": "IPR014759",
+              "name": "Helicase_SF3_ssRNA_vir"
+            },
+            {
+              "id": "IPR014838",
+              "name": "P3A"
+            },
+            {
+              "id": "IPR036203",
+              "name": "P3A_soluble_dom"
+            },
+            {
+              "id": "IPR044067",
+              "name": "PCV_3C_PRO"
+            },
+            {
+              "id": "IPR000081",
+              "name": "Peptidase_C3"
+            },
+            {
+              "id": "IPR000199",
+              "name": "Peptidase_C3A/C3B_picornavir"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR003138",
+              "name": "Pico_P1A"
+            },
+            {
+              "id": "IPR002527",
+              "name": "Pico_P2B"
+            },
+            {
+              "id": "IPR001676",
+              "name": "Picornavirus_capsid"
+            },
+            {
+              "id": "IPR043128",
+              "name": "Rev_trsase/Diguanyl_cyclase"
+            },
+            {
+              "id": "IPR033703",
+              "name": "Rhv-like"
+            },
+            {
+              "id": "IPR001205",
+              "name": "RNA-dir_pol_C"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR029053",
+              "name": "Viral_coat"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF08727",
+              "name": "P3A"
+            },
+            {
+              "id": "PF00548",
+              "name": "Peptidase_C3"
+            },
+            {
+              "id": "PF02226",
+              "name": "Pico_P1A"
+            },
+            {
+              "id": "PF00947",
+              "name": "Pico_P2A"
+            },
+            {
+              "id": "PF01552",
+              "name": "Pico_P2B"
+            },
+            {
+              "id": "PF00680",
+              "name": "RdRP_1"
+            },
+            {
+              "id": "PF00073",
+              "name": "Rhv"
+            },
+            {
+              "id": "PF00910",
+              "name": "RNA_helicase"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF88633",
+              "name": "Positive stranded ssRNA viruses"
+            },
+            {
+              "id": "SSF89043",
+              "name": "Soluble domain of poliovirus core protein 3a"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51874",
+              "name": "PCV_3C_PRO"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51218",
+              "name": "SF3_HELICASE_2"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044162",
+              "term": "host cell cytoplasmic vesicle membrane"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0039618",
+              "term": "T=pseudo3 icosahedral viral capsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0015267",
+              "term": "channel activity"
+            },
+            {
+              "id": "GO:0004197",
+              "term": "cysteine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0017111",
+              "term": "ribonucleoside triphosphate phosphatase activity"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            },
+            {
+              "id": "GO:0008270",
+              "term": "zinc ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006260",
+              "term": "DNA replication"
+            },
+            {
+              "id": "GO:0006351",
+              "term": "DNA-templated transcription"
+            },
+            {
+              "id": "GO:0075509",
+              "term": "endocytosis involved in viral entry into host cell"
+            },
+            {
+              "id": "GO:0034220",
+              "term": "monoatomic ion transmembrane transport"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0044694",
+              "term": "symbiont genome entry into host cell via pore formation in plasma membrane"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0039540",
+              "term": "symbiont-mediated suppression of host cytoplasmic pattern recognition receptor signaling pathway via inhibition of RIG-I activity"
+            },
+            {
+              "id": "GO:0039522",
+              "term": "symbiont-mediated suppression of host mRNA export from nucleus"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Autocatalytic cleavage",
+          "Capsid protein",
+          "Covalent protein-RNA linkage",
+          "DNA replication",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Helicase",
+          "Host cytoplasm",
+          "Host cytoplasmic vesicle",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host mRNA suppression by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host mRNA nuclear export by virus",
+          "Inhibition of host RIG-I by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Ion channel",
+          "Ion transport",
+          "Lipoprotein",
+          "Magnesium",
+          "Membrane",
+          "Metal-binding",
+          "Myristate",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Pore-mediated penetration of viral genome into host cell",
+          "Protease",
+          "Repeat",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "T=pseudo3 icosahedral capsid protein",
+          "Thiol protease",
+          "Transferase",
+          "Transport",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral ion channel",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell",
+          "Zinc",
+          "Zinc-finger"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Host cytoplasm",
+          "Host cytoplasmic vesicle",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host mRNA suppression by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host mRNA nuclear export by virus",
+          "Inhibition of host RIG-I by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Pore-mediated penetration of viral genome into host cell",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 5,
+        "source": "https://rest.uniprot.org/uniprotkb/P22055.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 3,
+      "target": "RNA-directed RNA polymerase",
+      "parent": "POLG_CXA21 Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P22055",
+      "score": 5.3427,
+      "score_terms": {
+        "conservation": 1.4427,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 1.0,
+          "confirmed_at": [
+            "the start of the chain",
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": true,
+          "one_end_only_note": null,
+          "leading_identity": 0.975,
+          "trailing_identity": 1.0,
+          "residues_compared": 40,
+          "frame_span_residues": 461,
+          "relative_chain_residues": 461,
+          "lengths_differ": false,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain",
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": true,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 742,
+        "orf_length_aa": 2209,
+        "segment": 0,
+        "orf_name": "POLG_CXA21 Genome polyprotein",
+        "reading_frame": "+1 at nt 743",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        1746,
+        2206
+      ],
+      "chain_span_in_this_genome": [
+        1749,
+        2209
+      ],
+      "chain_span_nt": [
+        5987,
+        7369
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "segment_length_nt": 7440,
+      "annotation": {
+        "accession": "P22055",
+        "entry_id": "POLG_CXA21",
+        "protein_name": "Genome polyprotein",
+        "organism": "Coxsackievirus A21 (strain Coe)",
+        "reviewed": true,
+        "molecule_asked_for": "RNA-directed RNA polymerase",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein VP0",
+          "Capsid protein VP1",
+          "Capsid protein VP2",
+          "Capsid protein VP3",
+          "Capsid protein VP4",
+          "Genome polyprotein",
+          "Protease 2A",
+          "Protease 3C",
+          "Protein 2B",
+          "Protein 2C",
+          "Protein 3A",
+          "Protein 3AB",
+          "Protein 3CD",
+          "RNA-directed RNA polymerase",
+          "Viral protein genome-linked"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Replicates the viral genomic RNA on the surface of intracellular membranes. May form linear arrays of subunits that propagate along a strong head-to-tail interaction called interface-I. Covalently attaches UMP to a tyrosine of VPg, which is used to prime RNA synthesis. The positive stranded RNA genome is first replicated at virus induced membranous vesicles, creating a dsRNA genomic replication form. This dsRNA is then used as template to synthesize positive stranded RNA genomes. ss(+)RNA genomes are either translated, replicated or encapsidated"
+          ],
+          "ACTIVITY REGULATION": [
+            "Replication or transcription is subject to high level of random mutations by the nucleotide analog ribavirin"
+          ],
+          "SUBUNIT": [
+            "Interacts with Viral protein genome-linked and with protein 3CD"
+          ]
+        },
+        "about_the_whole_entry": {},
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "ACTIVITY REGULATION": "what switches it on or off"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000426220",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd23213",
+              "name": "Enterovirus_RdRp"
+            },
+            {
+              "id": "cd00205",
+              "name": "rhv_like"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.20.960.20",
+              "name": "-"
+            },
+            {
+              "id": "2.60.120.20",
+              "name": "-"
+            },
+            {
+              "id": "3.30.70.270",
+              "name": "-"
+            },
+            {
+              "id": "6.10.20.20",
+              "name": "Poliovirus 3A protein-like"
+            },
+            {
+              "id": "4.10.880.10",
+              "name": "Poliovirus 3D polymerase Domain 1 (Nucleotidyltransferase)"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000605",
+              "name": "Helicase_SF3_ssDNA/RNA_vir"
+            },
+            {
+              "id": "IPR014759",
+              "name": "Helicase_SF3_ssRNA_vir"
+            },
+            {
+              "id": "IPR014838",
+              "name": "P3A"
+            },
+            {
+              "id": "IPR036203",
+              "name": "P3A_soluble_dom"
+            },
+            {
+              "id": "IPR044067",
+              "name": "PCV_3C_PRO"
+            },
+            {
+              "id": "IPR000081",
+              "name": "Peptidase_C3"
+            },
+            {
+              "id": "IPR000199",
+              "name": "Peptidase_C3A/C3B_picornavir"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR003138",
+              "name": "Pico_P1A"
+            },
+            {
+              "id": "IPR002527",
+              "name": "Pico_P2B"
+            },
+            {
+              "id": "IPR001676",
+              "name": "Picornavirus_capsid"
+            },
+            {
+              "id": "IPR043128",
+              "name": "Rev_trsase/Diguanyl_cyclase"
+            },
+            {
+              "id": "IPR033703",
+              "name": "Rhv-like"
+            },
+            {
+              "id": "IPR001205",
+              "name": "RNA-dir_pol_C"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR029053",
+              "name": "Viral_coat"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF08727",
+              "name": "P3A"
+            },
+            {
+              "id": "PF00548",
+              "name": "Peptidase_C3"
+            },
+            {
+              "id": "PF02226",
+              "name": "Pico_P1A"
+            },
+            {
+              "id": "PF00947",
+              "name": "Pico_P2A"
+            },
+            {
+              "id": "PF01552",
+              "name": "Pico_P2B"
+            },
+            {
+              "id": "PF00680",
+              "name": "RdRP_1"
+            },
+            {
+              "id": "PF00073",
+              "name": "Rhv"
+            },
+            {
+              "id": "PF00910",
+              "name": "RNA_helicase"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF88633",
+              "name": "Positive stranded ssRNA viruses"
+            },
+            {
+              "id": "SSF89043",
+              "name": "Soluble domain of poliovirus core protein 3a"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51874",
+              "name": "PCV_3C_PRO"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51218",
+              "name": "SF3_HELICASE_2"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044162",
+              "term": "host cell cytoplasmic vesicle membrane"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0039618",
+              "term": "T=pseudo3 icosahedral viral capsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0015267",
+              "term": "channel activity"
+            },
+            {
+              "id": "GO:0004197",
+              "term": "cysteine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0017111",
+              "term": "ribonucleoside triphosphate phosphatase activity"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            },
+            {
+              "id": "GO:0008270",
+              "term": "zinc ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006260",
+              "term": "DNA replication"
+            },
+            {
+              "id": "GO:0006351",
+              "term": "DNA-templated transcription"
+            },
+            {
+              "id": "GO:0075509",
+              "term": "endocytosis involved in viral entry into host cell"
+            },
+            {
+              "id": "GO:0034220",
+              "term": "monoatomic ion transmembrane transport"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0044694",
+              "term": "symbiont genome entry into host cell via pore formation in plasma membrane"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0039540",
+              "term": "symbiont-mediated suppression of host cytoplasmic pattern recognition receptor signaling pathway via inhibition of RIG-I activity"
+            },
+            {
+              "id": "GO:0039522",
+              "term": "symbiont-mediated suppression of host mRNA export from nucleus"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Autocatalytic cleavage",
+          "Capsid protein",
+          "Covalent protein-RNA linkage",
+          "DNA replication",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Helicase",
+          "Host cytoplasm",
+          "Host cytoplasmic vesicle",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host mRNA suppression by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host mRNA nuclear export by virus",
+          "Inhibition of host RIG-I by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Ion channel",
+          "Ion transport",
+          "Lipoprotein",
+          "Magnesium",
+          "Membrane",
+          "Metal-binding",
+          "Myristate",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Pore-mediated penetration of viral genome into host cell",
+          "Protease",
+          "Repeat",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "T=pseudo3 icosahedral capsid protein",
+          "Thiol protease",
+          "Transferase",
+          "Transport",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral ion channel",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell",
+          "Zinc",
+          "Zinc-finger"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Host cytoplasm",
+          "Host cytoplasmic vesicle",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host mRNA suppression by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host mRNA nuclear export by virus",
+          "Inhibition of host RIG-I by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Pore-mediated penetration of viral genome into host cell",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 5,
+        "source": "https://rest.uniprot.org/uniprotkb/P22055.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 4,
+      "target": "Capsid protein VP0",
+      "parent": "POLG_CXA21 Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P22055",
+      "score": 2.9827,
+      "score_terms": {
+        "conservation": 1.4427,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.04,
+        "druggable_class": 0.0
+      },
+      "gate": "no",
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.8,
+          "confirmed_at": [
+            "the start of the chain"
+          ],
+          "confirmed_at_both_ends": false,
+          "one_end_only_note": "Only the start of the chain matches the relative. The other end of this span does not, so the coordinate at that end is not confirmed. On a polyprotein the usual cause is a ribosomal frameshift: the chain starts in one reading frame and the frame it was located in starts in another, which leaves the far end exact and the near end short.",
+          "leading_identity": 0.8,
+          "trailing_identity": 0.125,
+          "residues_compared": 40,
+          "frame_span_residues": 337,
+          "relative_chain_residues": 340,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 742,
+        "orf_length_aa": 2209,
+        "segment": 0,
+        "orf_name": "POLG_CXA21 Genome polyprotein",
+        "reading_frame": "+1 at nt 743",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        2,
+        341
+      ],
+      "chain_span_in_this_genome": [
+        2,
+        338
+      ],
+      "chain_span_nt": [
+        746,
+        1756
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain"
+      ],
+      "segment_length_nt": 7440,
+      "annotation": {
+        "accession": "P22055",
+        "entry_id": "POLG_CXA21",
+        "protein_name": "Genome polyprotein",
+        "organism": "Coxsackievirus A21 (strain Coe)",
+        "reviewed": true,
+        "molecule_asked_for": "Capsid protein VP0",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein VP0",
+          "Capsid protein VP1",
+          "Capsid protein VP2",
+          "Capsid protein VP3",
+          "Capsid protein VP4",
+          "Genome polyprotein",
+          "Protease 2A",
+          "Protease 3C",
+          "Protein 2B",
+          "Protein 2C",
+          "Protein 3A",
+          "Protein 3AB",
+          "Protein 3CD",
+          "RNA-directed RNA polymerase",
+          "Viral protein genome-linked"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Component of immature procapsids, which is cleaved into capsid proteins VP4 and VP2 after maturation (By similarity). Allows the capsid to remain inactive before the maturation step (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Interacts with capsid protein VP1 and capsid protein VP3 to form heterotrimeric protomers"
+          ],
+          "PTM": [
+            "Myristoylation is required for the formation of pentamers during virus assembly. Further assembly of 12 pentamers and a molecule of genomic RNA generates the provirion",
+            "During virion maturation, immature virions are rendered infectious following cleavage of VP0 into VP4 and VP2. This maturation seems to be an autocatalytic event triggered by the presence of RNA in the capsid and it is followed by a conformational change infectious virion"
+          ]
+        },
+        "about_the_whole_entry": {},
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000426209",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd23213",
+              "name": "Enterovirus_RdRp"
+            },
+            {
+              "id": "cd00205",
+              "name": "rhv_like"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.20.960.20",
+              "name": "-"
+            },
+            {
+              "id": "2.60.120.20",
+              "name": "-"
+            },
+            {
+              "id": "3.30.70.270",
+              "name": "-"
+            },
+            {
+              "id": "6.10.20.20",
+              "name": "Poliovirus 3A protein-like"
+            },
+            {
+              "id": "4.10.880.10",
+              "name": "Poliovirus 3D polymerase Domain 1 (Nucleotidyltransferase)"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000605",
+              "name": "Helicase_SF3_ssDNA/RNA_vir"
+            },
+            {
+              "id": "IPR014759",
+              "name": "Helicase_SF3_ssRNA_vir"
+            },
+            {
+              "id": "IPR014838",
+              "name": "P3A"
+            },
+            {
+              "id": "IPR036203",
+              "name": "P3A_soluble_dom"
+            },
+            {
+              "id": "IPR044067",
+              "name": "PCV_3C_PRO"
+            },
+            {
+              "id": "IPR000081",
+              "name": "Peptidase_C3"
+            },
+            {
+              "id": "IPR000199",
+              "name": "Peptidase_C3A/C3B_picornavir"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR003138",
+              "name": "Pico_P1A"
+            },
+            {
+              "id": "IPR002527",
+              "name": "Pico_P2B"
+            },
+            {
+              "id": "IPR001676",
+              "name": "Picornavirus_capsid"
+            },
+            {
+              "id": "IPR043128",
+              "name": "Rev_trsase/Diguanyl_cyclase"
+            },
+            {
+              "id": "IPR033703",
+              "name": "Rhv-like"
+            },
+            {
+              "id": "IPR001205",
+              "name": "RNA-dir_pol_C"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR029053",
+              "name": "Viral_coat"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF08727",
+              "name": "P3A"
+            },
+            {
+              "id": "PF00548",
+              "name": "Peptidase_C3"
+            },
+            {
+              "id": "PF02226",
+              "name": "Pico_P1A"
+            },
+            {
+              "id": "PF00947",
+              "name": "Pico_P2A"
+            },
+            {
+              "id": "PF01552",
+              "name": "Pico_P2B"
+            },
+            {
+              "id": "PF00680",
+              "name": "RdRP_1"
+            },
+            {
+              "id": "PF00073",
+              "name": "Rhv"
+            },
+            {
+              "id": "PF00910",
+              "name": "RNA_helicase"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF88633",
+              "name": "Positive stranded ssRNA viruses"
+            },
+            {
+              "id": "SSF89043",
+              "name": "Soluble domain of poliovirus core protein 3a"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51874",
+              "name": "PCV_3C_PRO"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51218",
+              "name": "SF3_HELICASE_2"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044162",
+              "term": "host cell cytoplasmic vesicle membrane"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0039618",
+              "term": "T=pseudo3 icosahedral viral capsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0015267",
+              "term": "channel activity"
+            },
+            {
+              "id": "GO:0004197",
+              "term": "cysteine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0017111",
+              "term": "ribonucleoside triphosphate phosphatase activity"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            },
+            {
+              "id": "GO:0008270",
+              "term": "zinc ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006260",
+              "term": "DNA replication"
+            },
+            {
+              "id": "GO:0006351",
+              "term": "DNA-templated transcription"
+            },
+            {
+              "id": "GO:0075509",
+              "term": "endocytosis involved in viral entry into host cell"
+            },
+            {
+              "id": "GO:0034220",
+              "term": "monoatomic ion transmembrane transport"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0044694",
+              "term": "symbiont genome entry into host cell via pore formation in plasma membrane"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0039540",
+              "term": "symbiont-mediated suppression of host cytoplasmic pattern recognition receptor signaling pathway via inhibition of RIG-I activity"
+            },
+            {
+              "id": "GO:0039522",
+              "term": "symbiont-mediated suppression of host mRNA export from nucleus"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Autocatalytic cleavage",
+          "Capsid protein",
+          "Covalent protein-RNA linkage",
+          "DNA replication",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Helicase",
+          "Host cytoplasm",
+          "Host cytoplasmic vesicle",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host mRNA suppression by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host mRNA nuclear export by virus",
+          "Inhibition of host RIG-I by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Ion channel",
+          "Ion transport",
+          "Lipoprotein",
+          "Magnesium",
+          "Membrane",
+          "Metal-binding",
+          "Myristate",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Pore-mediated penetration of viral genome into host cell",
+          "Protease",
+          "Repeat",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "T=pseudo3 icosahedral capsid protein",
+          "Thiol protease",
+          "Transferase",
+          "Transport",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral ion channel",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell",
+          "Zinc",
+          "Zinc-finger"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Host cytoplasm",
+          "Host cytoplasmic vesicle",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host mRNA suppression by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host mRNA nuclear export by virus",
+          "Inhibition of host RIG-I by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Pore-mediated penetration of viral genome into host cell",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 5,
+        "source": "https://rest.uniprot.org/uniprotkb/P22055.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 5,
+      "target": "Capsid protein VP3",
+      "parent": "POLG_CXA21 Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P22055",
+      "score": 2.9827,
+      "score_terms": {
+        "conservation": 1.4427,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.04,
+        "druggable_class": 0.0
+      },
+      "gate": "no",
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.85,
+          "confirmed_at": [
+            "the start of the chain"
+          ],
+          "confirmed_at_both_ends": false,
+          "one_end_only_note": "Only the start of the chain matches the relative. The other end of this span does not, so the coordinate at that end is not confirmed. On a polyprotein the usual cause is a ribosomal frameshift: the chain starts in one reading frame and the frame it was located in starts in another, which leaves the far end exact and the near end short.",
+          "leading_identity": 0.85,
+          "trailing_identity": 0.0,
+          "residues_compared": 40,
+          "frame_span_residues": 236,
+          "relative_chain_residues": 240,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 742,
+        "orf_length_aa": 2209,
+        "segment": 0,
+        "orf_name": "POLG_CXA21 Genome polyprotein",
+        "reading_frame": "+1 at nt 743",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        342,
+        581
+      ],
+      "chain_span_in_this_genome": [
+        342,
+        577
+      ],
+      "chain_span_nt": [
+        1766,
+        2473
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain"
+      ],
+      "segment_length_nt": 7440,
+      "annotation": {
+        "accession": "P22055",
+        "entry_id": "POLG_CXA21",
+        "protein_name": "Genome polyprotein",
+        "organism": "Coxsackievirus A21 (strain Coe)",
+        "reviewed": true,
+        "molecule_asked_for": "Capsid protein VP3",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein VP0",
+          "Capsid protein VP1",
+          "Capsid protein VP2",
+          "Capsid protein VP3",
+          "Capsid protein VP4",
+          "Genome polyprotein",
+          "Protease 2A",
+          "Protease 3C",
+          "Protein 2B",
+          "Protein 2C",
+          "Protein 3A",
+          "Protein 3AB",
+          "Protein 3CD",
+          "RNA-directed RNA polymerase",
+          "Viral protein genome-linked"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Forms an icosahedral capsid of pseudo T=3 symmetry with capsid proteins VP2 and VP3 (By similarity). The capsid is 300 Angstroms in diameter, composed of 60 copies of each capsid protein and enclosing the viral positive strand RNA genome (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Interacts with capsid protein VP0 and capsid protein VP1 to form heterotrimeric protomers (By similarity). Five protomers subsequently associate to form pentamers which serve as building blocks for the capsid (By similarity). Interacts with capsid protein VP4 in the mature capsid (By similarity). Interacts with protein 2C; this interaction may be important for virion morphogenesis (By similarity)"
+          ]
+        },
+        "about_the_whole_entry": {},
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000426212",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd23213",
+              "name": "Enterovirus_RdRp"
+            },
+            {
+              "id": "cd00205",
+              "name": "rhv_like"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.20.960.20",
+              "name": "-"
+            },
+            {
+              "id": "2.60.120.20",
+              "name": "-"
+            },
+            {
+              "id": "3.30.70.270",
+              "name": "-"
+            },
+            {
+              "id": "6.10.20.20",
+              "name": "Poliovirus 3A protein-like"
+            },
+            {
+              "id": "4.10.880.10",
+              "name": "Poliovirus 3D polymerase Domain 1 (Nucleotidyltransferase)"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000605",
+              "name": "Helicase_SF3_ssDNA/RNA_vir"
+            },
+            {
+              "id": "IPR014759",
+              "name": "Helicase_SF3_ssRNA_vir"
+            },
+            {
+              "id": "IPR014838",
+              "name": "P3A"
+            },
+            {
+              "id": "IPR036203",
+              "name": "P3A_soluble_dom"
+            },
+            {
+              "id": "IPR044067",
+              "name": "PCV_3C_PRO"
+            },
+            {
+              "id": "IPR000081",
+              "name": "Peptidase_C3"
+            },
+            {
+              "id": "IPR000199",
+              "name": "Peptidase_C3A/C3B_picornavir"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR003138",
+              "name": "Pico_P1A"
+            },
+            {
+              "id": "IPR002527",
+              "name": "Pico_P2B"
+            },
+            {
+              "id": "IPR001676",
+              "name": "Picornavirus_capsid"
+            },
+            {
+              "id": "IPR043128",
+              "name": "Rev_trsase/Diguanyl_cyclase"
+            },
+            {
+              "id": "IPR033703",
+              "name": "Rhv-like"
+            },
+            {
+              "id": "IPR001205",
+              "name": "RNA-dir_pol_C"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR029053",
+              "name": "Viral_coat"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF08727",
+              "name": "P3A"
+            },
+            {
+              "id": "PF00548",
+              "name": "Peptidase_C3"
+            },
+            {
+              "id": "PF02226",
+              "name": "Pico_P1A"
+            },
+            {
+              "id": "PF00947",
+              "name": "Pico_P2A"
+            },
+            {
+              "id": "PF01552",
+              "name": "Pico_P2B"
+            },
+            {
+              "id": "PF00680",
+              "name": "RdRP_1"
+            },
+            {
+              "id": "PF00073",
+              "name": "Rhv"
+            },
+            {
+              "id": "PF00910",
+              "name": "RNA_helicase"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF88633",
+              "name": "Positive stranded ssRNA viruses"
+            },
+            {
+              "id": "SSF89043",
+              "name": "Soluble domain of poliovirus core protein 3a"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51874",
+              "name": "PCV_3C_PRO"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51218",
+              "name": "SF3_HELICASE_2"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044162",
+              "term": "host cell cytoplasmic vesicle membrane"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0039618",
+              "term": "T=pseudo3 icosahedral viral capsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0015267",
+              "term": "channel activity"
+            },
+            {
+              "id": "GO:0004197",
+              "term": "cysteine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0017111",
+              "term": "ribonucleoside triphosphate phosphatase activity"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            },
+            {
+              "id": "GO:0008270",
+              "term": "zinc ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006260",
+              "term": "DNA replication"
+            },
+            {
+              "id": "GO:0006351",
+              "term": "DNA-templated transcription"
+            },
+            {
+              "id": "GO:0075509",
+              "term": "endocytosis involved in viral entry into host cell"
+            },
+            {
+              "id": "GO:0034220",
+              "term": "monoatomic ion transmembrane transport"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0044694",
+              "term": "symbiont genome entry into host cell via pore formation in plasma membrane"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0039540",
+              "term": "symbiont-mediated suppression of host cytoplasmic pattern recognition receptor signaling pathway via inhibition of RIG-I activity"
+            },
+            {
+              "id": "GO:0039522",
+              "term": "symbiont-mediated suppression of host mRNA export from nucleus"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Autocatalytic cleavage",
+          "Capsid protein",
+          "Covalent protein-RNA linkage",
+          "DNA replication",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Helicase",
+          "Host cytoplasm",
+          "Host cytoplasmic vesicle",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host mRNA suppression by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host mRNA nuclear export by virus",
+          "Inhibition of host RIG-I by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Ion channel",
+          "Ion transport",
+          "Lipoprotein",
+          "Magnesium",
+          "Membrane",
+          "Metal-binding",
+          "Myristate",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Pore-mediated penetration of viral genome into host cell",
+          "Protease",
+          "Repeat",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "T=pseudo3 icosahedral capsid protein",
+          "Thiol protease",
+          "Transferase",
+          "Transport",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral ion channel",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell",
+          "Zinc",
+          "Zinc-finger"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Host cytoplasm",
+          "Host cytoplasmic vesicle",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host mRNA suppression by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host mRNA nuclear export by virus",
+          "Inhibition of host RIG-I by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Pore-mediated penetration of viral genome into host cell",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 5,
+        "source": "https://rest.uniprot.org/uniprotkb/P22055.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 6,
+      "target": "Capsid protein VP1",
+      "parent": "POLG_CXA21 Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P22055",
+      "score": 2.9527,
+      "score_terms": {
+        "conservation": 1.4427,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.01,
+        "druggable_class": 0.0
+      },
+      "gate": "no",
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": 1,
+        "route": "parent",
+        "because": "the residues at 580-881 of the reading frame the parent route selected match the relative's own chain at only 20%, so this is not the frame the chain was located in and a coordinate from it would be wrong."
+      },
+      "chain_span_on_the_relative": [
+        582,
+        879
+      ],
+      "chain_span_in_this_genome": [
+        580,
+        881
+      ],
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P22055",
+        "entry_id": "POLG_CXA21",
+        "protein_name": "Genome polyprotein",
+        "organism": "Coxsackievirus A21 (strain Coe)",
+        "reviewed": true,
+        "molecule_asked_for": "Capsid protein VP1",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein VP0",
+          "Capsid protein VP1",
+          "Capsid protein VP2",
+          "Capsid protein VP3",
+          "Capsid protein VP4",
+          "Genome polyprotein",
+          "Protease 2A",
+          "Protease 3C",
+          "Protein 2B",
+          "Protein 2C",
+          "Protein 3A",
+          "Protein 3AB",
+          "Protein 3CD",
+          "RNA-directed RNA polymerase",
+          "Viral protein genome-linked"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Forms an icosahedral capsid of pseudo T=3 symmetry with capsid proteins VP2 and VP3 (By similarity). The capsid is 300 Angstroms in diameter, composed of 60 copies of each capsid protein and enclosing the viral positive strand RNA genome (By similarity). Capsid protein VP1 mainly forms the vertices of the capsid (By similarity). Capsid protein VP1 interacts with host cell receptor to provide virion attachment to target host cells (By similarity). This attachment induces virion internalization (By similarity). Tyrosine kinases are probably involved in the entry process (By similarity). After binding to its receptor, the capsid undergoes conformational changes (By similarity). Capsid protein VP1 N-terminus (that contains an amphipathic alpha-helix) and capsid protein VP4 are externalized (By similarity). Together, they shape a pore in the host membrane through which viral genome is translocated to host cell cytoplasm (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Interacts with capsid protein VP0, and capsid protein VP3 to form heterotrimeric protomers (By similarity). Five protomers subsequently associate to form pentamers which serve as building blocks for the capsid (By similarity). Interacts with capsid protein VP2, capsid protein VP3 and capsid protein VP4 following cleavage of capsid protein VP0 (By similarity)"
+          ]
+        },
+        "about_the_whole_entry": {},
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000426213",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd23213",
+              "name": "Enterovirus_RdRp"
+            },
+            {
+              "id": "cd00205",
+              "name": "rhv_like"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.20.960.20",
+              "name": "-"
+            },
+            {
+              "id": "2.60.120.20",
+              "name": "-"
+            },
+            {
+              "id": "3.30.70.270",
+              "name": "-"
+            },
+            {
+              "id": "6.10.20.20",
+              "name": "Poliovirus 3A protein-like"
+            },
+            {
+              "id": "4.10.880.10",
+              "name": "Poliovirus 3D polymerase Domain 1 (Nucleotidyltransferase)"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000605",
+              "name": "Helicase_SF3_ssDNA/RNA_vir"
+            },
+            {
+              "id": "IPR014759",
+              "name": "Helicase_SF3_ssRNA_vir"
+            },
+            {
+              "id": "IPR014838",
+              "name": "P3A"
+            },
+            {
+              "id": "IPR036203",
+              "name": "P3A_soluble_dom"
+            },
+            {
+              "id": "IPR044067",
+              "name": "PCV_3C_PRO"
+            },
+            {
+              "id": "IPR000081",
+              "name": "Peptidase_C3"
+            },
+            {
+              "id": "IPR000199",
+              "name": "Peptidase_C3A/C3B_picornavir"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR003138",
+              "name": "Pico_P1A"
+            },
+            {
+              "id": "IPR002527",
+              "name": "Pico_P2B"
+            },
+            {
+              "id": "IPR001676",
+              "name": "Picornavirus_capsid"
+            },
+            {
+              "id": "IPR043128",
+              "name": "Rev_trsase/Diguanyl_cyclase"
+            },
+            {
+              "id": "IPR033703",
+              "name": "Rhv-like"
+            },
+            {
+              "id": "IPR001205",
+              "name": "RNA-dir_pol_C"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR029053",
+              "name": "Viral_coat"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF08727",
+              "name": "P3A"
+            },
+            {
+              "id": "PF00548",
+              "name": "Peptidase_C3"
+            },
+            {
+              "id": "PF02226",
+              "name": "Pico_P1A"
+            },
+            {
+              "id": "PF00947",
+              "name": "Pico_P2A"
+            },
+            {
+              "id": "PF01552",
+              "name": "Pico_P2B"
+            },
+            {
+              "id": "PF00680",
+              "name": "RdRP_1"
+            },
+            {
+              "id": "PF00073",
+              "name": "Rhv"
+            },
+            {
+              "id": "PF00910",
+              "name": "RNA_helicase"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF88633",
+              "name": "Positive stranded ssRNA viruses"
+            },
+            {
+              "id": "SSF89043",
+              "name": "Soluble domain of poliovirus core protein 3a"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51874",
+              "name": "PCV_3C_PRO"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51218",
+              "name": "SF3_HELICASE_2"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044162",
+              "term": "host cell cytoplasmic vesicle membrane"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0039618",
+              "term": "T=pseudo3 icosahedral viral capsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0015267",
+              "term": "channel activity"
+            },
+            {
+              "id": "GO:0004197",
+              "term": "cysteine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0017111",
+              "term": "ribonucleoside triphosphate phosphatase activity"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            },
+            {
+              "id": "GO:0008270",
+              "term": "zinc ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006260",
+              "term": "DNA replication"
+            },
+            {
+              "id": "GO:0006351",
+              "term": "DNA-templated transcription"
+            },
+            {
+              "id": "GO:0075509",
+              "term": "endocytosis involved in viral entry into host cell"
+            },
+            {
+              "id": "GO:0034220",
+              "term": "monoatomic ion transmembrane transport"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0044694",
+              "term": "symbiont genome entry into host cell via pore formation in plasma membrane"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0039540",
+              "term": "symbiont-mediated suppression of host cytoplasmic pattern recognition receptor signaling pathway via inhibition of RIG-I activity"
+            },
+            {
+              "id": "GO:0039522",
+              "term": "symbiont-mediated suppression of host mRNA export from nucleus"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Autocatalytic cleavage",
+          "Capsid protein",
+          "Covalent protein-RNA linkage",
+          "DNA replication",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Helicase",
+          "Host cytoplasm",
+          "Host cytoplasmic vesicle",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host mRNA suppression by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host mRNA nuclear export by virus",
+          "Inhibition of host RIG-I by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Ion channel",
+          "Ion transport",
+          "Lipoprotein",
+          "Magnesium",
+          "Membrane",
+          "Metal-binding",
+          "Myristate",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Pore-mediated penetration of viral genome into host cell",
+          "Protease",
+          "Repeat",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "T=pseudo3 icosahedral capsid protein",
+          "Thiol protease",
+          "Transferase",
+          "Transport",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral ion channel",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell",
+          "Zinc",
+          "Zinc-finger"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Host cytoplasm",
+          "Host cytoplasmic vesicle",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host mRNA suppression by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host mRNA nuclear export by virus",
+          "Inhibition of host RIG-I by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Pore-mediated penetration of viral genome into host cell",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 5,
+        "source": "https://rest.uniprot.org/uniprotkb/P22055.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    }
+  ],
+  "coverage": {
+    "chains": 6,
+    "with_a_reviewed_relative": 6,
+    "with_a_function_for_this_chain": 6,
+    "with_a_verified_reading_frame": 5,
+    "with_nucleotide_coordinates": 5,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:03:43.073116+00:00"
+  },
+  "content_sha256": "50d52779890b407b0cf1c350c17b2be74d92d93a37719667b25e47bab57de667"
+}

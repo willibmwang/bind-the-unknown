@@ -1,0 +1,900 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_004296.1,NC_004297.1",
+  "pathogen": "Lassa virus",
+  "reference_excluded_organism": "Lassa virus",
+  "source_record": "runs/onset_chain_NC_004296_1.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "Glycoprotein G1",
+      "parent": "GLYC_MOBVC Pre-glycoprotein polyprotein GP complex",
+      "tier": "exact",
+      "nearest_homolog": "Q2A069",
+      "score": 6.1596,
+      "score_terms": {
+        "conservation": 1.0596,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.825,
+          "confirmed_at": [
+            "the start of the chain",
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": true,
+          "one_end_only_note": null,
+          "leading_identity": 0.625,
+          "trailing_identity": 0.825,
+          "residues_compared": 40,
+          "frame_span_residues": 200,
+          "relative_chain_residues": 201,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain",
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": true,
+        "orf_rank": 1,
+        "strand": "-",
+        "frame": 1,
+        "nt_start": 55,
+        "orf_length_aa": 491,
+        "segment": 0,
+        "orf_name": "GLYC_MOBVC Pre-glycoprotein polyprotein GP complex",
+        "reading_frame": "-1 at nt 56",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        59,
+        259
+      ],
+      "chain_span_in_this_genome": [
+        60,
+        259
+      ],
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q2A069",
+        "entry_id": "GLYC_MOBVC",
+        "protein_name": "Pre-glycoprotein polyprotein GP complex",
+        "organism": "Mobala mammarenavirus (isolate Rat/Central African Republic/Acar 3080/1983)",
+        "reviewed": true,
+        "molecule_asked_for": "Glycoprotein G1",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Glycoprotein G1",
+          "Glycoprotein G2",
+          "Pre-glycoprotein polyprotein GP complex",
+          "Stable signal peptide"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Forms the virion spikes together with glycoprotein G2. The glycoprotein spike trimers are connected to the underlying matrix. Mediates virus attachment to host receptor alpha-dystroglycan DAG1. This attachment induces virion internalization predominantly through clathrin- and caveolin-independent endocytosis (PubMed:11967329)"
+          ],
+          "SUBUNIT": [
+            "Homotrimer; disulfide-linked. In pre-fusion state, G1 homotrimers bind G2 homotrimers via ionic interactions. Part of the GP complex (GP-C) together with glycoprotein G2 and the stable signal peptide. The GP-complex interacts with protein Z, which interacts with ribonucleocapsid; these interactions may induce virion budding"
+          ]
+        },
+        "about_the_whole_entry": {},
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000361606",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Praomys",
+            "common_name": "African soft-furred rats",
+            "taxon": 10111
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "6.10.140.1590",
+              "name": "-"
+            },
+            {
+              "id": "2.20.28.180",
+              "name": "Arenavirus glycoprotein, zinc binding domain"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043015",
+              "name": "Arena_glycoprot_zinc-bd"
+            },
+            {
+              "id": "IPR001535",
+              "name": "Glycoprot_G1-G2"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00798",
+              "name": "Arena_glycoprot"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044178",
+              "term": "host cell Golgi membrane"
+            },
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0016020",
+              "term": "membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0019065",
+              "term": "receptor-mediated endocytosis of virus by host cell"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "Host cell membrane",
+          "Host endoplasmic reticulum",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction",
+          "Lipoprotein",
+          "Membrane",
+          "Metal-binding",
+          "Myristate",
+          "Reference proteome",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral attachment to host cell",
+          "Viral envelope protein",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cell membrane",
+          "Host endoplasmic reticulum",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/Q2A069.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 2,
+      "target": "Glycoprotein G2",
+      "parent": "GLYC_MOBVC Pre-glycoprotein polyprotein GP complex",
+      "tier": "exact",
+      "nearest_homolog": "Q2A069",
+      "score": 6.1596,
+      "score_terms": {
+        "conservation": 1.0596,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.9,
+          "confirmed_at": [
+            "the start of the chain",
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": true,
+          "one_end_only_note": null,
+          "leading_identity": 0.9,
+          "trailing_identity": 0.875,
+          "residues_compared": 40,
+          "frame_span_residues": 232,
+          "relative_chain_residues": 232,
+          "lengths_differ": false,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain",
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": true,
+        "orf_rank": 1,
+        "strand": "-",
+        "frame": 1,
+        "nt_start": 55,
+        "orf_length_aa": 491,
+        "segment": 0,
+        "orf_name": "GLYC_MOBVC Pre-glycoprotein polyprotein GP complex",
+        "reading_frame": "-1 at nt 56",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        260,
+        491
+      ],
+      "chain_span_in_this_genome": [
+        260,
+        491
+      ],
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q2A069",
+        "entry_id": "GLYC_MOBVC",
+        "protein_name": "Pre-glycoprotein polyprotein GP complex",
+        "organism": "Mobala mammarenavirus (isolate Rat/Central African Republic/Acar 3080/1983)",
+        "reviewed": true,
+        "molecule_asked_for": "Glycoprotein G2",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Glycoprotein G1",
+          "Glycoprotein G2",
+          "Pre-glycoprotein polyprotein GP complex",
+          "Stable signal peptide"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Forms the virion spikes together with glycoprotein G1. The glycoprotein spike trimers are connected to the underlying matrix. Class I viral fusion protein that directs fusion of viral and host endosomal membranes, leading to delivery of the nucleocapsid into the cytoplasm. Membrane fusion is mediated by irreversible conformational changes induced by acidification"
+          ],
+          "SUBUNIT": [
+            "Homotrimer. Interacts with the stable signal peptide. In pre-fusion state, G2 homotrimers bind G1 homotrimers via ionic interactions. Part of the GP complex (GP-C) together with glycoprotein G1 and the stable signal peptide. Acidification in the endosome triggers rearrangements, which ultimately leads to a 6 helix bundle formed by the two heptad repeat domains (HR1 and HR2) in post-fusion state. The GP-complex interacts with protein Z, which interacts with ribonucleocapsid; these interactions may induce virion budding"
+          ],
+          "DOMAIN": [
+            "Contains 1 fusion peptide at the N-terminus, 2 heptad repeats domains HR1 and HR2 and, at the C-terminus, a cytoplasmic domain that plays a role in ER location. Also contains a zinc-binding domain that allows SSP retention in the GPC complex by accepting a cysteine from SSP as the fourth ligand"
+          ]
+        },
+        "about_the_whole_entry": {},
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000361607",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Praomys",
+            "common_name": "African soft-furred rats",
+            "taxon": 10111
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "6.10.140.1590",
+              "name": "-"
+            },
+            {
+              "id": "2.20.28.180",
+              "name": "Arenavirus glycoprotein, zinc binding domain"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043015",
+              "name": "Arena_glycoprot_zinc-bd"
+            },
+            {
+              "id": "IPR001535",
+              "name": "Glycoprot_G1-G2"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00798",
+              "name": "Arena_glycoprot"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044178",
+              "term": "host cell Golgi membrane"
+            },
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0016020",
+              "term": "membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0019065",
+              "term": "receptor-mediated endocytosis of virus by host cell"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "Host cell membrane",
+          "Host endoplasmic reticulum",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction",
+          "Lipoprotein",
+          "Membrane",
+          "Metal-binding",
+          "Myristate",
+          "Reference proteome",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral attachment to host cell",
+          "Viral envelope protein",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cell membrane",
+          "Host endoplasmic reticulum",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/Q2A069.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 3,
+      "target": "L_LASV RNA-directed RNA polymerase L",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q6GWS6",
+      "score": 5.9074,
+      "score_terms": {
+        "conservation": 1.9674,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.04,
+        "druggable_class": 2.4
+      },
+      "gate": "no",
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q6GWS6",
+        "entry_id": "L_LASV",
+        "protein_name": "RNA-directed RNA polymerase L",
+        "organism": "Mammarenavirus lassaense",
+        "reviewed": true,
+        "molecule_asked_for": "L_LASV RNA-directed RNA polymerase L",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "RNA-dependent RNA polymerase, which is responsible for the replication and transcription of the viral RNA genome using antigenomic RNA as an intermediate. During transcription, synthesizes subgenomic RNAs and assures their capping by a cap-snatching mechanism, which involves the endonuclease activity cleaving the host capped pre-mRNAs. These short capped RNAs are then used as primers for viral transcription. The 3'-end of subgenomic mRNAs molecules are heterogeneous and not polyadenylated. The replicase function is to direct synthesis of antigenomic and genomic RNA which are encapsidated and non capped. As a consequence of the use of the same enzyme for both transcription and replication, these mechanisms need to be well coordinated. These processes may be regulated by proteins N and Z in a dose-dependent manner. Z protein inhibits the viral polymerase L und thus the viral transcription and RNA synthesis"
+          ],
+          "SUBUNIT": [
+            "Homomultimer; the oligomeric structure is essential for the polymerase activity. Interacts with nucleoprotein N. Interacts with protein Z; this interaction inhibits viral transcription and replication, Z partially blocks the product exit tunnel for the releasing nascent RNA product"
+          ],
+          "DOMAIN": [
+            "The N-terminus contains the endonuclease activity (endoN). The central region contains the RdRp activity"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Mastomys natalensis",
+            "common_name": "African soft-furred rat",
+            "taxon": 10112
+          },
+          {
+            "name": "Rattus",
+            "common_name": "rats",
+            "taxon": 10114
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.30.70.2640",
+              "name": "Arenavirus RNA polymerase"
+            },
+            {
+              "id": "1.20.1440.300",
+              "name": "RNA-directed RNA polymerase L, helical domain"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR026382",
+              "name": "CapSnatch_arenavir"
+            },
+            {
+              "id": "IPR048006",
+              "name": "CapSnatch_bunyavir"
+            },
+            {
+              "id": "IPR007099",
+              "name": "RNA-dir_pol_NSvirus"
+            },
+            {
+              "id": "IPR010453",
+              "name": "RNA_pol_arenavir"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF06317",
+              "name": "Arena_RNA_pol"
+            },
+            {
+              "id": "PF17296",
+              "name": "ArenaCapSnatch"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS00591",
+              "name": "GH10_1"
+            },
+            {
+              "id": "PS50525",
+              "name": "RDRP_SSRNA_NEG_SEG"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0016787",
+              "term": "hydrolase activity"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0000166",
+              "term": "nucleotide binding"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0075526",
+              "term": "cap snatching"
+            },
+            {
+              "id": "GO:0039689",
+              "term": "negative stranded viral RNA replication"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Cap snatching",
+          "Host cytoplasm",
+          "Hydrolase",
+          "Magnesium",
+          "Metal-binding",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "RNA-directed RNA polymerase",
+          "Transferase",
+          "Viral RNA replication",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host cytoplasm"
+        ],
+        "structures_deposited": 4,
+        "source": "https://rest.uniprot.org/uniprotkb/Q6GWS6.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 4,
+      "target": "NCAP_MOBVC Nucleoprotein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q2A068",
+      "score": 3.9219,
+      "score_terms": {
+        "conservation": 0.8019,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.02,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q2A068",
+        "entry_id": "NCAP_MOBVC",
+        "protein_name": "Nucleoprotein",
+        "organism": "Mobala mammarenavirus (isolate Rat/Central African Republic/Acar 3080/1983)",
+        "reviewed": true,
+        "molecule_asked_for": "NCAP_MOBVC Nucleoprotein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Encapsidates the genome, protecting it from nucleases. The encapsidated genomic RNA is termed the nucleocapsid (NC). Serves as template for viral transcription and replication. The increased presence of protein N in host cell does not seem to trigger the switch from transcription to replication as observed in other negative strain RNA viruses. Through the interaction with host IKBKE, strongly inhibits the phosphorylation and nuclear translocation of host IRF3, a protein involved in interferon activation pathway, leading to the inhibition of interferon-beta and IRF3-dependent promoters activation. Also encodes a functional 3'-5' exoribonuclease that degrades preferentially dsRNA substrates and thereby participates in the suppression of interferon induction"
+          ],
+          "SUBUNIT": [
+            "Homomultimerizes to form the nucleocapsid. Binds to viral genomic RNA. Interacts with glycoprotein G2. Interacts with protein Z; this interaction probably directs the encapsidated genome to budding sites. Interacts with protein L; this interaction does not interfere with Z-L interaction. Interacts with host IKBKE (via Protein kinase domain); the interaction inhibits IKBKE kinase activity"
+          ],
+          "DOMAIN": [
+            "The N-terminal region is important for the cap-binding activity while the C-terminal region contains the 3'-5' exoribonuclease activity. A CCHE zinc binding site is present in the C-terminal region and may thus contribute to the substrate binding and/or the specificity of the exonuclease activity"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Praomys",
+            "common_name": "African soft-furred rats",
+            "taxon": 10111
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.30.420.410",
+              "name": "Arenaviral nucleoprotein, C-terminal domain"
+            },
+            {
+              "id": "1.10.150.550",
+              "name": "Arenavirus nucleocapsid protein, head domain"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR000229",
+              "name": "Nucleocapsid_arenaviridae"
+            },
+            {
+              "id": "IPR035084",
+              "name": "Nucleocapsid_C_arenaviridae"
+            },
+            {
+              "id": "IPR038115",
+              "name": "Nucleocapsid_C_sf"
+            },
+            {
+              "id": "IPR035083",
+              "name": "Nucleocapsid_N_arenaviridae"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF17290",
+              "name": "Arena_ncap_C"
+            },
+            {
+              "id": "PF00843",
+              "name": "Arena_nucleocap"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0019029",
+              "term": "helical viral capsid"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:1990904",
+              "term": "ribonucleoprotein complex"
+            },
+            {
+              "id": "GO:0019013",
+              "term": "viral nucleocapsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0016787",
+              "term": "hydrolase activity"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039689",
+              "term": "negative stranded viral RNA replication"
+            },
+            {
+              "id": "GO:0039696",
+              "term": "RNA-templated viral transcription"
+            },
+            {
+              "id": "GO:0039724",
+              "term": "symbiont-mediated suppression of host cytoplasmic pattern recognition receptor signaling pathway via inhibition of IKBKE activity"
+            }
+          ]
+        },
+        "keywords": [
+          "Capsid protein",
+          "Helical capsid protein",
+          "Host cytoplasm",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host IKBKE by virus",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Interferon antiviral system evasion",
+          "Manganese",
+          "Metal-binding",
+          "Reference proteome",
+          "Ribonucleoprotein",
+          "RNA-binding",
+          "Viral immunoevasion",
+          "Viral nucleoprotein",
+          "Virion",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Host cytoplasm",
+          "Host-virus interaction",
+          "Inhibition of host IKBKE by virus",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host RLR pathway by virus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/Q2A068.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    }
+  ],
+  "coverage": {
+    "chains": 4,
+    "with_a_reviewed_relative": 4,
+    "with_a_function_for_this_chain": 2,
+    "with_a_verified_reading_frame": 2,
+    "with_nucleotide_coordinates": 0,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:04:08.314514+00:00"
+  },
+  "content_sha256": "c3d25b05c908abc9e63ce2523766f68c0c863584fbd0ca38526b139000d3c400"
+}

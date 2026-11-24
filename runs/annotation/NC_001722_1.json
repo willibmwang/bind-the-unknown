@@ -1,0 +1,2299 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_001722.1",
+  "pathogen": "HIV-2",
+  "reference_excluded_organism": "Human immunodeficiency virus type 2",
+  "source_record": "runs/onset_chain_NC_001722_1.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "Surface protein gp120",
+      "parent": "ENV_SIVS4 Envelope glycoprotein gp160",
+      "tier": "exact",
+      "nearest_homolog": "P12492",
+      "score": 6.082,
+      "score_terms": {
+        "conservation": 0.972,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.01,
+        "druggable_class": 1.6
+      },
+      "gate": "yes",
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.925,
+          "confirmed_at": [
+            "the start of the chain"
+          ],
+          "confirmed_at_both_ends": false,
+          "one_end_only_note": "Only the start of the chain matches the relative. The other end of this span does not, so the coordinate at that end is not confirmed. On a polyprotein the usual cause is a ribosomal frameshift: the chain starts in one reading frame and the frame it was located in starts in another, which leaves the far end exact and the near end short.",
+          "leading_identity": 0.925,
+          "trailing_identity": 0.125,
+          "residues_compared": 40,
+          "frame_span_residues": 487,
+          "relative_chain_residues": 508,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 6703,
+        "orf_length_aa": 860,
+        "segment": 0,
+        "orf_name": "ENV_SIVS4 Envelope glycoprotein gp160",
+        "reading_frame": "+1 at nt 6704",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        24,
+        531
+      ],
+      "chain_span_in_this_genome": [
+        24,
+        510
+      ],
+      "chain_span_nt": [
+        6773,
+        8233
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain"
+      ],
+      "segment_length_nt": 10359,
+      "annotation": {
+        "accession": "P12492",
+        "entry_id": "ENV_SIVS4",
+        "protein_name": "Envelope glycoprotein gp160",
+        "organism": "Simian immunodeficiency virus (isolate F236/smH4)",
+        "reviewed": true,
+        "molecule_asked_for": "Surface protein gp120",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Surface protein gp120",
+          "Transmembrane protein gp41"
+        ],
+        "about_this_chain": {
+          "SUBUNIT": [
+            "The mature envelope protein (Env) consists of a homotrimer of non-covalently associated gp120-gp41 heterodimers. The resulting complex protrudes from the virus surface as a spike. Interacts with host CD4 and CCR5 (By similarity). Gp120 also interacts with the C-type lectins CD209/DC-SIGN and CLEC4M/DC-SIGNR (collectively referred to as DC-SIGN(R))"
+          ]
+        },
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "The surface protein gp120 (SU) attaches the virus to the host lymphoid cell by binding to the primary receptor CD4. This interaction induces a structural rearrangement creating a high affinity binding site for a chemokine coreceptor like CCR5. This peculiar 2 stage receptor-interaction strategy allows gp120 to maintain the highly conserved coreceptor-binding site in a cryptic conformation, protected from neutralizing antibodies. These changes are transmitted to the transmembrane protein gp41 and are thought to activate its fusogenic potential by unmasking its fusion peptide (By similarity)",
+            "Surface protein gp120 (SU) may target the virus to gut-associated lymphoid tissue (GALT) by binding host ITGA4/ITGB7 (alpha-4/beta-7 integrins), a complex that mediates T-cell migration to the GALT. Interaction between gp120 and ITGA4/ITGB7 would allow the virus to enter GALT early in the infection, infecting and killing most of GALT's resting CD4+ T-cells. This T-cell depletion is believed to be the major insult to the host immune system leading to AIDS (By similarity)",
+            "The surface protein gp120 is a ligand for CD209/DC-SIGN and CLEC4M/DC-SIGNR, which are respectively found on dendritic cells (DCs), and on endothelial cells of liver sinusoids and lymph node sinuses. These interactions allow capture of viral particles at mucosal surfaces by these cells and subsequent transmission to permissive cells. DCs are professional antigen presenting cells, critical for host immunity by inducing specific immune responses against a broad variety of pathogens. They act as sentinels in various tissues where they take up antigen, process it, and present it to T-cells following migration to lymphoid organs. SIV subverts the migration properties of dendritic cells to gain access to CD4+ T-cells in lymph nodes. Virus transmission to permissive T-cells occurs either in trans (without DCs infection, through viral capture and transmission), or in cis (following DCs productive infection, through the usual CD4-gp120 interaction), thereby inducing a robust infection. In trans infection, bound virions remain infectious over days and it is proposed that they are not degraded, but protected in non-lysosomal acidic organelles within the DCs close to the cell membrane thus contributing to the viral infectious potential during DCs' migration from the periphery to the lymphoid tissues. On arrival at lymphoid tissues, intact virions recycle back to DCs' cell surface allowing virus transmission to CD4+ T-cells. Virion capture also seems to lead to MHC-II-restricted viral antigen presentation, and probably to the activation of SIV-specific CD4+ cells (By similarity)",
+            "The transmembrane protein gp41 (TM) acts as a class I viral fusion protein. Under the current model, the protein has at least 3 conformational states: pre-fusion native state, pre-hairpin intermediate state, and post-fusion hairpin state. During fusion of viral and target intracellular membranes, the coiled coil regions (heptad repeats) assume a trimer-of-hairpins structure, positioning the fusion peptide in close proximity to the C-terminal region of the ectodomain. The formation of this structure appears to drive apposition and subsequent fusion of viral and target cell membranes. Complete fusion occurs in host cell endosomes. The virus undergoes clathrin-dependent internalization long before endosomal fusion, thus minimizing the surface exposure of conserved viral epitopes during fusion and reducing the efficacy of inhibitors targeting these epitopes. Membranes fusion leads to delivery of the nucleocapsid into the cytoplasm (By similarity)",
+            "The envelope glycoprotein gp160 precursor down-modulates cell surface CD4 antigen by interacting with it in the endoplasmic reticulum and blocking its transport to the cell surface",
+            "The gp120-gp41 heterodimer allows rapid transcytosis of the virus through CD4 negative cells such as simple epithelial monolayers of the intestinal, rectal and endocervical epithelial barriers. Both gp120 and gp41 specifically recognize glycosphingolipids galactosyl-ceramide (GalCer) or 3' sulfo-galactosyl-ceramide (GalS) present in the lipid rafts structures of epithelial cells. Binding to these alternative receptors allows the rapid transcytosis of the virus through the epithelial cells. This transcytotic vesicle-mediated transport of virions from the apical side to the basolateral side of the epithelial cells does not involve infection of the cells themselves (By similarity)"
+          ],
+          "DOMAIN": [
+            "Some of the most genetically diverse regions of the viral genome are present in Env. They are called variable regions 1 through 5 (V1 through V5) (By similarity)",
+            "The 17 amino acids long immunosuppressive region is present in many retroviral envelope proteins. Synthetic peptides derived from this relatively conserved sequence inhibit immune function in vitro and in vivo (By similarity)"
+          ],
+          "PTM": [
+            "Specific enzymatic cleavages in vivo yield mature proteins. Envelope glycoproteins are synthesized as an inactive precursor that is heavily N-glycosylated and processed likely by host cell furin in the Golgi to yield the mature SU and TM proteins. The cleavage site between SU and TM requires the minimal sequence [KR]-X-[KR]-R (By similarity)",
+            "Palmitoylation of the transmembrane protein and of Env polyprotein (prior to its proteolytic cleavage) is essential for their association with host cell membrane lipid rafts. Palmitoylation is therefore required for envelope trafficking to classical lipid rafts, but not for viral replication (By similarity)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000239515",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Cercopithecidae",
+            "common_name": "Old World monkeys",
+            "taxon": 9527
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd09909",
+              "name": "HIV-1-like_HR1-HR2"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.10.287.210",
+              "name": "-"
+            },
+            {
+              "id": "2.170.40.20",
+              "name": "Human immunodeficiency virus 1, Gp160, envelope glycoprotein"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR036377",
+              "name": "Gp120_core_sf"
+            },
+            {
+              "id": "IPR000328",
+              "name": "GP41-like"
+            },
+            {
+              "id": "IPR000777",
+              "name": "HIV1_Gp120"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00516",
+              "name": "GP120"
+            },
+            {
+              "id": "PF00517",
+              "name": "GP41"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56502",
+              "name": "gp120 core"
+            },
+            {
+              "id": "SSF58069",
+              "name": "Virus ectodomain"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044175",
+              "term": "host cell endosome membrane"
+            },
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039663",
+              "term": "membrane fusion involved in viral entry into host cell"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Apoptosis",
+          "Cleavage on pair of basic residues",
+          "Coiled coil",
+          "Disulfide bond",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "Host cell membrane",
+          "Host endosome",
+          "Host membrane",
+          "Host-virus interaction",
+          "Lipoprotein",
+          "Membrane",
+          "Palmitate",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral attachment to host cell",
+          "Viral envelope protein",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Fusion of virus membrane with host membrane",
+          "Host cell membrane",
+          "Host endosome",
+          "Host membrane",
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 2,
+        "source": "https://rest.uniprot.org/uniprotkb/P12492.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 2,
+      "target": "Transmembrane protein gp41",
+      "parent": "ENV_SIVS4 Envelope glycoprotein gp160",
+      "tier": "exact",
+      "nearest_homolog": "P12492",
+      "score": 6.072,
+      "score_terms": {
+        "conservation": 0.972,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.95,
+          "confirmed_at": [
+            "the start of the chain",
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": true,
+          "one_end_only_note": null,
+          "leading_identity": 0.95,
+          "trailing_identity": 0.7,
+          "residues_compared": 40,
+          "frame_span_residues": 350,
+          "relative_chain_residues": 354,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain",
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": true,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 6703,
+        "orf_length_aa": 860,
+        "segment": 0,
+        "orf_name": "ENV_SIVS4 Envelope glycoprotein gp160",
+        "reading_frame": "+1 at nt 6704",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        532,
+        885
+      ],
+      "chain_span_in_this_genome": [
+        511,
+        860
+      ],
+      "chain_span_nt": [
+        8234,
+        9283
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "segment_length_nt": 10359,
+      "annotation": {
+        "accession": "P12492",
+        "entry_id": "ENV_SIVS4",
+        "protein_name": "Envelope glycoprotein gp160",
+        "organism": "Simian immunodeficiency virus (isolate F236/smH4)",
+        "reviewed": true,
+        "molecule_asked_for": "Transmembrane protein gp41",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Surface protein gp120",
+          "Transmembrane protein gp41"
+        ],
+        "about_this_chain": {
+          "SUBUNIT": [
+            "The mature envelope protein (Env) consists of a homotrimer of non-covalently associated gp120-gp41 heterodimers. The resulting complex protrudes from the virus surface as a spike"
+          ]
+        },
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "The surface protein gp120 (SU) attaches the virus to the host lymphoid cell by binding to the primary receptor CD4. This interaction induces a structural rearrangement creating a high affinity binding site for a chemokine coreceptor like CCR5. This peculiar 2 stage receptor-interaction strategy allows gp120 to maintain the highly conserved coreceptor-binding site in a cryptic conformation, protected from neutralizing antibodies. These changes are transmitted to the transmembrane protein gp41 and are thought to activate its fusogenic potential by unmasking its fusion peptide (By similarity)",
+            "Surface protein gp120 (SU) may target the virus to gut-associated lymphoid tissue (GALT) by binding host ITGA4/ITGB7 (alpha-4/beta-7 integrins), a complex that mediates T-cell migration to the GALT. Interaction between gp120 and ITGA4/ITGB7 would allow the virus to enter GALT early in the infection, infecting and killing most of GALT's resting CD4+ T-cells. This T-cell depletion is believed to be the major insult to the host immune system leading to AIDS (By similarity)",
+            "The surface protein gp120 is a ligand for CD209/DC-SIGN and CLEC4M/DC-SIGNR, which are respectively found on dendritic cells (DCs), and on endothelial cells of liver sinusoids and lymph node sinuses. These interactions allow capture of viral particles at mucosal surfaces by these cells and subsequent transmission to permissive cells. DCs are professional antigen presenting cells, critical for host immunity by inducing specific immune responses against a broad variety of pathogens. They act as sentinels in various tissues where they take up antigen, process it, and present it to T-cells following migration to lymphoid organs. SIV subverts the migration properties of dendritic cells to gain access to CD4+ T-cells in lymph nodes. Virus transmission to permissive T-cells occurs either in trans (without DCs infection, through viral capture and transmission), or in cis (following DCs productive infection, through the usual CD4-gp120 interaction), thereby inducing a robust infection. In trans infection, bound virions remain infectious over days and it is proposed that they are not degraded, but protected in non-lysosomal acidic organelles within the DCs close to the cell membrane thus contributing to the viral infectious potential during DCs' migration from the periphery to the lymphoid tissues. On arrival at lymphoid tissues, intact virions recycle back to DCs' cell surface allowing virus transmission to CD4+ T-cells. Virion capture also seems to lead to MHC-II-restricted viral antigen presentation, and probably to the activation of SIV-specific CD4+ cells (By similarity)",
+            "The transmembrane protein gp41 (TM) acts as a class I viral fusion protein. Under the current model, the protein has at least 3 conformational states: pre-fusion native state, pre-hairpin intermediate state, and post-fusion hairpin state. During fusion of viral and target intracellular membranes, the coiled coil regions (heptad repeats) assume a trimer-of-hairpins structure, positioning the fusion peptide in close proximity to the C-terminal region of the ectodomain. The formation of this structure appears to drive apposition and subsequent fusion of viral and target cell membranes. Complete fusion occurs in host cell endosomes. The virus undergoes clathrin-dependent internalization long before endosomal fusion, thus minimizing the surface exposure of conserved viral epitopes during fusion and reducing the efficacy of inhibitors targeting these epitopes. Membranes fusion leads to delivery of the nucleocapsid into the cytoplasm (By similarity)",
+            "The envelope glycoprotein gp160 precursor down-modulates cell surface CD4 antigen by interacting with it in the endoplasmic reticulum and blocking its transport to the cell surface",
+            "The gp120-gp41 heterodimer allows rapid transcytosis of the virus through CD4 negative cells such as simple epithelial monolayers of the intestinal, rectal and endocervical epithelial barriers. Both gp120 and gp41 specifically recognize glycosphingolipids galactosyl-ceramide (GalCer) or 3' sulfo-galactosyl-ceramide (GalS) present in the lipid rafts structures of epithelial cells. Binding to these alternative receptors allows the rapid transcytosis of the virus through the epithelial cells. This transcytotic vesicle-mediated transport of virions from the apical side to the basolateral side of the epithelial cells does not involve infection of the cells themselves (By similarity)"
+          ],
+          "DOMAIN": [
+            "Some of the most genetically diverse regions of the viral genome are present in Env. They are called variable regions 1 through 5 (V1 through V5) (By similarity)",
+            "The 17 amino acids long immunosuppressive region is present in many retroviral envelope proteins. Synthetic peptides derived from this relatively conserved sequence inhibit immune function in vitro and in vivo (By similarity)"
+          ],
+          "PTM": [
+            "Specific enzymatic cleavages in vivo yield mature proteins. Envelope glycoproteins are synthesized as an inactive precursor that is heavily N-glycosylated and processed likely by host cell furin in the Golgi to yield the mature SU and TM proteins. The cleavage site between SU and TM requires the minimal sequence [KR]-X-[KR]-R (By similarity)",
+            "Palmitoylation of the transmembrane protein and of Env polyprotein (prior to its proteolytic cleavage) is essential for their association with host cell membrane lipid rafts. Palmitoylation is therefore required for envelope trafficking to classical lipid rafts, but not for viral replication (By similarity)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000239516",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Cercopithecidae",
+            "common_name": "Old World monkeys",
+            "taxon": 9527
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd09909",
+              "name": "HIV-1-like_HR1-HR2"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.10.287.210",
+              "name": "-"
+            },
+            {
+              "id": "2.170.40.20",
+              "name": "Human immunodeficiency virus 1, Gp160, envelope glycoprotein"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR036377",
+              "name": "Gp120_core_sf"
+            },
+            {
+              "id": "IPR000328",
+              "name": "GP41-like"
+            },
+            {
+              "id": "IPR000777",
+              "name": "HIV1_Gp120"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00516",
+              "name": "GP120"
+            },
+            {
+              "id": "PF00517",
+              "name": "GP41"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56502",
+              "name": "gp120 core"
+            },
+            {
+              "id": "SSF58069",
+              "name": "Virus ectodomain"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044175",
+              "term": "host cell endosome membrane"
+            },
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039663",
+              "term": "membrane fusion involved in viral entry into host cell"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Apoptosis",
+          "Cleavage on pair of basic residues",
+          "Coiled coil",
+          "Disulfide bond",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "Host cell membrane",
+          "Host endosome",
+          "Host membrane",
+          "Host-virus interaction",
+          "Lipoprotein",
+          "Membrane",
+          "Palmitate",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral attachment to host cell",
+          "Viral envelope protein",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Fusion of virus membrane with host membrane",
+          "Host cell membrane",
+          "Host endosome",
+          "Host membrane",
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 2,
+        "source": "https://rest.uniprot.org/uniprotkb/P12492.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 3,
+      "target": "Protease",
+      "parent": "POL_SIVSP Gag-Pol polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P19505",
+      "score": 5.3892,
+      "score_terms": {
+        "conservation": 1.4892,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": 4,
+        "route": "named",
+        "because": "the residues at 68-126 of the reading frame the named route selected match the relative's own chain at only 22%, so this is not the frame the chain was located in and a coordinate from it would be wrong."
+      },
+      "chain_span_on_the_relative": [
+        502,
+        597
+      ],
+      "chain_span_in_this_genome": [
+        68,
+        126
+      ],
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P19505",
+        "entry_id": "POL_SIVSP",
+        "protein_name": "Gag-Pol polyprotein",
+        "organism": "Simian immunodeficiency virus (isolate PBj14/BCL-3)",
+        "reviewed": true,
+        "molecule_asked_for": "Protease",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein p24",
+          "Integrase",
+          "Isoform Gag-Pol polyprotein",
+          "Matrix protein p17",
+          "Nucleocapsid protein p7",
+          "Protease",
+          "Reverse transcriptase/ribonuclease H"
+        ],
+        "about_this_chain": {
+          "SUBUNIT": [
+            "Homodimer. The active site consists of two apposed aspartic acid residues"
+          ]
+        },
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Gag-Pol polyprotein and Gag polyprotein may regulate their own translation, by the binding genomic RNA in the 5'-UTR. At low concentration, Gag-Pol and Gag would promote translation, whereas at high concentration, the polyproteins encapsidate genomic RNA and then shut off translation (By similarity)",
+            "Matrix protein p17 has two main functions: in infected cell, it targets Gag and Gag-pol polyproteins to the plasma membrane via a multipartite membrane-binding signal, that includes its myristointegration complex. The myristoylation signal and the NLS exert conflicting influences its subcellular localization. The key regulation of these motifs might be phosphorylation of a portion of MA molecules on the C-terminal tyrosine at the time of virus maturation, by virion-associated cellular tyrosine kinase. Implicated in the release from host cell mediated by Vpu (By similarity)",
+            "Capsid protein p24 forms the conical core that encapsulates the genomic RNA-nucleocapsid complex in the virion. The core is constituted by capsid protein hexamer subunits. The core is disassembled soon after virion entry. Interaction with host PPIA/CYPA protects the virus from restriction by host TRIM5-alpha and from an unknown antiviral activity in host cells. This capsid restriction by TRIM5 is one of the factors which restricts SIV to the simian species (By similarity)",
+            "Nucleocapsid protein p7 encapsulates and protects viral dimeric unspliced (genomic) RNA. Binds these RNAs through its zinc fingers. Facilitates rearangement of nucleic acid secondary structure during retrotranscription of genomic RNA. This capability is referred to as nucleic acid chaperone activity (By similarity)",
+            "The aspartyl protease mediates proteolytic cleavages of Gag and Gag-Pol polyproteins during or shortly after the release of the virion from the plasma membrane. Cleavages take place as an ordered, step-wise cascade to yield mature proteins. This process is called maturation. Displays maximal activity during the budding process just prior to particle release from the cell. Also cleaves Nef and Vif, probably concomitantly with viral structural proteins on maturation of virus particles. Hydrolyzes host EIF4GI and PABP1 in order to shut off the capped cellular mRNA translation. The resulting inhibition of cellular protein synthesis serves to ensure maximal viral gene expression and to evade host immune response (By similarity)",
+            "Reverse transcriptase/ribonuclease H (RT) is a multifunctional enzyme that converts the viral dimeric RNA genome into dsDNA in the cytoplasm, shortly after virus entry into the cell. This enzyme displays a DNA polymerase activity that can copy either DNA or RNA templates, and a ribonuclease H (RNase H) activity that cleaves the RNA strand of RNA-DNA heteroduplexes in a partially processive 3' to 5' endonucleasic mode. Conversion of viral genomic RNA into dsDNA requires many steps. A tRNA binds to the primer-binding site (PBS) situated at the 5'-end of the viral RNA. RT uses the 3' end of the tRNA primer to perform a short round of RNA-dependent minus-strand DNA synthesis. The reading proceeds through the U5 region and ends after the repeated (R) region which is present at both ends of viral RNA. The portion of the RNA-DNA heteroduplex is digested by the RNase H, resulting in a ssDNA product attached to the tRNA primer. This ssDNA/tRNA hybridizes with the identical R region situated at the 3' end of viral RNA. This template exchange, known as minus-strand DNA strong stop transfer, can be either intra- or intermolecular. RT uses the 3' end of this newly synthesized short ssDNA to perform the RNA-dependent minus-strand DNA synthesis of the whole template. RNase H digests the RNA template except for two polypurine tracts (PPTs) situated at the 5'-end and near the center of the genome. It is not clear if both polymerase and RNase H activities are simultaneous. RNase H can probably proceed both in a polymerase-dependent (RNA cut into small fragments by the same RT performing DNA synthesis) and a polymerase-independent mode (cleavage of remaining RNA fragments by free RTs). Secondly, RT performs DNA-directed plus-strand DNA synthesis using the PPTs that have not been removed by RNase H as primers. PPTs and tRNA primers are then removed by RNase H. The 3' and 5' ssDNA PBS regions hybridize to form a circular dsDNA intermediate. Strand displacement synthesis by RT to the PBS and PPT ends produces a blunt ended, linear dsDNA copy of the viral genome that includes long terminal repeats (LTRs) at both ends (By similarity)",
+            "Integrase catalyzes viral DNA integration into the host chromosome, by performing a series of DNA cutting and joining reactions. This enzyme activity takes place after virion entry into a cell and reverse transcription of the RNA genome in dsDNA. The first step in the integration process is 3' processing. This step requires a complex comprising the viral genome, matrix protein, Vpr and integrase. This complex is called the pre-integration complex (PIC). The integrase protein removes 2 nucleotides from each 3' end of the viral DNA, leaving recessed CA OH's at the 3' ends. In the second step, the PIC enters cell nucleus. This process is mediated through integrase and Vpr proteins, and allows the virus to infect a non dividing cell. This ability to enter the nucleus is specific of lentiviruses, other retroviruses cannot and rely on cell division to access cell chromosomes. In the third step, termed strand transfer, the integrase protein joins the previously processed 3' ends to the 5' ends of strands of target cellular DNA at the site of integration. The 5'-ends are produced by integrase-catalyzed staggered cuts, 5 bp apart. A Y-shaped, gapped, recombination intermediate results, with the 5'-ends of the viral DNA strands and the 3' ends of target DNA strands remaining unjoined, flanking a gap of 5 bp. The last step is viral DNA integration into host chromosome. This involves host DNA repair synthesis in which the 5 bp gaps between the unjoined strands are filled in and then ligated. Since this process occurs at both cuts flanking the SIV genome, a 5 bp duplication of host DNA is produced at the ends of SIV integration. Alternatively, Integrase may catalyze the excision of viral DNA just after strand transfer, this is termed disintegration (By similarity)"
+          ],
+          "ACTIVITY REGULATION": [
+            "The viral protease is inhibited by many synthetic protease inhibitors (PIs), such as amprenavir, atazanavir, indinavir, loprinavir, nelfinavir, ritonavir and saquinavir. RT can be inhibited either by nucleoside RT inhibitors (NRTIs) or by non nucleoside RT inhibitors (NNRTIs). NRTIs act as chain terminators, whereas NNRTIs inhibit DNA polymerization by binding a small hydrophobic pocket near the RT active site and inducing an allosteric change in this region. Classical NRTIs are abacavir, adefovir (PMEA), didanosine (ddI), lamivudine (3TC), stavudine (d4T), tenofovir (PMPA), zalcitabine (ddC), and zidovudine (AZT). Classical NNRTIs are atevirdine (BHAP U-87201E), delavirdine, efavirenz (DMP-266), emivirine (I-EBU), and nevirapine (BI-RG-587). The tritherapies used as a basic effective treatment of AIDS associate two NRTIs and one NNRTI. Use of protease inhibitors in tritherapy regimens permit more ambitious therapeutic strategies"
+          ],
+          "DOMAIN": [
+            "The p66 RT is structured in five subdomains: finger, palm, thumb, connection and RNase H. Within the palm subdomain, the 'primer grip' region is thought to be involved in the positioning of the primer terminus for accommodating the incoming nucleotide. The RNase H domain stabilizes the association of RT with primer-template (By similarity)",
+            "The tryptophan repeat motif is involved in RT p66/p51 dimerization"
+          ],
+          "PTM": [
+            "Specific enzymatic cleavages by the viral protease yield mature proteins. The protease is released by autocatalytic cleavage. The polyprotein is cleaved during and after budding, this process is termed maturation. Proteolytic cleavage of p66 RT removes the RNase H domain to yield the p51 RT subunit",
+            "Capsid protein p24 is phosphorylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "ACTIVITY REGULATION": "what switches it on or off",
+          "DOMAIN": "what its parts do",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000306070",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Cercopithecidae",
+            "common_name": "Old World monkeys",
+            "taxon": 9527
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd05482",
+              "name": "HIV_retropepsin_like"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.10.10.200",
+              "name": "-"
+            },
+            {
+              "id": "1.10.1200.30",
+              "name": "-"
+            },
+            {
+              "id": "3.30.70.270",
+              "name": "-"
+            },
+            {
+              "id": "2.40.70.10",
+              "name": "Acid Proteases"
+            },
+            {
+              "id": "3.10.10.10",
+              "name": "HIV Type 1 Reverse Transcriptase, subunit A, domain 1"
+            },
+            {
+              "id": "1.10.375.10",
+              "name": "Human Immunodeficiency Virus Type 1 Capsid Protein"
+            },
+            {
+              "id": "1.10.150.90",
+              "name": "Immunodeficiency lentiviruses, gag gene matrix protein p17"
+            },
+            {
+              "id": "2.30.30.10",
+              "name": "Integrase, C-terminal domain superfamily, retroviral"
+            },
+            {
+              "id": "3.30.420.10",
+              "name": "Ribonuclease H-like superfamily/Ribonuclease H"
+            },
+            {
+              "id": "1.20.5.760",
+              "name": "Single helix bin"
+            },
+            {
+              "id": "4.10.60.10",
+              "name": "Zinc finger, CCHC-type"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR001969",
+              "name": "Aspartic_peptidase_AS"
+            },
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR045345",
+              "name": "Gag_p24_C"
+            },
+            {
+              "id": "IPR017856",
+              "name": "Integrase-like_N"
+            },
+            {
+              "id": "IPR036862",
+              "name": "Integrase_C_dom_sf_retrovir"
+            },
+            {
+              "id": "IPR001037",
+              "name": "Integrase_C_retrovir"
+            },
+            {
+              "id": "IPR001584",
+              "name": "Integrase_cat-core"
+            },
+            {
+              "id": "IPR003308",
+              "name": "Integrase_Zn-bd_dom_N"
+            },
+            {
+              "id": "IPR000071",
+              "name": "Lentvrl_matrix_N"
+            },
+            {
+              "id": "IPR012344",
+              "name": "Matrix_HIV/RSV_N"
+            },
+            {
+              "id": "IPR001995",
+              "name": "Peptidase_A2_cat"
+            },
+            {
+              "id": "IPR021109",
+              "name": "Peptidase_aspartic_dom_sf"
+            },
+            {
+              "id": "IPR034170",
+              "name": "Retropepsin-like_cat_dom"
+            },
+            {
+              "id": "IPR018061",
+              "name": "Retropepsins"
+            },
+            {
+              "id": "IPR008916",
+              "name": "Retrov_capsid_C"
+            },
+            {
+              "id": "IPR008919",
+              "name": "Retrov_capsid_N"
+            },
+            {
+              "id": "IPR010999",
+              "name": "Retrovr_matrix"
+            },
+            {
+              "id": "IPR043128",
+              "name": "Rev_trsase/Diguanyl_cyclase"
+            },
+            {
+              "id": "IPR012337",
+              "name": "RNaseH-like_sf"
+            },
+            {
+              "id": "IPR002156",
+              "name": "RNaseH_domain"
+            },
+            {
+              "id": "IPR036397",
+              "name": "RNaseH_sf"
+            },
+            {
+              "id": "IPR000477",
+              "name": "RT_dom"
+            },
+            {
+              "id": "IPR010659",
+              "name": "RVT_connect"
+            },
+            {
+              "id": "IPR010661",
+              "name": "RVT_thumb"
+            },
+            {
+              "id": "IPR001878",
+              "name": "Znf_CCHC"
+            },
+            {
+              "id": "IPR036875",
+              "name": "Znf_CCHC_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00540",
+              "name": "Gag_p17"
+            },
+            {
+              "id": "PF00607",
+              "name": "Gag_p24"
+            },
+            {
+              "id": "PF19317",
+              "name": "Gag_p24_C"
+            },
+            {
+              "id": "PF00552",
+              "name": "IN_DBD_C"
+            },
+            {
+              "id": "PF02022",
+              "name": "Integrase_Zn"
+            },
+            {
+              "id": "PF00075",
+              "name": "RNase_H"
+            },
+            {
+              "id": "PF00665",
+              "name": "rve"
+            },
+            {
+              "id": "PF00077",
+              "name": "RVP"
+            },
+            {
+              "id": "PF00078",
+              "name": "RVT_1"
+            },
+            {
+              "id": "PF06815",
+              "name": "RVT_connect"
+            },
+            {
+              "id": "PF06817",
+              "name": "RVT_thumb"
+            },
+            {
+              "id": "PF00098",
+              "name": "zf-CCHC"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF50630",
+              "name": "Acid proteases"
+            },
+            {
+              "id": "SSF50122",
+              "name": "DNA-binding domain of retroviral integrase"
+            },
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF46919",
+              "name": "N-terminal Zn binding domain of HIV integrase"
+            },
+            {
+              "id": "SSF47836",
+              "name": "Retroviral matrix proteins"
+            },
+            {
+              "id": "SSF47353",
+              "name": "Retrovirus capsid dimerization domain-like"
+            },
+            {
+              "id": "SSF47943",
+              "name": "Retrovirus capsid protein, N-terminal core domain"
+            },
+            {
+              "id": "SSF57756",
+              "name": "Retrovirus zinc finger-like domains"
+            },
+            {
+              "id": "SSF53098",
+              "name": "Ribonuclease H-like"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS50175",
+              "name": "ASP_PROT_RETROV"
+            },
+            {
+              "id": "PS00141",
+              "name": "ASP_PROTEASE"
+            },
+            {
+              "id": "PS50994",
+              "name": "INTEGRASE"
+            },
+            {
+              "id": "PS51027",
+              "name": "INTEGRASE_DBD"
+            },
+            {
+              "id": "PS50879",
+              "name": "RNASE_H_1"
+            },
+            {
+              "id": "PS50878",
+              "name": "RT_POL"
+            },
+            {
+              "id": "PS50158",
+              "name": "ZF_CCHC"
+            },
+            {
+              "id": "PS50876",
+              "name": "ZF_INTEGRASE"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0043657",
+              "term": "host cell"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0019013",
+              "term": "viral nucleocapsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0004190",
+              "term": "aspartic-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0003677",
+              "term": "DNA binding"
+            },
+            {
+              "id": "GO:0003887",
+              "term": "DNA-directed DNA polymerase activity"
+            },
+            {
+              "id": "GO:0004533",
+              "term": "exoribonuclease H activity"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0003964",
+              "term": "RNA-directed DNA polymerase activity"
+            },
+            {
+              "id": "GO:0004523",
+              "term": "RNA-DNA hybrid ribonuclease activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            },
+            {
+              "id": "GO:0008270",
+              "term": "zinc ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0015074",
+              "term": "DNA integration"
+            },
+            {
+              "id": "GO:0006310",
+              "term": "DNA recombination"
+            },
+            {
+              "id": "GO:0075713",
+              "term": "establishment of integrated proviral latency"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0039657",
+              "term": "symbiont-mediated suppression of host gene expression"
+            },
+            {
+              "id": "GO:0044826",
+              "term": "viral genome integration into host DNA"
+            },
+            {
+              "id": "GO:0075732",
+              "term": "viral penetration into host nucleus"
+            },
+            {
+              "id": "GO:0075523",
+              "term": "viral translational frameshifting"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Aspartyl protease",
+          "Capsid protein",
+          "DNA integration",
+          "DNA recombination",
+          "DNA-binding",
+          "DNA-directed DNA polymerase",
+          "Endonuclease",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Host cell membrane",
+          "Host cytoplasm",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Lipoprotein",
+          "Magnesium",
+          "Membrane",
+          "Metal-binding",
+          "Multifunctional enzyme",
+          "Myristate",
+          "Nuclease",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Protease",
+          "Repeat",
+          "Ribosomal frameshifting",
+          "RNA-binding",
+          "RNA-directed DNA polymerase",
+          "Transferase",
+          "Viral genome integration",
+          "Viral nucleoprotein",
+          "Viral penetration into host nucleus",
+          "Viral release from host cell",
+          "Virion",
+          "Virion maturation",
+          "Virus entry into host cell",
+          "Zinc",
+          "Zinc-finger"
+        ],
+        "host_interaction_keywords": [
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Host cell membrane",
+          "Host cytoplasm",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Viral penetration into host nucleus",
+          "Viral release from host cell",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 1,
+        "source": "https://rest.uniprot.org/uniprotkb/P19505.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 4,
+      "target": "p51 RT",
+      "parent": "POL_SIVSP Gag-Pol polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P19505",
+      "score": 5.3892,
+      "score_terms": {
+        "conservation": 1.4892,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.85,
+          "confirmed_at": [
+            "the start of the chain",
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": true,
+          "one_end_only_note": null,
+          "leading_identity": 0.825,
+          "trailing_identity": 0.85,
+          "residues_compared": 40,
+          "frame_span_residues": 439,
+          "relative_chain_residues": 439,
+          "lengths_differ": false,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain",
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": true,
+        "orf_rank": 2,
+        "strand": "+",
+        "frame": 0,
+        "nt_start": 2862,
+        "orf_length_aa": 963,
+        "segment": 0,
+        "orf_name": "POL_SIVSP Gag-Pol polyprotein",
+        "reading_frame": "+0 at nt 2863",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        598,
+        1036
+      ],
+      "chain_span_in_this_genome": [
+        25,
+        463
+      ],
+      "chain_span_nt": [
+        2935,
+        4251
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "segment_length_nt": 10359,
+      "annotation": {
+        "accession": "P19505",
+        "entry_id": "POL_SIVSP",
+        "protein_name": "Gag-Pol polyprotein",
+        "organism": "Simian immunodeficiency virus (isolate PBj14/BCL-3)",
+        "reviewed": true,
+        "molecule_asked_for": "p51 RT",
+        "molecule_matched": false,
+        "molecules_available": [
+          "Capsid protein p24",
+          "Integrase",
+          "Isoform Gag-Pol polyprotein",
+          "Matrix protein p17",
+          "Nucleocapsid protein p7",
+          "Protease",
+          "Reverse transcriptase/ribonuclease H"
+        ],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Gag-Pol polyprotein and Gag polyprotein may regulate their own translation, by the binding genomic RNA in the 5'-UTR. At low concentration, Gag-Pol and Gag would promote translation, whereas at high concentration, the polyproteins encapsidate genomic RNA and then shut off translation (By similarity)",
+            "Matrix protein p17 has two main functions: in infected cell, it targets Gag and Gag-pol polyproteins to the plasma membrane via a multipartite membrane-binding signal, that includes its myristointegration complex. The myristoylation signal and the NLS exert conflicting influences its subcellular localization. The key regulation of these motifs might be phosphorylation of a portion of MA molecules on the C-terminal tyrosine at the time of virus maturation, by virion-associated cellular tyrosine kinase. Implicated in the release from host cell mediated by Vpu (By similarity)",
+            "Capsid protein p24 forms the conical core that encapsulates the genomic RNA-nucleocapsid complex in the virion. The core is constituted by capsid protein hexamer subunits. The core is disassembled soon after virion entry. Interaction with host PPIA/CYPA protects the virus from restriction by host TRIM5-alpha and from an unknown antiviral activity in host cells. This capsid restriction by TRIM5 is one of the factors which restricts SIV to the simian species (By similarity)",
+            "Nucleocapsid protein p7 encapsulates and protects viral dimeric unspliced (genomic) RNA. Binds these RNAs through its zinc fingers. Facilitates rearangement of nucleic acid secondary structure during retrotranscription of genomic RNA. This capability is referred to as nucleic acid chaperone activity (By similarity)",
+            "The aspartyl protease mediates proteolytic cleavages of Gag and Gag-Pol polyproteins during or shortly after the release of the virion from the plasma membrane. Cleavages take place as an ordered, step-wise cascade to yield mature proteins. This process is called maturation. Displays maximal activity during the budding process just prior to particle release from the cell. Also cleaves Nef and Vif, probably concomitantly with viral structural proteins on maturation of virus particles. Hydrolyzes host EIF4GI and PABP1 in order to shut off the capped cellular mRNA translation. The resulting inhibition of cellular protein synthesis serves to ensure maximal viral gene expression and to evade host immune response (By similarity)",
+            "Reverse transcriptase/ribonuclease H (RT) is a multifunctional enzyme that converts the viral dimeric RNA genome into dsDNA in the cytoplasm, shortly after virus entry into the cell. This enzyme displays a DNA polymerase activity that can copy either DNA or RNA templates, and a ribonuclease H (RNase H) activity that cleaves the RNA strand of RNA-DNA heteroduplexes in a partially processive 3' to 5' endonucleasic mode. Conversion of viral genomic RNA into dsDNA requires many steps. A tRNA binds to the primer-binding site (PBS) situated at the 5'-end of the viral RNA. RT uses the 3' end of the tRNA primer to perform a short round of RNA-dependent minus-strand DNA synthesis. The reading proceeds through the U5 region and ends after the repeated (R) region which is present at both ends of viral RNA. The portion of the RNA-DNA heteroduplex is digested by the RNase H, resulting in a ssDNA product attached to the tRNA primer. This ssDNA/tRNA hybridizes with the identical R region situated at the 3' end of viral RNA. This template exchange, known as minus-strand DNA strong stop transfer, can be either intra- or intermolecular. RT uses the 3' end of this newly synthesized short ssDNA to perform the RNA-dependent minus-strand DNA synthesis of the whole template. RNase H digests the RNA template except for two polypurine tracts (PPTs) situated at the 5'-end and near the center of the genome. It is not clear if both polymerase and RNase H activities are simultaneous. RNase H can probably proceed both in a polymerase-dependent (RNA cut into small fragments by the same RT performing DNA synthesis) and a polymerase-independent mode (cleavage of remaining RNA fragments by free RTs). Secondly, RT performs DNA-directed plus-strand DNA synthesis using the PPTs that have not been removed by RNase H as primers. PPTs and tRNA primers are then removed by RNase H. The 3' and 5' ssDNA PBS regions hybridize to form a circular dsDNA intermediate. Strand displacement synthesis by RT to the PBS and PPT ends produces a blunt ended, linear dsDNA copy of the viral genome that includes long terminal repeats (LTRs) at both ends (By similarity)",
+            "Integrase catalyzes viral DNA integration into the host chromosome, by performing a series of DNA cutting and joining reactions. This enzyme activity takes place after virion entry into a cell and reverse transcription of the RNA genome in dsDNA. The first step in the integration process is 3' processing. This step requires a complex comprising the viral genome, matrix protein, Vpr and integrase. This complex is called the pre-integration complex (PIC). The integrase protein removes 2 nucleotides from each 3' end of the viral DNA, leaving recessed CA OH's at the 3' ends. In the second step, the PIC enters cell nucleus. This process is mediated through integrase and Vpr proteins, and allows the virus to infect a non dividing cell. This ability to enter the nucleus is specific of lentiviruses, other retroviruses cannot and rely on cell division to access cell chromosomes. In the third step, termed strand transfer, the integrase protein joins the previously processed 3' ends to the 5' ends of strands of target cellular DNA at the site of integration. The 5'-ends are produced by integrase-catalyzed staggered cuts, 5 bp apart. A Y-shaped, gapped, recombination intermediate results, with the 5'-ends of the viral DNA strands and the 3' ends of target DNA strands remaining unjoined, flanking a gap of 5 bp. The last step is viral DNA integration into host chromosome. This involves host DNA repair synthesis in which the 5 bp gaps between the unjoined strands are filled in and then ligated. Since this process occurs at both cuts flanking the SIV genome, a 5 bp duplication of host DNA is produced at the ends of SIV integration. Alternatively, Integrase may catalyze the excision of viral DNA just after strand transfer, this is termed disintegration (By similarity)"
+          ],
+          "ACTIVITY REGULATION": [
+            "The viral protease is inhibited by many synthetic protease inhibitors (PIs), such as amprenavir, atazanavir, indinavir, loprinavir, nelfinavir, ritonavir and saquinavir. RT can be inhibited either by nucleoside RT inhibitors (NRTIs) or by non nucleoside RT inhibitors (NNRTIs). NRTIs act as chain terminators, whereas NNRTIs inhibit DNA polymerization by binding a small hydrophobic pocket near the RT active site and inducing an allosteric change in this region. Classical NRTIs are abacavir, adefovir (PMEA), didanosine (ddI), lamivudine (3TC), stavudine (d4T), tenofovir (PMPA), zalcitabine (ddC), and zidovudine (AZT). Classical NNRTIs are atevirdine (BHAP U-87201E), delavirdine, efavirenz (DMP-266), emivirine (I-EBU), and nevirapine (BI-RG-587). The tritherapies used as a basic effective treatment of AIDS associate two NRTIs and one NNRTI. Use of protease inhibitors in tritherapy regimens permit more ambitious therapeutic strategies"
+          ],
+          "DOMAIN": [
+            "The p66 RT is structured in five subdomains: finger, palm, thumb, connection and RNase H. Within the palm subdomain, the 'primer grip' region is thought to be involved in the positioning of the primer terminus for accommodating the incoming nucleotide. The RNase H domain stabilizes the association of RT with primer-template (By similarity)",
+            "The tryptophan repeat motif is involved in RT p66/p51 dimerization"
+          ],
+          "PTM": [
+            "Specific enzymatic cleavages by the viral protease yield mature proteins. The protease is released by autocatalytic cleavage. The polyprotein is cleaved during and after budding, this process is termed maturation. Proteolytic cleavage of p66 RT removes the RNase H domain to yield the p51 RT subunit",
+            "Capsid protein p24 is phosphorylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "ACTIVITY REGULATION": "what switches it on or off",
+          "DOMAIN": "what its parts do",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000306072",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Cercopithecidae",
+            "common_name": "Old World monkeys",
+            "taxon": 9527
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd05482",
+              "name": "HIV_retropepsin_like"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.10.10.200",
+              "name": "-"
+            },
+            {
+              "id": "1.10.1200.30",
+              "name": "-"
+            },
+            {
+              "id": "3.30.70.270",
+              "name": "-"
+            },
+            {
+              "id": "2.40.70.10",
+              "name": "Acid Proteases"
+            },
+            {
+              "id": "3.10.10.10",
+              "name": "HIV Type 1 Reverse Transcriptase, subunit A, domain 1"
+            },
+            {
+              "id": "1.10.375.10",
+              "name": "Human Immunodeficiency Virus Type 1 Capsid Protein"
+            },
+            {
+              "id": "1.10.150.90",
+              "name": "Immunodeficiency lentiviruses, gag gene matrix protein p17"
+            },
+            {
+              "id": "2.30.30.10",
+              "name": "Integrase, C-terminal domain superfamily, retroviral"
+            },
+            {
+              "id": "3.30.420.10",
+              "name": "Ribonuclease H-like superfamily/Ribonuclease H"
+            },
+            {
+              "id": "1.20.5.760",
+              "name": "Single helix bin"
+            },
+            {
+              "id": "4.10.60.10",
+              "name": "Zinc finger, CCHC-type"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR001969",
+              "name": "Aspartic_peptidase_AS"
+            },
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR045345",
+              "name": "Gag_p24_C"
+            },
+            {
+              "id": "IPR017856",
+              "name": "Integrase-like_N"
+            },
+            {
+              "id": "IPR036862",
+              "name": "Integrase_C_dom_sf_retrovir"
+            },
+            {
+              "id": "IPR001037",
+              "name": "Integrase_C_retrovir"
+            },
+            {
+              "id": "IPR001584",
+              "name": "Integrase_cat-core"
+            },
+            {
+              "id": "IPR003308",
+              "name": "Integrase_Zn-bd_dom_N"
+            },
+            {
+              "id": "IPR000071",
+              "name": "Lentvrl_matrix_N"
+            },
+            {
+              "id": "IPR012344",
+              "name": "Matrix_HIV/RSV_N"
+            },
+            {
+              "id": "IPR001995",
+              "name": "Peptidase_A2_cat"
+            },
+            {
+              "id": "IPR021109",
+              "name": "Peptidase_aspartic_dom_sf"
+            },
+            {
+              "id": "IPR034170",
+              "name": "Retropepsin-like_cat_dom"
+            },
+            {
+              "id": "IPR018061",
+              "name": "Retropepsins"
+            },
+            {
+              "id": "IPR008916",
+              "name": "Retrov_capsid_C"
+            },
+            {
+              "id": "IPR008919",
+              "name": "Retrov_capsid_N"
+            },
+            {
+              "id": "IPR010999",
+              "name": "Retrovr_matrix"
+            },
+            {
+              "id": "IPR043128",
+              "name": "Rev_trsase/Diguanyl_cyclase"
+            },
+            {
+              "id": "IPR012337",
+              "name": "RNaseH-like_sf"
+            },
+            {
+              "id": "IPR002156",
+              "name": "RNaseH_domain"
+            },
+            {
+              "id": "IPR036397",
+              "name": "RNaseH_sf"
+            },
+            {
+              "id": "IPR000477",
+              "name": "RT_dom"
+            },
+            {
+              "id": "IPR010659",
+              "name": "RVT_connect"
+            },
+            {
+              "id": "IPR010661",
+              "name": "RVT_thumb"
+            },
+            {
+              "id": "IPR001878",
+              "name": "Znf_CCHC"
+            },
+            {
+              "id": "IPR036875",
+              "name": "Znf_CCHC_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00540",
+              "name": "Gag_p17"
+            },
+            {
+              "id": "PF00607",
+              "name": "Gag_p24"
+            },
+            {
+              "id": "PF19317",
+              "name": "Gag_p24_C"
+            },
+            {
+              "id": "PF00552",
+              "name": "IN_DBD_C"
+            },
+            {
+              "id": "PF02022",
+              "name": "Integrase_Zn"
+            },
+            {
+              "id": "PF00075",
+              "name": "RNase_H"
+            },
+            {
+              "id": "PF00665",
+              "name": "rve"
+            },
+            {
+              "id": "PF00077",
+              "name": "RVP"
+            },
+            {
+              "id": "PF00078",
+              "name": "RVT_1"
+            },
+            {
+              "id": "PF06815",
+              "name": "RVT_connect"
+            },
+            {
+              "id": "PF06817",
+              "name": "RVT_thumb"
+            },
+            {
+              "id": "PF00098",
+              "name": "zf-CCHC"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF50630",
+              "name": "Acid proteases"
+            },
+            {
+              "id": "SSF50122",
+              "name": "DNA-binding domain of retroviral integrase"
+            },
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF46919",
+              "name": "N-terminal Zn binding domain of HIV integrase"
+            },
+            {
+              "id": "SSF47836",
+              "name": "Retroviral matrix proteins"
+            },
+            {
+              "id": "SSF47353",
+              "name": "Retrovirus capsid dimerization domain-like"
+            },
+            {
+              "id": "SSF47943",
+              "name": "Retrovirus capsid protein, N-terminal core domain"
+            },
+            {
+              "id": "SSF57756",
+              "name": "Retrovirus zinc finger-like domains"
+            },
+            {
+              "id": "SSF53098",
+              "name": "Ribonuclease H-like"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS50175",
+              "name": "ASP_PROT_RETROV"
+            },
+            {
+              "id": "PS00141",
+              "name": "ASP_PROTEASE"
+            },
+            {
+              "id": "PS50994",
+              "name": "INTEGRASE"
+            },
+            {
+              "id": "PS51027",
+              "name": "INTEGRASE_DBD"
+            },
+            {
+              "id": "PS50879",
+              "name": "RNASE_H_1"
+            },
+            {
+              "id": "PS50878",
+              "name": "RT_POL"
+            },
+            {
+              "id": "PS50158",
+              "name": "ZF_CCHC"
+            },
+            {
+              "id": "PS50876",
+              "name": "ZF_INTEGRASE"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0043657",
+              "term": "host cell"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0019013",
+              "term": "viral nucleocapsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0004190",
+              "term": "aspartic-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0003677",
+              "term": "DNA binding"
+            },
+            {
+              "id": "GO:0003887",
+              "term": "DNA-directed DNA polymerase activity"
+            },
+            {
+              "id": "GO:0004533",
+              "term": "exoribonuclease H activity"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0003964",
+              "term": "RNA-directed DNA polymerase activity"
+            },
+            {
+              "id": "GO:0004523",
+              "term": "RNA-DNA hybrid ribonuclease activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            },
+            {
+              "id": "GO:0008270",
+              "term": "zinc ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0015074",
+              "term": "DNA integration"
+            },
+            {
+              "id": "GO:0006310",
+              "term": "DNA recombination"
+            },
+            {
+              "id": "GO:0075713",
+              "term": "establishment of integrated proviral latency"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0039657",
+              "term": "symbiont-mediated suppression of host gene expression"
+            },
+            {
+              "id": "GO:0044826",
+              "term": "viral genome integration into host DNA"
+            },
+            {
+              "id": "GO:0075732",
+              "term": "viral penetration into host nucleus"
+            },
+            {
+              "id": "GO:0075523",
+              "term": "viral translational frameshifting"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Aspartyl protease",
+          "Capsid protein",
+          "DNA integration",
+          "DNA recombination",
+          "DNA-binding",
+          "DNA-directed DNA polymerase",
+          "Endonuclease",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Host cell membrane",
+          "Host cytoplasm",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Lipoprotein",
+          "Magnesium",
+          "Membrane",
+          "Metal-binding",
+          "Multifunctional enzyme",
+          "Myristate",
+          "Nuclease",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Protease",
+          "Repeat",
+          "Ribosomal frameshifting",
+          "RNA-binding",
+          "RNA-directed DNA polymerase",
+          "Transferase",
+          "Viral genome integration",
+          "Viral nucleoprotein",
+          "Viral penetration into host nucleus",
+          "Viral release from host cell",
+          "Virion",
+          "Virion maturation",
+          "Virus entry into host cell",
+          "Zinc",
+          "Zinc-finger"
+        ],
+        "host_interaction_keywords": [
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host translation shutoff by virus",
+          "Host cell membrane",
+          "Host cytoplasm",
+          "Host gene expression shutoff by virus",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Viral penetration into host nucleus",
+          "Viral release from host cell",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 1,
+        "source": "https://rest.uniprot.org/uniprotkb/P19505.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 5,
+      "target": "Capsid protein p24",
+      "parent": "GAG_SIVS4 Gag polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P12496",
+      "score": 3.1668,
+      "score_terms": {
+        "conservation": 1.6668,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 1.0,
+          "confirmed_at": [
+            "the start of the chain",
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": true,
+          "one_end_only_note": null,
+          "leading_identity": 0.95,
+          "trailing_identity": 1.0,
+          "residues_compared": 40,
+          "frame_span_residues": 230,
+          "relative_chain_residues": 230,
+          "lengths_differ": false,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain",
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": true,
+        "orf_rank": 3,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 1102,
+        "orf_length_aa": 521,
+        "segment": 0,
+        "orf_name": "GAG_SIVS4 Gag polyprotein",
+        "reading_frame": "+1 at nt 1103",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        136,
+        365
+      ],
+      "chain_span_in_this_genome": [
+        136,
+        365
+      ],
+      "chain_span_nt": [
+        1508,
+        2197
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "segment_length_nt": 10359,
+      "annotation": {
+        "accession": "P12496",
+        "entry_id": "GAG_SIVS4",
+        "protein_name": "Gag polyprotein",
+        "organism": "Simian immunodeficiency virus (isolate F236/smH4)",
+        "reviewed": true,
+        "molecule_asked_for": "Capsid protein p24",
+        "molecule_matched": false,
+        "molecules_available": [
+          "Capsid protein p24",
+          "Isoform Gag polyprotein",
+          "Matrix protein p17",
+          "Nucleocapsid protein p7",
+          "p6-gag"
+        ],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Matrix protein p17 targets Gag and Gag-Pol polyproteins to the plasma membrane via a multipartite membrane binding signal, that includes its myristoylated N-terminus. Also mediates nuclear localization of the pre-integration complex. Implicated in the release from host cell mediated by Vpu (By similarity)",
+            "Capsid protein p24 forms the conical core of the virus that encapsulates the genomic RNA-nucleocapsid complex",
+            "Nucleocapsid protein p7 encapsulates and protects viral dimeric unspliced (genomic) RNA. Binds these RNAs through its zinc fingers (By similarity)",
+            "p6-gag plays a role in budding of the assembled particle by interacting with the host class E VPS proteins TSG101 and PDCD6IP/AIP1"
+          ],
+          "DOMAIN": [
+            "Late-budding domains (L domains) are short sequence motifs essential for viral particle budding. They recruit proteins of the host ESCRT machinery (Endosomal Sorting Complex Required for Transport) or ESCRT-associated proteins. p6-gag contains two L domains: a PTAP/PSAP motif, which interacts with the UEV domain of TSG101 and an ALIX binding motif"
+          ],
+          "PTM": [
+            "Capsid protein p24 is phosphorylated",
+            "Specific enzymatic cleavages by the viral protease yield mature proteins. The polyprotein is cleaved during and after budding, this process is termed maturation (By similarity)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "DOMAIN": "what its parts do",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000038641",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Cercopithecidae",
+            "common_name": "Old World monkeys",
+            "taxon": 9527
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "1.10.1200.30",
+              "name": "-"
+            },
+            {
+              "id": "1.10.375.10",
+              "name": "Human Immunodeficiency Virus Type 1 Capsid Protein"
+            },
+            {
+              "id": "1.10.150.90",
+              "name": "Immunodeficiency lentiviruses, gag gene matrix protein p17"
+            },
+            {
+              "id": "1.20.5.760",
+              "name": "Single helix bin"
+            },
+            {
+              "id": "4.10.60.10",
+              "name": "Zinc finger, CCHC-type"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR045345",
+              "name": "Gag_p24_C"
+            },
+            {
+              "id": "IPR000071",
+              "name": "Lentvrl_matrix_N"
+            },
+            {
+              "id": "IPR012344",
+              "name": "Matrix_HIV/RSV_N"
+            },
+            {
+              "id": "IPR050195",
+              "name": "Primate_lentivir_Gag_pol-like"
+            },
+            {
+              "id": "IPR008916",
+              "name": "Retrov_capsid_C"
+            },
+            {
+              "id": "IPR008919",
+              "name": "Retrov_capsid_N"
+            },
+            {
+              "id": "IPR010999",
+              "name": "Retrovr_matrix"
+            },
+            {
+              "id": "IPR001878",
+              "name": "Znf_CCHC"
+            },
+            {
+              "id": "IPR036875",
+              "name": "Znf_CCHC_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00540",
+              "name": "Gag_p17"
+            },
+            {
+              "id": "PF00607",
+              "name": "Gag_p24"
+            },
+            {
+              "id": "PF19317",
+              "name": "Gag_p24_C"
+            },
+            {
+              "id": "PF00098",
+              "name": "zf-CCHC"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF47836",
+              "name": "Retroviral matrix proteins"
+            },
+            {
+              "id": "SSF47353",
+              "name": "Retrovirus capsid dimerization domain-like"
+            },
+            {
+              "id": "SSF47943",
+              "name": "Retrovirus capsid protein, N-terminal core domain"
+            },
+            {
+              "id": "SSF57756",
+              "name": "Retrovirus zinc finger-like domains"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS50158",
+              "name": "ZF_CCHC"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0019013",
+              "term": "viral nucleocapsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            },
+            {
+              "id": "GO:0008270",
+              "term": "zinc ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039702",
+              "term": "viral budding via host ESCRT complex"
+            },
+            {
+              "id": "GO:0075523",
+              "term": "viral translational frameshifting"
+            }
+          ]
+        },
+        "keywords": [
+          "Capsid protein",
+          "Host cell membrane",
+          "Host cytoplasm",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Lipoprotein",
+          "Membrane",
+          "Metal-binding",
+          "Myristate",
+          "Phosphoprotein",
+          "Repeat",
+          "Ribosomal frameshifting",
+          "RNA-binding",
+          "Viral budding",
+          "Viral budding via the host ESCRT complexes",
+          "Viral nucleoprotein",
+          "Viral release from host cell",
+          "Virion",
+          "Zinc",
+          "Zinc-finger"
+        ],
+        "host_interaction_keywords": [
+          "Host cell membrane",
+          "Host cytoplasm",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Viral budding via the host ESCRT complexes",
+          "Viral release from host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P12496.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 6,
+      "target": "NEF_SIVS4 Protein Nef",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P12482",
+      "score": 2.6622,
+      "score_terms": {
+        "conservation": 0.6522,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.01,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P12482",
+        "entry_id": "NEF_SIVS4",
+        "protein_name": "Protein Nef",
+        "organism": "Simian immunodeficiency virus (isolate F236/smH4)",
+        "reviewed": true,
+        "molecule_asked_for": "NEF_SIVS4 Protein Nef",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Seems to play a role in optimizing the host cell environment for viral replication without causing cell death by apoptosis. Enhances virus infectivity and pathogenicity. Probably involved in viral immune evasion mechanisms (By similarity)",
+            "In infected CD4(+) T-lymphocytes, down-regulates cell surface expression of CD4, CD28, CD3, and MHC-I or MHC-II molecules",
+            "Interferes with TCR signaling from the cell membrane. Interacts with CD247/TCRZ (TCR zeta chain) and exert potent down-regulation of cell surface TCR/CD3 complexes"
+          ],
+          "SUBUNIT": [
+            "Homodimer (By similarity). Interacts with host CD247/TCRZ; this interaction induces down-regulation of cell surface TCR/CD3 complexes"
+          ],
+          "DOMAIN": [
+            "The N-terminal domain is composed of the N-myristoyl glycine and of a cluster of positively charged amino acids. It is required for inner plasma membrane targeting of Nef (By similarity)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Cercopithecidae",
+            "common_name": "Old World monkeys",
+            "taxon": 9527
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.30.62.10",
+              "name": "Nef Regulatory Factor"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR027481",
+              "name": "HIV-1_Nef_core_sf"
+            },
+            {
+              "id": "IPR001558",
+              "name": "HIV_Nef"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00469",
+              "name": "F-protein"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF55671",
+              "name": "Regulatory factor Nef"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005525",
+              "term": "GTP binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0052031",
+              "term": "symbiont-mediated perturbation of host defense response"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Host cell membrane",
+          "Host membrane",
+          "Host-virus interaction",
+          "Lipoprotein",
+          "Membrane",
+          "Myristate",
+          "Viral immunoevasion",
+          "Virulence"
+        ],
+        "host_interaction_keywords": [
+          "Host cell membrane",
+          "Host membrane",
+          "Host-virus interaction"
+        ],
+        "structures_deposited": 1,
+        "source": "https://rest.uniprot.org/uniprotkb/P12482.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 7,
+      "target": "NEF_SIVM1 Protein Nef",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P05862",
+      "score": 2.6493,
+      "score_terms": {
+        "conservation": 0.6393,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.01,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P05862",
+        "entry_id": "NEF_SIVM1",
+        "protein_name": "Protein Nef",
+        "organism": "Simian immunodeficiency virus (isolate Mm142-83)",
+        "reviewed": true,
+        "molecule_asked_for": "NEF_SIVM1 Protein Nef",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Seems to play a role in optimizing the host cell environment for viral replication without causing cell death by apoptosis. Enhances virus infectivity and pathogenicity. Probably involved in viral immune evasion mechanisms (By similarity)",
+            "In infected CD4(+) T-lymphocytes, down-regulates cell surface expression of CD4, CD28, CD3, and MHC-I or MHC-II molecules",
+            "Interferes with TCR signaling from the cell membrane. Interacts with CD247/TCRZ (TCR zeta chain) and exert potent down-regulation of cell surface TCR/CD3 complexes (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Homodimer. Interacts with host CD247/TCRZ; this interaction induces down-regulation of cell surface TCR/CD3 complexes"
+          ],
+          "DOMAIN": [
+            "The N-terminal domain is composed of the N-myristoyl glycine and of a cluster of positively charged amino acids. It is required for inner plasma membrane targeting of Nef (By similarity)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Cercopithecidae",
+            "common_name": "Old World monkeys",
+            "taxon": 9527
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.30.62.10",
+              "name": "Nef Regulatory Factor"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR027481",
+              "name": "HIV-1_Nef_core_sf"
+            },
+            {
+              "id": "IPR001558",
+              "name": "HIV_Nef"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00469",
+              "name": "F-protein"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF55671",
+              "name": "Regulatory factor Nef"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005525",
+              "term": "GTP binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0052031",
+              "term": "symbiont-mediated perturbation of host defense response"
+            }
+          ]
+        },
+        "keywords": [
+          "Host cell membrane",
+          "Host membrane",
+          "Host-virus interaction",
+          "Lipoprotein",
+          "Membrane",
+          "Myristate",
+          "Viral immunoevasion",
+          "Virulence"
+        ],
+        "host_interaction_keywords": [
+          "Host cell membrane",
+          "Host membrane",
+          "Host-virus interaction"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P05862.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    }
+  ],
+  "coverage": {
+    "chains": 7,
+    "with_a_reviewed_relative": 7,
+    "with_a_function_for_this_chain": 3,
+    "with_a_verified_reading_frame": 4,
+    "with_nucleotide_coordinates": 4,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:02:59.546250+00:00"
+  },
+  "content_sha256": "605f07fcbc9af8eafa4dd4ffc2821bde0edbd354c31a31917ed4918b0f67e04a"
+}

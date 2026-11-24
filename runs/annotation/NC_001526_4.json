@@ -1,0 +1,571 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_001526.4",
+  "pathogen": "Human papillomavirus 16",
+  "reference_excluded_organism": "Human papillomavirus type 16",
+  "source_record": "runs/onset_chain_NC_001526_4.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "VL1_HPV35 Major capsid protein L1",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P27232",
+      "score": 4.5731,
+      "score_terms": {
+        "conservation": 1.4631,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.01,
+        "druggable_class": 1.6
+      },
+      "gate": "no",
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P27232",
+        "entry_id": "VL1_HPV35",
+        "protein_name": "Major capsid protein L1",
+        "organism": "Human papillomavirus 35",
+        "reviewed": true,
+        "molecule_asked_for": "VL1_HPV35 Major capsid protein L1",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Forms an icosahedral capsid with a T=7 symmetry and a 50 nm diameter. The capsid is composed of 72 pentamers linked to each other by disulfide bonds and associated with L2 proteins. Binds to heparan sulfate proteoglycans on cell surface of basal layer keratinocytes to provide initial virion attachment. This binding mediates a conformational change in the virus capsid that facilitates efficient infection. The virion enters the host cell via endocytosis. During virus trafficking, L1 protein dissociates from the viral DNA and the genomic DNA is released to the host nucleus. The virion assembly takes place within the cell nucleus. Encapsulates the genomic DNA together with protein L2"
+          ],
+          "SUBUNIT": [
+            "Self-assembles into homopentamers. The capsid has an icosahedral symmetry and consists of 72 capsomers, with each capsomer being a pentamer of L1. Interacts with the minor capsid protein L2; this interaction is necessary for viral genome encapsidation. Interacts with protein E2; this interaction enhances E2-dependent replication and transcription activation"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "2.60.175.20",
+              "name": "Major capsid L1 (late) superfamily, Papillomavirus"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR002210",
+              "name": "Capsid_L1_Papillomavir"
+            },
+            {
+              "id": "IPR036973",
+              "name": "Capsid_L1_sf_Papillomavir"
+            },
+            {
+              "id": "IPR011222",
+              "name": "dsDNA_vir_gr_I_capsid"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00500",
+              "name": "Late_protein_L1"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF88648",
+              "name": "Group I dsDNA viruses"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0039620",
+              "term": "T=7 icosahedral viral capsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0075509",
+              "term": "endocytosis involved in viral entry into host cell"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Capsid protein",
+          "Disulfide bond",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Late protein",
+          "Reference proteome",
+          "T=7 icosahedral capsid protein",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus",
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 1,
+        "source": "https://rest.uniprot.org/uniprotkb/P27232.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 2,
+      "target": "VE1_HPV31 Replication protein E1",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P17382",
+      "score": 3.9805,
+      "score_terms": {
+        "conservation": 0.8805,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P17382",
+        "entry_id": "VE1_HPV31",
+        "protein_name": "Replication protein E1",
+        "organism": "Human papillomavirus 31",
+        "reviewed": true,
+        "molecule_asked_for": "VE1_HPV31 Replication protein E1",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "ATP-dependent DNA 3'-5' helicase required for initiation of viral DNA replication. It forms a complex with the viral E2 protein. The E1-E2 complex binds to the replication origin which contains binding sites for both proteins. During the initial step, a dimer of E1 interacts with a dimer of protein E2 leading to a complex that binds the viral origin of replication with high specificity. Then, a second dimer of E1 displaces the E2 dimer in an ATP-dependent manner to form the E1 tetramer. Following this, two E1 monomers are added to each half of the site, which results in the formation of two E1 trimers on the viral ori. Subsequently, two hexamers will be created. The double hexamer acts as a bi-directional helicase machinery and unwinds the viral DNA and then recruits the host DNA polymerase to start replication"
+          ],
+          "SUBUNIT": [
+            "Can form hexamers. Interacts with E2 protein; this interaction increases E1 DNA binding specificity. Interacts with host DNA polymerase subunit POLA2. Interacts with host single stranded DNA-binding protein RPA1. Interacts with host TOP1; this interaction stimulates the enzymatic activity of TOP1"
+          ],
+          "PTM": [
+            "Phosphorylated",
+            "Sumoylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.40.1310.10",
+              "name": "-"
+            },
+            {
+              "id": "3.40.50.300",
+              "name": "P-loop containing nucleotide triphosphate hydrolases"
+            },
+            {
+              "id": "1.10.10.510",
+              "name": "Zinc finger, large T-antigen D1 domain"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR014015",
+              "name": "Helicase_SF3_DNA-vir"
+            },
+            {
+              "id": "IPR027417",
+              "name": "P-loop_NTPase"
+            },
+            {
+              "id": "IPR001177",
+              "name": "PPV_DNA_helicase_E1_C"
+            },
+            {
+              "id": "IPR014000",
+              "name": "PPV_DNA_helicase_E1_N"
+            },
+            {
+              "id": "IPR046832",
+              "name": "PPV_E1_DBD"
+            },
+            {
+              "id": "IPR046935",
+              "name": "PPV_E1_DBD_sf"
+            },
+            {
+              "id": "IPR016393",
+              "name": "Rep_E1_papillomaV"
+            },
+            {
+              "id": "IPR037102",
+              "name": "Znf_lg_T-Ag_D1_dom_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00519",
+              "name": "PPV_E1_C"
+            },
+            {
+              "id": "PF20450",
+              "name": "PPV_E1_DBD"
+            },
+            {
+              "id": "PF00524",
+              "name": "PPV_E1_N"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF55464",
+              "name": "Origin of replication-binding domain, RBD-like"
+            },
+            {
+              "id": "SSF52540",
+              "name": "P-loop containing nucleoside triphosphate hydrolases"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51206",
+              "name": "SF3_HELICASE_1"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0043138",
+              "term": "3'-5' DNA helicase activity"
+            },
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0016887",
+              "term": "ATP hydrolysis activity"
+            },
+            {
+              "id": "GO:0003677",
+              "term": "DNA binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006260",
+              "term": "DNA replication"
+            }
+          ]
+        },
+        "keywords": [
+          "ATP-binding",
+          "DNA replication",
+          "DNA-binding",
+          "Early protein",
+          "Helicase",
+          "Host nucleus",
+          "Hydrolase",
+          "Isomerase",
+          "Isopeptide bond",
+          "Nucleotide-binding",
+          "Phosphoprotein",
+          "Reference proteome",
+          "Ubl conjugation"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P17382.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 3,
+      "target": "VL2_HPV31 Minor capsid protein L2",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P17389",
+      "score": 2.2227,
+      "score_terms": {
+        "conservation": 0.7227,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P17389",
+        "entry_id": "VL2_HPV31",
+        "protein_name": "Minor capsid protein L2",
+        "organism": "Human papillomavirus 31",
+        "reviewed": true,
+        "molecule_asked_for": "VL2_HPV31 Minor capsid protein L2",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Minor protein of the capsid that localizes along the inner surface of the virion, within the central cavities beneath the L1 pentamers. Plays a role in capsid stabilization through interaction with the major capsid protein L1. Once the virion enters the host cell, L2 escorts the genomic DNA into the nucleus by promoting escape from the endosomal compartments and traffic through the host Golgi network. Mechanistically, the C-terminus of L2 possesses a cell-penetrating peptide that protudes from the host endosome, interacts with host cytoplasmic retromer cargo and thereby mediates the capsid delivery to the host trans-Golgi network. Plays a role through its interaction with host dynein in the intracellular microtubule-dependent transport of viral capsid toward the nucleus. Mediates the viral genome import into the nucleus through binding to host importins. Once within the nucleus, L2 localizes viral genomes to host PML bodies in order to activate early gene expression for establishment of infection. Later on, promotes late gene expression by interacting with the viral E2 protein and by inhibiting its transcriptional activation functions. During virion assembly, encapsidates the genome by direct interaction with the viral DNA"
+          ],
+          "SUBUNIT": [
+            "Interacts with major capsid protein L1. Interacts with E2; this interaction inhibits E2 transcriptional activity but not the DNA replication function E2. Interacts with host GADD45GIP1. Interacts with host HSPA8; this interaction is required for L2 nuclear translocation. Interacts with host importins KPNB2 and KPNB3. Forms a complex with importin alpha2-beta1 heterodimers via interaction with the importin alpha2 adapter. Interacts with host DYNLT1; this interaction is essential for virus intracellular transport during entry. Interacts (via C-terminus) with host retromer subunits VPS35 and VPS29"
+          ],
+          "PTM": [
+            "Highly phosphorylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR000784",
+              "name": "Late_L2"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00513",
+              "name": "Late_protein_L2"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0043657",
+              "term": "host cell"
+            },
+            {
+              "id": "GO:0044177",
+              "term": "host cell Golgi apparatus"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0019028",
+              "term": "viral capsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0003677",
+              "term": "DNA binding"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0075521",
+              "term": "microtubule-dependent intracellular transport of viral material towards nucleus"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0075732",
+              "term": "viral penetration into host nucleus"
+            }
+          ]
+        },
+        "keywords": [
+          "Capsid protein",
+          "Cytoplasmic inwards viral transport",
+          "Disulfide bond",
+          "DNA-binding",
+          "Host endosome",
+          "Host Golgi apparatus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Late protein",
+          "Microtubular inwards viral transport",
+          "Phosphoprotein",
+          "Reference proteome",
+          "Viral penetration into host nucleus",
+          "Virion",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Host endosome",
+          "Host Golgi apparatus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Viral penetration into host nucleus",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P17389.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    }
+  ],
+  "coverage": {
+    "chains": 3,
+    "with_a_reviewed_relative": 3,
+    "with_a_function_for_this_chain": 0,
+    "with_a_verified_reading_frame": 0,
+    "with_nucleotide_coordinates": 0,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:02:46.059764+00:00"
+  },
+  "content_sha256": "3824f04edc2ca9c20e566a3afeaed2fcc9e367ce0dc6cd336e2887bf4d88d1fc"
+}

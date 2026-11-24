@@ -1,0 +1,5239 @@
+{
+  "experiment": "handoff",
+  "status": "complete",
+  "what": "Every target this pipeline proposed for one genome, with the residues to bind and what the protein does, in a form another platform can read.",
+  "genome_accession": "NC_001802.1",
+  "pathogen": "HIV-1",
+  "family": "Retroviridae",
+  "reference_excluded_organism": "Human immunodeficiency virus type 1",
+  "source_record": "runs/onset_chain_NC_001802_1.json",
+  "annotation_record": "runs/annotation/NC_001802_1.json",
+  "site_kinds": [
+    "hydrophobic_patch",
+    "hydrophobic_patch_predicted",
+    "functional_site",
+    "site_patch"
+  ],
+  "targets": [
+    {
+      "accession": "NC_001802.1",
+      "pathogen": "HIV-1",
+      "rank": 1,
+      "target": "Surface protein gp120",
+      "parent": "ENV_SIVMB Envelope glycoprotein gp160",
+      "uniprot": "Q1A261",
+      "tier": "exact",
+      "score": 5.76,
+      "score_terms": {
+        "conservation": 0.66,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "gate_means": "whether this chain sits where a binder can reach it and is worth the stages below. `no` is a verdict and not a failure.",
+      "chain_length_aa": 492,
+      "chain_span_on_the_relative": [
+        36,
+        527
+      ],
+      "chain_span_in_the_reading_frame": [
+        34,
+        511
+      ],
+      "chain_span_nt": [
+        5870,
+        7303
+      ],
+      "nt_confirmed_at": [
+        "the end of the chain"
+      ],
+      "reading_frame": "+1 at nt 5771",
+      "reading_frame_unresolved_because": null,
+      "function": "Attaches the virus to the host lymphoid cell by binding to the primary receptor CD4. This interaction induces a structural rearrangement creating a high affinity binding site for a chemokine coreceptor like CXCR4 and/or CCR5. Acts as a ligand for CD209/DC-SIGN and CLEC4M/DC-SIGNR, which are respectively found on dendritic cells (DCs), and on endothelial cells of liver sinusoids and lymph node sinuses. These interactions allow capture of viral particles at mucosal surfaces by these cells and subsequent transmission to permissive cells. HIV subverts the migration properties of dendritic cells to gain access to CD4+ T-cells in lymph nodes. Virus transmission to permissive T-cells occurs either in trans (without DCs infection, through viral capture and transmission), or in cis (following DCs productive infection, through the usual CD4-gp120 interaction), thereby inducing a robust infection. In trans infection, bound virions remain infectious over days and it is proposed that they are not degraded, but protected in non-lysosomal acidic organelles within the DCs close to the cell membrane thus contributing to the viral infectious potential during DCs' migration from the periphery to the lymphoid tissues. On arrival at lymphoid tissues, intact virions recycle back to DCs' cell surface allowing virus transmission to CD4+ T-cells",
+      "function_is_about": "this mature chain",
+      "function_of_the_whole_entry": null,
+      "assembles_into": "The mature envelope protein (Env) consists of a homotrimer of non-covalently associated gp120-gp41 heterodimers. The resulting complex protrudes from the virus surface as a spike. There seems to be as few as 10 spikes on the average virion. Interacts with host CD4, CCR5 and CXCR4. Gp120 also interacts with the C-type lectins CD209/DC-SIGN and CLEC4M/DC-SIGNR (collectively referred to as DC-SIGN(R)). Gp120 and gp41 interact with GalCer. Gp120 interacts with host ITGA4/ITGB7 complex; on CD4+ T-cells, this interaction results in rapid activation of integrin ITGAL/LFA-1, which facilitates efficient cell-to-cell spreading of HIV-1. Gp120 interacts with cell-associated heparan sulfate; this interaction increases virus infectivity on permissive cells and may be involved in infection of CD4- cells",
+      "catalyses": null,
+      "needs_bound": null,
+      "interacts_with_host": [],
+      "interacts_with_this_virus": [],
+      "host_species": [
+        {
+          "name": "Pan troglodytes",
+          "common_name": "Chimpanzee",
+          "taxon": 9598
+        }
+      ],
+      "families": {
+        "CDD": [
+          {
+            "id": "cd09909",
+            "name": "HIV-1-like_HR1-HR2"
+          }
+        ],
+        "Gene3D": [
+          {
+            "id": "1.10.287.210",
+            "name": "-"
+          },
+          {
+            "id": "2.170.40.20",
+            "name": "Human immunodeficiency virus 1, Gp160, envelope glycoprotein"
+          },
+          {
+            "id": "1.20.5.490",
+            "name": "Single helix bin"
+          }
+        ],
+        "InterPro": [
+          {
+            "id": "IPR036377",
+            "name": "Gp120_core_sf"
+          },
+          {
+            "id": "IPR037527",
+            "name": "Gp160"
+          },
+          {
+            "id": "IPR000328",
+            "name": "GP41-like"
+          },
+          {
+            "id": "IPR000777",
+            "name": "HIV1_Gp120"
+          }
+        ],
+        "Pfam": [
+          {
+            "id": "PF00516",
+            "name": "GP120"
+          },
+          {
+            "id": "PF00517",
+            "name": "GP41"
+          }
+        ],
+        "SUPFAM": [
+          {
+            "id": "SSF56502",
+            "name": "gp120 core"
+          },
+          {
+            "id": "SSF58069",
+            "name": "Virus ectodomain"
+          }
+        ]
+      },
+      "go_terms": {
+        "cellular_component": [
+          {
+            "id": "GO:0044175",
+            "term": "host cell endosome membrane"
+          },
+          {
+            "id": "GO:0020002",
+            "term": "host cell plasma membrane"
+          },
+          {
+            "id": "GO:0016020",
+            "term": "membrane"
+          },
+          {
+            "id": "GO:0019031",
+            "term": "viral envelope"
+          },
+          {
+            "id": "GO:0055036",
+            "term": "virion membrane"
+          }
+        ],
+        "molecular_function": [
+          {
+            "id": "GO:0005198",
+            "term": "structural molecule activity"
+          }
+        ],
+        "biological_process": [
+          {
+            "id": "GO:0075512",
+            "term": "clathrin-dependent endocytosis of virus by host cell"
+          },
+          {
+            "id": "GO:0039654",
+            "term": "fusion of virus membrane with host endosome membrane"
+          },
+          {
+            "id": "GO:0019064",
+            "term": "fusion of virus membrane with host plasma membrane"
+          },
+          {
+            "id": "GO:1903908",
+            "term": "positive regulation of plasma membrane raft polarization"
+          },
+          {
+            "id": "GO:1903911",
+            "term": "positive regulation of receptor clustering"
+          },
+          {
+            "id": "GO:0052031",
+            "term": "symbiont-mediated perturbation of host defense response"
+          },
+          {
+            "id": "GO:0019082",
+            "term": "viral protein processing"
+          },
+          {
+            "id": "GO:0019062",
+            "term": "virion attachment to host cell"
+          }
+        ]
+      },
+      "keywords": [
+        "AIDS",
+        "Apoptosis",
+        "Clathrin-mediated endocytosis of virus by host",
+        "Cleavage on pair of basic residues",
+        "Coiled coil",
+        "Disulfide bond",
+        "Fusion of virus membrane with host endosomal membrane",
+        "Fusion of virus membrane with host membrane",
+        "Glycoprotein",
+        "Host cell membrane",
+        "Host endosome",
+        "Host membrane",
+        "Host-virus interaction",
+        "Lipoprotein",
+        "Membrane",
+        "Palmitate",
+        "Signal",
+        "Transmembrane",
+        "Transmembrane helix",
+        "Viral attachment to host cell",
+        "Viral envelope protein",
+        "Viral immunoevasion",
+        "Viral penetration into host cytoplasm",
+        "Virion",
+        "Virus endocytosis by host",
+        "Virus entry into host cell"
+      ],
+      "complexes": [],
+      "structures_deposited_on_the_relative": 0,
+      "regions": [
+        {
+          "label": "Surface protein gp120",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span_in_the_reading_frame": [
+            34,
+            511
+          ],
+          "span_in_the_chain": [
+            1,
+            478
+          ],
+          "span_on_the_relative": [
+            36,
+            527
+          ],
+          "length_aa": 478,
+          "folded": true,
+          "mean_plddt": 26.59,
+          "confident_fraction": 0.0,
+          "refused_because": null
+        }
+      ],
+      "folded": true,
+      "mean_plddt": 26.59,
+      "already_drugged": [
+        "Envelope"
+      ],
+      "sites": [
+        {
+          "site_kind": "hydrophobic_patch_predicted",
+          "residues_in_the_chain": [
+            1,
+            2,
+            3,
+            6,
+            7,
+            9,
+            11,
+            12,
+            15,
+            19,
+            20,
+            21,
+            22,
+            25,
+            27,
+            28,
+            32,
+            35,
+            36,
+            37,
+            40,
+            41,
+            42,
+            51,
+            52,
+            53,
+            62,
+            63,
+            67,
+            68,
+            76,
+            78,
+            86,
+            89,
+            93,
+            94,
+            96,
+            98,
+            101,
+            115,
+            121,
+            140,
+            141,
+            142,
+            143,
+            149,
+            151,
+            158,
+            160,
+            163,
+            167,
+            168,
+            171,
+            172,
+            175,
+            177,
+            180,
+            184,
+            185,
+            186,
+            188,
+            190,
+            191,
+            192,
+            193,
+            200,
+            206,
+            209,
+            214,
+            218,
+            221,
+            222,
+            226,
+            227,
+            228,
+            232,
+            233
+          ],
+          "residue_names": [
+            "L",
+            "W",
+            "V",
+            "Y",
+            "Y",
+            "V",
+            "V",
+            "W",
+            "A",
+            "L",
+            "F",
+            "C",
+            "A",
+            "A",
+            "A",
+            "Y",
+            "V",
+            "V",
+            "W",
+            "A",
+            "A",
+            "C",
+            "V",
+            "V",
+            "V",
+            "L",
+            "M",
+            "W",
+            "M",
+            "V",
+            "I",
+            "L",
+            "C",
+            "L",
+            "C",
+            "V",
+            "L",
+            "C",
+            "L",
+            "I",
+            "I",
+            "Y",
+            "A",
+            "F",
+            "F",
+            "I",
+            "I",
+            "Y",
+            "L",
+            "C",
+            "V",
+            "I",
+            "A",
+            "C",
+            "V",
+            "F",
+            "I",
+            "Y",
+            "C",
+            "A",
+            "A",
+            "F",
+            "A",
+            "I",
+            "L",
+            "F",
+            "C",
+            "V",
+            "C",
+            "I",
+            "V",
+            "V",
+            "L",
+            "L",
+            "L",
+            "L",
+            "A"
+          ],
+          "area_a2": 6303.2,
+          "area_fraction_of_surface": 0.143,
+          "measured_on": "coordinates from the fold stage, not a deposition",
+          "mean_plddt": 26.59,
+          "confident_fraction": 0.0,
+          "on_predicted_coordinates": true,
+          "only_route_to_a_surface": true,
+          "ratio_to_deposited_median": null,
+          "what_it_is": "the same measurement on coordinates a predictor emitted, which is the only route to a surface for a protein nothing has solved",
+          "caveat": "An area measured on a prediction is comparable with another prediction and not with a deposition; on the one chain carrying both, the prediction read several times larger. The residue positions transfer far better than the area does.",
+          "residues_in_the_reading_frame": [
+            34,
+            35,
+            36,
+            39,
+            40,
+            42,
+            44,
+            45,
+            48,
+            52,
+            53,
+            54,
+            55,
+            58,
+            60,
+            61,
+            65,
+            68,
+            69,
+            70,
+            73,
+            74,
+            75,
+            84,
+            85,
+            86,
+            95,
+            96,
+            100,
+            101,
+            109,
+            111,
+            119,
+            122,
+            126,
+            127,
+            129,
+            131,
+            134,
+            148,
+            154,
+            173,
+            174,
+            175,
+            176,
+            182,
+            184,
+            191,
+            193,
+            196,
+            200,
+            201,
+            204,
+            205,
+            208,
+            210,
+            213,
+            217,
+            218,
+            219,
+            221,
+            223,
+            224,
+            225,
+            226,
+            233,
+            239,
+            242,
+            247,
+            251,
+            254,
+            255,
+            259,
+            260,
+            261,
+            265,
+            266
+          ],
+          "residue_count": 77,
+          "residues_nt": [
+            [
+              5870,
+              5872
+            ],
+            [
+              5873,
+              5875
+            ],
+            [
+              5876,
+              5878
+            ],
+            [
+              5885,
+              5887
+            ],
+            [
+              5888,
+              5890
+            ],
+            [
+              5894,
+              5896
+            ],
+            [
+              5900,
+              5902
+            ],
+            [
+              5903,
+              5905
+            ],
+            [
+              5912,
+              5914
+            ],
+            [
+              5924,
+              5926
+            ],
+            [
+              5927,
+              5929
+            ],
+            [
+              5930,
+              5932
+            ],
+            [
+              5933,
+              5935
+            ],
+            [
+              5942,
+              5944
+            ],
+            [
+              5948,
+              5950
+            ],
+            [
+              5951,
+              5953
+            ],
+            [
+              5963,
+              5965
+            ],
+            [
+              5972,
+              5974
+            ],
+            [
+              5975,
+              5977
+            ],
+            [
+              5978,
+              5980
+            ],
+            [
+              5987,
+              5989
+            ],
+            [
+              5990,
+              5992
+            ],
+            [
+              5993,
+              5995
+            ],
+            [
+              6020,
+              6022
+            ],
+            [
+              6023,
+              6025
+            ],
+            [
+              6026,
+              6028
+            ],
+            [
+              6053,
+              6055
+            ],
+            [
+              6056,
+              6058
+            ],
+            [
+              6068,
+              6070
+            ],
+            [
+              6071,
+              6073
+            ],
+            [
+              6095,
+              6097
+            ],
+            [
+              6101,
+              6103
+            ],
+            [
+              6125,
+              6127
+            ],
+            [
+              6134,
+              6136
+            ],
+            [
+              6146,
+              6148
+            ],
+            [
+              6149,
+              6151
+            ],
+            [
+              6155,
+              6157
+            ],
+            [
+              6161,
+              6163
+            ],
+            [
+              6170,
+              6172
+            ],
+            [
+              6212,
+              6214
+            ],
+            [
+              6230,
+              6232
+            ],
+            [
+              6287,
+              6289
+            ],
+            [
+              6290,
+              6292
+            ],
+            [
+              6293,
+              6295
+            ],
+            [
+              6296,
+              6298
+            ],
+            [
+              6314,
+              6316
+            ],
+            [
+              6320,
+              6322
+            ],
+            [
+              6341,
+              6343
+            ],
+            [
+              6347,
+              6349
+            ],
+            [
+              6356,
+              6358
+            ],
+            [
+              6368,
+              6370
+            ],
+            [
+              6371,
+              6373
+            ],
+            [
+              6380,
+              6382
+            ],
+            [
+              6383,
+              6385
+            ],
+            [
+              6392,
+              6394
+            ],
+            [
+              6398,
+              6400
+            ],
+            [
+              6407,
+              6409
+            ],
+            [
+              6419,
+              6421
+            ],
+            [
+              6422,
+              6424
+            ],
+            [
+              6425,
+              6427
+            ],
+            [
+              6431,
+              6433
+            ],
+            [
+              6437,
+              6439
+            ],
+            [
+              6440,
+              6442
+            ],
+            [
+              6443,
+              6445
+            ],
+            [
+              6446,
+              6448
+            ],
+            [
+              6467,
+              6469
+            ],
+            [
+              6485,
+              6487
+            ],
+            [
+              6494,
+              6496
+            ],
+            [
+              6509,
+              6511
+            ],
+            [
+              6521,
+              6523
+            ],
+            [
+              6530,
+              6532
+            ],
+            [
+              6533,
+              6535
+            ],
+            [
+              6545,
+              6547
+            ],
+            [
+              6548,
+              6550
+            ],
+            [
+              6551,
+              6553
+            ],
+            [
+              6563,
+              6565
+            ],
+            [
+              6566,
+              6568
+            ]
+          ],
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        },
+        {
+          "site_kind": "functional_site",
+          "residues_in_the_reading_frame": [
+            511
+          ],
+          "residues_in_the_chain": [
+            478
+          ],
+          "site_types": [
+            "Site"
+          ],
+          "site_descriptions": [
+            "Cleavage; by host furin"
+          ],
+          "ligands": [],
+          "on_predicted_coordinates": null,
+          "what_it_is": "residues a curator marked on the nearest relative as an active site, a binding site or a cleavage site, carried into this genome's numbering through the alignment",
+          "caveat": "A marked residue is an annotation transferred from a relative and was not measured on this pathogen. A cleavage site is where this protein is cut, which is not the same as somewhere to bind it.",
+          "residue_count": 1,
+          "residues_nt": [
+            [
+              7301,
+              7303
+            ]
+          ],
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        }
+      ],
+      "no_site_because": null,
+      "not_annotated_because": null,
+      "family": "Retroviridae"
+    },
+    {
+      "accession": "NC_001802.1",
+      "pathogen": "HIV-1",
+      "rank": 2,
+      "target": "Transmembrane protein gp41",
+      "parent": "ENV_SIVMB Envelope glycoprotein gp160",
+      "uniprot": "Q1A261",
+      "tier": "exact",
+      "score": 5.76,
+      "score_terms": {
+        "conservation": 0.66,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "gate_means": "whether this chain sits where a binder can reach it and is worth the stages below. `no` is a verdict and not a failure.",
+      "chain_length_aa": 353,
+      "chain_span_on_the_relative": [
+        528,
+        880
+      ],
+      "chain_span_in_the_reading_frame": [
+        512,
+        856
+      ],
+      "chain_span_nt": [
+        7304,
+        8338
+      ],
+      "nt_confirmed_at": [
+        "the end of the chain"
+      ],
+      "reading_frame": "+1 at nt 5771",
+      "reading_frame_unresolved_because": null,
+      "function": "Acts as a class I viral fusion protein. Under the current model, the protein has at least 3 conformational states: pre-fusion native state, pre-hairpin intermediate state, and post-fusion hairpin state. During fusion of viral and target intracellular membranes, the coiled coil regions (heptad repeats) assume a trimer-of-hairpins structure, positioning the fusion peptide in close proximity to the C-terminal region of the ectodomain. The formation of this structure appears to drive apposition and subsequent fusion of viral and target cell membranes. Complete fusion occurs in host cell endosomes and is dynamin-dependent, however some lipid transfer might occur at the plasma membrane. The virus undergoes clathrin-dependent internalization long before endosomal fusion, thus minimizing the surface exposure of conserved viral epitopes during fusion and reducing the efficacy of inhibitors targeting these epitopes. Membranes fusion leads to delivery of the nucleocapsid into the cytoplasm",
+      "function_is_about": "this mature chain",
+      "function_of_the_whole_entry": null,
+      "assembles_into": "The mature envelope protein (Env) consists of a homotrimer of non-covalently associated gp120-gp41 heterodimers. The resulting complex protrudes from the virus surface as a spike. There seems to be as few as 10 spikes on the average virion",
+      "catalyses": null,
+      "needs_bound": null,
+      "interacts_with_host": [],
+      "interacts_with_this_virus": [],
+      "host_species": [
+        {
+          "name": "Pan troglodytes",
+          "common_name": "Chimpanzee",
+          "taxon": 9598
+        }
+      ],
+      "families": {
+        "CDD": [
+          {
+            "id": "cd09909",
+            "name": "HIV-1-like_HR1-HR2"
+          }
+        ],
+        "Gene3D": [
+          {
+            "id": "1.10.287.210",
+            "name": "-"
+          },
+          {
+            "id": "2.170.40.20",
+            "name": "Human immunodeficiency virus 1, Gp160, envelope glycoprotein"
+          },
+          {
+            "id": "1.20.5.490",
+            "name": "Single helix bin"
+          }
+        ],
+        "InterPro": [
+          {
+            "id": "IPR036377",
+            "name": "Gp120_core_sf"
+          },
+          {
+            "id": "IPR037527",
+            "name": "Gp160"
+          },
+          {
+            "id": "IPR000328",
+            "name": "GP41-like"
+          },
+          {
+            "id": "IPR000777",
+            "name": "HIV1_Gp120"
+          }
+        ],
+        "Pfam": [
+          {
+            "id": "PF00516",
+            "name": "GP120"
+          },
+          {
+            "id": "PF00517",
+            "name": "GP41"
+          }
+        ],
+        "SUPFAM": [
+          {
+            "id": "SSF56502",
+            "name": "gp120 core"
+          },
+          {
+            "id": "SSF58069",
+            "name": "Virus ectodomain"
+          }
+        ]
+      },
+      "go_terms": {
+        "cellular_component": [
+          {
+            "id": "GO:0044175",
+            "term": "host cell endosome membrane"
+          },
+          {
+            "id": "GO:0020002",
+            "term": "host cell plasma membrane"
+          },
+          {
+            "id": "GO:0016020",
+            "term": "membrane"
+          },
+          {
+            "id": "GO:0019031",
+            "term": "viral envelope"
+          },
+          {
+            "id": "GO:0055036",
+            "term": "virion membrane"
+          }
+        ],
+        "molecular_function": [
+          {
+            "id": "GO:0005198",
+            "term": "structural molecule activity"
+          }
+        ],
+        "biological_process": [
+          {
+            "id": "GO:0075512",
+            "term": "clathrin-dependent endocytosis of virus by host cell"
+          },
+          {
+            "id": "GO:0039654",
+            "term": "fusion of virus membrane with host endosome membrane"
+          },
+          {
+            "id": "GO:0019064",
+            "term": "fusion of virus membrane with host plasma membrane"
+          },
+          {
+            "id": "GO:1903908",
+            "term": "positive regulation of plasma membrane raft polarization"
+          },
+          {
+            "id": "GO:1903911",
+            "term": "positive regulation of receptor clustering"
+          },
+          {
+            "id": "GO:0052031",
+            "term": "symbiont-mediated perturbation of host defense response"
+          },
+          {
+            "id": "GO:0019082",
+            "term": "viral protein processing"
+          },
+          {
+            "id": "GO:0019062",
+            "term": "virion attachment to host cell"
+          }
+        ]
+      },
+      "keywords": [
+        "AIDS",
+        "Apoptosis",
+        "Clathrin-mediated endocytosis of virus by host",
+        "Cleavage on pair of basic residues",
+        "Coiled coil",
+        "Disulfide bond",
+        "Fusion of virus membrane with host endosomal membrane",
+        "Fusion of virus membrane with host membrane",
+        "Glycoprotein",
+        "Host cell membrane",
+        "Host endosome",
+        "Host membrane",
+        "Host-virus interaction",
+        "Lipoprotein",
+        "Membrane",
+        "Palmitate",
+        "Signal",
+        "Transmembrane",
+        "Transmembrane helix",
+        "Viral attachment to host cell",
+        "Viral envelope protein",
+        "Viral immunoevasion",
+        "Viral penetration into host cytoplasm",
+        "Virion",
+        "Virus endocytosis by host",
+        "Virus entry into host cell"
+      ],
+      "complexes": [],
+      "structures_deposited_on_the_relative": 0,
+      "regions": [
+        {
+          "label": "Transmembrane protein gp41",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span_in_the_reading_frame": [
+            512,
+            856
+          ],
+          "span_in_the_chain": [
+            1,
+            345
+          ],
+          "span_on_the_relative": [
+            528,
+            880
+          ],
+          "length_aa": 345,
+          "folded": true,
+          "mean_plddt": 55.68,
+          "confident_fraction": 0.0986,
+          "refused_because": null
+        }
+      ],
+      "folded": true,
+      "mean_plddt": 55.68,
+      "already_drugged": [
+        "Envelope"
+      ],
+      "sites": [
+        {
+          "site_kind": "hydrophobic_patch_predicted",
+          "residues_in_the_chain": [
+            1,
+            2,
+            4,
+            6,
+            7,
+            8,
+            9,
+            11,
+            12,
+            14,
+            15,
+            19,
+            21,
+            22,
+            24,
+            26,
+            28,
+            30,
+            34,
+            37,
+            38,
+            44,
+            45,
+            48,
+            127,
+            130,
+            135,
+            149,
+            150,
+            152,
+            155,
+            156,
+            158,
+            159,
+            161,
+            162,
+            167,
+            168,
+            169,
+            174,
+            175,
+            176,
+            177,
+            178,
+            181,
+            182,
+            184,
+            186,
+            187,
+            189,
+            190,
+            191,
+            193,
+            194,
+            197,
+            201,
+            204,
+            206,
+            210,
+            235,
+            237,
+            238,
+            242,
+            243,
+            244,
+            246,
+            253,
+            254,
+            255,
+            257,
+            260,
+            263,
+            264,
+            265,
+            266,
+            271,
+            273,
+            279,
+            281,
+            282,
+            284,
+            286,
+            289,
+            291,
+            296,
+            300,
+            301,
+            303,
+            304,
+            306,
+            308,
+            309,
+            311,
+            312,
+            319,
+            328,
+            329,
+            332,
+            343,
+            344,
+            345
+          ],
+          "residue_names": [
+            "A",
+            "V",
+            "I",
+            "A",
+            "L",
+            "F",
+            "L",
+            "F",
+            "L",
+            "A",
+            "A",
+            "M",
+            "A",
+            "A",
+            "M",
+            "L",
+            "V",
+            "A",
+            "L",
+            "I",
+            "V",
+            "L",
+            "L",
+            "I",
+            "Y",
+            "L",
+            "I",
+            "L",
+            "L",
+            "L",
+            "W",
+            "A",
+            "L",
+            "W",
+            "W",
+            "F",
+            "W",
+            "L",
+            "W",
+            "F",
+            "I",
+            "M",
+            "I",
+            "V",
+            "L",
+            "V",
+            "L",
+            "I",
+            "V",
+            "A",
+            "V",
+            "L",
+            "I",
+            "V",
+            "V",
+            "Y",
+            "L",
+            "F",
+            "L",
+            "I",
+            "L",
+            "V",
+            "L",
+            "A",
+            "L",
+            "W",
+            "C",
+            "L",
+            "F",
+            "Y",
+            "L",
+            "L",
+            "L",
+            "L",
+            "I",
+            "V",
+            "L",
+            "W",
+            "A",
+            "L",
+            "Y",
+            "W",
+            "L",
+            "Y",
+            "L",
+            "A",
+            "V",
+            "L",
+            "L",
+            "A",
+            "A",
+            "I",
+            "V",
+            "A",
+            "I",
+            "A",
+            "I",
+            "I",
+            "I",
+            "L",
+            "L"
+          ],
+          "area_a2": 9670.4,
+          "area_fraction_of_surface": 0.315,
+          "measured_on": "coordinates from the fold stage, not a deposition",
+          "mean_plddt": 55.68,
+          "confident_fraction": 0.0986,
+          "on_predicted_coordinates": true,
+          "only_route_to_a_surface": true,
+          "ratio_to_deposited_median": null,
+          "what_it_is": "the same measurement on coordinates a predictor emitted, which is the only route to a surface for a protein nothing has solved",
+          "caveat": "An area measured on a prediction is comparable with another prediction and not with a deposition; on the one chain carrying both, the prediction read several times larger. The residue positions transfer far better than the area does.",
+          "residues_in_the_reading_frame": [
+            512,
+            513,
+            515,
+            517,
+            518,
+            519,
+            520,
+            522,
+            523,
+            525,
+            526,
+            530,
+            532,
+            533,
+            535,
+            537,
+            539,
+            541,
+            545,
+            548,
+            549,
+            555,
+            556,
+            559,
+            638,
+            641,
+            646,
+            660,
+            661,
+            663,
+            666,
+            667,
+            669,
+            670,
+            672,
+            673,
+            678,
+            679,
+            680,
+            685,
+            686,
+            687,
+            688,
+            689,
+            692,
+            693,
+            695,
+            697,
+            698,
+            700,
+            701,
+            702,
+            704,
+            705,
+            708,
+            712,
+            715,
+            717,
+            721,
+            746,
+            748,
+            749,
+            753,
+            754,
+            755,
+            757,
+            764,
+            765,
+            766,
+            768,
+            771,
+            774,
+            775,
+            776,
+            777,
+            782,
+            784,
+            790,
+            792,
+            793,
+            795,
+            797,
+            800,
+            802,
+            807,
+            811,
+            812,
+            814,
+            815,
+            817,
+            819,
+            820,
+            822,
+            823,
+            830,
+            839,
+            840,
+            843,
+            854,
+            855,
+            856
+          ],
+          "residue_count": 101,
+          "residues_nt": [
+            [
+              7304,
+              7306
+            ],
+            [
+              7307,
+              7309
+            ],
+            [
+              7313,
+              7315
+            ],
+            [
+              7319,
+              7321
+            ],
+            [
+              7322,
+              7324
+            ],
+            [
+              7325,
+              7327
+            ],
+            [
+              7328,
+              7330
+            ],
+            [
+              7334,
+              7336
+            ],
+            [
+              7337,
+              7339
+            ],
+            [
+              7343,
+              7345
+            ],
+            [
+              7346,
+              7348
+            ],
+            [
+              7358,
+              7360
+            ],
+            [
+              7364,
+              7366
+            ],
+            [
+              7367,
+              7369
+            ],
+            [
+              7373,
+              7375
+            ],
+            [
+              7379,
+              7381
+            ],
+            [
+              7385,
+              7387
+            ],
+            [
+              7391,
+              7393
+            ],
+            [
+              7403,
+              7405
+            ],
+            [
+              7412,
+              7414
+            ],
+            [
+              7415,
+              7417
+            ],
+            [
+              7433,
+              7435
+            ],
+            [
+              7436,
+              7438
+            ],
+            [
+              7445,
+              7447
+            ],
+            [
+              7682,
+              7684
+            ],
+            [
+              7691,
+              7693
+            ],
+            [
+              7706,
+              7708
+            ],
+            [
+              7748,
+              7750
+            ],
+            [
+              7751,
+              7753
+            ],
+            [
+              7757,
+              7759
+            ],
+            [
+              7766,
+              7768
+            ],
+            [
+              7769,
+              7771
+            ],
+            [
+              7775,
+              7777
+            ],
+            [
+              7778,
+              7780
+            ],
+            [
+              7784,
+              7786
+            ],
+            [
+              7787,
+              7789
+            ],
+            [
+              7802,
+              7804
+            ],
+            [
+              7805,
+              7807
+            ],
+            [
+              7808,
+              7810
+            ],
+            [
+              7823,
+              7825
+            ],
+            [
+              7826,
+              7828
+            ],
+            [
+              7829,
+              7831
+            ],
+            [
+              7832,
+              7834
+            ],
+            [
+              7835,
+              7837
+            ],
+            [
+              7844,
+              7846
+            ],
+            [
+              7847,
+              7849
+            ],
+            [
+              7853,
+              7855
+            ],
+            [
+              7859,
+              7861
+            ],
+            [
+              7862,
+              7864
+            ],
+            [
+              7868,
+              7870
+            ],
+            [
+              7871,
+              7873
+            ],
+            [
+              7874,
+              7876
+            ],
+            [
+              7880,
+              7882
+            ],
+            [
+              7883,
+              7885
+            ],
+            [
+              7892,
+              7894
+            ],
+            [
+              7904,
+              7906
+            ],
+            [
+              7913,
+              7915
+            ],
+            [
+              7919,
+              7921
+            ],
+            [
+              7931,
+              7933
+            ],
+            [
+              8006,
+              8008
+            ],
+            [
+              8012,
+              8014
+            ],
+            [
+              8015,
+              8017
+            ],
+            [
+              8027,
+              8029
+            ],
+            [
+              8030,
+              8032
+            ],
+            [
+              8033,
+              8035
+            ],
+            [
+              8039,
+              8041
+            ],
+            [
+              8060,
+              8062
+            ],
+            [
+              8063,
+              8065
+            ],
+            [
+              8066,
+              8068
+            ],
+            [
+              8072,
+              8074
+            ],
+            [
+              8081,
+              8083
+            ],
+            [
+              8090,
+              8092
+            ],
+            [
+              8093,
+              8095
+            ],
+            [
+              8096,
+              8098
+            ],
+            [
+              8099,
+              8101
+            ],
+            [
+              8114,
+              8116
+            ],
+            [
+              8120,
+              8122
+            ],
+            [
+              8138,
+              8140
+            ],
+            [
+              8144,
+              8146
+            ],
+            [
+              8147,
+              8149
+            ],
+            [
+              8153,
+              8155
+            ],
+            [
+              8159,
+              8161
+            ],
+            [
+              8168,
+              8170
+            ],
+            [
+              8174,
+              8176
+            ],
+            [
+              8189,
+              8191
+            ],
+            [
+              8201,
+              8203
+            ],
+            [
+              8204,
+              8206
+            ],
+            [
+              8210,
+              8212
+            ],
+            [
+              8213,
+              8215
+            ],
+            [
+              8219,
+              8221
+            ],
+            [
+              8225,
+              8227
+            ],
+            [
+              8228,
+              8230
+            ],
+            [
+              8234,
+              8236
+            ],
+            [
+              8237,
+              8239
+            ],
+            [
+              8258,
+              8260
+            ],
+            [
+              8285,
+              8287
+            ],
+            [
+              8288,
+              8290
+            ],
+            [
+              8297,
+              8299
+            ],
+            [
+              8330,
+              8332
+            ],
+            [
+              8333,
+              8335
+            ],
+            [
+              8336,
+              8338
+            ]
+          ],
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        }
+      ],
+      "no_site_because": null,
+      "not_annotated_because": null,
+      "family": "Retroviridae"
+    },
+    {
+      "accession": "NC_001802.1",
+      "pathogen": "HIV-1",
+      "rank": 3,
+      "target": "Protease",
+      "parent": "POL_SIVMB Gag-Pol polyprotein",
+      "uniprot": "P17283",
+      "tier": "exact",
+      "score": 5.6271,
+      "score_terms": {
+        "conservation": 1.7271,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "gate_means": "whether this chain sits where a binder can reach it and is worth the stages below. `no` is a verdict and not a failure.",
+      "chain_length_aa": 99,
+      "chain_span_on_the_relative": [
+        438,
+        536
+      ],
+      "chain_span_in_the_reading_frame": [
+        1,
+        64
+      ],
+      "chain_span_nt": [
+        1904,
+        2095
+      ],
+      "nt_confirmed_at": [
+        "the end of the chain"
+      ],
+      "reading_frame": "+1 at nt 1904",
+      "reading_frame_unresolved_because": null,
+      "function": null,
+      "function_is_about": "the whole entry",
+      "function_of_the_whole_entry": "Gag-Pol polyprotein and Gag polyprotein may regulate their own translation, by the binding genomic RNA in the 5'-UTR. At low concentration, Gag-Pol and Gag would promote translation, whereas at high concentration, the polyproteins encapsidate genomic RNA and then shut off translation (By similarity)",
+      "assembles_into": "Homodimer. The active site consists of two apposed aspartic acid residues",
+      "catalyses": null,
+      "needs_bound": null,
+      "interacts_with_host": [],
+      "interacts_with_this_virus": [],
+      "host_species": [
+        {
+          "name": "Pan",
+          "common_name": "chimpanzees",
+          "taxon": 9596
+        }
+      ],
+      "families": {
+        "CDD": [
+          {
+            "id": "cd05482",
+            "name": "HIV_retropepsin_like"
+          },
+          {
+            "id": "cd01645",
+            "name": "RT_Rtv"
+          }
+        ],
+        "Gene3D": [
+          {
+            "id": "1.10.10.200",
+            "name": "-"
+          },
+          {
+            "id": "1.10.1200.30",
+            "name": "-"
+          },
+          {
+            "id": "3.30.70.270",
+            "name": "-"
+          },
+          {
+            "id": "2.40.70.10",
+            "name": "Acid Proteases"
+          },
+          {
+            "id": "3.10.10.10",
+            "name": "HIV Type 1 Reverse Transcriptase, subunit A, domain 1"
+          },
+          {
+            "id": "1.10.375.10",
+            "name": "Human Immunodeficiency Virus Type 1 Capsid Protein"
+          },
+          {
+            "id": "1.10.150.90",
+            "name": "Immunodeficiency lentiviruses, gag gene matrix protein p17"
+          },
+          {
+            "id": "2.30.30.10",
+            "name": "Integrase, C-terminal domain superfamily, retroviral"
+          },
+          {
+            "id": "3.30.420.10",
+            "name": "Ribonuclease H-like superfamily/Ribonuclease H"
+          },
+          {
+            "id": "1.20.5.760",
+            "name": "Single helix bin"
+          },
+          {
+            "id": "4.10.60.10",
+            "name": "Zinc finger, CCHC-type"
+          }
+        ],
+        "InterPro": [
+          {
+            "id": "IPR001969",
+            "name": "Aspartic_peptidase_AS"
+          },
+          {
+            "id": "IPR043502",
+            "name": "DNA/RNA_pol_sf"
+          },
+          {
+            "id": "IPR045345",
+            "name": "Gag_p24_C"
+          },
+          {
+            "id": "IPR017856",
+            "name": "Integrase-like_N"
+          },
+          {
+            "id": "IPR036862",
+            "name": "Integrase_C_dom_sf_retrovir"
+          },
+          {
+            "id": "IPR001037",
+            "name": "Integrase_C_retrovir"
+          },
+          {
+            "id": "IPR001584",
+            "name": "Integrase_cat-core"
+          },
+          {
+            "id": "IPR003308",
+            "name": "Integrase_Zn-bd_dom_N"
+          },
+          {
+            "id": "IPR000071",
+            "name": "Lentvrl_matrix_N"
+          },
+          {
+            "id": "IPR012344",
+            "name": "Matrix_HIV/RSV_N"
+          },
+          {
+            "id": "IPR001995",
+            "name": "Peptidase_A2_cat"
+          },
+          {
+            "id": "IPR021109",
+            "name": "Peptidase_aspartic_dom_sf"
+          },
+          {
+            "id": "IPR034170",
+            "name": "Retropepsin-like_cat_dom"
+          },
+          {
+            "id": "IPR018061",
+            "name": "Retropepsins"
+          },
+          {
+            "id": "IPR008916",
+            "name": "Retrov_capsid_C"
+          },
+          {
+            "id": "IPR008919",
+            "name": "Retrov_capsid_N"
+          },
+          {
+            "id": "IPR010999",
+            "name": "Retrovr_matrix"
+          },
+          {
+            "id": "IPR043128",
+            "name": "Rev_trsase/Diguanyl_cyclase"
+          },
+          {
+            "id": "IPR012337",
+            "name": "RNaseH-like_sf"
+          },
+          {
+            "id": "IPR002156",
+            "name": "RNaseH_domain"
+          },
+          {
+            "id": "IPR036397",
+            "name": "RNaseH_sf"
+          },
+          {
+            "id": "IPR000477",
+            "name": "RT_dom"
+          },
+          {
+            "id": "IPR010659",
+            "name": "RVT_connect"
+          },
+          {
+            "id": "IPR010661",
+            "name": "RVT_thumb"
+          },
+          {
+            "id": "IPR001878",
+            "name": "Znf_CCHC"
+          },
+          {
+            "id": "IPR036875",
+            "name": "Znf_CCHC_sf"
+          }
+        ],
+        "Pfam": [
+          {
+            "id": "PF00540",
+            "name": "Gag_p17"
+          },
+          {
+            "id": "PF19317",
+            "name": "Gag_p24_C"
+          },
+          {
+            "id": "PF00552",
+            "name": "IN_DBD_C"
+          },
+          {
+            "id": "PF02022",
+            "name": "Integrase_Zn"
+          },
+          {
+            "id": "PF00075",
+            "name": "RNase_H"
+          },
+          {
+            "id": "PF00665",
+            "name": "rve"
+          },
+          {
+            "id": "PF00077",
+            "name": "RVP"
+          },
+          {
+            "id": "PF00078",
+            "name": "RVT_1"
+          },
+          {
+            "id": "PF06815",
+            "name": "RVT_connect"
+          },
+          {
+            "id": "PF06817",
+            "name": "RVT_thumb"
+          },
+          {
+            "id": "PF00098",
+            "name": "zf-CCHC"
+          }
+        ],
+        "SUPFAM": [
+          {
+            "id": "SSF50630",
+            "name": "Acid proteases"
+          },
+          {
+            "id": "SSF50122",
+            "name": "DNA-binding domain of retroviral integrase"
+          },
+          {
+            "id": "SSF56672",
+            "name": "DNA/RNA polymerases"
+          },
+          {
+            "id": "SSF46919",
+            "name": "N-terminal Zn binding domain of HIV integrase"
+          },
+          {
+            "id": "SSF47836",
+            "name": "Retroviral matrix proteins"
+          },
+          {
+            "id": "SSF47353",
+            "name": "Retrovirus capsid dimerization domain-like"
+          },
+          {
+            "id": "SSF47943",
+            "name": "Retrovirus capsid protein, N-terminal core domain"
+          },
+          {
+            "id": "SSF57756",
+            "name": "Retrovirus zinc finger-like domains"
+          },
+          {
+            "id": "SSF53098",
+            "name": "Ribonuclease H-like"
+          }
+        ],
+        "PROSITE": [
+          {
+            "id": "PS50175",
+            "name": "ASP_PROT_RETROV"
+          },
+          {
+            "id": "PS00141",
+            "name": "ASP_PROTEASE"
+          },
+          {
+            "id": "PS50994",
+            "name": "INTEGRASE"
+          },
+          {
+            "id": "PS51027",
+            "name": "INTEGRASE_DBD"
+          },
+          {
+            "id": "PS50879",
+            "name": "RNASE_H_1"
+          },
+          {
+            "id": "PS50878",
+            "name": "RT_POL"
+          },
+          {
+            "id": "PS50158",
+            "name": "ZF_CCHC"
+          },
+          {
+            "id": "PS50876",
+            "name": "ZF_INTEGRASE"
+          }
+        ]
+      },
+      "go_terms": {
+        "cellular_component": [
+          {
+            "id": "GO:0043657",
+            "term": "host cell"
+          },
+          {
+            "id": "GO:0030430",
+            "term": "host cell cytoplasm"
+          },
+          {
+            "id": "GO:0042025",
+            "term": "host cell nucleus"
+          },
+          {
+            "id": "GO:0020002",
+            "term": "host cell plasma membrane"
+          },
+          {
+            "id": "GO:0019013",
+            "term": "viral nucleocapsid"
+          }
+        ],
+        "molecular_function": [
+          {
+            "id": "GO:0004190",
+            "term": "aspartic-type endopeptidase activity"
+          },
+          {
+            "id": "GO:0003677",
+            "term": "DNA binding"
+          },
+          {
+            "id": "GO:0003887",
+            "term": "DNA-directed DNA polymerase activity"
+          },
+          {
+            "id": "GO:0004533",
+            "term": "exoribonuclease H activity"
+          },
+          {
+            "id": "GO:0003723",
+            "term": "RNA binding"
+          },
+          {
+            "id": "GO:0003964",
+            "term": "RNA-directed DNA polymerase activity"
+          },
+          {
+            "id": "GO:0004523",
+            "term": "RNA-DNA hybrid ribonuclease activity"
+          },
+          {
+            "id": "GO:0005198",
+            "term": "structural molecule activity"
+          },
+          {
+            "id": "GO:0008270",
+            "term": "zinc ion binding"
+          }
+        ],
+        "biological_process": [
+          {
+            "id": "GO:0015074",
+            "term": "DNA integration"
+          },
+          {
+            "id": "GO:0006310",
+            "term": "DNA recombination"
+          },
+          {
+            "id": "GO:0075713",
+            "term": "establishment of integrated proviral latency"
+          },
+          {
+            "id": "GO:0006508",
+            "term": "proteolysis"
+          },
+          {
+            "id": "GO:0046718",
+            "term": "symbiont entry into host cell"
+          },
+          {
+            "id": "GO:0039657",
+            "term": "symbiont-mediated suppression of host gene expression"
+          },
+          {
+            "id": "GO:0044826",
+            "term": "viral genome integration into host DNA"
+          },
+          {
+            "id": "GO:0075732",
+            "term": "viral penetration into host nucleus"
+          },
+          {
+            "id": "GO:0075523",
+            "term": "viral translational frameshifting"
+          }
+        ]
+      },
+      "keywords": [
+        "Aspartyl protease",
+        "Capsid protein",
+        "DNA integration",
+        "DNA recombination",
+        "DNA-binding",
+        "DNA-directed DNA polymerase",
+        "Endonuclease",
+        "Eukaryotic host gene expression shutoff by virus",
+        "Eukaryotic host translation shutoff by virus",
+        "Host cell membrane",
+        "Host cytoplasm",
+        "Host gene expression shutoff by virus",
+        "Host membrane",
+        "Host nucleus",
+        "Host-virus interaction",
+        "Hydrolase",
+        "Lipoprotein",
+        "Magnesium",
+        "Membrane",
+        "Metal-binding",
+        "Multifunctional enzyme",
+        "Myristate",
+        "Nuclease",
+        "Nucleotidyltransferase",
+        "Phosphoprotein",
+        "Protease",
+        "Repeat",
+        "Ribosomal frameshifting",
+        "RNA-binding",
+        "RNA-directed DNA polymerase",
+        "Transferase",
+        "Viral genome integration",
+        "Viral nucleoprotein",
+        "Viral penetration into host nucleus",
+        "Viral release from host cell",
+        "Virion",
+        "Virion maturation",
+        "Virus entry into host cell",
+        "Zinc",
+        "Zinc-finger"
+      ],
+      "complexes": [],
+      "structures_deposited_on_the_relative": 0,
+      "regions": [
+        {
+          "label": "Protease",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span_in_the_reading_frame": [
+            1,
+            64
+          ],
+          "span_in_the_chain": [
+            1,
+            64
+          ],
+          "span_on_the_relative": [
+            438,
+            536
+          ],
+          "length_aa": 64,
+          "folded": true,
+          "mean_plddt": 84.97,
+          "confident_fraction": 0.9688,
+          "refused_because": null
+        }
+      ],
+      "folded": true,
+      "mean_plddt": 84.97,
+      "already_drugged": [
+        "Protease"
+      ],
+      "sites": [
+        {
+          "site_kind": "hydrophobic_patch_predicted",
+          "residues_in_the_chain": [
+            1,
+            7,
+            11,
+            12,
+            15,
+            18,
+            19,
+            41,
+            42,
+            47,
+            49,
+            50,
+            55,
+            60,
+            62,
+            64
+          ],
+          "residue_names": [
+            "M",
+            "W",
+            "M",
+            "I",
+            "I",
+            "F",
+            "I",
+            "L",
+            "V",
+            "V",
+            "I",
+            "I",
+            "L",
+            "C",
+            "L",
+            "F"
+          ],
+          "area_a2": 1790.1,
+          "area_fraction_of_surface": 0.315,
+          "measured_on": "coordinates from the fold stage, not a deposition",
+          "mean_plddt": 84.97,
+          "confident_fraction": 0.9688,
+          "on_predicted_coordinates": true,
+          "only_route_to_a_surface": true,
+          "ratio_to_deposited_median": null,
+          "what_it_is": "the same measurement on coordinates a predictor emitted, which is the only route to a surface for a protein nothing has solved",
+          "caveat": "An area measured on a prediction is comparable with another prediction and not with a deposition; on the one chain carrying both, the prediction read several times larger. The residue positions transfer far better than the area does.",
+          "residues_in_the_reading_frame": [
+            1,
+            7,
+            11,
+            12,
+            15,
+            18,
+            19,
+            41,
+            42,
+            47,
+            49,
+            50,
+            55,
+            60,
+            62,
+            64
+          ],
+          "residue_count": 16,
+          "residues_nt": [
+            [
+              1904,
+              1906
+            ],
+            [
+              1922,
+              1924
+            ],
+            [
+              1934,
+              1936
+            ],
+            [
+              1937,
+              1939
+            ],
+            [
+              1946,
+              1948
+            ],
+            [
+              1955,
+              1957
+            ],
+            [
+              1958,
+              1960
+            ],
+            [
+              2024,
+              2026
+            ],
+            [
+              2027,
+              2029
+            ],
+            [
+              2042,
+              2044
+            ],
+            [
+              2048,
+              2050
+            ],
+            [
+              2051,
+              2053
+            ],
+            [
+              2066,
+              2068
+            ],
+            [
+              2081,
+              2083
+            ],
+            [
+              2087,
+              2089
+            ],
+            [
+              2093,
+              2095
+            ]
+          ],
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        },
+        {
+          "site_kind": "functional_site",
+          "residues_in_the_reading_frame": [
+            64
+          ],
+          "residues_in_the_chain": [
+            64
+          ],
+          "site_types": [
+            "Active site",
+            "Site"
+          ],
+          "site_descriptions": [
+            "Cleavage; by viral protease",
+            "For protease activity; shared with dimeric partner",
+            "Cleavage; by viral protease"
+          ],
+          "ligands": [],
+          "on_predicted_coordinates": null,
+          "what_it_is": "residues a curator marked on the nearest relative as an active site, a binding site or a cleavage site, carried into this genome's numbering through the alignment",
+          "caveat": "A marked residue is an annotation transferred from a relative and was not measured on this pathogen. A cleavage site is where this protein is cut, which is not the same as somewhere to bind it.",
+          "residue_count": 1,
+          "residues_nt": [
+            [
+              2093,
+              2095
+            ]
+          ],
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        }
+      ],
+      "no_site_because": null,
+      "not_annotated_because": null,
+      "family": "Retroviridae"
+    },
+    {
+      "accession": "NC_001802.1",
+      "pathogen": "HIV-1",
+      "rank": 4,
+      "target": "p51 RT",
+      "parent": "POL_SIVMB Gag-Pol polyprotein",
+      "uniprot": "P17283",
+      "tier": "exact",
+      "score": 5.6271,
+      "score_terms": {
+        "conservation": 1.7271,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "gate_means": "whether this chain sits where a binder can reach it and is worth the stages below. `no` is a verdict and not a failure.",
+      "chain_length_aa": 440,
+      "chain_span_on_the_relative": [
+        537,
+        976
+      ],
+      "chain_span_in_the_reading_frame": [
+        65,
+        504
+      ],
+      "chain_span_nt": [
+        2096,
+        3415
+      ],
+      "nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "reading_frame": "+1 at nt 1904",
+      "reading_frame_unresolved_because": null,
+      "function": null,
+      "function_is_about": "the whole entry",
+      "function_of_the_whole_entry": "Gag-Pol polyprotein and Gag polyprotein may regulate their own translation, by the binding genomic RNA in the 5'-UTR. At low concentration, Gag-Pol and Gag would promote translation, whereas at high concentration, the polyproteins encapsidate genomic RNA and then shut off translation (By similarity)",
+      "assembles_into": null,
+      "catalyses": null,
+      "needs_bound": null,
+      "interacts_with_host": [],
+      "interacts_with_this_virus": [],
+      "host_species": [
+        {
+          "name": "Pan",
+          "common_name": "chimpanzees",
+          "taxon": 9596
+        }
+      ],
+      "families": {
+        "CDD": [
+          {
+            "id": "cd05482",
+            "name": "HIV_retropepsin_like"
+          },
+          {
+            "id": "cd01645",
+            "name": "RT_Rtv"
+          }
+        ],
+        "Gene3D": [
+          {
+            "id": "1.10.10.200",
+            "name": "-"
+          },
+          {
+            "id": "1.10.1200.30",
+            "name": "-"
+          },
+          {
+            "id": "3.30.70.270",
+            "name": "-"
+          },
+          {
+            "id": "2.40.70.10",
+            "name": "Acid Proteases"
+          },
+          {
+            "id": "3.10.10.10",
+            "name": "HIV Type 1 Reverse Transcriptase, subunit A, domain 1"
+          },
+          {
+            "id": "1.10.375.10",
+            "name": "Human Immunodeficiency Virus Type 1 Capsid Protein"
+          },
+          {
+            "id": "1.10.150.90",
+            "name": "Immunodeficiency lentiviruses, gag gene matrix protein p17"
+          },
+          {
+            "id": "2.30.30.10",
+            "name": "Integrase, C-terminal domain superfamily, retroviral"
+          },
+          {
+            "id": "3.30.420.10",
+            "name": "Ribonuclease H-like superfamily/Ribonuclease H"
+          },
+          {
+            "id": "1.20.5.760",
+            "name": "Single helix bin"
+          },
+          {
+            "id": "4.10.60.10",
+            "name": "Zinc finger, CCHC-type"
+          }
+        ],
+        "InterPro": [
+          {
+            "id": "IPR001969",
+            "name": "Aspartic_peptidase_AS"
+          },
+          {
+            "id": "IPR043502",
+            "name": "DNA/RNA_pol_sf"
+          },
+          {
+            "id": "IPR045345",
+            "name": "Gag_p24_C"
+          },
+          {
+            "id": "IPR017856",
+            "name": "Integrase-like_N"
+          },
+          {
+            "id": "IPR036862",
+            "name": "Integrase_C_dom_sf_retrovir"
+          },
+          {
+            "id": "IPR001037",
+            "name": "Integrase_C_retrovir"
+          },
+          {
+            "id": "IPR001584",
+            "name": "Integrase_cat-core"
+          },
+          {
+            "id": "IPR003308",
+            "name": "Integrase_Zn-bd_dom_N"
+          },
+          {
+            "id": "IPR000071",
+            "name": "Lentvrl_matrix_N"
+          },
+          {
+            "id": "IPR012344",
+            "name": "Matrix_HIV/RSV_N"
+          },
+          {
+            "id": "IPR001995",
+            "name": "Peptidase_A2_cat"
+          },
+          {
+            "id": "IPR021109",
+            "name": "Peptidase_aspartic_dom_sf"
+          },
+          {
+            "id": "IPR034170",
+            "name": "Retropepsin-like_cat_dom"
+          },
+          {
+            "id": "IPR018061",
+            "name": "Retropepsins"
+          },
+          {
+            "id": "IPR008916",
+            "name": "Retrov_capsid_C"
+          },
+          {
+            "id": "IPR008919",
+            "name": "Retrov_capsid_N"
+          },
+          {
+            "id": "IPR010999",
+            "name": "Retrovr_matrix"
+          },
+          {
+            "id": "IPR043128",
+            "name": "Rev_trsase/Diguanyl_cyclase"
+          },
+          {
+            "id": "IPR012337",
+            "name": "RNaseH-like_sf"
+          },
+          {
+            "id": "IPR002156",
+            "name": "RNaseH_domain"
+          },
+          {
+            "id": "IPR036397",
+            "name": "RNaseH_sf"
+          },
+          {
+            "id": "IPR000477",
+            "name": "RT_dom"
+          },
+          {
+            "id": "IPR010659",
+            "name": "RVT_connect"
+          },
+          {
+            "id": "IPR010661",
+            "name": "RVT_thumb"
+          },
+          {
+            "id": "IPR001878",
+            "name": "Znf_CCHC"
+          },
+          {
+            "id": "IPR036875",
+            "name": "Znf_CCHC_sf"
+          }
+        ],
+        "Pfam": [
+          {
+            "id": "PF00540",
+            "name": "Gag_p17"
+          },
+          {
+            "id": "PF19317",
+            "name": "Gag_p24_C"
+          },
+          {
+            "id": "PF00552",
+            "name": "IN_DBD_C"
+          },
+          {
+            "id": "PF02022",
+            "name": "Integrase_Zn"
+          },
+          {
+            "id": "PF00075",
+            "name": "RNase_H"
+          },
+          {
+            "id": "PF00665",
+            "name": "rve"
+          },
+          {
+            "id": "PF00077",
+            "name": "RVP"
+          },
+          {
+            "id": "PF00078",
+            "name": "RVT_1"
+          },
+          {
+            "id": "PF06815",
+            "name": "RVT_connect"
+          },
+          {
+            "id": "PF06817",
+            "name": "RVT_thumb"
+          },
+          {
+            "id": "PF00098",
+            "name": "zf-CCHC"
+          }
+        ],
+        "SUPFAM": [
+          {
+            "id": "SSF50630",
+            "name": "Acid proteases"
+          },
+          {
+            "id": "SSF50122",
+            "name": "DNA-binding domain of retroviral integrase"
+          },
+          {
+            "id": "SSF56672",
+            "name": "DNA/RNA polymerases"
+          },
+          {
+            "id": "SSF46919",
+            "name": "N-terminal Zn binding domain of HIV integrase"
+          },
+          {
+            "id": "SSF47836",
+            "name": "Retroviral matrix proteins"
+          },
+          {
+            "id": "SSF47353",
+            "name": "Retrovirus capsid dimerization domain-like"
+          },
+          {
+            "id": "SSF47943",
+            "name": "Retrovirus capsid protein, N-terminal core domain"
+          },
+          {
+            "id": "SSF57756",
+            "name": "Retrovirus zinc finger-like domains"
+          },
+          {
+            "id": "SSF53098",
+            "name": "Ribonuclease H-like"
+          }
+        ],
+        "PROSITE": [
+          {
+            "id": "PS50175",
+            "name": "ASP_PROT_RETROV"
+          },
+          {
+            "id": "PS00141",
+            "name": "ASP_PROTEASE"
+          },
+          {
+            "id": "PS50994",
+            "name": "INTEGRASE"
+          },
+          {
+            "id": "PS51027",
+            "name": "INTEGRASE_DBD"
+          },
+          {
+            "id": "PS50879",
+            "name": "RNASE_H_1"
+          },
+          {
+            "id": "PS50878",
+            "name": "RT_POL"
+          },
+          {
+            "id": "PS50158",
+            "name": "ZF_CCHC"
+          },
+          {
+            "id": "PS50876",
+            "name": "ZF_INTEGRASE"
+          }
+        ]
+      },
+      "go_terms": {
+        "cellular_component": [
+          {
+            "id": "GO:0043657",
+            "term": "host cell"
+          },
+          {
+            "id": "GO:0030430",
+            "term": "host cell cytoplasm"
+          },
+          {
+            "id": "GO:0042025",
+            "term": "host cell nucleus"
+          },
+          {
+            "id": "GO:0020002",
+            "term": "host cell plasma membrane"
+          },
+          {
+            "id": "GO:0019013",
+            "term": "viral nucleocapsid"
+          }
+        ],
+        "molecular_function": [
+          {
+            "id": "GO:0004190",
+            "term": "aspartic-type endopeptidase activity"
+          },
+          {
+            "id": "GO:0003677",
+            "term": "DNA binding"
+          },
+          {
+            "id": "GO:0003887",
+            "term": "DNA-directed DNA polymerase activity"
+          },
+          {
+            "id": "GO:0004533",
+            "term": "exoribonuclease H activity"
+          },
+          {
+            "id": "GO:0003723",
+            "term": "RNA binding"
+          },
+          {
+            "id": "GO:0003964",
+            "term": "RNA-directed DNA polymerase activity"
+          },
+          {
+            "id": "GO:0004523",
+            "term": "RNA-DNA hybrid ribonuclease activity"
+          },
+          {
+            "id": "GO:0005198",
+            "term": "structural molecule activity"
+          },
+          {
+            "id": "GO:0008270",
+            "term": "zinc ion binding"
+          }
+        ],
+        "biological_process": [
+          {
+            "id": "GO:0015074",
+            "term": "DNA integration"
+          },
+          {
+            "id": "GO:0006310",
+            "term": "DNA recombination"
+          },
+          {
+            "id": "GO:0075713",
+            "term": "establishment of integrated proviral latency"
+          },
+          {
+            "id": "GO:0006508",
+            "term": "proteolysis"
+          },
+          {
+            "id": "GO:0046718",
+            "term": "symbiont entry into host cell"
+          },
+          {
+            "id": "GO:0039657",
+            "term": "symbiont-mediated suppression of host gene expression"
+          },
+          {
+            "id": "GO:0044826",
+            "term": "viral genome integration into host DNA"
+          },
+          {
+            "id": "GO:0075732",
+            "term": "viral penetration into host nucleus"
+          },
+          {
+            "id": "GO:0075523",
+            "term": "viral translational frameshifting"
+          }
+        ]
+      },
+      "keywords": [
+        "Aspartyl protease",
+        "Capsid protein",
+        "DNA integration",
+        "DNA recombination",
+        "DNA-binding",
+        "DNA-directed DNA polymerase",
+        "Endonuclease",
+        "Eukaryotic host gene expression shutoff by virus",
+        "Eukaryotic host translation shutoff by virus",
+        "Host cell membrane",
+        "Host cytoplasm",
+        "Host gene expression shutoff by virus",
+        "Host membrane",
+        "Host nucleus",
+        "Host-virus interaction",
+        "Hydrolase",
+        "Lipoprotein",
+        "Magnesium",
+        "Membrane",
+        "Metal-binding",
+        "Multifunctional enzyme",
+        "Myristate",
+        "Nuclease",
+        "Nucleotidyltransferase",
+        "Phosphoprotein",
+        "Protease",
+        "Repeat",
+        "Ribosomal frameshifting",
+        "RNA-binding",
+        "RNA-directed DNA polymerase",
+        "Transferase",
+        "Viral genome integration",
+        "Viral nucleoprotein",
+        "Viral penetration into host nucleus",
+        "Viral release from host cell",
+        "Virion",
+        "Virion maturation",
+        "Virus entry into host cell",
+        "Zinc",
+        "Zinc-finger"
+      ],
+      "complexes": [],
+      "structures_deposited_on_the_relative": 0,
+      "regions": [
+        {
+          "label": "p51 RT",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span_in_the_reading_frame": [
+            65,
+            504
+          ],
+          "span_in_the_chain": [
+            1,
+            440
+          ],
+          "span_on_the_relative": [
+            537,
+            976
+          ],
+          "length_aa": 440,
+          "folded": true,
+          "mean_plddt": 84.97,
+          "confident_fraction": 0.8295,
+          "refused_because": null
+        }
+      ],
+      "folded": true,
+      "mean_plddt": 84.97,
+      "already_drugged": [
+        "Reverse transcriptase"
+      ],
+      "sites": [
+        {
+          "site_kind": "hydrophobic_patch_predicted",
+          "residues_in_the_chain": [
+            365,
+            389,
+            398,
+            402,
+            405,
+            406,
+            408,
+            410,
+            411,
+            414,
+            417,
+            422,
+            425,
+            426,
+            427,
+            429,
+            434,
+            435,
+            437,
+            440
+          ],
+          "residue_names": [
+            "V",
+            "F",
+            "W",
+            "W",
+            "Y",
+            "W",
+            "A",
+            "W",
+            "I",
+            "W",
+            "V",
+            "L",
+            "L",
+            "W",
+            "Y",
+            "L",
+            "I",
+            "V",
+            "A",
+            "F"
+          ],
+          "area_a2": 1895.8,
+          "area_fraction_of_surface": 0.071,
+          "measured_on": "coordinates from the fold stage, not a deposition",
+          "mean_plddt": 84.97,
+          "confident_fraction": 0.8295,
+          "on_predicted_coordinates": true,
+          "only_route_to_a_surface": true,
+          "ratio_to_deposited_median": null,
+          "what_it_is": "the same measurement on coordinates a predictor emitted, which is the only route to a surface for a protein nothing has solved",
+          "caveat": "An area measured on a prediction is comparable with another prediction and not with a deposition; on the one chain carrying both, the prediction read several times larger. The residue positions transfer far better than the area does.",
+          "residues_in_the_reading_frame": [
+            429,
+            453,
+            462,
+            466,
+            469,
+            470,
+            472,
+            474,
+            475,
+            478,
+            481,
+            486,
+            489,
+            490,
+            491,
+            493,
+            498,
+            499,
+            501,
+            504
+          ],
+          "residue_count": 20,
+          "residues_nt": [
+            [
+              3188,
+              3190
+            ],
+            [
+              3260,
+              3262
+            ],
+            [
+              3287,
+              3289
+            ],
+            [
+              3299,
+              3301
+            ],
+            [
+              3308,
+              3310
+            ],
+            [
+              3311,
+              3313
+            ],
+            [
+              3317,
+              3319
+            ],
+            [
+              3323,
+              3325
+            ],
+            [
+              3326,
+              3328
+            ],
+            [
+              3335,
+              3337
+            ],
+            [
+              3344,
+              3346
+            ],
+            [
+              3359,
+              3361
+            ],
+            [
+              3368,
+              3370
+            ],
+            [
+              3371,
+              3373
+            ],
+            [
+              3374,
+              3376
+            ],
+            [
+              3380,
+              3382
+            ],
+            [
+              3395,
+              3397
+            ],
+            [
+              3398,
+              3400
+            ],
+            [
+              3404,
+              3406
+            ],
+            [
+              3413,
+              3415
+            ]
+          ],
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        },
+        {
+          "site_kind": "functional_site",
+          "residues_in_the_reading_frame": [
+            65,
+            174,
+            249,
+            250,
+            465,
+            478,
+            504
+          ],
+          "residues_in_the_chain": [
+            1,
+            110,
+            185,
+            186,
+            401,
+            414,
+            440
+          ],
+          "site_types": [
+            "Binding site",
+            "Site"
+          ],
+          "site_descriptions": [
+            "Cleavage; by viral protease",
+            "Essential for RT p66/p51 heterodimerization",
+            "Essential for RT p66/p51 heterodimerization",
+            "Cleavage; by viral protease"
+          ],
+          "ligands": [
+            "Mg(2+)"
+          ],
+          "on_predicted_coordinates": null,
+          "what_it_is": "residues a curator marked on the nearest relative as an active site, a binding site or a cleavage site, carried into this genome's numbering through the alignment",
+          "caveat": "A marked residue is an annotation transferred from a relative and was not measured on this pathogen. A cleavage site is where this protein is cut, which is not the same as somewhere to bind it.",
+          "residue_count": 7,
+          "residues_nt": [
+            [
+              2096,
+              2098
+            ],
+            [
+              2423,
+              2425
+            ],
+            [
+              2648,
+              2650
+            ],
+            [
+              2651,
+              2653
+            ],
+            [
+              3296,
+              3298
+            ],
+            [
+              3335,
+              3337
+            ],
+            [
+              3413,
+              3415
+            ]
+          ],
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        }
+      ],
+      "no_site_because": null,
+      "not_annotated_because": null,
+      "family": "Retroviridae"
+    },
+    {
+      "accession": "NC_001802.1",
+      "pathogen": "HIV-1",
+      "rank": 5,
+      "target": "unidentified probable surface antigen",
+      "parent": null,
+      "uniprot": null,
+      "tier": "topology",
+      "score": 3.6,
+      "score_terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "gate_means": "whether this chain sits where a binder can reach it and is worth the stages below. `no` is a verdict and not a failure.",
+      "chain_length_aa": null,
+      "chain_span_on_the_relative": null,
+      "chain_span_in_the_reading_frame": null,
+      "chain_span_nt": null,
+      "nt_confirmed_at": null,
+      "reading_frame": null,
+      "reading_frame_unresolved_because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation",
+      "function": null,
+      "function_is_about": null,
+      "function_of_the_whole_entry": null,
+      "assembles_into": null,
+      "catalyses": null,
+      "needs_bound": null,
+      "interacts_with_host": [],
+      "interacts_with_this_virus": [],
+      "host_species": [],
+      "families": {},
+      "go_terms": {},
+      "keywords": [],
+      "complexes": [],
+      "structures_deposited_on_the_relative": null,
+      "regions": [
+        {
+          "label": "unidentified probable surface antigen",
+          "type": "ORF",
+          "description": "the whole called ORF; no mature-chain boundaries were read",
+          "span_in_the_reading_frame": [
+            1,
+            189
+          ],
+          "span_in_the_chain": null,
+          "span_on_the_relative": null,
+          "length_aa": 189,
+          "folded": true,
+          "mean_plddt": 32.91,
+          "confident_fraction": 0.0,
+          "refused_because": null
+        }
+      ],
+      "folded": true,
+      "mean_plddt": 32.91,
+      "already_drugged": null,
+      "sites": [
+        {
+          "site_kind": "hydrophobic_patch_predicted",
+          "residues_in_the_chain": [
+            5,
+            7,
+            10,
+            11,
+            12,
+            13,
+            15,
+            16,
+            17,
+            20,
+            21,
+            22,
+            23,
+            24,
+            26,
+            31,
+            32,
+            33,
+            34,
+            36,
+            38,
+            39,
+            41,
+            42,
+            44,
+            45,
+            46,
+            48,
+            49,
+            57,
+            59,
+            62,
+            63,
+            64,
+            66,
+            67,
+            70,
+            71,
+            72,
+            73,
+            75,
+            77,
+            83,
+            84,
+            87,
+            88,
+            90,
+            93,
+            94,
+            96,
+            98,
+            99,
+            105,
+            107,
+            111,
+            112,
+            113,
+            114,
+            118,
+            119,
+            124,
+            125,
+            126,
+            130,
+            131,
+            132,
+            134,
+            135,
+            138,
+            139,
+            140,
+            141,
+            142,
+            145,
+            146,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            160,
+            161,
+            163,
+            166,
+            167,
+            168,
+            173,
+            175,
+            181,
+            182,
+            185,
+            186,
+            188
+          ],
+          "residue_names": [
+            "V",
+            "C",
+            "C",
+            "C",
+            "C",
+            "A",
+            "I",
+            "A",
+            "L",
+            "L",
+            "F",
+            "C",
+            "C",
+            "C",
+            "I",
+            "C",
+            "L",
+            "A",
+            "C",
+            "V",
+            "V",
+            "I",
+            "A",
+            "A",
+            "I",
+            "V",
+            "L",
+            "A",
+            "A",
+            "A",
+            "I",
+            "A",
+            "L",
+            "F",
+            "L",
+            "C",
+            "L",
+            "L",
+            "F",
+            "A",
+            "V",
+            "A",
+            "I",
+            "F",
+            "L",
+            "Y",
+            "Y",
+            "L",
+            "L",
+            "L",
+            "L",
+            "I",
+            "L",
+            "I",
+            "L",
+            "L",
+            "L",
+            "L",
+            "L",
+            "V",
+            "V",
+            "I",
+            "F",
+            "L",
+            "I",
+            "C",
+            "L",
+            "M",
+            "A",
+            "Y",
+            "I",
+            "A",
+            "F",
+            "F",
+            "C",
+            "M",
+            "F",
+            "I",
+            "I",
+            "C",
+            "F",
+            "I",
+            "I",
+            "V",
+            "L",
+            "V",
+            "L",
+            "F",
+            "L",
+            "V",
+            "L",
+            "L",
+            "C",
+            "V",
+            "L"
+          ],
+          "area_a2": 8466.2,
+          "area_fraction_of_surface": 0.494,
+          "measured_on": "coordinates from the fold stage, not a deposition",
+          "mean_plddt": 32.91,
+          "confident_fraction": 0.0,
+          "on_predicted_coordinates": true,
+          "only_route_to_a_surface": true,
+          "ratio_to_deposited_median": null,
+          "what_it_is": "the same measurement on coordinates a predictor emitted, which is the only route to a surface for a protein nothing has solved",
+          "caveat": "An area measured on a prediction is comparable with another prediction and not with a deposition; on the one chain carrying both, the prediction read several times larger. The residue positions transfer far better than the area does.",
+          "residues_in_the_reading_frame": null,
+          "residue_count": 95,
+          "residues_nt": null,
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        }
+      ],
+      "no_site_because": null,
+      "not_annotated_because": "this chain was identified with no reviewed relative, so there is no curated entry to read a function from",
+      "family": "Retroviridae"
+    },
+    {
+      "accession": "NC_001802.1",
+      "pathogen": "HIV-1",
+      "rank": 6,
+      "target": "Capsid protein p24",
+      "parent": "POL_SIVMB Gag-Pol polyprotein",
+      "uniprot": "P17283",
+      "tier": "exact",
+      "score": 3.2271,
+      "score_terms": {
+        "conservation": 1.7271,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "gate_means": "whether this chain sits where a binder can reach it and is worth the stages below. `no` is a verdict and not a failure.",
+      "chain_length_aa": 231,
+      "chain_span_on_the_relative": [
+        82,
+        312
+      ],
+      "chain_span_in_the_reading_frame": [
+        133,
+        363
+      ],
+      "chain_span_nt": [
+        732,
+        1424
+      ],
+      "nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "reading_frame": "+2 at nt 336",
+      "reading_frame_unresolved_because": null,
+      "function": null,
+      "function_is_about": "the whole entry",
+      "function_of_the_whole_entry": "Gag-Pol polyprotein and Gag polyprotein may regulate their own translation, by the binding genomic RNA in the 5'-UTR. At low concentration, Gag-Pol and Gag would promote translation, whereas at high concentration, the polyproteins encapsidate genomic RNA and then shut off translation (By similarity)",
+      "assembles_into": null,
+      "catalyses": null,
+      "needs_bound": null,
+      "interacts_with_host": [],
+      "interacts_with_this_virus": [],
+      "host_species": [
+        {
+          "name": "Pan",
+          "common_name": "chimpanzees",
+          "taxon": 9596
+        }
+      ],
+      "families": {
+        "CDD": [
+          {
+            "id": "cd05482",
+            "name": "HIV_retropepsin_like"
+          },
+          {
+            "id": "cd01645",
+            "name": "RT_Rtv"
+          }
+        ],
+        "Gene3D": [
+          {
+            "id": "1.10.10.200",
+            "name": "-"
+          },
+          {
+            "id": "1.10.1200.30",
+            "name": "-"
+          },
+          {
+            "id": "3.30.70.270",
+            "name": "-"
+          },
+          {
+            "id": "2.40.70.10",
+            "name": "Acid Proteases"
+          },
+          {
+            "id": "3.10.10.10",
+            "name": "HIV Type 1 Reverse Transcriptase, subunit A, domain 1"
+          },
+          {
+            "id": "1.10.375.10",
+            "name": "Human Immunodeficiency Virus Type 1 Capsid Protein"
+          },
+          {
+            "id": "1.10.150.90",
+            "name": "Immunodeficiency lentiviruses, gag gene matrix protein p17"
+          },
+          {
+            "id": "2.30.30.10",
+            "name": "Integrase, C-terminal domain superfamily, retroviral"
+          },
+          {
+            "id": "3.30.420.10",
+            "name": "Ribonuclease H-like superfamily/Ribonuclease H"
+          },
+          {
+            "id": "1.20.5.760",
+            "name": "Single helix bin"
+          },
+          {
+            "id": "4.10.60.10",
+            "name": "Zinc finger, CCHC-type"
+          }
+        ],
+        "InterPro": [
+          {
+            "id": "IPR001969",
+            "name": "Aspartic_peptidase_AS"
+          },
+          {
+            "id": "IPR043502",
+            "name": "DNA/RNA_pol_sf"
+          },
+          {
+            "id": "IPR045345",
+            "name": "Gag_p24_C"
+          },
+          {
+            "id": "IPR017856",
+            "name": "Integrase-like_N"
+          },
+          {
+            "id": "IPR036862",
+            "name": "Integrase_C_dom_sf_retrovir"
+          },
+          {
+            "id": "IPR001037",
+            "name": "Integrase_C_retrovir"
+          },
+          {
+            "id": "IPR001584",
+            "name": "Integrase_cat-core"
+          },
+          {
+            "id": "IPR003308",
+            "name": "Integrase_Zn-bd_dom_N"
+          },
+          {
+            "id": "IPR000071",
+            "name": "Lentvrl_matrix_N"
+          },
+          {
+            "id": "IPR012344",
+            "name": "Matrix_HIV/RSV_N"
+          },
+          {
+            "id": "IPR001995",
+            "name": "Peptidase_A2_cat"
+          },
+          {
+            "id": "IPR021109",
+            "name": "Peptidase_aspartic_dom_sf"
+          },
+          {
+            "id": "IPR034170",
+            "name": "Retropepsin-like_cat_dom"
+          },
+          {
+            "id": "IPR018061",
+            "name": "Retropepsins"
+          },
+          {
+            "id": "IPR008916",
+            "name": "Retrov_capsid_C"
+          },
+          {
+            "id": "IPR008919",
+            "name": "Retrov_capsid_N"
+          },
+          {
+            "id": "IPR010999",
+            "name": "Retrovr_matrix"
+          },
+          {
+            "id": "IPR043128",
+            "name": "Rev_trsase/Diguanyl_cyclase"
+          },
+          {
+            "id": "IPR012337",
+            "name": "RNaseH-like_sf"
+          },
+          {
+            "id": "IPR002156",
+            "name": "RNaseH_domain"
+          },
+          {
+            "id": "IPR036397",
+            "name": "RNaseH_sf"
+          },
+          {
+            "id": "IPR000477",
+            "name": "RT_dom"
+          },
+          {
+            "id": "IPR010659",
+            "name": "RVT_connect"
+          },
+          {
+            "id": "IPR010661",
+            "name": "RVT_thumb"
+          },
+          {
+            "id": "IPR001878",
+            "name": "Znf_CCHC"
+          },
+          {
+            "id": "IPR036875",
+            "name": "Znf_CCHC_sf"
+          }
+        ],
+        "Pfam": [
+          {
+            "id": "PF00540",
+            "name": "Gag_p17"
+          },
+          {
+            "id": "PF19317",
+            "name": "Gag_p24_C"
+          },
+          {
+            "id": "PF00552",
+            "name": "IN_DBD_C"
+          },
+          {
+            "id": "PF02022",
+            "name": "Integrase_Zn"
+          },
+          {
+            "id": "PF00075",
+            "name": "RNase_H"
+          },
+          {
+            "id": "PF00665",
+            "name": "rve"
+          },
+          {
+            "id": "PF00077",
+            "name": "RVP"
+          },
+          {
+            "id": "PF00078",
+            "name": "RVT_1"
+          },
+          {
+            "id": "PF06815",
+            "name": "RVT_connect"
+          },
+          {
+            "id": "PF06817",
+            "name": "RVT_thumb"
+          },
+          {
+            "id": "PF00098",
+            "name": "zf-CCHC"
+          }
+        ],
+        "SUPFAM": [
+          {
+            "id": "SSF50630",
+            "name": "Acid proteases"
+          },
+          {
+            "id": "SSF50122",
+            "name": "DNA-binding domain of retroviral integrase"
+          },
+          {
+            "id": "SSF56672",
+            "name": "DNA/RNA polymerases"
+          },
+          {
+            "id": "SSF46919",
+            "name": "N-terminal Zn binding domain of HIV integrase"
+          },
+          {
+            "id": "SSF47836",
+            "name": "Retroviral matrix proteins"
+          },
+          {
+            "id": "SSF47353",
+            "name": "Retrovirus capsid dimerization domain-like"
+          },
+          {
+            "id": "SSF47943",
+            "name": "Retrovirus capsid protein, N-terminal core domain"
+          },
+          {
+            "id": "SSF57756",
+            "name": "Retrovirus zinc finger-like domains"
+          },
+          {
+            "id": "SSF53098",
+            "name": "Ribonuclease H-like"
+          }
+        ],
+        "PROSITE": [
+          {
+            "id": "PS50175",
+            "name": "ASP_PROT_RETROV"
+          },
+          {
+            "id": "PS00141",
+            "name": "ASP_PROTEASE"
+          },
+          {
+            "id": "PS50994",
+            "name": "INTEGRASE"
+          },
+          {
+            "id": "PS51027",
+            "name": "INTEGRASE_DBD"
+          },
+          {
+            "id": "PS50879",
+            "name": "RNASE_H_1"
+          },
+          {
+            "id": "PS50878",
+            "name": "RT_POL"
+          },
+          {
+            "id": "PS50158",
+            "name": "ZF_CCHC"
+          },
+          {
+            "id": "PS50876",
+            "name": "ZF_INTEGRASE"
+          }
+        ]
+      },
+      "go_terms": {
+        "cellular_component": [
+          {
+            "id": "GO:0043657",
+            "term": "host cell"
+          },
+          {
+            "id": "GO:0030430",
+            "term": "host cell cytoplasm"
+          },
+          {
+            "id": "GO:0042025",
+            "term": "host cell nucleus"
+          },
+          {
+            "id": "GO:0020002",
+            "term": "host cell plasma membrane"
+          },
+          {
+            "id": "GO:0019013",
+            "term": "viral nucleocapsid"
+          }
+        ],
+        "molecular_function": [
+          {
+            "id": "GO:0004190",
+            "term": "aspartic-type endopeptidase activity"
+          },
+          {
+            "id": "GO:0003677",
+            "term": "DNA binding"
+          },
+          {
+            "id": "GO:0003887",
+            "term": "DNA-directed DNA polymerase activity"
+          },
+          {
+            "id": "GO:0004533",
+            "term": "exoribonuclease H activity"
+          },
+          {
+            "id": "GO:0003723",
+            "term": "RNA binding"
+          },
+          {
+            "id": "GO:0003964",
+            "term": "RNA-directed DNA polymerase activity"
+          },
+          {
+            "id": "GO:0004523",
+            "term": "RNA-DNA hybrid ribonuclease activity"
+          },
+          {
+            "id": "GO:0005198",
+            "term": "structural molecule activity"
+          },
+          {
+            "id": "GO:0008270",
+            "term": "zinc ion binding"
+          }
+        ],
+        "biological_process": [
+          {
+            "id": "GO:0015074",
+            "term": "DNA integration"
+          },
+          {
+            "id": "GO:0006310",
+            "term": "DNA recombination"
+          },
+          {
+            "id": "GO:0075713",
+            "term": "establishment of integrated proviral latency"
+          },
+          {
+            "id": "GO:0006508",
+            "term": "proteolysis"
+          },
+          {
+            "id": "GO:0046718",
+            "term": "symbiont entry into host cell"
+          },
+          {
+            "id": "GO:0039657",
+            "term": "symbiont-mediated suppression of host gene expression"
+          },
+          {
+            "id": "GO:0044826",
+            "term": "viral genome integration into host DNA"
+          },
+          {
+            "id": "GO:0075732",
+            "term": "viral penetration into host nucleus"
+          },
+          {
+            "id": "GO:0075523",
+            "term": "viral translational frameshifting"
+          }
+        ]
+      },
+      "keywords": [
+        "Aspartyl protease",
+        "Capsid protein",
+        "DNA integration",
+        "DNA recombination",
+        "DNA-binding",
+        "DNA-directed DNA polymerase",
+        "Endonuclease",
+        "Eukaryotic host gene expression shutoff by virus",
+        "Eukaryotic host translation shutoff by virus",
+        "Host cell membrane",
+        "Host cytoplasm",
+        "Host gene expression shutoff by virus",
+        "Host membrane",
+        "Host nucleus",
+        "Host-virus interaction",
+        "Hydrolase",
+        "Lipoprotein",
+        "Magnesium",
+        "Membrane",
+        "Metal-binding",
+        "Multifunctional enzyme",
+        "Myristate",
+        "Nuclease",
+        "Nucleotidyltransferase",
+        "Phosphoprotein",
+        "Protease",
+        "Repeat",
+        "Ribosomal frameshifting",
+        "RNA-binding",
+        "RNA-directed DNA polymerase",
+        "Transferase",
+        "Viral genome integration",
+        "Viral nucleoprotein",
+        "Viral penetration into host nucleus",
+        "Viral release from host cell",
+        "Virion",
+        "Virion maturation",
+        "Virus entry into host cell",
+        "Zinc",
+        "Zinc-finger"
+      ],
+      "complexes": [],
+      "structures_deposited_on_the_relative": 0,
+      "regions": [
+        {
+          "label": "Capsid protein p24",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span_in_the_reading_frame": [
+            133,
+            363
+          ],
+          "span_in_the_chain": [
+            1,
+            231
+          ],
+          "span_on_the_relative": [
+            82,
+            312
+          ],
+          "length_aa": 231,
+          "folded": true,
+          "mean_plddt": 86.09,
+          "confident_fraction": 0.9827,
+          "refused_because": null
+        }
+      ],
+      "folded": true,
+      "mean_plddt": 86.09,
+      "already_drugged": null,
+      "sites": [
+        {
+          "site_kind": "hydrophobic_patch_predicted",
+          "residues_in_the_chain": [
+            78,
+            83,
+            86,
+            88,
+            91,
+            92,
+            96
+          ],
+          "residue_names": [
+            "A",
+            "V",
+            "V",
+            "A",
+            "I",
+            "A",
+            "M"
+          ],
+          "area_a2": 503.1,
+          "area_fraction_of_surface": 0.036,
+          "measured_on": "coordinates from the fold stage, not a deposition",
+          "mean_plddt": 86.09,
+          "confident_fraction": 0.9827,
+          "on_predicted_coordinates": true,
+          "only_route_to_a_surface": true,
+          "ratio_to_deposited_median": null,
+          "what_it_is": "the same measurement on coordinates a predictor emitted, which is the only route to a surface for a protein nothing has solved",
+          "caveat": "An area measured on a prediction is comparable with another prediction and not with a deposition; on the one chain carrying both, the prediction read several times larger. The residue positions transfer far better than the area does.",
+          "residues_in_the_reading_frame": [
+            210,
+            215,
+            218,
+            220,
+            223,
+            224,
+            228
+          ],
+          "residue_count": 7,
+          "residues_nt": [
+            [
+              963,
+              965
+            ],
+            [
+              978,
+              980
+            ],
+            [
+              987,
+              989
+            ],
+            [
+              993,
+              995
+            ],
+            [
+              1002,
+              1004
+            ],
+            [
+              1005,
+              1007
+            ],
+            [
+              1017,
+              1019
+            ]
+          ],
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        },
+        {
+          "site_kind": "functional_site",
+          "residues_in_the_reading_frame": [
+            133,
+            221,
+            222,
+            363
+          ],
+          "residues_in_the_chain": [
+            1,
+            89,
+            90,
+            231
+          ],
+          "site_types": [
+            "Site"
+          ],
+          "site_descriptions": [
+            "Cleavage; by viral protease",
+            "Cis/trans isomerization of proline peptide bond; by human PPIA/CYPA",
+            "Cleavage; by viral protease"
+          ],
+          "ligands": [],
+          "on_predicted_coordinates": null,
+          "what_it_is": "residues a curator marked on the nearest relative as an active site, a binding site or a cleavage site, carried into this genome's numbering through the alignment",
+          "caveat": "A marked residue is an annotation transferred from a relative and was not measured on this pathogen. A cleavage site is where this protein is cut, which is not the same as somewhere to bind it.",
+          "residue_count": 4,
+          "residues_nt": [
+            [
+              732,
+              734
+            ],
+            [
+              996,
+              998
+            ],
+            [
+              999,
+              1001
+            ],
+            [
+              1422,
+              1424
+            ]
+          ],
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        }
+      ],
+      "no_site_because": null,
+      "not_annotated_because": null,
+      "family": "Retroviridae"
+    },
+    {
+      "accession": "NC_001802.1",
+      "pathogen": "HIV-1",
+      "rank": 7,
+      "target": "Nucleocapsid protein p7",
+      "parent": "POL_SIVMB Gag-Pol polyprotein",
+      "uniprot": "P17283",
+      "tier": "exact",
+      "score": 3.2271,
+      "score_terms": {
+        "conservation": 1.7271,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "gate_means": "whether this chain sits where a binder can reach it and is worth the stages below. `no` is a verdict and not a failure.",
+      "chain_length_aa": 71,
+      "chain_span_on_the_relative": [
+        313,
+        383
+      ],
+      "chain_span_in_the_reading_frame": [
+        364,
+        432
+      ],
+      "chain_span_nt": [
+        1425,
+        1631
+      ],
+      "nt_confirmed_at": [
+        "the end of the chain"
+      ],
+      "reading_frame": "+2 at nt 336",
+      "reading_frame_unresolved_because": null,
+      "function": null,
+      "function_is_about": "the whole entry",
+      "function_of_the_whole_entry": "Gag-Pol polyprotein and Gag polyprotein may regulate their own translation, by the binding genomic RNA in the 5'-UTR. At low concentration, Gag-Pol and Gag would promote translation, whereas at high concentration, the polyproteins encapsidate genomic RNA and then shut off translation (By similarity)",
+      "assembles_into": null,
+      "catalyses": null,
+      "needs_bound": null,
+      "interacts_with_host": [],
+      "interacts_with_this_virus": [],
+      "host_species": [
+        {
+          "name": "Pan",
+          "common_name": "chimpanzees",
+          "taxon": 9596
+        }
+      ],
+      "families": {
+        "CDD": [
+          {
+            "id": "cd05482",
+            "name": "HIV_retropepsin_like"
+          },
+          {
+            "id": "cd01645",
+            "name": "RT_Rtv"
+          }
+        ],
+        "Gene3D": [
+          {
+            "id": "1.10.10.200",
+            "name": "-"
+          },
+          {
+            "id": "1.10.1200.30",
+            "name": "-"
+          },
+          {
+            "id": "3.30.70.270",
+            "name": "-"
+          },
+          {
+            "id": "2.40.70.10",
+            "name": "Acid Proteases"
+          },
+          {
+            "id": "3.10.10.10",
+            "name": "HIV Type 1 Reverse Transcriptase, subunit A, domain 1"
+          },
+          {
+            "id": "1.10.375.10",
+            "name": "Human Immunodeficiency Virus Type 1 Capsid Protein"
+          },
+          {
+            "id": "1.10.150.90",
+            "name": "Immunodeficiency lentiviruses, gag gene matrix protein p17"
+          },
+          {
+            "id": "2.30.30.10",
+            "name": "Integrase, C-terminal domain superfamily, retroviral"
+          },
+          {
+            "id": "3.30.420.10",
+            "name": "Ribonuclease H-like superfamily/Ribonuclease H"
+          },
+          {
+            "id": "1.20.5.760",
+            "name": "Single helix bin"
+          },
+          {
+            "id": "4.10.60.10",
+            "name": "Zinc finger, CCHC-type"
+          }
+        ],
+        "InterPro": [
+          {
+            "id": "IPR001969",
+            "name": "Aspartic_peptidase_AS"
+          },
+          {
+            "id": "IPR043502",
+            "name": "DNA/RNA_pol_sf"
+          },
+          {
+            "id": "IPR045345",
+            "name": "Gag_p24_C"
+          },
+          {
+            "id": "IPR017856",
+            "name": "Integrase-like_N"
+          },
+          {
+            "id": "IPR036862",
+            "name": "Integrase_C_dom_sf_retrovir"
+          },
+          {
+            "id": "IPR001037",
+            "name": "Integrase_C_retrovir"
+          },
+          {
+            "id": "IPR001584",
+            "name": "Integrase_cat-core"
+          },
+          {
+            "id": "IPR003308",
+            "name": "Integrase_Zn-bd_dom_N"
+          },
+          {
+            "id": "IPR000071",
+            "name": "Lentvrl_matrix_N"
+          },
+          {
+            "id": "IPR012344",
+            "name": "Matrix_HIV/RSV_N"
+          },
+          {
+            "id": "IPR001995",
+            "name": "Peptidase_A2_cat"
+          },
+          {
+            "id": "IPR021109",
+            "name": "Peptidase_aspartic_dom_sf"
+          },
+          {
+            "id": "IPR034170",
+            "name": "Retropepsin-like_cat_dom"
+          },
+          {
+            "id": "IPR018061",
+            "name": "Retropepsins"
+          },
+          {
+            "id": "IPR008916",
+            "name": "Retrov_capsid_C"
+          },
+          {
+            "id": "IPR008919",
+            "name": "Retrov_capsid_N"
+          },
+          {
+            "id": "IPR010999",
+            "name": "Retrovr_matrix"
+          },
+          {
+            "id": "IPR043128",
+            "name": "Rev_trsase/Diguanyl_cyclase"
+          },
+          {
+            "id": "IPR012337",
+            "name": "RNaseH-like_sf"
+          },
+          {
+            "id": "IPR002156",
+            "name": "RNaseH_domain"
+          },
+          {
+            "id": "IPR036397",
+            "name": "RNaseH_sf"
+          },
+          {
+            "id": "IPR000477",
+            "name": "RT_dom"
+          },
+          {
+            "id": "IPR010659",
+            "name": "RVT_connect"
+          },
+          {
+            "id": "IPR010661",
+            "name": "RVT_thumb"
+          },
+          {
+            "id": "IPR001878",
+            "name": "Znf_CCHC"
+          },
+          {
+            "id": "IPR036875",
+            "name": "Znf_CCHC_sf"
+          }
+        ],
+        "Pfam": [
+          {
+            "id": "PF00540",
+            "name": "Gag_p17"
+          },
+          {
+            "id": "PF19317",
+            "name": "Gag_p24_C"
+          },
+          {
+            "id": "PF00552",
+            "name": "IN_DBD_C"
+          },
+          {
+            "id": "PF02022",
+            "name": "Integrase_Zn"
+          },
+          {
+            "id": "PF00075",
+            "name": "RNase_H"
+          },
+          {
+            "id": "PF00665",
+            "name": "rve"
+          },
+          {
+            "id": "PF00077",
+            "name": "RVP"
+          },
+          {
+            "id": "PF00078",
+            "name": "RVT_1"
+          },
+          {
+            "id": "PF06815",
+            "name": "RVT_connect"
+          },
+          {
+            "id": "PF06817",
+            "name": "RVT_thumb"
+          },
+          {
+            "id": "PF00098",
+            "name": "zf-CCHC"
+          }
+        ],
+        "SUPFAM": [
+          {
+            "id": "SSF50630",
+            "name": "Acid proteases"
+          },
+          {
+            "id": "SSF50122",
+            "name": "DNA-binding domain of retroviral integrase"
+          },
+          {
+            "id": "SSF56672",
+            "name": "DNA/RNA polymerases"
+          },
+          {
+            "id": "SSF46919",
+            "name": "N-terminal Zn binding domain of HIV integrase"
+          },
+          {
+            "id": "SSF47836",
+            "name": "Retroviral matrix proteins"
+          },
+          {
+            "id": "SSF47353",
+            "name": "Retrovirus capsid dimerization domain-like"
+          },
+          {
+            "id": "SSF47943",
+            "name": "Retrovirus capsid protein, N-terminal core domain"
+          },
+          {
+            "id": "SSF57756",
+            "name": "Retrovirus zinc finger-like domains"
+          },
+          {
+            "id": "SSF53098",
+            "name": "Ribonuclease H-like"
+          }
+        ],
+        "PROSITE": [
+          {
+            "id": "PS50175",
+            "name": "ASP_PROT_RETROV"
+          },
+          {
+            "id": "PS00141",
+            "name": "ASP_PROTEASE"
+          },
+          {
+            "id": "PS50994",
+            "name": "INTEGRASE"
+          },
+          {
+            "id": "PS51027",
+            "name": "INTEGRASE_DBD"
+          },
+          {
+            "id": "PS50879",
+            "name": "RNASE_H_1"
+          },
+          {
+            "id": "PS50878",
+            "name": "RT_POL"
+          },
+          {
+            "id": "PS50158",
+            "name": "ZF_CCHC"
+          },
+          {
+            "id": "PS50876",
+            "name": "ZF_INTEGRASE"
+          }
+        ]
+      },
+      "go_terms": {
+        "cellular_component": [
+          {
+            "id": "GO:0043657",
+            "term": "host cell"
+          },
+          {
+            "id": "GO:0030430",
+            "term": "host cell cytoplasm"
+          },
+          {
+            "id": "GO:0042025",
+            "term": "host cell nucleus"
+          },
+          {
+            "id": "GO:0020002",
+            "term": "host cell plasma membrane"
+          },
+          {
+            "id": "GO:0019013",
+            "term": "viral nucleocapsid"
+          }
+        ],
+        "molecular_function": [
+          {
+            "id": "GO:0004190",
+            "term": "aspartic-type endopeptidase activity"
+          },
+          {
+            "id": "GO:0003677",
+            "term": "DNA binding"
+          },
+          {
+            "id": "GO:0003887",
+            "term": "DNA-directed DNA polymerase activity"
+          },
+          {
+            "id": "GO:0004533",
+            "term": "exoribonuclease H activity"
+          },
+          {
+            "id": "GO:0003723",
+            "term": "RNA binding"
+          },
+          {
+            "id": "GO:0003964",
+            "term": "RNA-directed DNA polymerase activity"
+          },
+          {
+            "id": "GO:0004523",
+            "term": "RNA-DNA hybrid ribonuclease activity"
+          },
+          {
+            "id": "GO:0005198",
+            "term": "structural molecule activity"
+          },
+          {
+            "id": "GO:0008270",
+            "term": "zinc ion binding"
+          }
+        ],
+        "biological_process": [
+          {
+            "id": "GO:0015074",
+            "term": "DNA integration"
+          },
+          {
+            "id": "GO:0006310",
+            "term": "DNA recombination"
+          },
+          {
+            "id": "GO:0075713",
+            "term": "establishment of integrated proviral latency"
+          },
+          {
+            "id": "GO:0006508",
+            "term": "proteolysis"
+          },
+          {
+            "id": "GO:0046718",
+            "term": "symbiont entry into host cell"
+          },
+          {
+            "id": "GO:0039657",
+            "term": "symbiont-mediated suppression of host gene expression"
+          },
+          {
+            "id": "GO:0044826",
+            "term": "viral genome integration into host DNA"
+          },
+          {
+            "id": "GO:0075732",
+            "term": "viral penetration into host nucleus"
+          },
+          {
+            "id": "GO:0075523",
+            "term": "viral translational frameshifting"
+          }
+        ]
+      },
+      "keywords": [
+        "Aspartyl protease",
+        "Capsid protein",
+        "DNA integration",
+        "DNA recombination",
+        "DNA-binding",
+        "DNA-directed DNA polymerase",
+        "Endonuclease",
+        "Eukaryotic host gene expression shutoff by virus",
+        "Eukaryotic host translation shutoff by virus",
+        "Host cell membrane",
+        "Host cytoplasm",
+        "Host gene expression shutoff by virus",
+        "Host membrane",
+        "Host nucleus",
+        "Host-virus interaction",
+        "Hydrolase",
+        "Lipoprotein",
+        "Magnesium",
+        "Membrane",
+        "Metal-binding",
+        "Multifunctional enzyme",
+        "Myristate",
+        "Nuclease",
+        "Nucleotidyltransferase",
+        "Phosphoprotein",
+        "Protease",
+        "Repeat",
+        "Ribosomal frameshifting",
+        "RNA-binding",
+        "RNA-directed DNA polymerase",
+        "Transferase",
+        "Viral genome integration",
+        "Viral nucleoprotein",
+        "Viral penetration into host nucleus",
+        "Viral release from host cell",
+        "Virion",
+        "Virion maturation",
+        "Virus entry into host cell",
+        "Zinc",
+        "Zinc-finger"
+      ],
+      "complexes": [],
+      "structures_deposited_on_the_relative": 0,
+      "regions": [
+        {
+          "label": "Nucleocapsid protein p7",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span_in_the_reading_frame": [
+            364,
+            432
+          ],
+          "span_in_the_chain": [
+            1,
+            69
+          ],
+          "span_on_the_relative": [
+            313,
+            383
+          ],
+          "length_aa": 69,
+          "folded": true,
+          "mean_plddt": 73.88,
+          "confident_fraction": 0.6812,
+          "refused_because": null
+        }
+      ],
+      "folded": true,
+      "mean_plddt": 73.88,
+      "already_drugged": null,
+      "sites": [
+        {
+          "site_kind": "hydrophobic_patch_predicted",
+          "residues_in_the_chain": [
+            1,
+            3,
+            4,
+            7,
+            11,
+            13,
+            14,
+            15,
+            20
+          ],
+          "residue_names": [
+            "A",
+            "A",
+            "M",
+            "V",
+            "A",
+            "I",
+            "M",
+            "M",
+            "F"
+          ],
+          "area_a2": 995.7,
+          "area_fraction_of_surface": 0.136,
+          "measured_on": "coordinates from the fold stage, not a deposition",
+          "mean_plddt": 73.88,
+          "confident_fraction": 0.6812,
+          "on_predicted_coordinates": true,
+          "only_route_to_a_surface": true,
+          "ratio_to_deposited_median": null,
+          "what_it_is": "the same measurement on coordinates a predictor emitted, which is the only route to a surface for a protein nothing has solved",
+          "caveat": "An area measured on a prediction is comparable with another prediction and not with a deposition; on the one chain carrying both, the prediction read several times larger. The residue positions transfer far better than the area does.",
+          "residues_in_the_reading_frame": [
+            364,
+            366,
+            367,
+            370,
+            374,
+            376,
+            377,
+            378,
+            383
+          ],
+          "residue_count": 9,
+          "residues_nt": [
+            [
+              1425,
+              1427
+            ],
+            [
+              1431,
+              1433
+            ],
+            [
+              1434,
+              1436
+            ],
+            [
+              1443,
+              1445
+            ],
+            [
+              1455,
+              1457
+            ],
+            [
+              1461,
+              1463
+            ],
+            [
+              1464,
+              1466
+            ],
+            [
+              1467,
+              1469
+            ],
+            [
+              1482,
+              1484
+            ]
+          ],
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        },
+        {
+          "site_kind": "functional_site",
+          "residues_in_the_reading_frame": [
+            364,
+            376,
+            377,
+            432
+          ],
+          "residues_in_the_chain": [
+            1,
+            13,
+            14,
+            69
+          ],
+          "site_types": [
+            "Site"
+          ],
+          "site_descriptions": [
+            "Cleavage; by viral protease",
+            "Cleavage; by viral protease",
+            "Cleavage; by viral protease"
+          ],
+          "ligands": [],
+          "on_predicted_coordinates": null,
+          "what_it_is": "residues a curator marked on the nearest relative as an active site, a binding site or a cleavage site, carried into this genome's numbering through the alignment",
+          "caveat": "A marked residue is an annotation transferred from a relative and was not measured on this pathogen. A cleavage site is where this protein is cut, which is not the same as somewhere to bind it.",
+          "residue_count": 4,
+          "residues_nt": [
+            [
+              1425,
+              1427
+            ],
+            [
+              1461,
+              1463
+            ],
+            [
+              1464,
+              1466
+            ],
+            [
+              1629,
+              1631
+            ]
+          ],
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        }
+      ],
+      "no_site_because": null,
+      "not_annotated_because": null,
+      "family": "Retroviridae"
+    },
+    {
+      "accession": "NC_001802.1",
+      "pathogen": "HIV-1",
+      "rank": 8,
+      "target": "VPR_SIVMB Protein Vpr",
+      "parent": null,
+      "uniprot": "Q1A265",
+      "tier": "exact",
+      "score": 2.8785,
+      "score_terms": {
+        "conservation": 1.3785,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "gate_means": "whether this chain sits where a binder can reach it and is worth the stages below. `no` is a verdict and not a failure.",
+      "chain_length_aa": null,
+      "chain_span_on_the_relative": null,
+      "chain_span_in_the_reading_frame": null,
+      "chain_span_nt": null,
+      "nt_confirmed_at": null,
+      "reading_frame": null,
+      "reading_frame_unresolved_because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation",
+      "function": null,
+      "function_is_about": "the whole entry",
+      "function_of_the_whole_entry": "During virus replication, may deplete host UNG protein, and incude G2-M cell cycle arrest. Acts by targeting specific host proteins for degradation by the 26S proteasome, through association with the cellular CUL4A-DDB1 E3 ligase complex by direct interaction with host DCAF1. Cell cycle arrest reportedly occurs within hours of infection and is not blocked by antiviral agents, suggesting that it is initiated by the VPR carried into the virion. Additionally, VPR induces apoptosis in a cell cycle dependent manner suggesting that these two effects are mechanistically linked. Detected in the serum and cerebrospinal fluid of AIDS patient, VPR may also induce cell death to bystander cells",
+      "assembles_into": null,
+      "catalyses": null,
+      "needs_bound": null,
+      "interacts_with_host": [],
+      "interacts_with_this_virus": [],
+      "host_species": [
+        {
+          "name": "Pan troglodytes",
+          "common_name": "Chimpanzee",
+          "taxon": 9598
+        }
+      ],
+      "families": {
+        "Gene3D": [
+          {
+            "id": "6.10.210.10",
+            "name": "-"
+          },
+          {
+            "id": "1.20.5.90",
+            "name": "VpR/VpX protein, C-terminal domain"
+          }
+        ],
+        "InterPro": [
+          {
+            "id": "IPR000012",
+            "name": "RetroV_VpR/X"
+          }
+        ],
+        "Pfam": [
+          {
+            "id": "PF00522",
+            "name": "VPR"
+          }
+        ]
+      },
+      "go_terms": {
+        "cellular_component": [
+          {
+            "id": "GO:0043657",
+            "term": "host cell"
+          },
+          {
+            "id": "GO:0042025",
+            "term": "host cell nucleus"
+          },
+          {
+            "id": "GO:0043655",
+            "term": "host extracellular region"
+          },
+          {
+            "id": "GO:0044423",
+            "term": "virion component"
+          }
+        ],
+        "biological_process": [
+          {
+            "id": "GO:0006351",
+            "term": "DNA-templated transcription"
+          },
+          {
+            "id": "GO:0034220",
+            "term": "monoatomic ion transmembrane transport"
+          },
+          {
+            "id": "GO:0051260",
+            "term": "protein homooligomerization"
+          },
+          {
+            "id": "GO:0006355",
+            "term": "regulation of DNA-templated transcription"
+          },
+          {
+            "id": "GO:0046718",
+            "term": "symbiont entry into host cell"
+          },
+          {
+            "id": "GO:0052151",
+            "term": "symbiont-mediated activation of host apoptosis"
+          },
+          {
+            "id": "GO:0039592",
+            "term": "symbiont-mediated arrest of host cell cycle during G2/M transition"
+          },
+          {
+            "id": "GO:0075732",
+            "term": "viral penetration into host nucleus"
+          }
+        ]
+      },
+      "keywords": [
+        "Activator",
+        "AIDS",
+        "Apoptosis",
+        "Cell cycle",
+        "Host G2/M cell cycle arrest by virus",
+        "Host nucleus",
+        "Host-virus interaction",
+        "Ion channel",
+        "Ion transport",
+        "Modulation of host cell cycle by virus",
+        "Phosphoprotein",
+        "Transcription",
+        "Transcription regulation",
+        "Transport",
+        "Viral penetration into host nucleus",
+        "Virion",
+        "Virus entry into host cell"
+      ],
+      "complexes": [],
+      "structures_deposited_on_the_relative": 0,
+      "regions": [
+        {
+          "label": "VPR_SIVMB Protein Vpr",
+          "type": "ORF",
+          "description": "the whole called ORF; no mature-chain boundaries were read",
+          "span_in_the_reading_frame": [
+            1,
+            78
+          ],
+          "span_in_the_chain": null,
+          "span_on_the_relative": null,
+          "length_aa": 78,
+          "folded": true,
+          "mean_plddt": 82.59,
+          "confident_fraction": 0.8077,
+          "refused_because": null
+        }
+      ],
+      "folded": true,
+      "mean_plddt": 82.59,
+      "already_drugged": null,
+      "sites": [
+        {
+          "site_kind": "hydrophobic_patch_predicted",
+          "residues_in_the_chain": [
+            63,
+            69,
+            70,
+            72,
+            75,
+            76
+          ],
+          "residue_names": [
+            "I",
+            "F",
+            "I",
+            "F",
+            "W",
+            "V"
+          ],
+          "area_a2": 651.4,
+          "area_fraction_of_surface": 0.096,
+          "measured_on": "coordinates from the fold stage, not a deposition",
+          "mean_plddt": 82.59,
+          "confident_fraction": 0.8077,
+          "on_predicted_coordinates": true,
+          "only_route_to_a_surface": true,
+          "ratio_to_deposited_median": null,
+          "what_it_is": "the same measurement on coordinates a predictor emitted, which is the only route to a surface for a protein nothing has solved",
+          "caveat": "An area measured on a prediction is comparable with another prediction and not with a deposition; on the one chain carrying both, the prediction read several times larger. The residue positions transfer far better than the area does.",
+          "residues_in_the_reading_frame": null,
+          "residue_count": 6,
+          "residues_nt": null,
+          "numbering": {
+            "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
+            "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
+            "residues_nt": "genome coordinate of each residue's codon, 1-based inclusive, low coordinate first on either strand. Absent where the reading frame was not confirmed."
+          }
+        }
+      ],
+      "no_site_because": null,
+      "not_annotated_because": null,
+      "family": "Retroviridae"
+    },
+    {
+      "accession": "NC_001802.1",
+      "pathogen": "HIV-1",
+      "rank": 9,
+      "target": "C-terminal core protein",
+      "parent": "NEF_SIVMB Protein Nef",
+      "uniprot": "Q1A260",
+      "tier": "exact",
+      "score": 2.7059,
+      "score_terms": {
+        "conservation": 0.7059,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "gate_means": "whether this chain sits where a binder can reach it and is worth the stages below. `no` is a verdict and not a failure.",
+      "chain_length_aa": 149,
+      "chain_span_on_the_relative": [
+        58,
+        206
+      ],
+      "chain_span_in_the_reading_frame": [
+        58,
+        123
+      ],
+      "chain_span_nt": [
+        8514,
+        8711
+      ],
+      "nt_confirmed_at": [
+        "the start of the chain"
+      ],
+      "reading_frame": "+2 at nt 8343",
+      "reading_frame_unresolved_because": null,
+      "function": null,
+      "function_is_about": "the whole entry",
+      "function_of_the_whole_entry": "Factor of infectivity and pathogenicity, required for optimal virus replication. Alters numerous pathways of T-lymphocyte function and down-regulates immunity surface molecules in order to evade host defense and increase viral infectivity. Alters the functionality of other immunity cells, like dendritic cells, monocytes/macrophages and NK cells",
+      "assembles_into": null,
+      "catalyses": null,
+      "needs_bound": null,
+      "interacts_with_host": [],
+      "interacts_with_this_virus": [],
+      "host_species": [
+        {
+          "name": "Pan troglodytes",
+          "common_name": "Chimpanzee",
+          "taxon": 9598
+        }
+      ],
+      "families": {
+        "Gene3D": [
+          {
+            "id": "4.10.890.10",
+            "name": "HIV 1 nef anchor domain"
+          },
+          {
+            "id": "3.30.62.10",
+            "name": "Nef Regulatory Factor"
+          }
+        ],
+        "InterPro": [
+          {
+            "id": "IPR027480",
+            "name": "HIV-1_Nef_anchor_sf"
+          },
+          {
+            "id": "IPR027481",
+            "name": "HIV-1_Nef_core_sf"
+          },
+          {
+            "id": "IPR001558",
+            "name": "HIV_Nef"
+          }
+        ],
+        "Pfam": [
+          {
+            "id": "PF00469",
+            "name": "F-protein"
+          }
+        ],
+        "SUPFAM": [
+          {
+            "id": "SSF55671",
+            "name": "Regulatory factor Nef"
+          }
+        ]
+      },
+      "go_terms": {
+        "cellular_component": [
+          {
+            "id": "GO:0005576",
+            "term": "extracellular region"
+          },
+          {
+            "id": "GO:0044178",
+            "term": "host cell Golgi membrane"
+          },
+          {
+            "id": "GO:0020002",
+            "term": "host cell plasma membrane"
+          },
+          {
+            "id": "GO:0016020",
+            "term": "membrane"
+          },
+          {
+            "id": "GO:0044423",
+            "term": "virion component"
+          }
+        ],
+        "molecular_function": [
+          {
+            "id": "GO:0005525",
+            "term": "GTP binding"
+          },
+          {
+            "id": "GO:0017124",
+            "term": "SH3 domain binding"
+          }
+        ],
+        "biological_process": [
+          {
+            "id": "GO:0046776",
+            "term": "symbiont-mediated suppression of host antigen processing and presentation of peptide antigen via MHC class I"
+          },
+          {
+            "id": "GO:0039505",
+            "term": "symbiont-mediated suppression of host antigen processing and presentation of peptide antigen via MHC class II"
+          },
+          {
+            "id": "GO:0140321",
+            "term": "symbiont-mediated suppression of host autophagy"
+          }
+        ]
+      },
+      "keywords": [
+        "AIDS",
+        "Apoptosis",
+        "Early protein",
+        "Host cell membrane",
+        "Host Golgi apparatus",
+        "Host membrane",
+        "Host-virus interaction",
+        "Inhibition of host adaptive immune response by virus",
+        "Inhibition of host autophagy by virus",
+        "Inhibition of host MHC class I molecule presentation by virus",
+        "Inhibition of host MHC class II molecule presentation by virus",
+        "Lipoprotein",
+        "Membrane",
+        "Myristate",
+        "Phosphoprotein",
+        "Secreted",
+        "SH3-binding",
+        "Viral immunoevasion",
+        "Virion",
+        "Virulence"
+      ],
+      "complexes": [],
+      "structures_deposited_on_the_relative": 0,
+      "regions": [],
+      "folded": null,
+      "mean_plddt": null,
+      "already_drugged": null,
+      "sites": [],
+      "no_site_because": "PDBe maps no deposited chain to Q1A260 at all. The protein may be well solved under another accession; this entry is not it.",
+      "not_annotated_because": null,
+      "family": "Retroviridae"
+    }
+  ],
+  "counts": {
+    "targets": 9,
+    "with_a_site": 8,
+    "with_a_measured_patch": 0,
+    "with_a_functional_site": 5,
+    "with_nucleotide_coordinates": 7,
+    "already_drugged": 4
+  },
+  "limitations": [
+    "No row here is a measurement on the pathogen. Function, families, partners and marked residues are curated annotation on the nearest reviewed relative, transferred across a species gap. A deposited area is measured on a relative's domain; a predicted area is measured on coordinates a model emitted.",
+    "An area measured on predicted coordinates is comparable with another prediction and not with a deposition. On the one chain carrying both, the prediction read several times larger. Residue positions transfer far better than areas do.",
+    "A nucleotide range appears only where the reading frame was confirmed by reading its residues back against the relative's chain. `nt_confirmed_at` says which end of the span that confirmation covered: a chain spanning a ribosomal frameshift can be exact at one end and short at the other, and that row says so rather than being dropped or trusted whole.",
+    "`residues_in_the_chain` is 1-based within the mature chain and is the numbering for a structure viewer. `residues_in_the_reading_frame` is 1-based along one reading frame of this genome and is meaningless without the frame in the same row.",
+    "A cleavage site is where this protein is cut. It is a marked residue and it is not somewhere to bind.",
+    "The ranking is the pipeline's five stated weights. Fitting those weights against the proteins approved antivirals already act on does not improve them, which is recorded in runs/rubric_fit.json; the ranking is carried by the terms rather than their weighting.",
+    "`already_drugged` marks a target an approved or late-stage antiviral acts on, which is the label set this pipeline is scored against. It is not a claim that the target is easy, and an unmarked target is not a claim that it is novel."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:05:33.021714+00:00"
+  },
+  "content_sha256": "ea311c2850bb9edef96ea0bb14c3bb8736ad784e4b16ac6f931177571d51e846"
+}

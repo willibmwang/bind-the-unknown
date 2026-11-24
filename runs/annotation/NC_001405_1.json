@@ -1,0 +1,949 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_001405.1",
+  "pathogen": "Human adenovirus 2",
+  "reference_excluded_organism": "Human adenovirus C",
+  "source_record": "runs/onset_chain_NC_001405_1.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "DPOL_ADE04 DNA polymerase",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P87503",
+      "score": 5.1318,
+      "score_terms": {
+        "conservation": 1.2318,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P87503",
+        "entry_id": "DPOL_ADE04",
+        "protein_name": "DNA polymerase",
+        "organism": "Human adenovirus E serotype 4",
+        "reviewed": true,
+        "molecule_asked_for": "DPOL_ADE04 DNA polymerase",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Eukaryotic-type DNA polymerase involved in viral genomic replication. DNA synthesis is protein primed, and acts in a strand displacement replication. Assembles in complex with viral pTP, DBP, host NFIA and host POU2F1/OCT1 on viral origin of replication. The polymerase covalently transfers dCMP onto pTP, thereby initiating complementary strand synthesis"
+          ],
+          "SUBUNIT": [
+            "Heterodimer with the terminal protein; this heterodimer binds to bp 9 to 18 of the genome. Forms a complex with viral pTP, DBP and hosts NFIA and POU2F1/OCT1 for initiation of replication"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR006172",
+              "name": "DNA-dir_DNA_pol_B"
+            },
+            {
+              "id": "IPR014382",
+              "name": "DNA-dir_DNA_pol_B_adenovir"
+            },
+            {
+              "id": "IPR017964",
+              "name": "DNA-dir_DNA_pol_B_CS"
+            },
+            {
+              "id": "IPR004868",
+              "name": "DNA-dir_DNA_pol_B_mt/vir"
+            },
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR012337",
+              "name": "RNaseH-like_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF03175",
+              "name": "DNA_pol_B_2"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF53098",
+              "name": "Ribonuclease H-like"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS00116",
+              "name": "DNA_POLYMERASE_B"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0008408",
+              "term": "3'-5' exonuclease activity"
+            },
+            {
+              "id": "GO:0003677",
+              "term": "DNA binding"
+            },
+            {
+              "id": "GO:0003887",
+              "term": "DNA-directed DNA polymerase activity"
+            },
+            {
+              "id": "GO:0000166",
+              "term": "nucleotide binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006261",
+              "term": "DNA-templated DNA replication"
+            },
+            {
+              "id": "GO:0039693",
+              "term": "viral DNA genome replication"
+            }
+          ]
+        },
+        "keywords": [
+          "DNA replication",
+          "DNA-binding",
+          "DNA-directed DNA polymerase",
+          "Host nucleus",
+          "Nucleotidyltransferase",
+          "Transferase",
+          "Viral DNA replication"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P87503.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 2,
+      "target": "CAPSP_ADE12 Penton protein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P36716",
+      "score": 4.2079,
+      "score_terms": {
+        "conservation": 1.1079,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P36716",
+        "entry_id": "CAPSP_ADE12",
+        "protein_name": "Penton protein",
+        "organism": "Human adenovirus A serotype 12",
+        "reviewed": true,
+        "molecule_asked_for": "CAPSP_ADE12 Penton protein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Major capsid protein that self-associates to form penton base pentamers, each in the shape of a pentagon, situated at the 12 vertices of the pseudo T=25 capsid. Involved in virus secondary attachment to host cell after initial attachment by the fiber protein. Binds host integrin heterodimer ITGAV-ITGB5 (alphaV-beta5) thereby triggering clathrin-mediated endocytosis of virions. Mediates initial virus attachment to CXADR-negative cells. Binding to integrins ITGAV-ITGB5 also seems to induce macropinocytosis uptake of the virus. As the virus enters the host cell, penton proteins are shed concomitant with virion acidification in the endosome"
+          ],
+          "SUBUNIT": [
+            "Interacts (via the cell attachment site RGD) with host heterodimer ITGAV-ITGB5; this interaction promotes virus internalization. Interacts with host WWP1 and WWP2. Interacts with the fiber protein (via N-terminal tail region). Interacts with the capsid vertex protein; this interaction binds the penton base to neighboring peripentonal hexons"
+          ],
+          "DOMAIN": [
+            "The cell attachment RGD motif is exposed at the virion surface and is involved in binding to the integrin heterodimer ITGAV-ITGB5"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.90.1620.10",
+              "name": "adenovirus 2 penton base, domain 2"
+            },
+            {
+              "id": "2.60.120.550",
+              "name": "Penton protein, domain 1"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR002605",
+              "name": "Adeno_Penton_B"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF01686",
+              "name": "Adeno_Penton_B"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0039623",
+              "term": "T=25 icosahedral viral capsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0075512",
+              "term": "clathrin-dependent endocytosis of virus by host cell"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Capsid protein",
+          "Clathrin-mediated endocytosis of virus by host",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Late protein",
+          "Reference proteome",
+          "T=25 icosahedral capsid protein",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Clathrin-mediated endocytosis of virus by host",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P36716.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 3,
+      "target": "unidentified probable surface antigen",
+      "parent": null,
+      "tier": "topology",
+      "nearest_homolog": null,
+      "score": 3.6,
+      "score_terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": null,
+      "annotation_failed_because": null,
+      "not_annotated_because": "this chain was identified with no reviewed relative, so there is no curated entry to read a function from"
+    },
+    {
+      "rank": 4,
+      "target": "unidentified probable surface antigen",
+      "parent": null,
+      "tier": "topology",
+      "nearest_homolog": null,
+      "score": 3.6,
+      "score_terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": null,
+      "annotation_failed_because": null,
+      "not_annotated_because": "this chain was identified with no reviewed relative, so there is no curated entry to read a function from"
+    },
+    {
+      "rank": 5,
+      "target": "unidentified probable surface antigen",
+      "parent": null,
+      "tier": "topology",
+      "nearest_homolog": null,
+      "score": 3.6,
+      "score_terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": null,
+      "annotation_failed_because": null,
+      "not_annotated_because": "this chain was identified with no reviewed relative, so there is no curated entry to read a function from"
+    },
+    {
+      "rank": 6,
+      "target": "unidentified probable surface antigen",
+      "parent": null,
+      "tier": "topology",
+      "nearest_homolog": null,
+      "score": 3.6,
+      "score_terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": null,
+      "annotation_failed_because": null,
+      "not_annotated_because": "this chain was identified with no reviewed relative, so there is no curated entry to read a function from"
+    },
+    {
+      "rank": 7,
+      "target": "unidentified probable surface antigen",
+      "parent": null,
+      "tier": "topology",
+      "nearest_homolog": null,
+      "score": 3.6,
+      "score_terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": null,
+      "annotation_failed_because": null,
+      "not_annotated_because": "this chain was identified with no reviewed relative, so there is no curated entry to read a function from"
+    },
+    {
+      "rank": 9,
+      "target": "CAPSH_ADE09 Hexon protein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P36853",
+      "score": 2.9781,
+      "score_terms": {
+        "conservation": 1.4781,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P36853",
+        "entry_id": "CAPSH_ADE09",
+        "protein_name": "Hexon protein",
+        "organism": "Human adenovirus D serotype 9",
+        "reviewed": true,
+        "molecule_asked_for": "CAPSH_ADE09 Hexon protein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Major capsid protein that self-associates to form 240 hexon trimers, each in the shape of a hexagon, building most of the pseudo T=25 capsid. Assembled into trimeric units with the help of the chaperone shutoff protein. Transported by pre-protein VI to the nucleus where it associates with other structural proteins to form an empty capsid. Might be involved, through its interaction with host dyneins, in the intracellular microtubule-dependent transport of incoming viral capsid to the nucleus"
+          ],
+          "SUBUNIT": [
+            "Homotrimer. Interacts with the capsid vertex protein; this interaction binds the peripentonal hexons to the neighboring penton base. Interacts with the hexon-linking protein VIII; this interaction tethers the hexons surrounding the penton to those situated in the central plate of the facet. Interacts with the hexon-interlacing protein; this interaction lashes the hexons together. Interacts with host dyneins DYNC1LI1 and DYNC1I2; this interaction might be involved in intracellular microtubule-dependent transport of incoming viral capsid. Interacts with the shutoff protein; this interaction allows folding and formation of hexons trimers. Interacts with pre-protein VI; this interaction probably allows nuclear import of hexon trimers and possibly pre-capsid assembly"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "2.70.9.10",
+              "name": "Adenovirus Type 2 Hexon, domain 4"
+            },
+            {
+              "id": "3.90.39.10",
+              "name": "Hexon Major Viral Coat Protein, domain 2"
+            },
+            {
+              "id": "3.90.249.10",
+              "name": "Hexon Major Viral Coat Protein, domain 3"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR016108",
+              "name": "Adenovirus_Pll_hexon_C"
+            },
+            {
+              "id": "IPR016107",
+              "name": "Adenovirus_Pll_hexon_N"
+            },
+            {
+              "id": "IPR044942",
+              "name": "Adenovirus_Pll_hexon_sub2"
+            },
+            {
+              "id": "IPR016110",
+              "name": "Adenovirus_Pll_hexon_sub3"
+            },
+            {
+              "id": "IPR037542",
+              "name": "ADV_hexon"
+            },
+            {
+              "id": "IPR016112",
+              "name": "VP_dsDNA_II"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF01065",
+              "name": "Adeno_hexon"
+            },
+            {
+              "id": "PF03678",
+              "name": "Adeno_hexon_C"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF49749",
+              "name": "Group II dsDNA viruses VP"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0043657",
+              "term": "host cell"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0039623",
+              "term": "T=25 icosahedral viral capsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0075521",
+              "term": "microtubule-dependent intracellular transport of viral material towards nucleus"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Acetylation",
+          "Capsid protein",
+          "Cytoplasmic inwards viral transport",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Late protein",
+          "Microtubular inwards viral transport",
+          "Phosphoprotein",
+          "Reference proteome",
+          "T=25 icosahedral capsid protein",
+          "Virion",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus",
+          "Host-virus interaction",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P36853.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 10,
+      "target": "CAP3_ADE12 Pre-hexon-linking protein IIIa",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P36712",
+      "score": 2.6821,
+      "score_terms": {
+        "conservation": 1.1721,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.01,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P36712",
+        "entry_id": "CAP3_ADE12",
+        "protein_name": "Pre-hexon-linking protein IIIa",
+        "organism": "Human adenovirus A serotype 12",
+        "reviewed": true,
+        "molecule_asked_for": "CAP3_ADE12 Pre-hexon-linking protein IIIa",
+        "molecule_matched": false,
+        "molecules_available": [
+          "Hexon-linking protein IIIa"
+        ],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "PTM": [
+            "Cleaved near the C-terminus by the viral protease during virion maturation to form the mature protein"
+          ]
+        },
+        "what_each_comment_answers": {
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "1.20.120.1500",
+              "name": "Pre-hexon-linking protein IIIa"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR003479",
+              "name": "Hex_IIIa"
+            },
+            {
+              "id": "IPR043053",
+              "name": "Hex_IIIa_N"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF02455",
+              "name": "Hex_IIIa"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0098021",
+              "term": "viral capsid, decoration"
+            }
+          ]
+        },
+        "keywords": [
+          "Capsid decoration protein",
+          "Capsid protein",
+          "Direct protein sequencing",
+          "Host nucleus",
+          "Late protein",
+          "Phosphoprotein",
+          "Reference proteome",
+          "Viral genome packaging",
+          "Viral release from host cell",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus",
+          "Viral release from host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P36712.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 11,
+      "target": "CORE5_ADE40 Core-capsid bridging protein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P48753",
+      "score": 1.9827,
+      "score_terms": {
+        "conservation": 0.4827,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P48753",
+        "entry_id": "CORE5_ADE40",
+        "protein_name": "Core-capsid bridging protein",
+        "organism": "Human adenovirus F serotype 40",
+        "reviewed": true,
+        "molecule_asked_for": "CORE5_ADE40 Core-capsid bridging protein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Associates loosely with the viral DNA to form an outer shell around the nucleoprotein-DNA complex and links it with the capsid by binding the endosome lysis protein. Dissociates from the viral genome during entry. Might be involved in nuclear capsid assembly of the viral particles through its association with NPM1/nucleophosmin"
+          ],
+          "SUBUNIT": [
+            "Monomer. Homodimer. Exists in equilibrium between monomers and dimers in solution. Interacts with the histone-like nucleoprotein; this interactions bridge the virus core to the capsid. Interacts with core protein X; this interactions bridge the virus core to the capsid. Interacts with the endosome lysis protein VI; this interactions bridge the virus core to the capsid. Interacts with the peripentonal hexons. Interacts with host NPM1; this interaction might play a role in virus assembly"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR005608",
+              "name": "Adeno_V"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF03910",
+              "name": "Adeno_PV"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044196",
+              "term": "host cell nucleolus"
+            },
+            {
+              "id": "GO:0044423",
+              "term": "virion component"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0003677",
+              "term": "DNA binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0019076",
+              "term": "viral release from host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "DNA-binding",
+          "Host nucleus",
+          "Late protein",
+          "Reference proteome",
+          "Viral capsid assembly",
+          "Viral release from host cell",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus",
+          "Viral release from host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P48753.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    }
+  ],
+  "coverage": {
+    "chains": 10,
+    "with_a_reviewed_relative": 5,
+    "with_a_function_for_this_chain": 0,
+    "with_a_verified_reading_frame": 0,
+    "with_nucleotide_coordinates": 0,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:02:33.956542+00:00"
+  },
+  "content_sha256": "3288211755edbd4944c078eff2b6342eb09096641486a1fed0c772ef0fb65b3e"
+}

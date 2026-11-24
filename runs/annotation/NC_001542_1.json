@@ -1,0 +1,803 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_001542.1",
+  "pathogen": "Rabies virus",
+  "reference_excluded_organism": "Rabies virus",
+  "source_record": "runs/onset_chain_NC_001542_1.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "L_ABLVH Large structural protein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q8JTG9",
+      "score": 5.6604,
+      "score_terms": {
+        "conservation": 1.7604,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q8JTG9",
+        "entry_id": "L_ABLVH",
+        "protein_name": "Large structural protein",
+        "organism": "Australian bat lyssavirus (isolate Human/AUS/1998)",
+        "reviewed": true,
+        "molecule_asked_for": "L_ABLVH Large structural protein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "RNA-directed RNA polymerase that catalyzes the transcription of viral mRNAs, their capping and polyadenylation. The template is composed of the viral RNA tightly encapsidated by the nucleoprotein (N). The viral polymerase binds to the genomic RNA at the 3' leader promoter, and transcribes subsequently all viral mRNAs with a decreasing efficiency. The first gene is the most transcribed, and the last the least transcribed. The viral phosphoprotein acts as a processivity factor. Capping is concomitant with initiation of mRNA transcription. Indeed, a GDP polyribonucleotidyl transferase (PRNTase) adds the cap structure when the nascent RNA chain length has reached few nucleotides. Ribose 2'-O methylation of viral mRNA cap precedes and facilitates subsequent guanine-N-7 methylation, both activities being carried by the viral polymerase. Polyadenylation of mRNAs occur by a stuttering mechanism at a slipery stop site present at the end viral genes. After finishing transcription of a mRNA, the polymerase can resume transcription of the downstream gene",
+            "RNA-directed RNA polymerase that catalyzes the replication of viral genomic RNA. The template is composed of the viral RNA tightly encapsidated by the nucleoprotein (N). The replicase mode is dependent on intracellular N protein concentration. In this mode, the polymerase replicates the whole viral genome without recognizing transcriptional signals, and the replicated genome is not caped or polyadenylated"
+          ],
+          "SUBUNIT": [
+            "May form homodimer. Interacts with the P protein"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Pteropus alecto",
+            "common_name": "Black flying fox",
+            "taxon": 9402
+          },
+          {
+            "name": "Pteropus conspicillatus",
+            "common_name": "Spectacled flying fox",
+            "taxon": 328804
+          },
+          {
+            "name": "Pteropus poliocephalus",
+            "common_name": "Grey-headed flying fox",
+            "taxon": 9403
+          },
+          {
+            "name": "Pteropus scapulatus",
+            "common_name": "Little red flying fox",
+            "taxon": 94117
+          },
+          {
+            "name": "Saccolaimus",
+            "common_name": null,
+            "taxon": 446909
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR039530",
+              "name": "L_methyltransferase_rhabdo"
+            },
+            {
+              "id": "IPR039736",
+              "name": "L_poly_C"
+            },
+            {
+              "id": "IPR048398",
+              "name": "Methyltrans_Mon_C"
+            },
+            {
+              "id": "IPR048397",
+              "name": "Methyltrans_Mon_CD"
+            },
+            {
+              "id": "IPR026890",
+              "name": "Mononeg_mRNAcap"
+            },
+            {
+              "id": "IPR014023",
+              "name": "Mononeg_RNA_pol_cat"
+            },
+            {
+              "id": "IPR025786",
+              "name": "Mononega_L_MeTrfase"
+            },
+            {
+              "id": "IPR017234",
+              "name": "RNA-dir_pol_rhabdovirus"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF21080",
+              "name": "Methyltrans_Mon_1st"
+            },
+            {
+              "id": "PF14314",
+              "name": "Methyltrans_Mon_2nd"
+            },
+            {
+              "id": "PF21081",
+              "name": "Methyltrans_Mon_3rd"
+            },
+            {
+              "id": "PF14318",
+              "name": "Mononeg_mRNAcap"
+            },
+            {
+              "id": "PF00946",
+              "name": "Mononeg_RNA_pol"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS52108",
+              "name": "MNV_L_PRNTASE"
+            },
+            {
+              "id": "PS50526",
+              "name": "RDRP_SSRNA_NEG_NONSEG"
+            },
+            {
+              "id": "PS51590",
+              "name": "SAM_MT_MNV_L"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0003924",
+              "term": "GTPase activity"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0004482",
+              "term": "mRNA 5'-cap (guanine-N7-)-methyltransferase activity"
+            },
+            {
+              "id": "GO:0062105",
+              "term": "RNA 2'-O-methyltransferase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039689",
+              "term": "negative stranded viral RNA replication"
+            }
+          ]
+        },
+        "keywords": [
+          "ATP-binding",
+          "Host cytoplasm",
+          "Hydrolase",
+          "Magnesium",
+          "Metal-binding",
+          "Methyltransferase",
+          "mRNA capping",
+          "mRNA processing",
+          "Multifunctional enzyme",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "RNA-directed RNA polymerase",
+          "S-adenosyl-L-methionine",
+          "Transferase",
+          "Viral RNA replication",
+          "Virion",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Host cytoplasm"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/Q8JTG9.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 2,
+      "target": "MATRX_ABLVH Matrix protein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q8JTH1",
+      "score": 4.9945,
+      "score_terms": {
+        "conservation": 1.3845,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.01,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q8JTH1",
+        "entry_id": "MATRX_ABLVH",
+        "protein_name": "Matrix protein",
+        "organism": "Australian bat lyssavirus (isolate Human/AUS/1998)",
+        "reviewed": true,
+        "molecule_asked_for": "MATRX_ABLVH Matrix protein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Plays a major role in assembly and budding of virion. Completely covers the ribonucleoprotein coil and keep it in condensed bullet-shaped form. Inhibits viral transcription and stimulates replication. Plays a major role in early induction of TRAIL-mediated apoptosis in infected neurons (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Homomultimer. Interacts with nucleoprotein and with the cytoplasmic domain of glycoprotein (By similarity)"
+          ],
+          "DOMAIN": [
+            "Late-budding domains (L domains) are short sequence motifs essential for viral particle budding. They recruit proteins of the host ESCRT machinery (Endosomal Sorting Complex Required for Transport) or ESCRT-associated proteins. Matrix protein contains one L domain: a PPXY motif which potentially interacts with the WW domain 3 of NEDD4 E3 ubiquitin ligase (Potential)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Pteropus alecto",
+            "common_name": "Black flying fox",
+            "taxon": 9402
+          },
+          {
+            "name": "Pteropus conspicillatus",
+            "common_name": "Spectacled flying fox",
+            "taxon": 328804
+          },
+          {
+            "name": "Pteropus poliocephalus",
+            "common_name": "Grey-headed flying fox",
+            "taxon": 9403
+          },
+          {
+            "name": "Pteropus scapulatus",
+            "common_name": "Little red flying fox",
+            "taxon": 94117
+          },
+          {
+            "name": "Saccolaimus",
+            "common_name": null,
+            "taxon": 446909
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.10.460.20",
+              "name": "Rhabdovirus matrix protein M2"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR006870",
+              "name": "Rhabdo_M"
+            },
+            {
+              "id": "IPR038617",
+              "name": "Rhabdovirus_M_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF04785",
+              "name": "Rhabdo_M2"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0033645",
+              "term": "host cell endomembrane system"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0039660",
+              "term": "structural constituent of virion"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039702",
+              "term": "viral budding via host ESCRT complex"
+            }
+          ]
+        },
+        "keywords": [
+          "Host membrane",
+          "Host-virus interaction",
+          "Membrane",
+          "Phosphoprotein",
+          "Viral budding",
+          "Viral budding via the host ESCRT complexes",
+          "Viral envelope protein",
+          "Viral matrix protein",
+          "Viral release from host cell",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host membrane",
+          "Host-virus interaction",
+          "Viral budding via the host ESCRT complexes",
+          "Viral release from host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/Q8JTH1.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 3,
+      "target": "GLYCO_ABLVH Glycoprotein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q8JTH0",
+      "score": 4.7595,
+      "score_terms": {
+        "conservation": 1.1595,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q8JTH0",
+        "entry_id": "GLYCO_ABLVH",
+        "protein_name": "Glycoprotein",
+        "organism": "Australian bat lyssavirus (isolate Human/AUS/1998)",
+        "reviewed": true,
+        "molecule_asked_for": "GLYCO_ABLVH Glycoprotein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Attaches the virus to host cellular receptor, inducing endocytosis of the virion. In the endosome, the acidic pH induces conformational changes in the glycoprotein trimer, which trigger fusion between virus and cell membrane. There is convincing in vitro evidence that the muscular form of the nicotinic acetylcholine receptor (nAChR), the neuronal cell adhesion molecule (NCAM), and the p75 neurotrophin receptor (p75NTR) bind glycoprotein and thereby facilitate rabies virus entry into cells (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Homotrimer. Interacts with matrix protein (By similarity)"
+          ],
+          "PTM": [
+            "Glycosylated and palmitoylated by host. Glycosylation is crucial for glycoprotein export at the cell surface (By similarity)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Pteropus alecto",
+            "common_name": "Black flying fox",
+            "taxon": 9402
+          },
+          {
+            "name": "Pteropus conspicillatus",
+            "common_name": "Spectacled flying fox",
+            "taxon": 328804
+          },
+          {
+            "name": "Pteropus poliocephalus",
+            "common_name": "Grey-headed flying fox",
+            "taxon": 9403
+          },
+          {
+            "name": "Pteropus scapulatus",
+            "common_name": "Little red flying fox",
+            "taxon": 94117
+          },
+          {
+            "name": "Saccolaimus",
+            "common_name": null,
+            "taxon": 446909
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "2.30.29.130",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR055448",
+              "name": "PH_Rhabdo_glycop"
+            },
+            {
+              "id": "IPR055447",
+              "name": "Rhabdo_glycop_CD"
+            },
+            {
+              "id": "IPR001903",
+              "name": "Rhabdo_glycop_FD"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF24834",
+              "name": "PH_Rhabdo_glycop"
+            },
+            {
+              "id": "PF24833",
+              "name": "Rhabdo_glycop_CD"
+            },
+            {
+              "id": "PF00974",
+              "name": "Rhabdo_glycop_FD"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF161008",
+              "name": "Viral glycoprotein ectodomain-like"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ]
+        },
+        "keywords": [
+          "Glycoprotein",
+          "Lipoprotein",
+          "Membrane",
+          "Palmitate",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral envelope protein",
+          "Virion"
+        ],
+        "host_interaction_keywords": [],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/Q8JTH0.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 4,
+      "target": "NCAP_ABLVH Nucleoprotein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q8JTH3",
+      "score": 3.4803,
+      "score_terms": {
+        "conservation": 1.9803,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q8JTH3",
+        "entry_id": "NCAP_ABLVH",
+        "protein_name": "Nucleoprotein",
+        "organism": "Australian bat lyssavirus (isolate Human/AUS/1998)",
+        "reviewed": true,
+        "molecule_asked_for": "NCAP_ABLVH Nucleoprotein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Encapsidates the genome in a ratio of one protein N per nine ribonucleotides, protecting it from nucleases. If expressed without protein P it binds non-specifically RNA and therefore can bind its own mRNA. Interaction with protein P abolishes any non-specific RNA binding, and prevents phosphorylation. The soluble N-P complex encapsidates specifically the genomic RNA, with protein N protecting the genome like a pearl necklace. The encapsidated genomic RNA is termed the nucleocapsid (NC) and serves as template for viral transcription and replication. Protein N binds protein P in the NC through a different interaction, and can be phosphorylated. Subsequent viral replication is dependent on intracellular concentration of newly synthesized protein N. During replication, encapsidation by protein N is coupled to RNA synthesis and all replicative products are resistant to nucleases (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Homomultimerizes to form the nucleocapsid. Binds to viral genomic RNA. In nucleocapsid, binds protein P and thereby positions the polymerase on the template. Protein P acts as a chaperone on free protein N to prevent it from aggregation before encapsidating genomic RNA (By similarity)"
+          ],
+          "PTM": [
+            "Phosphorylated by host CK2. Unphosphorylated protein N seems to have a better affinity for leader viral promoter encapsidation. Phosphorylation of protein N in ribonucleocapsid may stabilize the interaction with protein P, thereby playing an important role in viral transcription/replication (By similarity)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Pteropus alecto",
+            "common_name": "Black flying fox",
+            "taxon": 9402
+          },
+          {
+            "name": "Pteropus conspicillatus",
+            "common_name": "Spectacled flying fox",
+            "taxon": 328804
+          },
+          {
+            "name": "Pteropus poliocephalus",
+            "common_name": "Grey-headed flying fox",
+            "taxon": 9403
+          },
+          {
+            "name": "Pteropus scapulatus",
+            "common_name": "Little red flying fox",
+            "taxon": 94117
+          },
+          {
+            "name": "Saccolaimus",
+            "common_name": null,
+            "taxon": 446909
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "1.10.3610.10",
+              "name": "Nucleoprotein"
+            },
+            {
+              "id": "1.10.3570.10",
+              "name": "Rhabdovirus nucleocapsid protein like domain"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR000448",
+              "name": "Rhabdo_ncapsid"
+            },
+            {
+              "id": "IPR023331",
+              "name": "Rhabdovirus_ncapsid_C"
+            },
+            {
+              "id": "IPR023330",
+              "name": "Rhabdovirus_ncapsid_N"
+            },
+            {
+              "id": "IPR035961",
+              "name": "Rhabdovirus_nucleoprotein-like"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00945",
+              "name": "Rhabdo_ncap"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF140809",
+              "name": "Rhabdovirus nucleoprotein-like"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0019029",
+              "term": "helical viral capsid"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:1990904",
+              "term": "ribonucleoprotein complex"
+            },
+            {
+              "id": "GO:0019013",
+              "term": "viral nucleocapsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            }
+          ]
+        },
+        "keywords": [
+          "Capsid protein",
+          "Helical capsid protein",
+          "Host cytoplasm",
+          "Phosphoprotein",
+          "Ribonucleoprotein",
+          "RNA-binding",
+          "Superantigen",
+          "Viral nucleoprotein",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host cytoplasm"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/Q8JTH3.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    }
+  ],
+  "coverage": {
+    "chains": 4,
+    "with_a_reviewed_relative": 4,
+    "with_a_function_for_this_chain": 0,
+    "with_a_verified_reading_frame": 0,
+    "with_nucleotide_coordinates": 0,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:02:48.909141+00:00"
+  },
+  "content_sha256": "6f35d6f823f795e0df37d8f33bfc2a84b5dc94e1d0eaed342290eb9ed413452f"
+}

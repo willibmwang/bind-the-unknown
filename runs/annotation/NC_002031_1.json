@@ -1,0 +1,5522 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_002031.1",
+  "pathogen": "Yellow fever virus",
+  "reference_excluded_organism": "Yellow fever virus",
+  "source_record": "runs/onset_chain_NC_002031_1.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "Serine protease subunit NS2B",
+      "parent": "POLG_WSLV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "C5H431",
+      "score": 4.3632,
+      "score_terms": {
+        "conservation": 0.4632,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.55,
+          "confirmed_at": [
+            "the start of the chain"
+          ],
+          "confirmed_at_both_ends": false,
+          "one_end_only_note": "Only the start of the chain matches the relative. The other end of this span does not, so the coordinate at that end is not confirmed. On a polyprotein the usual cause is a ribosomal frameshift: the chain starts in one reading frame and the frame it was located in starts in another, which leaves the far end exact and the near end short.",
+          "leading_identity": 0.55,
+          "trailing_identity": 0.05,
+          "residues_compared": 40,
+          "frame_span_residues": 121,
+          "relative_chain_residues": 130,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 118,
+        "orf_length_aa": 3411,
+        "segment": 0,
+        "orf_name": "POLG_WSLV Genome polyprotein",
+        "reading_frame": "+1 at nt 119",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        1350,
+        1479
+      ],
+      "chain_span_in_this_genome": [
+        1355,
+        1475
+      ],
+      "chain_span_nt": [
+        4181,
+        4543
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain"
+      ],
+      "segment_length_nt": 10862,
+      "annotation": {
+        "accession": "C5H431",
+        "entry_id": "POLG_WSLV",
+        "protein_name": "Genome polyprotein",
+        "organism": "Wesselsbron virus",
+        "reviewed": true,
+        "molecule_asked_for": "Serine protease subunit NS2B",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein C",
+          "Envelope protein E",
+          "Genome polyprotein",
+          "Non-structural protein 1",
+          "Non-structural protein 2A",
+          "Non-structural protein 4A",
+          "Non-structural protein 4B",
+          "Peptide 2k",
+          "Peptide pr",
+          "Protein prM",
+          "RNA-directed RNA polymerase/Methyltransferase NS5",
+          "Serine protease NS3",
+          "Serine protease subunit NS2B",
+          "Small envelope protein M"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Required cofactor for the serine protease function of NS3. May have membrane-destabilizing activity and form viroporins (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Forms a heterodimer with serine protease NS3 (By similarity). May form homooligomers (By similarity)"
+          ]
+        },
+        "about_the_whole_entry": {
+          "PTM": [
+            "A C-terminally truncated form of non-structural protein 2A, NS2A-alpha, may result from partial cleavage by NS3",
+            "Polyubiquitinated; ubiquitination is probably mediated by host TRIM23 and is prerequisite for NS5-STAT2 interaction. NS5 is not ISGylated or sumoylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000441601",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aedes",
+            "common_name": null,
+            "taxon": 7158
+          },
+          {
+            "name": "Capra hircus",
+            "common_name": "Goat",
+            "taxon": 9925
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Ovis aries",
+            "common_name": "Sheep",
+            "taxon": 9940
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd20761",
+              "name": "capping_2-OMTase_Flaviviridae"
+            },
+            {
+              "id": "cd17931",
+              "name": "DEXHc_viral_Ns3"
+            },
+            {
+              "id": "cd12149",
+              "name": "Flavi_E_C"
+            },
+            {
+              "id": "cd17038",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "cd23204",
+              "name": "Flavivirus_RdRp"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.10.260.90",
+              "name": "-"
+            },
+            {
+              "id": "1.20.1280.260",
+              "name": "-"
+            },
+            {
+              "id": "2.40.10.120",
+              "name": "-"
+            },
+            {
+              "id": "2.60.40.350",
+              "name": "-"
+            },
+            {
+              "id": "1.10.8.970",
+              "name": "Flavivirus envelope glycoprotein M-like"
+            },
+            {
+              "id": "2.60.260.50",
+              "name": "Flavivirus polyprotein propeptide domain"
+            },
+            {
+              "id": "3.30.70.2840",
+              "name": "Flavivirus RNA-directed RNA polymerase, thumb domain"
+            },
+            {
+              "id": "3.40.50.300",
+              "name": "P-loop containing nucleotide triphosphate hydrolases"
+            },
+            {
+              "id": "2.60.98.10",
+              "name": "Tick-borne Encephalitis virus Glycoprotein, domain 1"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "3.40.50.150",
+              "name": "Vaccinia Virus protein VP39"
+            },
+            {
+              "id": "3.30.67.10",
+              "name": "Viral Envelope Glycoprotein, domain 2"
+            },
+            {
+              "id": "3.30.387.10",
+              "name": "Viral Envelope Glycoprotein, domain 3"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000069",
+              "name": "Env_glycoprot_M_flavivir"
+            },
+            {
+              "id": "IPR038302",
+              "name": "Env_glycoprot_M_sf_flavivir"
+            },
+            {
+              "id": "IPR013755",
+              "name": "Flav_gly_cen_dom_subdom1"
+            },
+            {
+              "id": "IPR001122",
+              "name": "Flavi_capsidC"
+            },
+            {
+              "id": "IPR011492",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "IPR027287",
+              "name": "Flavi_E_Ig-like"
+            },
+            {
+              "id": "IPR026470",
+              "name": "Flavi_E_Stem/Anchor_dom"
+            },
+            {
+              "id": "IPR038345",
+              "name": "Flavi_E_Stem/Anchor_dom_sf"
+            },
+            {
+              "id": "IPR011998",
+              "name": "Flavi_Glycoprot_E_cen/dimer"
+            },
+            {
+              "id": "IPR001157",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "IPR000752",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "IPR000487",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "IPR001850",
+              "name": "Flavi_NS3_S7"
+            },
+            {
+              "id": "IPR000404",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "IPR001528",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "IPR046811",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "IPR002535",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "IPR038688",
+              "name": "Flavi_propep_sf"
+            },
+            {
+              "id": "IPR047530",
+              "name": "Flavi_RdRp"
+            },
+            {
+              "id": "IPR000208",
+              "name": "Flavi_RdRp_fingers/palm"
+            },
+            {
+              "id": "IPR000336",
+              "name": "Flavivir/Alphavir_Ig-like_sf"
+            },
+            {
+              "id": "IPR014412",
+              "name": "Gen_Poly_FLV"
+            },
+            {
+              "id": "IPR036253",
+              "name": "Glycoprot_cen/dimer_sf"
+            },
+            {
+              "id": "IPR038055",
+              "name": "Glycoprot_E_dimer_dom"
+            },
+            {
+              "id": "IPR013756",
+              "name": "GlyE_cen_dom_subdom2"
+            },
+            {
+              "id": "IPR014001",
+              "name": "Helicase_ATP-bd"
+            },
+            {
+              "id": "IPR001650",
+              "name": "Helicase_C-like"
+            },
+            {
+              "id": "IPR014756",
+              "name": "Ig_E-set"
+            },
+            {
+              "id": "IPR026490",
+              "name": "mRNA_cap_0/1_MeTrfase"
+            },
+            {
+              "id": "IPR049486",
+              "name": "NS3-hel_C_flaviviridae"
+            },
+            {
+              "id": "IPR027417",
+              "name": "P-loop_NTPase"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR002877",
+              "name": "RNA_MeTrfase_FtsJ_dom"
+            },
+            {
+              "id": "IPR029063",
+              "name": "SAM-dependent_MTases_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF20907",
+              "name": "Flav_NS3-hel_C"
+            },
+            {
+              "id": "PF01003",
+              "name": "Flavi_capsid"
+            },
+            {
+              "id": "PF07652",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "PF21659",
+              "name": "Flavi_E_stem"
+            },
+            {
+              "id": "PF02832",
+              "name": "Flavi_glycop_C"
+            },
+            {
+              "id": "PF00869",
+              "name": "Flavi_glycoprot"
+            },
+            {
+              "id": "PF01004",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "PF00948",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "PF01005",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "PF01002",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "PF01350",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "PF01349",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "PF00972",
+              "name": "Flavi_NS5"
+            },
+            {
+              "id": "PF20483",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "PF01570",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "PF01728",
+              "name": "FtsJ"
+            },
+            {
+              "id": "PF00949",
+              "name": "Peptidase_S7"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF81296",
+              "name": "E set domains"
+            },
+            {
+              "id": "SSF52540",
+              "name": "P-loop containing nucleoside triphosphate hydrolases"
+            },
+            {
+              "id": "SSF53335",
+              "name": "S-adenosyl-L-methionine-dependent methyltransferases"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "SSF56983",
+              "name": "Viral glycoprotein, central and dimerisation domains"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51527",
+              "name": "FLAVIVIRUS_NS2B"
+            },
+            {
+              "id": "PS51528",
+              "name": "FLAVIVIRUS_NS3PRO"
+            },
+            {
+              "id": "PS51192",
+              "name": "HELICASE_ATP_BIND_1"
+            },
+            {
+              "id": "PS51194",
+              "name": "HELICASE_CTER"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51591",
+              "name": "RNA_CAP01_NS5_MT"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0005576",
+              "term": "extracellular region"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044196",
+              "term": "host cell nucleolus"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0044220",
+              "term": "host cell perinuclear region of cytoplasm"
+            },
+            {
+              "id": "GO:0019028",
+              "term": "viral capsid"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0016887",
+              "term": "ATP hydrolysis activity"
+            },
+            {
+              "id": "GO:0003725",
+              "term": "double-stranded RNA binding"
+            },
+            {
+              "id": "GO:0005525",
+              "term": "GTP binding"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0004483",
+              "term": "methyltransferase cap1 activity"
+            },
+            {
+              "id": "GO:0004482",
+              "term": "mRNA 5'-cap (guanine-N7-)-methyltransferase activity"
+            },
+            {
+              "id": "GO:0046983",
+              "term": "protein dimerization activity"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0004252",
+              "term": "serine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0052170",
+              "term": "symbiont-mediated suppression of host innate immune response"
+            },
+            {
+              "id": "GO:0039563",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT1 activity"
+            },
+            {
+              "id": "GO:0039564",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT2 activity"
+            },
+            {
+              "id": "GO:0039502",
+              "term": "symbiont-mediated suppression of host type I interferon-mediated signaling pathway"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Acetylation",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Capsid protein",
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "GTP-binding",
+          "Helicase",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Interferon antiviral system evasion",
+          "Membrane",
+          "Metal-binding",
+          "Methyltransferase",
+          "mRNA capping",
+          "mRNA processing",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Protease",
+          "Reference proteome",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "S-adenosyl-L-methionine",
+          "Secreted",
+          "Serine protease",
+          "Transferase",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Ubl conjugation",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus entry into host cell",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/C5H431.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 2,
+      "target": "Serine protease NS3",
+      "parent": "POLG_WSLV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "C5H431",
+      "score": 4.3632,
+      "score_terms": {
+        "conservation": 0.4632,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.675,
+          "confirmed_at": [
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": false,
+          "one_end_only_note": "Only the end of the chain matches the relative. The other end of this span does not, so the coordinate at that end is not confirmed. On a polyprotein the usual cause is a ribosomal frameshift: the chain starts in one reading frame and the frame it was located in starts in another, which leaves the far end exact and the near end short.",
+          "leading_identity": 0.1,
+          "trailing_identity": 0.675,
+          "residues_compared": 40,
+          "frame_span_residues": 620,
+          "relative_chain_residues": 623,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 118,
+        "orf_length_aa": 3411,
+        "segment": 0,
+        "orf_name": "POLG_WSLV Genome polyprotein",
+        "reading_frame": "+1 at nt 119",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        1480,
+        2102
+      ],
+      "chain_span_in_this_genome": [
+        1488,
+        2107
+      ],
+      "chain_span_nt": [
+        4580,
+        6439
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the end of the chain"
+      ],
+      "segment_length_nt": 10862,
+      "annotation": {
+        "accession": "C5H431",
+        "entry_id": "POLG_WSLV",
+        "protein_name": "Genome polyprotein",
+        "organism": "Wesselsbron virus",
+        "reviewed": true,
+        "molecule_asked_for": "Serine protease NS3",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein C",
+          "Envelope protein E",
+          "Genome polyprotein",
+          "Non-structural protein 1",
+          "Non-structural protein 2A",
+          "Non-structural protein 4A",
+          "Non-structural protein 4B",
+          "Peptide 2k",
+          "Peptide pr",
+          "Protein prM",
+          "RNA-directed RNA polymerase/Methyltransferase NS5",
+          "Serine protease NS3",
+          "Serine protease subunit NS2B",
+          "Small envelope protein M"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Displays three enzymatic activities: serine protease, NTPase and RNA helicase. NS3 serine protease, in association with NS2B, performs its autocleavage and cleaves the polyprotein at dibasic sites in the cytoplasm: C-prM, NS2A-NS2B, NS2B-NS3, NS3-NS4A, NS4A-2K and NS4B-NS5. NS3 RNA helicase binds RNA and unwinds dsRNA in the 3' to 5' direction. Also plays a role in virus assembly (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Forms a heterodimer with NS2B (By similarity). Interacts with NS4B (By similarity). Interacts with unphosphorylated RNA-directed RNA polymerase NS5; this interaction stimulates RNA-directed RNA polymerase NS5 guanylyltransferase activity (By similarity). NS3 interacts with host PDCD6IP; this interaction contributes to virion release (By similarity)"
+          ],
+          "PTM": [
+            "Acetylated by host KAT5. Acetylation modulates NS3 RNA-binding and unwinding activities and plays an important positive role for viral replication"
+          ]
+        },
+        "about_the_whole_entry": {
+          "PTM": [
+            "A C-terminally truncated form of non-structural protein 2A, NS2A-alpha, may result from partial cleavage by NS3",
+            "Polyubiquitinated; ubiquitination is probably mediated by host TRIM23 and is prerequisite for NS5-STAT2 interaction. NS5 is not ISGylated or sumoylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000441602",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aedes",
+            "common_name": null,
+            "taxon": 7158
+          },
+          {
+            "name": "Capra hircus",
+            "common_name": "Goat",
+            "taxon": 9925
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Ovis aries",
+            "common_name": "Sheep",
+            "taxon": 9940
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd20761",
+              "name": "capping_2-OMTase_Flaviviridae"
+            },
+            {
+              "id": "cd17931",
+              "name": "DEXHc_viral_Ns3"
+            },
+            {
+              "id": "cd12149",
+              "name": "Flavi_E_C"
+            },
+            {
+              "id": "cd17038",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "cd23204",
+              "name": "Flavivirus_RdRp"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.10.260.90",
+              "name": "-"
+            },
+            {
+              "id": "1.20.1280.260",
+              "name": "-"
+            },
+            {
+              "id": "2.40.10.120",
+              "name": "-"
+            },
+            {
+              "id": "2.60.40.350",
+              "name": "-"
+            },
+            {
+              "id": "1.10.8.970",
+              "name": "Flavivirus envelope glycoprotein M-like"
+            },
+            {
+              "id": "2.60.260.50",
+              "name": "Flavivirus polyprotein propeptide domain"
+            },
+            {
+              "id": "3.30.70.2840",
+              "name": "Flavivirus RNA-directed RNA polymerase, thumb domain"
+            },
+            {
+              "id": "3.40.50.300",
+              "name": "P-loop containing nucleotide triphosphate hydrolases"
+            },
+            {
+              "id": "2.60.98.10",
+              "name": "Tick-borne Encephalitis virus Glycoprotein, domain 1"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "3.40.50.150",
+              "name": "Vaccinia Virus protein VP39"
+            },
+            {
+              "id": "3.30.67.10",
+              "name": "Viral Envelope Glycoprotein, domain 2"
+            },
+            {
+              "id": "3.30.387.10",
+              "name": "Viral Envelope Glycoprotein, domain 3"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000069",
+              "name": "Env_glycoprot_M_flavivir"
+            },
+            {
+              "id": "IPR038302",
+              "name": "Env_glycoprot_M_sf_flavivir"
+            },
+            {
+              "id": "IPR013755",
+              "name": "Flav_gly_cen_dom_subdom1"
+            },
+            {
+              "id": "IPR001122",
+              "name": "Flavi_capsidC"
+            },
+            {
+              "id": "IPR011492",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "IPR027287",
+              "name": "Flavi_E_Ig-like"
+            },
+            {
+              "id": "IPR026470",
+              "name": "Flavi_E_Stem/Anchor_dom"
+            },
+            {
+              "id": "IPR038345",
+              "name": "Flavi_E_Stem/Anchor_dom_sf"
+            },
+            {
+              "id": "IPR011998",
+              "name": "Flavi_Glycoprot_E_cen/dimer"
+            },
+            {
+              "id": "IPR001157",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "IPR000752",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "IPR000487",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "IPR001850",
+              "name": "Flavi_NS3_S7"
+            },
+            {
+              "id": "IPR000404",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "IPR001528",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "IPR046811",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "IPR002535",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "IPR038688",
+              "name": "Flavi_propep_sf"
+            },
+            {
+              "id": "IPR047530",
+              "name": "Flavi_RdRp"
+            },
+            {
+              "id": "IPR000208",
+              "name": "Flavi_RdRp_fingers/palm"
+            },
+            {
+              "id": "IPR000336",
+              "name": "Flavivir/Alphavir_Ig-like_sf"
+            },
+            {
+              "id": "IPR014412",
+              "name": "Gen_Poly_FLV"
+            },
+            {
+              "id": "IPR036253",
+              "name": "Glycoprot_cen/dimer_sf"
+            },
+            {
+              "id": "IPR038055",
+              "name": "Glycoprot_E_dimer_dom"
+            },
+            {
+              "id": "IPR013756",
+              "name": "GlyE_cen_dom_subdom2"
+            },
+            {
+              "id": "IPR014001",
+              "name": "Helicase_ATP-bd"
+            },
+            {
+              "id": "IPR001650",
+              "name": "Helicase_C-like"
+            },
+            {
+              "id": "IPR014756",
+              "name": "Ig_E-set"
+            },
+            {
+              "id": "IPR026490",
+              "name": "mRNA_cap_0/1_MeTrfase"
+            },
+            {
+              "id": "IPR049486",
+              "name": "NS3-hel_C_flaviviridae"
+            },
+            {
+              "id": "IPR027417",
+              "name": "P-loop_NTPase"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR002877",
+              "name": "RNA_MeTrfase_FtsJ_dom"
+            },
+            {
+              "id": "IPR029063",
+              "name": "SAM-dependent_MTases_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF20907",
+              "name": "Flav_NS3-hel_C"
+            },
+            {
+              "id": "PF01003",
+              "name": "Flavi_capsid"
+            },
+            {
+              "id": "PF07652",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "PF21659",
+              "name": "Flavi_E_stem"
+            },
+            {
+              "id": "PF02832",
+              "name": "Flavi_glycop_C"
+            },
+            {
+              "id": "PF00869",
+              "name": "Flavi_glycoprot"
+            },
+            {
+              "id": "PF01004",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "PF00948",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "PF01005",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "PF01002",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "PF01350",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "PF01349",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "PF00972",
+              "name": "Flavi_NS5"
+            },
+            {
+              "id": "PF20483",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "PF01570",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "PF01728",
+              "name": "FtsJ"
+            },
+            {
+              "id": "PF00949",
+              "name": "Peptidase_S7"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF81296",
+              "name": "E set domains"
+            },
+            {
+              "id": "SSF52540",
+              "name": "P-loop containing nucleoside triphosphate hydrolases"
+            },
+            {
+              "id": "SSF53335",
+              "name": "S-adenosyl-L-methionine-dependent methyltransferases"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "SSF56983",
+              "name": "Viral glycoprotein, central and dimerisation domains"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51527",
+              "name": "FLAVIVIRUS_NS2B"
+            },
+            {
+              "id": "PS51528",
+              "name": "FLAVIVIRUS_NS3PRO"
+            },
+            {
+              "id": "PS51192",
+              "name": "HELICASE_ATP_BIND_1"
+            },
+            {
+              "id": "PS51194",
+              "name": "HELICASE_CTER"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51591",
+              "name": "RNA_CAP01_NS5_MT"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0005576",
+              "term": "extracellular region"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044196",
+              "term": "host cell nucleolus"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0044220",
+              "term": "host cell perinuclear region of cytoplasm"
+            },
+            {
+              "id": "GO:0019028",
+              "term": "viral capsid"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0016887",
+              "term": "ATP hydrolysis activity"
+            },
+            {
+              "id": "GO:0003725",
+              "term": "double-stranded RNA binding"
+            },
+            {
+              "id": "GO:0005525",
+              "term": "GTP binding"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0004483",
+              "term": "methyltransferase cap1 activity"
+            },
+            {
+              "id": "GO:0004482",
+              "term": "mRNA 5'-cap (guanine-N7-)-methyltransferase activity"
+            },
+            {
+              "id": "GO:0046983",
+              "term": "protein dimerization activity"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0004252",
+              "term": "serine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0052170",
+              "term": "symbiont-mediated suppression of host innate immune response"
+            },
+            {
+              "id": "GO:0039563",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT1 activity"
+            },
+            {
+              "id": "GO:0039564",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT2 activity"
+            },
+            {
+              "id": "GO:0039502",
+              "term": "symbiont-mediated suppression of host type I interferon-mediated signaling pathway"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Acetylation",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Capsid protein",
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "GTP-binding",
+          "Helicase",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Interferon antiviral system evasion",
+          "Membrane",
+          "Metal-binding",
+          "Methyltransferase",
+          "mRNA capping",
+          "mRNA processing",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Protease",
+          "Reference proteome",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "S-adenosyl-L-methionine",
+          "Secreted",
+          "Serine protease",
+          "Transferase",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Ubl conjugation",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus entry into host cell",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/C5H431.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 3,
+      "target": "RNA-directed RNA polymerase/Methyltransferase NS5",
+      "parent": "POLG_WSLV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "C5H431",
+      "score": 4.3632,
+      "score_terms": {
+        "conservation": 0.4632,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.65,
+          "confirmed_at": [
+            "the start of the chain"
+          ],
+          "confirmed_at_both_ends": false,
+          "one_end_only_note": "Only the start of the chain matches the relative. The other end of this span does not, so the coordinate at that end is not confirmed. On a polyprotein the usual cause is a ribosomal frameshift: the chain starts in one reading frame and the frame it was located in starts in another, which leaves the far end exact and the near end short.",
+          "leading_identity": 0.65,
+          "trailing_identity": 0.05,
+          "residues_compared": 40,
+          "frame_span_residues": 893,
+          "relative_chain_residues": 906,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 118,
+        "orf_length_aa": 3411,
+        "segment": 0,
+        "orf_name": "POLG_WSLV Genome polyprotein",
+        "reading_frame": "+1 at nt 119",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        2500,
+        3405
+      ],
+      "chain_span_in_this_genome": [
+        2507,
+        3399
+      ],
+      "chain_span_nt": [
+        7637,
+        10315
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain"
+      ],
+      "segment_length_nt": 10862,
+      "annotation": {
+        "accession": "C5H431",
+        "entry_id": "POLG_WSLV",
+        "protein_name": "Genome polyprotein",
+        "organism": "Wesselsbron virus",
+        "reviewed": true,
+        "molecule_asked_for": "RNA-directed RNA polymerase/Methyltransferase NS5",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein C",
+          "Envelope protein E",
+          "Genome polyprotein",
+          "Non-structural protein 1",
+          "Non-structural protein 2A",
+          "Non-structural protein 4A",
+          "Non-structural protein 4B",
+          "Peptide 2k",
+          "Peptide pr",
+          "Protein prM",
+          "RNA-directed RNA polymerase/Methyltransferase NS5",
+          "Serine protease NS3",
+          "Serine protease subunit NS2B",
+          "Small envelope protein M"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Replicates the viral (+) and (-) RNA genome, and performs the capping of genomes in the cytoplasm. NS5 methylates viral RNA cap at guanine N-7 and ribose 2'-O positions (By similarity). Besides its role in RNA genome replication, also prevents the establishment of cellular antiviral state by blocking the interferon-alpha/beta (IFN-alpha/beta) signaling pathway. IFN-I induces binding of NS5 to host IFN-activated transcription factor STAT2, preventing its transcriptional activity. Host TRIM23 is the E3 ligase that interacts with and polyubiquitinates NS5 to promote its binding to STAT2 and trigger IFN-I signaling inhibition"
+          ],
+          "SUBUNIT": [
+            "Homodimer (By similarity). Interacts with host STAT2; this interaction inhibits the phosphorylation of the latter, and, when all viral proteins are present (polyprotein), targets STAT2 for degradation (By similarity). Interacts with serine protease NS3 (By similarity). Interacts (via C-terminus) with host SCRIB (via PDZ3); this interaction targets NS5 to the cell membrane periphery and nucleus, thereby allowing efficient host nuclear STAT1 inhibition (By similarity). Interacts with host PAF1 complex; the interaction may prevent the recruitment of the PAF1 complex to interferon-responsive genes, and thus reduces the immune response (By similarity)"
+          ],
+          "PTM": [
+            "Phosphorylated on serines residues. This phosphorylation may trigger NS5 nuclear localization"
+          ]
+        },
+        "about_the_whole_entry": {
+          "PTM": [
+            "A C-terminally truncated form of non-structural protein 2A, NS2A-alpha, may result from partial cleavage by NS3",
+            "Polyubiquitinated; ubiquitination is probably mediated by host TRIM23 and is prerequisite for NS5-STAT2 interaction. NS5 is not ISGylated or sumoylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000441606",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aedes",
+            "common_name": null,
+            "taxon": 7158
+          },
+          {
+            "name": "Capra hircus",
+            "common_name": "Goat",
+            "taxon": 9925
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Ovis aries",
+            "common_name": "Sheep",
+            "taxon": 9940
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd20761",
+              "name": "capping_2-OMTase_Flaviviridae"
+            },
+            {
+              "id": "cd17931",
+              "name": "DEXHc_viral_Ns3"
+            },
+            {
+              "id": "cd12149",
+              "name": "Flavi_E_C"
+            },
+            {
+              "id": "cd17038",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "cd23204",
+              "name": "Flavivirus_RdRp"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.10.260.90",
+              "name": "-"
+            },
+            {
+              "id": "1.20.1280.260",
+              "name": "-"
+            },
+            {
+              "id": "2.40.10.120",
+              "name": "-"
+            },
+            {
+              "id": "2.60.40.350",
+              "name": "-"
+            },
+            {
+              "id": "1.10.8.970",
+              "name": "Flavivirus envelope glycoprotein M-like"
+            },
+            {
+              "id": "2.60.260.50",
+              "name": "Flavivirus polyprotein propeptide domain"
+            },
+            {
+              "id": "3.30.70.2840",
+              "name": "Flavivirus RNA-directed RNA polymerase, thumb domain"
+            },
+            {
+              "id": "3.40.50.300",
+              "name": "P-loop containing nucleotide triphosphate hydrolases"
+            },
+            {
+              "id": "2.60.98.10",
+              "name": "Tick-borne Encephalitis virus Glycoprotein, domain 1"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "3.40.50.150",
+              "name": "Vaccinia Virus protein VP39"
+            },
+            {
+              "id": "3.30.67.10",
+              "name": "Viral Envelope Glycoprotein, domain 2"
+            },
+            {
+              "id": "3.30.387.10",
+              "name": "Viral Envelope Glycoprotein, domain 3"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000069",
+              "name": "Env_glycoprot_M_flavivir"
+            },
+            {
+              "id": "IPR038302",
+              "name": "Env_glycoprot_M_sf_flavivir"
+            },
+            {
+              "id": "IPR013755",
+              "name": "Flav_gly_cen_dom_subdom1"
+            },
+            {
+              "id": "IPR001122",
+              "name": "Flavi_capsidC"
+            },
+            {
+              "id": "IPR011492",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "IPR027287",
+              "name": "Flavi_E_Ig-like"
+            },
+            {
+              "id": "IPR026470",
+              "name": "Flavi_E_Stem/Anchor_dom"
+            },
+            {
+              "id": "IPR038345",
+              "name": "Flavi_E_Stem/Anchor_dom_sf"
+            },
+            {
+              "id": "IPR011998",
+              "name": "Flavi_Glycoprot_E_cen/dimer"
+            },
+            {
+              "id": "IPR001157",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "IPR000752",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "IPR000487",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "IPR001850",
+              "name": "Flavi_NS3_S7"
+            },
+            {
+              "id": "IPR000404",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "IPR001528",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "IPR046811",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "IPR002535",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "IPR038688",
+              "name": "Flavi_propep_sf"
+            },
+            {
+              "id": "IPR047530",
+              "name": "Flavi_RdRp"
+            },
+            {
+              "id": "IPR000208",
+              "name": "Flavi_RdRp_fingers/palm"
+            },
+            {
+              "id": "IPR000336",
+              "name": "Flavivir/Alphavir_Ig-like_sf"
+            },
+            {
+              "id": "IPR014412",
+              "name": "Gen_Poly_FLV"
+            },
+            {
+              "id": "IPR036253",
+              "name": "Glycoprot_cen/dimer_sf"
+            },
+            {
+              "id": "IPR038055",
+              "name": "Glycoprot_E_dimer_dom"
+            },
+            {
+              "id": "IPR013756",
+              "name": "GlyE_cen_dom_subdom2"
+            },
+            {
+              "id": "IPR014001",
+              "name": "Helicase_ATP-bd"
+            },
+            {
+              "id": "IPR001650",
+              "name": "Helicase_C-like"
+            },
+            {
+              "id": "IPR014756",
+              "name": "Ig_E-set"
+            },
+            {
+              "id": "IPR026490",
+              "name": "mRNA_cap_0/1_MeTrfase"
+            },
+            {
+              "id": "IPR049486",
+              "name": "NS3-hel_C_flaviviridae"
+            },
+            {
+              "id": "IPR027417",
+              "name": "P-loop_NTPase"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR002877",
+              "name": "RNA_MeTrfase_FtsJ_dom"
+            },
+            {
+              "id": "IPR029063",
+              "name": "SAM-dependent_MTases_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF20907",
+              "name": "Flav_NS3-hel_C"
+            },
+            {
+              "id": "PF01003",
+              "name": "Flavi_capsid"
+            },
+            {
+              "id": "PF07652",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "PF21659",
+              "name": "Flavi_E_stem"
+            },
+            {
+              "id": "PF02832",
+              "name": "Flavi_glycop_C"
+            },
+            {
+              "id": "PF00869",
+              "name": "Flavi_glycoprot"
+            },
+            {
+              "id": "PF01004",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "PF00948",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "PF01005",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "PF01002",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "PF01350",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "PF01349",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "PF00972",
+              "name": "Flavi_NS5"
+            },
+            {
+              "id": "PF20483",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "PF01570",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "PF01728",
+              "name": "FtsJ"
+            },
+            {
+              "id": "PF00949",
+              "name": "Peptidase_S7"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF81296",
+              "name": "E set domains"
+            },
+            {
+              "id": "SSF52540",
+              "name": "P-loop containing nucleoside triphosphate hydrolases"
+            },
+            {
+              "id": "SSF53335",
+              "name": "S-adenosyl-L-methionine-dependent methyltransferases"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "SSF56983",
+              "name": "Viral glycoprotein, central and dimerisation domains"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51527",
+              "name": "FLAVIVIRUS_NS2B"
+            },
+            {
+              "id": "PS51528",
+              "name": "FLAVIVIRUS_NS3PRO"
+            },
+            {
+              "id": "PS51192",
+              "name": "HELICASE_ATP_BIND_1"
+            },
+            {
+              "id": "PS51194",
+              "name": "HELICASE_CTER"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51591",
+              "name": "RNA_CAP01_NS5_MT"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0005576",
+              "term": "extracellular region"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044196",
+              "term": "host cell nucleolus"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0044220",
+              "term": "host cell perinuclear region of cytoplasm"
+            },
+            {
+              "id": "GO:0019028",
+              "term": "viral capsid"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0016887",
+              "term": "ATP hydrolysis activity"
+            },
+            {
+              "id": "GO:0003725",
+              "term": "double-stranded RNA binding"
+            },
+            {
+              "id": "GO:0005525",
+              "term": "GTP binding"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0004483",
+              "term": "methyltransferase cap1 activity"
+            },
+            {
+              "id": "GO:0004482",
+              "term": "mRNA 5'-cap (guanine-N7-)-methyltransferase activity"
+            },
+            {
+              "id": "GO:0046983",
+              "term": "protein dimerization activity"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0004252",
+              "term": "serine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0052170",
+              "term": "symbiont-mediated suppression of host innate immune response"
+            },
+            {
+              "id": "GO:0039563",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT1 activity"
+            },
+            {
+              "id": "GO:0039564",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT2 activity"
+            },
+            {
+              "id": "GO:0039502",
+              "term": "symbiont-mediated suppression of host type I interferon-mediated signaling pathway"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Acetylation",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Capsid protein",
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "GTP-binding",
+          "Helicase",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Interferon antiviral system evasion",
+          "Membrane",
+          "Metal-binding",
+          "Methyltransferase",
+          "mRNA capping",
+          "mRNA processing",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Protease",
+          "Reference proteome",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "S-adenosyl-L-methionine",
+          "Secreted",
+          "Serine protease",
+          "Transferase",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Ubl conjugation",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus entry into host cell",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/C5H431.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 4,
+      "target": "Peptide pr",
+      "parent": "POLG_WSLV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "C5H431",
+      "score": 2.4632,
+      "score_terms": {
+        "conservation": 0.4632,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": 1,
+        "route": "parent",
+        "because": "the residues at 131-210 of the reading frame the parent route selected match the relative's own chain at only 22%, so this is not the frame the chain was located in and a coordinate from it would be wrong."
+      },
+      "chain_span_on_the_relative": [
+        117,
+        205
+      ],
+      "chain_span_in_this_genome": [
+        131,
+        210
+      ],
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "C5H431",
+        "entry_id": "POLG_WSLV",
+        "protein_name": "Genome polyprotein",
+        "organism": "Wesselsbron virus",
+        "reviewed": true,
+        "molecule_asked_for": "Peptide pr",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein C",
+          "Envelope protein E",
+          "Genome polyprotein",
+          "Non-structural protein 1",
+          "Non-structural protein 2A",
+          "Non-structural protein 4A",
+          "Non-structural protein 4B",
+          "Peptide 2k",
+          "Peptide pr",
+          "Protein prM",
+          "RNA-directed RNA polymerase/Methyltransferase NS5",
+          "Serine protease NS3",
+          "Serine protease subunit NS2B",
+          "Small envelope protein M"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Prevents premature fusion activity of envelope proteins in trans-Golgi by binding to envelope protein E at pH6.0. After virion release in extracellular space, gets dissociated from E dimers"
+          ]
+        },
+        "about_the_whole_entry": {
+          "PTM": [
+            "A C-terminally truncated form of non-structural protein 2A, NS2A-alpha, may result from partial cleavage by NS3",
+            "Polyubiquitinated; ubiquitination is probably mediated by host TRIM23 and is prerequisite for NS5-STAT2 interaction. NS5 is not ISGylated or sumoylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000441595",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aedes",
+            "common_name": null,
+            "taxon": 7158
+          },
+          {
+            "name": "Capra hircus",
+            "common_name": "Goat",
+            "taxon": 9925
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Ovis aries",
+            "common_name": "Sheep",
+            "taxon": 9940
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd20761",
+              "name": "capping_2-OMTase_Flaviviridae"
+            },
+            {
+              "id": "cd17931",
+              "name": "DEXHc_viral_Ns3"
+            },
+            {
+              "id": "cd12149",
+              "name": "Flavi_E_C"
+            },
+            {
+              "id": "cd17038",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "cd23204",
+              "name": "Flavivirus_RdRp"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.10.260.90",
+              "name": "-"
+            },
+            {
+              "id": "1.20.1280.260",
+              "name": "-"
+            },
+            {
+              "id": "2.40.10.120",
+              "name": "-"
+            },
+            {
+              "id": "2.60.40.350",
+              "name": "-"
+            },
+            {
+              "id": "1.10.8.970",
+              "name": "Flavivirus envelope glycoprotein M-like"
+            },
+            {
+              "id": "2.60.260.50",
+              "name": "Flavivirus polyprotein propeptide domain"
+            },
+            {
+              "id": "3.30.70.2840",
+              "name": "Flavivirus RNA-directed RNA polymerase, thumb domain"
+            },
+            {
+              "id": "3.40.50.300",
+              "name": "P-loop containing nucleotide triphosphate hydrolases"
+            },
+            {
+              "id": "2.60.98.10",
+              "name": "Tick-borne Encephalitis virus Glycoprotein, domain 1"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "3.40.50.150",
+              "name": "Vaccinia Virus protein VP39"
+            },
+            {
+              "id": "3.30.67.10",
+              "name": "Viral Envelope Glycoprotein, domain 2"
+            },
+            {
+              "id": "3.30.387.10",
+              "name": "Viral Envelope Glycoprotein, domain 3"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000069",
+              "name": "Env_glycoprot_M_flavivir"
+            },
+            {
+              "id": "IPR038302",
+              "name": "Env_glycoprot_M_sf_flavivir"
+            },
+            {
+              "id": "IPR013755",
+              "name": "Flav_gly_cen_dom_subdom1"
+            },
+            {
+              "id": "IPR001122",
+              "name": "Flavi_capsidC"
+            },
+            {
+              "id": "IPR011492",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "IPR027287",
+              "name": "Flavi_E_Ig-like"
+            },
+            {
+              "id": "IPR026470",
+              "name": "Flavi_E_Stem/Anchor_dom"
+            },
+            {
+              "id": "IPR038345",
+              "name": "Flavi_E_Stem/Anchor_dom_sf"
+            },
+            {
+              "id": "IPR011998",
+              "name": "Flavi_Glycoprot_E_cen/dimer"
+            },
+            {
+              "id": "IPR001157",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "IPR000752",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "IPR000487",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "IPR001850",
+              "name": "Flavi_NS3_S7"
+            },
+            {
+              "id": "IPR000404",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "IPR001528",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "IPR046811",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "IPR002535",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "IPR038688",
+              "name": "Flavi_propep_sf"
+            },
+            {
+              "id": "IPR047530",
+              "name": "Flavi_RdRp"
+            },
+            {
+              "id": "IPR000208",
+              "name": "Flavi_RdRp_fingers/palm"
+            },
+            {
+              "id": "IPR000336",
+              "name": "Flavivir/Alphavir_Ig-like_sf"
+            },
+            {
+              "id": "IPR014412",
+              "name": "Gen_Poly_FLV"
+            },
+            {
+              "id": "IPR036253",
+              "name": "Glycoprot_cen/dimer_sf"
+            },
+            {
+              "id": "IPR038055",
+              "name": "Glycoprot_E_dimer_dom"
+            },
+            {
+              "id": "IPR013756",
+              "name": "GlyE_cen_dom_subdom2"
+            },
+            {
+              "id": "IPR014001",
+              "name": "Helicase_ATP-bd"
+            },
+            {
+              "id": "IPR001650",
+              "name": "Helicase_C-like"
+            },
+            {
+              "id": "IPR014756",
+              "name": "Ig_E-set"
+            },
+            {
+              "id": "IPR026490",
+              "name": "mRNA_cap_0/1_MeTrfase"
+            },
+            {
+              "id": "IPR049486",
+              "name": "NS3-hel_C_flaviviridae"
+            },
+            {
+              "id": "IPR027417",
+              "name": "P-loop_NTPase"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR002877",
+              "name": "RNA_MeTrfase_FtsJ_dom"
+            },
+            {
+              "id": "IPR029063",
+              "name": "SAM-dependent_MTases_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF20907",
+              "name": "Flav_NS3-hel_C"
+            },
+            {
+              "id": "PF01003",
+              "name": "Flavi_capsid"
+            },
+            {
+              "id": "PF07652",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "PF21659",
+              "name": "Flavi_E_stem"
+            },
+            {
+              "id": "PF02832",
+              "name": "Flavi_glycop_C"
+            },
+            {
+              "id": "PF00869",
+              "name": "Flavi_glycoprot"
+            },
+            {
+              "id": "PF01004",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "PF00948",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "PF01005",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "PF01002",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "PF01350",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "PF01349",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "PF00972",
+              "name": "Flavi_NS5"
+            },
+            {
+              "id": "PF20483",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "PF01570",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "PF01728",
+              "name": "FtsJ"
+            },
+            {
+              "id": "PF00949",
+              "name": "Peptidase_S7"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF81296",
+              "name": "E set domains"
+            },
+            {
+              "id": "SSF52540",
+              "name": "P-loop containing nucleoside triphosphate hydrolases"
+            },
+            {
+              "id": "SSF53335",
+              "name": "S-adenosyl-L-methionine-dependent methyltransferases"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "SSF56983",
+              "name": "Viral glycoprotein, central and dimerisation domains"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51527",
+              "name": "FLAVIVIRUS_NS2B"
+            },
+            {
+              "id": "PS51528",
+              "name": "FLAVIVIRUS_NS3PRO"
+            },
+            {
+              "id": "PS51192",
+              "name": "HELICASE_ATP_BIND_1"
+            },
+            {
+              "id": "PS51194",
+              "name": "HELICASE_CTER"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51591",
+              "name": "RNA_CAP01_NS5_MT"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0005576",
+              "term": "extracellular region"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044196",
+              "term": "host cell nucleolus"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0044220",
+              "term": "host cell perinuclear region of cytoplasm"
+            },
+            {
+              "id": "GO:0019028",
+              "term": "viral capsid"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0016887",
+              "term": "ATP hydrolysis activity"
+            },
+            {
+              "id": "GO:0003725",
+              "term": "double-stranded RNA binding"
+            },
+            {
+              "id": "GO:0005525",
+              "term": "GTP binding"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0004483",
+              "term": "methyltransferase cap1 activity"
+            },
+            {
+              "id": "GO:0004482",
+              "term": "mRNA 5'-cap (guanine-N7-)-methyltransferase activity"
+            },
+            {
+              "id": "GO:0046983",
+              "term": "protein dimerization activity"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0004252",
+              "term": "serine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0052170",
+              "term": "symbiont-mediated suppression of host innate immune response"
+            },
+            {
+              "id": "GO:0039563",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT1 activity"
+            },
+            {
+              "id": "GO:0039564",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT2 activity"
+            },
+            {
+              "id": "GO:0039502",
+              "term": "symbiont-mediated suppression of host type I interferon-mediated signaling pathway"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Acetylation",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Capsid protein",
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "GTP-binding",
+          "Helicase",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Interferon antiviral system evasion",
+          "Membrane",
+          "Metal-binding",
+          "Methyltransferase",
+          "mRNA capping",
+          "mRNA processing",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Protease",
+          "Reference proteome",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "S-adenosyl-L-methionine",
+          "Secreted",
+          "Serine protease",
+          "Transferase",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Ubl conjugation",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus entry into host cell",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/C5H431.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 5,
+      "target": "Small envelope protein M",
+      "parent": "POLG_WSLV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "C5H431",
+      "score": 2.4632,
+      "score_terms": {
+        "conservation": 0.4632,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.55,
+          "confirmed_at": [
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": false,
+          "one_end_only_note": "Only the end of the chain matches the relative. The other end of this span does not, so the coordinate at that end is not confirmed. On a polyprotein the usual cause is a ribosomal frameshift: the chain starts in one reading frame and the frame it was located in starts in another, which leaves the far end exact and the near end short.",
+          "leading_identity": 0.0,
+          "trailing_identity": 0.55,
+          "residues_compared": 40,
+          "frame_span_residues": 69,
+          "relative_chain_residues": 75,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 118,
+        "orf_length_aa": 3411,
+        "segment": 0,
+        "orf_name": "POLG_WSLV Genome polyprotein",
+        "reading_frame": "+1 at nt 119",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        206,
+        280
+      ],
+      "chain_span_in_this_genome": [
+        217,
+        285
+      ],
+      "chain_span_nt": [
+        767,
+        973
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the end of the chain"
+      ],
+      "segment_length_nt": 10862,
+      "annotation": {
+        "accession": "C5H431",
+        "entry_id": "POLG_WSLV",
+        "protein_name": "Genome polyprotein",
+        "organism": "Wesselsbron virus",
+        "reviewed": true,
+        "molecule_asked_for": "Small envelope protein M",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein C",
+          "Envelope protein E",
+          "Genome polyprotein",
+          "Non-structural protein 1",
+          "Non-structural protein 2A",
+          "Non-structural protein 4A",
+          "Non-structural protein 4B",
+          "Peptide 2k",
+          "Peptide pr",
+          "Protein prM",
+          "RNA-directed RNA polymerase/Methyltransferase NS5",
+          "Serine protease NS3",
+          "Serine protease subunit NS2B",
+          "Small envelope protein M"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "May play a role in virus budding. Exerts cytotoxic effects by activating a mitochondrial apoptotic pathway through M ectodomain. May display a viroporin activity"
+          ],
+          "SUBUNIT": [
+            "Heterotetramer with envelope protein E, made up of two M-E dimers; in mature virion, prefusion state"
+          ],
+          "DOMAIN": [
+            "The transmembrane domains contain an endoplasmic reticulum retention signal"
+          ]
+        },
+        "about_the_whole_entry": {
+          "PTM": [
+            "A C-terminally truncated form of non-structural protein 2A, NS2A-alpha, may result from partial cleavage by NS3",
+            "Polyubiquitinated; ubiquitination is probably mediated by host TRIM23 and is prerequisite for NS5-STAT2 interaction. NS5 is not ISGylated or sumoylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000441596",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aedes",
+            "common_name": null,
+            "taxon": 7158
+          },
+          {
+            "name": "Capra hircus",
+            "common_name": "Goat",
+            "taxon": 9925
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Ovis aries",
+            "common_name": "Sheep",
+            "taxon": 9940
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd20761",
+              "name": "capping_2-OMTase_Flaviviridae"
+            },
+            {
+              "id": "cd17931",
+              "name": "DEXHc_viral_Ns3"
+            },
+            {
+              "id": "cd12149",
+              "name": "Flavi_E_C"
+            },
+            {
+              "id": "cd17038",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "cd23204",
+              "name": "Flavivirus_RdRp"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.10.260.90",
+              "name": "-"
+            },
+            {
+              "id": "1.20.1280.260",
+              "name": "-"
+            },
+            {
+              "id": "2.40.10.120",
+              "name": "-"
+            },
+            {
+              "id": "2.60.40.350",
+              "name": "-"
+            },
+            {
+              "id": "1.10.8.970",
+              "name": "Flavivirus envelope glycoprotein M-like"
+            },
+            {
+              "id": "2.60.260.50",
+              "name": "Flavivirus polyprotein propeptide domain"
+            },
+            {
+              "id": "3.30.70.2840",
+              "name": "Flavivirus RNA-directed RNA polymerase, thumb domain"
+            },
+            {
+              "id": "3.40.50.300",
+              "name": "P-loop containing nucleotide triphosphate hydrolases"
+            },
+            {
+              "id": "2.60.98.10",
+              "name": "Tick-borne Encephalitis virus Glycoprotein, domain 1"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "3.40.50.150",
+              "name": "Vaccinia Virus protein VP39"
+            },
+            {
+              "id": "3.30.67.10",
+              "name": "Viral Envelope Glycoprotein, domain 2"
+            },
+            {
+              "id": "3.30.387.10",
+              "name": "Viral Envelope Glycoprotein, domain 3"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000069",
+              "name": "Env_glycoprot_M_flavivir"
+            },
+            {
+              "id": "IPR038302",
+              "name": "Env_glycoprot_M_sf_flavivir"
+            },
+            {
+              "id": "IPR013755",
+              "name": "Flav_gly_cen_dom_subdom1"
+            },
+            {
+              "id": "IPR001122",
+              "name": "Flavi_capsidC"
+            },
+            {
+              "id": "IPR011492",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "IPR027287",
+              "name": "Flavi_E_Ig-like"
+            },
+            {
+              "id": "IPR026470",
+              "name": "Flavi_E_Stem/Anchor_dom"
+            },
+            {
+              "id": "IPR038345",
+              "name": "Flavi_E_Stem/Anchor_dom_sf"
+            },
+            {
+              "id": "IPR011998",
+              "name": "Flavi_Glycoprot_E_cen/dimer"
+            },
+            {
+              "id": "IPR001157",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "IPR000752",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "IPR000487",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "IPR001850",
+              "name": "Flavi_NS3_S7"
+            },
+            {
+              "id": "IPR000404",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "IPR001528",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "IPR046811",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "IPR002535",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "IPR038688",
+              "name": "Flavi_propep_sf"
+            },
+            {
+              "id": "IPR047530",
+              "name": "Flavi_RdRp"
+            },
+            {
+              "id": "IPR000208",
+              "name": "Flavi_RdRp_fingers/palm"
+            },
+            {
+              "id": "IPR000336",
+              "name": "Flavivir/Alphavir_Ig-like_sf"
+            },
+            {
+              "id": "IPR014412",
+              "name": "Gen_Poly_FLV"
+            },
+            {
+              "id": "IPR036253",
+              "name": "Glycoprot_cen/dimer_sf"
+            },
+            {
+              "id": "IPR038055",
+              "name": "Glycoprot_E_dimer_dom"
+            },
+            {
+              "id": "IPR013756",
+              "name": "GlyE_cen_dom_subdom2"
+            },
+            {
+              "id": "IPR014001",
+              "name": "Helicase_ATP-bd"
+            },
+            {
+              "id": "IPR001650",
+              "name": "Helicase_C-like"
+            },
+            {
+              "id": "IPR014756",
+              "name": "Ig_E-set"
+            },
+            {
+              "id": "IPR026490",
+              "name": "mRNA_cap_0/1_MeTrfase"
+            },
+            {
+              "id": "IPR049486",
+              "name": "NS3-hel_C_flaviviridae"
+            },
+            {
+              "id": "IPR027417",
+              "name": "P-loop_NTPase"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR002877",
+              "name": "RNA_MeTrfase_FtsJ_dom"
+            },
+            {
+              "id": "IPR029063",
+              "name": "SAM-dependent_MTases_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF20907",
+              "name": "Flav_NS3-hel_C"
+            },
+            {
+              "id": "PF01003",
+              "name": "Flavi_capsid"
+            },
+            {
+              "id": "PF07652",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "PF21659",
+              "name": "Flavi_E_stem"
+            },
+            {
+              "id": "PF02832",
+              "name": "Flavi_glycop_C"
+            },
+            {
+              "id": "PF00869",
+              "name": "Flavi_glycoprot"
+            },
+            {
+              "id": "PF01004",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "PF00948",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "PF01005",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "PF01002",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "PF01350",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "PF01349",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "PF00972",
+              "name": "Flavi_NS5"
+            },
+            {
+              "id": "PF20483",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "PF01570",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "PF01728",
+              "name": "FtsJ"
+            },
+            {
+              "id": "PF00949",
+              "name": "Peptidase_S7"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF81296",
+              "name": "E set domains"
+            },
+            {
+              "id": "SSF52540",
+              "name": "P-loop containing nucleoside triphosphate hydrolases"
+            },
+            {
+              "id": "SSF53335",
+              "name": "S-adenosyl-L-methionine-dependent methyltransferases"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "SSF56983",
+              "name": "Viral glycoprotein, central and dimerisation domains"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51527",
+              "name": "FLAVIVIRUS_NS2B"
+            },
+            {
+              "id": "PS51528",
+              "name": "FLAVIVIRUS_NS3PRO"
+            },
+            {
+              "id": "PS51192",
+              "name": "HELICASE_ATP_BIND_1"
+            },
+            {
+              "id": "PS51194",
+              "name": "HELICASE_CTER"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51591",
+              "name": "RNA_CAP01_NS5_MT"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0005576",
+              "term": "extracellular region"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044196",
+              "term": "host cell nucleolus"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0044220",
+              "term": "host cell perinuclear region of cytoplasm"
+            },
+            {
+              "id": "GO:0019028",
+              "term": "viral capsid"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0016887",
+              "term": "ATP hydrolysis activity"
+            },
+            {
+              "id": "GO:0003725",
+              "term": "double-stranded RNA binding"
+            },
+            {
+              "id": "GO:0005525",
+              "term": "GTP binding"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0004483",
+              "term": "methyltransferase cap1 activity"
+            },
+            {
+              "id": "GO:0004482",
+              "term": "mRNA 5'-cap (guanine-N7-)-methyltransferase activity"
+            },
+            {
+              "id": "GO:0046983",
+              "term": "protein dimerization activity"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0004252",
+              "term": "serine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0052170",
+              "term": "symbiont-mediated suppression of host innate immune response"
+            },
+            {
+              "id": "GO:0039563",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT1 activity"
+            },
+            {
+              "id": "GO:0039564",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT2 activity"
+            },
+            {
+              "id": "GO:0039502",
+              "term": "symbiont-mediated suppression of host type I interferon-mediated signaling pathway"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Acetylation",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Capsid protein",
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "GTP-binding",
+          "Helicase",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Interferon antiviral system evasion",
+          "Membrane",
+          "Metal-binding",
+          "Methyltransferase",
+          "mRNA capping",
+          "mRNA processing",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Protease",
+          "Reference proteome",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "S-adenosyl-L-methionine",
+          "Secreted",
+          "Serine protease",
+          "Transferase",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Ubl conjugation",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus entry into host cell",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/C5H431.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 6,
+      "target": "Envelope protein E",
+      "parent": "POLG_WSLV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "C5H431",
+      "score": 2.4632,
+      "score_terms": {
+        "conservation": 0.4632,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.45,
+          "confirmed_at": [
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": false,
+          "one_end_only_note": "Only the end of the chain matches the relative. The other end of this span does not, so the coordinate at that end is not confirmed. On a polyprotein the usual cause is a ribosomal frameshift: the chain starts in one reading frame and the frame it was located in starts in another, which leaves the far end exact and the near end short.",
+          "leading_identity": 0.05,
+          "trailing_identity": 0.45,
+          "residues_compared": 40,
+          "frame_span_residues": 492,
+          "relative_chain_residues": 490,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 118,
+        "orf_length_aa": 3411,
+        "segment": 0,
+        "orf_name": "POLG_WSLV Genome polyprotein",
+        "reading_frame": "+1 at nt 119",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        281,
+        770
+      ],
+      "chain_span_in_this_genome": [
+        287,
+        778
+      ],
+      "chain_span_nt": [
+        977,
+        2452
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the end of the chain"
+      ],
+      "segment_length_nt": 10862,
+      "annotation": {
+        "accession": "C5H431",
+        "entry_id": "POLG_WSLV",
+        "protein_name": "Genome polyprotein",
+        "organism": "Wesselsbron virus",
+        "reviewed": true,
+        "molecule_asked_for": "Envelope protein E",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein C",
+          "Envelope protein E",
+          "Genome polyprotein",
+          "Non-structural protein 1",
+          "Non-structural protein 2A",
+          "Non-structural protein 4A",
+          "Non-structural protein 4B",
+          "Peptide 2k",
+          "Peptide pr",
+          "Protein prM",
+          "RNA-directed RNA polymerase/Methyltransferase NS5",
+          "Serine protease NS3",
+          "Serine protease subunit NS2B",
+          "Small envelope protein M"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Type II fusion protein that binds to host cell surface receptor and mediates fusion between viral and cellular membranes (By similarity). The envelope protein E shifts from dimeric state to trimeric state to perform fusion with the host membrane (By similarity). The fusion loops of the three subunits come together to form a membrane-insertable tip containing aromatic residues (By similarity). Envelope protein is synthesized in the endoplasmic reticulum in the form of heterodimer with protein prM. They play a role in virion budding in the ER, and the newly formed immature particle is covered with 60 spikes composed of heterodimer between precursor prM and envelope protein E. The virion is transported to the Golgi apparatus where the low pH causes dissociation of PrM-E heterodimers and formation of E homodimers. prM-E cleavage is inefficient, and many virions are only partially matured. These uncleaved prM would play a role in immune evasion"
+          ],
+          "SUBUNIT": [
+            "Homodimer; in mature virion, prefusion state (By similarity). Homotrimer; in mature virion, postfusion state (By similarity). Heterotetramer with the small membrane protein, made up of two M-E dimers; in mature virion, prefusion state (By similarity). Heterodimer with protein prM; each spike of the immature virion in the ER/Golgi consists of three prM-E heterodimers (By similarity). Interacts with the peptide pr; this interaction allows the stabilization of the E dimer at acidic pH (By similarity). Pr remains bound to the particle as long as the pH is acidic because of electrostatic complementarity, dissociation of pr occurs at neutral pH upon virus release from the infected cell (By similarity). Interacts with non-structural protein 1 (By similarity)"
+          ],
+          "DOMAIN": [
+            "The transmembrane domains contain an endoplasmic reticulum retention signal"
+          ],
+          "PTM": [
+            "N-glycosylated"
+          ]
+        },
+        "about_the_whole_entry": {
+          "PTM": [
+            "A C-terminally truncated form of non-structural protein 2A, NS2A-alpha, may result from partial cleavage by NS3",
+            "Polyubiquitinated; ubiquitination is probably mediated by host TRIM23 and is prerequisite for NS5-STAT2 interaction. NS5 is not ISGylated or sumoylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000441597",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aedes",
+            "common_name": null,
+            "taxon": 7158
+          },
+          {
+            "name": "Capra hircus",
+            "common_name": "Goat",
+            "taxon": 9925
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Ovis aries",
+            "common_name": "Sheep",
+            "taxon": 9940
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd20761",
+              "name": "capping_2-OMTase_Flaviviridae"
+            },
+            {
+              "id": "cd17931",
+              "name": "DEXHc_viral_Ns3"
+            },
+            {
+              "id": "cd12149",
+              "name": "Flavi_E_C"
+            },
+            {
+              "id": "cd17038",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "cd23204",
+              "name": "Flavivirus_RdRp"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.10.260.90",
+              "name": "-"
+            },
+            {
+              "id": "1.20.1280.260",
+              "name": "-"
+            },
+            {
+              "id": "2.40.10.120",
+              "name": "-"
+            },
+            {
+              "id": "2.60.40.350",
+              "name": "-"
+            },
+            {
+              "id": "1.10.8.970",
+              "name": "Flavivirus envelope glycoprotein M-like"
+            },
+            {
+              "id": "2.60.260.50",
+              "name": "Flavivirus polyprotein propeptide domain"
+            },
+            {
+              "id": "3.30.70.2840",
+              "name": "Flavivirus RNA-directed RNA polymerase, thumb domain"
+            },
+            {
+              "id": "3.40.50.300",
+              "name": "P-loop containing nucleotide triphosphate hydrolases"
+            },
+            {
+              "id": "2.60.98.10",
+              "name": "Tick-borne Encephalitis virus Glycoprotein, domain 1"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "3.40.50.150",
+              "name": "Vaccinia Virus protein VP39"
+            },
+            {
+              "id": "3.30.67.10",
+              "name": "Viral Envelope Glycoprotein, domain 2"
+            },
+            {
+              "id": "3.30.387.10",
+              "name": "Viral Envelope Glycoprotein, domain 3"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000069",
+              "name": "Env_glycoprot_M_flavivir"
+            },
+            {
+              "id": "IPR038302",
+              "name": "Env_glycoprot_M_sf_flavivir"
+            },
+            {
+              "id": "IPR013755",
+              "name": "Flav_gly_cen_dom_subdom1"
+            },
+            {
+              "id": "IPR001122",
+              "name": "Flavi_capsidC"
+            },
+            {
+              "id": "IPR011492",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "IPR027287",
+              "name": "Flavi_E_Ig-like"
+            },
+            {
+              "id": "IPR026470",
+              "name": "Flavi_E_Stem/Anchor_dom"
+            },
+            {
+              "id": "IPR038345",
+              "name": "Flavi_E_Stem/Anchor_dom_sf"
+            },
+            {
+              "id": "IPR011998",
+              "name": "Flavi_Glycoprot_E_cen/dimer"
+            },
+            {
+              "id": "IPR001157",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "IPR000752",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "IPR000487",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "IPR001850",
+              "name": "Flavi_NS3_S7"
+            },
+            {
+              "id": "IPR000404",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "IPR001528",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "IPR046811",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "IPR002535",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "IPR038688",
+              "name": "Flavi_propep_sf"
+            },
+            {
+              "id": "IPR047530",
+              "name": "Flavi_RdRp"
+            },
+            {
+              "id": "IPR000208",
+              "name": "Flavi_RdRp_fingers/palm"
+            },
+            {
+              "id": "IPR000336",
+              "name": "Flavivir/Alphavir_Ig-like_sf"
+            },
+            {
+              "id": "IPR014412",
+              "name": "Gen_Poly_FLV"
+            },
+            {
+              "id": "IPR036253",
+              "name": "Glycoprot_cen/dimer_sf"
+            },
+            {
+              "id": "IPR038055",
+              "name": "Glycoprot_E_dimer_dom"
+            },
+            {
+              "id": "IPR013756",
+              "name": "GlyE_cen_dom_subdom2"
+            },
+            {
+              "id": "IPR014001",
+              "name": "Helicase_ATP-bd"
+            },
+            {
+              "id": "IPR001650",
+              "name": "Helicase_C-like"
+            },
+            {
+              "id": "IPR014756",
+              "name": "Ig_E-set"
+            },
+            {
+              "id": "IPR026490",
+              "name": "mRNA_cap_0/1_MeTrfase"
+            },
+            {
+              "id": "IPR049486",
+              "name": "NS3-hel_C_flaviviridae"
+            },
+            {
+              "id": "IPR027417",
+              "name": "P-loop_NTPase"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR002877",
+              "name": "RNA_MeTrfase_FtsJ_dom"
+            },
+            {
+              "id": "IPR029063",
+              "name": "SAM-dependent_MTases_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF20907",
+              "name": "Flav_NS3-hel_C"
+            },
+            {
+              "id": "PF01003",
+              "name": "Flavi_capsid"
+            },
+            {
+              "id": "PF07652",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "PF21659",
+              "name": "Flavi_E_stem"
+            },
+            {
+              "id": "PF02832",
+              "name": "Flavi_glycop_C"
+            },
+            {
+              "id": "PF00869",
+              "name": "Flavi_glycoprot"
+            },
+            {
+              "id": "PF01004",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "PF00948",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "PF01005",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "PF01002",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "PF01350",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "PF01349",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "PF00972",
+              "name": "Flavi_NS5"
+            },
+            {
+              "id": "PF20483",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "PF01570",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "PF01728",
+              "name": "FtsJ"
+            },
+            {
+              "id": "PF00949",
+              "name": "Peptidase_S7"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF81296",
+              "name": "E set domains"
+            },
+            {
+              "id": "SSF52540",
+              "name": "P-loop containing nucleoside triphosphate hydrolases"
+            },
+            {
+              "id": "SSF53335",
+              "name": "S-adenosyl-L-methionine-dependent methyltransferases"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "SSF56983",
+              "name": "Viral glycoprotein, central and dimerisation domains"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51527",
+              "name": "FLAVIVIRUS_NS2B"
+            },
+            {
+              "id": "PS51528",
+              "name": "FLAVIVIRUS_NS3PRO"
+            },
+            {
+              "id": "PS51192",
+              "name": "HELICASE_ATP_BIND_1"
+            },
+            {
+              "id": "PS51194",
+              "name": "HELICASE_CTER"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51591",
+              "name": "RNA_CAP01_NS5_MT"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0005576",
+              "term": "extracellular region"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044196",
+              "term": "host cell nucleolus"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0044220",
+              "term": "host cell perinuclear region of cytoplasm"
+            },
+            {
+              "id": "GO:0019028",
+              "term": "viral capsid"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0016887",
+              "term": "ATP hydrolysis activity"
+            },
+            {
+              "id": "GO:0003725",
+              "term": "double-stranded RNA binding"
+            },
+            {
+              "id": "GO:0005525",
+              "term": "GTP binding"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0004483",
+              "term": "methyltransferase cap1 activity"
+            },
+            {
+              "id": "GO:0004482",
+              "term": "mRNA 5'-cap (guanine-N7-)-methyltransferase activity"
+            },
+            {
+              "id": "GO:0046983",
+              "term": "protein dimerization activity"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0004252",
+              "term": "serine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0052170",
+              "term": "symbiont-mediated suppression of host innate immune response"
+            },
+            {
+              "id": "GO:0039563",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT1 activity"
+            },
+            {
+              "id": "GO:0039564",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT2 activity"
+            },
+            {
+              "id": "GO:0039502",
+              "term": "symbiont-mediated suppression of host type I interferon-mediated signaling pathway"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Acetylation",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Capsid protein",
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "GTP-binding",
+          "Helicase",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Interferon antiviral system evasion",
+          "Membrane",
+          "Metal-binding",
+          "Methyltransferase",
+          "mRNA capping",
+          "mRNA processing",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Protease",
+          "Reference proteome",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "S-adenosyl-L-methionine",
+          "Secreted",
+          "Serine protease",
+          "Transferase",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Ubl conjugation",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus entry into host cell",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/C5H431.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 7,
+      "target": "Non-structural protein 1",
+      "parent": "POLG_WSLV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "C5H431",
+      "score": 2.4632,
+      "score_terms": {
+        "conservation": 0.4632,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.75,
+          "confirmed_at": [
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": false,
+          "one_end_only_note": "Only the end of the chain matches the relative. The other end of this span does not, so the coordinate at that end is not confirmed. On a polyprotein the usual cause is a ribosomal frameshift: the chain starts in one reading frame and the frame it was located in starts in another, which leaves the far end exact and the near end short.",
+          "leading_identity": 0.1,
+          "trailing_identity": 0.75,
+          "residues_compared": 40,
+          "frame_span_residues": 350,
+          "relative_chain_residues": 353,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 118,
+        "orf_length_aa": 3411,
+        "segment": 0,
+        "orf_name": "POLG_WSLV Genome polyprotein",
+        "reading_frame": "+1 at nt 119",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        771,
+        1123
+      ],
+      "chain_span_in_this_genome": [
+        781,
+        1130
+      ],
+      "chain_span_nt": [
+        2459,
+        3508
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the end of the chain"
+      ],
+      "segment_length_nt": 10862,
+      "annotation": {
+        "accession": "C5H431",
+        "entry_id": "POLG_WSLV",
+        "protein_name": "Genome polyprotein",
+        "organism": "Wesselsbron virus",
+        "reviewed": true,
+        "molecule_asked_for": "Non-structural protein 1",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein C",
+          "Envelope protein E",
+          "Genome polyprotein",
+          "Non-structural protein 1",
+          "Non-structural protein 2A",
+          "Non-structural protein 4A",
+          "Non-structural protein 4B",
+          "Peptide 2k",
+          "Peptide pr",
+          "Protein prM",
+          "RNA-directed RNA polymerase/Methyltransferase NS5",
+          "Serine protease NS3",
+          "Serine protease subunit NS2B",
+          "Small envelope protein M"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Involved in immune evasion, pathogenesis and viral replication. Once cleaved off the polyprotein, is targeted to three destinations: the viral replication cycle, the plasma membrane and the extracellular compartment. Essential for viral replication. Required for formation of the replication complex and recruitment of other non-structural proteins to the ER-derived membrane structures. Excreted as a hexameric lipoparticle that plays a role against host immune response. Antagonizing the complement function. Binds to the host macrophages and dendritic cells. Inhibits signal transduction originating from Toll-like receptor 3 (TLR3)"
+          ],
+          "SUBUNIT": [
+            "Homodimer; Homohexamer when secreted. Interacts with envelope protein E (By similarity)"
+          ],
+          "PTM": [
+            "N-glycosylated. The excreted form is glycosylated and this is required for efficient secretion of the protein from infected cells"
+          ]
+        },
+        "about_the_whole_entry": {
+          "PTM": [
+            "A C-terminally truncated form of non-structural protein 2A, NS2A-alpha, may result from partial cleavage by NS3",
+            "Polyubiquitinated; ubiquitination is probably mediated by host TRIM23 and is prerequisite for NS5-STAT2 interaction. NS5 is not ISGylated or sumoylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000441598",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aedes",
+            "common_name": null,
+            "taxon": 7158
+          },
+          {
+            "name": "Capra hircus",
+            "common_name": "Goat",
+            "taxon": 9925
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Ovis aries",
+            "common_name": "Sheep",
+            "taxon": 9940
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd20761",
+              "name": "capping_2-OMTase_Flaviviridae"
+            },
+            {
+              "id": "cd17931",
+              "name": "DEXHc_viral_Ns3"
+            },
+            {
+              "id": "cd12149",
+              "name": "Flavi_E_C"
+            },
+            {
+              "id": "cd17038",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "cd23204",
+              "name": "Flavivirus_RdRp"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.10.260.90",
+              "name": "-"
+            },
+            {
+              "id": "1.20.1280.260",
+              "name": "-"
+            },
+            {
+              "id": "2.40.10.120",
+              "name": "-"
+            },
+            {
+              "id": "2.60.40.350",
+              "name": "-"
+            },
+            {
+              "id": "1.10.8.970",
+              "name": "Flavivirus envelope glycoprotein M-like"
+            },
+            {
+              "id": "2.60.260.50",
+              "name": "Flavivirus polyprotein propeptide domain"
+            },
+            {
+              "id": "3.30.70.2840",
+              "name": "Flavivirus RNA-directed RNA polymerase, thumb domain"
+            },
+            {
+              "id": "3.40.50.300",
+              "name": "P-loop containing nucleotide triphosphate hydrolases"
+            },
+            {
+              "id": "2.60.98.10",
+              "name": "Tick-borne Encephalitis virus Glycoprotein, domain 1"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "3.40.50.150",
+              "name": "Vaccinia Virus protein VP39"
+            },
+            {
+              "id": "3.30.67.10",
+              "name": "Viral Envelope Glycoprotein, domain 2"
+            },
+            {
+              "id": "3.30.387.10",
+              "name": "Viral Envelope Glycoprotein, domain 3"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000069",
+              "name": "Env_glycoprot_M_flavivir"
+            },
+            {
+              "id": "IPR038302",
+              "name": "Env_glycoprot_M_sf_flavivir"
+            },
+            {
+              "id": "IPR013755",
+              "name": "Flav_gly_cen_dom_subdom1"
+            },
+            {
+              "id": "IPR001122",
+              "name": "Flavi_capsidC"
+            },
+            {
+              "id": "IPR011492",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "IPR027287",
+              "name": "Flavi_E_Ig-like"
+            },
+            {
+              "id": "IPR026470",
+              "name": "Flavi_E_Stem/Anchor_dom"
+            },
+            {
+              "id": "IPR038345",
+              "name": "Flavi_E_Stem/Anchor_dom_sf"
+            },
+            {
+              "id": "IPR011998",
+              "name": "Flavi_Glycoprot_E_cen/dimer"
+            },
+            {
+              "id": "IPR001157",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "IPR000752",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "IPR000487",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "IPR001850",
+              "name": "Flavi_NS3_S7"
+            },
+            {
+              "id": "IPR000404",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "IPR001528",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "IPR046811",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "IPR002535",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "IPR038688",
+              "name": "Flavi_propep_sf"
+            },
+            {
+              "id": "IPR047530",
+              "name": "Flavi_RdRp"
+            },
+            {
+              "id": "IPR000208",
+              "name": "Flavi_RdRp_fingers/palm"
+            },
+            {
+              "id": "IPR000336",
+              "name": "Flavivir/Alphavir_Ig-like_sf"
+            },
+            {
+              "id": "IPR014412",
+              "name": "Gen_Poly_FLV"
+            },
+            {
+              "id": "IPR036253",
+              "name": "Glycoprot_cen/dimer_sf"
+            },
+            {
+              "id": "IPR038055",
+              "name": "Glycoprot_E_dimer_dom"
+            },
+            {
+              "id": "IPR013756",
+              "name": "GlyE_cen_dom_subdom2"
+            },
+            {
+              "id": "IPR014001",
+              "name": "Helicase_ATP-bd"
+            },
+            {
+              "id": "IPR001650",
+              "name": "Helicase_C-like"
+            },
+            {
+              "id": "IPR014756",
+              "name": "Ig_E-set"
+            },
+            {
+              "id": "IPR026490",
+              "name": "mRNA_cap_0/1_MeTrfase"
+            },
+            {
+              "id": "IPR049486",
+              "name": "NS3-hel_C_flaviviridae"
+            },
+            {
+              "id": "IPR027417",
+              "name": "P-loop_NTPase"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR002877",
+              "name": "RNA_MeTrfase_FtsJ_dom"
+            },
+            {
+              "id": "IPR029063",
+              "name": "SAM-dependent_MTases_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF20907",
+              "name": "Flav_NS3-hel_C"
+            },
+            {
+              "id": "PF01003",
+              "name": "Flavi_capsid"
+            },
+            {
+              "id": "PF07652",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "PF21659",
+              "name": "Flavi_E_stem"
+            },
+            {
+              "id": "PF02832",
+              "name": "Flavi_glycop_C"
+            },
+            {
+              "id": "PF00869",
+              "name": "Flavi_glycoprot"
+            },
+            {
+              "id": "PF01004",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "PF00948",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "PF01005",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "PF01002",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "PF01350",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "PF01349",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "PF00972",
+              "name": "Flavi_NS5"
+            },
+            {
+              "id": "PF20483",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "PF01570",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "PF01728",
+              "name": "FtsJ"
+            },
+            {
+              "id": "PF00949",
+              "name": "Peptidase_S7"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF81296",
+              "name": "E set domains"
+            },
+            {
+              "id": "SSF52540",
+              "name": "P-loop containing nucleoside triphosphate hydrolases"
+            },
+            {
+              "id": "SSF53335",
+              "name": "S-adenosyl-L-methionine-dependent methyltransferases"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "SSF56983",
+              "name": "Viral glycoprotein, central and dimerisation domains"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51527",
+              "name": "FLAVIVIRUS_NS2B"
+            },
+            {
+              "id": "PS51528",
+              "name": "FLAVIVIRUS_NS3PRO"
+            },
+            {
+              "id": "PS51192",
+              "name": "HELICASE_ATP_BIND_1"
+            },
+            {
+              "id": "PS51194",
+              "name": "HELICASE_CTER"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51591",
+              "name": "RNA_CAP01_NS5_MT"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0005576",
+              "term": "extracellular region"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044196",
+              "term": "host cell nucleolus"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0044220",
+              "term": "host cell perinuclear region of cytoplasm"
+            },
+            {
+              "id": "GO:0019028",
+              "term": "viral capsid"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0016887",
+              "term": "ATP hydrolysis activity"
+            },
+            {
+              "id": "GO:0003725",
+              "term": "double-stranded RNA binding"
+            },
+            {
+              "id": "GO:0005525",
+              "term": "GTP binding"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0004483",
+              "term": "methyltransferase cap1 activity"
+            },
+            {
+              "id": "GO:0004482",
+              "term": "mRNA 5'-cap (guanine-N7-)-methyltransferase activity"
+            },
+            {
+              "id": "GO:0046983",
+              "term": "protein dimerization activity"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0004252",
+              "term": "serine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0052170",
+              "term": "symbiont-mediated suppression of host innate immune response"
+            },
+            {
+              "id": "GO:0039563",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT1 activity"
+            },
+            {
+              "id": "GO:0039564",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT2 activity"
+            },
+            {
+              "id": "GO:0039502",
+              "term": "symbiont-mediated suppression of host type I interferon-mediated signaling pathway"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Acetylation",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Capsid protein",
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "GTP-binding",
+          "Helicase",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Interferon antiviral system evasion",
+          "Membrane",
+          "Metal-binding",
+          "Methyltransferase",
+          "mRNA capping",
+          "mRNA processing",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Protease",
+          "Reference proteome",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "S-adenosyl-L-methionine",
+          "Secreted",
+          "Serine protease",
+          "Transferase",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Ubl conjugation",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus entry into host cell",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/C5H431.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 8,
+      "target": "Capsid protein C",
+      "parent": "POLG_WSLV Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "C5H431",
+      "score": 1.9632,
+      "score_terms": {
+        "conservation": 0.4632,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": 1,
+        "route": "parent",
+        "because": "the residues at 5-101 of the reading frame the parent route selected match the relative's own chain at only 18%, so this is not the frame the chain was located in and a coordinate from it would be wrong."
+      },
+      "chain_span_on_the_relative": [
+        1,
+        99
+      ],
+      "chain_span_in_this_genome": [
+        5,
+        101
+      ],
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "C5H431",
+        "entry_id": "POLG_WSLV",
+        "protein_name": "Genome polyprotein",
+        "organism": "Wesselsbron virus",
+        "reviewed": true,
+        "molecule_asked_for": "Capsid protein C",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Capsid protein C",
+          "Envelope protein E",
+          "Genome polyprotein",
+          "Non-structural protein 1",
+          "Non-structural protein 2A",
+          "Non-structural protein 4A",
+          "Non-structural protein 4B",
+          "Peptide 2k",
+          "Peptide pr",
+          "Protein prM",
+          "RNA-directed RNA polymerase/Methyltransferase NS5",
+          "Serine protease NS3",
+          "Serine protease subunit NS2B",
+          "Small envelope protein M"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Capsid protein C self-assembles to form an icosahedral capsid about 30 nm in diameter. The capsid encapsulates the genomic RNA (Probable). Plays a role in virus budding by binding to the cell membrane and gathering the viral RNA into a nucleocapsid that forms the core of a mature virus particle. During virus entry, may induce genome penetration into the host cytoplasm after hemifusion induced by the surface proteins. Can migrate to the cell nucleus where it modulates host functions"
+          ],
+          "SUBUNIT": [
+            "Homodimer (By similarity). Interacts (via N-terminus) with host EXOC1 (via C-terminus); this interaction results in EXOC1 degradation through the proteasome degradation pathway (By similarity). Interacts (via the NLS) with host KPNA2/Importin alpha-1; this interaction allows the nuclear import of the capsid protein (By similarity)"
+          ]
+        },
+        "about_the_whole_entry": {
+          "PTM": [
+            "A C-terminally truncated form of non-structural protein 2A, NS2A-alpha, may result from partial cleavage by NS3",
+            "Polyubiquitinated; ubiquitination is probably mediated by host TRIM23 and is prerequisite for NS5-STAT2 interaction. NS5 is not ISGylated or sumoylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000441592",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aedes",
+            "common_name": null,
+            "taxon": 7158
+          },
+          {
+            "name": "Capra hircus",
+            "common_name": "Goat",
+            "taxon": 9925
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Ovis aries",
+            "common_name": "Sheep",
+            "taxon": 9940
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd20761",
+              "name": "capping_2-OMTase_Flaviviridae"
+            },
+            {
+              "id": "cd17931",
+              "name": "DEXHc_viral_Ns3"
+            },
+            {
+              "id": "cd12149",
+              "name": "Flavi_E_C"
+            },
+            {
+              "id": "cd17038",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "cd23204",
+              "name": "Flavivirus_RdRp"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "1.10.260.90",
+              "name": "-"
+            },
+            {
+              "id": "1.20.1280.260",
+              "name": "-"
+            },
+            {
+              "id": "2.40.10.120",
+              "name": "-"
+            },
+            {
+              "id": "2.60.40.350",
+              "name": "-"
+            },
+            {
+              "id": "1.10.8.970",
+              "name": "Flavivirus envelope glycoprotein M-like"
+            },
+            {
+              "id": "2.60.260.50",
+              "name": "Flavivirus polyprotein propeptide domain"
+            },
+            {
+              "id": "3.30.70.2840",
+              "name": "Flavivirus RNA-directed RNA polymerase, thumb domain"
+            },
+            {
+              "id": "3.40.50.300",
+              "name": "P-loop containing nucleotide triphosphate hydrolases"
+            },
+            {
+              "id": "2.60.98.10",
+              "name": "Tick-borne Encephalitis virus Glycoprotein, domain 1"
+            },
+            {
+              "id": "2.40.10.10",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "3.40.50.150",
+              "name": "Vaccinia Virus protein VP39"
+            },
+            {
+              "id": "3.30.67.10",
+              "name": "Viral Envelope Glycoprotein, domain 2"
+            },
+            {
+              "id": "3.30.387.10",
+              "name": "Viral Envelope Glycoprotein, domain 3"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR000069",
+              "name": "Env_glycoprot_M_flavivir"
+            },
+            {
+              "id": "IPR038302",
+              "name": "Env_glycoprot_M_sf_flavivir"
+            },
+            {
+              "id": "IPR013755",
+              "name": "Flav_gly_cen_dom_subdom1"
+            },
+            {
+              "id": "IPR001122",
+              "name": "Flavi_capsidC"
+            },
+            {
+              "id": "IPR011492",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "IPR027287",
+              "name": "Flavi_E_Ig-like"
+            },
+            {
+              "id": "IPR026470",
+              "name": "Flavi_E_Stem/Anchor_dom"
+            },
+            {
+              "id": "IPR038345",
+              "name": "Flavi_E_Stem/Anchor_dom_sf"
+            },
+            {
+              "id": "IPR011998",
+              "name": "Flavi_Glycoprot_E_cen/dimer"
+            },
+            {
+              "id": "IPR001157",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "IPR000752",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "IPR000487",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "IPR001850",
+              "name": "Flavi_NS3_S7"
+            },
+            {
+              "id": "IPR000404",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "IPR001528",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "IPR046811",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "IPR002535",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "IPR038688",
+              "name": "Flavi_propep_sf"
+            },
+            {
+              "id": "IPR047530",
+              "name": "Flavi_RdRp"
+            },
+            {
+              "id": "IPR000208",
+              "name": "Flavi_RdRp_fingers/palm"
+            },
+            {
+              "id": "IPR000336",
+              "name": "Flavivir/Alphavir_Ig-like_sf"
+            },
+            {
+              "id": "IPR014412",
+              "name": "Gen_Poly_FLV"
+            },
+            {
+              "id": "IPR036253",
+              "name": "Glycoprot_cen/dimer_sf"
+            },
+            {
+              "id": "IPR038055",
+              "name": "Glycoprot_E_dimer_dom"
+            },
+            {
+              "id": "IPR013756",
+              "name": "GlyE_cen_dom_subdom2"
+            },
+            {
+              "id": "IPR014001",
+              "name": "Helicase_ATP-bd"
+            },
+            {
+              "id": "IPR001650",
+              "name": "Helicase_C-like"
+            },
+            {
+              "id": "IPR014756",
+              "name": "Ig_E-set"
+            },
+            {
+              "id": "IPR026490",
+              "name": "mRNA_cap_0/1_MeTrfase"
+            },
+            {
+              "id": "IPR049486",
+              "name": "NS3-hel_C_flaviviridae"
+            },
+            {
+              "id": "IPR027417",
+              "name": "P-loop_NTPase"
+            },
+            {
+              "id": "IPR009003",
+              "name": "Peptidase_S1_PA"
+            },
+            {
+              "id": "IPR007094",
+              "name": "RNA-dir_pol_PSvirus"
+            },
+            {
+              "id": "IPR002877",
+              "name": "RNA_MeTrfase_FtsJ_dom"
+            },
+            {
+              "id": "IPR029063",
+              "name": "SAM-dependent_MTases_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF20907",
+              "name": "Flav_NS3-hel_C"
+            },
+            {
+              "id": "PF01003",
+              "name": "Flavi_capsid"
+            },
+            {
+              "id": "PF07652",
+              "name": "Flavi_DEAD"
+            },
+            {
+              "id": "PF21659",
+              "name": "Flavi_E_stem"
+            },
+            {
+              "id": "PF02832",
+              "name": "Flavi_glycop_C"
+            },
+            {
+              "id": "PF00869",
+              "name": "Flavi_glycoprot"
+            },
+            {
+              "id": "PF01004",
+              "name": "Flavi_M"
+            },
+            {
+              "id": "PF00948",
+              "name": "Flavi_NS1"
+            },
+            {
+              "id": "PF01005",
+              "name": "Flavi_NS2A"
+            },
+            {
+              "id": "PF01002",
+              "name": "Flavi_NS2B"
+            },
+            {
+              "id": "PF01350",
+              "name": "Flavi_NS4A"
+            },
+            {
+              "id": "PF01349",
+              "name": "Flavi_NS4B"
+            },
+            {
+              "id": "PF00972",
+              "name": "Flavi_NS5"
+            },
+            {
+              "id": "PF20483",
+              "name": "Flavi_NS5_thumb"
+            },
+            {
+              "id": "PF01570",
+              "name": "Flavi_propep"
+            },
+            {
+              "id": "PF01728",
+              "name": "FtsJ"
+            },
+            {
+              "id": "PF00949",
+              "name": "Peptidase_S7"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF81296",
+              "name": "E set domains"
+            },
+            {
+              "id": "SSF52540",
+              "name": "P-loop containing nucleoside triphosphate hydrolases"
+            },
+            {
+              "id": "SSF53335",
+              "name": "S-adenosyl-L-methionine-dependent methyltransferases"
+            },
+            {
+              "id": "SSF50494",
+              "name": "Trypsin-like serine proteases"
+            },
+            {
+              "id": "SSF56983",
+              "name": "Viral glycoprotein, central and dimerisation domains"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51527",
+              "name": "FLAVIVIRUS_NS2B"
+            },
+            {
+              "id": "PS51528",
+              "name": "FLAVIVIRUS_NS3PRO"
+            },
+            {
+              "id": "PS51192",
+              "name": "HELICASE_ATP_BIND_1"
+            },
+            {
+              "id": "PS51194",
+              "name": "HELICASE_CTER"
+            },
+            {
+              "id": "PS50507",
+              "name": "RDRP_SSRNA_POS"
+            },
+            {
+              "id": "PS51591",
+              "name": "RNA_CAP01_NS5_MT"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0005576",
+              "term": "extracellular region"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044196",
+              "term": "host cell nucleolus"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0044220",
+              "term": "host cell perinuclear region of cytoplasm"
+            },
+            {
+              "id": "GO:0019028",
+              "term": "viral capsid"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0016887",
+              "term": "ATP hydrolysis activity"
+            },
+            {
+              "id": "GO:0003725",
+              "term": "double-stranded RNA binding"
+            },
+            {
+              "id": "GO:0005525",
+              "term": "GTP binding"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0004483",
+              "term": "methyltransferase cap1 activity"
+            },
+            {
+              "id": "GO:0004482",
+              "term": "mRNA 5'-cap (guanine-N7-)-methyltransferase activity"
+            },
+            {
+              "id": "GO:0046983",
+              "term": "protein dimerization activity"
+            },
+            {
+              "id": "GO:0003724",
+              "term": "RNA helicase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0004252",
+              "term": "serine-type endopeptidase activity"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0039520",
+              "term": "symbiont-mediated activation of host autophagy"
+            },
+            {
+              "id": "GO:0052170",
+              "term": "symbiont-mediated suppression of host innate immune response"
+            },
+            {
+              "id": "GO:0039563",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT1 activity"
+            },
+            {
+              "id": "GO:0039564",
+              "term": "symbiont-mediated suppression of host JAK-STAT cascade via inhibition of STAT2 activity"
+            },
+            {
+              "id": "GO:0039502",
+              "term": "symbiont-mediated suppression of host type I interferon-mediated signaling pathway"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Acetylation",
+          "Activation of host autophagy by virus",
+          "ATP-binding",
+          "Capsid protein",
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "GTP-binding",
+          "Helicase",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Interferon antiviral system evasion",
+          "Membrane",
+          "Metal-binding",
+          "Methyltransferase",
+          "mRNA capping",
+          "mRNA processing",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "Protease",
+          "Reference proteome",
+          "RNA-binding",
+          "RNA-directed RNA polymerase",
+          "S-adenosyl-L-methionine",
+          "Secreted",
+          "Serine protease",
+          "Transferase",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Ubl conjugation",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Viral penetration into host cytoplasm",
+          "Viral RNA replication",
+          "Virion",
+          "Virus entry into host cell",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Activation of host autophagy by virus",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cytoplasm",
+          "Host endoplasmic reticulum",
+          "Host membrane",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host STAT1 by virus",
+          "Inhibition of host STAT2 by virus",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/C5H431.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    }
+  ],
+  "coverage": {
+    "chains": 8,
+    "with_a_reviewed_relative": 8,
+    "with_a_function_for_this_chain": 8,
+    "with_a_verified_reading_frame": 6,
+    "with_nucleotide_coordinates": 6,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:03:41.427477+00:00"
+  },
+  "content_sha256": "16dbd37cac14a81dcdb6da17561b72b5819cc5fdbafd4c577b965fcc8ad83ac3"
+}

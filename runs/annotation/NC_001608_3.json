@@ -1,0 +1,480 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_001608.3",
+  "pathogen": "Marburg virus",
+  "reference_excluded_organism": "Lake Victoria marburgvirus",
+  "source_record": "runs/onset_chain_NC_001608_3.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "NCAP_EBOSB Nucleoprotein",
+      "parent": null,
+      "tier": "remote",
+      "nearest_homolog": "Q9QP77",
+      "score": 4.66,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.16,
+        "druggable_class": 0.0
+      },
+      "gate": "no",
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q9QP77",
+        "entry_id": "NCAP_EBOSB",
+        "protein_name": "Nucleoprotein",
+        "organism": "Sudan ebolavirus (strain Boniface-76)",
+        "reviewed": true,
+        "molecule_asked_for": "NCAP_EBOSB Nucleoprotein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Oligomerizes into helical capsid to encapsidate the viral genome, protecting it from nucleases and the cellular innate immune response. VP35 binds to and stabilizes monomeric NP, keeping it soluble. Upon virus replication, NP is recruited to bind cooperatively viral genomic RNA and VP35 is released. The encapsidated genomic RNA is termed the nucleocapsid and serves as template for transcription and replication. The nucleocapsid is helical with a pitch of 10.81 NP per turn and a diameter of about 22nm. Each NP binds to six nucleotides of viral genomic RNA, three being exposed to the solvant and three hidden into the nucleocapsid. Also recruits host PPP2R5C phosphatase to dephosphorylate VP30 and thereby promote viral transcription. Upon virion assembly and budding, NP binds to VP24 and possibly host STAU1"
+          ],
+          "SUBUNIT": [
+            "Homooligomer. Homomultimerizes to form the nucleocapsid. Binds to viral genomic RNA. Interacts with VP35 and VP30 to form the nucleocapsid. Interacts with host PPP2R5C; this interaction leads to VP30 dephosphorylation and viral transcription. Interacts with VP24; this interaction facilitates nucleocapsid assembly and genome packaging. Interacts with matrix protein VP40; this interaction allows recruitment of the nucleocapsid into progeny virions. Interacts with host STAU1. Interacts with host NXF1 (via RNA-binding domain); this interaction recruits NXF1 to the inclusion bodies were viral replication takes place, probably to export viral mRNA-NXF1 complexes from these sites. Interacts with host CCDC92; this interaction sequesters NP in the host cytoplasm. Interacts with host TRIM14"
+          ],
+          "DOMAIN": [
+            "Comprizes a N-terminal arm involved in oligomerization, a NP core region involved in RNA binding, a disordered region follwoed by a C-terminal tail involved in protein-protein interactions. During oligomerization, NP N-terminal arm binds to a neighbor NP thereby displacing VP35 bound to monomeric NP"
+          ],
+          "PTM": [
+            "Phosphorylated and O-glycosylated by host. Acetylated by host EP300 in vitro"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Epomops franqueti",
+            "common_name": "Franquet's epauletted fruit bat",
+            "taxon": 77231
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Myonycteris torquata",
+            "common_name": "Little collared fruit bat",
+            "taxon": 77243
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR008609",
+              "name": "Ebola_NP"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF05505",
+              "name": "Ebola_NP"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS52113",
+              "name": "FV_NP_CT"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0019029",
+              "term": "helical viral capsid"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:1990904",
+              "term": "ribonucleoprotein complex"
+            },
+            {
+              "id": "GO:0019013",
+              "term": "viral nucleocapsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0019074",
+              "term": "viral RNA genome packaging"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Capsid protein",
+          "Coiled coil",
+          "Helical capsid protein",
+          "Host cytoplasm",
+          "Phosphoprotein",
+          "Ribonucleoprotein",
+          "RNA-binding",
+          "Viral nucleoprotein",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host cytoplasm"
+        ],
+        "structures_deposited": 3,
+        "source": "https://rest.uniprot.org/uniprotkb/Q9QP77.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 2,
+      "target": "L_EBOZM RNA-directed RNA polymerase L",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q05318",
+      "score": 4.2766,
+      "score_terms": {
+        "conservation": 0.3666,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.01,
+        "druggable_class": 2.4
+      },
+      "gate": "no",
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q05318",
+        "entry_id": "L_EBOZM",
+        "protein_name": "RNA-directed RNA polymerase L",
+        "organism": "Zaire ebolavirus (strain Mayinga-76)",
+        "reviewed": true,
+        "molecule_asked_for": "L_EBOZM RNA-directed RNA polymerase L",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "RNA-directed RNA polymerase that catalyzes the transcription of viral mRNAs, their capping and polyadenylation. The template is composed of the viral RNA tightly encapsidated by the nucleoprotein (N). The viral polymerase binds to the genomic RNA at the 3' leader promoter, and transcribes subsequently all viral mRNAs with a decreasing efficiency. The first gene is the most transcribed, and the last the least transcribed. The viral phosphoprotein acts as a processivity factor. Capping is concomitant with initiation of mRNA transcription. Indeed, a GDP polyribonucleotidyl transferase (PRNTase) adds the cap structure when the nascent RNA chain length has reached few nucleotides. Ribose 2'-O methylation of viral mRNA cap precedes and facilitates subsequent guanine-N-7 methylation, both activities being carried by the viral polymerase. Polyadenylation of mRNAs occur by a stuttering mechanism at a slipery stop site present at the end viral genes. After finishing transcription of a mRNA, the polymerase can resume transcription of the downstream gene",
+            "RNA-directed RNA polymerase that catalyzes the replication of viral genomic RNA. The template is composed of the viral RNA tightly encapsidated by the nucleoprotein (N). The replicase mode is dependent on intracellular N protein concentration. In this mode, the polymerase replicates the whole viral genome without recognizing transcriptional signals, and the replicated genome is not caped or polyadenylated"
+          ],
+          "SUBUNIT": [
+            "Forms homooligomers. Interacts with VP35; this complex constitutes a functional polymerase complex"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Epomops franqueti",
+            "common_name": "Franquet's epauletted fruit bat",
+            "taxon": 77231
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Myonycteris torquata",
+            "common_name": "Little collared fruit bat",
+            "taxon": 77243
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.40.50.150",
+              "name": "Vaccinia Virus protein VP39"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR039736",
+              "name": "L_poly_C"
+            },
+            {
+              "id": "IPR026890",
+              "name": "Mononeg_mRNAcap"
+            },
+            {
+              "id": "IPR014023",
+              "name": "Mononeg_RNA_pol_cat"
+            },
+            {
+              "id": "IPR025786",
+              "name": "Mononega_L_MeTrfase"
+            },
+            {
+              "id": "IPR017235",
+              "name": "RNA-dir_pol_L_filovirus"
+            },
+            {
+              "id": "IPR029063",
+              "name": "SAM-dependent_MTases_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF14318",
+              "name": "Mononeg_mRNAcap"
+            },
+            {
+              "id": "PF00946",
+              "name": "Mononeg_RNA_pol"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS52109",
+              "name": "FV_L_CTD"
+            },
+            {
+              "id": "PS52108",
+              "name": "MNV_L_PRNTASE"
+            },
+            {
+              "id": "PS50526",
+              "name": "RDRP_SSRNA_NEG_NONSEG"
+            },
+            {
+              "id": "PS51590",
+              "name": "SAM_MT_MNV_L"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0003924",
+              "term": "GTPase activity"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0004482",
+              "term": "mRNA 5'-cap (guanine-N7-)-methyltransferase activity"
+            },
+            {
+              "id": "GO:0062105",
+              "term": "RNA 2'-O-methyltransferase activity"
+            },
+            {
+              "id": "GO:0097747",
+              "term": "RNA polymerase activity"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039689",
+              "term": "negative stranded viral RNA replication"
+            },
+            {
+              "id": "GO:0039697",
+              "term": "negative stranded viral RNA transcription"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "ATP-binding",
+          "Host cytoplasm",
+          "Hydrolase",
+          "Magnesium",
+          "Metal-binding",
+          "Methyltransferase",
+          "mRNA capping",
+          "mRNA processing",
+          "Multifunctional enzyme",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Reference proteome",
+          "RNA-directed RNA polymerase",
+          "S-adenosyl-L-methionine",
+          "Transferase",
+          "Viral RNA replication",
+          "Virion",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Host cytoplasm"
+        ],
+        "structures_deposited": 1,
+        "source": "https://rest.uniprot.org/uniprotkb/Q05318.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 3,
+      "target": "unidentified probable surface antigen",
+      "parent": null,
+      "tier": "topology",
+      "nearest_homolog": null,
+      "score": 3.6,
+      "score_terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": null,
+      "annotation_failed_because": null,
+      "not_annotated_because": "this chain was identified with no reviewed relative, so there is no curated entry to read a function from"
+    },
+    {
+      "rank": 4,
+      "target": "unidentified probable surface antigen",
+      "parent": null,
+      "tier": "topology",
+      "nearest_homolog": null,
+      "score": 3.6,
+      "score_terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": null,
+      "annotation_failed_because": null,
+      "not_annotated_because": "this chain was identified with no reviewed relative, so there is no curated entry to read a function from"
+    }
+  ],
+  "coverage": {
+    "chains": 4,
+    "with_a_reviewed_relative": 2,
+    "with_a_function_for_this_chain": 0,
+    "with_a_verified_reading_frame": 0,
+    "with_nucleotide_coordinates": 0,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:02:53.945512+00:00"
+  },
+  "content_sha256": "4cc572bedebe984dee66bec093bf44190c9d8ceca6bdbe89c2c40611c4265f38"
+}

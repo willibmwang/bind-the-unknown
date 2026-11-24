@@ -1,0 +1,241 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_014397.1",
+  "pathogen": "Rift Valley fever virus",
+  "reference_excluded_organism": "Rift Valley fever virus",
+  "source_record": "runs/onset_chain_NC_014397_1.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "L_TOSV RNA-directed RNA polymerase L",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P37800",
+      "score": 4.3353,
+      "score_terms": {
+        "conservation": 0.4053,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.03,
+        "druggable_class": 2.4
+      },
+      "gate": "no",
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P37800",
+        "entry_id": "L_TOSV",
+        "protein_name": "RNA-directed RNA polymerase L",
+        "organism": "Toscana virus",
+        "reviewed": true,
+        "molecule_asked_for": "L_TOSV RNA-directed RNA polymerase L",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "RNA-dependent RNA polymerase, which is responsible for the replication and transcription of the viral RNA genome using antigenomic RNA as an intermediate (By similarity). During transcription, synthesizes subgenomic RNAs and assures their capping by a cap-snatching mechanism, which involves the endonuclease activity cleaving the host capped pre-mRNAs (PubMed:31584100). These short capped RNAs are then used as primers for viral transcription. The 3'-end of subgenomic mRNAs molecules are not polyadenylated. During replication, the polymerase binds the 5' and 3' vRNA extremities at distinct sites (By similarity). In turn, significant conformational changes occur in the polymerase and in vRNA to initiate active RNA synthesis (By similarity). As a consequence of the use of the same enzyme for both transcription and replication, these mechanisms need to be well coordinated (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Homomultimer (By similarity). Interacts with glycoprotein N; this interaction allows efficient polymerase packaging into virus particles (By similarity). Interacts with nucleoprotein N (By similarity)"
+          ],
+          "DOMAIN": [
+            "The N-terminus contains the endonuclease activity (endoN) (PubMed:31584100). The central region contains the RdRp activity (By similarity). The C-terminus contains the cap-binding region (By similarity)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Phlebotomus perniciosus",
+            "common_name": "Phlebotomine sand fly",
+            "taxon": 13204
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR022531",
+              "name": "L_PA-C-like"
+            },
+            {
+              "id": "IPR029124",
+              "name": "L_protein_N"
+            },
+            {
+              "id": "IPR007099",
+              "name": "RNA-dir_pol_NSvirus"
+            },
+            {
+              "id": "IPR014385",
+              "name": "RNA-dir_pol_phlebovirus"
+            },
+            {
+              "id": "IPR007322",
+              "name": "RNA_pol_bunyavir"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF04196",
+              "name": "Bunya_RdRp"
+            },
+            {
+              "id": "PF12603",
+              "name": "L_PA-C-like"
+            },
+            {
+              "id": "PF15518",
+              "name": "L_protein_N"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS50525",
+              "name": "RDRP_SSRNA_NEG_SEG"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044165",
+              "term": "host cell endoplasmic reticulum"
+            },
+            {
+              "id": "GO:0044172",
+              "term": "host cell endoplasmic reticulum-Golgi intermediate compartment"
+            },
+            {
+              "id": "GO:0044177",
+              "term": "host cell Golgi apparatus"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0016787",
+              "term": "hydrolase activity"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0001882",
+              "term": "nucleoside binding"
+            },
+            {
+              "id": "GO:0000166",
+              "term": "nucleotide binding"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006351",
+              "term": "DNA-templated transcription"
+            },
+            {
+              "id": "GO:0039689",
+              "term": "negative stranded viral RNA replication"
+            },
+            {
+              "id": "GO:0039696",
+              "term": "RNA-templated viral transcription"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Host endoplasmic reticulum",
+          "Host Golgi apparatus",
+          "Hydrolase",
+          "Magnesium",
+          "Manganese",
+          "Metal-binding",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Reference proteome",
+          "RNA-directed RNA polymerase",
+          "Transferase",
+          "Viral RNA replication",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host endoplasmic reticulum",
+          "Host Golgi apparatus"
+        ],
+        "structures_deposited": 3,
+        "source": "https://rest.uniprot.org/uniprotkb/P37800.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    }
+  ],
+  "coverage": {
+    "chains": 1,
+    "with_a_reviewed_relative": 1,
+    "with_a_function_for_this_chain": 0,
+    "with_a_verified_reading_frame": 0,
+    "with_nucleotide_coordinates": 0,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:04:51.421718+00:00"
+  },
+  "content_sha256": "7098290e602600e753a5f0c50332725ebc328f4574f2d11c0a784b94104dd534"
+}

@@ -1157,3 +1157,148 @@ a{color:var(--accent)}
 .runmx tr.unfinished td{opacity:.55}
 .runmx .broke{display:block;color:var(--warn,#b64342);font-family:var(--mono);font-size:10px;
   margin-top:3px;opacity:1}
+
+/* ================================================================ the residue track
+   One protein along an axis of its own residues: how long it is, which parts the pipeline
+   folded, which residues a curator marked, and where the measured patch sits. Every other
+   figure here draws one number per chain; this draws one chain in full.
+
+   The roles are the region map's and no new one is introduced:
+
+     --accent, purple  -- this virus, and everything measured on it
+     --fig-other, blue -- the relative's entry, where the annotation was written down
+     grey, hatched     -- offered to the folder and refused
+
+   Text inside the figure is only ever a number: region names live in the list under it, keyed
+   by the number in the box. Lane names sit in a fixed gutter and are right-aligned against it,
+   so no label on this figure can collide with another. */
+.ftrack{margin:22px 0 26px}
+.ftrack-scroll{overflow-x:auto;overflow-y:hidden}
+/* The same floor the region map takes, for the same reason: the 12px numbers must not shrink
+   below legibility on a phone, so under this width the figure scrolls sideways. */
+.ftrack svg{display:block;width:100%;min-width:700px;height:auto;color:var(--fg)}
+.ftrack .ftl{font-size:13px;font-weight:600;fill:var(--fg)}
+.ftrack .ftu{font-family:var(--mono);font-size:11.5px;fill:var(--fg-3)}
+.ftrack .ftn{font-family:var(--mono);font-size:11.5px;fill:var(--fg-3)}
+.ftrack .ftg{stroke:var(--rule);stroke-width:1}
+/* The chain: a track is the whole extent, so it is the faintest thing on the figure and every
+   mark below is read against it. */
+.ftrack .ftb{fill:currentColor;fill-opacity:.055;stroke:var(--rule)}
+/* A part that reached the folder. */
+.ftrack .ftr{fill:var(--accent);fill-opacity:.17;stroke:var(--accent);stroke-opacity:.55;
+  stroke-width:1.2}
+.ftrack .ftm{font-family:var(--mono);font-size:11px;font-weight:650;fill:var(--accent)}
+/* Offered and refused. Hatched so the distinction survives grayscale and does not depend on
+   telling grey from purple. */
+.ftrack .ftx{fill:url(#fthatch);fill-opacity:1;stroke:var(--fg-3);stroke-opacity:.5}
+.ftrack .fthl{stroke:var(--fg-3);stroke-opacity:.45;stroke-width:1.4}
+/* Marked residues, in the relative's role, because that is where they were written down. */
+.ftrack .ftk{fill:var(--fig-other)}
+/* The measured patch, and the part of it that reaches the marked residues -- taller rather
+   than a second hue, because a third colour here would have to mean a third kind of thing. */
+.ftrack .ftp{fill:var(--brand)}
+.ftrack .ftpr{fill:var(--accent)}
+/* The same measurement on predicted coordinates: outlined, which is the role the surface
+   tiles already give a prediction. */
+.ftrack .ftq{fill:var(--accent);fill-opacity:.2;stroke:var(--accent);stroke-width:1}
+.ftrack .ftw{font-family:var(--mono);font-size:13px;color:var(--fg-2);margin:10px 0 0}
+.ftrack .ftkeys{list-style:none;margin:12px 0 0;padding:0;font-size:15px;color:var(--fg-2)}
+.ftrack .ftkeys li{margin:0 0 7px;padding-left:22px;position:relative;line-height:1.5}
+.ftrack .ftkeys li b{font-weight:650;color:var(--fg)}
+.ftrack .ftkeys li>b:first-child:not(.ftkey){position:absolute;left:0;font-family:var(--mono)}
+.ftrack .ftd{color:var(--fg-3)}
+.ftkey{position:absolute;left:0;top:5px;width:12px;height:12px;border-radius:3px;
+  display:inline-block}
+.ftkey-a{background:var(--brand)}
+.ftkey-t{background:var(--accent)}
+/* The region swatch matches the region box, which is the accent at the same low fill
+   with its own stroke, rather than a solid block of a hue the figure never uses. */
+.ftkey-r{background:color-mix(in srgb,var(--accent) 17%,transparent);
+  border:1px solid var(--accent)}
+.ftkey-o{background:var(--fig-other)}
+.ftkey-p{background:var(--accent);opacity:.25;border:1px solid var(--accent)}
+.ftrack figcaption{margin-top:12px}
+@media (max-width:760px){
+  .ftrack svg{min-width:660px}
+}
+
+/* ================================================================ the weight map
+   One coefficient per residue per randomised position: the library model's opinion of each
+   building block. A table rather than a figure, because every cell is one number on a grid a
+   reader wants to look things up in.
+
+   **The scale here has to diverge and the rest of this page's ramps do not.** `.cmx` shades a
+   term by how much of its ceiling it earned, which runs one way from nothing to the cap. A
+   coefficient has a sign and the sign is the whole content -- whether that residue raises or
+   lowers the predicted score -- so a one-sided purple ramp would put a strongly unfavourable
+   residue in the same pale cell as a residue the model has no opinion about.
+
+   So this figure gets the one extra hue on the page, and it is placed opposite the accent
+   rather than beside it: purple raises the score, ochre lowers it. Ochre rather than the
+   `--fig-other` blue, which already means "the relative's entry" three figures above and
+   cannot be given a second job here; and rather than red, which would read as an error rather
+   than as a direction. Both ramps are banded in four steps, so text contrast is decided once
+   per band as it is for `.cmx`, and the darkest band of each carries light text.
+
+   Measured on the page: the darkest purple is 7.3:1 under white and the darkest ochre 5.9:1,
+   both above the 4.5:1 floor the rest of this stylesheet holds to. In dark mode each ramp is
+   lifted and the text on the two darkest bands flips to near-black, which is the inversion
+   `--accent`/`--on-accent` already follows. */
+.wmapscroll{overflow-x:auto;overflow-y:hidden;margin:18px 0 10px}
+.wmap{border-collapse:collapse;font-family:var(--mono);font-size:11.5px;min-width:760px;
+  width:100%}
+.wmap caption{caption-side:top;text-align:left;font-family:var(--body);
+  font-size:var(--fs-sm);font-weight:600;color:var(--fg);padding:0 0 8px}
+.wmap th{font-family:var(--body);font-size:var(--fs-micro);font-weight:600;color:var(--fg-2);
+  padding:4px 3px;text-align:center;white-space:nowrap}
+.wmap th[scope=row]{text-align:right;padding-right:8px;color:var(--fg)}
+.wmap td{padding:4px 2px;text-align:center;font-variant-numeric:tabular-nums;
+  border:1px solid var(--bg);color:var(--fg-2)}
+.wmap td.z0{color:var(--fg-3)}
+.wmap td.p1{background:#f7f0fd;color:var(--fg)}
+.wmap td.p2{background:#eedcfb;color:var(--fg)}
+.wmap td.p3{background:#c48ff0;color:var(--fg)}
+.wmap td.p4{background:#8f1ad8;color:#fff}
+.wmap td.n1{background:#fbf3e6;color:var(--fg)}
+.wmap td.n2{background:#f4e2c4;color:var(--fg)}
+.wmap td.n3{background:#dfae63;color:var(--fg)}
+.wmap td.n4{background:#8a5410;color:#fff}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .wmap td.p1{background:#241132}
+  :root:not([data-theme="light"]) .wmap td.p2{background:#351a49}
+  :root:not([data-theme="light"]) .wmap td.p3{background:#6d2a9b}
+  :root:not([data-theme="light"]) .wmap td.p4{background:#c47cff;color:#111113}
+  :root:not([data-theme="light"]) .wmap td.n1{background:#251c10}
+  :root:not([data-theme="light"]) .wmap td.n2{background:#3a2a14}
+  :root:not([data-theme="light"]) .wmap td.n3{background:#8a5c1e}
+  :root:not([data-theme="light"]) .wmap td.n4{background:#d79c53;color:#111113}
+}
+:root[data-theme="dark"] .wmap td.p1{background:#241132}
+:root[data-theme="dark"] .wmap td.p2{background:#351a49}
+:root[data-theme="dark"] .wmap td.p3{background:#6d2a9b}
+:root[data-theme="dark"] .wmap td.p4{background:#c47cff;color:#111113}
+:root[data-theme="dark"] .wmap td.n1{background:#251c10}
+:root[data-theme="dark"] .wmap td.n2{background:#3a2a14}
+:root[data-theme="dark"] .wmap td.n3{background:#8a5c1e}
+:root[data-theme="dark"] .wmap td.n4{background:#d79c53;color:#111113}
+/* The weight rows take the surface lane's marks as well as its grid, so a bar here means the
+   same thing it means three figures above: solid is the measured or stated quantity, outlined
+   is the one that came from a model. The selectors are shared rather than copied, because two
+   definitions of `.b` would drift the moment either lane's bar changed. */
+.wr .plot{position:relative;height:20px;background:var(--surface-2);border-radius:5px}
+.wr .plot .b{position:absolute;top:6px;height:8px;border-radius:0 5px 5px 0;
+  background:var(--brand)}
+.wr .plot .b.pred{background:color-mix(in srgb,var(--brand) 20%,transparent);
+  border:1.5px solid var(--brand);box-sizing:border-box}
+.wr .plot .thr{position:absolute;top:0;width:2px;height:100%;background:var(--fg-3);
+  opacity:.55}
+/* The weight lane reuses the surface lane's grid, so a row here lines up with a row there. */
+.lane .wr{display:grid;grid-template-columns:200px 1fr 190px;gap:12px;align-items:center;
+  padding:5px 0}
+.lane .wr .who{font-size:var(--fs-sm);color:var(--fg)}
+.lane .wr .vl{font-family:var(--mono);font-size:var(--fs-micro);color:var(--fg-2);
+  text-align:right}
+@media (max-width:760px){
+  .lane .wr{grid-template-columns:130px 1fr 120px;gap:8px}
+  .wmap{min-width:720px}
+}

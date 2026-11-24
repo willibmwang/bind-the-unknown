@@ -12,32 +12,38 @@
       "asked_about": [
         {
           "rank": 1,
-          "target": "P1",
-          "range": "2-862"
+          "target": "Protease 2A",
+          "range": "863-1012"
         },
         {
           "rank": 2,
-          "target": "P3",
-          "range": "1441-2193"
+          "target": "Protease 3C",
+          "range": "1549-1731"
+        },
+        {
+          "rank": 3,
+          "target": "RNA-directed RNA polymerase",
+          "range": "1732-2193"
         }
       ],
       "requested_ranges": [
-        "2-862",
-        "1441-2193"
+        "863-1012",
+        "1549-1731",
+        "1732-2193"
       ],
-      "predicted_model_count": 3,
+      "predicted_model_count": 4,
       "any_prediction_exists": true,
       "providers_with_models": [
         "SWISS-MODEL"
       ],
       "models_by_provider": {
-        "SWISS-MODEL": 3
+        "SWISS-MODEL": 4
       },
       "models_by_tool_used": {
-        "not stated by the host": 3
+        "not stated by the host": 4
       },
       "models_by_category": {
-        "TEMPLATE-BASED": 3
+        "TEMPLATE-BASED": 4
       },
       "alphafold_host_queried": true,
       "alphafold_host_served_models": false,
@@ -47,20 +53,28 @@
       "tools_used": [],
       "models_found_only_by_alphafold_host": [],
       "mean_confidence_by_metric": {
-        "QMEANDisCo": 0.6897
+        "QMEANDisCo": 0.6867
       },
       "ranges": [
         {
-          "range": "2-862",
-          "width": 861,
-          "models_overlapping": 2,
+          "range": "863-1012",
+          "width": 150,
+          "models_overlapping": 0,
+          "modelled": false,
+          "best_plddt_model": null,
+          "no_plddt_because": "no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply"
+        },
+        {
+          "range": "1549-1731",
+          "width": 183,
+          "models_overlapping": 1,
           "modelled": true,
           "best_plddt_model": null,
           "no_plddt_because": "no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply"
         },
         {
-          "range": "1441-2193",
-          "width": 753,
+          "range": "1732-2193",
+          "width": 462,
           "models_overlapping": 1,
           "modelled": true,
           "best_plddt_model": null,
@@ -70,14 +84,14 @@
       "excluded_experimental_count": 39,
       "per_residue_refusals": [],
       "network_calls": 2,
-      "bytes_received": 45081,
-      "content_sha256": "5c4f9435865ab29b5f3532bb9f68bc35439eff79a8ccf91bd06c7e81dc5bb15b"
+      "bytes_received": 45891,
+      "content_sha256": "984cb233c97e5b08948409f9d84fd1313828a4516c74a3f59d4a68bdd494b10c"
     }
   ],
-  "predicted_model_count": 3,
+  "predicted_model_count": 4,
   "alphafold_host_model_count": 0,
   "alphafold_authored_model_count": 0,
-  "headline": "3 predicted models across 1 accessions. 0 were served by the AlphaFold host and 0 were computed by AlphaFold.",
+  "headline": "4 predicted models across 1 accessions. 0 were served by the AlphaFold host and 0 were computed by AlphaFold.",
   "interpretation": "The provenance of the `structures.predicted` scalars on the landing page. Each accession's predicted models are counted three ways that the page's single `predicted_model_count` collapses into one: by the provider that served the model, by the tool that computed it, and by model category. Nothing here is a new capability and nothing here changes a rank; it re-asks one tool already in the toolkit for the same accessions the held-out run reached, and keeps the list that the chain record reduces to a count.",
   "limitations": [
     "The AlphaFold host's name is not the provenance of what it serves. Every model provider `AlphaFold DB` returned for these accessions was computed by ColabFold v1.5.2, so `alphafold_host_served_models: true` must not be read as 'AlphaFold modelled this protein'. `alphafold_authored_model_count` is counted from each model's `tool_used`, which is the only field that answers that.",
@@ -89,14 +103,14 @@
     "The accessions are read out of the landing record's held-out case rather than written here, so this inventory covers the relatives the chain actually reached. It says nothing about SARS-CoV-2's own P0DTD1, whose curated entries that case deletes before the run."
   ],
   "provenance": {
-    "host": "Williams-MacBook-Pro-260.local",
+    "host": "YLS-PF5VB7HK.yu.yale.edu",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "96cf82d7cf34512bb1b5d65d37418f58f4311e6c",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-11-13T17:56:22.647216+00:00"
+    "recorded_at_utc": "2026-11-22T03:06:17.399902+00:00"
   },
-  "content_sha256": "dfc9589f04be2ee4b6e89c9cbc80ead050b33eb3343150dc379df3a0ba9ff1a8"
+  "content_sha256": "26d3bb1a13cd3af110681cb067b1cc3e6379348d955e8a566417d0be527239fe"
 }

@@ -1,0 +1,1936 @@
+{
+  "case": "Hepatitis B virus, Hepatitis B virus held out",
+  "genome_accession": "NC_003977.2",
+  "reference_excluded_organism": "Hepatitis B virus",
+  "stages": [
+    {
+      "stage": 1,
+      "name": "Genome to candidate proteins",
+      "tool": "intake.rank_targets",
+      "endpoints": [
+        "NCBI efetch",
+        "UniProt"
+      ],
+      "input": {
+        "genome_accession": "NC_003977.2",
+        "reference_excluded_organism": "Hepatitis B virus"
+      },
+      "output": {
+        "genome_length_nt": 3182,
+        "segments": 1,
+        "orfs_found": 10,
+        "orfs_ranked": 10,
+        "reference_entries": 17243,
+        "reference_entries_removed": 286,
+        "identified": 5,
+        "unidentified": 5,
+        "gate": {
+          "terms": [
+            "surface_exposed",
+            "essential_class",
+            "druggable_class",
+            "structures_in_family"
+          ],
+          "floor": 0.5,
+          "rule": "a row is kept when at least one of 4 evidence terms pays 0.5 points or more. Conservation is not among them: it says how well this genome was recognised, not whether what was recognised is worth aiming at",
+          "kept": 9,
+          "gated_out": 1,
+          "dropped": [
+            {
+              "rank": 5,
+              "name": "X_GSHV Protein X",
+              "parent": null,
+              "score": 1.6407,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            }
+          ]
+        }
+      },
+      "seconds": 14.97,
+      "hands_to_next": "one reviewed accession and one residue range per candidate"
+    },
+    {
+      "stage": 2,
+      "name": "Polyproteins to mature chains, and the score for each",
+      "tool": "intake.decompose + intake.rank_score",
+      "endpoints": [
+        "UniProt"
+      ],
+      "input": {
+        "candidates_in": 10
+      },
+      "output": {
+        "chains_out": 3,
+        "rubric": {
+          "conservation": 3.0,
+          "surface_exposed": 2.0,
+          "essential_class": 1.5,
+          "druggable_class": 0.8,
+          "structures_in_family_capped": 0.5
+        },
+        "chains_scored_before_the_gate": 4,
+        "gate": {
+          "terms": [
+            "surface_exposed",
+            "essential_class",
+            "druggable_class",
+            "structures_in_family"
+          ],
+          "floor": 0.5,
+          "rule": "a row is kept when at least one of 4 evidence terms pays 0.5 points or more. Conservation is not among them: it says how well this genome was recognised, not whether what was recognised is worth aiming at",
+          "kept": 3,
+          "gated_out": 1,
+          "dropped": [
+            {
+              "rank": 4,
+              "name": "X_GSHV Protein X",
+              "parent": null,
+              "score": 1.6407,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            }
+          ]
+        },
+        "all_decompositions_reproduce_the_score": true
+      },
+      "seconds": 4.41,
+      "hands_to_next": "every chain that cleared the gate, with the accession and range its surface is measured on. 1 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them"
+    },
+    {
+      "stage": 3,
+      "name": "Every chain to coordinates, whole where it fits and by its functional regions where it does not",
+      "tool": "structures.folded",
+      "endpoints": [
+        "ESM Atlas"
+      ],
+      "input": {
+        "candidates_in": 3,
+        "identified_in": 3,
+        "gated_out_before_this_stage": 1,
+        "residue_ceiling": 1200,
+        "domain_units_per_chain": 3,
+        "fold_requests_per_run": 40,
+        "folding_budget_seconds": 240.0
+      },
+      "output": {
+        "foldable": 3,
+        "not_foldable": 0,
+        "unidentified_foldable": 0,
+        "chains_folded": 3,
+        "folds_attempted": 3,
+        "folds_refused": 0,
+        "also_folded": [
+          "DPOL_GSHV Protein P",
+          "External core antigen"
+        ],
+        "units_offered": 9,
+        "units_inside_the_ceiling": 4,
+        "units_recorded": 3,
+        "units_folded": 3,
+        "domain_units_offered": 6,
+        "domain_units_inside_the_ceiling": 1,
+        "domain_units_recorded": 0,
+        "domain_units_folded": 0,
+        "domain_units_attempted": 0,
+        "domains_folded": [],
+        "chains_offered_a_domain_route": 1,
+        "chains_rescued_by_the_domain_route": 0,
+        "chains_with_coordinates": 3,
+        "chains_with_no_coordinates": 0,
+        "domain_units_not_folded_by_limit": 0,
+        "domain_units_not_folded_by_budget": 0,
+        "chains_not_folded_by_limit": 0,
+        "chains_not_folded_by_budget": 0,
+        "seconds_spent_on_refused_folds": 0,
+        "chains_over_the_ceiling": 0,
+        "over_the_ceiling": [],
+        "changes_any_rank": false,
+        "folded_target": "HBSAG_GSHV Large envelope protein",
+        "residues": 226,
+        "mean_plddt": 50.77,
+        "at_or_above_70": 0.0,
+        "sequence_sha256": "c781462aec267a69239a1dfca3415f8b69445ee68d15dc19d4ee8626163cf29c",
+        "error": null
+      },
+      "seconds": 6.58,
+      "hands_to_next": "coordinates for 3 of the 3 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 0 chains over it. Plus the functional site positions, carried through the alignment into this genome's numbering, which the surface stage anchors the patch arithmetic on. 0 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region's surface goes under its chain's row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2"
+    },
+    {
+      "stage": 4,
+      "name": "Every chain to a measured surface, and the patch at the residues that do the chemistry",
+      "tool": "geometry.surface_markers",
+      "endpoints": [
+        "PDBe",
+        "RCSB",
+        "UniProt"
+      ],
+      "input": {
+        "candidates_in": 3,
+        "predicted_coordinates_in": 3,
+        "predicted_region_coordinates_in": 0,
+        "chains_with_functional_site_positions_in": 2,
+        "macrocycle_reach_a": 13.81976597885342
+      },
+      "output": {
+        "rows_out": 3,
+        "measured": 0,
+        "unmeasured": 3,
+        "nothing_dropped": true,
+        "predicted_coordinates_offered": 3,
+        "measured_on_predicted_coordinates": 3,
+        "predicted_was_the_only_route": 3,
+        "no_surface_by_either_route": 0,
+        "no_surface_over_the_folding_ceiling": 0,
+        "region_surfaces_offered": 0,
+        "region_surfaces_measured": 0,
+        "chains_with_a_region_surface": 0,
+        "chains_with_no_surface_and_no_region_surface": 0,
+        "chains_with_functional_sites": 2,
+        "functional_site_positions": 6,
+        "functional_site_positions_mapped_into_this_genome": 2,
+        "site_patch_measured_on_a_deposition": 0,
+        "site_patch_measured_on_a_prediction": 1,
+        "site_patch_on_a_deposition_not_at_the_annotated_residues": 0,
+        "site_patch_on_a_prediction_not_at_the_annotated_residues": 0,
+        "gate_yes": 0,
+        "gate_borderline": 0,
+        "gate_no": 0,
+        "changes_any_rank": false,
+        "read_by_later_stages": []
+      },
+      "seconds": 1.25,
+      "hands_to_next": "a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 1 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage's product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one"
+    },
+    {
+      "stage": 5,
+      "name": "A library definition over the randomised region",
+      "tool": "chemistry.library_spec",
+      "endpoints": [
+        "local tables"
+      ],
+      "input": {
+        "reads_from_upstream": [],
+        "would_read_if_connected": [
+          "patch_median_a2",
+          "patch_fraction_of_surface",
+          "sequons_near_patch"
+        ],
+        "not_connected_because": "the library definition takes an initiator, a randomised-region length range and a set of elongator classes, all three properties of the display platform rather than of a target. No stated rule turns a measured patch area into any of them, and inventing one would publish a conversion as a result."
+      },
+      "output": {
+        "initiator": "ClAc-D-Tyr",
+        "closure_residue": "C",
+        "random_region": [
+          4,
+          8
+        ],
+        "alphabet_size": 25,
+        "theoretical_diversity": 158945703125
+      },
+      "seconds": 0.0,
+      "hands_to_next": "the position count the go/no-go test in arm 2 reads"
+    },
+    {
+      "stage": 6,
+      "name": "Evidence on the highest-ranked targets",
+      "tool": "literature.search + similarity.homologs + families.entries + structures.predicted + bioactivity.prior_binders",
+      "endpoints": [
+        "Europe PMC",
+        "EBI HMMER",
+        "InterPro",
+        "AlphaFold DB",
+        "3D-Beacons",
+        "ChEMBL",
+        "IEDB",
+        "MaveDB"
+      ],
+      "input": {
+        "targets_in": 3,
+        "ranked_available": 3,
+        "wall_budget_seconds": 700.0
+      },
+      "output": {
+        "targets_covered": 3,
+        "calls_made": 15,
+        "ok": 9,
+        "not_ok": 6,
+        "network_calls": 70,
+        "changes_any_rank": false,
+        "every_target_has_every_tool": true
+      },
+      "seconds": 314.07,
+      "hands_to_next": "nothing. This annotates the shortlist and never reorders it"
+    }
+  ],
+  "candidates": [
+    {
+      "rank": 1,
+      "identified": true,
+      "name": "HBSAG_GSHV Large envelope protein",
+      "identification_route": "remote",
+      "nearest_homolog": "P03144",
+      "nearest_organism": "Ground squirrel hepatitis virus (strain 27)",
+      "strand": "+",
+      "frame": 0,
+      "nt_start": 156,
+      "length_aa": 226,
+      "segment": 0,
+      "features": {
+        "conservation": 1.0,
+        "surface_exposed": true,
+        "essential_class": true,
+        "druggable_class": 2,
+        "structures_in_family": 0
+      },
+      "terms": {
+        "conservation": 3.0,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "score": 8.1,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "fusion of virus membrane with host endosomal membrane",
+        "fusion of virus membrane with host membrane",
+        "glycoprotein",
+        "viral attachment to host cell",
+        "virus entry into host cell"
+      ],
+      "locations": [
+        "virion membrane"
+      ],
+      "exposed_fraction_of_locations": 1.0,
+      "conservation_scale": "bits_over_200",
+      "conservation_at_ceiling": true
+    },
+    {
+      "rank": 2,
+      "identified": true,
+      "name": "DPOL_GSHV Protein P",
+      "identification_route": "remote",
+      "nearest_homolog": "P03161",
+      "nearest_organism": "Ground squirrel hepatitis virus (strain 27)",
+      "strand": "+",
+      "frame": 2,
+      "nt_start": 422,
+      "length_aa": 400,
+      "segment": 0,
+      "features": {
+        "conservation": 1.0,
+        "surface_exposed": false,
+        "essential_class": true,
+        "druggable_class": 3,
+        "structures_in_family": 0
+      },
+      "terms": {
+        "conservation": 3.0,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "score": 6.9,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "dna-directed dna polymerase",
+        "endonuclease",
+        "hydrolase",
+        "nucleotidyltransferase",
+        "rna-directed dna polymerase",
+        "transferase"
+      ],
+      "locations": [],
+      "exposed_fraction_of_locations": 0.0,
+      "conservation_scale": "bits_over_200",
+      "conservation_at_ceiling": true
+    },
+    {
+      "rank": 3,
+      "identified": true,
+      "name": "HBSAG_GSHV Large envelope protein",
+      "identification_route": "remote",
+      "nearest_homolog": "P03144",
+      "nearest_organism": "Ground squirrel hepatitis virus (strain 27)",
+      "strand": "+",
+      "frame": 2,
+      "nt_start": 2849,
+      "length_aa": 111,
+      "segment": 0,
+      "features": {
+        "conservation": 0.2079,
+        "surface_exposed": true,
+        "essential_class": true,
+        "druggable_class": 2,
+        "structures_in_family": 0
+      },
+      "terms": {
+        "conservation": 0.6237,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "score": 5.7237,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "fusion of virus membrane with host endosomal membrane",
+        "fusion of virus membrane with host membrane",
+        "glycoprotein",
+        "viral attachment to host cell",
+        "virus entry into host cell"
+      ],
+      "locations": [
+        "virion membrane"
+      ],
+      "exposed_fraction_of_locations": 1.0,
+      "conservation_scale": "bits_over_200",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 4,
+      "identified": true,
+      "name": "HBEAG_GSHV External core antigen",
+      "identification_route": "exact",
+      "nearest_homolog": "P03153",
+      "nearest_organism": "Ground squirrel hepatitis virus (strain 27)",
+      "strand": "+",
+      "frame": 0,
+      "nt_start": 1815,
+      "length_aa": 212,
+      "segment": 0,
+      "features": {
+        "conservation": 0.2871,
+        "surface_exposed": false,
+        "essential_class": true,
+        "druggable_class": 0,
+        "structures_in_family": 0
+      },
+      "terms": {
+        "conservation": 0.8613,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 2.3613,
+      "terms_sum_to_score": true,
+      "keywords_matched": [
+        "capsd_gshv capsid protein",
+        "capsid protein",
+        "t=4 icosahedral capsid protein",
+        "virus entry into host cell"
+      ],
+      "locations": [
+        "host cytoplasm",
+        "host nucleus",
+        "secreted",
+        "virion"
+      ],
+      "exposed_fraction_of_locations": 0.25,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false
+    },
+    {
+      "rank": 6,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "+",
+      "frame": 1,
+      "nt_start": 2308,
+      "length_aa": 291,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 2,
+        "plausible_antigen_length": true,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 7,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 0,
+      "nt_start": 1911,
+      "length_aa": 133,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 0,
+        "plausible_antigen_length": true,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 8,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 2,
+      "nt_start": 1571,
+      "length_aa": 95,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 0,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 9,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 1,
+      "nt_start": 625,
+      "length_aa": 62,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 0,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    },
+    {
+      "rank": 10,
+      "identified": false,
+      "name": null,
+      "identification_route": null,
+      "nearest_homolog": null,
+      "nearest_organism": null,
+      "strand": "-",
+      "frame": 0,
+      "nt_start": 1614,
+      "length_aa": 61,
+      "segment": 0,
+      "features": null,
+      "terms": null,
+      "score": null,
+      "unidentified_because": "no homolog at either tier and neither topology route fired",
+      "topology": {
+        "signal_peptide": false,
+        "transmembrane_segments": 0,
+        "sequons": 0,
+        "plausible_antigen_length": false,
+        "surface_route": null,
+        "likely_surface": false
+      }
+    }
+  ],
+  "minimum_orf_aa": 60,
+  "minimum_hit_score": 0.12,
+  "scores": [
+    {
+      "rank": 1,
+      "target": "HBSAG_GSHV Large envelope protein",
+      "parent": null,
+      "tier": "remote",
+      "nearest_homolog": "P03144",
+      "chain_range": null,
+      "conservation": 1.0,
+      "conservation_scale": "bits_over_200",
+      "conservation_at_ceiling": true,
+      "surface_exposed": true,
+      "essential_class": true,
+      "druggable_class": 2,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "score": 8.1,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 2,
+      "target": "DPOL_GSHV Protein P",
+      "parent": null,
+      "tier": "remote",
+      "nearest_homolog": "P03161",
+      "chain_range": null,
+      "conservation": 1.0,
+      "conservation_scale": "bits_over_200",
+      "conservation_at_ceiling": true,
+      "surface_exposed": false,
+      "essential_class": true,
+      "druggable_class": 3,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "score": 6.9,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 3,
+      "target": "External core antigen",
+      "parent": "HBEAG_GSHV External core antigen",
+      "tier": "exact",
+      "nearest_homolog": "P03153",
+      "chain_range": [
+        21,
+        217
+      ],
+      "conservation": 0.2871,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false,
+      "surface_exposed": false,
+      "essential_class": true,
+      "druggable_class": 0,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 0.8613,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "score": 2.3613,
+      "decomposition_reproduces_score": true
+    }
+  ],
+  "surfaces": [
+    {
+      "target": "HBSAG_GSHV Large envelope protein",
+      "rank": 1,
+      "identified": true,
+      "measured_on_accession": "P03144",
+      "chain_range": null,
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to P03144 at all. The protein may be well solved under another accession; this entry is not it.",
+      "functional_sites": [],
+      "functional_sites_absent_because": "P03144 carries no Active site, Binding site or Site annotation inside this chain's range, so there is no marked residue to aim at. An absence in the annotation, not in the protein.",
+      "site_positions_in_this_genome": [],
+      "site_surface": null,
+      "seconds": 0.62,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0,
+      "predicted_surface": {
+        "measured": true,
+        "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
+        "model": "ESMFold v1",
+        "mean_plddt": 50.77,
+        "confident_fraction": 0.0,
+        "residues": 226,
+        "patch_a2": 9128.3,
+        "patch_fraction_of_surface": 0.468,
+        "patch_positions": [
+          1,
+          4,
+          8,
+          13,
+          14,
+          15,
+          17,
+          19,
+          20,
+          21,
+          22,
+          25,
+          26,
+          28,
+          47,
+          48,
+          49,
+          65,
+          69,
+          72,
+          74,
+          75,
+          76,
+          77,
+          80,
+          83,
+          84,
+          86,
+          87,
+          89,
+          90,
+          91,
+          93,
+          94,
+          95,
+          97,
+          98,
+          100,
+          103,
+          106,
+          109,
+          110,
+          121,
+          124,
+          125,
+          128,
+          133,
+          134,
+          137,
+          139,
+          147,
+          149,
+          150,
+          152,
+          156,
+          157,
+          158,
+          161,
+          162,
+          163,
+          165,
+          168,
+          170,
+          172,
+          175,
+          179,
+          182,
+          183,
+          190,
+          192,
+          194,
+          195,
+          196,
+          197,
+          198,
+          199,
+          200,
+          201,
+          205,
+          208,
+          209,
+          212,
+          215,
+          216,
+          218,
+          219,
+          220,
+          221,
+          222,
+          223,
+          224,
+          225,
+          226
+        ],
+        "patch_residue_names": [
+          "M",
+          "I",
+          "F",
+          "L",
+          "V",
+          "L",
+          "A",
+          "F",
+          "F",
+          "L",
+          "L",
+          "I",
+          "L",
+          "I",
+          "V",
+          "C",
+          "L",
+          "C",
+          "C",
+          "Y",
+          "W",
+          "M",
+          "C",
+          "L",
+          "F",
+          "F",
+          "L",
+          "I",
+          "L",
+          "L",
+          "C",
+          "L",
+          "F",
+          "L",
+          "L",
+          "L",
+          "L",
+          "Y",
+          "M",
+          "V",
+          "L",
+          "I",
+          "C",
+          "C",
+          "M",
+          "A",
+          "M",
+          "Y",
+          "C",
+          "C",
+          "C",
+          "C",
+          "I",
+          "I",
+          "W",
+          "A",
+          "F",
+          "F",
+          "L",
+          "W",
+          "W",
+          "A",
+          "F",
+          "W",
+          "L",
+          "F",
+          "W",
+          "F",
+          "V",
+          "L",
+          "V",
+          "I",
+          "W",
+          "M",
+          "M",
+          "W",
+          "Y",
+          "W",
+          "L",
+          "I",
+          "L",
+          "F",
+          "L",
+          "L",
+          "I",
+          "F",
+          "F",
+          "C",
+          "L",
+          "W",
+          "V",
+          "Y",
+          "I"
+        ],
+        "exposed_fraction_of_residues": 0.863,
+        "sequons_near_patch": 3,
+        "site_surface": {
+          "measured": false,
+          "anchors_asked": [],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 HBSAG_GSHV Large envelope protein",
+          "reach_a": null,
+          "positions_within_reach": null,
+          "residues_within_reach": null,
+          "hydrophobic_within_reach": null,
+          "exposed_within_reach": null,
+          "site_patch_area_a2": null,
+          "site_patch_positions": null,
+          "site_patch_fraction_of_the_site": null,
+          "site_shares_the_patch": null,
+          "not_measured_because": "P03144 carries no Active site, Binding site or Site annotation inside this chain's range, so there is no marked residue to aim at. An absence in the annotation, not in the protein.",
+          "anchors_agreeing_with_the_annotation": 0,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": null,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
+        "seconds": 0.05,
+        "only_route_to_a_surface": true,
+        "deposited_patch_median_a2": null,
+        "ratio_to_deposited_median": null,
+        "not_compared_because": null,
+        "is_deposited_measurement": false,
+        "in_the_ranking": false,
+        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
+      }
+    },
+    {
+      "target": "DPOL_GSHV Protein P",
+      "rank": 2,
+      "identified": true,
+      "measured_on_accession": "P03161",
+      "chain_range": null,
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to P03161 at all. The protein may be well solved under another accession; this entry is not it.",
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Priming of reverse-transcription by covalently linking the first nucleotide of the (-)DNA",
+          "ligand": null,
+          "positions_on_the_relative": [
+            68
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mg(2+)",
+          "positions_on_the_relative": [
+            467
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mg(2+)",
+          "positions_on_the_relative": [
+            587
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mg(2+)",
+          "positions_on_the_relative": [
+            588
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [],
+      "site_surface": null,
+      "seconds": 0.45,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0,
+      "predicted_surface": {
+        "measured": true,
+        "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
+        "model": "ESMFold v1",
+        "mean_plddt": 71.37,
+        "confident_fraction": 0.6775,
+        "residues": 400,
+        "patch_a2": 2754.9,
+        "patch_fraction_of_surface": 0.117,
+        "patch_positions": [
+          1,
+          4,
+          5,
+          6,
+          11,
+          16,
+          44,
+          45,
+          48,
+          49,
+          51,
+          54,
+          58,
+          60,
+          61,
+          65,
+          66,
+          67,
+          69,
+          74,
+          76,
+          78,
+          81,
+          84,
+          89,
+          93,
+          97,
+          98,
+          107,
+          126,
+          130,
+          132,
+          134
+        ],
+        "patch_residue_names": [
+          "M",
+          "L",
+          "L",
+          "V",
+          "L",
+          "A",
+          "Y",
+          "V",
+          "L",
+          "L",
+          "Y",
+          "F",
+          "L",
+          "L",
+          "Y",
+          "I",
+          "I",
+          "L",
+          "F",
+          "M",
+          "V",
+          "L",
+          "F",
+          "A",
+          "A",
+          "V",
+          "A",
+          "F",
+          "M",
+          "A",
+          "F",
+          "L",
+          "L"
+        ],
+        "exposed_fraction_of_residues": 0.585,
+        "sequons_near_patch": 0,
+        "site_surface": {
+          "measured": false,
+          "anchors_asked": [],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 DPOL_GSHV Protein P",
+          "reach_a": null,
+          "positions_within_reach": null,
+          "residues_within_reach": null,
+          "hydrophobic_within_reach": null,
+          "exposed_within_reach": null,
+          "site_patch_area_a2": null,
+          "site_patch_positions": null,
+          "site_patch_fraction_of_the_site": null,
+          "site_shares_the_patch": null,
+          "not_measured_because": "no annotated site position could be put in this structure's numbering, so there was nothing to anchor the measurement on.",
+          "anchors_agreeing_with_the_annotation": 0,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": null,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
+        "seconds": 0.08,
+        "only_route_to_a_surface": true,
+        "deposited_patch_median_a2": null,
+        "ratio_to_deposited_median": null,
+        "not_compared_because": null,
+        "is_deposited_measurement": false,
+        "in_the_ranking": false,
+        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
+      }
+    },
+    {
+      "target": "External core antigen",
+      "rank": 3,
+      "identified": true,
+      "measured_on_accession": "P03153",
+      "chain_range": [
+        21,
+        217
+      ],
+      "measured": false,
+      "unmeasured_because": "PDBe maps no deposited chain to P03153 at all. The protein may be well solved under another accession; this entry is not it.",
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host",
+          "ligand": null,
+          "positions_on_the_relative": [
+            188,
+            189
+          ],
+          "positions": [
+            183,
+            184
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        183,
+        184
+      ],
+      "site_surface": null,
+      "seconds": 0.0,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 0,
+      "predicted_surface": {
+        "measured": true,
+        "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
+        "model": "ESMFold v1",
+        "mean_plddt": 45.66,
+        "confident_fraction": 0.0466,
+        "residues": 193,
+        "patch_a2": 4641.8,
+        "patch_fraction_of_surface": 0.246,
+        "patch_positions": [
+          3,
+          4,
+          5,
+          7,
+          8,
+          9,
+          11,
+          13,
+          16,
+          21,
+          23,
+          25,
+          28,
+          29,
+          33,
+          34,
+          40,
+          46,
+          47,
+          52,
+          64,
+          65,
+          68,
+          79,
+          81,
+          82,
+          86,
+          90,
+          94,
+          98,
+          105,
+          107,
+          110,
+          112,
+          118,
+          120,
+          126,
+          128,
+          130,
+          132,
+          134,
+          135,
+          136,
+          147,
+          149,
+          150,
+          153
+        ],
+        "patch_residue_names": [
+          "L",
+          "C",
+          "L",
+          "W",
+          "L",
+          "W",
+          "M",
+          "I",
+          "Y",
+          "A",
+          "V",
+          "L",
+          "F",
+          "L",
+          "F",
+          "F",
+          "L",
+          "A",
+          "L",
+          "L",
+          "A",
+          "L",
+          "A",
+          "A",
+          "W",
+          "V",
+          "L",
+          "A",
+          "L",
+          "Y",
+          "L",
+          "F",
+          "L",
+          "W",
+          "L",
+          "F",
+          "I",
+          "Y",
+          "V",
+          "F",
+          "V",
+          "W",
+          "I",
+          "A",
+          "I",
+          "L",
+          "L"
+        ],
+        "exposed_fraction_of_residues": 0.819,
+        "sequons_near_patch": 0,
+        "site_surface": {
+          "measured": true,
+          "anchors_asked": [
+            164,
+            165
+          ],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [
+            164,
+            165
+          ],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 External core antigen",
+          "reach_a": 13.81976597885342,
+          "positions_within_reach": [
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            166,
+            167,
+            168,
+            169,
+            170
+          ],
+          "residues_within_reach": 12,
+          "hydrophobic_within_reach": 1,
+          "exposed_within_reach": 12,
+          "site_patch_area_a2": 0.0,
+          "site_patch_positions": [],
+          "site_patch_fraction_of_the_site": 0.0,
+          "site_shares_the_patch": false,
+          "not_measured_because": null,
+          "anchors_agreeing_with_the_annotation": 2,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": true,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
+        "seconds": 0.04,
+        "only_route_to_a_surface": true,
+        "deposited_patch_median_a2": null,
+        "ratio_to_deposited_median": null,
+        "not_compared_because": null,
+        "is_deposited_measurement": false,
+        "in_the_ranking": false,
+        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
+      }
+    }
+  ],
+  "library": {
+    "initiator": "ClAc-D-Tyr",
+    "closure_residue": "C",
+    "random_region": [
+      4,
+      8
+    ],
+    "elongator_classes": [
+      "canonical",
+      "N-methyl",
+      "D-alpha-amino"
+    ],
+    "elongator_alphabet": [
+      "A",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "K",
+      "L",
+      "M",
+      "N",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "V",
+      "W",
+      "Y",
+      "NMe-Gly",
+      "NMe-Ala",
+      "NMe-Phe",
+      "D-Ala",
+      "D-Phe",
+      "D-Ser"
+    ],
+    "cyclisation": "spontaneous thioether between chloroacetyl initiator and downstream Cys",
+    "theoretical_diversity": 158945703125,
+    "endpoint_note": "A library definition only; no binding, enrichment, inhibition or antiviral property is predicted for any member."
+  },
+  "folded": {
+    "target_name": "HBSAG_GSHV Large envelope protein",
+    "sequence_length": 226,
+    "sequence_sha256": "c781462aec267a69239a1dfca3415f8b69445ee68d15dc19d4ee8626163cf29c",
+    "mean_plddt": 50.77,
+    "confident_fraction": 0.0,
+    "pdb_sha256": "01a767c30e6a14c06a0d1ead05343bcbb26aa33729d18ceabc88f002b71d3c6d",
+    "absence": null
+  },
+  "folded_also": [
+    {
+      "target_name": "DPOL_GSHV Protein P",
+      "unit": {
+        "kind": "whole_chain",
+        "chain": "DPOL_GSHV Protein P",
+        "label": "DPOL_GSHV Protein P",
+        "type": "ORF",
+        "span_in_this_genome": [
+          1,
+          400
+        ],
+        "entry_span_on_the_relative": null,
+        "length_aa": 400
+      },
+      "sequence_length": 400,
+      "sequence_sha256": "cf20f49130d257c2a5e4201c9e5bebee513777be14ee138fdd3e79aafd7eb5d6",
+      "mean_plddt": 71.37,
+      "confident_fraction": 0.6775,
+      "pdb_sha256": "bd4eaa104af550c8aa01822cc4ab032615e9a13c154c031e19e3c9e02ed65763",
+      "absence": null
+    },
+    {
+      "target_name": "External core antigen",
+      "unit": {
+        "kind": "whole_chain",
+        "chain": "External core antigen",
+        "label": "External core antigen",
+        "type": "Chain",
+        "span_in_this_genome": [
+          20,
+          212
+        ],
+        "entry_span_on_the_relative": [
+          21,
+          217
+        ],
+        "length_aa": 193
+      },
+      "sequence_length": 193,
+      "sequence_sha256": "3f9833585a8dedf3fde3c6d2991ebe5cfafcedf71fa00e31264154d57936e48c",
+      "mean_plddt": 45.66,
+      "confident_fraction": 0.0466,
+      "pdb_sha256": "bc3f87eb63f60ac0935a7de9f6256fe21827750320ecb1f8408d4d0b99b6b6ac",
+      "absence": null
+    }
+  ],
+  "foldable": [
+    {
+      "target": "HBSAG_GSHV Large envelope protein",
+      "rank": 1,
+      "identified": true,
+      "identification_route": "remote",
+      "chain_range_on_the_relative": null,
+      "declared_length_aa": null,
+      "parent_orf_length_aa": 226,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "recovered_length_aa": 226,
+      "recovered_by": "the ORF translation is the candidate",
+      "inside_the_ceiling": true,
+      "domain_units_offered": 0,
+      "domain_units_inside_the_ceiling": 0,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling, and the relative's entry annotates no functional region inside this chain in any case, so there is none to set aside. An absence in the annotation, not in the protein.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "HBSAG_GSHV Large envelope protein",
+          "type": "ORF",
+          "description": "the whole called ORF; no mature-chain boundaries were read",
+          "span": [
+            1,
+            226
+          ],
+          "entry_span": null,
+          "entry_span_mapped": null,
+          "entry_length_mapped": null,
+          "length": 226,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": null,
+          "mapping_reproduces_the_span": null,
+          "folded": true,
+          "target_name": "HBSAG_GSHV Large envelope protein",
+          "mean_plddt": 50.77,
+          "confident_fraction": 0.0,
+          "pdb_sha256": "01a767c30e6a14c06a0d1ead05343bcbb26aa33729d18ceabc88f002b71d3c6d"
+        }
+      ],
+      "functional_sites": [],
+      "functional_sites_absent_because": "P03144 carries no Active site, Binding site or Site annotation inside this chain's range, so there is no marked residue to aim at. An absence in the annotation, not in the protein.",
+      "folded": true,
+      "mean_plddt": 50.77,
+      "units_folded": 1,
+      "domain_route": false
+    },
+    {
+      "target": "DPOL_GSHV Protein P",
+      "rank": 2,
+      "identified": true,
+      "identification_route": "remote",
+      "chain_range_on_the_relative": null,
+      "declared_length_aa": null,
+      "parent_orf_length_aa": 400,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "recovered_length_aa": 400,
+      "recovered_by": "the ORF translation is the candidate",
+      "inside_the_ceiling": true,
+      "domain_units_offered": 0,
+      "domain_units_inside_the_ceiling": 0,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling, and the relative's entry annotates no functional region inside this chain in any case, so there is none to set aside. An absence in the annotation, not in the protein.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "DPOL_GSHV Protein P",
+          "type": "ORF",
+          "description": "the whole called ORF; no mature-chain boundaries were read",
+          "span": [
+            1,
+            400
+          ],
+          "entry_span": null,
+          "entry_span_mapped": null,
+          "entry_length_mapped": null,
+          "length": 400,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": null,
+          "mapping_reproduces_the_span": null,
+          "folded": true,
+          "target_name": "DPOL_GSHV Protein P",
+          "mean_plddt": 71.37,
+          "confident_fraction": 0.6775,
+          "pdb_sha256": "bd4eaa104af550c8aa01822cc4ab032615e9a13c154c031e19e3c9e02ed65763"
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Priming of reverse-transcription by covalently linking the first nucleotide of the (-)DNA",
+          "ligand": null,
+          "positions_on_the_relative": [
+            68
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mg(2+)",
+          "positions_on_the_relative": [
+            467
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mg(2+)",
+          "positions_on_the_relative": [
+            587
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Mg(2+)",
+          "positions_on_the_relative": [
+            588
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "folded": true,
+      "mean_plddt": 71.37,
+      "units_folded": 1,
+      "domain_route": false
+    },
+    {
+      "target": "External core antigen",
+      "rank": 3,
+      "identified": true,
+      "identification_route": null,
+      "chain_range_on_the_relative": [
+        21,
+        217
+      ],
+      "declared_length_aa": 197,
+      "parent_orf_length_aa": 212,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 197,
+      "orfs_searched": 10,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        20,
+        212
+      ],
+      "recovered_length_aa": 193,
+      "chain_covered_by_alignment": 0.9746,
+      "identity_over_aligned_columns": 0.7135,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 97% of it at 71% identity",
+      "inside_the_ceiling": true,
+      "domain_units_offered": 6,
+      "domain_units_inside_the_ceiling": 1,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 6 annotated regions, 1 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "External core antigen",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            20,
+            212
+          ],
+          "entry_span": [
+            21,
+            217
+          ],
+          "entry_span_mapped": [
+            21,
+            217
+          ],
+          "entry_length_mapped": 197,
+          "length": 193,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 20,
+            "end": 212,
+            "length": 193,
+            "entry_span": [
+              21,
+              217
+            ],
+            "entry_length": 197,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": true,
+          "folded": true,
+          "target_name": "External core antigen",
+          "mean_plddt": 45.66,
+          "confident_fraction": 0.0466,
+          "pdb_sha256": "bc3f87eb63f60ac0935a7de9f6256fe21827750320ecb1f8408d4d0b99b6b6ac"
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by host",
+          "ligand": null,
+          "positions_on_the_relative": [
+            188,
+            189
+          ],
+          "positions": [
+            183,
+            184
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "folded": true,
+      "mean_plddt": 45.66,
+      "units_folded": 1,
+      "domain_route": false
+    }
+  ],
+  "evidence": [
+    {
+      "rank": 1,
+      "target": "HBSAG_GSHV Large envelope protein",
+      "nearest_homolog": "P03144",
+      "chain_range": null,
+      "sequence_available": false,
+      "calls": [
+        {
+          "tool": "literature.search",
+          "endpoint": "Europe PMC",
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 30.28,
+          "network_calls": 1,
+          "returned": {}
+        },
+        {
+          "tool": "similarity.homologs",
+          "endpoint": "EBI HMMER",
+          "status": "not_asked",
+          "note": "the chain holds no argument this tool requires",
+          "seconds": null,
+          "network_calls": null,
+          "returned": {}
+        },
+        {
+          "tool": "families.entries",
+          "endpoint": "InterPro",
+          "status": "ok",
+          "note": null,
+          "seconds": 3.39,
+          "network_calls": 4,
+          "returned": {
+            "protein_name": "Large envelope protein",
+            "organism": "Ground squirrel hepatitis virus (strain 27)",
+            "sequence_md5": "FB9AD9C8DA5D607B8F829471B2ACFC37",
+            "sequence_length": 428,
+            "sequence_source": "uniprot",
+            "assignments_count": 2,
+            "predicted_count": 1,
+            "sequence_features_count": 6,
+            "residue_ranges_count": 1,
+            "functional_sites_count": 0
+          }
+        },
+        {
+          "tool": "structures.predicted",
+          "endpoint": "AlphaFold DB, 3D-Beacons",
+          "status": "ok",
+          "note": null,
+          "seconds": 1.37,
+          "network_calls": 2,
+          "returned": {
+            "sequence_length": 428,
+            "confident_plddt": 70.0,
+            "plddt_bands_count": 4,
+            "residue_detail": false,
+            "any_prediction_exists": true,
+            "predicted_model_count": 4,
+            "providers_queried_count": 2,
+            "providers_with_models_count": 2,
+            "alphafold_host_queried": true,
+            "alphafold_host_served_models": true
+          }
+        },
+        {
+          "tool": "bioactivity.prior_binders",
+          "endpoint": "ChEMBL, IEDB, MaveDB",
+          "status": "ok",
+          "note": null,
+          "seconds": 17.72,
+          "network_calls": 4,
+          "returned": {
+            "max_molecules_requested": 50,
+            "max_molecules_applied": 50,
+            "max_molecules_clamped": false,
+            "lanes_unavailable_count": 0,
+            "network_calls": 4,
+            "calls_count": 4,
+            "sources_count": 3,
+            "urls_hit_count": 4,
+            "limitations_count": 13
+          }
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "target": "DPOL_GSHV Protein P",
+      "nearest_homolog": "P03161",
+      "chain_range": null,
+      "sequence_available": false,
+      "calls": [
+        {
+          "tool": "literature.search",
+          "endpoint": "Europe PMC",
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 30.26,
+          "network_calls": 1,
+          "returned": {}
+        },
+        {
+          "tool": "similarity.homologs",
+          "endpoint": "EBI HMMER",
+          "status": "not_asked",
+          "note": "the chain holds no argument this tool requires",
+          "seconds": null,
+          "network_calls": null,
+          "returned": {}
+        },
+        {
+          "tool": "families.entries",
+          "endpoint": "InterPro",
+          "status": "ok",
+          "note": null,
+          "seconds": 10.29,
+          "network_calls": 10,
+          "returned": {
+            "protein_name": "Protein P",
+            "organism": "Ground squirrel hepatitis virus (strain 27)",
+            "sequence_md5": "D7EED14271AA4E78D4B8146F37EA66FB",
+            "sequence_length": 881,
+            "sequence_source": "uniprot",
+            "assignments_count": 8,
+            "predicted_count": 8,
+            "sequence_features_count": 1,
+            "residue_ranges_count": 7,
+            "functional_sites_count": 0
+          }
+        },
+        {
+          "tool": "structures.predicted",
+          "endpoint": "AlphaFold DB, 3D-Beacons",
+          "status": "ok",
+          "note": null,
+          "seconds": 1.4,
+          "network_calls": 2,
+          "returned": {
+            "sequence_length": 881,
+            "confident_plddt": 70.0,
+            "plddt_bands_count": 4,
+            "residue_detail": false,
+            "any_prediction_exists": true,
+            "predicted_model_count": 2,
+            "providers_queried_count": 2,
+            "providers_with_models_count": 1,
+            "alphafold_host_queried": true,
+            "alphafold_host_served_models": true
+          }
+        },
+        {
+          "tool": "bioactivity.prior_binders",
+          "endpoint": "ChEMBL, IEDB, MaveDB",
+          "status": "ok",
+          "note": null,
+          "seconds": 28.33,
+          "network_calls": 4,
+          "returned": {
+            "max_molecules_requested": 50,
+            "max_molecules_applied": 50,
+            "max_molecules_clamped": false,
+            "lanes_unavailable_count": 0,
+            "network_calls": 4,
+            "calls_count": 4,
+            "sources_count": 3,
+            "urls_hit_count": 4,
+            "limitations_count": 13
+          }
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "target": "External core antigen",
+      "nearest_homolog": "P03153",
+      "chain_range": [
+        21,
+        217
+      ],
+      "sequence_available": true,
+      "calls": [
+        {
+          "tool": "literature.search",
+          "endpoint": "Europe PMC",
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 51.15,
+          "network_calls": 2,
+          "returned": {}
+        },
+        {
+          "tool": "similarity.homologs",
+          "endpoint": "EBI HMMER",
+          "status": "failed",
+          "note": "RuntimeError: job d419e5c2-467a-4811-9ba1-6b33d5aa0603 on swissprot was still 'STARTED' after 24 poll(s) and 120.7s, over the 120.0s ceiling; the job id is retrievable at https://www.ebi.ac.uk/Tools/hmmer/api/v1/re",
+          "seconds": 120.73,
+          "network_calls": 26,
+          "returned": {}
+        },
+        {
+          "tool": "families.entries",
+          "endpoint": "InterPro",
+          "status": "ok",
+          "note": null,
+          "seconds": 4.48,
+          "network_calls": 6,
+          "returned": {
+            "protein_name": "External core antigen",
+            "organism": "Ground squirrel hepatitis virus (strain 27)",
+            "sequence_md5": "84CD33256E9D32C42D7F170F7AA811A2",
+            "sequence_length": 217,
+            "sequence_source": "uniprot",
+            "assignments_count": 5,
+            "predicted_count": 5,
+            "sequence_features_count": 8,
+            "residue_ranges_count": 3,
+            "functional_sites_count": 0
+          }
+        },
+        {
+          "tool": "structures.predicted",
+          "endpoint": "AlphaFold DB, 3D-Beacons",
+          "status": "ok",
+          "note": null,
+          "seconds": 2.35,
+          "network_calls": 4,
+          "returned": {
+            "sequence_length": 217,
+            "confident_plddt": 70.0,
+            "plddt_bands_count": 4,
+            "residue_detail": false,
+            "any_prediction_exists": true,
+            "predicted_model_count": 3,
+            "providers_queried_count": 2,
+            "providers_with_models_count": 2,
+            "alphafold_host_queried": true,
+            "alphafold_host_served_models": true
+          }
+        },
+        {
+          "tool": "bioactivity.prior_binders",
+          "endpoint": "ChEMBL, IEDB, MaveDB",
+          "status": "ok",
+          "note": null,
+          "seconds": 12.33,
+          "network_calls": 4,
+          "returned": {
+            "max_molecules_requested": 50,
+            "max_molecules_applied": 50,
+            "max_molecules_clamped": false,
+            "lanes_unavailable_count": 1,
+            "network_calls": 3,
+            "calls_count": 3,
+            "sources_count": 3,
+            "urls_hit_count": 3,
+            "limitations_count": 13
+          }
+        }
+      ]
+    }
+  ],
+  "seconds": 341.28,
+  "coverage": {
+    "chains_ranked": 3,
+    "surface_rows": 3,
+    "surface_measured": 0,
+    "surface_refused": 3,
+    "surface_covers_every_chain": true,
+    "surface_on_predicted_coordinates": 3,
+    "surface_predicted_was_the_only_route": 3,
+    "chains_with_any_surface": 3,
+    "chains_with_no_surface": 0,
+    "chains_with_no_surface_over_the_ceiling": 0,
+    "chains_over_the_folding_ceiling": 0,
+    "fold_rows": 3,
+    "fold_rows_unidentified": 0,
+    "fold_sequence_recovered": 3,
+    "fold_sequence_recovered_unidentified": 0,
+    "fold_covers_every_chain": true,
+    "fold_units_offered": 9,
+    "fold_units_folded": 3,
+    "domain_units_offered": 6,
+    "domain_units_folded": 0,
+    "chains_rescued_by_the_domain_route": 0,
+    "chains_with_no_coordinates": 0,
+    "chains_with_a_region_surface": 0,
+    "region_surfaces_measured": 0,
+    "chains_with_functional_sites": 2,
+    "site_patch_measured_on_a_deposition": 0,
+    "site_patch_measured_on_a_prediction": 1,
+    "site_patch_on_a_deposition_not_at_the_annotated_residues": 0,
+    "site_patch_on_a_prediction_not_at_the_annotated_residues": 0,
+    "evidence_targets": 3,
+    "evidence_calls": 15
+  },
+  "pathogen": "Hepatitis B virus",
+  "fold_integrity": {
+    "trustworthy": true,
+    "infrastructure_failures": 0,
+    "failures": [],
+    "means": "every missing structure on this run is a declared refusal -- a sequence over a ceiling, or a host that refused this sequence -- so the absences are results"
+  }
+}

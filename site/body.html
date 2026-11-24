@@ -89,6 +89,14 @@
     <span class="ti">The shortlist<span class="ds">Every mature chain, scored, each traced back to the ORF it was cut out of.</span></span>
     <span class="ar" aria-hidden="true">→</span></a>
 
+  <div class="grp">What comes out, and what it learned</div>
+  <a class="tocrow" href="#handoff"><span class="n">06</span>
+    <span class="ti">The list you can hand to a chemist<span class="ds">Every target across every genome, with the residues to aim at and what the protein does.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>
+  <a class="tocrow" href="#learned"><span class="n">07</span>
+    <span class="ti">What the models learned<span class="ds">The weights that pick the target, the weights that pick molecules, and which of them fitting improves.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>
+
 </nav>
 
 <section id="how">
@@ -854,6 +862,22 @@
       </details>
     </div>
     <!--SITE-PATCH-->
+
+    <h3>Where on the protein a drug would go</h3>
+    <p>Everything above reports one number for each chain. This draws one chain in full, along
+    an axis of its own residues, so the numbers have a place to sit.</p>
+    <ul class="pts">
+      <li><b>The chain, and the parts of it that reached the folder.</b> A box is a region the
+      pipeline could fold on its own. A hatched box was offered and refused, with the reason
+      beside its number.</li>
+      <li><b>The residues a curator marked.</b> These are written down for the nearest
+      relative and carried onto this virus through the alignment. They are where the chemistry
+      happens.</li>
+      <li><b>The patch a macrocycle would lie across.</b> Measured on a deposited structure
+      where one exists, and on predicted coordinates where none does. Where the patch reaches
+      the marked residues, a molecule on it would cover both.</li>
+    </ul>
+    <!--TRACK-->
   </div>
 
   <div class="stage">
@@ -1044,6 +1068,63 @@
     <li><b>Both still land in the top five with SARS-CoV-2 deleted from the reference
     library</b>, scored only against relatives and never against the virus itself.</li>
   </ul>
+</section>
+
+<section id="handoff">
+  <div class="sec-head"><h2>The list you can hand to a chemist</h2>
+    <span class="tag">every genome, every target, every site</span></div>
+  <p>The pages above show one genome. The same five steps have run on all of them, and this is
+  what comes out: a target, the residues to aim at, and what the protein does.</p>
+  <!--HANDOFF-->
+  <ul class="pts sm" style="margin:20px 0 0">
+    <li><b>Residue numbers come in two countings and both are in the file.</b> One counts along
+    the protein, which is what a structure viewer wants. The other counts along the genome, and
+    a row only carries it where the reading frame was checked by reading the residues back.</li>
+    <li><b>Nothing in the file was measured on the pathogen.</b> What a protein does, which
+    family it belongs to and which residues are marked are all copied from its nearest studied
+    relative. Areas are measured on a solved structure of a relative, or on a predicted one.
+    Every row says which.</li>
+  </ul>
+</section>
+
+<section id="learned">
+  <div class="sec-head"><h2>What the models learned</h2>
+    <span class="tag">and what they did not</span></div>
+  <p>Two things here are called weights. One picks the target and was set by hand. The other
+  picks molecules out of a library and is fitted to measurements. Only the second one learns.</p>
+
+  <div class="substep">
+    <h3>The five weights that pick the target</h3>
+    <ul class="pts">
+      <li><b>They were never fitted to anything, and the reason given was that there was
+      nothing to fit them against.</b> There is now: 46 genomes whose real drug target is
+      known.</li>
+      <li><b>So they were fitted, holding out one virus family at a time.</b> Fit on twenty
+      families, rank the twenty-first, and compare against the weights the pipeline ships.</li>
+      <li><b>It does not help.</b> Fitting gains two points, which is one genome out of
+      forty-four, and the same fit on deliberately shuffled answers scores just as well. What
+      the comparison does show is that any sensible weighting beats chance by more than twenty
+      points, so the ranking rests on the five terms and not on their weighting.</li>
+    </ul>
+    <!--RUBRIC-->
+    <p class="note"><b>The weights the pipeline uses are unchanged.</b> A fitted weighting would
+    be fitted toward proteins that already carry a drug, which are the best-studied proteins of
+    the best-studied viruses. A new pathogen's real target is not in that set.</p>
+  </div>
+
+  <div class="substep">
+    <h3>The model that picks molecules out of a library</h3>
+    <ul class="pts">
+      <li><b>This one does learn, and the table shows what.</b> The library varies four
+      positions over the twenty amino acids, so the model holds one number for each of the
+      eighty choices: purple raises the predicted score, ochre lowers it.</li>
+      <li><b>Glycine at position 267 is the strongest thing it finds</b>, and it finds it from
+      128 measurements.</li>
+      <li><b>Run the same thing on shuffled answers and the table goes flat.</b> That is the
+      check that it is reading the measurements and not the shape of the data.</li>
+    </ul>
+    <!--WEIGHTS-->
+  </div>
 </section>
 
 <footer>

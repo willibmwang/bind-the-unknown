@@ -25,7 +25,7 @@
   <h1>Dengue virus 2</h1>
   <p class="standfirst">One genome accession went in. This is what each stage of the chain
   handed the next.</p>
-  <dl class="strip"><div><dt>Accession</dt><dd>NC_001474.2</dd></div><div><dt>Chains ranked</dt><dd>7</dd></div><div><dt>Surfaces measured</dt><dd>0 of 7</dd></div><div><dt>Nothing dropped</dt><dd>yes</dd></div><div><dt>Seconds</dt><dd>129</dd></div></dl>
+  <dl class="strip"><div><dt>Accession</dt><dd>NC_001474.2</dd></div><div><dt>Chains ranked</dt><dd>9</dd></div><div><dt>Surfaces measured</dt><dd>0 of 9</dd></div><div><dt>Nothing dropped</dt><dd>yes</dd></div><div><dt>Seconds</dt><dd>196</dd></div></dl>
   <p class="reclink"><a href="NC_001474_2.json">Download the raw record · JSON</a>
   <span>Every number on this page is read from it. Nothing here is retyped.</span></p>
 </header>
@@ -36,7 +36,7 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">1</span>
       <span class="what">Genome to candidate proteins</span>
-      <span class="secs">14.04 s</span></div>
+      <span class="secs">14.6 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>genome accession</b> NC_001474.2</li><li><b>reference excluded organism</b> Dengue virus type 2</li></ul></div>
       <div class="out"><h3>Out</h3><ul><li><b>genome length in nucleotides</b> 10,723</li><li><b>segments</b> 1</li><li><b>ORFs found</b> 22</li><li><b>ORFs ranked</b> 12</li><li><b>reference entries</b> 17,516</li><li><b>reference entries removed</b> 13</li><li><b>identified</b> 2</li><li><b>unidentified</b> 10</li></ul></div>
@@ -46,31 +46,31 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">2</span>
       <span class="what">Polyproteins to mature chains, and the score for each</span>
-      <span class="secs">0.44 s</span></div>
+      <span class="secs">3.32 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>candidates in</b> 12</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>chains out</b> 7</li><li><b>chains scored before the gate</b> 11</li><li><b>every score re-adds from its parts</b> yes</li></ul></div>
-    </div><div class="hands"><b>hands on</b> &nbsp;every chain that cleared the gate, with the accession and range its surface is measured on. 4 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them</div>
+      <div class="out"><h3>Out</h3><ul><li><b>chains out</b> 9</li><li><b>chains scored before the gate</b> 12</li><li><b>every score re-adds from its parts</b> yes</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;every chain that cleared the gate, with the accession and range its surface is measured on. 3 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">3</span>
       <span class="what">Every chain to coordinates, whole where it fits and by its functional regions where it does not</span>
-      <span class="secs">66.86 s</span></div>
+      <span class="secs">35.9 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>candidates in</b> 7</li><li><b>identified in</b> 7</li><li><b>gated out before this stage</b> 4</li><li><b>residue ceiling</b> 1,200</li><li><b>domain units per chain</b> 3</li><li><b>fold requests per run</b> 40</li><li><b>folding budget seconds</b> 240</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>foldable</b> 7</li><li><b>not foldable</b> 0</li><li><b>unidentified foldable</b> 0</li><li><b>chains folded</b> 7</li><li><b>folds attempted</b> 7</li><li><b>folds refused</b> 0</li><li><b>units offered</b> 39</li><li><b>units inside the ceiling</b> 20</li><li><b>units recorded</b> 7</li><li><b>units folded</b> 7</li><li><b>domain units offered</b> 32</li><li><b>domain units inside the ceiling</b> 13</li><li><b>domain units recorded</b> 0</li><li><b>domain units folded</b> 0</li><li><b>domain units attempted</b> 0</li><li><b>chains offered a domain route</b> 6</li><li><b>chains rescued by the domain route</b> 0</li><li><b>chains with coordinates</b> 7</li><li><b>chains with no coordinates</b> 0</li><li><b>domain units not folded by limit</b> 0</li><li><b>domain units not folded by budget</b> 0</li><li><b>chains not folded by limit</b> 0</li><li><b>chains not folded by budget</b> 0</li><li><b>seconds spent on refused folds</b> 0</li><li><b>chains over the ceiling</b> 0</li><li><b>changes any rank</b> no</li><li><b>folded target</b> RNA-directed RNA polymerase/Methyltransferase NS5</li><li><b>residues</b> 900</li><li><b>mean confidence, out of 100</b> 66.78</li><li><b>at or above 70</b> 0.5411</li><li><b>sequence sha256</b> bc166171f8e4a4ec090ba0bc0db5353a12a176ccbcbbb6e7da504372cfe6b5d1</li><li><b>error</b> —</li></ul></div>
-    </div><div class="hands"><b>hands on</b> &nbsp;coordinates for 7 of the 7 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 0 chains over it. Plus the functional site positions, carried through the alignment into this genome&#x27;s numbering, which the surface stage anchors the patch arithmetic on. 0 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region&#x27;s surface goes under its chain&#x27;s row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2</div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 9</li><li><b>identified in</b> 9</li><li><b>gated out before this stage</b> 3</li><li><b>residue ceiling</b> 1,200</li><li><b>domain units per chain</b> 3</li><li><b>fold requests per run</b> 40</li><li><b>folding budget seconds</b> 240</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>foldable</b> 9</li><li><b>not foldable</b> 0</li><li><b>unidentified foldable</b> 0</li><li><b>chains folded</b> 9</li><li><b>folds attempted</b> 9</li><li><b>folds refused</b> 0</li><li><b>units offered</b> 47</li><li><b>units inside the ceiling</b> 23</li><li><b>units recorded</b> 9</li><li><b>units folded</b> 9</li><li><b>domain units offered</b> 38</li><li><b>domain units inside the ceiling</b> 14</li><li><b>domain units recorded</b> 0</li><li><b>domain units folded</b> 0</li><li><b>domain units attempted</b> 0</li><li><b>chains offered a domain route</b> 7</li><li><b>chains rescued by the domain route</b> 0</li><li><b>chains with coordinates</b> 9</li><li><b>chains with no coordinates</b> 0</li><li><b>domain units not folded by limit</b> 0</li><li><b>domain units not folded by budget</b> 0</li><li><b>chains not folded by limit</b> 0</li><li><b>chains not folded by budget</b> 0</li><li><b>seconds spent on refused folds</b> 0</li><li><b>chains over the ceiling</b> 0</li><li><b>changes any rank</b> no</li><li><b>folded target</b> RNA-directed RNA polymerase/Methyltransferase NS5</li><li><b>residues</b> 900</li><li><b>mean confidence, out of 100</b> 66.78</li><li><b>at or above 70</b> 0.5411</li><li><b>sequence sha256</b> bc166171f8e4a4ec090ba0bc0db5353a12a176ccbcbbb6e7da504372cfe6b5d1</li><li><b>error</b> —</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;coordinates for 9 of the 9 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 0 chains over it. Plus the functional site positions, carried through the alignment into this genome&#x27;s numbering, which the surface stage anchors the patch arithmetic on. 0 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region&#x27;s surface goes under its chain&#x27;s row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">4</span>
       <span class="what">Every chain to a measured surface, and the patch at the residues that do the chemistry</span>
-      <span class="secs">0.54 s</span></div>
+      <span class="secs">0.55 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>candidates in</b> 7</li><li><b>predicted coordinates in</b> 7</li><li><b>predicted region coordinates in</b> 0</li><li><b>chains with functional site positions in</b> 6</li><li><b>macrocycle reach a</b> 13.82</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>rows out</b> 7</li><li><b>measured</b> 0</li><li><b>unmeasured</b> 7</li><li><b>nothing dropped</b> yes</li><li><b>predicted coordinates offered</b> 7</li><li><b>measured on predicted coordinates</b> 7</li><li><b>predicted was the only route</b> 7</li><li><b>no surface by either route</b> 0</li><li><b>no surface over the folding ceiling</b> 0</li><li><b>region surfaces offered</b> 0</li><li><b>region surfaces measured</b> 0</li><li><b>chains with a region surface</b> 0</li><li><b>chains with no surface and no region surface</b> 0</li><li><b>chains with functional sites</b> 6</li><li><b>functional site positions</b> 61</li><li><b>functional site positions mapped into this genome</b> 57</li><li><b>site patch measured on a deposition</b> 0</li><li><b>site patch measured on a prediction</b> 6</li><li><b>site patch on a deposition not at the annotated residues</b> 0</li><li><b>site patch on a prediction not at the annotated residues</b> 2</li><li><b>gate yes</b> 0</li><li><b>gate borderline</b> 0</li><li><b>gate no</b> 0</li><li><b>changes any rank</b> no</li></ul></div>
-    </div><div class="hands"><b>hands on</b> &nbsp;a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 6 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage&#x27;s product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one</div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 9</li><li><b>predicted coordinates in</b> 9</li><li><b>predicted region coordinates in</b> 0</li><li><b>chains with functional site positions in</b> 8</li><li><b>macrocycle reach a</b> 13.82</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>rows out</b> 9</li><li><b>measured</b> 0</li><li><b>unmeasured</b> 9</li><li><b>nothing dropped</b> yes</li><li><b>predicted coordinates offered</b> 9</li><li><b>measured on predicted coordinates</b> 9</li><li><b>predicted was the only route</b> 9</li><li><b>no surface by either route</b> 0</li><li><b>no surface over the folding ceiling</b> 0</li><li><b>region surfaces offered</b> 0</li><li><b>region surfaces measured</b> 0</li><li><b>chains with a region surface</b> 0</li><li><b>chains with no surface and no region surface</b> 0</li><li><b>chains with functional sites</b> 8</li><li><b>functional site positions</b> 65</li><li><b>functional site positions mapped into this genome</b> 61</li><li><b>site patch measured on a deposition</b> 0</li><li><b>site patch measured on a prediction</b> 8</li><li><b>site patch on a deposition not at the annotated residues</b> 0</li><li><b>site patch on a prediction not at the annotated residues</b> 2</li><li><b>gate yes</b> 0</li><li><b>gate borderline</b> 0</li><li><b>gate no</b> 0</li><li><b>changes any rank</b> no</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 8 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage&#x27;s product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one</div>
   </div>
 
   <div class="stage">
@@ -86,9 +86,9 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">6</span>
       <span class="what">Evidence on the highest-ranked targets</span>
-      <span class="secs">47.14 s</span></div>
+      <span class="secs">142 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>targets in</b> 3</li><li><b>ranked available</b> 7</li><li><b>wall budget seconds</b> 700</li></ul></div>
+      <div><h3>In</h3><ul><li><b>targets in</b> 3</li><li><b>ranked available</b> 9</li><li><b>wall budget seconds</b> 700</li></ul></div>
       <div class="out"><h3>Out</h3><ul><li><b>targets covered</b> 3</li><li><b>calls made</b> 15</li><li><b>OK</b> 13</li><li><b>not OK</b> 2</li><li><b>network calls</b> 93</li><li><b>changes any rank</b> no</li><li><b>every target has every tool</b> yes</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;nothing. This annotates the shortlist and never reorders it</div>
   </div>
@@ -96,7 +96,7 @@
 
 <section>
   <div class="sec-head"><h2>The shortlist</h2>
-    <span class="tag">2 identified ORFs cut into 7 chains</span></div>
+    <span class="tag">2 identified ORFs cut into 9 chains</span></div>
   <ul class="pts">
     <li><b>A different list from the stage-1 candidates above, not a shorter one.</b> Stage 1
     ranks whole ORFs; stage 2 cuts the long proteins among them into the shorter chains a
@@ -164,6 +164,26 @@
       </tr>
       <tr id="chain-5">
         <td class="rk">5</td>
+        <td class="nm"><span class="t">Peptide pr</span>
+          <span class="w">Q6YMS3</span>
+          <span class="w">residues 115–205 of the parent</span></td>
+        <td class="cut">POLG_DEN3M Genome polyprotein</td>
+        <td class="h h2"><span class="pt">0.88</span><span class="rw">0.295</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
+        <td class="sc"><span class="v">2.88</span>
+          <span class="tr"><i style="width:57.5%"></i></span></td>
+      </tr>
+      <tr id="chain-6">
+        <td class="rk">6</td>
+        <td class="nm"><span class="t">Small envelope protein M</span>
+          <span class="w">Q6YMS3</span>
+          <span class="w">residues 206–280 of the parent</span></td>
+        <td class="cut">POLG_DEN3M Genome polyprotein</td>
+        <td class="h h2"><span class="pt">0.88</span><span class="rw">0.295</span></td><td class="h h5"><span class="pt">2.00</span><span class="rw">yes</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">class 0</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
+        <td class="sc"><span class="v">2.88</span>
+          <span class="tr"><i style="width:57.5%"></i></span></td>
+      </tr>
+      <tr id="chain-7">
+        <td class="rk">7</td>
         <td class="nm"><span class="t">Envelope protein E</span>
           <span class="w">Q6YMS3</span>
           <span class="w">residues 281–773 of the parent</span></td>
@@ -172,8 +192,8 @@
         <td class="sc"><span class="v">2.88</span>
           <span class="tr"><i style="width:57.5%"></i></span></td>
       </tr>
-      <tr id="chain-6">
-        <td class="rk">6</td>
+      <tr id="chain-8">
+        <td class="rk">8</td>
         <td class="nm"><span class="t">Non-structural protein 1</span>
           <span class="w">Q6YMS3</span>
           <span class="w">residues 774–1,125 of the parent</span></td>
@@ -182,8 +202,8 @@
         <td class="sc"><span class="v">2.88</span>
           <span class="tr"><i style="width:57.5%"></i></span></td>
       </tr>
-      <tr id="chain-7">
-        <td class="rk">7</td>
+      <tr id="chain-9">
+        <td class="rk">9</td>
         <td class="nm"><span class="t">Capsid protein C</span>
           <span class="w">Q6YMS3</span>
           <span class="w">residues 1–100 of the parent</span></td>
@@ -193,13 +213,13 @@
           <span class="tr"><i style="width:47.6%"></i></span></td>
       </tr></tbody>
   </table>
-  </div><ul class="pts sm" style="margin:20px 0 0"><li><b>4 more mature chains were scored and are not in this table.</b> A row is kept when at least one of exposure on the outside of the virus, essentiality, druggability, structures in the family pays 0.5 points or more, and these paid under that on all 4.</li><li><b>They leave the pipeline here.</b> Nothing after this stage folds them, measures a surface on them or reads literature for them.</li><li><b>Conservation is not one of the four</b>, because it says how well this genome was recognised rather than whether what was recognised is worth aiming at.</li><li><b>The numbering keeps each row its place in the full ranking</b>, so a gap in the # column is one of these: Protein prM, Non-structural protein 2A, Non-structural protein 4A, Non-structural protein 4B.</li></ul>
+  </div><ul class="pts sm" style="margin:20px 0 0"><li><b>3 more mature chains were scored and are not in this table.</b> A row is kept when at least one of exposure on the outside of the virus, essentiality, druggability, structures in the family pays 0.5 points or more, and these paid under that on all 4.</li><li><b>They leave the pipeline here.</b> Nothing after this stage folds them, measures a surface on them or reads literature for them.</li><li><b>Conservation is not one of the four</b>, because it says how well this genome was recognised rather than whether what was recognised is worth aiming at.</li><li><b>The numbering keeps each row its place in the full ranking</b>, so a gap in the # column is one of these: Non-structural protein 2A, Non-structural protein 4A, Non-structural protein 4B.</li></ul>
 </section>
 
 
 <section>
   <div class="sec-head"><h2>The structure it folded</h2><span class="tag">step 3</span></div>
-  <div class="sub">7 chains folded this run; this is the one the record reports in full</div>
+  <div class="sub">9 chains folded this run; this is the one the record reports in full</div>
   <div class="two">
     <div class="card acc">
       <div class="label">RNA-directed RNA polymerase/Methyltransferase NS5</div>
@@ -224,7 +244,7 @@
     measure.</li>
   </ul>
   
-  <div class="lane"><div class="lane-grp"><b>Folded &middot; 7</b><span>at or under 1200 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
+  <div class="lane"><div class="lane-grp"><b>Folded &middot; 9</b><span>at or under 1200 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
     <div class="lane-axis" aria-hidden="true">
       <span></span>
       <span class="ax"><i class="lim" style="left:100.00%"></i>
@@ -282,6 +302,20 @@
       <span class="vl">100 aa
         <span class="cf">confidence 50.6</span></span>
     </div>
+    <div class="lr">
+      <span class="who"><span class="t">Peptide pr</span>
+        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 73 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:100.00%"></i><i class="b" style="left:0.00%;width:7.58%"></i></span>
+      <span class="vl">91 aa
+        <span class="cf">confidence 36.1</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Small envelope protein M</span>
+        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 68 % identity</span></span>
+      <span class="plot"><i class="thr" style="left:100.00%"></i><i class="b" style="left:0.00%;width:6.25%"></i></span>
+      <span class="vl">75 aa
+        <span class="cf">confidence 51.9</span></span>
+    </div>
     <div class="lane-foot"><span>bar length is the chain&rsquo;s own residue count, from
       zero, on one scale &middot; longest 1,200 aa</span>
       <span>the upright line is the 1,200-residue folding ceiling</span></div>
@@ -289,19 +323,19 @@
 </section>
 <section>
   <div class="sec-head"><h2>Surfaces</h2><span class="tag">one row per ranked chain</span></div>
-  <div class="good"><p><b>7 answers for
-  7 chains.</b> A chain can be refused, but it cannot
+  <div class="good"><p><b>9 answers for
+  9 chains.</b> A chain can be refused, but it cannot
   disappear from the list.</p></div>
   
-  <div class="tiles" aria-hidden="true"><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span></div>
+  <div class="tiles" aria-hidden="true"><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span></div>
   <div class="legend">
     <span><span class="key m"></span> 0 measured on deposited structures</span>
-    <span><span class="key r"></span> 7 with none, each with a reason</span>
-    <span><span class="key p"></span> 7 of those measured on predicted coordinates instead</span>
+    <span><span class="key r"></span> 9 with none, each with a reason</span>
+    <span><span class="key p"></span> 9 of those measured on predicted coordinates instead</span>
   </div>
   
   <div class="lane">
-    <div class="lane-grp"><b>Measured on a shape a model predicted &middot; 7</b><span>nobody has ever solved these, so the shape being measured was predicted from the sequence by stage 3. The arithmetic is identical and the evidence is not, so this group stays in its own column, outside the count above and outside the ranking</span></div>
+    <div class="lane-grp"><b>Measured on a shape a model predicted &middot; 9</b><span>nobody has ever solved these, so the shape being measured was predicted from the sequence by stage 3. The arithmetic is identical and the evidence is not, so this group stays in its own column, outside the count above and outside the ranking</span></div>
     <div class="lane-axis" aria-hidden="true">
       <span></span>
       <span class="ax"><i class="lim" style="left:6.91%"></i>
@@ -339,6 +373,20 @@
       <span class="vl">3,417 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
+      <span class="who"><span class="t">Peptide pr</span>
+        <span class="w">the only surface this chain has &middot; fold confidence 36.1</span></span>
+      <span class="plot"><i class="thr" style="left:6.91%"></i>
+        <i class="b pred" style="left:0.00%;width:23.66%"></i></span>
+      <span class="vl">2,054 Å²<span class="cf">predicted</span></span>
+    </div>
+    <div class="lr">
+      <span class="who"><span class="t">Small envelope protein M</span>
+        <span class="w">the only surface this chain has &middot; fold confidence 51.9</span></span>
+      <span class="plot"><i class="thr" style="left:6.91%"></i>
+        <i class="b pred" style="left:0.00%;width:28.78%"></i></span>
+      <span class="vl">2,498 Å²<span class="cf">predicted</span></span>
+    </div>
+    <div class="lr">
       <span class="who"><span class="t">Envelope protein E</span>
         <span class="w">the only surface this chain has &middot; fold confidence 74.1</span></span>
       <span class="plot"><i class="thr" style="left:6.91%"></i>
@@ -367,6 +415,40 @@
   
 </section>
 
+<section>
+  <div class="sec-head"><h2>Where on the protein a drug would go</h2>
+    <span class="tag">the best-ranked chain, in full</span></div>
+  <ul class="pts">
+    <li><b>One chain along an axis of its own residues.</b> The boxes are the parts the
+    pipeline could fold, the blue marks are residues a curator wrote down for the nearest
+    relative, and the solid marks are the water-repelling patch a ring-shaped peptide would
+    have to lie across.</li>
+  </ul>
+  
+    <figure class="ftrack">
+      <div class="ftrack-scroll" tabindex="0" role="group"
+           aria-label="Residue map of RNA-directed RNA polymerase/Methyltransferase NS5">
+        <svg viewBox="0 0 960 130" role="img"
+             aria-label="RNA-directed RNA polymerase/Methyltransferase NS5, 900 residues, with the parts folded, the residues
+             a curator marked and the measured patch drawn along the chain">
+          <defs>
+            <pattern id="fthatch" width="6" height="6" patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)">
+              <line class="fthl" x1="0" y1="0" x2="0" y2="6"/>
+            </pattern>
+          </defs>
+          <line class="ftg" x1="162.0" y1="22" x2="940.0" y2="22"/><line class="ftg" x1="162.0" y1="18" x2="162.0" y2="22"/><text class="ftn" x="162.0" y="16" text-anchor="start">1</text><line class="ftg" x1="334.2" y1="18" x2="334.2" y2="22"/><text class="ftn" x="334.2" y="16" text-anchor="middle">200</text><line class="ftg" x1="507.3" y1="18" x2="507.3" y2="22"/><text class="ftn" x="507.3" y="16" text-anchor="middle">400</text><line class="ftg" x1="680.4" y1="18" x2="680.4" y2="22"/><text class="ftn" x="680.4" y="16" text-anchor="middle">600</text><line class="ftg" x1="853.5" y1="18" x2="853.5" y2="22"/><text class="ftn" x="853.5" y="16" text-anchor="middle">800</text><line class="ftg" x1="940.0" y1="18" x2="940.0" y2="22"/><text class="ftn" x="940.0" y="16" text-anchor="end">900</text><text class="ftl" x="150" y="16" text-anchor="end">residue</text><text class="ftl" x="150" y="43" text-anchor="end">the chain</text><rect class="ftb" x="162" y="32" width="778" height="15" rx="3"/><text class="ftl" x="150" y="66" text-anchor="end">folded parts</text><rect class="ftr" x="162.0" y="55" width="778.0" height="15" rx="3"/><text class="ftm" x="551.0" y="66" text-anchor="middle">1</text><text class="ftl" x="150" y="89" text-anchor="end">marked residues</text><rect class="ftk" x="161.0" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="172.3" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="174.8" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="175.7" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="177.4" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="181.8" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="185.2" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="208.6" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="212.9" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="234.6" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="235.4" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="250.1" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="251.0" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="273.5" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="274.4" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="286.5" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="287.3" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="289.9" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="316.8" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="343.6" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="345.3" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="347.9" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="349.7" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="539.2" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="542.6" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="547.0" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="549.6" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="776.3" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="790.2" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="893.1" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="925.2" y="78" width="2.4" height="15" rx="1"/><text class="ftl" x="150" y="112" text-anchor="end">patch, predicted</text><rect class="ftq" x="372.2" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="373.9" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="376.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="378.2" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="434.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="437.1" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="804.0" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="920.8" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="923.4" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="924.3" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="929.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="935.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="937.3" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="938.1" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="939.0" y="101" width="2.4" height="15" rx="1"/>
+        </svg>
+      </div>
+      <p class="ftw">In the genome this chain sits at nucleotides 7,570&ndash;10,269, read +0 at nt 97.</p>
+      <ul class="ftkeys"><li><b class="ftkey ftkey-r"></b> 1 of 1 parts of this chain reached the folder. The chain is 900 residues long.</li><li><b>1</b> RNA-directed RNA polymerase/Methyltransferase NS5 <span class="ftd">residues 1&ndash;900 &middot; folded, confidence 66.78 out of 100</span></li><li><b class="ftkey ftkey-o"></b> 31 residues of 900 are marked on the nearest relative and carried here through the alignment: binding site, cleavage or other marked site. This is where the chemistry happens.</li><li><b class="ftkey ftkey-p"></b> the same measurement on coordinates a predictor emitted, which is the only route to a surface where nothing has been solved. 1,491 &Aring;&sup2; at a mean confidence of 66.78 out of 100. An area from a prediction compares with another prediction and not with a deposition.</li></ul>
+      <figcaption>Every mark is drawn from the run record at the residue it was measured or
+        annotated at. Purple is this virus and what was measured on it; blue is what a curator
+        wrote down for the nearest relative; a hatched box was offered to the folder and
+        refused, with the reason beside its number.</figcaption>
+    </figure>
+</section>
+
 
 
 <section id="evidence">
@@ -380,7 +462,7 @@
     tool declaring exactly 600 is admitted.</li>
     <li><b>What keeps them off the path is the cost they actually run up</b>, about 210
     seconds for one target across the five, against a chain that finishes in
-    129 seconds.</li>
+    196 seconds.</li>
     <li><b>Nothing they return changes a rank.</b> Each accession below is the relative the chain identified that target through, not Dengue virus type 2, which was deleted from the reference before the run. Every annotation here is a record of that relative.</li>
   </ul>
   
@@ -392,7 +474,7 @@
       <div class="pdbrow none">
         <span class="who">Search the literature<em>Europe PMC</em></span>
         <span class="ids">empty
-          · 3.2 s
+          · 13 s
           · 7 requests
           <br>A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.
           
@@ -401,7 +483,7 @@
       <div class="pdbrow">
         <span class="who">Find relatives<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 1.26 s
+          · 2.62 s
           · 3 requests
           
           <br>resolution attempts count 1 · database ID swissprot · database name SwissProt · database version 2025 01 · database release date 2025-01-01 · declared databases not served count 0 · homologs count 50 · homolog count 50 · hits returned 50 · hits dropped by min identity 0
@@ -410,7 +492,7 @@
       <div class="pdbrow">
         <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
-          · 6.23 s
+          · 11.68 s
           · 15 requests
           
           <br>protein name Genome polyprotein · organism Dengue virus type 3 (strain Martinique/1243/1999) · sequence md5 DDB3F9D682012C9D351F612E40DBBE2D · sequence length 3,390 · sequence source uniprot · assignments count 59 · predicted count 51 · sequence features count 17 · residue ranges count 37 · functional sites count 16
@@ -419,7 +501,7 @@
       <div class="pdbrow">
         <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 1.66 s
+          · 1.38 s
           · 2 requests
           
           <br>sequence length 3,390 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 8 · providers queried count 2 · providers with models count 1 · alphafold host queried yes · alphafold host served models no
@@ -428,7 +510,7 @@
       <div class="pdbrow">
         <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 3.47 s
+          · 3.08 s
           · 4 requests
           
           <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
@@ -443,7 +525,7 @@
       <div class="pdbrow none">
         <span class="who">Search the literature<em>Europe PMC</em></span>
         <span class="ids">empty
-          · 3.36 s
+          · 28.78 s
           · 7 requests
           <br>A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.
           
@@ -452,7 +534,7 @@
       <div class="pdbrow">
         <span class="who">Find relatives<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 1.1 s
+          · 2.46 s
           · 3 requests
           
           <br>resolution attempts count 1 · database ID swissprot · database name SwissProt · database version 2025 01 · database release date 2025-01-01 · declared databases not served count 0 · homologs count 50 · homolog count 50 · hits returned 50 · hits dropped by min identity 0
@@ -461,7 +543,7 @@
       <div class="pdbrow">
         <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
-          · 6.56 s
+          · 11.12 s
           · 15 requests
           
           <br>protein name Genome polyprotein · organism Dengue virus type 3 (strain Martinique/1243/1999) · sequence md5 DDB3F9D682012C9D351F612E40DBBE2D · sequence length 3,390 · sequence source uniprot · assignments count 59 · predicted count 51 · sequence features count 17 · residue ranges count 37 · functional sites count 16
@@ -470,7 +552,7 @@
       <div class="pdbrow">
         <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 1.39 s
+          · 1.46 s
           · 2 requests
           
           <br>sequence length 3,390 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 8 · providers queried count 2 · providers with models count 1 · alphafold host queried yes · alphafold host served models no
@@ -479,7 +561,7 @@
       <div class="pdbrow">
         <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 3.86 s
+          · 2.66 s
           · 4 requests
           
           <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
@@ -494,7 +576,7 @@
       <div class="pdbrow">
         <span class="who">Search the literature<em>Europe PMC</em></span>
         <span class="ids">ok
-          · 3.71 s
+          · 35.24 s
           · 7 requests
           
           <br>subject kind term · scope title abstract · hit count 42 · returned 10 · hits with abstract 10 · preprints returned 0 · limitations count 8 · sources count 7
@@ -503,7 +585,7 @@
       <div class="pdbrow">
         <span class="who">Find relatives<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 1.35 s
+          · 2.88 s
           · 3 requests
           
           <br>resolution attempts count 1 · database ID swissprot · database name SwissProt · database version 2025 01 · database release date 2025-01-01 · declared databases not served count 0 · homologs count 50 · homolog count 50 · hits returned 50 · hits dropped by min identity 0
@@ -512,7 +594,7 @@
       <div class="pdbrow">
         <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
-          · 5.95 s
+          · 11.48 s
           · 15 requests
           
           <br>protein name Genome polyprotein · organism Dengue virus type 3 (strain Martinique/1243/1999) · sequence md5 DDB3F9D682012C9D351F612E40DBBE2D · sequence length 3,390 · sequence source uniprot · assignments count 59 · predicted count 51 · sequence features count 17 · residue ranges count 37 · functional sites count 16
@@ -521,7 +603,7 @@
       <div class="pdbrow">
         <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 1.19 s
+          · 1.38 s
           · 2 requests
           
           <br>sequence length 3,390 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 8 · providers queried count 2 · providers with models count 1 · alphafold host queried yes · alphafold host served models no
@@ -530,10 +612,10 @@
       <div class="pdbrow">
         <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 2.84 s
+          · 12.81 s
           · 4 requests
           
-          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
+          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 1 · network calls 3 · calls count 3 · sources count 3 · URLs hit count 3 · limitations count 13
         </span>
       </div></div></div>
   </div>

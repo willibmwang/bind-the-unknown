@@ -109,6 +109,14 @@
     <span class="ti">The shortlist<span class="ds">Every mature chain, scored, each traced back to the ORF it was cut out of.</span></span>
     <span class="ar" aria-hidden="true">→</span></a>
 
+  <div class="grp">What comes out, and what it learned</div>
+  <a class="tocrow" href="#handoff"><span class="n">06</span>
+    <span class="ti">The list you can hand to a chemist<span class="ds">Every target across every genome, with the residues to aim at and what the protein does.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>
+  <a class="tocrow" href="#learned"><span class="n">07</span>
+    <span class="ti">What the models learned<span class="ds">The weights that pick the target, the weights that pick molecules, and which of them fitting improves.</span></span>
+    <span class="ar" aria-hidden="true">→</span></a>
+
 </nav>
 
 <section id="how">
@@ -3064,6 +3072,44 @@
     <li><b>The rows run along 6 reading frames in all.</b> Each row names the frame its span is numbered along, because 26 pairs of these rows carry spans that overlap as numbers while sharing no residue.</li>
     
   </ul>
+
+    <h3>Where on the protein a drug would go</h3>
+    <p>Everything above reports one number for each chain. This draws one chain in full, along
+    an axis of its own residues, so the numbers have a place to sit.</p>
+    <ul class="pts">
+      <li><b>The chain, and the parts of it that reached the folder.</b> A box is a region the
+      pipeline could fold on its own. A hatched box was offered and refused, with the reason
+      beside its number.</li>
+      <li><b>The residues a curator marked.</b> These are written down for the nearest
+      relative and carried onto this virus through the alignment. They are where the chemistry
+      happens.</li>
+      <li><b>The patch a macrocycle would lie across.</b> Measured on a deposited structure
+      where one exists, and on predicted coordinates where none does. Where the patch reaches
+      the marked residues, a molecule on it would cover both.</li>
+    </ul>
+    
+    <figure class="ftrack">
+      <div class="ftrack-scroll" tabindex="0" role="group"
+           aria-label="Residue map of 3C-like proteinase nsp5">
+        <svg viewBox="0 0 960 153" role="img"
+             aria-label="3C-like proteinase nsp5, 306 residues, with the parts folded, the residues
+             a curator marked and the measured patch drawn along the chain">
+          <defs>
+            <pattern id="fthatch" width="6" height="6" patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)">
+              <line class="fthl" x1="0" y1="0" x2="0" y2="6"/>
+            </pattern>
+          </defs>
+          <line class="ftg" x1="162.0" y1="22" x2="940.0" y2="22"/><line class="ftg" x1="162.0" y1="18" x2="162.0" y2="22"/><text class="ftn" x="162.0" y="16" text-anchor="start">1</text><line class="ftg" x1="261.5" y1="18" x2="261.5" y2="22"/><text class="ftn" x="261.5" y="16" text-anchor="middle">40</text><line class="ftg" x1="363.5" y1="18" x2="363.5" y2="22"/><text class="ftn" x="363.5" y="16" text-anchor="middle">80</text><line class="ftg" x1="465.5" y1="18" x2="465.5" y2="22"/><text class="ftn" x="465.5" y="16" text-anchor="middle">120</text><line class="ftg" x1="567.6" y1="18" x2="567.6" y2="22"/><text class="ftn" x="567.6" y="16" text-anchor="middle">160</text><line class="ftg" x1="669.6" y1="18" x2="669.6" y2="22"/><text class="ftn" x="669.6" y="16" text-anchor="middle">200</text><line class="ftg" x1="771.6" y1="18" x2="771.6" y2="22"/><text class="ftn" x="771.6" y="16" text-anchor="middle">240</text><line class="ftg" x1="873.7" y1="18" x2="873.7" y2="22"/><text class="ftn" x="873.7" y="16" text-anchor="middle">280</text><line class="ftg" x1="940.0" y1="18" x2="940.0" y2="22"/><text class="ftn" x="940.0" y="16" text-anchor="end">306</text><text class="ftl" x="150" y="16" text-anchor="end">residue</text><text class="ftl" x="150" y="43" text-anchor="end">the chain</text><rect class="ftb" x="162" y="32" width="778" height="15" rx="3"/><text class="ftl" x="150" y="66" text-anchor="end">folded parts</text><rect class="ftr" x="162.0" y="55" width="778.0" height="15" rx="3"/><text class="ftm" x="551.0" y="66" text-anchor="middle">1</text><text class="ftl" x="150" y="89" text-anchor="end">marked residues</text><rect class="ftk" x="161.0" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="263.0" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="528.3" y="78" width="2.4" height="15" rx="1"/><rect class="ftk" x="939.0" y="78" width="2.4" height="15" rx="1"/><text class="ftl" x="150" y="112" text-anchor="end">patch, measured</text><rect class="ftp" x="750.2" y="101" width="2.4" height="15" rx="1"/><rect class="ftp" x="757.9" y="101" width="2.4" height="15" rx="1"/><rect class="ftp" x="763.0" y="101" width="2.4" height="15" rx="1"/><text class="ftl" x="150" y="135" text-anchor="end">patch, predicted</text><rect class="ftq" x="283.4" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="286.0" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="750.2" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="757.9" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="763.0" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="768.1" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="862.5" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="875.2" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="877.8" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="885.4" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="888.0" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="890.5" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="900.7" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="908.4" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="913.5" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="916.0" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="923.7" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="931.3" y="124" width="2.4" height="15" rx="1"/><rect class="ftq" x="936.4" y="124" width="2.4" height="15" rx="1"/>
+        </svg>
+      </div>
+      <p class="ftw">In the genome this chain sits at nucleotides 10,055&ndash;10,972, read +1 at nt 266.</p>
+      <ul class="ftkeys"><li><b class="ftkey ftkey-r"></b> 1 of 1 parts of this chain reached the folder. The chain is 306 residues long.</li><li><b>1</b> 3C-like proteinase nsp5 <span class="ftd">residues 1&ndash;306 &middot; folded, confidence 62.57 out of 100</span></li><li><b class="ftkey ftkey-o"></b> 4 residues of 306 are marked on the nearest relative and carried here through the alignment: active site, cleavage or other marked site. This is where the chemistry happens.</li><li><b class="ftkey ftkey-a"></b> the largest unbroken water-repelling patch on a deposited structure of this part (6w79:A), which is the surface a macrocyclic peptide has to lie across. 562.4 &Aring;&sup2;, moving by 355.3 &Aring;&sup2; between structures</li><li><b class="ftkey ftkey-p"></b> the same measurement on coordinates a predictor emitted, which is the only route to a surface where nothing has been solved. 2,013 &Aring;&sup2; at a mean confidence of 62.57 out of 100. An area from a prediction compares with another prediction and not with a deposition.</li></ul>
+      <figcaption>Every mark is drawn from the run record at the residue it was measured or
+        annotated at. Purple is this virus and what was measured on it; blue is what a curator
+        wrote down for the nearest relative; a hatched box was offered to the folder and
+        refused, with the reason beside its number.</figcaption>
+    </figure>
   </div>
 
   <div class="stage">
@@ -3354,6 +3400,258 @@
     <li><b>Both still land in the top five with SARS-CoV-2 deleted from the reference
     library</b>, scored only against relatives and never against the virus itself.</li>
   </ul>
+</section>
+
+<section id="handoff">
+  <div class="sec-head"><h2>The list you can hand to a chemist</h2>
+    <span class="tag">every genome, every target, every site</span></div>
+  <p>The pages above show one genome. The same five steps have run on all of them, and this is
+  what comes out: a target, the residues to aim at, and what the protein does.</p>
+  
+    <dl class="ledger">
+      <div><dt class="s">genomes</dt>
+        <dd><span class="v">46</span><span class="u">run end to end</span></dd></div>
+      <div><dt class="s">targets</dt>
+        <dd><span class="v">396</span><span class="u">ranked and kept</span></dd></div>
+      <div><dt class="s">places to bind</dt>
+        <dd><span class="v">641</span><span class="u">rows in the file</span></dd></div>
+      <div><dt class="s">what it does</dt>
+        <dd><span class="v">146</span><span class="u">targets described</span></dd></div>
+      <div><dt class="s">genome coordinates</dt>
+        <dd><span class="v">162</span><span class="u">targets located</span></dd></div>
+    </dl>
+    <ul class="pts">
+      <li><b>436
+      rows name a water-repelling patch</b>, which is the surface a ring-shaped peptide lies
+      across. 82 of them are measured on a solved
+      structure and the rest on a predicted one, and every row says which.</li>
+      <li><b>161 rows name residues a curator marked</b> as an
+      active site, a binding site or a cut point.
+      23 rows are the places where the patch and those residues
+      meet, which is where one molecule could do both.</li>
+      <li><b>21 rows say no site was found</b>, with the reason. A
+      target that reached nothing stays in the table.</li>
+      <li><b>123 targets already carry an approved
+      antiviral.</b> That column is how the list reads as a check on itself rather than only as
+      a proposal.</li>
+    </ul>
+    <p class="acts">
+      <a class="btn" href="handoff/targets.csv">Download the target list (CSV)</a>
+      <a class="btn" href="handoff/index.json">What the columns mean (JSON)</a>
+    </p>
+  <ul class="pts sm" style="margin:20px 0 0">
+    <li><b>Residue numbers come in two countings and both are in the file.</b> One counts along
+    the protein, which is what a structure viewer wants. The other counts along the genome, and
+    a row only carries it where the reading frame was checked by reading the residues back.</li>
+    <li><b>Nothing in the file was measured on the pathogen.</b> What a protein does, which
+    family it belongs to and which residues are marked are all copied from its nearest studied
+    relative. Areas are measured on a solved structure of a relative, or on a predicted one.
+    Every row says which.</li>
+  </ul>
+</section>
+
+<section id="learned">
+  <div class="sec-head"><h2>What the models learned</h2>
+    <span class="tag">and what they did not</span></div>
+  <p>Two things here are called weights. One picks the target and was set by hand. The other
+  picks molecules out of a library and is fitted to measurements. Only the second one learns.</p>
+
+  <div class="substep">
+    <h3>The five weights that pick the target</h3>
+    <ul class="pts">
+      <li><b>They were never fitted to anything, and the reason given was that there was
+      nothing to fit them against.</b> There is now: 46 genomes whose real drug target is
+      known.</li>
+      <li><b>So they were fitted, holding out one virus family at a time.</b> Fit on twenty
+      families, rank the twenty-first, and compare against the weights the pipeline ships.</li>
+      <li><b>It does not help.</b> Fitting gains two points, which is one genome out of
+      forty-four, and the same fit on deliberately shuffled answers scores just as well. What
+      the comparison does show is that any sensible weighting beats chance by more than twenty
+      points, so the ranking rests on the five terms and not on their weighting.</li>
+    </ul>
+    
+    <div class="lane">
+      <div class="lane-grp"><span class="gl">The five weights, as the pipeline states them and
+        as fitting would set them</span></div>
+      <div class="lane-axis" aria-hidden="true"><span></span>
+        <span class="ax"><b class="l0">0</b>
+          <b class="lm">3 points</b></span><span></span></div>
+      
+      <div class="wr">
+        <span class="who">conservation</span>
+        <span class="plot">
+          <i class="b" style="left:0.00%;width:100.00%"></i>
+          <i class="b pred" style="left:0.00%;width:65.66%"></i>
+        </span>
+        <span class="vl">3 &rarr; 1.97</span>
+      </div>
+      <div class="wr">
+        <span class="who">surface exposed</span>
+        <span class="plot">
+          <i class="b" style="left:0.00%;width:66.67%"></i>
+          <i class="b pred" style="left:0.00%;width:48.92%"></i>
+        </span>
+        <span class="vl">2 &rarr; 1.468</span>
+      </div>
+      <div class="wr">
+        <span class="who">essential class</span>
+        <span class="plot">
+          <i class="b" style="left:0.00%;width:50.00%"></i>
+          <i class="b pred" style="left:0.00%;width:82.53%"></i>
+        </span>
+        <span class="vl">1.5 &rarr; 2.476</span>
+      </div>
+      <div class="wr">
+        <span class="who">druggable class</span>
+        <span class="plot">
+          <i class="b" style="left:0.00%;width:80.00%"></i>
+          <i class="b pred" style="left:0.00%;width:63.37%"></i>
+        </span>
+        <span class="vl">2.4 &rarr; 1.901</span>
+      </div>
+      <div class="wr">
+        <span class="who">structures in family</span>
+        <span class="plot">
+          <i class="b" style="left:0.00%;width:16.67%"></i>
+          <i class="b pred" style="left:0.00%;width:52.85%"></i>
+        </span>
+        <span class="vl">0.5 &rarr; 1.586</span>
+      </div>
+      <div class="lane-foot"><p>The solid bar is the weight the pipeline uses. The outlined bar
+        is what fitting sets it to. Fitting moves weight off how conserved a protein is and
+        onto whether the virus can replicate without it.</p></div>
+    </div>
+    <div class="lane">
+      <div class="lane-grp"><span class="gl">How often each weighting puts a drugged target
+        first, on a virus family it was not fitted on</span></div>
+      <div class="lane-axis" aria-hidden="true"><span></span>
+        <span class="ax"><i class="lim" style="left:22.4%"></i>
+          <b class="l0">0</b>
+          <b class="ll l" style="left:22.4%">
+            22% by chance</b>
+          <b class="lm">100%</b></span><span></span></div>
+      
+      <div class="wr">
+        <span class="who">the five weights it ships</span>
+        <span class="plot">
+          <i class="b" style="left:0.00%;width:45.50%"></i>
+          <i class="thr" style="left:22.40%"></i>
+        </span>
+        <span class="vl">46%</span>
+      </div>
+      <div class="wr">
+        <span class="who">every term weighted alike</span>
+        <span class="plot">
+          <i class="b" style="left:0.00%;width:50.00%"></i>
+          <i class="thr" style="left:22.40%"></i>
+        </span>
+        <span class="vl">50%</span>
+      </div>
+      <div class="wr">
+        <span class="who">fitted on the other families</span>
+        <span class="plot">
+          <i class="b" style="left:0.00%;width:47.70%"></i>
+          <i class="thr" style="left:22.40%"></i>
+        </span>
+        <span class="vl">48%</span>
+      </div>
+      <div class="wr">
+        <span class="who">fitted, conservation dropped</span>
+        <span class="plot">
+          <i class="b" style="left:0.00%;width:54.50%"></i>
+          <i class="thr" style="left:22.40%"></i>
+        </span>
+        <span class="vl">54%</span>
+      </div>
+      <div class="wr">
+        <span class="who">fitted on shuffled labels</span>
+        <span class="plot">
+          <i class="b pred" style="left:0.00%;width:50.00%"></i>
+          <i class="thr" style="left:22.40%"></i>
+        </span>
+        <span class="vl">50%</span>
+      </div>
+      <div class="lane-foot"><p>Every weighting beats chance by more than twenty points, and the
+        whole spread between them is 9 points, which
+        is 2.3 points per genome. The last row was fitted on
+        shuffled labels and scores in the same band, which is why none of the differences above
+        it is evidence of learning.</p></div>
+    </div>
+    <p class="note"><b>The weights the pipeline uses are unchanged.</b> A fitted weighting would
+    be fitted toward proteins that already carry a drug, which are the best-studied proteins of
+    the best-studied viruses. A new pathogen's real target is not in that set.</p>
+  </div>
+
+  <div class="substep">
+    <h3>The model that picks molecules out of a library</h3>
+    <ul class="pts">
+      <li><b>This one does learn, and the table shows what.</b> The library varies four
+      positions over the twenty amino acids, so the model holds one number for each of the
+      eighty choices: purple raises the predicted score, ochre lowers it.</li>
+      <li><b>Glycine at position 267 is the strongest thing it finds</b>, and it finds it from
+      128 measurements.</li>
+      <li><b>Run the same thing on shuffled answers and the table goes flat.</b> That is the
+      check that it is reading the measurements and not the shape of the data.</li>
+    </ul>
+    
+    
+      <div class="wmapscroll" tabindex="0" role="group" aria-label="What the model learned from 128 measurements">
+        <table class="wmap">
+          <caption>What the model learned from 128 measurements</caption>
+          <thead><tr><th scope="col">position</th><th>A</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>H</th><th>I</th><th>K</th><th>L</th><th>M</th><th>N</th><th>P</th><th>Q</th><th>R</th><th>S</th><th>T</th><th>V</th><th>W</th><th>Y</th></tr></thead>
+          <tbody><tr><th scope="row">265</th><td class="z0" title="A at position 265: -0.013">-0.01</td><td class="p1" title="C at position 265: +0.055">+0.05</td><td class="n1" title="D at position 265: -0.115">-0.11</td><td class="n1" title="E at position 265: -0.030">-0.03</td><td class="n1" title="F at position 265: -0.036">-0.04</td><td class="n1" title="G at position 265: -0.106">-0.11</td><td class="p1" title="H at position 265: +0.098">+0.10</td><td class="z0" title="I at position 265: -0.026">-0.03</td><td class="n1" title="K at position 265: -0.044">-0.04</td><td class="p1" title="L at position 265: +0.109">+0.11</td><td class="p1" title="M at position 265: +0.033">+0.03</td><td class="n1" title="N at position 265: -0.058">-0.06</td><td class="n1" title="P at position 265: -0.037">-0.04</td><td class="z0" title="Q at position 265: -0.023">-0.02</td><td class="n1" title="R at position 265: -0.086">-0.09</td><td class="n1" title="S at position 265: -0.032">-0.03</td><td class="n1" title="T at position 265: -0.083">-0.08</td><td class="p2" title="V at position 265: +0.200">+0.20</td><td class="p2" title="W at position 265: +0.213">+0.21</td><td class="z0" title="Y at position 265: -0.015">-0.02</td></tr><tr><th scope="row">266</th><td class="z0" title="A at position 266: -0.009">-0.01</td><td class="n1" title="C at position 266: -0.031">-0.03</td><td class="z0" title="D at position 266: +0.017">+0.02</td><td class="z0" title="E at position 266: -0.005">-0.01</td><td class="p3" title="F at position 266: +0.241">+0.24</td><td class="n1" title="G at position 266: -0.052">-0.05</td><td class="p1" title="H at position 266: +0.090">+0.09</td><td class="n1" title="I at position 266: -0.064">-0.06</td><td class="n1" title="K at position 266: -0.052">-0.05</td><td class="n1" title="L at position 266: -0.094">-0.09</td><td class="n1" title="M at position 266: -0.043">-0.04</td><td class="z0" title="N at position 266: -0.026">-0.03</td><td class="z0" title="P at position 266: -0.018">-0.02</td><td class="n1" title="Q at position 266: -0.074">-0.07</td><td class="p2" title="R at position 266: +0.140">+0.14</td><td class="n1" title="S at position 266: -0.064">-0.06</td><td class="z0" title="T at position 266: -0.010">-0.01</td><td class="n1" title="V at position 266: -0.103">-0.10</td><td class="p2" title="W at position 266: +0.141">+0.14</td><td class="z0" title="Y at position 266: +0.016">+0.02</td></tr><tr><th scope="row">267</th><td class="z0" title="A at position 267: -0.000">-0.00</td><td class="z0" title="C at position 267: -0.024">-0.02</td><td class="z0" title="D at position 267: -0.027">-0.03</td><td class="n1" title="E at position 267: -0.056">-0.06</td><td class="p2" title="F at position 267: +0.135">+0.14</td><td class="p4" title="G at position 267: +0.472">+0.47</td><td class="n1" title="H at position 267: -0.032">-0.03</td><td class="n1" title="I at position 267: -0.079">-0.08</td><td class="n1" title="K at position 267: -0.038">-0.04</td><td class="p2" title="L at position 267: +0.118">+0.12</td><td class="n1" title="M at position 267: -0.044">-0.04</td><td class="n1" title="N at position 267: -0.064">-0.06</td><td class="z0" title="P at position 267: -0.027">-0.03</td><td class="n1" title="Q at position 267: -0.072">-0.07</td><td class="n1" title="R at position 267: -0.056">-0.06</td><td class="n1" title="S at position 267: -0.061">-0.06</td><td class="n1" title="T at position 267: -0.067">-0.07</td><td class="n1" title="V at position 267: -0.044">-0.04</td><td class="z0" title="W at position 267: -0.000">-0.00</td><td class="n1" title="Y at position 267: -0.033">-0.03</td></tr><tr><th scope="row">280</th><td class="z0" title="A at position 280: -0.018">-0.02</td><td class="p2" title="C at position 280: +0.192">+0.19</td><td class="n1" title="D at position 280: -0.049">-0.05</td><td class="n1" title="E at position 280: -0.113">-0.11</td><td class="p1" title="F at position 280: +0.109">+0.11</td><td class="p4" title="G at position 280: +0.417">+0.42</td><td class="n2" title="H at position 280: -0.132">-0.13</td><td class="n1" title="I at position 280: -0.081">-0.08</td><td class="n1" title="K at position 280: -0.088">-0.09</td><td class="n1" title="L at position 280: -0.034">-0.03</td><td class="p2" title="M at position 280: +0.156">+0.16</td><td class="z0" title="N at position 280: +0.000">+0.00</td><td class="n1" title="P at position 280: -0.106">-0.11</td><td class="n1" title="Q at position 280: -0.102">-0.10</td><td class="n1" title="R at position 280: -0.108">-0.11</td><td class="z0" title="S at position 280: -0.010">-0.01</td><td class="z0" title="T at position 280: -0.026">-0.03</td><td class="p2" title="V at position 280: +0.160">+0.16</td><td class="n1" title="W at position 280: -0.102">-0.10</td><td class="n1" title="Y at position 280: -0.067">-0.07</td></tr></tbody>
+        </table>
+      </div>
+    <div class="bars">
+      <div class="bi"><div class="bi-top"><span class="nm"><b>How well it ranks molecules it
+        has never been shown</b><span class="cut">1.00 would be a perfect ordering, 0.00 no
+        better than guessing</span></span></div></div>
+      
+      <div class="bi">
+        <div class="bi-top"><span class="nm">8 measurements
+          <span class="cut">weights now 0.1449 long</span></span>
+          <span class="vl">+0.17 &nbsp;vs&nbsp; +0.01 shuffled</span></div>
+        <div class="track"><div class="fill"
+          style="width:42.1%"></div></div>
+      </div>
+      <div class="bi">
+        <div class="bi-top"><span class="nm">16 measurements
+          <span class="cut">weights now 0.01652 long</span></span>
+          <span class="vl">+0.18 &nbsp;vs&nbsp; +0.01 shuffled</span></div>
+        <div class="track"><div class="fill"
+          style="width:45.0%"></div></div>
+      </div>
+      <div class="bi">
+        <div class="bi-top"><span class="nm">32 measurements
+          <span class="cut">weights now 0.3315 long</span></span>
+          <span class="vl">+0.18 &nbsp;vs&nbsp; +0.02 shuffled</span></div>
+        <div class="track"><div class="fill"
+          style="width:45.1%"></div></div>
+      </div>
+      <div class="bi">
+        <div class="bi-top"><span class="nm">64 measurements
+          <span class="cut">weights now 0.4579 long</span></span>
+          <span class="vl">+0.21 &nbsp;vs&nbsp; +0.00 shuffled</span></div>
+        <div class="track"><div class="fill"
+          style="width:52.4%"></div></div>
+      </div>
+      <div class="bi">
+        <div class="bi-top"><span class="nm">128 measurements
+          <span class="cut">weights now 0.987 long</span></span>
+          <span class="vl">+0.36 &nbsp;vs&nbsp; -0.01 shuffled</span></div>
+        <div class="track"><div class="fill"
+          style="width:90.6%"></div></div>
+      </div>
+    </div>
+    
+      <div class="wmapscroll" tabindex="0" role="group" aria-label="The same procedure on shuffled answers, where there is nothing to learn">
+        <table class="wmap">
+          <caption>The same procedure on shuffled answers, where there is nothing to learn</caption>
+          <thead><tr><th scope="col">position</th><th>A</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>H</th><th>I</th><th>K</th><th>L</th><th>M</th><th>N</th><th>P</th><th>Q</th><th>R</th><th>S</th><th>T</th><th>V</th><th>W</th><th>Y</th></tr></thead>
+          <tbody><tr><th scope="row">265</th><td class="z0" title="A at position 265: -0.003">-0.00</td><td class="n2" title="C at position 265: -0.043">-0.04</td><td class="z0" title="D at position 265: +0.000">+0.00</td><td class="n1" title="E at position 265: -0.035">-0.04</td><td class="n2" title="F at position 265: -0.048">-0.05</td><td class="n1" title="G at position 265: -0.011">-0.01</td><td class="p4" title="H at position 265: +0.126">+0.13</td><td class="n1" title="I at position 265: -0.011">-0.01</td><td class="p2" title="K at position 265: +0.046">+0.05</td><td class="p4" title="L at position 265: +0.149">+0.15</td><td class="n1" title="M at position 265: -0.034">-0.03</td><td class="n2" title="N at position 265: -0.050">-0.05</td><td class="n1" title="P at position 265: -0.036">-0.04</td><td class="n1" title="Q at position 265: -0.014">-0.01</td><td class="n1" title="R at position 265: -0.025">-0.03</td><td class="n2" title="S at position 265: -0.042">-0.04</td><td class="n1" title="T at position 265: -0.030">-0.03</td><td class="p2" title="V at position 265: +0.069">+0.07</td><td class="z0" title="W at position 265: +0.000">+0.00</td><td class="z0" title="Y at position 265: -0.009">-0.01</td></tr><tr><th scope="row">266</th><td class="n1" title="A at position 266: -0.013">-0.01</td><td class="p2" title="C at position 266: +0.067">+0.07</td><td class="p1" title="D at position 266: +0.020">+0.02</td><td class="n2" title="E at position 266: -0.046">-0.05</td><td class="n1" title="F at position 266: -0.010">-0.01</td><td class="z0" title="G at position 266: -0.002">-0.00</td><td class="n1" title="H at position 266: -0.027">-0.03</td><td class="n2" title="I at position 266: -0.058">-0.06</td><td class="z0" title="K at position 266: -0.008">-0.01</td><td class="n1" title="L at position 266: -0.028">-0.03</td><td class="z0" title="M at position 266: -0.004">-0.00</td><td class="n1" title="N at position 266: -0.028">-0.03</td><td class="n1" title="P at position 266: -0.021">-0.02</td><td class="p4" title="Q at position 266: +0.166">+0.17</td><td class="n1" title="R at position 266: -0.024">-0.02</td><td class="n1" title="S at position 266: -0.022">-0.02</td><td class="p4" title="T at position 266: +0.130">+0.13</td><td class="n2" title="V at position 266: -0.045">-0.04</td><td class="n1" title="W at position 266: -0.028">-0.03</td><td class="n1" title="Y at position 266: -0.019">-0.02</td></tr><tr><th scope="row">267</th><td class="n1" title="A at position 267: -0.019">-0.02</td><td class="z0" title="C at position 267: +0.001">+0.00</td><td class="n1" title="D at position 267: -0.011">-0.01</td><td class="n1" title="E at position 267: -0.018">-0.02</td><td class="n1" title="F at position 267: -0.014">-0.01</td><td class="n1" title="G at position 267: -0.029">-0.03</td><td class="n1" title="H at position 267: -0.035">-0.03</td><td class="n1" title="I at position 267: -0.030">-0.03</td><td class="z0" title="K at position 267: -0.003">-0.00</td><td class="p2" title="L at position 267: +0.051">+0.05</td><td class="n1" title="M at position 267: -0.034">-0.03</td><td class="n1" title="N at position 267: -0.041">-0.04</td><td class="n2" title="P at position 267: -0.044">-0.04</td><td class="n2" title="Q at position 267: -0.047">-0.05</td><td class="p4" title="R at position 267: +0.164">+0.16</td><td class="n2" title="S at position 267: -0.048">-0.05</td><td class="p2" title="T at position 267: +0.065">+0.06</td><td class="z0" title="V at position 267: -0.001">-0.00</td><td class="n1" title="W at position 267: -0.017">-0.02</td><td class="p3" title="Y at position 267: +0.109">+0.11</td></tr><tr><th scope="row">280</th><td class="n1" title="A at position 280: -0.017">-0.02</td><td class="p2" title="C at position 280: +0.056">+0.06</td><td class="z0" title="D at position 280: +0.000">+0.00</td><td class="n1" title="E at position 280: -0.017">-0.02</td><td class="n1" title="F at position 280: -0.016">-0.02</td><td class="z0" title="G at position 280: +0.000">+0.00</td><td class="n2" title="H at position 280: -0.056">-0.06</td><td class="p3" title="I at position 280: +0.095">+0.10</td><td class="p2" title="K at position 280: +0.067">+0.07</td><td class="n1" title="L at position 280: -0.016">-0.02</td><td class="p3" title="M at position 280: +0.088">+0.09</td><td class="n1" title="N at position 280: -0.014">-0.01</td><td class="n1" title="P at position 280: -0.030">-0.03</td><td class="n1" title="Q at position 280: -0.018">-0.02</td><td class="n2" title="R at position 280: -0.043">-0.04</td><td class="n1" title="S at position 280: -0.030">-0.03</td><td class="n1" title="T at position 280: -0.020">-0.02</td><td class="n1" title="V at position 280: -0.021">-0.02</td><td class="z0" title="W at position 280: -0.007">-0.01</td><td class="z0" title="Y at position 280: +0.000">+0.00</td></tr></tbody>
+        </table>
+      </div>
+  </div>
 </section>
 
 <footer>

@@ -1,0 +1,3048 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_001806.2",
+  "pathogen": "Herpes simplex virus 1",
+  "reference_excluded_organism": "Human herpesvirus 1",
+  "source_record": "runs/onset_chain_NC_001806_2.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "GB_HHV23 Envelope glycoprotein B",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P06763",
+      "score": 7.1156,
+      "score_terms": {
+        "conservation": 1.9956,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.02,
+        "druggable_class": 1.6
+      },
+      "gate": "borderline",
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P06763",
+        "entry_id": "GB_HHV23",
+        "protein_name": "Envelope glycoprotein B",
+        "organism": "Human herpesvirus 2 (strain 333)",
+        "reviewed": true,
+        "molecule_asked_for": "GB_HHV23 Envelope glycoprotein B",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Envelope glycoprotein that forms spikes at the surface of virion envelope. Essential for the initial attachment to heparan sulfate moieties of the host cell surface proteoglycans. Involved in fusion of viral and cellular membranes leading to virus entry into the host cell. Following initial binding to its host receptors, membrane fusion is mediated by the fusion machinery composed at least of gB and the heterodimer gH/gL. May be involved in the fusion between the virion envelope and the outer nuclear membrane during virion egress"
+          ],
+          "SUBUNIT": [
+            "Homotrimer; disulfide-linked. Binds to heparan sulfate proteoglycans. Interacts with gH/gL heterodimer"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "1.20.5.1890",
+              "name": "-"
+            },
+            {
+              "id": "2.30.29.100",
+              "name": "-"
+            },
+            {
+              "id": "2.30.30.1230",
+              "name": "-"
+            },
+            {
+              "id": "6.10.250.3280",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR035377",
+              "name": "Glycoprot_B_PH1"
+            },
+            {
+              "id": "IPR035381",
+              "name": "Glycoprot_B_PH2"
+            },
+            {
+              "id": "IPR038631",
+              "name": "Glycoprot_B_PH2_sf"
+            },
+            {
+              "id": "IPR055341",
+              "name": "Glycoprotein_B_ecto_C"
+            },
+            {
+              "id": "IPR000234",
+              "name": "Herpes_Glycoprot_B"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF17416",
+              "name": "Glycoprot_B_PH1"
+            },
+            {
+              "id": "PF17417",
+              "name": "Glycoprot_B_PH2"
+            },
+            {
+              "id": "PF00606",
+              "name": "Glycoprotein_B"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF161008",
+              "name": "Viral glycoprotein ectodomain-like"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044175",
+              "term": "host cell endosome membrane"
+            },
+            {
+              "id": "GO:0044178",
+              "term": "host cell Golgi membrane"
+            },
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0016020",
+              "term": "membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0001618",
+              "term": "virus receptor activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Disulfide bond",
+          "Glycoprotein",
+          "Host cell membrane",
+          "Host endosome",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction",
+          "Membrane",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral attachment to host cell",
+          "Viral envelope protein",
+          "Virion",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Host cell membrane",
+          "Host endosome",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 2,
+        "source": "https://rest.uniprot.org/uniprotkb/P06763.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 2,
+      "target": "Envelope glycoprotein D",
+      "parent": "GD_HHV2H Envelope glycoprotein D",
+      "tier": "exact",
+      "nearest_homolog": "Q69467",
+      "score": 6.5476,
+      "score_terms": {
+        "conservation": 1.4076,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.04,
+        "druggable_class": 1.6
+      },
+      "gate": "yes",
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": false,
+          "because": "this reading frame could not be re-derived from the genome, so its residues could not be read"
+        },
+        "confirmed_at": [
+          "neither end: the residues could not be compared"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 2,
+        "strand": "+",
+        "frame": 2,
+        "nt_start": 138422,
+        "orf_length_aa": 394,
+        "segment": 0,
+        "orf_name": "GD_HHV2H Envelope glycoprotein D",
+        "reading_frame": "+2 at nt 138423",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        26,
+        393
+      ],
+      "chain_span_in_this_genome": [
+        26,
+        394
+      ],
+      "chain_span_nt": [
+        138498,
+        139604
+      ],
+      "chain_span_nt_confirmed_at": [
+        "neither end: the residues could not be compared"
+      ],
+      "segment_length_nt": 152222,
+      "annotation": {
+        "accession": "Q69467",
+        "entry_id": "GD_HHV2H",
+        "protein_name": "Envelope glycoprotein D",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "Envelope glycoprotein D",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Envelope glycoprotein that binds to the host cell entry receptors NECTIN1 and TNFRSF14/HVEM, promoting the virus entry into host cells. May trigger fusion with host membrane, by recruiting the fusion machinery composed of gB and gH/gL (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Homodimer (By similarity). Interacts with host receptor TNFRSF14. Interacts with host receptor NECTIN1. Interacts with host receptor NECTIN2. Interacts (via profusion domain) with gB; this interaction occurs in the absence of gH/gL. Interacts (via profusion domain) with gH/gL heterodimer; this interaction occurs in the absence of gB. Associates with the gB-gH/gL-gD complex. Interacts (via C-terminus) with UL11 tegument protein (By similarity)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000385470",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd12087",
+              "name": "TM_EGFR-like"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "2.70.230.10",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR002896",
+              "name": "Herpes_glycop_dom"
+            },
+            {
+              "id": "IPR036179",
+              "name": "Ig-like_dom_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF01537",
+              "name": "Herpes_glycop_D"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF48726",
+              "name": "Immunoglobulin"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0016020",
+              "term": "membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0098670",
+              "term": "entry receptor-mediated virion attachment to host cell"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Disulfide bond",
+          "Glycoprotein",
+          "Host-virus interaction",
+          "Membrane",
+          "Metal-binding",
+          "Reference proteome",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral attachment to host cell",
+          "Viral attachment to host entry receptor",
+          "Viral envelope protein",
+          "Virion",
+          "Virus entry into host cell",
+          "Zinc"
+        ],
+        "host_interaction_keywords": [
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Viral attachment to host entry receptor",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 2,
+        "source": "https://rest.uniprot.org/uniprotkb/Q69467.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 3,
+      "target": "GH_HHV2H Envelope glycoprotein H",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P89445",
+      "score": 6.1891,
+      "score_terms": {
+        "conservation": 1.0791,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.01,
+        "druggable_class": 1.6
+      },
+      "gate": "borderline",
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P89445",
+        "entry_id": "GH_HHV2H",
+        "protein_name": "Envelope glycoprotein H",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "GH_HHV2H Envelope glycoprotein H",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "The heterodimer glycoprotein H-glycoprotein L is required for the fusion of viral and plasma membranes leading to virus entry into the host cell. Following initial binding to host receptor, membrane fusion is mediated by the fusion machinery composed of gB and the heterodimer gH/gL. May also be involved in the fusion between the virion envelope and the outer nuclear membrane during virion morphogenesis (By similarity). Interaction with host integrins ITGAV/ITGB3 triggers release of cytosolic Ca(2+) and FAK phosphorylation leading to efficient viral entry into host genital tract epithelial cells (PubMed:24942591)"
+          ],
+          "SUBUNIT": [
+            "Interacts with glycoprotein L (gL); this interaction is necessary for the correct processing and cell surface expression of gH. The heterodimer gH/gL seems to interact with gB trimers during fusion. Interacts with host integrins ITGAV/ITGB3 to mediate viral entry into epithelial cells"
+          ],
+          "PTM": [
+            "N-glycosylated, O-glycosylated, and sialylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "1.20.58.1340",
+              "name": "-"
+            },
+            {
+              "id": "3.10.360.40",
+              "name": "-"
+            },
+            {
+              "id": "3.30.500.50",
+              "name": "-"
+            },
+            {
+              "id": "2.60.40.3190",
+              "name": "Herpesvirus glycoprotein H, C-terminal domain"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR003493",
+              "name": "Herpes_gH"
+            },
+            {
+              "id": "IPR035305",
+              "name": "Herpes_glycoH_C"
+            },
+            {
+              "id": "IPR038172",
+              "name": "Herpes_glycoH_C_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF17488",
+              "name": "Herpes_glycoH_C"
+            },
+            {
+              "id": "PF02489",
+              "name": "Herpes_glycop_H"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044175",
+              "term": "host cell endosome membrane"
+            },
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0016020",
+              "term": "membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0019064",
+              "term": "fusion of virus membrane with host plasma membrane"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Disulfide bond",
+          "Fusion of virus membrane with host cell membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "Host cell membrane",
+          "Host endosome",
+          "Host membrane",
+          "Host-virus interaction",
+          "Membrane",
+          "Reference proteome",
+          "Sialic acid",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral envelope protein",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Fusion of virus membrane with host cell membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cell membrane",
+          "Host endosome",
+          "Host membrane",
+          "Host-virus interaction",
+          "Viral penetration into host cytoplasm",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 1,
+        "source": "https://rest.uniprot.org/uniprotkb/P89445.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 4,
+      "target": "RIR1_HHV2H Ribonucleoside-diphosphate reductase large subunit",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P89462",
+      "score": 5.921,
+      "score_terms": {
+        "conservation": 1.521,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P89462",
+        "entry_id": "RIR1_HHV2H",
+        "protein_name": "Ribonucleoside-diphosphate reductase large subunit",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "RIR1_HHV2H Ribonucleoside-diphosphate reductase large subunit",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Ribonucleoside-diphosphate reductase holoenzyme that provides the precursors necessary for viral DNA synthesis. Allows virus growth in non-dividing cells, as well as reactivation from latency in infected hosts. Catalyzes the biosynthesis of deoxyribonucleotides from the corresponding ribonucleotides (By similarity). The N-terminal region confers antiapoptotic activity in differentiated cells such as neurons and is important for viral reactivation to increase neural survivability (PubMed:11773417). Prevents host necroptosis by targeting host RIPK1 and RIPK3, thereby hampering the formation of necroptotic RIPK1-RIPK3 complexes (PubMed:25674983). May form hetero-amyloid structures with host proteins RIPK3 or ZBP1, thereby preventing RIPK3- and ZBP1-mediated necroptosis (By similarity). In addition, inhibits extrinsic apoptosis by targeting host CASP8 (PubMed:25674983)"
+          ],
+          "SUBUNIT": [
+            "Heterotetramer composed of a homodimer of the large subunit (R1) and a homodimer of the small subunit (R2). Larger multisubunit protein complex are also active, composed of (R1)n(R2)n (By similarity). May self-assemble (via RIP homotypic interaction motif/RHIM) into homomeric fibrillar amyloid structures (By similarity). Interacts (via RHIM) with human RIPK1 (via RHIM) (PubMed:25674983). Interacts (via RHIM) with human RIPK3 (via RHIM) (PubMed:25674983). May interact (via RHIM) with human ZBP1 (via RHIM) (By similarity). Interacts (via C-terminus) with host CASP8 (PubMed:25674983)"
+          ],
+          "DOMAIN": [
+            "Contains an alpha-crystallin domain homologous to small heat-shock proteins",
+            "The RIP homotypic interaction motif/RHIM may drive self-assembly into homomeric amyloid structures and mediates interaction with the RHIM motif of host proteins RIPK3 and ZBP1 to form heteromeric amyloid structures"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.20.70.20",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR034717",
+              "name": "HSV_RIR1"
+            },
+            {
+              "id": "IPR013346",
+              "name": "NrdE_NrdA_C"
+            },
+            {
+              "id": "IPR000788",
+              "name": "RNR_lg_C"
+            },
+            {
+              "id": "IPR013509",
+              "name": "RNR_lsu_N"
+            },
+            {
+              "id": "IPR039718",
+              "name": "Rrm1"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF02867",
+              "name": "Ribonuc_red_lgC"
+            },
+            {
+              "id": "PF00317",
+              "name": "Ribonuc_red_lgN"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF51998",
+              "name": "PFL-like glycyl radical enzymes"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS00089",
+              "name": "RIBORED_LARGE"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044175",
+              "term": "host cell endosome membrane"
+            },
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0004748",
+              "term": "ribonucleoside-diphosphate reductase activity, thioredoxin disulfide as acceptor"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0009263",
+              "term": "deoxyribonucleotide biosynthetic process"
+            },
+            {
+              "id": "GO:0006260",
+              "term": "DNA replication"
+            },
+            {
+              "id": "GO:0010804",
+              "term": "negative regulation of tumor necrosis factor-mediated signaling pathway"
+            },
+            {
+              "id": "GO:0019046",
+              "term": "release from viral latency"
+            },
+            {
+              "id": "GO:0033668",
+              "term": "symbiont-mediated suppression of host apoptosis"
+            }
+          ]
+        },
+        "keywords": [
+          "ATP-binding",
+          "Disulfide bond",
+          "DNA replication",
+          "Early protein",
+          "Host cell membrane",
+          "Host endosome",
+          "Host membrane",
+          "Host-virus interaction",
+          "Inhibition of host caspases by virus",
+          "Membrane",
+          "Modulation of host cell apoptosis by virus",
+          "Nucleotide-binding",
+          "Oxidoreductase",
+          "Reference proteome",
+          "Viral latency",
+          "Viral reactivation from latency"
+        ],
+        "host_interaction_keywords": [
+          "Host cell membrane",
+          "Host endosome",
+          "Host membrane",
+          "Host-virus interaction",
+          "Inhibition of host caspases by virus",
+          "Modulation of host cell apoptosis by virus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P89462.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 5,
+      "target": "Envelope glycoprotein C",
+      "parent": "GC_HHV2H Envelope glycoprotein C",
+      "tier": "exact",
+      "nearest_homolog": "Q89730",
+      "score": 5.7694,
+      "score_terms": {
+        "conservation": 0.6594,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.01,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": false,
+          "because": "this reading frame could not be re-derived from the genome, so its residues could not be read"
+        },
+        "confirmed_at": [
+          "neither end: the residues could not be compared"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 5,
+        "strand": "+",
+        "frame": 2,
+        "nt_start": 96311,
+        "orf_length_aa": 511,
+        "segment": 0,
+        "orf_name": "GC_HHV2H Envelope glycoprotein C",
+        "reading_frame": "+2 at nt 96312",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        28,
+        480
+      ],
+      "chain_span_in_this_genome": [
+        30,
+        511
+      ],
+      "chain_span_nt": [
+        96399,
+        97844
+      ],
+      "chain_span_nt_confirmed_at": [
+        "neither end: the residues could not be compared"
+      ],
+      "segment_length_nt": 152222,
+      "annotation": {
+        "accession": "Q89730",
+        "entry_id": "GC_HHV2H",
+        "protein_name": "Envelope glycoprotein C",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "Envelope glycoprotein C",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Major attachment protein that mediates binding of the virus to cell surface heparan sulfate or chondroitin sulfate (By similarity). Also plays a role in host immune evasion by inhibiting the host complement cascade activation"
+          ],
+          "SUBUNIT": [
+            "Interacts with host complement component C3b; this interaction inhibits host immune response by disregulating complement cascade"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000038201",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "2.60.40.10",
+              "name": "Immunoglobulins"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR001038",
+              "name": "GA_GC"
+            },
+            {
+              "id": "IPR007110",
+              "name": "Ig-like_dom"
+            },
+            {
+              "id": "IPR036179",
+              "name": "Ig-like_dom_sf"
+            },
+            {
+              "id": "IPR013783",
+              "name": "Ig-like_fold"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF02124",
+              "name": "Marek_A"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF48726",
+              "name": "Immunoglobulin"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS50835",
+              "name": "IG_LIKE"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0098671",
+              "term": "adhesion receptor-mediated virion attachment to host cell"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0042784",
+              "term": "symbiont-mediated suppression of host complement activation"
+            }
+          ]
+        },
+        "keywords": [
+          "Disulfide bond",
+          "Glycoprotein",
+          "Host-virus interaction",
+          "Immunoglobulin domain",
+          "Inhibition of host complement factors by virus",
+          "Membrane",
+          "Reference proteome",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral attachment to host adhesion receptor",
+          "Viral attachment to host cell",
+          "Viral immunoevasion",
+          "Virion",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Host-virus interaction",
+          "Inhibition of host complement factors by virus",
+          "Viral attachment to host adhesion receptor",
+          "Viral attachment to host cell",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/Q89730.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 6,
+      "target": "Envelope glycoprotein L",
+      "parent": "GL_HHV2H Envelope glycoprotein L",
+      "tier": "exact",
+      "nearest_homolog": "P28278",
+      "score": 5.6919,
+      "score_terms": {
+        "conservation": 0.5319,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.06,
+        "druggable_class": 1.6
+      },
+      "gate": "borderline",
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": false,
+          "because": "this reading frame could not be re-derived from the genome, so its residues could not be read"
+        },
+        "confirmed_at": [
+          "neither end: the residues could not be compared"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 7,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 9337,
+        "orf_length_aa": 224,
+        "segment": 0,
+        "orf_name": "GL_HHV2H Envelope glycoprotein L",
+        "reading_frame": "+1 at nt 9338",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        17,
+        224
+      ],
+      "chain_span_in_this_genome": [
+        19,
+        223
+      ],
+      "chain_span_nt": [
+        9392,
+        10006
+      ],
+      "chain_span_nt_confirmed_at": [
+        "neither end: the residues could not be compared"
+      ],
+      "segment_length_nt": 152222,
+      "annotation": {
+        "accession": "P28278",
+        "entry_id": "GL_HHV2H",
+        "protein_name": "Envelope glycoprotein L",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "Envelope glycoprotein L",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "The heterodimer glycoprotein H-glycoprotein L is required for the fusion of viral and plasma membranes leading to virus entry into the host cell. Acts as a functional inhibitor of gH and maintains gH in an inhibited form. Upon binding to host integrins, gL dissociates from gH leading to activation of the viral fusion glycoproteins gB and gH"
+          ],
+          "SUBUNIT": [
+            "Interacts with glycoprotein H (gH); this interaction is necessary for the correct processing and cell surface expression of gH. The heterodimer gH/gL seems to interact with gB trimers during fusion"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000038265",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.30.390.170",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR022200",
+              "name": "Herpes_gL_C"
+            },
+            {
+              "id": "IPR007923",
+              "name": "Herpes_gL_N"
+            },
+            {
+              "id": "IPR038311",
+              "name": "Herpes_gL_N_sf"
+            },
+            {
+              "id": "IPR034708",
+              "name": "HSV_GL_alphagamma"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF12524",
+              "name": "GlyL_C"
+            },
+            {
+              "id": "PF05259",
+              "name": "Herpes_UL1"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS52024",
+              "name": "GL_AHV"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044177",
+              "term": "host cell Golgi apparatus"
+            },
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0019064",
+              "term": "fusion of virus membrane with host plasma membrane"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Disulfide bond",
+          "Fusion of virus membrane with host cell membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "Host cell membrane",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Membrane",
+          "Reference proteome",
+          "Signal",
+          "Viral envelope protein",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Fusion of virus membrane with host cell membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cell membrane",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Viral penetration into host cytoplasm",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 1,
+        "source": "https://rest.uniprot.org/uniprotkb/P28278.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 7,
+      "target": "DPOL_HHV21 DNA polymerase catalytic subunit",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P07918",
+      "score": 5.6658,
+      "score_terms": {
+        "conservation": 1.7658,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P07918",
+        "entry_id": "DPOL_HHV21",
+        "protein_name": "DNA polymerase catalytic subunit",
+        "organism": "Human herpesvirus 2 (strain 186)",
+        "reviewed": true,
+        "molecule_asked_for": "DPOL_HHV21 DNA polymerase catalytic subunit",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Replicates viral genomic DNA. The replication complex is composed of six viral proteins: the DNA polymerase, processivity factor, primase, primase-associated factor, helicase, and ssDNA-binding protein. Additionally, the polymerase contains an intrinsic ribonuclease H (RNase H) activity that specifically degrades RNA/DNA heteroduplexes or duplex DNA substrates in the 5' to 3' direction. Therefore, it can catalyze the excision of the RNA primers that initiate the synthesis of Okazaki fragments at a replication fork during viral DNA replication (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Forms a complex with the ssDNA-binding protein UL29, the DNA polymerase processivity factor, and the alkaline exonuclease. Interacts with the putative helicase-primase complex subunit UL8; this interaction may coordinate leading and lagging strand DNA synthesis at the replication fork (By similarity)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "1.10.132.60",
+              "name": "DNA polymerase family B, C-terminal domain"
+            },
+            {
+              "id": "3.30.342.10",
+              "name": "DNA Polymerase, chain B, domain 1"
+            },
+            {
+              "id": "1.10.287.690",
+              "name": "Helix hairpin bin"
+            },
+            {
+              "id": "3.90.1600.10",
+              "name": "Palm domain of DNA polymerase"
+            },
+            {
+              "id": "3.30.420.10",
+              "name": "Ribonuclease H-like superfamily/Ribonuclease H"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR006172",
+              "name": "DNA-dir_DNA_pol_B"
+            },
+            {
+              "id": "IPR017964",
+              "name": "DNA-dir_DNA_pol_B_CS"
+            },
+            {
+              "id": "IPR006133",
+              "name": "DNA-dir_DNA_pol_B_exonuc"
+            },
+            {
+              "id": "IPR006134",
+              "name": "DNA-dir_DNA_pol_B_multi_dom"
+            },
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR042087",
+              "name": "DNA_pol_B_thumb"
+            },
+            {
+              "id": "IPR023211",
+              "name": "DNA_pol_palm_dom_sf"
+            },
+            {
+              "id": "IPR050240",
+              "name": "DNA_pol_type-B"
+            },
+            {
+              "id": "IPR021639",
+              "name": "DNAPolymera_Pol_C"
+            },
+            {
+              "id": "IPR061942",
+              "name": "Herpes_Pol_N"
+            },
+            {
+              "id": "IPR012337",
+              "name": "RNaseH-like_sf"
+            },
+            {
+              "id": "IPR036397",
+              "name": "RNaseH_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00136",
+              "name": "DNA_pol_B"
+            },
+            {
+              "id": "PF03104",
+              "name": "DNA_pol_B_exo1"
+            },
+            {
+              "id": "PF11590",
+              "name": "DNAPolymera_Pol"
+            },
+            {
+              "id": "PF31254",
+              "name": "Herpes_Pol_N"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            },
+            {
+              "id": "SSF53098",
+              "name": "Ribonuclease H-like"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS00116",
+              "name": "DNA_POLYMERASE_B"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0003677",
+              "term": "DNA binding"
+            },
+            {
+              "id": "GO:0003887",
+              "term": "DNA-directed DNA polymerase activity"
+            },
+            {
+              "id": "GO:0004527",
+              "term": "exonuclease activity"
+            },
+            {
+              "id": "GO:0000166",
+              "term": "nucleotide binding"
+            },
+            {
+              "id": "GO:0004523",
+              "term": "RNA-DNA hybrid ribonuclease activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039686",
+              "term": "bidirectional double-stranded viral DNA replication"
+            },
+            {
+              "id": "GO:0006260",
+              "term": "DNA replication"
+            }
+          ]
+        },
+        "keywords": [
+          "DNA replication",
+          "DNA-binding",
+          "DNA-directed DNA polymerase",
+          "Endonuclease",
+          "Host nucleus",
+          "Hydrolase",
+          "Multifunctional enzyme",
+          "Nuclease",
+          "Nucleotidyltransferase",
+          "Transferase",
+          "Viral DNA replication"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P07918.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 8,
+      "target": "LTP_HHV2H Large tegument protein deneddylase",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P89459",
+      "score": 5.1764,
+      "score_terms": {
+        "conservation": 1.2564,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.02,
+        "druggable_class": 2.4
+      },
+      "gate": "no",
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P89459",
+        "entry_id": "LTP_HHV2H",
+        "protein_name": "Large tegument protein deneddylase",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "LTP_HHV2H Large tegument protein deneddylase",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Large tegument protein that plays multiple roles in the viral cycle. During viral entry, remains associated with the capsid while most of the tegument is detached and participates in the capsid transport toward the host nucleus. Plays a role in the routing of the capsid at the nuclear pore complex and subsequent uncoating. Within the host nucleus, acts as a deneddylase and promotes the degradation of nuclear CRLs (cullin-RING ubiquitin ligases) and thereby stabilizes nuclear CRL substrates, while cytoplasmic CRLs remain unaffected. These modifications prevent host cell cycle S-phase progression and create a favorable environment allowing efficient viral genome replication. Participates later in the secondary envelopment of capsids. Indeed, plays a linker role for the association of the outer viral tegument to the capsids together with the inner tegument protein"
+          ],
+          "SUBUNIT": [
+            "Interacts with host CUL1 and CUL4A; these interactions inhibit the E3 ligase activity of cullins. Interacts with inner tegument protein. Interacts with capsid vertex specific component CVC2. Interacts with the major capsid protein/MCP"
+          ],
+          "PTM": [
+            "Proteolytically processed, possibly into several polypeptides. Enzymatic activity is only detectable following cleavage of the UL36 protein, which occurs late during viral replication (By similarity)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.90.70.120",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR005210",
+              "name": "Herpes_LT_deneddylase"
+            },
+            {
+              "id": "IPR006928",
+              "name": "Herpes_teg_USP"
+            },
+            {
+              "id": "IPR034702",
+              "name": "HSV_LTP"
+            },
+            {
+              "id": "IPR038765",
+              "name": "Papain-like_cys_pep_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF04843",
+              "name": "Herpes_teg_N"
+            },
+            {
+              "id": "PF03586",
+              "name": "Herpes_UL36"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF54001",
+              "name": "Cysteine proteinases"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS51521",
+              "name": "HTUSP"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0019033",
+              "term": "viral tegument"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0004843",
+              "term": "cysteine-type deubiquitinase activity"
+            },
+            {
+              "id": "GO:0019784",
+              "term": "deNEDDylase activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006508",
+              "term": "proteolysis"
+            },
+            {
+              "id": "GO:0039648",
+              "term": "symbiont-mediated perturbation of host ubiquitin-like protein modification"
+            },
+            {
+              "id": "GO:0039693",
+              "term": "viral DNA genome replication"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Host cytoplasm",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Modulation of host ubiquitin pathway by viral deubiquitinase",
+          "Modulation of host ubiquitin pathway by virus",
+          "Protease",
+          "Reference proteome",
+          "Repeat",
+          "Thiol protease",
+          "Ubl conjugation pathway",
+          "Virion",
+          "Virion tegument"
+        ],
+        "host_interaction_keywords": [
+          "Host cytoplasm",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Modulation of host ubiquitin pathway by viral deubiquitinase",
+          "Modulation of host ubiquitin pathway by virus"
+        ],
+        "structures_deposited": 2,
+        "source": "https://rest.uniprot.org/uniprotkb/P89459.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 9,
+      "target": "HELI_HHV2H DNA replication helicase",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P28277",
+      "score": 5.0191,
+      "score_terms": {
+        "conservation": 1.9191,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P28277",
+        "entry_id": "HELI_HHV2H",
+        "protein_name": "DNA replication helicase",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "HELI_HHV2H DNA replication helicase",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Component of the helicase/primase complex. Unwinds the DNA at the replication forks and generates single-stranded DNA for both leading and lagging strand synthesis. The primase synthesizes short RNA primers on the lagging strand that the polymerase elongates using dNTPs. Possesses helicase-like motifs and therefore may act as the helicase subunit of the complex"
+          ],
+          "SUBUNIT": [
+            "Associates with the primase and the primase-associated factor to form the helicase-primase complex"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.40.50.300",
+              "name": "P-loop containing nucleotide triphosphate hydrolases"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR003840",
+              "name": "DNA_helicase_dom"
+            },
+            {
+              "id": "IPR034711",
+              "name": "HSV_HELI"
+            },
+            {
+              "id": "IPR027417",
+              "name": "P-loop_NTPase"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF02689",
+              "name": "Herpes_Helicase"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF52540",
+              "name": "P-loop containing nucleoside triphosphate hydrolases"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0004386",
+              "term": "helicase activity"
+            },
+            {
+              "id": "GO:0016787",
+              "term": "hydrolase activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039686",
+              "term": "bidirectional double-stranded viral DNA replication"
+            },
+            {
+              "id": "GO:0006260",
+              "term": "DNA replication"
+            }
+          ]
+        },
+        "keywords": [
+          "ATP-binding",
+          "DNA replication",
+          "Helicase",
+          "Host nucleus",
+          "Hydrolase",
+          "Nucleotide-binding",
+          "Reference proteome"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P28277.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 10,
+      "target": "Envelope glycoprotein K",
+      "parent": "GK_HHV2H Envelope glycoprotein K",
+      "tier": "exact",
+      "nearest_homolog": "P22485",
+      "score": 4.6807,
+      "score_terms": {
+        "conservation": 1.5807,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": false,
+          "because": "this reading frame could not be re-derived from the genome, so its residues could not be read"
+        },
+        "confirmed_at": [
+          "neither end: the residues could not be compared"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 10,
+        "strand": "+",
+        "frame": 0,
+        "nt_start": 112179,
+        "orf_length_aa": 338,
+        "segment": 0,
+        "orf_name": "GK_HHV2H Envelope glycoprotein K",
+        "reading_frame": "+0 at nt 112180",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        31,
+        338
+      ],
+      "chain_span_in_this_genome": [
+        31,
+        338
+      ],
+      "chain_span_nt": [
+        112270,
+        113193
+      ],
+      "chain_span_nt_confirmed_at": [
+        "neither end: the residues could not be compared"
+      ],
+      "segment_length_nt": 152222,
+      "annotation": {
+        "accession": "P22485",
+        "entry_id": "GK_HHV2H",
+        "protein_name": "Envelope glycoprotein K",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "Envelope glycoprotein K",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Glycoprotein that probably modulates membrane fusion events during secondary envelopment of cytoplasmic capsids that bud into specific trans-Golgi network (TGN)-derived membranes. Also plays a role, together with gB, in virus-induced cell-to-cell fusion (syncytia formation). Seems to block fusion of virions with infected-cell membranes (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Interacts (via UL20 interaction region) with protein UL20 (via N-terminus); this interaction probably plays a role in the coordinate transport of protein UL20 and gK to the trans-Golgi network (TGN), and is required for the cell surface expression of gK"
+          ],
+          "PTM": [
+            "N-glycosylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000038303",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR002567",
+              "name": "GK"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF01621",
+              "name": "Fusion_gly_K"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044175",
+              "term": "host cell endosome membrane"
+            },
+            {
+              "id": "GO:0044178",
+              "term": "host cell Golgi membrane"
+            },
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0016020",
+              "term": "membrane"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039700",
+              "term": "fusion of viral membrane with host outer nuclear membrane"
+            },
+            {
+              "id": "GO:0060141",
+              "term": "symbiont-mediated induction of syncytium formation"
+            }
+          ]
+        },
+        "keywords": [
+          "Glycoprotein",
+          "Host cell membrane",
+          "Host endosome",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Membrane",
+          "Reference proteome",
+          "Signal",
+          "Syncytium formation induced by viral infection",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral primary envelope fusion with host outer nuclear membrane",
+          "Viral release from host cell"
+        ],
+        "host_interaction_keywords": [
+          "Host cell membrane",
+          "Host endosome",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Viral primary envelope fusion with host outer nuclear membrane",
+          "Viral release from host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P22485.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 11,
+      "target": "Envelope glycoprotein I",
+      "parent": "GI_HHV23 Envelope glycoprotein I",
+      "tier": "exact",
+      "nearest_homolog": "P06764",
+      "score": 4.2888,
+      "score_terms": {
+        "conservation": 0.6888,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": false,
+          "because": "this reading frame could not be re-derived from the genome, so its residues could not be read"
+        },
+        "confirmed_at": [
+          "neither end: the residues could not be compared"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 11,
+        "strand": "+",
+        "frame": 0,
+        "nt_start": 139788,
+        "orf_length_aa": 390,
+        "segment": 0,
+        "orf_name": "GI_HHV23 Envelope glycoprotein I",
+        "reading_frame": "+0 at nt 139789",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        21,
+        372
+      ],
+      "chain_span_in_this_genome": [
+        21,
+        382
+      ],
+      "chain_span_nt": [
+        139849,
+        140934
+      ],
+      "chain_span_nt_confirmed_at": [
+        "neither end: the residues could not be compared"
+      ],
+      "segment_length_nt": 152222,
+      "annotation": {
+        "accession": "P06764",
+        "entry_id": "GI_HHV23",
+        "protein_name": "Envelope glycoprotein I",
+        "organism": "Human herpesvirus 2 (strain 333)",
+        "reviewed": true,
+        "molecule_asked_for": "Envelope glycoprotein I",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "In epithelial cells, the heterodimer gE/gI is required for the cell-to-cell spread of the virus, by sorting nascent virions to cell junctions. Once the virus reaches the cell junctions, virus particles can spread to adjacent cells extremely rapidly through interactions with cellular receptors that accumulate at these junctions. Implicated in basolateral spread in polarized cells. In neuronal cells, gE/gI is essential for the anterograde spread of the infection throughout the host nervous system. Together with US9, the heterodimer gE/gI is involved in the sorting and transport of viral structural components toward axon tips",
+            "The heterodimer gE/gI serves as a receptor for the Fc part of human IgG. Dissociation of gE/gI from IgG occurs at acidic pH. May thus be involved in anti-HSV antibodies bipolar bridging, followed by intracellular endocytosis and degradation, thereby interfering with host Ig-mediated immune responses"
+          ],
+          "SUBUNIT": [
+            "Interacts with gE; this interaction enhances the Fc receptor function of gE"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000115772",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR002874",
+              "name": "Herpes_gI"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF01688",
+              "name": "Herpes_gI"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0043657",
+              "term": "host cell"
+            },
+            {
+              "id": "GO:0044178",
+              "term": "host cell Golgi membrane"
+            },
+            {
+              "id": "GO:0044156",
+              "term": "host cell junction"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0052031",
+              "term": "symbiont-mediated perturbation of host defense response"
+            }
+          ]
+        },
+        "keywords": [
+          "Glycoprotein",
+          "Host cell junction",
+          "Host cell membrane",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction",
+          "Membrane",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral envelope protein",
+          "Viral immunoevasion",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host cell junction",
+          "Host cell membrane",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P06764.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 12,
+      "target": "MCP_HHV2H Major capsid protein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P89442",
+      "score": 3.7785,
+      "score_terms": {
+        "conservation": 2.2485,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.03,
+        "druggable_class": 0.0
+      },
+      "gate": "no",
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P89442",
+        "entry_id": "MCP_HHV2H",
+        "protein_name": "Major capsid protein",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "MCP_HHV2H Major capsid protein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Self-assembles to form an icosahedral capsid with a T=16 symmetry, about 200 nm in diameter, and consisting of 150 hexons and 12 pentons (total of 162 capsomers). Hexons form the edges and faces of the capsid and are each composed of six MCP molecules. In contrast, one penton is found at each of the 12 vertices. Eleven of the pentons are MCP pentamers, while the last vertex is occupied by the portal complex. The capsid is surrounded by a layer of proteinaceous material designated the tegument which, in turn, is enclosed in an envelope of host cell-derived lipids containing virus-encoded glycoproteins"
+          ],
+          "SUBUNIT": [
+            "Homomultimer. Makes the hexons and eleven out of twelve pentons. Interacts with triplex proteins 1/TRX1 and 2/TRX2; adjacent capsomers are linked together in groups of three by triplexes, heterotrimeric complexes composed of one molecule of TRX1 and two molecules of TRX2. Interacts with scaffold protein; this interaction allows efficient MCP transport to the host nucleus. Interacts with capsid vertex component 2/CVC2. Interacts with the small capsomere-interacting protein/SCP"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR000912",
+              "name": "Herpes_MCP"
+            },
+            {
+              "id": "IPR023233",
+              "name": "Herpes_MCP_upper_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF03122",
+              "name": "Herpes_MCP"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF103417",
+              "name": "Major capsid protein VP5"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0039622",
+              "term": "T=16 icosahedral viral capsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Capsid protein",
+          "Host nucleus",
+          "Reference proteome",
+          "T=16 icosahedral capsid protein",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus"
+        ],
+        "structures_deposited": 3,
+        "source": "https://rest.uniprot.org/uniprotkb/P89442.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 13,
+      "target": "unidentified probable surface antigen",
+      "parent": null,
+      "tier": "topology",
+      "nearest_homolog": null,
+      "score": 3.6,
+      "score_terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": null,
+      "annotation_failed_because": null,
+      "not_annotated_because": "this chain was identified with no reviewed relative, so there is no curated entry to read a function from"
+    },
+    {
+      "rank": 14,
+      "target": "UL13_HHV2H Serine/threonine-protein kinase UL13",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P89436",
+      "score": 3.0034,
+      "score_terms": {
+        "conservation": 1.4034,
+        "surface_exposed": 0.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P89436",
+        "entry_id": "UL13_HHV2H",
+        "protein_name": "Serine/threonine-protein kinase UL13",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "UL13_HHV2H Serine/threonine-protein kinase UL13",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Multifunctional serine/threonine kinase that plays a role in several processes including egress of virus particles from the nucleus, modulation of the actin cytoskeleton and regulation of viral and cellular gene expression. Regulates the nuclear localization of viral envelopment factors UL34 and UL31, by phosphorylating the US3 kinase, indicating a role in nuclear egress. Disrupts host nuclear lamins, including LMNA and LMNB1. Phosphorylates the viral Fc receptor composed of glycoproteins E (gE) and I (gI). Phosphorylation of glycoprotein E (gE) by UL13 alters its subcellular localization, from the host early endosome to the plasma membrane. Participates in the transcriptional regulation of cellular and viral mRNAs mainly by phosphorylating the viral transcriptional regulator ICP22. Additional substrates have been identified, including UL41, UL49 or host EF1D (By similarity)"
+          ],
+          "PTM": [
+            "Autophosphorylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "1.10.510.10",
+              "name": "Transferase(Phosphotransferase) domain 1"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR010615",
+              "name": "Herpes_UL97"
+            },
+            {
+              "id": "IPR011009",
+              "name": "Kinase-like_dom_sf"
+            },
+            {
+              "id": "IPR000719",
+              "name": "Prot_kinase_dom"
+            },
+            {
+              "id": "IPR008271",
+              "name": "Ser/Thr_kinase_AS"
+            },
+            {
+              "id": "IPR051681",
+              "name": "Ser/Thr_Kinases-Pseudokinases"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF06734",
+              "name": "UL97"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56112",
+              "name": "Protein kinase-like (PK-like)"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS50011",
+              "name": "PROTEIN_KINASE_DOM"
+            },
+            {
+              "id": "PS00108",
+              "name": "PROTEIN_KINASE_ST"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0019033",
+              "term": "viral tegument"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0005524",
+              "term": "ATP binding"
+            },
+            {
+              "id": "GO:0106310",
+              "term": "protein serine kinase activity"
+            },
+            {
+              "id": "GO:0004674",
+              "term": "protein serine/threonine kinase activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0016032",
+              "term": "viral process"
+            }
+          ]
+        },
+        "keywords": [
+          "ATP-binding",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Kinase",
+          "Nucleotide-binding",
+          "Reference proteome",
+          "Serine/threonine-protein kinase",
+          "Transferase",
+          "Virion",
+          "Virion tegument"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus",
+          "Host-virus interaction"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P89436.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 15,
+      "target": "GM_HHV2H Envelope glycoprotein M",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P89433",
+      "score": 2.914,
+      "score_terms": {
+        "conservation": 1.314,
+        "surface_exposed": 0.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P89433",
+        "entry_id": "GM_HHV2H",
+        "protein_name": "Envelope glycoprotein M",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "GM_HHV2H Envelope glycoprotein M",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Envelope glycoprotein important for virion assembly and egress. Plays a role in the correct incorporation of gH-gL into virion membrane. Directs the glycoprotein N (gN) to the host trans-Golgi network"
+          ],
+          "SUBUNIT": [
+            "Interacts (via N-terminus) with gN (via N-terminus). The gM-gN heterodimer forms the gCII complex"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR000785",
+              "name": "Herpes_glycop_M"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF01528",
+              "name": "Herpes_glycop"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044175",
+              "term": "host cell endosome membrane"
+            },
+            {
+              "id": "GO:0044178",
+              "term": "host cell Golgi membrane"
+            },
+            {
+              "id": "GO:0044201",
+              "term": "host cell nuclear inner membrane"
+            },
+            {
+              "id": "GO:0016020",
+              "term": "membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ]
+        },
+        "keywords": [
+          "Disulfide bond",
+          "Glycoprotein",
+          "Host endosome",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host nucleus",
+          "Membrane",
+          "Reference proteome",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral envelope protein",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host endosome",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host nucleus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P89433.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 16,
+      "target": "Envelope glycoprotein J",
+      "parent": "GJ_HHV2H Envelope glycoprotein J",
+      "tier": "remote",
+      "nearest_homolog": "P13293",
+      "score": 2.686,
+      "score_terms": {
+        "conservation": 1.086,
+        "surface_exposed": 0.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": false,
+          "because": "this reading frame could not be re-derived from the genome, so its residues could not be read"
+        },
+        "confirmed_at": [
+          "neither end: the residues could not be compared"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 16,
+        "strand": "+",
+        "frame": 0,
+        "nt_start": 137625,
+        "orf_length_aa": 128,
+        "segment": 0,
+        "orf_name": "GJ_HHV2H Envelope glycoprotein J",
+        "reading_frame": "+0 at nt 137626",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        23,
+        92
+      ],
+      "chain_span_in_this_genome": [
+        62,
+        122
+      ],
+      "chain_span_nt": [
+        137809,
+        137991
+      ],
+      "chain_span_nt_confirmed_at": [
+        "neither end: the residues could not be compared"
+      ],
+      "segment_length_nt": 152222,
+      "annotation": {
+        "accession": "P13293",
+        "entry_id": "GJ_HHV2H",
+        "protein_name": "Envelope glycoprotein J",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "Envelope glycoprotein J",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Functions as an activator of viral protein expression and virus production. In turn, promotes cell-to-cell spread as well as syncytia formation"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000115790",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {},
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044175",
+              "term": "host cell endosome membrane"
+            },
+            {
+              "id": "GO:0044178",
+              "term": "host cell Golgi membrane"
+            }
+          ]
+        },
+        "keywords": [
+          "Glycoprotein",
+          "Host endoplasmic reticulum",
+          "Host endosome",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Membrane",
+          "Reference proteome",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix"
+        ],
+        "host_interaction_keywords": [
+          "Host endoplasmic reticulum",
+          "Host endosome",
+          "Host Golgi apparatus",
+          "Host membrane"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P13293.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 17,
+      "target": "GE_HHV2H Envelope glycoprotein E",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P89475",
+      "score": 2.5138,
+      "score_terms": {
+        "conservation": 0.9138,
+        "surface_exposed": 0.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P89475",
+        "entry_id": "GE_HHV2H",
+        "protein_name": "Envelope glycoprotein E",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "GE_HHV2H Envelope glycoprotein E",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "In epithelial cells, the heterodimer gE/gI is required for the cell-to-cell spread of the virus, by sorting nascent virions to cell junctions. Once the virus reaches the cell junctions, virus particles can spread to adjacent cells extremely rapidly through interactions with cellular receptors that accumulate at these junctions. Implicated in basolateral spread in polarized cells. In neuronal cells, gE/gI is essential for the anterograde spread of the infection throughout the host nervous system. Together with US9, the heterodimer gE/gI is involved in the sorting and transport of viral structural components toward axon tips (By similarity)",
+            "The heterodimer gE/gI serves as a receptor for the Fc part of host IgG. Dissociation of gE/gI from IgG occurs at acidic pH. May thus be involved in anti-HSV antibodies bipolar bridging, followed by intracellular endocytosis and degradation, thereby interfering with host IgG-mediated immune responses (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Interacts with gI; this interaction enhances the Fc receptor function of gE. The heterodimer gE/gI interacts with the Fc part of host IgG. Interacts (via C-terminus) with VP22 tegument protein; this interaction is necessary for the recruitment of VP22 to the Golgi and its packaging into virions. Interacts (via C-terminus) with UL11 tegument protein (By similarity)"
+          ],
+          "PTM": [
+            "Phosphorylated on serines within the acidic cluster. Phosphorylation determines whether endocytosed viral gE traffics to the trans-Golgi network or recycles to the cell membrane",
+            "N-glycosylated, and sulfated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "2.60.40.10",
+              "name": "Immunoglobulins"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR046463",
+              "name": "Herpes_gE_N"
+            },
+            {
+              "id": "IPR003404",
+              "name": "Herpes_glycopE_Fc"
+            },
+            {
+              "id": "IPR036179",
+              "name": "Ig-like_dom_sf"
+            },
+            {
+              "id": "IPR013783",
+              "name": "Ig-like_fold"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF02480",
+              "name": "Herpes_gE"
+            },
+            {
+              "id": "PF20418",
+              "name": "Herpes_gE_N"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF48726",
+              "name": "Immunoglobulin"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044175",
+              "term": "host cell endosome membrane"
+            },
+            {
+              "id": "GO:0044178",
+              "term": "host cell Golgi membrane"
+            },
+            {
+              "id": "GO:0044156",
+              "term": "host cell junction"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0052031",
+              "term": "symbiont-mediated perturbation of host defense response"
+            }
+          ]
+        },
+        "keywords": [
+          "Disulfide bond",
+          "Glycoprotein",
+          "Host cell junction",
+          "Host cell membrane",
+          "Host endosome",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction",
+          "Membrane",
+          "Phosphoprotein",
+          "Reference proteome",
+          "Signal",
+          "Sulfation",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral envelope protein",
+          "Viral immunoevasion",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host cell junction",
+          "Host cell membrane",
+          "Host endosome",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P89475.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 18,
+      "target": "PRIM_HHV2H DNA primase",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P89471",
+      "score": 2.2289,
+      "score_terms": {
+        "conservation": 1.4289,
+        "surface_exposed": 0.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.8
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P89471",
+        "entry_id": "PRIM_HHV2H",
+        "protein_name": "DNA primase",
+        "organism": "Human herpesvirus 2 (strain HG52)",
+        "reviewed": true,
+        "molecule_asked_for": "PRIM_HHV2H DNA primase",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Essential component of the helicase/primase complex. Unwinds the DNA at the replication forks and generates single-stranded DNA for both leading and lagging strand synthesis. The primase initiates primer synthesis and thereby produces large amount of short RNA primers on the lagging strand that the polymerase elongates using dNTPs"
+          ],
+          "SUBUNIT": [
+            "Associates with the helicase and the primase-associated factor to form the helicase-primase factor"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR033685",
+              "name": "HSV_PRIM"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF03121",
+              "name": "Herpes_UL52"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0003899",
+              "term": "DNA-directed RNA polymerase activity"
+            },
+            {
+              "id": "GO:0008270",
+              "term": "zinc ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0039686",
+              "term": "bidirectional double-stranded viral DNA replication"
+            },
+            {
+              "id": "GO:0006260",
+              "term": "DNA replication"
+            }
+          ]
+        },
+        "keywords": [
+          "DNA replication",
+          "Host nucleus",
+          "Metal-binding",
+          "Reference proteome",
+          "Transferase",
+          "Zinc",
+          "Zinc-finger"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P89471.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    }
+  ],
+  "coverage": {
+    "chains": 18,
+    "with_a_reviewed_relative": 17,
+    "with_a_function_for_this_chain": 0,
+    "with_a_verified_reading_frame": 6,
+    "with_nucleotide_coordinates": 6,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:03:30.704602+00:00"
+  },
+  "content_sha256": "98d93b27ed3d4ed47dc996128854afdac8edf9948c2b807ac042b7e67574b82d"
+}

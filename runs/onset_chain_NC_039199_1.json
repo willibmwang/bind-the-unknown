@@ -81,7 +81,7 @@
           ]
         }
       },
-      "seconds": 13.11,
+      "seconds": 13.27,
       "hands_to_next": "one reviewed accession and one residue range per candidate"
     },
     {
@@ -162,7 +162,7 @@
         },
         "all_decompositions_reproduce_the_score": true
       },
-      "seconds": 1.72,
+      "seconds": 4.5,
       "hands_to_next": "every chain that cleared the gate, with the accession and range its surface is measured on. 3 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them"
     },
     {
@@ -225,7 +225,7 @@
         "sequence_sha256": "cc3e2c1eabee537c882687fda5751d11e2a6d22c9ad071cb54ebde7a2fa8b1d0",
         "error": null
       },
-      "seconds": 26.36,
+      "seconds": 8.2,
       "hands_to_next": "coordinates for 5 of the 7 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 1 chains over it. Plus the functional site positions, carried through the alignment into this genome's numbering, which the surface stage anchors the patch arithmetic on. 2 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region's surface goes under its chain's row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2"
     },
     {
@@ -271,7 +271,7 @@
         "changes_any_rank": false,
         "read_by_later_stages": []
       },
-      "seconds": 0.6,
+      "seconds": 1.45,
       "hands_to_next": "a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 0 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage's product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one"
     },
     {
@@ -325,13 +325,13 @@
       "output": {
         "targets_covered": 3,
         "calls_made": 15,
-        "ok": 11,
-        "not_ok": 4,
+        "ok": 12,
+        "not_ok": 3,
         "network_calls": 61,
         "changes_any_rank": false,
         "every_target_has_every_tool": true
       },
-      "seconds": 31.67,
+      "seconds": 142.65,
       "hands_to_next": "nothing. This annotates the shortlist and never reorders it"
     }
   ],
@@ -966,7 +966,7 @@
           "not_the_annotated_residues_because": null,
           "residues_not_checked_because": null
         },
-        "seconds": 0.07,
+        "seconds": 0.02,
         "only_route_to_a_surface": true,
         "deposited_patch_median_a2": null,
         "ratio_to_deposited_median": null,
@@ -1304,7 +1304,7 @@
       "functional_sites_absent_because": null,
       "site_positions_in_this_genome": [],
       "site_surface": null,
-      "seconds": 0.11,
+      "seconds": 0.69,
       "structures_offered": [],
       "chains_mapped_to_accession": 0,
       "no_surface_because": {
@@ -1606,7 +1606,7 @@
       "functional_sites_absent_because": "Q2Y2M6 carries no Active site, Binding site or Site annotation inside this chain's range, so there is no marked residue to aim at. An absence in the annotation, not in the protein.",
       "site_positions_in_this_genome": [],
       "site_surface": null,
-      "seconds": 0.2,
+      "seconds": 0.52,
       "structures_offered": [],
       "chains_mapped_to_accession": 0,
       "predicted_surface": {
@@ -2567,7 +2567,7 @@
           "endpoint": "Europe PMC",
           "status": "empty",
           "note": "{'subject_zero': True, 'axes_zero': ('assay_availability', 'conservation', 'essentiality', 'precedent', 'public_labels'), 'means': 'A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.'}",
-          "seconds": 3.26,
+          "seconds": 30.95,
           "network_calls": 7,
           "returned": {}
         },
@@ -2576,7 +2576,7 @@
           "endpoint": "EBI HMMER",
           "status": "ok",
           "note": null,
-          "seconds": 1.04,
+          "seconds": 2.13,
           "network_calls": 3,
           "returned": {
             "resolution_attempts_count": 1,
@@ -2594,18 +2594,29 @@
         {
           "tool": "families.entries",
           "endpoint": "InterPro",
-          "status": "failed",
-          "note": "RuntimeError: https://www.ebi.ac.uk/interpro/api/entry/interpro/IPR000776?extra_fields=counters returned HTTP 429 Too Many Requests",
-          "seconds": 1.67,
+          "status": "ok",
+          "note": null,
+          "seconds": 2.96,
           "network_calls": 4,
-          "returned": {}
+          "returned": {
+            "protein_name": "Fusion glycoprotein F0",
+            "sequence_md5": "6AE5D2F9AC6D03BF5B3B545A2B411D25",
+            "sequence_length": 537,
+            "sequence_source": "uniprot",
+            "assignments_count": 4,
+            "predicted_count": 3,
+            "sequence_features_count": 11,
+            "residue_ranges_count": 1,
+            "functional_sites_count": 0,
+            "absences_count": 0
+          }
         },
         {
           "tool": "structures.predicted",
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 1.79,
+          "seconds": 2.38,
           "network_calls": 2,
           "returned": {
             "sequence_length": 537,
@@ -2625,7 +2636,7 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 2.79,
+          "seconds": 3.51,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -2656,7 +2667,7 @@
           "endpoint": "Europe PMC",
           "status": "ok",
           "note": null,
-          "seconds": 3.37,
+          "seconds": 36.44,
           "network_calls": 7,
           "returned": {
             "subject_kind": "term",
@@ -2674,7 +2685,7 @@
           "endpoint": "EBI HMMER",
           "status": "ok",
           "note": null,
-          "seconds": 1.23,
+          "seconds": 2.84,
           "network_calls": 3,
           "returned": {
             "resolution_attempts_count": 1,
@@ -2694,7 +2705,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 1.65,
+          "seconds": 3.12,
           "network_calls": 4,
           "returned": {
             "protein_name": "Fusion glycoprotein F0",
@@ -2714,7 +2725,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 1.27,
+          "seconds": 1.46,
           "network_calls": 2,
           "returned": {
             "sequence_length": 537,
@@ -2734,7 +2745,7 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 2.74,
+          "seconds": 2.65,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -2762,7 +2773,7 @@
           "endpoint": "Europe PMC",
           "status": "empty",
           "note": "{'subject_zero': True, 'axes_zero': ('assay_availability', 'conservation', 'essentiality', 'precedent', 'public_labels'), 'means': 'A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.'}",
-          "seconds": 3.42,
+          "seconds": 43.63,
           "network_calls": 7,
           "returned": {}
         },
@@ -2780,7 +2791,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 3.26,
+          "seconds": 6.33,
           "network_calls": 8,
           "returned": {
             "protein_name": "RNA-directed RNA polymerase L",
@@ -2800,7 +2811,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 1.36,
+          "seconds": 1.74,
           "network_calls": 2,
           "returned": {
             "sequence_length": 2005,
@@ -2820,7 +2831,7 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 2.82,
+          "seconds": 2.51,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -2837,7 +2848,7 @@
       ]
     }
   ],
-  "seconds": 73.46,
+  "seconds": 170.07,
   "coverage": {
     "chains_ranked": 7,
     "surface_rows": 7,

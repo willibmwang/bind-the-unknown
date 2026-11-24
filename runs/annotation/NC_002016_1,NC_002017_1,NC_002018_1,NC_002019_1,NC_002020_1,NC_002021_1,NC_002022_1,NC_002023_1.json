@@ -1,0 +1,1820 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_002016.1,NC_002017.1,NC_002018.1,NC_002019.1,NC_002020.1,NC_002021.1,NC_002022.1,NC_002023.1",
+  "pathogen": "Influenza A PR8",
+  "reference_excluded_organism": "Influenza A virus (strain A/Puerto Rico/8/1934 H1N1)",
+  "source_record": "runs/onset_chain_NC_002016_1.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "NRAM_I36A0 Neuraminidase",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "A4GCI9",
+      "score": 8.6399,
+      "score_terms": {
+        "conservation": 2.7399,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "A4GCI9",
+        "entry_id": "NRAM_I36A0",
+        "protein_name": "Neuraminidase",
+        "organism": "Influenza A virus (strain A/Henry/1936 H1N1)",
+        "reviewed": true,
+        "molecule_asked_for": "NRAM_I36A0 Neuraminidase",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Catalyzes the removal of terminal sialic acid residues from viral and cellular glycoconjugates. Cleaves off the terminal sialic acids on the glycosylated HA during virus budding to facilitate virus release. Additionally helps virus spread through the circulation by further removing sialic acids from the cell surface. These cleavages prevent self-aggregation and ensure the efficient spread of the progeny virus from cell to cell. Otherwise, infection would be limited to one round of replication. Described as a receptor-destroying enzyme because it cleaves a terminal sialic acid from the cellular receptors. May facilitate viral invasion of the upper airways by cleaving the sialic acid moieties on the mucin of the airway epithelial cells. Likely to plays a role in the budding process through its association with lipid rafts during intracellular transport. May additionally display a raft-association independent effect on budding. Plays a role in the determination of host range restriction on replication and virulence. Sialidase activity in late endosome/lysosome traffic seems to enhance virus replication"
+          ],
+          "ACTIVITY REGULATION": [
+            "Inhibited by the neuraminidase inhibitors zanamivir (Relenza) and oseltamivir (Tamiflu). These drugs interfere with the release of progeny virus from infected cells and are effective against all influenza strains. Resistance to neuraminidase inhibitors is quite rare"
+          ],
+          "SUBUNIT": [
+            "Homotetramer"
+          ],
+          "DOMAIN": [
+            "Intact N-terminus is essential for virion morphogenesis. Possesses two apical sorting signals, one in the ectodomain, which is likely to be a glycan, and the other in the transmembrane domain. The transmembrane domain also plays a role in lipid raft association"
+          ],
+          "PTM": [
+            "N-glycosylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "ACTIVITY REGULATION": "what switches it on or off",
+          "DOMAIN": "what its parts do",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aves",
+            "common_name": null,
+            "taxon": 8782
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Sus scrofa",
+            "common_name": "Pig",
+            "taxon": 9823
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd15483",
+              "name": "Influenza_NA"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "2.120.10.10",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR001860",
+              "name": "Glyco_hydro_34"
+            },
+            {
+              "id": "IPR033654",
+              "name": "Sialidase_Influenza_A/B"
+            },
+            {
+              "id": "IPR036278",
+              "name": "Sialidase_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00064",
+              "name": "Neur"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF50939",
+              "name": "Sialidases"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0016020",
+              "term": "membrane"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0004308",
+              "term": "exo-alpha-sialidase activity"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0005975",
+              "term": "carbohydrate metabolic process"
+            },
+            {
+              "id": "GO:0046761",
+              "term": "viral budding from plasma membrane"
+            }
+          ]
+        },
+        "keywords": [
+          "Calcium",
+          "Disulfide bond",
+          "Glycoprotein",
+          "Glycosidase",
+          "Host cell membrane",
+          "Host membrane",
+          "Hydrolase",
+          "Membrane",
+          "Metal-binding",
+          "Signal-anchor",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host cell membrane",
+          "Host membrane"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/A4GCI9.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 2,
+      "target": "Hemagglutinin HA1 chain",
+      "parent": "HEMA_I36A0 Hemagglutinin",
+      "tier": "exact",
+      "nearest_homolog": "A4GCI6",
+      "score": 7.6134,
+      "score_terms": {
+        "conservation": 2.5134,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 1.0,
+          "confirmed_at": [
+            "the start of the chain",
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": true,
+          "one_end_only_note": null,
+          "leading_identity": 1.0,
+          "trailing_identity": 1.0,
+          "residues_compared": 40,
+          "frame_span_residues": 326,
+          "relative_chain_residues": 326,
+          "lengths_differ": false,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain",
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": true,
+        "orf_rank": 2,
+        "strand": "+",
+        "frame": 2,
+        "nt_start": 32,
+        "orf_length_aa": 566,
+        "segment": 1,
+        "orf_name": "HEMA_I36A0 Hemagglutinin",
+        "reading_frame": "+2 at nt 33",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        18,
+        343
+      ],
+      "chain_span_in_this_genome": [
+        18,
+        343
+      ],
+      "chain_span_nt": [
+        84,
+        1061
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "A4GCI6",
+        "entry_id": "HEMA_I36A0",
+        "protein_name": "Hemagglutinin",
+        "organism": "Influenza A virus (strain A/Henry/1936 H1N1)",
+        "reviewed": true,
+        "molecule_asked_for": "Hemagglutinin HA1 chain",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Binds to sialic acid-containing receptors on the cell surface, bringing about the attachment of the virus particle to the cell. This attachment induces virion internalization either through clathrin-dependent endocytosis or through clathrin- and caveolin-independent pathway. Plays a major role in the determination of host range restriction and virulence. Class I viral fusion protein. Responsible for penetration of the virus into the cell cytoplasm by mediating the fusion of the membrane of the endocytosed virus particle with the endosomal membrane. Low pH in endosomes induces an irreversible conformational change in HA2, releasing the fusion hydrophobic peptide. Several trimers are required to form a competent fusion pore"
+          ],
+          "SUBUNIT": [
+            "Homotrimer of disulfide-linked HA1-HA2. Interacts with human CACNA1C"
+          ],
+          "PTM": [
+            "Palmitoylated",
+            "In natural infection, inactive HA is matured into HA1 and HA2 outside the cell by one or more trypsin-like, arginine-specific endoprotease secreted by the bronchial epithelial cells. One identified protease that may be involved in this process is secreted in lungs by club cells"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000372875",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aves",
+            "common_name": null,
+            "taxon": 8782
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Sus scrofa",
+            "common_name": "Pig",
+            "taxon": 9823
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.90.20.10",
+              "name": "-"
+            },
+            {
+              "id": "3.90.209.20",
+              "name": "-"
+            },
+            {
+              "id": "2.10.77.10",
+              "name": "Hemagglutinin Chain A, Domain 2"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR008980",
+              "name": "Capsid_hemagglutn"
+            },
+            {
+              "id": "IPR013828",
+              "name": "Hemagglutn_HA1_a/b_dom_sf"
+            },
+            {
+              "id": "IPR000149",
+              "name": "Hemagglutn_influenz_A"
+            },
+            {
+              "id": "IPR001364",
+              "name": "Hemagglutn_influenz_A/B"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00509",
+              "name": "Hemagglutinin"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF58064",
+              "name": "Influenza hemagglutinin (stalk)"
+            },
+            {
+              "id": "SSF49818",
+              "name": "Viral protein domain"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0016020",
+              "term": "membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0046789",
+              "term": "host cell surface receptor binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0075512",
+              "term": "clathrin-dependent endocytosis of virus by host cell"
+            },
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0019064",
+              "term": "fusion of virus membrane with host plasma membrane"
+            },
+            {
+              "id": "GO:0046761",
+              "term": "viral budding from plasma membrane"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Clathrin- and caveolin-independent endocytosis of virus by host",
+          "Clathrin-mediated endocytosis of virus by host",
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "Hemagglutinin",
+          "Host cell membrane",
+          "Host membrane",
+          "Host-virus interaction",
+          "Lipoprotein",
+          "Membrane",
+          "Palmitate",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral attachment to host cell",
+          "Viral envelope protein",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Clathrin- and caveolin-independent endocytosis of virus by host",
+          "Clathrin-mediated endocytosis of virus by host",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cell membrane",
+          "Host membrane",
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/A4GCI6.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 3,
+      "target": "Hemagglutinin HA2 chain",
+      "parent": "HEMA_I36A0 Hemagglutinin",
+      "tier": "exact",
+      "nearest_homolog": "A4GCI6",
+      "score": 7.6134,
+      "score_terms": {
+        "conservation": 2.5134,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 1.0,
+          "confirmed_at": [
+            "the start of the chain",
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": true,
+          "one_end_only_note": null,
+          "leading_identity": 1.0,
+          "trailing_identity": 0.975,
+          "residues_compared": 40,
+          "frame_span_residues": 222,
+          "relative_chain_residues": 222,
+          "lengths_differ": false,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain",
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": true,
+        "orf_rank": 2,
+        "strand": "+",
+        "frame": 2,
+        "nt_start": 32,
+        "orf_length_aa": 566,
+        "segment": 1,
+        "orf_name": "HEMA_I36A0 Hemagglutinin",
+        "reading_frame": "+2 at nt 33",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        345,
+        566
+      ],
+      "chain_span_in_this_genome": [
+        345,
+        566
+      ],
+      "chain_span_nt": [
+        1065,
+        1730
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "A4GCI6",
+        "entry_id": "HEMA_I36A0",
+        "protein_name": "Hemagglutinin",
+        "organism": "Influenza A virus (strain A/Henry/1936 H1N1)",
+        "reviewed": true,
+        "molecule_asked_for": "Hemagglutinin HA2 chain",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Binds to sialic acid-containing receptors on the cell surface, bringing about the attachment of the virus particle to the cell. This attachment induces virion internalization either through clathrin-dependent endocytosis or through clathrin- and caveolin-independent pathway. Plays a major role in the determination of host range restriction and virulence. Class I viral fusion protein. Responsible for penetration of the virus into the cell cytoplasm by mediating the fusion of the membrane of the endocytosed virus particle with the endosomal membrane. Low pH in endosomes induces an irreversible conformational change in HA2, releasing the fusion hydrophobic peptide. Several trimers are required to form a competent fusion pore"
+          ],
+          "SUBUNIT": [
+            "Homotrimer of disulfide-linked HA1-HA2. Interacts with human CACNA1C"
+          ],
+          "PTM": [
+            "Palmitoylated",
+            "In natural infection, inactive HA is matured into HA1 and HA2 outside the cell by one or more trypsin-like, arginine-specific endoprotease secreted by the bronchial epithelial cells. One identified protease that may be involved in this process is secreted in lungs by club cells"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000372876",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aves",
+            "common_name": null,
+            "taxon": 8782
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Sus scrofa",
+            "common_name": "Pig",
+            "taxon": 9823
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.90.20.10",
+              "name": "-"
+            },
+            {
+              "id": "3.90.209.20",
+              "name": "-"
+            },
+            {
+              "id": "2.10.77.10",
+              "name": "Hemagglutinin Chain A, Domain 2"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR008980",
+              "name": "Capsid_hemagglutn"
+            },
+            {
+              "id": "IPR013828",
+              "name": "Hemagglutn_HA1_a/b_dom_sf"
+            },
+            {
+              "id": "IPR000149",
+              "name": "Hemagglutn_influenz_A"
+            },
+            {
+              "id": "IPR001364",
+              "name": "Hemagglutn_influenz_A/B"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00509",
+              "name": "Hemagglutinin"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF58064",
+              "name": "Influenza hemagglutinin (stalk)"
+            },
+            {
+              "id": "SSF49818",
+              "name": "Viral protein domain"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0020002",
+              "term": "host cell plasma membrane"
+            },
+            {
+              "id": "GO:0016020",
+              "term": "membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0046789",
+              "term": "host cell surface receptor binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0075512",
+              "term": "clathrin-dependent endocytosis of virus by host cell"
+            },
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0019064",
+              "term": "fusion of virus membrane with host plasma membrane"
+            },
+            {
+              "id": "GO:0046761",
+              "term": "viral budding from plasma membrane"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Clathrin- and caveolin-independent endocytosis of virus by host",
+          "Clathrin-mediated endocytosis of virus by host",
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "Hemagglutinin",
+          "Host cell membrane",
+          "Host membrane",
+          "Host-virus interaction",
+          "Lipoprotein",
+          "Membrane",
+          "Palmitate",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral attachment to host cell",
+          "Viral envelope protein",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Clathrin- and caveolin-independent endocytosis of virus by host",
+          "Clathrin-mediated endocytosis of virus by host",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host cell membrane",
+          "Host membrane",
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/A4GCI6.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 4,
+      "target": "PA_I06A0 Polymerase acidic protein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "B4URE3",
+      "score": 6.8577,
+      "score_terms": {
+        "conservation": 2.9577,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "B4URE3",
+        "entry_id": "PA_I06A0",
+        "protein_name": "Polymerase acidic protein",
+        "organism": "Influenza A virus (strain A/Russia:St.Petersburg/8/2006 H1N1)",
+        "reviewed": true,
+        "molecule_asked_for": "PA_I06A0 Polymerase acidic protein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Plays an essential role in viral RNA transcription and replication by forming the heterotrimeric polymerase complex together with PB1 and PB2 subunits. The complex transcribes viral mRNAs by using a unique mechanism called cap-snatching. It consists in the hijacking and cleavage of host capped pre-mRNAs. These short capped RNAs are then used as primers for viral mRNAs. The PB2 subunit is responsible for the binding of the 5' cap of cellular pre-mRNAs which are subsequently cleaved after 10-13 nucleotides by the PA subunit that carries the endonuclease activity"
+          ],
+          "SUBUNIT": [
+            "Influenza RNA polymerase is composed of three subunits: PB1, PB2 and PA. Interacts (via C-terminus) with PB1 (via N-terminus)"
+          ],
+          "PTM": [
+            "Phosphorylated on serines and threonines by host kinases, including human casein kinase II"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aves",
+            "common_name": null,
+            "taxon": 8782
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Sus scrofa",
+            "common_name": "Pig",
+            "taxon": 9823
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.40.91.90",
+              "name": "Influenza RNA-dependent RNA polymerase subunit PA, endonuclease domain"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR037534",
+              "name": "INFV_PA"
+            },
+            {
+              "id": "IPR001009",
+              "name": "PA/PA-X"
+            },
+            {
+              "id": "IPR038372",
+              "name": "PA/PA-X_sf"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00603",
+              "name": "Flu_PA"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0004519",
+              "term": "endonuclease activity"
+            },
+            {
+              "id": "GO:0016787",
+              "term": "hydrolase activity"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0075526",
+              "term": "cap snatching"
+            },
+            {
+              "id": "GO:0006351",
+              "term": "DNA-templated transcription"
+            },
+            {
+              "id": "GO:0039657",
+              "term": "symbiont-mediated suppression of host gene expression"
+            },
+            {
+              "id": "GO:0039523",
+              "term": "symbiont-mediated suppression of host mRNA transcription via inhibition of RNA polymerase II activity"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0075523",
+              "term": "viral translational frameshifting"
+            }
+          ]
+        },
+        "keywords": [
+          "Cap snatching",
+          "Endonuclease",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host transcription shutoff by virus",
+          "Host cytoplasm",
+          "Host gene expression shutoff by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host RNA polymerase II by virus",
+          "Manganese",
+          "Metal-binding",
+          "Nuclease",
+          "Phosphoprotein",
+          "Ribosomal frameshifting"
+        ],
+        "host_interaction_keywords": [
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host transcription shutoff by virus",
+          "Host cytoplasm",
+          "Host gene expression shutoff by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host RNA polymerase II by virus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/B4URE3.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 5,
+      "target": "PB2_I36A0 Polymerase basic protein 2",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "A4GCJ6",
+      "score": 6.8007,
+      "score_terms": {
+        "conservation": 2.9007,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "A4GCJ6",
+        "entry_id": "PB2_I36A0",
+        "protein_name": "Polymerase basic protein 2",
+        "organism": "Influenza A virus (strain A/Henry/1936 H1N1)",
+        "reviewed": true,
+        "molecule_asked_for": "PB2_I36A0 Polymerase basic protein 2",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Plays an essential role in transcription initiation and cap-stealing mechanism, in which cellular capped pre-mRNAs are used to generate primers for viral transcription. Recognizes and binds the 7-methylguanosine-containing cap of the target pre-RNA which is subsequently cleaved after 10-13 nucleotides by the viral protein PA. Plays a role in the initiation of the viral genome replication and modulates the activity of the ribonucleoprotein (RNP) complex. In addition, participates in the inhibition of type I interferon induction through interaction with and inhibition of the host mitochondrial antiviral signaling protein MAVS"
+          ],
+          "SUBUNIT": [
+            "Influenza RNA polymerase is composed of three subunits: PB1, PB2 and PA. Interacts (via N-terminus) with PB1 (via C-terminus). Interacts with nucleoprotein NP (via N-terminus). Interacts (via N-terminus) with host MAVS (via N-terminus); this interaction inhibits host innate immune response"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aves",
+            "common_name": null,
+            "taxon": 8782
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Sus scrofa",
+            "common_name": "Pig",
+            "taxon": 9823
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.30.30.90",
+              "name": "Polymerase Basic Protein 2, C-terminal domain"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR049110",
+              "name": "Flu_PB2_2nd"
+            },
+            {
+              "id": "IPR049114",
+              "name": "Flu_PB2_6th"
+            },
+            {
+              "id": "IPR049115",
+              "name": "Flu_PB2_C"
+            },
+            {
+              "id": "IPR048298",
+              "name": "Flu_PB2_CAP-bd"
+            },
+            {
+              "id": "IPR049111",
+              "name": "Flu_PB2_middle"
+            },
+            {
+              "id": "IPR049106",
+              "name": "Flu_PB2_N"
+            },
+            {
+              "id": "IPR001591",
+              "name": "INV_PB2"
+            },
+            {
+              "id": "IPR049113",
+              "name": "PB2_helical"
+            },
+            {
+              "id": "IPR037258",
+              "name": "PDB2_C"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF20947",
+              "name": "Flu_PB2_1st"
+            },
+            {
+              "id": "PF20948",
+              "name": "Flu_PB2_2nd"
+            },
+            {
+              "id": "PF20949",
+              "name": "Flu_PB2_3rd"
+            },
+            {
+              "id": "PF20950",
+              "name": "Flu_PB2_4th"
+            },
+            {
+              "id": "PF00604",
+              "name": "Flu_PB2_5th"
+            },
+            {
+              "id": "PF20951",
+              "name": "Flu_PB2_6th"
+            },
+            {
+              "id": "PF20952",
+              "name": "Flu_PB2_7th"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF160453",
+              "name": "PB2 C-terminal domain-like"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0033650",
+              "term": "host cell mitochondrion"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0044423",
+              "term": "virion component"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006370",
+              "term": "7-methylguanosine mRNA capping"
+            },
+            {
+              "id": "GO:0075526",
+              "term": "cap snatching"
+            },
+            {
+              "id": "GO:0006351",
+              "term": "DNA-templated transcription"
+            },
+            {
+              "id": "GO:0039545",
+              "term": "symbiont-mediated suppression of host cytoplasmic pattern recognition receptor signaling pathway via inhibition of MAVS activity"
+            },
+            {
+              "id": "GO:0039657",
+              "term": "symbiont-mediated suppression of host gene expression"
+            },
+            {
+              "id": "GO:0039523",
+              "term": "symbiont-mediated suppression of host mRNA transcription via inhibition of RNA polymerase II activity"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            }
+          ]
+        },
+        "keywords": [
+          "Cap snatching",
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host transcription shutoff by virus",
+          "Host gene expression shutoff by virus",
+          "Host mitochondrion",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host MAVS by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Inhibition of host RNA polymerase II by virus",
+          "mRNA capping",
+          "mRNA processing",
+          "Viral immunoevasion",
+          "Viral transcription",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host transcription shutoff by virus",
+          "Host gene expression shutoff by virus",
+          "Host mitochondrion",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host MAVS by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Inhibition of host RNA polymerase II by virus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/A4GCJ6.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 6,
+      "target": "RDRP_I06A0 RNA-directed RNA polymerase catalytic subunit",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "B4URE4",
+      "score": 6.7485,
+      "score_terms": {
+        "conservation": 2.8485,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "B4URE4",
+        "entry_id": "RDRP_I06A0",
+        "protein_name": "RNA-directed RNA polymerase catalytic subunit",
+        "organism": "Influenza A virus (strain A/Russia:St.Petersburg/8/2006 H1N1)",
+        "reviewed": true,
+        "molecule_asked_for": "RDRP_I06A0 RNA-directed RNA polymerase catalytic subunit",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "RNA-dependent RNA polymerase which is responsible for replication and transcription of virus RNA segments. The transcription of viral mRNAs occurs by a unique mechanism called cap-snatching. 5' methylated caps of cellular mRNAs are cleaved after 10-13 nucleotides by PA. In turn, these short capped RNAs are used as primers by PB1 for transcription of viral mRNAs. During virus replication, PB1 initiates RNA synthesis and copy vRNA into complementary RNA (cRNA) which in turn serves as a template for the production of more vRNAs"
+          ],
+          "SUBUNIT": [
+            "Influenza RNA polymerase is composed of three subunits: PB1, PB2 and PA. Interacts (via N-terminus) with PA (via C-terminus). Interacts (via C-terminus) with PB2 (via N-terminus); this interaction is essential for transcription initiation. Interacts (via C-terminus) with human PKP2 (via N-terminus); the interaction competitively inhibits the interaction between the RNA polymerase subunits PB1 and PB2 (By similarity)"
+          ],
+          "PTM": [
+            "Phosphorylated by host PRKCA"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aves",
+            "common_name": null,
+            "taxon": 8782
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Sus scrofa",
+            "common_name": "Pig",
+            "taxon": 9823
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "6.10.140.720",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR007099",
+              "name": "RNA-dir_pol_NSvirus"
+            },
+            {
+              "id": "IPR001407",
+              "name": "RNA_pol_PB1_influenza"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00602",
+              "name": "Flu_PB1"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS50525",
+              "name": "RDRP_SSRNA_NEG_SEG"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0000166",
+              "term": "nucleotide binding"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006351",
+              "term": "DNA-templated transcription"
+            },
+            {
+              "id": "GO:0039657",
+              "term": "symbiont-mediated suppression of host gene expression"
+            },
+            {
+              "id": "GO:0039523",
+              "term": "symbiont-mediated suppression of host mRNA transcription via inhibition of RNA polymerase II activity"
+            },
+            {
+              "id": "GO:0039694",
+              "term": "viral RNA genome replication"
+            },
+            {
+              "id": "GO:0019083",
+              "term": "viral transcription"
+            }
+          ]
+        },
+        "keywords": [
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host transcription shutoff by virus",
+          "Host cytoplasm",
+          "Host gene expression shutoff by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host RNA polymerase II by virus",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Phosphoprotein",
+          "RNA-directed RNA polymerase",
+          "Transferase",
+          "Viral RNA replication",
+          "Viral transcription"
+        ],
+        "host_interaction_keywords": [
+          "Eukaryotic host gene expression shutoff by virus",
+          "Eukaryotic host transcription shutoff by virus",
+          "Host cytoplasm",
+          "Host gene expression shutoff by virus",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Inhibition of host RNA polymerase II by virus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/B4URE4.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 7,
+      "target": "M1_I06A0 Matrix protein 1",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "B4URD8",
+      "score": 5.0,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "B4URD8",
+        "entry_id": "M1_I06A0",
+        "protein_name": "Matrix protein 1",
+        "organism": "Influenza A virus (strain A/Russia:St.Petersburg/8/2006 H1N1)",
+        "reviewed": true,
+        "molecule_asked_for": "M1_I06A0 Matrix protein 1",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Plays critical roles in virus replication, from virus entry and uncoating to assembly and budding of the virus particle. M1 binding to ribonucleocapsids (RNPs) in nucleus seems to inhibit viral transcription. Interaction of viral NEP with M1-RNP is thought to promote nuclear export of the complex, which is targeted to the virion assembly site at the apical plasma membrane in polarized epithelial cells. Interactions with NA and HA may bring M1, a non-raft-associated protein, into lipid rafts. Forms a continuous shell on the inner side of the lipid bilayer in virion, where it binds the RNP. During virus entry into cell, the M2 ion channel acidifies the internal virion core, inducing M1 dissociation from the RNP. M1-free RNPs are transported to the nucleus, where viral transcription and replication can take place",
+            "Determines the virion's shape: spherical or filamentous. Clinical isolates of influenza are characterized by the presence of significant proportion of filamentous virions, whereas after multiple passage on eggs or cell culture, virions have only spherical morphology. Filamentous virions are thought to be important to infect neighboring cells, and spherical virions more suited to spread through aerosol between hosts organisms"
+          ],
+          "SUBUNIT": [
+            "Homodimer and homomultimer. Interacts with NEP. Binds ribonucleocapsid by both interacting with genomic RNA and NP protein. May interact with HA and NA. Cannot bind NP without genomic RNA"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aves",
+            "common_name": null,
+            "taxon": 8782
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Sus scrofa",
+            "common_name": "Pig",
+            "taxon": 9823
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "1.10.10.180",
+              "name": "-"
+            },
+            {
+              "id": "1.20.91.10",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR036039",
+              "name": "Flu_matrix_M1"
+            },
+            {
+              "id": "IPR013188",
+              "name": "Flu_matrix_M1_C"
+            },
+            {
+              "id": "IPR001561",
+              "name": "Flu_matrix_M1_N"
+            },
+            {
+              "id": "IPR015423",
+              "name": "Flu_matrix_M1_N_sub1"
+            },
+            {
+              "id": "IPR015799",
+              "name": "Flu_matrix_M1_N_sub2"
+            },
+            {
+              "id": "IPR037533",
+              "name": "INFV_M1"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00598",
+              "name": "Flu_M1"
+            },
+            {
+              "id": "PF08289",
+              "name": "Flu_M1_C"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF48145",
+              "name": "Influenza virus matrix protein M1"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0039660",
+              "term": "structural constituent of virion"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0046761",
+              "term": "viral budding from plasma membrane"
+            }
+          ]
+        },
+        "keywords": [
+          "Alternative splicing",
+          "Host nucleus",
+          "Membrane",
+          "RNA-binding",
+          "Viral matrix protein",
+          "Virion"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/B4URD8.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 8,
+      "target": "NCAP_I54A0 Nucleoprotein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P31609",
+      "score": 4.4088,
+      "score_terms": {
+        "conservation": 2.9088,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P31609",
+        "entry_id": "NCAP_I54A0",
+        "protein_name": "Nucleoprotein",
+        "organism": "Influenza A virus (strain A/Leningrad/1/1954 H1N1)",
+        "reviewed": true,
+        "molecule_asked_for": "NCAP_I54A0 Nucleoprotein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Encapsidates the negative strand viral RNA, protecting it from nucleases. The encapsidated genomic RNA is termed the ribonucleoprotein (RNP) and serves as template for transcription and replication. The RNP needs to be localized in the host nucleus to start an infectious cycle, but is too large to diffuse through the nuclear pore complex. NP comprises at least 2 nuclear localization signals that are responsible for the active RNP import into the nucleus through cellular importin alpha/beta pathway. Later in the infection, nclear export of RNPs are mediated through viral proteins NEP interacting with M1 which binds nucleoproteins. It is possible that nucleoprotein binds directly host exportin-1/XPO1 and plays an active role in RNPs nuclear export. M1 interaction with RNP seems to hide nucleoprotein's nuclear localization signals. Soon after a virion infects a new cell, M1 dissociates from the RNP under acidification of the virion driven by M2 protein. Dissociation of M1 from RNP unmasks nucleoprotein's nuclear localization signals, targeting the RNP to the nucleus"
+          ],
+          "SUBUNIT": [
+            "Homomultimerizes to form the nucleocapsid. May bind host exportin-1/XPO1. Binds to viral genomic RNA. Protein-RNA contacts are mediated by a combination of electrostatic interactions between positively charged residues and the phosphate backbone and planar interactions between aromatic side chains and bases"
+          ],
+          "PTM": [
+            "Late in virus-infected cells, may be cleaved from a 56-kDa protein to a 53-kDa protein by a cellular caspase. This cleavage might be a marker for the onset of apoptosis in infected cells or have a specific function in virus host interaction"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Aves",
+            "common_name": null,
+            "taxon": 8782
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Sus scrofa",
+            "common_name": "Pig",
+            "taxon": 9823
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR002141",
+              "name": "Flu_NP"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00506",
+              "name": "Flu_NP"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF161003",
+              "name": "flu NP-like"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0019029",
+              "term": "helical viral capsid"
+            },
+            {
+              "id": "GO:0043657",
+              "term": "host cell"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:1990904",
+              "term": "ribonucleoprotein complex"
+            },
+            {
+              "id": "GO:0019013",
+              "term": "viral nucleocapsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0075732",
+              "term": "viral penetration into host nucleus"
+            }
+          ]
+        },
+        "keywords": [
+          "Capsid protein",
+          "Helical capsid protein",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Ribonucleoprotein",
+          "RNA-binding",
+          "Viral nucleoprotein",
+          "Viral penetration into host nucleus",
+          "Virion",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus",
+          "Host-virus interaction",
+          "Viral penetration into host nucleus",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P31609.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 9,
+      "target": "unidentified probable surface antigen",
+      "parent": null,
+      "tier": "topology",
+      "nearest_homolog": null,
+      "score": 3.6,
+      "score_terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": null,
+      "annotation_failed_because": null,
+      "not_annotated_because": "this chain was identified with no reviewed relative, so there is no curated entry to read a function from"
+    },
+    {
+      "rank": 10,
+      "target": "unidentified probable surface antigen",
+      "parent": null,
+      "tier": "topology",
+      "nearest_homolog": null,
+      "score": 3.6,
+      "score_terms": {
+        "conservation": 0.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": null,
+      "annotation_failed_because": null,
+      "not_annotated_because": "this chain was identified with no reviewed relative, so there is no curated entry to read a function from"
+    }
+  ],
+  "coverage": {
+    "chains": 10,
+    "with_a_reviewed_relative": 8,
+    "with_a_function_for_this_chain": 0,
+    "with_a_verified_reading_frame": 2,
+    "with_nucleotide_coordinates": 2,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:03:39.882168+00:00"
+  },
+  "content_sha256": "03b42503f333edaa9e85961aa0ceffe1e2f86aefaa942797171cd1f4c4a4a30f"
+}

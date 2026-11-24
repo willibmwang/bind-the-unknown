@@ -38,7 +38,7 @@
           "dropped": []
         }
       },
-      "seconds": 12.61,
+      "seconds": 14.66,
       "hands_to_next": "one reviewed accession and one residue range per candidate"
     },
     {
@@ -52,7 +52,7 @@
         "candidates_in": 10
       },
       "output": {
-        "chains_out": 2,
+        "chains_out": 6,
         "rubric": {
           "conservation": 3.0,
           "surface_exposed": 2.0,
@@ -60,7 +60,7 @@
           "druggable_class": 0.8,
           "structures_in_family_capped": 0.5
         },
-        "chains_scored_before_the_gate": 3,
+        "chains_scored_before_the_gate": 9,
         "gate": {
           "terms": [
             "surface_exposed",
@@ -70,12 +70,40 @@
           ],
           "floor": 0.5,
           "rule": "a row is kept when at least one of 4 evidence terms pays 0.5 points or more. Conservation is not among them: it says how well this genome was recognised, not whether what was recognised is worth aiming at",
-          "kept": 2,
-          "gated_out": 1,
+          "kept": 6,
+          "gated_out": 3,
           "dropped": [
             {
-              "rank": 3,
-              "name": "P2",
+              "rank": 7,
+              "name": "Protein 2B",
+              "parent": "POLG_CXA21 Genome polyprotein",
+              "score": 1.4427,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 8,
+              "name": "Protein 2C",
+              "parent": "POLG_CXA21 Genome polyprotein",
+              "score": 1.4427,
+              "terms": {
+                "surface_exposed": 0.0,
+                "essential_class": 0.0,
+                "druggable_class": 0.0,
+                "structures_in_family": 0.0
+              },
+              "highest_term": null,
+              "highest": 0.0
+            },
+            {
+              "rank": 9,
+              "name": "Protein 3AB",
               "parent": "POLG_CXA21 Genome polyprotein",
               "score": 1.4427,
               "terms": {
@@ -91,8 +119,8 @@
         },
         "all_decompositions_reproduce_the_score": true
       },
-      "seconds": 0.61,
-      "hands_to_next": "every chain that cleared the gate, with the accession and range its surface is measured on. 1 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them"
+      "seconds": 3.05,
+      "hands_to_next": "every chain that cleared the gate, with the accession and range its surface is measured on. 3 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them"
     },
     {
       "stage": 3,
@@ -102,37 +130,41 @@
         "ESM Atlas"
       ],
       "input": {
-        "candidates_in": 2,
-        "identified_in": 2,
-        "gated_out_before_this_stage": 1,
+        "candidates_in": 6,
+        "identified_in": 6,
+        "gated_out_before_this_stage": 3,
         "residue_ceiling": 1200,
         "domain_units_per_chain": 3,
         "fold_requests_per_run": 40,
         "folding_budget_seconds": 240.0
       },
       "output": {
-        "foldable": 2,
+        "foldable": 6,
         "not_foldable": 0,
         "unidentified_foldable": 0,
-        "chains_folded": 2,
-        "folds_attempted": 2,
+        "chains_folded": 6,
+        "folds_attempted": 6,
         "folds_refused": 0,
         "also_folded": [
-          "P3"
+          "Protease 3C",
+          "RNA-directed RNA polymerase",
+          "Capsid protein VP0",
+          "Capsid protein VP3",
+          "Capsid protein VP1"
         ],
-        "units_offered": 9,
-        "units_inside_the_ceiling": 7,
-        "units_recorded": 2,
-        "units_folded": 2,
-        "domain_units_offered": 7,
-        "domain_units_inside_the_ceiling": 5,
+        "units_offered": 17,
+        "units_inside_the_ceiling": 14,
+        "units_recorded": 6,
+        "units_folded": 6,
+        "domain_units_offered": 11,
+        "domain_units_inside_the_ceiling": 8,
         "domain_units_recorded": 0,
         "domain_units_folded": 0,
         "domain_units_attempted": 0,
         "domains_folded": [],
-        "chains_offered_a_domain_route": 2,
+        "chains_offered_a_domain_route": 6,
         "chains_rescued_by_the_domain_route": 0,
-        "chains_with_coordinates": 2,
+        "chains_with_coordinates": 6,
         "chains_with_no_coordinates": 0,
         "domain_units_not_folded_by_limit": 0,
         "domain_units_not_folded_by_budget": 0,
@@ -142,15 +174,15 @@
         "chains_over_the_ceiling": 0,
         "over_the_ceiling": [],
         "changes_any_rank": false,
-        "folded_target": "P1",
-        "residues": 880,
-        "mean_plddt": 56.64,
-        "at_or_above_70": 0.4193,
-        "sequence_sha256": "2599af4d2df81cfa275751f1c935482480d524fe5d235251cacd39a125f4c23d",
+        "folded_target": "Protease 2A",
+        "residues": 149,
+        "mean_plddt": 82.56,
+        "at_or_above_70": 0.8725,
+        "sequence_sha256": "7a1d868bcaaf2de45b54e2ef6773e9c20ef1ae058c9e5bd4e34707fea82da35f",
         "error": null
       },
-      "seconds": 53.38,
-      "hands_to_next": "coordinates for 2 of the 2 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 0 chains over it. Plus the functional site positions, carried through the alignment into this genome's numbering, which the surface stage anchors the patch arithmetic on. 0 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region's surface goes under its chain's row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2"
+      "seconds": 26.11,
+      "hands_to_next": "coordinates for 6 of the 6 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 0 chains over it. Plus the functional site positions, carried through the alignment into this genome's numbering, which the surface stage anchors the patch arithmetic on. 0 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region's surface goes under its chain's row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2"
     },
     {
       "stage": 4,
@@ -162,41 +194,41 @@
         "UniProt"
       ],
       "input": {
-        "candidates_in": 2,
-        "predicted_coordinates_in": 2,
+        "candidates_in": 6,
+        "predicted_coordinates_in": 6,
         "predicted_region_coordinates_in": 0,
-        "chains_with_functional_site_positions_in": 2,
+        "chains_with_functional_site_positions_in": 6,
         "macrocycle_reach_a": 13.81976597885342
       },
       "output": {
-        "rows_out": 2,
-        "measured": 0,
-        "unmeasured": 2,
+        "rows_out": 6,
+        "measured": 3,
+        "unmeasured": 3,
         "nothing_dropped": true,
-        "predicted_coordinates_offered": 2,
-        "measured_on_predicted_coordinates": 2,
-        "predicted_was_the_only_route": 2,
+        "predicted_coordinates_offered": 6,
+        "measured_on_predicted_coordinates": 6,
+        "predicted_was_the_only_route": 3,
         "no_surface_by_either_route": 0,
         "no_surface_over_the_folding_ceiling": 0,
         "region_surfaces_offered": 0,
         "region_surfaces_measured": 0,
         "chains_with_a_region_surface": 0,
         "chains_with_no_surface_and_no_region_surface": 0,
-        "chains_with_functional_sites": 2,
-        "functional_site_positions": 21,
-        "functional_site_positions_mapped_into_this_genome": 17,
-        "site_patch_measured_on_a_deposition": 0,
-        "site_patch_measured_on_a_prediction": 2,
-        "site_patch_on_a_deposition_not_at_the_annotated_residues": 0,
+        "chains_with_functional_sites": 6,
+        "functional_site_positions": 26,
+        "functional_site_positions_mapped_into_this_genome": 21,
+        "site_patch_measured_on_a_deposition": 3,
+        "site_patch_measured_on_a_prediction": 6,
+        "site_patch_on_a_deposition_not_at_the_annotated_residues": 2,
         "site_patch_on_a_prediction_not_at_the_annotated_residues": 1,
         "gate_yes": 0,
         "gate_borderline": 0,
-        "gate_no": 0,
+        "gate_no": 3,
         "changes_any_rank": false,
         "read_by_later_stages": []
       },
-      "seconds": 0.32,
-      "hands_to_next": "a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 2 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage's product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one"
+      "seconds": 10.08,
+      "hands_to_next": "a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 3 chains through a deposition and 6 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage's product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one"
     },
     {
       "stage": 5,
@@ -242,20 +274,20 @@
         "MaveDB"
       ],
       "input": {
-        "targets_in": 2,
-        "ranked_available": 2,
+        "targets_in": 3,
+        "ranked_available": 6,
         "wall_budget_seconds": 700.0
       },
       "output": {
-        "targets_covered": 2,
-        "calls_made": 10,
-        "ok": 9,
-        "not_ok": 1,
-        "network_calls": 54,
+        "targets_covered": 3,
+        "calls_made": 15,
+        "ok": 15,
+        "not_ok": 0,
+        "network_calls": 93,
         "changes_any_rank": false,
         "every_target_has_every_tool": true
       },
-      "seconds": 48.1,
+      "seconds": 200.91,
       "hands_to_next": "nothing. This annotates the shortlist and never reorders it"
     }
   ],
@@ -539,13 +571,13 @@
   "scores": [
     {
       "rank": 1,
-      "target": "P1",
+      "target": "Protease 2A",
       "parent": "POLG_CXA21 Genome polyprotein",
       "tier": "exact",
       "nearest_homolog": "P22055",
       "chain_range": [
-        2,
-        879
+        880,
+        1028
       ],
       "conservation": 0.4809,
       "conservation_scale": "shared_kmer_fraction_of_query",
@@ -566,12 +598,39 @@
     },
     {
       "rank": 2,
-      "target": "P3",
+      "target": "Protease 3C",
       "parent": "POLG_CXA21 Genome polyprotein",
       "tier": "exact",
       "nearest_homolog": "P22055",
       "chain_range": [
-        1454,
+        1563,
+        1745
+      ],
+      "conservation": 0.4809,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false,
+      "surface_exposed": false,
+      "essential_class": true,
+      "druggable_class": 3,
+      "structures_in_family": 0,
+      "score_terms": {
+        "conservation": 1.4427,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "score": 5.3427,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 3,
+      "target": "RNA-directed RNA polymerase",
+      "parent": "POLG_CXA21 Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P22055",
+      "chain_range": [
+        1746,
         2206
       ],
       "conservation": 0.4809,
@@ -590,32 +649,195 @@
       },
       "score": 5.3427,
       "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 4,
+      "target": "Capsid protein VP0",
+      "parent": "POLG_CXA21 Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P22055",
+      "chain_range": [
+        2,
+        341
+      ],
+      "conservation": 0.4809,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false,
+      "surface_exposed": false,
+      "essential_class": true,
+      "druggable_class": 0,
+      "structures_in_family": 4,
+      "score_terms": {
+        "conservation": 1.4427,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.04,
+        "druggable_class": 0.0
+      },
+      "score": 2.9827,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 5,
+      "target": "Capsid protein VP3",
+      "parent": "POLG_CXA21 Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P22055",
+      "chain_range": [
+        342,
+        581
+      ],
+      "conservation": 0.4809,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false,
+      "surface_exposed": false,
+      "essential_class": true,
+      "druggable_class": 0,
+      "structures_in_family": 4,
+      "score_terms": {
+        "conservation": 1.4427,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.04,
+        "druggable_class": 0.0
+      },
+      "score": 2.9827,
+      "decomposition_reproduces_score": true
+    },
+    {
+      "rank": 6,
+      "target": "Capsid protein VP1",
+      "parent": "POLG_CXA21 Genome polyprotein",
+      "tier": "exact",
+      "nearest_homolog": "P22055",
+      "chain_range": [
+        582,
+        879
+      ],
+      "conservation": 0.4809,
+      "conservation_scale": "shared_kmer_fraction_of_query",
+      "conservation_at_ceiling": false,
+      "surface_exposed": false,
+      "essential_class": true,
+      "druggable_class": 0,
+      "structures_in_family": 1,
+      "score_terms": {
+        "conservation": 1.4427,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.01,
+        "druggable_class": 0.0
+      },
+      "score": 2.9527,
+      "decomposition_reproduces_score": true
     }
   ],
   "surfaces": [
     {
-      "target": "P1",
+      "target": "Protease 2A",
       "rank": 1,
       "identified": true,
       "measured_on_accession": "P22055",
       "chain_range": [
-        2,
-        879
+        880,
+        1028
       ],
       "measured": false,
-      "unmeasured_because": "44 chains map to P22055 and none covers 2-879",
+      "unmeasured_because": "44 chains map to P22055 and none covers 880-1028",
       "functional_sites": [
         {
           "type": "Site",
           "description": "Cleavage; by autolysis",
           "ligand": null,
           "positions_on_the_relative": [
-            69,
-            70
+            880
           ],
           "positions": [
-            69,
-            70
+            882
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Active site",
+          "description": "For protease 2A activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            899
+          ],
+          "positions": [
+            901
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Active site",
+          "description": "For protease 2A activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            917
+          ],
+          "positions": [
+            919
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            934
+          ],
+          "positions": [
+            936
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            936
+          ],
+          "positions": [
+            938
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Active site",
+          "description": "For protease 2A activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            988
+          ],
+          "positions": [
+            990
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            994
+          ],
+          "positions": [
+            996
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            996
+          ],
+          "positions": [
+            998
           ],
           "positions_unmapped": 0
         },
@@ -624,49 +846,25 @@
           "description": "Cleavage; by protease 3C",
           "ligand": null,
           "positions_on_the_relative": [
-            341,
-            342
+            1028
           ],
           "positions": [
-            341,
-            342
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Cleavage; by protease 3C",
-          "ligand": null,
-          "positions_on_the_relative": [
-            578,
-            579
-          ],
-          "positions": [
-            null,
-            null
-          ],
-          "positions_unmapped": 2
-        },
-        {
-          "type": "Site",
-          "description": "Cleavage; by autolysis",
-          "ligand": null,
-          "positions_on_the_relative": [
-            879
-          ],
-          "positions": [
-            881
+            1030
           ],
           "positions_unmapped": 0
         }
       ],
       "functional_sites_absent_because": null,
       "site_positions_in_this_genome": [
-        69,
-        70,
-        341,
-        342,
-        881
+        882,
+        901,
+        919,
+        936,
+        938,
+        990,
+        996,
+        998,
+        1030
       ],
       "site_surface": null,
       "seconds": 0.0,
@@ -677,116 +875,120 @@
         "measured_on": "coordinates from the fold stage, not a deposition",
         "unit": null,
         "model": "ESMFold v1",
-        "mean_plddt": 56.64,
-        "confident_fraction": 0.4193,
-        "residues": 880,
-        "patch_a2": 3387.1,
-        "patch_fraction_of_surface": 0.061,
+        "mean_plddt": 82.56,
+        "confident_fraction": 0.8725,
+        "residues": 149,
+        "patch_a2": 1049.8,
+        "patch_fraction_of_surface": 0.122,
         "patch_positions": [
-          18,
           19,
-          24,
-          26,
-          29,
+          27,
+          30,
           31,
-          32,
-          52,
-          56,
-          59,
-          60,
-          61,
-          64,
-          66,
-          67,
-          72,
-          74,
-          75,
-          77,
-          81,
+          33,
+          35,
+          80,
           82,
-          84,
-          86,
-          96,
-          97,
-          100,
-          101,
-          103,
-          109,
-          110,
-          115,
-          118,
-          126,
-          129,
-          131,
-          159,
-          325
+          85,
+          88,
+          91,
+          93
         ],
         "patch_residue_names": [
+          "Y",
+          "L",
           "A",
-          "Y",
-          "I",
-          "Y",
-          "I",
-          "Y",
-          "Y",
+          "V",
+          "V",
+          "W",
           "F",
-          "I",
-          "V",
-          "L",
-          "I",
-          "A",
-          "M",
-          "L",
-          "I",
-          "A",
-          "C",
           "Y",
-          "V",
-          "L",
-          "L",
-          "L",
           "A",
-          "A",
-          "V",
-          "V",
           "Y",
-          "Y",
-          "L",
           "A",
-          "V",
-          "V",
-          "C",
-          "F",
-          "L",
-          "C"
+          "Y"
         ],
-        "exposed_fraction_of_residues": 0.61,
-        "sequons_near_patch": 3,
+        "exposed_fraction_of_residues": 0.537,
+        "sequons_near_patch": 0,
         "site_surface": {
           "measured": true,
           "anchors_asked": [
-            68,
-            69,
-            340,
-            341,
-            880
+            1,
+            20,
+            38,
+            55,
+            57,
+            109,
+            115,
+            117,
+            149
           ],
           "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
           "anchors_found": [
-            68,
-            69,
-            340,
-            341,
-            880
+            1,
+            20,
+            38,
+            55,
+            57,
+            109,
+            115,
+            117,
+            149
           ],
           "anchors_missing": [],
-          "measured_on": "ESMFold v1 \u00b7 P1",
+          "measured_on": "ESMFold v1 \u00b7 Protease 2A",
           "reach_a": 13.81976597885342,
           "positions_within_reach": [
-            31,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            30,
             32,
+            33,
+            34,
             35,
             36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
             61,
             62,
             63,
@@ -795,13 +997,17 @@
             66,
             67,
             68,
-            69,
             70,
             71,
             72,
             73,
             74,
             75,
+            76,
+            77,
+            78,
+            79,
+            80,
             81,
             82,
             83,
@@ -809,9 +1015,19 @@
             85,
             86,
             87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
             99,
             100,
-            101,
             102,
             103,
             104,
@@ -820,94 +1036,74 @@
             107,
             108,
             109,
+            110,
             111,
-            155,
-            156,
-            157,
-            158,
-            161,
-            162,
-            233,
-            234,
-            235,
-            236,
-            237,
-            238,
-            239,
-            277,
-            279,
-            336,
-            337,
-            338,
-            339,
-            340,
-            341,
-            342,
-            343,
-            344,
-            345,
-            346,
-            377,
-            397,
-            398,
-            431,
-            432,
-            433,
-            434,
-            436,
-            569,
-            570,
-            856,
-            874,
-            875,
-            876,
-            877,
-            878,
-            879,
-            880
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149
           ],
-          "residues_within_reach": 82,
-          "hydrophobic_within_reach": 32,
+          "residues_within_reach": 135,
+          "hydrophobic_within_reach": 65,
           "exposed_within_reach": 69,
-          "site_patch_area_a2": 1606.6,
+          "site_patch_area_a2": 976.5,
           "site_patch_positions": [
-            31,
-            32,
-            61,
-            64,
-            66,
-            67,
-            72,
-            74,
-            75,
-            81,
+            19,
+            27,
+            30,
+            33,
+            35,
+            80,
             82,
-            84,
-            86,
-            100,
-            101,
-            103,
-            109
+            85,
+            88,
+            91,
+            93
           ],
-          "site_patch_fraction_of_the_site": 0.217,
+          "site_patch_fraction_of_the_site": 0.135,
           "site_shares_the_patch": true,
           "not_measured_because": null,
-          "anchors_agreeing_with_the_annotation": 4,
-          "anchors_disagreeing_with_the_annotation": 1,
+          "anchors_agreeing_with_the_annotation": 9,
+          "anchors_disagreeing_with_the_annotation": 0,
           "anchors_not_checked_against_the_annotation": 0,
-          "anchors_at_the_wrong_residue": [
-            {
-              "anchor": 880,
-              "on_the_relative": 879,
-              "expected_residue": "F",
-              "residue_found": "Y"
-            }
-          ],
-          "measured_at_the_annotated_residues": false,
-          "not_the_annotated_residues_because": "1 of the 5 anchors this measurement was taken at do not carry the residue the annotation names there -- 880 carries Y where the relative's entry has F at 879. An annotated position is offered to a structure as `position - chain_start + 1`, which is right for a deposition of the mature chain and wrong for a construct numbered from its own first residue or for a chain deposited in the parent polyprotein's numbering; a deliberately mutated construct and a substitution across the species gap read the same way from here. The figures in this block were measured at the residues named above and are reported rather than withheld so that they can be seen to be the wrong ones, but they are not the annotated site.",
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": true,
+          "not_the_annotated_residues_because": null,
           "residues_not_checked_because": null
         },
-        "seconds": 0.17,
+        "seconds": 0.03,
         "only_route_to_a_surface": true,
         "deposited_patch_median_a2": null,
         "ratio_to_deposited_median": null,
@@ -918,53 +1114,25 @@
       }
     },
     {
-      "target": "P3",
+      "target": "Protease 3C",
       "rank": 2,
       "identified": true,
       "measured_on_accession": "P22055",
       "chain_range": [
-        1454,
-        2206
+        1563,
+        1745
       ],
       "measured": false,
-      "unmeasured_because": "44 chains map to P22055 and none covers 1454-2206",
+      "unmeasured_because": "44 chains map to P22055 and none covers 1563-1745",
       "functional_sites": [
         {
           "type": "Site",
           "description": "Cleavage; by protease 3C",
           "ligand": null,
           "positions_on_the_relative": [
-            1454
-          ],
-          "positions": [
-            1457
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Cleavage; by protease 3C",
-          "ligand": null,
-          "positions_on_the_relative": [
-            1540,
-            1541
-          ],
-          "positions": [
-            1543,
-            1544
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Cleavage; by protease 3C",
-          "ligand": null,
-          "positions_on_the_relative": [
-            1562,
             1563
           ],
           "positions": [
-            1565,
             1566
           ],
           "positions_unmapped": 0
@@ -1010,11 +1178,250 @@
           "description": "Cleavage; by protease 3C",
           "ligand": null,
           "positions_on_the_relative": [
-            1745,
+            1745
+          ],
+          "positions": [
+            1748
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        1566,
+        1605,
+        1636,
+        1712,
+        1748
+      ],
+      "site_surface": null,
+      "seconds": 0.0,
+      "structures_offered": [],
+      "chains_mapped_to_accession": 44,
+      "predicted_surface": {
+        "measured": true,
+        "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
+        "model": "ESMFold v1",
+        "mean_plddt": 88.26,
+        "confident_fraction": 0.9727,
+        "residues": 183,
+        "patch_a2": 201.5,
+        "patch_fraction_of_surface": 0.023,
+        "patch_positions": [
+          57,
+          59,
+          61
+        ],
+        "patch_residue_names": [
+          "L",
+          "A",
+          "A"
+        ],
+        "exposed_fraction_of_residues": 0.47,
+        "sequons_near_patch": 0,
+        "site_surface": {
+          "measured": true,
+          "anchors_asked": [
+            1,
+            40,
+            71,
+            147,
+            183
+          ],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [
+            1,
+            40,
+            71,
+            147,
+            183
+          ],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 Protease 3C",
+          "reach_a": 13.81976597885342,
+          "positions_within_reach": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            47,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            159,
+            160,
+            161,
+            162,
+            163,
+            164,
+            165,
+            168,
+            169,
+            170,
+            171,
+            172,
+            173,
+            174,
+            175,
+            177,
+            178,
+            179,
+            180,
+            181,
+            182,
+            183
+          ],
+          "residues_within_reach": 130,
+          "hydrophobic_within_reach": 56,
+          "exposed_within_reach": 51,
+          "site_patch_area_a2": 201.5,
+          "site_patch_positions": [
+            57,
+            59,
+            61
+          ],
+          "site_patch_fraction_of_the_site": 0.039,
+          "site_shares_the_patch": true,
+          "not_measured_because": null,
+          "anchors_agreeing_with_the_annotation": 5,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": true,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
+        "seconds": 0.04,
+        "only_route_to_a_surface": true,
+        "deposited_patch_median_a2": null,
+        "ratio_to_deposited_median": null,
+        "not_compared_because": null,
+        "is_deposited_measurement": false,
+        "in_the_ranking": false,
+        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
+      }
+    },
+    {
+      "target": "RNA-directed RNA polymerase",
+      "rank": 3,
+      "identified": true,
+      "measured_on_accession": "P22055",
+      "chain_range": [
+        1746,
+        2206
+      ],
+      "measured": false,
+      "unmeasured_because": "44 chains map to P22055 and none covers 1746-2206",
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by protease 3C",
+          "ligand": null,
+          "positions_on_the_relative": [
             1746
           ],
           "positions": [
-            1748,
             1749
           ],
           "positions_unmapped": 0
@@ -1070,15 +1477,6 @@
       ],
       "functional_sites_absent_because": null,
       "site_positions_in_this_genome": [
-        1457,
-        1543,
-        1544,
-        1565,
-        1566,
-        1605,
-        1636,
-        1712,
-        1748,
         1749,
         1981,
         2076
@@ -1092,94 +1490,54 @@
         "measured_on": "coordinates from the fold stage, not a deposition",
         "unit": null,
         "model": "ESMFold v1",
-        "mean_plddt": 77.77,
-        "confident_fraction": 0.7915,
-        "residues": 753,
-        "patch_a2": 1999.9,
-        "patch_fraction_of_surface": 0.049,
+        "mean_plddt": 88.02,
+        "confident_fraction": 0.9479,
+        "residues": 461,
+        "patch_a2": 901.9,
+        "patch_fraction_of_surface": 0.041,
         "patch_positions": [
-          50,
-          56,
-          59,
-          60,
-          62,
-          63,
-          65,
-          66,
-          69,
-          70,
-          71,
-          72,
-          73,
-          75,
-          76,
-          77,
-          78,
-          79,
-          80,
-          82,
-          83,
-          84
+          86,
+          205,
+          216,
+          223,
+          224,
+          377,
+          380,
+          384,
+          386,
+          458,
+          461
         ],
         "patch_residue_names": [
-          "V",
-          "I",
-          "A",
           "M",
           "I",
           "L",
-          "A",
           "V",
-          "F",
-          "A",
-          "A",
-          "V",
-          "A",
-          "V",
-          "V",
-          "Y",
-          "V",
-          "M",
-          "Y",
           "L",
           "F",
-          "A"
+          "A",
+          "Y",
+          "F",
+          "L",
+          "F"
         ],
-        "exposed_fraction_of_residues": 0.546,
-        "sequons_near_patch": 2,
+        "exposed_fraction_of_residues": 0.497,
+        "sequons_near_patch": 1,
         "site_surface": {
           "measured": true,
           "anchors_asked": [
             1,
-            87,
-            88,
-            109,
-            110,
-            149,
-            180,
-            256,
-            292,
-            293,
-            525,
-            620
+            233,
+            328
           ],
           "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
           "anchors_found": [
             1,
-            87,
-            88,
-            109,
-            110,
-            149,
-            180,
-            256,
-            292,
-            293,
-            525,
-            620
+            233,
+            328
           ],
           "anchors_missing": [],
-          "measured_on": "ESMFold v1 \u00b7 P3",
+          "measured_on": "ESMFold v1 \u00b7 RNA-directed RNA polymerase",
           "reach_a": 13.81976597885342,
           "positions_within_reach": [
             1,
@@ -1187,98 +1545,26 @@
             3,
             4,
             5,
-            6,
-            81,
-            82,
-            83,
-            84,
-            85,
-            86,
-            87,
-            88,
-            89,
-            90,
-            91,
-            92,
-            93,
-            94,
-            104,
-            105,
-            106,
-            107,
-            108,
-            109,
-            110,
-            111,
-            112,
-            113,
-            114,
-            115,
-            116,
-            117,
-            118,
-            124,
-            125,
-            126,
-            127,
-            128,
-            129,
-            130,
-            131,
-            132,
-            133,
-            134,
-            135,
-            136,
-            137,
-            144,
-            145,
-            146,
-            147,
-            148,
-            149,
-            150,
-            151,
-            152,
-            153,
-            156,
-            168,
-            169,
-            170,
-            171,
-            172,
-            173,
-            174,
-            176,
-            177,
-            178,
-            179,
-            180,
-            181,
-            182,
-            183,
-            184,
-            206,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
             207,
             208,
             209,
             210,
-            211,
-            212,
-            213,
-            214,
-            215,
-            216,
-            217,
-            218,
-            219,
-            220,
-            221,
-            222,
-            223,
-            224,
-            225,
-            226,
+            230,
+            231,
             232,
             233,
             234,
@@ -1293,34 +1579,10 @@
             243,
             244,
             245,
-            249,
-            250,
-            251,
-            252,
-            253,
-            254,
-            255,
-            256,
-            257,
-            258,
-            259,
-            260,
-            261,
-            262,
-            263,
-            264,
-            265,
-            268,
             269,
             270,
             271,
             272,
-            273,
-            274,
-            275,
-            277,
-            278,
-            279,
             280,
             281,
             282,
@@ -1330,15 +1592,35 @@
             286,
             287,
             288,
-            289,
-            290,
-            291,
             292,
             293,
             294,
             295,
             296,
             297,
+            298,
+            299,
+            300,
+            301,
+            302,
+            303,
+            304,
+            305,
+            323,
+            324,
+            325,
+            326,
+            327,
+            328,
+            329,
+            330,
+            331,
+            332,
+            340,
+            341,
+            343,
+            344,
+            345,
             347,
             348,
             350,
@@ -1352,111 +1634,26 @@
             358,
             359,
             360,
-            445,
-            499,
-            500,
-            501,
-            502,
-            522,
-            523,
-            524,
-            525,
-            526,
-            527,
-            528,
-            529,
-            530,
-            531,
-            532,
-            533,
-            534,
-            535,
-            537,
-            559,
-            560,
-            561,
-            562,
-            563,
-            564,
-            565,
-            566,
-            567,
-            570,
-            571,
-            572,
-            573,
-            574,
-            575,
-            576,
-            577,
-            578,
-            579,
-            580,
-            584,
-            585,
-            586,
-            587,
-            588,
-            589,
-            590,
-            591,
-            592,
-            593,
-            594,
-            595,
-            596,
-            597,
-            615,
-            616,
-            617,
-            618,
-            619,
-            620,
-            621,
-            622,
-            623,
-            624,
-            632,
-            633,
-            635,
-            636,
-            637,
-            639,
-            640,
-            644,
-            645,
-            646,
-            647,
-            648,
-            649,
-            650,
-            651,
-            652,
-            653,
-            654,
-            655,
-            656,
-            658,
-            663,
-            664,
-            665,
-            666,
-            667,
-            668
+            361,
+            362,
+            363,
+            364,
+            366,
+            371,
+            372,
+            373,
+            374,
+            375
           ],
-          "residues_within_reach": 261,
-          "hydrophobic_within_reach": 113,
-          "exposed_within_reach": 114,
-          "site_patch_area_a2": 289.1,
-          "site_patch_positions": [
-            82,
-            83,
-            84
-          ],
-          "site_patch_fraction_of_the_site": 0.026,
-          "site_shares_the_patch": true,
+          "residues_within_reach": 104,
+          "hydrophobic_within_reach": 50,
+          "exposed_within_reach": 40,
+          "site_patch_area_a2": 0.0,
+          "site_patch_positions": [],
+          "site_patch_fraction_of_the_site": 0.0,
+          "site_shares_the_patch": false,
           "not_measured_because": null,
-          "anchors_agreeing_with_the_annotation": 12,
+          "anchors_agreeing_with_the_annotation": 3,
           "anchors_disagreeing_with_the_annotation": 0,
           "anchors_not_checked_against_the_annotation": 0,
           "anchors_at_the_wrong_residue": null,
@@ -1464,10 +1661,843 @@
           "not_the_annotated_residues_because": null,
           "residues_not_checked_because": null
         },
-        "seconds": 0.15,
+        "seconds": 0.1,
         "only_route_to_a_surface": true,
         "deposited_patch_median_a2": null,
         "ratio_to_deposited_median": null,
+        "not_compared_because": null,
+        "is_deposited_measurement": false,
+        "in_the_ranking": false,
+        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
+      }
+    },
+    {
+      "target": "Capsid protein VP0",
+      "rank": 4,
+      "identified": true,
+      "measured_on_accession": "P22055",
+      "chain_range": [
+        2,
+        341
+      ],
+      "measured": true,
+      "unmeasured_because": null,
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by autolysis",
+          "ligand": null,
+          "positions_on_the_relative": [
+            69,
+            70
+          ],
+          "positions": [
+            69,
+            70
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by protease 3C",
+          "ligand": null,
+          "positions_on_the_relative": [
+            341
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        69,
+        70
+      ],
+      "site_surface": {
+        "measured": true,
+        "anchors_asked": [
+          68,
+          69,
+          340
+        ],
+        "anchors_numbering": "author numbering of the deposited chain, taken as 1-based within the mature chain the relative's entry delimits",
+        "anchors_found": [
+          68,
+          69
+        ],
+        "anchors_missing": [
+          340
+        ],
+        "measured_on": "1z7s:2",
+        "reach_a": 13.81976597885342,
+        "positions_within_reach": [
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          80,
+          85,
+          109,
+          110,
+          111,
+          112,
+          113,
+          122,
+          151,
+          152,
+          153,
+          154,
+          155,
+          156,
+          157,
+          229,
+          230,
+          231,
+          232,
+          233,
+          237,
+          245,
+          246,
+          247,
+          248,
+          249,
+          250,
+          251,
+          252,
+          253
+        ],
+        "residues_within_reach": 46,
+        "hydrophobic_within_reach": 21,
+        "exposed_within_reach": 14,
+        "site_patch_area_a2": 0.0,
+        "site_patch_positions": [],
+        "site_patch_fraction_of_the_site": 0.0,
+        "site_shares_the_patch": false,
+        "not_measured_because": null,
+        "anchors_agreeing_with_the_annotation": 0,
+        "anchors_disagreeing_with_the_annotation": 2,
+        "anchors_not_checked_against_the_annotation": 0,
+        "anchors_at_the_wrong_residue": [
+          {
+            "anchor": 68,
+            "on_the_relative": 69,
+            "expected_residue": "N",
+            "residue_found": "S"
+          },
+          {
+            "anchor": 69,
+            "on_the_relative": 70,
+            "expected_residue": "S",
+            "residue_found": "V"
+          }
+        ],
+        "measured_at_the_annotated_residues": false,
+        "not_the_annotated_residues_because": "2 of the 2 anchors this measurement was taken at do not carry the residue the annotation names there -- 68 carries S where the relative's entry has N at 69; 69 carries V where the relative's entry has S at 70. An annotated position is offered to a structure as `position - chain_start + 1`, which is right for a deposition of the mature chain and wrong for a construct numbered from its own first residue or for a chain deposited in the parent polyprotein's numbering; a deliberately mutated construct and a substitution across the species gap read the same way from here. The figures in this block were measured at the residues named above and are reported rather than withheld so that they can be seen to be the wrong ones, but they are not the annotated site.",
+        "residues_not_checked_because": null
+      },
+      "seconds": 6.09,
+      "patch_median_a2": 432.6,
+      "patch_range_a2": [
+        383.1,
+        936.1
+      ],
+      "patch_spread_a2": 553.0,
+      "structures_measured": 5,
+      "structures_used": [
+        "1z7s:2",
+        "7tqu:b",
+        "7tqu:f",
+        "7tqu:j",
+        "7tqs:b"
+      ],
+      "surface_score": 2.644,
+      "patch_fraction_of_surface": 0.061,
+      "structures_clipped_to_domain": 5,
+      "residues_in_range": 263,
+      "exposed_fraction_of_residues": 0.27,
+      "sequons_near_patch": 2,
+      "available_from": "2005-03-28",
+      "patch_positions": [
+        6,
+        7,
+        9,
+        13
+      ],
+      "patch_residue_names": [
+        "A",
+        "C",
+        "Y",
+        "V"
+      ],
+      "patch_positions_measured_on": "1z7s:2",
+      "locations": [
+        "Virion",
+        "Host cytoplasm"
+      ],
+      "location_scope": "chain",
+      "exposed": false,
+      "exposed_fraction_of_locations": 0.0,
+      "gate": "no",
+      "predicted_surface": {
+        "measured": true,
+        "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
+        "model": "ESMFold v1",
+        "mean_plddt": 51.39,
+        "confident_fraction": 0.2819,
+        "residues": 337,
+        "patch_a2": 4979.1,
+        "patch_fraction_of_surface": 0.203,
+        "patch_positions": [
+          52,
+          56,
+          59,
+          60,
+          61,
+          64,
+          66,
+          67,
+          72,
+          74,
+          75,
+          77,
+          82,
+          84,
+          86,
+          91,
+          96,
+          100,
+          101,
+          102,
+          103,
+          106,
+          109,
+          110,
+          115,
+          118,
+          126,
+          127,
+          129,
+          131,
+          157,
+          159,
+          165,
+          166,
+          168,
+          169,
+          198,
+          200,
+          213,
+          216,
+          225,
+          229,
+          242,
+          247,
+          249,
+          255,
+          259,
+          260,
+          261,
+          265,
+          277,
+          280,
+          302,
+          303,
+          324,
+          325,
+          331,
+          334,
+          336
+        ],
+        "patch_residue_names": [
+          "F",
+          "I",
+          "V",
+          "L",
+          "I",
+          "A",
+          "M",
+          "L",
+          "I",
+          "A",
+          "C",
+          "Y",
+          "L",
+          "L",
+          "L",
+          "I",
+          "A",
+          "V",
+          "V",
+          "A",
+          "Y",
+          "W",
+          "Y",
+          "L",
+          "A",
+          "V",
+          "V",
+          "A",
+          "C",
+          "F",
+          "M",
+          "L",
+          "Y",
+          "Y",
+          "Y",
+          "L",
+          "M",
+          "L",
+          "Y",
+          "A",
+          "F",
+          "F",
+          "F",
+          "Y",
+          "L",
+          "L",
+          "F",
+          "V",
+          "F",
+          "I",
+          "V",
+          "Y",
+          "L",
+          "A",
+          "M",
+          "C",
+          "L",
+          "I",
+          "L"
+        ],
+        "exposed_fraction_of_residues": 0.727,
+        "sequons_near_patch": 6,
+        "site_surface": {
+          "measured": true,
+          "anchors_asked": [
+            68,
+            69
+          ],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [
+            68,
+            69
+          ],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 Capsid protein VP0",
+          "reach_a": 13.81976597885342,
+          "positions_within_reach": [
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            105
+          ],
+          "residues_within_reach": 18,
+          "hydrophobic_within_reach": 8,
+          "exposed_within_reach": 18,
+          "site_patch_area_a2": 587.6,
+          "site_patch_positions": [
+            60,
+            61,
+            64,
+            66,
+            67,
+            72,
+            74,
+            75
+          ],
+          "site_patch_fraction_of_the_site": 0.377,
+          "site_shares_the_patch": true,
+          "not_measured_because": null,
+          "anchors_agreeing_with_the_annotation": 2,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": true,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
+        "seconds": 0.08,
+        "only_route_to_a_surface": false,
+        "deposited_patch_median_a2": 432.6,
+        "ratio_to_deposited_median": 11.51,
+        "not_compared_because": null,
+        "is_deposited_measurement": false,
+        "in_the_ranking": false,
+        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
+      }
+    },
+    {
+      "target": "Capsid protein VP3",
+      "rank": 5,
+      "identified": true,
+      "measured_on_accession": "P22055",
+      "chain_range": [
+        342,
+        581
+      ],
+      "measured": true,
+      "unmeasured_because": null,
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by protease 3C",
+          "ligand": null,
+          "positions_on_the_relative": [
+            342
+          ],
+          "positions": [
+            342
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by protease 3C",
+          "ligand": null,
+          "positions_on_the_relative": [
+            578,
+            579
+          ],
+          "positions": [
+            null,
+            null
+          ],
+          "positions_unmapped": 2
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        342
+      ],
+      "site_surface": {
+        "measured": true,
+        "anchors_asked": [
+          1,
+          237,
+          238
+        ],
+        "anchors_numbering": "author numbering of the deposited chain, taken as 1-based within the mature chain the relative's entry delimits",
+        "anchors_found": [
+          1,
+          237,
+          238
+        ],
+        "anchors_missing": [],
+        "measured_on": "1z7s:3",
+        "reach_a": 13.81976597885342,
+        "positions_within_reach": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          233,
+          234,
+          235,
+          236,
+          237,
+          238,
+          239
+        ],
+        "residues_within_reach": 12,
+        "hydrophobic_within_reach": 4,
+        "exposed_within_reach": 12,
+        "site_patch_area_a2": 175.3,
+        "site_patch_positions": [],
+        "site_patch_fraction_of_the_site": 0.255,
+        "site_shares_the_patch": true,
+        "not_measured_because": null,
+        "anchors_agreeing_with_the_annotation": 2,
+        "anchors_disagreeing_with_the_annotation": 1,
+        "anchors_not_checked_against_the_annotation": 0,
+        "anchors_at_the_wrong_residue": [
+          {
+            "anchor": 237,
+            "on_the_relative": 578,
+            "expected_residue": "A",
+            "residue_found": "G"
+          }
+        ],
+        "measured_at_the_annotated_residues": false,
+        "not_the_annotated_residues_because": "1 of the 3 anchors this measurement was taken at do not carry the residue the annotation names there -- 237 carries G where the relative's entry has A at 578. An annotated position is offered to a structure as `position - chain_start + 1`, which is right for a deposition of the mature chain and wrong for a construct numbered from its own first residue or for a chain deposited in the parent polyprotein's numbering; a deliberately mutated construct and a substitution across the species gap read the same way from here. The figures in this block were measured at the residues named above and are reported rather than withheld so that they can be seen to be the wrong ones, but they are not the annotated site.",
+        "residues_not_checked_because": null
+      },
+      "seconds": 3.08,
+      "patch_median_a2": 334.5,
+      "patch_range_a2": [
+        175.3,
+        551.1
+      ],
+      "patch_spread_a2": 375.8,
+      "structures_measured": 5,
+      "structures_used": [
+        "1z7s:3",
+        "7tqu:c",
+        "7tqu:g",
+        "7tqu:k",
+        "7tqs:c"
+      ],
+      "surface_score": 2.4245,
+      "patch_fraction_of_surface": 0.04,
+      "structures_clipped_to_domain": 5,
+      "residues_in_range": 236,
+      "exposed_fraction_of_residues": 0.352,
+      "sequons_near_patch": 1,
+      "available_from": "2005-03-28",
+      "patch_positions": [
+        76,
+        79,
+        123,
+        124,
+        159,
+        198,
+        201
+      ],
+      "patch_residue_names": [
+        "L",
+        "A",
+        "M",
+        "M",
+        "L",
+        "V",
+        "A"
+      ],
+      "patch_positions_measured_on": "1z7s:3",
+      "locations": [
+        "Virion",
+        "Host cytoplasm"
+      ],
+      "location_scope": "chain",
+      "exposed": false,
+      "exposed_fraction_of_locations": 0.0,
+      "gate": "no",
+      "predicted_surface": {
+        "measured": true,
+        "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
+        "model": "ESMFold v1",
+        "mean_plddt": 79.29,
+        "confident_fraction": 0.7839,
+        "residues": 236,
+        "patch_a2": 999.6,
+        "patch_fraction_of_surface": 0.064,
+        "patch_positions": [
+          13,
+          14,
+          16,
+          19,
+          23,
+          24,
+          25,
+          28,
+          30
+        ],
+        "patch_residue_names": [
+          "Y",
+          "L",
+          "A",
+          "F",
+          "C",
+          "A",
+          "L",
+          "F",
+          "V"
+        ],
+        "exposed_fraction_of_residues": 0.619,
+        "sequons_near_patch": 0,
+        "site_surface": {
+          "measured": true,
+          "anchors_asked": [
+            1
+          ],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [
+            1
+          ],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 Capsid protein VP3",
+          "reach_a": 13.81976597885342,
+          "positions_within_reach": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "residues_within_reach": 5,
+          "hydrophobic_within_reach": 3,
+          "exposed_within_reach": 5,
+          "site_patch_area_a2": 0.0,
+          "site_patch_positions": [],
+          "site_patch_fraction_of_the_site": 0.0,
+          "site_shares_the_patch": false,
+          "not_measured_because": null,
+          "anchors_agreeing_with_the_annotation": 1,
+          "anchors_disagreeing_with_the_annotation": 0,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": null,
+          "measured_at_the_annotated_residues": true,
+          "not_the_annotated_residues_because": null,
+          "residues_not_checked_because": null
+        },
+        "seconds": 0.05,
+        "only_route_to_a_surface": false,
+        "deposited_patch_median_a2": 334.5,
+        "ratio_to_deposited_median": 2.99,
+        "not_compared_because": null,
+        "is_deposited_measurement": false,
+        "in_the_ranking": false,
+        "caveat": "A patch computed on predicted coordinates. It inherits the prediction's error, a monomer's surface is not necessarily exposed in an oligomer, and over a low-confidence stretch it describes a fold the model did not commit to. Reported beside a deposited measurement and never pooled with one."
+      }
+    },
+    {
+      "target": "Capsid protein VP1",
+      "rank": 6,
+      "identified": true,
+      "measured_on_accession": "P22055",
+      "chain_range": [
+        582,
+        879
+      ],
+      "measured": true,
+      "unmeasured_because": null,
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by autolysis",
+          "ligand": null,
+          "positions_on_the_relative": [
+            879
+          ],
+          "positions": [
+            881
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "site_positions_in_this_genome": [
+        881
+      ],
+      "site_surface": {
+        "measured": true,
+        "anchors_asked": [
+          298
+        ],
+        "anchors_numbering": "author numbering of the deposited chain, taken as 1-based within the mature chain the relative's entry delimits",
+        "anchors_found": [
+          298
+        ],
+        "anchors_missing": [],
+        "measured_on": "1z7s:1",
+        "reach_a": 13.81976597885342,
+        "positions_within_reach": [
+          291,
+          292,
+          293,
+          294,
+          295,
+          296,
+          297,
+          298
+        ],
+        "residues_within_reach": 8,
+        "hydrophobic_within_reach": 3,
+        "exposed_within_reach": 6,
+        "site_patch_area_a2": 0.0,
+        "site_patch_positions": [],
+        "site_patch_fraction_of_the_site": 0.0,
+        "site_shares_the_patch": false,
+        "not_measured_because": null,
+        "anchors_agreeing_with_the_annotation": 1,
+        "anchors_disagreeing_with_the_annotation": 0,
+        "anchors_not_checked_against_the_annotation": 0,
+        "anchors_at_the_wrong_residue": null,
+        "measured_at_the_annotated_residues": true,
+        "not_the_annotated_residues_because": null,
+        "residues_not_checked_because": null
+      },
+      "seconds": 0.54,
+      "patch_median_a2": 373.6,
+      "patch_range_a2": [
+        373.6,
+        373.6
+      ],
+      "patch_spread_a2": 0.0,
+      "structures_measured": 1,
+      "structures_used": [
+        "1z7s:1"
+      ],
+      "surface_score": 1.837,
+      "patch_fraction_of_surface": 0.032,
+      "structures_clipped_to_domain": 1,
+      "residues_in_range": 283,
+      "exposed_fraction_of_residues": 0.399,
+      "sequons_near_patch": 2,
+      "available_from": "2005-03-28",
+      "patch_positions": [
+        179,
+        181,
+        182,
+        185,
+        240
+      ],
+      "patch_residue_names": [
+        "F",
+        "M",
+        "Y",
+        "A",
+        "V"
+      ],
+      "patch_positions_measured_on": "1z7s:1",
+      "locations": [
+        "Virion",
+        "Host cytoplasm"
+      ],
+      "location_scope": "chain",
+      "exposed": false,
+      "exposed_fraction_of_locations": 0.0,
+      "gate": "no",
+      "predicted_surface": {
+        "measured": true,
+        "measured_on": "coordinates from the fold stage, not a deposition",
+        "unit": null,
+        "model": "ESMFold v1",
+        "mean_plddt": 64.07,
+        "confident_fraction": 0.5033,
+        "residues": 302,
+        "patch_a2": 2381.2,
+        "patch_fraction_of_surface": 0.107,
+        "patch_positions": [
+          41,
+          44,
+          46,
+          47,
+          80,
+          82,
+          124,
+          127,
+          201,
+          208,
+          209,
+          212,
+          215,
+          217,
+          222,
+          223,
+          224,
+          228,
+          229,
+          231,
+          232,
+          234,
+          269,
+          270
+        ],
+        "patch_residue_names": [
+          "I",
+          "L",
+          "A",
+          "V",
+          "F",
+          "A",
+          "F",
+          "Y",
+          "I",
+          "F",
+          "Y",
+          "F",
+          "V",
+          "L",
+          "A",
+          "A",
+          "L",
+          "L",
+          "Y",
+          "A",
+          "A",
+          "L",
+          "W",
+          "C"
+        ],
+        "exposed_fraction_of_residues": 0.722,
+        "sequons_near_patch": 0,
+        "site_surface": {
+          "measured": true,
+          "anchors_asked": [
+            302
+          ],
+          "anchors_numbering": "the predicted coordinates' own numbering, 1-based over the chain that was folded",
+          "anchors_found": [
+            302
+          ],
+          "anchors_missing": [],
+          "measured_on": "ESMFold v1 \u00b7 Capsid protein VP1",
+          "reach_a": 13.81976597885342,
+          "positions_within_reach": [
+            297,
+            298,
+            299,
+            300,
+            301,
+            302
+          ],
+          "residues_within_reach": 6,
+          "hydrophobic_within_reach": 2,
+          "exposed_within_reach": 6,
+          "site_patch_area_a2": 0.0,
+          "site_patch_positions": [],
+          "site_patch_fraction_of_the_site": 0.0,
+          "site_shares_the_patch": false,
+          "not_measured_because": null,
+          "anchors_agreeing_with_the_annotation": 0,
+          "anchors_disagreeing_with_the_annotation": 1,
+          "anchors_not_checked_against_the_annotation": 0,
+          "anchors_at_the_wrong_residue": [
+            {
+              "anchor": 302,
+              "on_the_relative": 879,
+              "expected_residue": "F",
+              "residue_found": "Y"
+            }
+          ],
+          "measured_at_the_annotated_residues": false,
+          "not_the_annotated_residues_because": "1 of the 1 anchors this measurement was taken at do not carry the residue the annotation names there -- 302 carries Y where the relative's entry has F at 879. An annotated position is offered to a structure as `position - chain_start + 1`, which is right for a deposition of the mature chain and wrong for a construct numbered from its own first residue or for a chain deposited in the parent polyprotein's numbering; a deliberately mutated construct and a substitution across the species gap read the same way from here. The figures in this block were measured at the residues named above and are reported rather than withheld so that they can be seen to be the wrong ones, but they are not the annotated site.",
+          "residues_not_checked_because": null
+        },
+        "seconds": 0.06,
+        "only_route_to_a_surface": false,
+        "deposited_patch_median_a2": 373.6,
+        "ratio_to_deposited_median": 6.37,
         "not_compared_because": null,
         "is_deposited_measurement": false,
         "in_the_ranking": false,
@@ -1519,111 +2549,207 @@
     "endpoint_note": "A library definition only; no binding, enrichment, inhibition or antiviral property is predicted for any member."
   },
   "folded": {
-    "target_name": "P1",
-    "sequence_length": 880,
-    "sequence_sha256": "2599af4d2df81cfa275751f1c935482480d524fe5d235251cacd39a125f4c23d",
-    "mean_plddt": 56.64,
-    "confident_fraction": 0.4193,
-    "pdb_sha256": "411ab763c564649652cf4b7b9bb452c10c4cedda11782a07b8d3a9d9c1dbd4ca",
+    "target_name": "Protease 2A",
+    "sequence_length": 149,
+    "sequence_sha256": "7a1d868bcaaf2de45b54e2ef6773e9c20ef1ae058c9e5bd4e34707fea82da35f",
+    "mean_plddt": 82.56,
+    "confident_fraction": 0.8725,
+    "pdb_sha256": "1c68eb4af602261b8db5d258cdbf047fcb394afca2699cfbb84529a9fcd4ce3d",
     "absence": null
   },
   "folded_also": [
     {
-      "target_name": "P3",
+      "target_name": "Protease 3C",
       "unit": {
         "kind": "whole_chain",
-        "chain": "P3",
-        "label": "P3",
+        "chain": "Protease 3C",
+        "label": "Protease 3C",
         "type": "Chain",
         "span_in_this_genome": [
-          1457,
+          1566,
+          1748
+        ],
+        "entry_span_on_the_relative": [
+          1563,
+          1745
+        ],
+        "length_aa": 183
+      },
+      "sequence_length": 183,
+      "sequence_sha256": "906150e67b5adfcfb2f4e60b06171f754c24619afd824743318e7ca7cd9d729e",
+      "mean_plddt": 88.26,
+      "confident_fraction": 0.9727,
+      "pdb_sha256": "3c8b9ace93b20a19a5464cc13fb2c383f7d4dcc462532bc59b71a9539a846ee2",
+      "absence": null
+    },
+    {
+      "target_name": "RNA-directed RNA polymerase",
+      "unit": {
+        "kind": "whole_chain",
+        "chain": "RNA-directed RNA polymerase",
+        "label": "RNA-directed RNA polymerase",
+        "type": "Chain",
+        "span_in_this_genome": [
+          1749,
           2209
         ],
         "entry_span_on_the_relative": [
-          1454,
+          1746,
           2206
         ],
-        "length_aa": 753
+        "length_aa": 461
       },
-      "sequence_length": 753,
-      "sequence_sha256": "79b53e2c5f5eafa68be9b2328d7d3979bc9774a689bf9f06d42e27d0021b3d54",
-      "mean_plddt": 77.77,
-      "confident_fraction": 0.7915,
-      "pdb_sha256": "36248bcd2c167503146318d2fb6fc5e33913fda8ecc0b2850471fc18b5eb5d24",
+      "sequence_length": 461,
+      "sequence_sha256": "324bc7485733323db3bf49c66ca1b5c4ab9ffd57dc0d21b89489182067b8faba",
+      "mean_plddt": 88.02,
+      "confident_fraction": 0.9479,
+      "pdb_sha256": "b6640ea59b1c0a236b89d68ad0a58b3a09ce83b5d0f6d35c285775bb3fa18d55",
+      "absence": null
+    },
+    {
+      "target_name": "Capsid protein VP0",
+      "unit": {
+        "kind": "whole_chain",
+        "chain": "Capsid protein VP0",
+        "label": "Capsid protein VP0",
+        "type": "Chain",
+        "span_in_this_genome": [
+          2,
+          338
+        ],
+        "entry_span_on_the_relative": [
+          2,
+          341
+        ],
+        "length_aa": 337
+      },
+      "sequence_length": 337,
+      "sequence_sha256": "498b16cd00979e910c6a0b31545aa3bb11ec6ea82185794a5c0589d78bb48890",
+      "mean_plddt": 51.39,
+      "confident_fraction": 0.2819,
+      "pdb_sha256": "0e477368ec75408b79883f63d81216099a2b6ea91977515ea120ce8210f94ad7",
+      "absence": null
+    },
+    {
+      "target_name": "Capsid protein VP3",
+      "unit": {
+        "kind": "whole_chain",
+        "chain": "Capsid protein VP3",
+        "label": "Capsid protein VP3",
+        "type": "Chain",
+        "span_in_this_genome": [
+          342,
+          577
+        ],
+        "entry_span_on_the_relative": [
+          342,
+          581
+        ],
+        "length_aa": 236
+      },
+      "sequence_length": 236,
+      "sequence_sha256": "6062a6616c9c15de34b5ec9620ac5f4391daacee6c383fca3557c8a2a7e5fa14",
+      "mean_plddt": 79.29,
+      "confident_fraction": 0.7839,
+      "pdb_sha256": "e1d8103cac065fc69c9081d019a8cfc3b7704d3ba313b2b721a56e404b891321",
+      "absence": null
+    },
+    {
+      "target_name": "Capsid protein VP1",
+      "unit": {
+        "kind": "whole_chain",
+        "chain": "Capsid protein VP1",
+        "label": "Capsid protein VP1",
+        "type": "Chain",
+        "span_in_this_genome": [
+          580,
+          881
+        ],
+        "entry_span_on_the_relative": [
+          582,
+          879
+        ],
+        "length_aa": 302
+      },
+      "sequence_length": 302,
+      "sequence_sha256": "45305cea99ca91a0005532054184eed81e4a4c16cf00e270ed60011e062d73af",
+      "mean_plddt": 64.07,
+      "confident_fraction": 0.5033,
+      "pdb_sha256": "e1abbbe98b24f196c5d05f40259087da1f803576647c8401925d84c1cdf51a05",
       "absence": null
     }
   ],
   "foldable": [
     {
-      "target": "P1",
+      "target": "Protease 2A",
       "rank": 1,
       "identified": true,
       "identification_route": null,
       "chain_range_on_the_relative": [
-        2,
-        879
+        880,
+        1028
       ],
-      "declared_length_aa": 878,
+      "declared_length_aa": 149,
       "parent_orf_length_aa": 2209,
       "sequence_recovered": true,
       "not_recovered_because": null,
-      "reference_chain_length_aa": 878,
+      "reference_chain_length_aa": 149,
       "orfs_searched": 10,
       "found_in": "the ORF that matched",
       "span_in_this_genome": [
-        2,
-        881
+        882,
+        1030
       ],
-      "recovered_length_aa": 880,
-      "chain_covered_by_alignment": 0.9954,
-      "identity_over_aligned_columns": 0.6854,
-      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 69% identity",
+      "recovered_length_aa": 149,
+      "chain_covered_by_alignment": 1.0,
+      "identity_over_aligned_columns": 0.8121,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 81% identity",
       "inside_the_ceiling": true,
-      "domain_units_offered": 3,
+      "domain_units_offered": 1,
       "domain_units_inside_the_ceiling": 1,
-      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 3 annotated regions, 1 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's single annotated region, inside the ceiling, is already covered by the whole-chain fold, so it is not offered as a unit of its own.",
       "fold_units": [
         {
           "kind": "whole_chain",
-          "label": "P1",
+          "label": "Protease 2A",
           "type": "Chain",
           "description": "the whole mature chain, as the relative's entry delimits it",
           "span": [
-            2,
-            881
+            882,
+            1030
           ],
           "entry_span": [
-            2,
-            879
+            880,
+            1028
           ],
           "entry_span_mapped": [
-            2,
-            879
+            880,
+            1028
           ],
-          "entry_length_mapped": 878,
-          "length": 880,
+          "entry_length_mapped": 149,
+          "length": 149,
           "inside_the_ceiling": true,
           "refused_because": null,
           "clipped": false,
           "coincides_with_the_whole_chain": true,
           "mapping": {
-            "start": 2,
-            "end": 881,
-            "length": 880,
+            "start": 882,
+            "end": 1030,
+            "length": 149,
             "entry_span": [
-              2,
-              879
+              880,
+              1028
             ],
-            "entry_length": 878,
+            "entry_length": 149,
             "ends_adjusted": false,
             "unmapped_ends": 0
           },
           "mapping_reproduces_the_span": true,
           "folded": true,
-          "target_name": "P1",
-          "mean_plddt": 56.64,
-          "confident_fraction": 0.4193,
-          "pdb_sha256": "411ab763c564649652cf4b7b9bb452c10c4cedda11782a07b8d3a9d9c1dbd4ca"
+          "target_name": "Protease 2A",
+          "mean_plddt": 82.56,
+          "confident_fraction": 0.8725,
+          "pdb_sha256": "1c68eb4af602261b8db5d258cdbf047fcb394afca2699cfbb84529a9fcd4ce3d"
         }
       ],
       "functional_sites": [
@@ -1632,12 +2758,94 @@
           "description": "Cleavage; by autolysis",
           "ligand": null,
           "positions_on_the_relative": [
-            69,
-            70
+            880
           ],
           "positions": [
-            69,
-            70
+            882
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Active site",
+          "description": "For protease 2A activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            899
+          ],
+          "positions": [
+            901
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Active site",
+          "description": "For protease 2A activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            917
+          ],
+          "positions": [
+            919
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            934
+          ],
+          "positions": [
+            936
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            936
+          ],
+          "positions": [
+            938
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Active site",
+          "description": "For protease 2A activity",
+          "ligand": null,
+          "positions_on_the_relative": [
+            988
+          ],
+          "positions": [
+            990
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            994
+          ],
+          "positions": [
+            996
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Binding site",
+          "description": "",
+          "ligand": "Zn(2+)",
+          "positions_on_the_relative": [
+            996
+          ],
+          "positions": [
+            998
           ],
           "positions_unmapped": 0
         },
@@ -1646,118 +2854,90 @@
           "description": "Cleavage; by protease 3C",
           "ligand": null,
           "positions_on_the_relative": [
-            341,
-            342
+            1028
           ],
           "positions": [
-            341,
-            342
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Cleavage; by protease 3C",
-          "ligand": null,
-          "positions_on_the_relative": [
-            578,
-            579
-          ],
-          "positions": [
-            null,
-            null
-          ],
-          "positions_unmapped": 2
-        },
-        {
-          "type": "Site",
-          "description": "Cleavage; by autolysis",
-          "ligand": null,
-          "positions_on_the_relative": [
-            879
-          ],
-          "positions": [
-            881
+            1030
           ],
           "positions_unmapped": 0
         }
       ],
       "functional_sites_absent_because": null,
       "folded": true,
-      "mean_plddt": 56.64,
+      "mean_plddt": 82.56,
       "units_folded": 1,
       "domain_route": false
     },
     {
-      "target": "P3",
+      "target": "Protease 3C",
       "rank": 2,
       "identified": true,
       "identification_route": null,
       "chain_range_on_the_relative": [
-        1454,
-        2206
+        1563,
+        1745
       ],
-      "declared_length_aa": 753,
+      "declared_length_aa": 183,
       "parent_orf_length_aa": 2209,
       "sequence_recovered": true,
       "not_recovered_because": null,
-      "reference_chain_length_aa": 753,
+      "reference_chain_length_aa": 183,
       "orfs_searched": 10,
       "found_in": "the ORF that matched",
       "span_in_this_genome": [
-        1457,
-        2209
+        1566,
+        1748
       ],
-      "recovered_length_aa": 753,
+      "recovered_length_aa": 183,
       "chain_covered_by_alignment": 1.0,
-      "identity_over_aligned_columns": 0.9668,
-      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 97% identity",
+      "identity_over_aligned_columns": 0.9508,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 95% identity",
       "inside_the_ceiling": true,
-      "domain_units_offered": 4,
-      "domain_units_inside_the_ceiling": 4,
-      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 4 annotated regions, 4 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
+      "domain_units_offered": 2,
+      "domain_units_inside_the_ceiling": 2,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 2 annotated regions, 2 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
       "fold_units": [
         {
           "kind": "whole_chain",
-          "label": "P3",
+          "label": "Protease 3C",
           "type": "Chain",
           "description": "the whole mature chain, as the relative's entry delimits it",
           "span": [
-            1457,
-            2209
+            1566,
+            1748
           ],
           "entry_span": [
-            1454,
-            2206
+            1563,
+            1745
           ],
           "entry_span_mapped": [
-            1454,
-            2206
+            1563,
+            1745
           ],
-          "entry_length_mapped": 753,
-          "length": 753,
+          "entry_length_mapped": 183,
+          "length": 183,
           "inside_the_ceiling": true,
           "refused_because": null,
           "clipped": false,
           "coincides_with_the_whole_chain": true,
           "mapping": {
-            "start": 1457,
-            "end": 2209,
-            "length": 753,
+            "start": 1566,
+            "end": 1748,
+            "length": 183,
             "entry_span": [
-              1454,
-              2206
+              1563,
+              1745
             ],
-            "entry_length": 753,
+            "entry_length": 183,
             "ends_adjusted": false,
             "unmapped_ends": 0
           },
           "mapping_reproduces_the_span": true,
           "folded": true,
-          "target_name": "P3",
-          "mean_plddt": 77.77,
-          "confident_fraction": 0.7915,
-          "pdb_sha256": "36248bcd2c167503146318d2fb6fc5e33913fda8ecc0b2850471fc18b5eb5d24"
+          "target_name": "Protease 3C",
+          "mean_plddt": 88.26,
+          "confident_fraction": 0.9727,
+          "pdb_sha256": "3c8b9ace93b20a19a5464cc13fb2c383f7d4dcc462532bc59b71a9539a846ee2"
         }
       ],
       "functional_sites": [
@@ -1766,37 +2946,9 @@
           "description": "Cleavage; by protease 3C",
           "ligand": null,
           "positions_on_the_relative": [
-            1454
-          ],
-          "positions": [
-            1457
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Cleavage; by protease 3C",
-          "ligand": null,
-          "positions_on_the_relative": [
-            1540,
-            1541
-          ],
-          "positions": [
-            1543,
-            1544
-          ],
-          "positions_unmapped": 0
-        },
-        {
-          "type": "Site",
-          "description": "Cleavage; by protease 3C",
-          "ligand": null,
-          "positions_on_the_relative": [
-            1562,
             1563
           ],
           "positions": [
-            1565,
             1566
           ],
           "positions_unmapped": 0
@@ -1842,11 +2994,101 @@
           "description": "Cleavage; by protease 3C",
           "ligand": null,
           "positions_on_the_relative": [
-            1745,
+            1745
+          ],
+          "positions": [
+            1748
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "folded": true,
+      "mean_plddt": 88.26,
+      "units_folded": 1,
+      "domain_route": false
+    },
+    {
+      "target": "RNA-directed RNA polymerase",
+      "rank": 3,
+      "identified": true,
+      "identification_route": null,
+      "chain_range_on_the_relative": [
+        1746,
+        2206
+      ],
+      "declared_length_aa": 461,
+      "parent_orf_length_aa": 2209,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 461,
+      "orfs_searched": 10,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        1749,
+        2209
+      ],
+      "recovered_length_aa": 461,
+      "chain_covered_by_alignment": 1.0,
+      "identity_over_aligned_columns": 0.9848,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 98% identity",
+      "inside_the_ceiling": true,
+      "domain_units_offered": 2,
+      "domain_units_inside_the_ceiling": 2,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 2 annotated regions, 2 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "RNA-directed RNA polymerase",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            1749,
+            2209
+          ],
+          "entry_span": [
+            1746,
+            2206
+          ],
+          "entry_span_mapped": [
+            1746,
+            2206
+          ],
+          "entry_length_mapped": 461,
+          "length": 461,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 1749,
+            "end": 2209,
+            "length": 461,
+            "entry_span": [
+              1746,
+              2206
+            ],
+            "entry_length": 461,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": true,
+          "folded": true,
+          "target_name": "RNA-directed RNA polymerase",
+          "mean_plddt": 88.02,
+          "confident_fraction": 0.9479,
+          "pdb_sha256": "b6640ea59b1c0a236b89d68ad0a58b3a09ce83b5d0f6d35c285775bb3fa18d55"
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by protease 3C",
+          "ligand": null,
+          "positions_on_the_relative": [
             1746
           ],
           "positions": [
-            1748,
             1749
           ],
           "positions_unmapped": 0
@@ -1902,7 +3144,311 @@
       ],
       "functional_sites_absent_because": null,
       "folded": true,
-      "mean_plddt": 77.77,
+      "mean_plddt": 88.02,
+      "units_folded": 1,
+      "domain_route": false
+    },
+    {
+      "target": "Capsid protein VP0",
+      "rank": 4,
+      "identified": true,
+      "identification_route": null,
+      "chain_range_on_the_relative": [
+        2,
+        341
+      ],
+      "declared_length_aa": 340,
+      "parent_orf_length_aa": 2209,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 340,
+      "orfs_searched": 10,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        2,
+        338
+      ],
+      "recovered_length_aa": 337,
+      "chain_covered_by_alignment": 0.9912,
+      "identity_over_aligned_columns": 0.7418,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 99% of it at 74% identity",
+      "inside_the_ceiling": true,
+      "domain_units_offered": 1,
+      "domain_units_inside_the_ceiling": 1,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's single annotated region, inside the ceiling, is already covered by the whole-chain fold, so it is not offered as a unit of its own.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "Capsid protein VP0",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            2,
+            338
+          ],
+          "entry_span": [
+            2,
+            341
+          ],
+          "entry_span_mapped": [
+            2,
+            338
+          ],
+          "entry_length_mapped": 337,
+          "length": 337,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 2,
+            "end": 338,
+            "length": 337,
+            "entry_span": [
+              2,
+              338
+            ],
+            "entry_length": 337,
+            "ends_adjusted": true,
+            "unmapped_ends": 1
+          },
+          "mapping_reproduces_the_span": true,
+          "folded": true,
+          "target_name": "Capsid protein VP0",
+          "mean_plddt": 51.39,
+          "confident_fraction": 0.2819,
+          "pdb_sha256": "0e477368ec75408b79883f63d81216099a2b6ea91977515ea120ce8210f94ad7"
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by autolysis",
+          "ligand": null,
+          "positions_on_the_relative": [
+            69,
+            70
+          ],
+          "positions": [
+            69,
+            70
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by protease 3C",
+          "ligand": null,
+          "positions_on_the_relative": [
+            341
+          ],
+          "positions": [
+            null
+          ],
+          "positions_unmapped": 1
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "folded": true,
+      "mean_plddt": 51.39,
+      "units_folded": 1,
+      "domain_route": false
+    },
+    {
+      "target": "Capsid protein VP3",
+      "rank": 5,
+      "identified": true,
+      "identification_route": null,
+      "chain_range_on_the_relative": [
+        342,
+        581
+      ],
+      "declared_length_aa": 240,
+      "parent_orf_length_aa": 2209,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 240,
+      "orfs_searched": 10,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        342,
+        577
+      ],
+      "recovered_length_aa": 236,
+      "chain_covered_by_alignment": 0.9792,
+      "identity_over_aligned_columns": 0.7532,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 98% of it at 75% identity",
+      "inside_the_ceiling": true,
+      "domain_units_offered": 2,
+      "domain_units_inside_the_ceiling": 1,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 2 annotated regions, 1 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "Capsid protein VP3",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            342,
+            577
+          ],
+          "entry_span": [
+            342,
+            581
+          ],
+          "entry_span_mapped": [
+            342,
+            576
+          ],
+          "entry_length_mapped": 235,
+          "length": 236,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 342,
+            "end": 577,
+            "length": 236,
+            "entry_span": [
+              342,
+              576
+            ],
+            "entry_length": 235,
+            "ends_adjusted": true,
+            "unmapped_ends": 1
+          },
+          "mapping_reproduces_the_span": true,
+          "folded": true,
+          "target_name": "Capsid protein VP3",
+          "mean_plddt": 79.29,
+          "confident_fraction": 0.7839,
+          "pdb_sha256": "e1d8103cac065fc69c9081d019a8cfc3b7704d3ba313b2b721a56e404b891321"
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by protease 3C",
+          "ligand": null,
+          "positions_on_the_relative": [
+            342
+          ],
+          "positions": [
+            342
+          ],
+          "positions_unmapped": 0
+        },
+        {
+          "type": "Site",
+          "description": "Cleavage; by protease 3C",
+          "ligand": null,
+          "positions_on_the_relative": [
+            578,
+            579
+          ],
+          "positions": [
+            null,
+            null
+          ],
+          "positions_unmapped": 2
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "folded": true,
+      "mean_plddt": 79.29,
+      "units_folded": 1,
+      "domain_route": false
+    },
+    {
+      "target": "Capsid protein VP1",
+      "rank": 6,
+      "identified": true,
+      "identification_route": null,
+      "chain_range_on_the_relative": [
+        582,
+        879
+      ],
+      "declared_length_aa": 298,
+      "parent_orf_length_aa": 2209,
+      "sequence_recovered": true,
+      "not_recovered_because": null,
+      "reference_chain_length_aa": 298,
+      "orfs_searched": 10,
+      "found_in": "the ORF that matched",
+      "span_in_this_genome": [
+        580,
+        881
+      ],
+      "recovered_length_aa": 302,
+      "chain_covered_by_alignment": 0.9966,
+      "identity_over_aligned_columns": 0.5724,
+      "recovered_by": "local alignment of the relative's mature chain against the ORF that matched, covering 100% of it at 57% identity",
+      "inside_the_ceiling": true,
+      "domain_units_offered": 3,
+      "domain_units_inside_the_ceiling": 1,
+      "domain_units_set_aside_because": "this stage folds a region only where the whole chain is over the ceiling. This chain's 3 annotated regions, 1 of them inside the ceiling, are already covered by the whole-chain fold, so none is offered as a unit of its own.",
+      "fold_units": [
+        {
+          "kind": "whole_chain",
+          "label": "Capsid protein VP1",
+          "type": "Chain",
+          "description": "the whole mature chain, as the relative's entry delimits it",
+          "span": [
+            580,
+            881
+          ],
+          "entry_span": [
+            582,
+            879
+          ],
+          "entry_span_mapped": [
+            582,
+            879
+          ],
+          "entry_length_mapped": 298,
+          "length": 302,
+          "inside_the_ceiling": true,
+          "refused_because": null,
+          "clipped": false,
+          "coincides_with_the_whole_chain": true,
+          "mapping": {
+            "start": 580,
+            "end": 881,
+            "length": 302,
+            "entry_span": [
+              582,
+              879
+            ],
+            "entry_length": 298,
+            "ends_adjusted": false,
+            "unmapped_ends": 0
+          },
+          "mapping_reproduces_the_span": true,
+          "folded": true,
+          "target_name": "Capsid protein VP1",
+          "mean_plddt": 64.07,
+          "confident_fraction": 0.5033,
+          "pdb_sha256": "e1abbbe98b24f196c5d05f40259087da1f803576647c8401925d84c1cdf51a05"
+        }
+      ],
+      "functional_sites": [
+        {
+          "type": "Site",
+          "description": "Cleavage; by autolysis",
+          "ligand": null,
+          "positions_on_the_relative": [
+            879
+          ],
+          "positions": [
+            881
+          ],
+          "positions_unmapped": 0
+        }
+      ],
+      "functional_sites_absent_because": null,
+      "folded": true,
+      "mean_plddt": 64.07,
       "units_folded": 1,
       "domain_route": false
     }
@@ -1910,11 +3456,11 @@
   "evidence": [
     {
       "rank": 1,
-      "target": "P1",
+      "target": "Protease 2A",
       "nearest_homolog": "P22055",
       "chain_range": [
-        2,
-        879
+        880,
+        1028
       ],
       "sequence_available": true,
       "calls": [
@@ -1923,110 +3469,12 @@
           "endpoint": "Europe PMC",
           "status": "ok",
           "note": null,
-          "seconds": 7.2,
+          "seconds": 33.62,
           "network_calls": 7,
           "returned": {
             "subject_kind": "term",
             "scope": "title_abstract",
-            "hit_count": 42600,
-            "returned": 10,
-            "hits_with_abstract": 10,
-            "preprints_returned": 1,
-            "limitations_count": 8,
-            "sources_count": 7
-          }
-        },
-        {
-          "tool": "similarity.homologs",
-          "endpoint": "EBI HMMER",
-          "status": "ok",
-          "note": null,
-          "seconds": 2.55,
-          "network_calls": 4,
-          "returned": {
-            "resolution_attempts_count": 1,
-            "database_id": "swissprot",
-            "database_name": "SwissProt",
-            "database_version": "2025_01",
-            "database_release_date": "2025-01-01",
-            "declared_databases_not_served_count": 0,
-            "homologs_count": 50,
-            "homolog_count": 50,
-            "hits_returned": 50,
-            "hits_dropped_by_min_identity": 0
-          }
-        },
-        {
-          "tool": "families.entries",
-          "endpoint": "InterPro",
-          "status": "failed",
-          "note": "RuntimeError: https://www.ebi.ac.uk/interpro/api/entry/interpro/IPR000605?extra_fields=counters returned HTTP 429 Too Many Requests",
-          "seconds": 2.47,
-          "network_calls": 6,
-          "returned": {}
-        },
-        {
-          "tool": "structures.predicted",
-          "endpoint": "AlphaFold DB, 3D-Beacons",
-          "status": "ok",
-          "note": null,
-          "seconds": 2.1,
-          "network_calls": 2,
-          "returned": {
-            "sequence_length": 2206,
-            "confident_plddt": 70.0,
-            "plddt_bands_count": 4,
-            "residue_detail": false,
-            "any_prediction_exists": true,
-            "predicted_model_count": 5,
-            "providers_queried_count": 2,
-            "providers_with_models_count": 1,
-            "alphafold_host_queried": true,
-            "alphafold_host_served_models": false
-          }
-        },
-        {
-          "tool": "bioactivity.prior_binders",
-          "endpoint": "ChEMBL, IEDB, MaveDB",
-          "status": "ok",
-          "note": null,
-          "seconds": 9.34,
-          "network_calls": 4,
-          "returned": {
-            "max_molecules_requested": 50,
-            "max_molecules_applied": 50,
-            "max_molecules_clamped": false,
-            "lanes_unavailable_count": 0,
-            "network_calls": 4,
-            "calls_count": 4,
-            "sources_count": 3,
-            "urls_hit_count": 4,
-            "limitations_count": 13
-          }
-        }
-      ]
-    },
-    {
-      "rank": 2,
-      "target": "P3",
-      "nearest_homolog": "P22055",
-      "chain_range": [
-        1454,
-        2206
-      ],
-      "sequence_available": true,
-      "calls": [
-        {
-          "tool": "literature.search",
-          "endpoint": "Europe PMC",
-          "status": "ok",
-          "note": null,
-          "seconds": 7.23,
-          "network_calls": 7,
-          "returned": {
-            "subject_kind": "term",
-            "scope": "title_abstract",
-            "hit_count": 26109,
+            "hit_count": 153,
             "returned": 10,
             "hits_with_abstract": 10,
             "preprints_returned": 2,
@@ -2039,7 +3487,7 @@
           "endpoint": "EBI HMMER",
           "status": "ok",
           "note": null,
-          "seconds": 1.11,
+          "seconds": 2.29,
           "network_calls": 3,
           "returned": {
             "resolution_attempts_count": 1,
@@ -2048,9 +3496,9 @@
             "database_version": "2025_01",
             "database_release_date": "2025-01-01",
             "declared_databases_not_served_count": 0,
-            "homologs_count": 50,
-            "homolog_count": 50,
-            "hits_returned": 50,
+            "homologs_count": 45,
+            "homolog_count": 45,
+            "hits_returned": 45,
             "hits_dropped_by_min_identity": 0
           }
         },
@@ -2059,7 +3507,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 8.34,
+          "seconds": 10.87,
           "network_calls": 15,
           "returned": {
             "protein_name": "Genome polyprotein",
@@ -2079,7 +3527,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 1.75,
+          "seconds": 6.4,
           "network_calls": 2,
           "returned": {
             "sequence_length": 2206,
@@ -2099,7 +3547,225 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 6.02,
+          "seconds": 3.09,
+          "network_calls": 4,
+          "returned": {
+            "max_molecules_requested": 50,
+            "max_molecules_applied": 50,
+            "max_molecules_clamped": false,
+            "lanes_unavailable_count": 0,
+            "network_calls": 4,
+            "calls_count": 4,
+            "sources_count": 3,
+            "urls_hit_count": 4,
+            "limitations_count": 13
+          }
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "target": "Protease 3C",
+      "nearest_homolog": "P22055",
+      "chain_range": [
+        1563,
+        1745
+      ],
+      "sequence_available": true,
+      "calls": [
+        {
+          "tool": "literature.search",
+          "endpoint": "Europe PMC",
+          "status": "ok",
+          "note": null,
+          "seconds": 71.25,
+          "network_calls": 7,
+          "returned": {
+            "subject_kind": "term",
+            "scope": "title_abstract",
+            "hit_count": 227,
+            "returned": 10,
+            "hits_with_abstract": 10,
+            "preprints_returned": 1,
+            "limitations_count": 8,
+            "sources_count": 7
+          }
+        },
+        {
+          "tool": "similarity.homologs",
+          "endpoint": "EBI HMMER",
+          "status": "ok",
+          "note": null,
+          "seconds": 2.36,
+          "network_calls": 3,
+          "returned": {
+            "resolution_attempts_count": 1,
+            "database_id": "swissprot",
+            "database_name": "SwissProt",
+            "database_version": "2025_01",
+            "database_release_date": "2025-01-01",
+            "declared_databases_not_served_count": 0,
+            "homologs_count": 50,
+            "homolog_count": 50,
+            "hits_returned": 50,
+            "hits_dropped_by_min_identity": 0
+          }
+        },
+        {
+          "tool": "families.entries",
+          "endpoint": "InterPro",
+          "status": "ok",
+          "note": null,
+          "seconds": 10.75,
+          "network_calls": 15,
+          "returned": {
+            "protein_name": "Genome polyprotein",
+            "organism": "Coxsackievirus A21 (strain Coe)",
+            "sequence_md5": "58A493CD2E85EA2D50B3E3F012A08FED",
+            "sequence_length": 2206,
+            "sequence_source": "uniprot",
+            "assignments_count": 30,
+            "predicted_count": 26,
+            "sequence_features_count": 15,
+            "residue_ranges_count": 17,
+            "functional_sites_count": 6
+          }
+        },
+        {
+          "tool": "structures.predicted",
+          "endpoint": "AlphaFold DB, 3D-Beacons",
+          "status": "ok",
+          "note": null,
+          "seconds": 6.2,
+          "network_calls": 2,
+          "returned": {
+            "sequence_length": 2206,
+            "confident_plddt": 70.0,
+            "plddt_bands_count": 4,
+            "residue_detail": false,
+            "any_prediction_exists": true,
+            "predicted_model_count": 5,
+            "providers_queried_count": 2,
+            "providers_with_models_count": 1,
+            "alphafold_host_queried": true,
+            "alphafold_host_served_models": false
+          }
+        },
+        {
+          "tool": "bioactivity.prior_binders",
+          "endpoint": "ChEMBL, IEDB, MaveDB",
+          "status": "ok",
+          "note": null,
+          "seconds": 2.52,
+          "network_calls": 4,
+          "returned": {
+            "max_molecules_requested": 50,
+            "max_molecules_applied": 50,
+            "max_molecules_clamped": false,
+            "lanes_unavailable_count": 0,
+            "network_calls": 4,
+            "calls_count": 4,
+            "sources_count": 3,
+            "urls_hit_count": 4,
+            "limitations_count": 13
+          }
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "target": "RNA-directed RNA polymerase",
+      "nearest_homolog": "P22055",
+      "chain_range": [
+        1746,
+        2206
+      ],
+      "sequence_available": true,
+      "calls": [
+        {
+          "tool": "literature.search",
+          "endpoint": "Europe PMC",
+          "status": "ok",
+          "note": null,
+          "seconds": 29.36,
+          "network_calls": 7,
+          "returned": {
+            "subject_kind": "term",
+            "scope": "title_abstract",
+            "hit_count": 236,
+            "returned": 10,
+            "hits_with_abstract": 10,
+            "preprints_returned": 1,
+            "limitations_count": 8,
+            "sources_count": 7
+          }
+        },
+        {
+          "tool": "similarity.homologs",
+          "endpoint": "EBI HMMER",
+          "status": "ok",
+          "note": null,
+          "seconds": 2.27,
+          "network_calls": 3,
+          "returned": {
+            "resolution_attempts_count": 1,
+            "database_id": "swissprot",
+            "database_name": "SwissProt",
+            "database_version": "2025_01",
+            "database_release_date": "2025-01-01",
+            "declared_databases_not_served_count": 0,
+            "homologs_count": 50,
+            "homolog_count": 50,
+            "hits_returned": 50,
+            "hits_dropped_by_min_identity": 0
+          }
+        },
+        {
+          "tool": "families.entries",
+          "endpoint": "InterPro",
+          "status": "ok",
+          "note": null,
+          "seconds": 10.87,
+          "network_calls": 15,
+          "returned": {
+            "protein_name": "Genome polyprotein",
+            "organism": "Coxsackievirus A21 (strain Coe)",
+            "sequence_md5": "58A493CD2E85EA2D50B3E3F012A08FED",
+            "sequence_length": 2206,
+            "sequence_source": "uniprot",
+            "assignments_count": 30,
+            "predicted_count": 26,
+            "sequence_features_count": 15,
+            "residue_ranges_count": 17,
+            "functional_sites_count": 6
+          }
+        },
+        {
+          "tool": "structures.predicted",
+          "endpoint": "AlphaFold DB, 3D-Beacons",
+          "status": "ok",
+          "note": null,
+          "seconds": 6.34,
+          "network_calls": 2,
+          "returned": {
+            "sequence_length": 2206,
+            "confident_plddt": 70.0,
+            "plddt_bands_count": 4,
+            "residue_detail": false,
+            "any_prediction_exists": true,
+            "predicted_model_count": 5,
+            "providers_queried_count": 2,
+            "providers_with_models_count": 1,
+            "alphafold_host_queried": true,
+            "alphafold_host_served_models": false
+          }
+        },
+        {
+          "tool": "bioactivity.prior_binders",
+          "endpoint": "ChEMBL, IEDB, MaveDB",
+          "status": "ok",
+          "note": null,
+          "seconds": 2.7,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -2116,39 +3782,39 @@
       ]
     }
   ],
-  "seconds": 115.01,
+  "seconds": 254.81,
   "coverage": {
-    "chains_ranked": 2,
-    "surface_rows": 2,
-    "surface_measured": 0,
-    "surface_refused": 2,
+    "chains_ranked": 6,
+    "surface_rows": 6,
+    "surface_measured": 3,
+    "surface_refused": 3,
     "surface_covers_every_chain": true,
-    "surface_on_predicted_coordinates": 2,
-    "surface_predicted_was_the_only_route": 2,
-    "chains_with_any_surface": 2,
+    "surface_on_predicted_coordinates": 6,
+    "surface_predicted_was_the_only_route": 3,
+    "chains_with_any_surface": 6,
     "chains_with_no_surface": 0,
     "chains_with_no_surface_over_the_ceiling": 0,
     "chains_over_the_folding_ceiling": 0,
-    "fold_rows": 2,
+    "fold_rows": 6,
     "fold_rows_unidentified": 0,
-    "fold_sequence_recovered": 2,
+    "fold_sequence_recovered": 6,
     "fold_sequence_recovered_unidentified": 0,
     "fold_covers_every_chain": true,
-    "fold_units_offered": 9,
-    "fold_units_folded": 2,
-    "domain_units_offered": 7,
+    "fold_units_offered": 17,
+    "fold_units_folded": 6,
+    "domain_units_offered": 11,
     "domain_units_folded": 0,
     "chains_rescued_by_the_domain_route": 0,
     "chains_with_no_coordinates": 0,
     "chains_with_a_region_surface": 0,
     "region_surfaces_measured": 0,
-    "chains_with_functional_sites": 2,
-    "site_patch_measured_on_a_deposition": 0,
-    "site_patch_measured_on_a_prediction": 2,
-    "site_patch_on_a_deposition_not_at_the_annotated_residues": 0,
+    "chains_with_functional_sites": 6,
+    "site_patch_measured_on_a_deposition": 3,
+    "site_patch_measured_on_a_prediction": 6,
+    "site_patch_on_a_deposition_not_at_the_annotated_residues": 2,
     "site_patch_on_a_prediction_not_at_the_annotated_residues": 1,
-    "evidence_targets": 2,
-    "evidence_calls": 10
+    "evidence_targets": 3,
+    "evidence_calls": 15
   },
   "pathogen": "Poliovirus",
   "fold_integrity": {

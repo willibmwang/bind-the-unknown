@@ -1,0 +1,963 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_005302.1,NC_005300.2,NC_005301.3",
+  "pathogen": "Crimean-Congo hemorrhagic fever virus",
+  "reference_excluded_organism": "Crimean-Congo hemorrhagic fever virus",
+  "source_record": "runs/onset_chain_NC_005302_1.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "Glycoprotein C",
+      "parent": "GP_DUGBA Envelopment polyprotein",
+      "tier": "remote",
+      "nearest_homolog": "Q02004",
+      "score": 6.9,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.525,
+          "confirmed_at": [
+            "the start of the chain"
+          ],
+          "confirmed_at_both_ends": false,
+          "one_end_only_note": "Only the start of the chain matches the relative. The other end of this span does not, so the coordinate at that end is not confirmed. On a polyprotein the usual cause is a ribosomal frameshift: the chain starts in one reading frame and the frame it was located in starts in another, which leaves the far end exact and the near end short.",
+          "leading_identity": 0.525,
+          "trailing_identity": 0.025,
+          "residues_compared": 40,
+          "frame_span_residues": 637,
+          "relative_chain_residues": 655,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain"
+        ],
+        "confirmed_at_both_ends": false,
+        "orf_rank": 1,
+        "strand": "+",
+        "frame": 2,
+        "nt_start": 92,
+        "orf_length_aa": 1684,
+        "segment": 1,
+        "orf_name": "GP_DUGBA Envelopment polyprotein",
+        "reading_frame": "+2 at nt 93",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        897,
+        1551
+      ],
+      "chain_span_in_this_genome": [
+        1041,
+        1677
+      ],
+      "chain_span_nt": [
+        3213,
+        5123
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain"
+      ],
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q02004",
+        "entry_id": "GP_DUGBA",
+        "protein_name": "Envelopment polyprotein",
+        "organism": "Dugbe virus (isolate ArD44313)",
+        "reviewed": true,
+        "molecule_asked_for": "Glycoprotein C",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Envelopment polyprotein",
+          "Glycoprotein C",
+          "Glycoprotein N",
+          "Non-Structural protein M"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Glycoprotein C and glycoprotein N interact with each other and are present at the surface of the virion (By similarity). The spikes at the surface of the virion are formed by an N-terminal extension of glycoprotein C (By similarity). Glycoprotein N and glycoprotein C are able to attach the virion to host cell receptors (By similarity). This attachment induces virion internalization predominantly through clathrin-dependent endocytosis (By similarity). Class II fusion protein that promotes fusion of viral membrane with host endosomal membrane after endocytosis of the virion (By similarity). Exposure to potassium is necessary for the conformational change leading to fusion (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Heterodimer with glycoprotein N; in prefusion state (By similarity). Homotrimeric; in postfusion state (By similarity)"
+          ],
+          "PTM": [
+            "Glycosylated"
+          ]
+        },
+        "about_the_whole_entry": {},
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000036805",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Amblyomma variegatum",
+            "common_name": "Tropical bont tick",
+            "taxon": 34610
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Hyalomma rufipes",
+            "common_name": "Tick",
+            "taxon": 72862
+          },
+          {
+            "name": "Hyalomma truncatum",
+            "common_name": null,
+            "taxon": 72855
+          },
+          {
+            "name": "Rhipicephalus",
+            "common_name": null,
+            "taxon": 34630
+          },
+          {
+            "name": "Rhipicephalus annulatus",
+            "common_name": null,
+            "taxon": 34611
+          },
+          {
+            "name": "Rhipicephalus decoloratus",
+            "common_name": "African blue tick",
+            "taxon": 60189
+          },
+          {
+            "name": "Rhipicephalus geigyi",
+            "common_name": null,
+            "taxon": 136141
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "1.10.8.1320",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR048791",
+              "name": "Gc_C_bunya"
+            },
+            {
+              "id": "IPR048801",
+              "name": "Gn_nairovirus"
+            },
+            {
+              "id": "IPR048529",
+              "name": "GP38_nairovirus"
+            },
+            {
+              "id": "IPR002532",
+              "name": "Hanta_Gc_N"
+            },
+            {
+              "id": "IPR048796",
+              "name": "NSm_dom_nairovirus"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF20682",
+              "name": "Hanta_Gc_C"
+            },
+            {
+              "id": "PF01561",
+              "name": "Hanta_Gc_N"
+            },
+            {
+              "id": "PF20726",
+              "name": "Nairovirus_Gn"
+            },
+            {
+              "id": "PF07948",
+              "name": "Nairovirus_GP38"
+            },
+            {
+              "id": "PF20728",
+              "name": "Nairovirus_NSm"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044178",
+              "term": "host cell Golgi membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0075512",
+              "term": "clathrin-dependent endocytosis of virus by host cell"
+            },
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Clathrin-mediated endocytosis of virus by host",
+          "Cleavage on pair of basic residues",
+          "Direct protein sequencing",
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "Host endoplasmic reticulum",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction",
+          "Membrane",
+          "Reference proteome",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral attachment to host cell",
+          "Viral envelope protein",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Clathrin-mediated endocytosis of virus by host",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host endoplasmic reticulum",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/Q02004.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 2,
+      "target": "Glycoprotein N",
+      "parent": "GP_DUGBA Envelopment polyprotein",
+      "tier": "remote",
+      "nearest_homolog": "Q02004",
+      "score": 6.6,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 2.0,
+        "essential_class": 0.0,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": 1,
+        "route": "parent",
+        "because": "the residues at 524-794 of the reading frame the parent route selected match the relative's own chain at only 8%, so this is not the frame the chain was located in and a coordinate from it would be wrong."
+      },
+      "chain_span_on_the_relative": [
+        375,
+        662
+      ],
+      "chain_span_in_this_genome": [
+        524,
+        794
+      ],
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q02004",
+        "entry_id": "GP_DUGBA",
+        "protein_name": "Envelopment polyprotein",
+        "organism": "Dugbe virus (isolate ArD44313)",
+        "reviewed": true,
+        "molecule_asked_for": "Glycoprotein N",
+        "molecule_matched": true,
+        "molecules_available": [
+          "Envelopment polyprotein",
+          "Glycoprotein C",
+          "Glycoprotein N",
+          "Non-Structural protein M"
+        ],
+        "about_this_chain": {
+          "FUNCTION": [
+            "Glycoprotein N and glycoprotein C interact with each other and are present at the surface of the virion. Glycoprotein N probably locks the Gn-Gc complex in a prefusion state. Glycoprotein N and glycoprotein C are able to attach the virion to host cell receptors. This attachment induces virion internalization predominantly through clathrin-dependent endocytosis"
+          ],
+          "SUBUNIT": [
+            "Heterodimer with glycoprotein C; in prefusion state"
+          ],
+          "PTM": [
+            "Glycosylated"
+          ]
+        },
+        "about_the_whole_entry": {},
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000036804",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Amblyomma variegatum",
+            "common_name": "Tropical bont tick",
+            "taxon": 34610
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Hyalomma rufipes",
+            "common_name": "Tick",
+            "taxon": 72862
+          },
+          {
+            "name": "Hyalomma truncatum",
+            "common_name": null,
+            "taxon": 72855
+          },
+          {
+            "name": "Rhipicephalus",
+            "common_name": null,
+            "taxon": 34630
+          },
+          {
+            "name": "Rhipicephalus annulatus",
+            "common_name": null,
+            "taxon": 34611
+          },
+          {
+            "name": "Rhipicephalus decoloratus",
+            "common_name": "African blue tick",
+            "taxon": 60189
+          },
+          {
+            "name": "Rhipicephalus geigyi",
+            "common_name": null,
+            "taxon": 136141
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "1.10.8.1320",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR048791",
+              "name": "Gc_C_bunya"
+            },
+            {
+              "id": "IPR048801",
+              "name": "Gn_nairovirus"
+            },
+            {
+              "id": "IPR048529",
+              "name": "GP38_nairovirus"
+            },
+            {
+              "id": "IPR002532",
+              "name": "Hanta_Gc_N"
+            },
+            {
+              "id": "IPR048796",
+              "name": "NSm_dom_nairovirus"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF20682",
+              "name": "Hanta_Gc_C"
+            },
+            {
+              "id": "PF01561",
+              "name": "Hanta_Gc_N"
+            },
+            {
+              "id": "PF20726",
+              "name": "Nairovirus_Gn"
+            },
+            {
+              "id": "PF07948",
+              "name": "Nairovirus_GP38"
+            },
+            {
+              "id": "PF20728",
+              "name": "Nairovirus_NSm"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0044167",
+              "term": "host cell endoplasmic reticulum membrane"
+            },
+            {
+              "id": "GO:0044178",
+              "term": "host cell Golgi membrane"
+            },
+            {
+              "id": "GO:0019031",
+              "term": "viral envelope"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0075512",
+              "term": "clathrin-dependent endocytosis of virus by host cell"
+            },
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Clathrin-mediated endocytosis of virus by host",
+          "Cleavage on pair of basic residues",
+          "Direct protein sequencing",
+          "Disulfide bond",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "Host endoplasmic reticulum",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction",
+          "Membrane",
+          "Reference proteome",
+          "Signal",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral attachment to host cell",
+          "Viral envelope protein",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Clathrin-mediated endocytosis of virus by host",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host endoplasmic reticulum",
+          "Host Golgi apparatus",
+          "Host membrane",
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/Q02004.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 3,
+      "target": "L_DUGBA RNA-directed RNA polymerase L",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "Q66431",
+      "score": 4.5607,
+      "score_terms": {
+        "conservation": 0.6507,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.01,
+        "druggable_class": 2.4
+      },
+      "gate": "no",
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "Q66431",
+        "entry_id": "L_DUGBA",
+        "protein_name": "RNA-directed RNA polymerase L",
+        "organism": "Dugbe virus (isolate ArD44313)",
+        "reviewed": true,
+        "molecule_asked_for": "L_DUGBA RNA-directed RNA polymerase L",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Displays RNA-directed RNA polymerase, deubiquitinating and deISGylase activities (PubMed:23345508). RNA-dependent RNA polymerase is responsible for replication and transcription of the viral RNA genome (By similarity). During transcription, synthesizes subgenomic RNAs and assures their capping by a cap-snatching mechanism, which involves the endonuclease activity cleaving the host capped pre-mRNAs. These short capped RNAs are then used as primers for viral transcription (By similarity). The deubiquitinating and deISGylating activities specifically cleaves poly-ubiquitinated conjugates and ISG15 from RIG-I, interfering with antiviral signaling pathways mediated by NF-kappaB and IRF signalings (By similarity). Favors K48 poly-Ub linkages (PubMed:23345508)"
+          ],
+          "SUBUNIT": [
+            "Interacts (via N-terminus) with host ISG15 (via C-terminus); the deISGylase activity of the viral protein interferes with antiviral signaling pathways mediated by NF-kappaB and IRF signalings (By similarity). Interacts with host ubiquitin (PubMed:23345508)"
+          ],
+          "DOMAIN": [
+            "The viral OTU domain (vOTU) and its N-terminal extension is responsible for ubiquitin and ISG15 binding and for the deubiquitination and deISGylation activities"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Amblyomma variegatum",
+            "common_name": "Tropical bont tick",
+            "taxon": 34610
+          },
+          {
+            "name": "Homo sapiens",
+            "common_name": "Human",
+            "taxon": 9606
+          },
+          {
+            "name": "Hyalomma rufipes",
+            "common_name": "Tick",
+            "taxon": 72862
+          },
+          {
+            "name": "Hyalomma truncatum",
+            "common_name": null,
+            "taxon": 72855
+          },
+          {
+            "name": "Rhipicephalus",
+            "common_name": null,
+            "taxon": 34630
+          },
+          {
+            "name": "Rhipicephalus annulatus",
+            "common_name": null,
+            "taxon": 34611
+          },
+          {
+            "name": "Rhipicephalus decoloratus",
+            "common_name": "African blue tick",
+            "taxon": 60189
+          },
+          {
+            "name": "Rhipicephalus geigyi",
+            "common_name": null,
+            "taxon": 136141
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "CDD": [
+            {
+              "id": "cd21880",
+              "name": "OTU_RNAP_L_virus"
+            }
+          ],
+          "Gene3D": [
+            {
+              "id": "3.90.70.80",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR049605",
+              "name": "L_OTU"
+            },
+            {
+              "id": "IPR029124",
+              "name": "L_protein_N"
+            },
+            {
+              "id": "IPR003323",
+              "name": "OTU_dom"
+            },
+            {
+              "id": "IPR007099",
+              "name": "RNA-dir_pol_NSvirus"
+            },
+            {
+              "id": "IPR007322",
+              "name": "RNA_pol_bunyavir"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF04196",
+              "name": "Bunya_RdRp"
+            },
+            {
+              "id": "PF15518",
+              "name": "L_protein_N"
+            },
+            {
+              "id": "PF02338",
+              "name": "OTU"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS50802",
+              "name": "OTU"
+            },
+            {
+              "id": "PS50525",
+              "name": "RDRP_SSRNA_NEG_SEG"
+            },
+            {
+              "id": "PS00028",
+              "name": "ZINC_FINGER_C2H2_1"
+            }
+          ]
+        },
+        "go_terms": {
+          "molecular_function": [
+            {
+              "id": "GO:0004843",
+              "term": "cysteine-type deubiquitinase activity"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0000166",
+              "term": "nucleotide binding"
+            },
+            {
+              "id": "GO:0003968",
+              "term": "RNA-directed RNA polymerase activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006351",
+              "term": "DNA-templated transcription"
+            },
+            {
+              "id": "GO:0039689",
+              "term": "negative stranded viral RNA replication"
+            },
+            {
+              "id": "GO:0039696",
+              "term": "RNA-templated viral transcription"
+            },
+            {
+              "id": "GO:0039648",
+              "term": "symbiont-mediated perturbation of host ubiquitin-like protein modification"
+            },
+            {
+              "id": "GO:0039579",
+              "term": "symbiont-mediated suppression of host ISG15-protein conjugation"
+            },
+            {
+              "id": "GO:0039502",
+              "term": "symbiont-mediated suppression of host type I interferon-mediated signaling pathway"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host ISG15 by virus",
+          "Interferon antiviral system evasion",
+          "Magnesium",
+          "Metal-binding",
+          "Modulation of host ubiquitin pathway by viral deubiquitinase",
+          "Modulation of host ubiquitin pathway by virus",
+          "Nucleotide-binding",
+          "Nucleotidyltransferase",
+          "Reference proteome",
+          "RNA-directed RNA polymerase",
+          "Transferase",
+          "Viral immunoevasion",
+          "Viral RNA replication"
+        ],
+        "host_interaction_keywords": [
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host interferon signaling pathway by virus",
+          "Inhibition of host ISG15 by virus",
+          "Modulation of host ubiquitin pathway by viral deubiquitinase",
+          "Modulation of host ubiquitin pathway by virus"
+        ],
+        "structures_deposited": 1,
+        "source": "https://rest.uniprot.org/uniprotkb/Q66431.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 4,
+      "target": "NCAP_HAZVJ Nucleoprotein",
+      "parent": null,
+      "tier": "exact",
+      "nearest_homolog": "P27318",
+      "score": 3.5091,
+      "score_terms": {
+        "conservation": 0.3891,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.02,
+        "druggable_class": 1.6
+      },
+      "gate": "no",
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P27318",
+        "entry_id": "NCAP_HAZVJ",
+        "protein_name": "Nucleoprotein",
+        "organism": "Hazara virus (isolate JC280)",
+        "reviewed": true,
+        "molecule_asked_for": "NCAP_HAZVJ Nucleoprotein",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Binds dsRNA and ssRNA and probably participates in the packaging of viral genome (By similarity). In the dsRNA binding mode, the nucleocapsid protein specifically binds to the vRNA panhandle secondary structure formed at the termini of viral genome (By similarity). Does not discriminate between viral and nonviral RNAs through ssRNA binding mode (By similarity). Displays dsDNA endonuclease activity that is sequence non-specific (By similarity)"
+          ],
+          "SUBUNIT": [
+            "Probable homooligomer; forms a double superhelical polymer (By similarity). Monomer (By similarity)"
+          ],
+          "DOMAIN": [
+            "The DQVD motif is a CASP3/caspase 3 cleavage site essential for viral replication in host cell (PubMed:31118258). However, the importance for viral replication is apprently not linked to caspase cleavage (PubMed:31118258). This motif is involved in homooligomerization (By similarity)"
+          ],
+          "PTM": [
+            "Cleaved at the DQVD motif by host CASP3/caspase 3 in mammalian cells at 48 hours postinfection giving rise to cleavage products of about 30 kDa and 22 kDa that remain associated (PubMed:30720418, PubMed:31118258). Only the monomeric form is cleaved (By similarity). Little or no cleavage in tick cells (PubMed:30720418). Caspase cleavage reduces the viral polymerase activity (By similarity). Caspase cleavage is not required for productive infection in mammalian or tick host cells (PubMed:31118258)"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "DOMAIN": "what its parts do",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Ixodes",
+            "common_name": null,
+            "taxon": 6944
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "1.20.58.1110",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR003486",
+              "name": "Nairo_nucleocap"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF02477",
+              "name": "Nairo_nucleo"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0019029",
+              "term": "helical viral capsid"
+            },
+            {
+              "id": "GO:1990904",
+              "term": "ribonucleoprotein complex"
+            },
+            {
+              "id": "GO:0019013",
+              "term": "viral nucleocapsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0016787",
+              "term": "hydrolase activity"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            }
+          ]
+        },
+        "keywords": [
+          "3D-structure",
+          "Capsid protein",
+          "Helical capsid protein",
+          "Hydrolase",
+          "Reference proteome",
+          "Ribonucleoprotein",
+          "RNA-binding",
+          "Viral nucleoprotein",
+          "Virion"
+        ],
+        "host_interaction_keywords": [],
+        "structures_deposited": 2,
+        "source": "https://rest.uniprot.org/uniprotkb/P27318.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    }
+  ],
+  "coverage": {
+    "chains": 4,
+    "with_a_reviewed_relative": 4,
+    "with_a_function_for_this_chain": 2,
+    "with_a_verified_reading_frame": 1,
+    "with_nucleotide_coordinates": 1,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:04:17.609138+00:00"
+  },
+  "content_sha256": "cf8732770782d33b1595f3fe850c0d6572f1f0f8c706216b85ca691554abe63e"
+}

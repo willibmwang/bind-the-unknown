@@ -230,3 +230,34 @@ runs/improve/
 notebooks/.mplcache/
 .mplcache/
 notebooks/.ipynb_checkpoints/
+
+# What each shortlisted chain does, what it touches, and where its residues sit in the genome.
+# One file per genome, joined to that genome's chain record on the accession and the held-out
+# organism, the way the inventory and the site patches already join. Tracked because the page's
+# residue track prints a nucleotide range off it and a reader should be able to open the file
+# the range came from -- and because the chain records are tracked, so a side record of them
+# that was not would make a clean checkout build a page with a lane missing. Written by
+# `python -m hpc_pilots annotate`.
+!runs/annotation/
+!runs/annotation/*.json
+
+# The target list another platform reads: one object per genome and one CSV over all of them,
+# a row per proposed binding site. `docs/handoff/` holds the published copy, and this is the
+# original, for the same reason `runs/onset_chain_*.json` is tracked against `docs/results/`.
+# Written by `python -m hpc_pilots handoff`.
+!runs/handoff/
+!runs/handoff/*.json
+!runs/handoff/*.csv
+
+# Whether fitting the five ranking weights against the proteins approved antivirals already act
+# on beats the weights the pipeline ships. It does not, and that is the point of keeping it: the
+# page states a null and a reader has to be able to check it. Carries the fitted vector, the
+# per-epoch trajectory, the leave-one-family-out folds and the shuffled-label control. Written
+# by `python -m hpc_pilots rubric-fit`.
+!runs/rubric_fit.json
+
+# What the library model learned, as a coefficient per residue per randomised position, at every
+# acquisition checkpoint. The page draws the 4-by-20 table straight off this, beside the same
+# procedure run on permuted outcomes. Written by `python -m hpc_pilots weights`.
+!runs/weights/
+!runs/weights/*.json

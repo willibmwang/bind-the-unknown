@@ -38,7 +38,7 @@
           "dropped": []
         }
       },
-      "seconds": 12.01,
+      "seconds": 61.77,
       "hands_to_next": "one reviewed accession and one residue range per candidate"
     },
     {
@@ -76,7 +76,7 @@
         },
         "all_decompositions_reproduce_the_score": true
       },
-      "seconds": 2.01,
+      "seconds": 173.84,
       "hands_to_next": "every chain that cleared the gate, with the accession and range its surface is measured on. 0 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them"
     },
     {
@@ -137,7 +137,7 @@
         "sequence_sha256": "b7e92c75dcbf4494959f1b4a2c52792275acc431ad8d38dcf827feb47026559c",
         "error": null
       },
-      "seconds": 31.9,
+      "seconds": 37.69,
       "hands_to_next": "coordinates for 3 of the 4 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 1 chains over it. Plus the functional site positions, carried through the alignment into this genome's numbering, which the surface stage anchors the patch arithmetic on. 1 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region's surface goes under its chain's row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2"
     },
     {
@@ -183,7 +183,7 @@
         "changes_any_rank": false,
         "read_by_later_stages": []
       },
-      "seconds": 0.52,
+      "seconds": 42.12,
       "hands_to_next": "a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 2 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage's product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one"
     },
     {
@@ -237,13 +237,13 @@
       "output": {
         "targets_covered": 3,
         "calls_made": 15,
-        "ok": 11,
-        "not_ok": 4,
-        "network_calls": 71,
+        "ok": 8,
+        "not_ok": 7,
+        "network_calls": 60,
         "changes_any_rank": false,
         "every_target_has_every_tool": true
       },
-      "seconds": 113.29,
+      "seconds": 4761.9,
       "hands_to_next": "nothing. This annotates the shortlist and never reorders it"
     }
   ],
@@ -899,7 +899,7 @@
           "not_the_annotated_residues_because": null,
           "residues_not_checked_because": null
         },
-        "seconds": 0.1,
+        "seconds": 0.15,
         "only_route_to_a_surface": true,
         "deposited_patch_median_a2": null,
         "ratio_to_deposited_median": null,
@@ -1018,7 +1018,7 @@
       "functional_sites_absent_because": null,
       "site_positions_in_this_genome": [],
       "site_surface": null,
-      "seconds": 0.12,
+      "seconds": 0.4,
       "structures_offered": [],
       "chains_mapped_to_accession": 0,
       "no_surface_because": {
@@ -1065,7 +1065,7 @@
       "functional_sites_absent_because": null,
       "site_positions_in_this_genome": [],
       "site_surface": null,
-      "seconds": 0.11,
+      "seconds": 41.38,
       "structures_offered": [],
       "chains_mapped_to_accession": 0,
       "predicted_surface": {
@@ -1269,7 +1269,7 @@
           "not_the_annotated_residues_because": null,
           "residues_not_checked_because": null
         },
-        "seconds": 0.07,
+        "seconds": 0.08,
         "only_route_to_a_surface": true,
         "deposited_patch_median_a2": null,
         "ratio_to_deposited_median": null,
@@ -1725,7 +1725,7 @@
           "not_the_annotated_residues_because": null,
           "residues_not_checked_because": null
         },
-        "seconds": 0.11,
+        "seconds": 0.12,
         "only_route_to_a_surface": true,
         "deposited_patch_median_a2": null,
         "ratio_to_deposited_median": null,
@@ -2251,47 +2251,27 @@
         {
           "tool": "literature.search",
           "endpoint": "Europe PMC",
-          "status": "ok",
-          "note": null,
-          "seconds": 19.51,
-          "network_calls": 7,
-          "returned": {
-            "subject_kind": "term",
-            "scope": "title_abstract",
-            "hit_count": 582,
-            "returned": 10,
-            "hits_with_abstract": 10,
-            "preprints_returned": 2,
-            "limitations_count": 8,
-            "sources_count": 7
-          }
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 462.7,
+          "network_calls": 1,
+          "returned": {}
         },
         {
           "tool": "similarity.homologs",
           "endpoint": "EBI HMMER",
-          "status": "ok",
-          "note": null,
-          "seconds": 2.04,
-          "network_calls": 3,
-          "returned": {
-            "resolution_attempts_count": 1,
-            "database_id": "swissprot",
-            "database_name": "SwissProt",
-            "database_version": "2025_01",
-            "database_release_date": "2025-01-01",
-            "declared_databases_not_served_count": 0,
-            "homologs_count": 22,
-            "homolog_count": 22,
-            "hits_returned": 22,
-            "hits_dropped_by_min_identity": 0
-          }
+          "status": "failed",
+          "note": "RuntimeError: job f6dc0191-0345-4b9d-8746-5f39238dbbb7 on swissprot was still 'RETRY' after 9 poll(s) and 122.6s, over the 120.0s ceiling; the job id is retrievable at https://www.ebi.ac.uk/Tools/hmmer/api/v1/resul",
+          "seconds": 122.56,
+          "network_calls": 11,
+          "returned": {}
         },
         {
           "tool": "families.entries",
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 5.61,
+          "seconds": 6.32,
           "network_calls": 9,
           "returned": {
             "protein_name": "Envelopment polyprotein",
@@ -2311,7 +2291,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 1.64,
+          "seconds": 6.84,
           "network_calls": 3,
           "returned": {
             "sequence_length": 1135,
@@ -2331,7 +2311,7 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 28.84,
+          "seconds": 42.27,
           "network_calls": 7,
           "returned": {
             "max_molecules_requested": 50,
@@ -2358,10 +2338,10 @@
         {
           "tool": "literature.search",
           "endpoint": "Europe PMC",
-          "status": "empty",
-          "note": "{'subject_zero': True, 'axes_zero': ('assay_availability', 'conservation', 'essentiality', 'precedent', 'public_labels'), 'means': 'A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.'}",
-          "seconds": 3.22,
-          "network_calls": 7,
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 1844.59,
+          "network_calls": 1,
           "returned": {}
         },
         {
@@ -2378,7 +2358,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 4.99,
+          "seconds": 6.38,
           "network_calls": 9,
           "returned": {
             "protein_name": "RNA-directed RNA polymerase L",
@@ -2396,29 +2376,18 @@
         {
           "tool": "structures.predicted",
           "endpoint": "AlphaFold DB, 3D-Beacons",
-          "status": "ok",
-          "note": null,
-          "seconds": 1.8,
-          "network_calls": 2,
-          "returned": {
-            "sequence_length": 2151,
-            "confident_plddt": 70.0,
-            "plddt_bands_count": 4,
-            "residue_detail": false,
-            "any_prediction_exists": true,
-            "predicted_model_count": 5,
-            "providers_queried_count": 2,
-            "providers_with_models_count": 2,
-            "alphafold_host_queried": true,
-            "alphafold_host_served_models": true
-          }
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 808.49,
+          "network_calls": 1,
+          "returned": {}
         },
         {
           "tool": "bioactivity.prior_binders",
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 21.49,
+          "seconds": 71.0,
           "network_calls": 7,
           "returned": {
             "max_molecules_requested": 50,
@@ -2445,10 +2414,10 @@
         {
           "tool": "literature.search",
           "endpoint": "Europe PMC",
-          "status": "empty",
-          "note": "{'subject_zero': True, 'axes_zero': ('assay_availability', 'conservation', 'essentiality', 'precedent', 'public_labels'), 'means': 'A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.'}",
-          "seconds": 17.18,
-          "network_calls": 7,
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 1163.28,
+          "network_calls": 1,
           "returned": {}
         },
         {
@@ -2465,7 +2434,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 3.02,
+          "seconds": 5.03,
           "network_calls": 4,
           "returned": {
             "protein_name": "Nucleoprotein",
@@ -2485,7 +2454,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 1.2,
+          "seconds": 24.44,
           "network_calls": 2,
           "returned": {
             "sequence_length": 429,
@@ -2505,7 +2474,7 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 2.76,
+          "seconds": 198.0,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -2522,7 +2491,7 @@
       ]
     }
   ],
-  "seconds": 159.74,
+  "seconds": 5077.32,
   "coverage": {
     "chains_ranked": 4,
     "surface_rows": 4,

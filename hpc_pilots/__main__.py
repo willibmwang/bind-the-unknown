@@ -155,6 +155,44 @@ def main(argv=None):
     p.add_argument("--held", type=int, help="One holdout size; omit to sweep the configured set")
     p.add_argument("--no-controls", action="store_true")
     p.add_argument("--smoke", action="store_true")
+    p = sub.add_parser("rubric-fit",
+                       help="Fit the five ranking weights against the panel, hold out each "
+                            "virus family in turn, and report what fitting buys")
+    p.add_argument("--tier", default="all", choices=("strong", "weak", "all"),
+                   help="Which label tier to fit and score on. `strong` is approved antivirals "
+                        "only and is the tier a headline may quote; `all` is every graded "
+                        "label and is the default here because 45 genomes over 20 families is "
+                        "the widest split the panel supports")
+    p.add_argument("--epochs", type=int, default=8000,
+                   help="Gradient steps. The fit settles by about 4,000 on the full panel; the "
+                        "default leaves margin and costs under a second")
+    p.add_argument("--rate", type=float, default=0.08)
+    p.add_argument("--penalty", type=float, default=1e-3)
+    p.add_argument("--report", action="store_true",
+                   help="Print the weights beside the stated ones from the existing record, "
+                        "and fit nothing")
+    p = sub.add_parser("annotate",
+                       help="What each shortlisted chain does, what it touches, and where its "
+                            "residues sit in the genome. Writes a side record and changes no "
+                            "chain record")
+    p.add_argument("--accession", help="One genome; omit to annotate every record on disk")
+    p = sub.add_parser("handoff",
+                       help="Export every target with the residues to bind and what the "
+                            "protein does, as one JSON per genome and one CSV over all")
+    p.add_argument("--accession", help="One genome; omit to export every record on disk")
+    p = sub.add_parser("weights",
+                       help="Record what the library model learned, as a coefficient per "
+                            "randomised position and residue, at every acquisition checkpoint")
+    p.add_argument("--pools", type=int, default=5,
+                   help="Evaluation pools to run, from 0. Each is one episode per arm")
+    p.add_argument("--policies", default="greedy,random",
+                   help="Acquisition policies to watch. `random` consults no surrogate, which "
+                        "separates what the model learned from what the policy chose")
+    p.add_argument("--no-controls", action="store_true",
+                   help="Skip the permuted-outcome arm, which is the only thing saying what "
+                        "this fit produces when there is nothing to learn")
+    p.add_argument("--report", action="store_true",
+                   help="Print the final coefficient map from the existing record, run nothing")
     p = sub.add_parser("sweep", help="Run the acquisition grid in parallel on this machine")
     p.add_argument("--arms", default="binding,target,method,display")
     p.add_argument("--workers", type=int, default=8)
@@ -352,6 +390,42 @@ def main(argv=None):
             transfer(args.landscape, args.held)
         else:
             run_monomers(args.landscape, controls=not args.no_controls, smoke=args.smoke)
+    elif args.command == "rubric-fit":
+        from .rubric_fit import report, run_rubric_fit
+        if not args.report:
+            run_rubric_fit(tier=args.tier, epochs=args.epochs, rate=args.rate,
+                           penalty=args.penalty)
+        report()
+    elif args.command == "annotate":
+        from .annotate import run_annotate
+        from .handoff import _records
+        paths = _records(args.accession) if not args.accession else None
+        if args.accession:
+            payload = run_annotate(accession=args.accession)
+            print(json.dumps(payload["coverage"]))
+        else:
+            for path in paths:
+                if not path.exists():
+                    continue
+                try:
+                    payload = run_annotate(path=path)
+                except Exception as failure:                            # noqa: BLE001
+                    print(f"{path.name}: {type(failure).__name__}: {str(failure)[:120]}")
+                    continue
+                print(f"{payload['genome_accession']}: "
+                      f"{json.dumps(payload['coverage'])}")
+    elif args.command == "handoff":
+        from .handoff import run_handoff
+        result = run_handoff(accession=args.accession)
+        print(f"{len(result['genomes'])} genome(s), {len(result['targets'])} target(s), "
+              f"{len(result['rows'])} site row(s) -> runs/handoff/")
+    elif args.command == "weights":
+        from .weights import report as weight_report, run_weights
+        if not args.report:
+            run_weights(pools=tuple(range(args.pools)),
+                        policies=tuple(p for p in args.policies.split(",") if p),
+                        controls=not args.no_controls)
+        weight_report()
     elif args.command == "sweep":
         from .sweep import run_sweep
         run_sweep([a for a in args.arms.split(",") if a], args.workers,

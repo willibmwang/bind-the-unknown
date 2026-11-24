@@ -38,7 +38,7 @@
           "dropped": []
         }
       },
-      "seconds": 16.69,
+      "seconds": 397.33,
       "hands_to_next": "one reviewed accession and one residue range per candidate"
     },
     {
@@ -119,7 +119,7 @@
         },
         "all_decompositions_reproduce_the_score": true
       },
-      "seconds": 1.0,
+      "seconds": 1.8,
       "hands_to_next": "every chain that cleared the gate, with the accession and range its surface is measured on. 3 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them"
     },
     {
@@ -180,7 +180,7 @@
         "sequence_sha256": "b3e347a1d7a3f7cba205fac35905e62af25e9e1bc2a0dcd9faf603e2a16b7c76",
         "error": null
       },
-      "seconds": 29.04,
+      "seconds": 2279.75,
       "hands_to_next": "coordinates for 3 of the 4 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 1 chains over it. Plus the functional site positions, carried through the alignment into this genome's numbering, which the surface stage anchors the patch arithmetic on. 1 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region's surface goes under its chain's row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2"
     },
     {
@@ -226,7 +226,7 @@
         "changes_any_rank": false,
         "read_by_later_stages": []
       },
-      "seconds": 4.63,
+      "seconds": 11.59,
       "hands_to_next": "a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 2 chains through a deposition and 1 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage's product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one"
     },
     {
@@ -280,13 +280,13 @@
       "output": {
         "targets_covered": 3,
         "calls_made": 15,
-        "ok": 13,
-        "not_ok": 2,
-        "network_calls": 72,
+        "ok": 9,
+        "not_ok": 6,
+        "network_calls": 48,
         "changes_any_rank": false,
         "every_target_has_every_tool": true
       },
-      "seconds": 90.15,
+      "seconds": 3749.57,
       "hands_to_next": "nothing. This annotates the shortlist and never reorders it"
     }
   ],
@@ -1074,7 +1074,7 @@
           "not_the_annotated_residues_because": null,
           "residues_not_checked_because": null
         },
-        "seconds": 0.12,
+        "seconds": 0.35,
         "only_route_to_a_surface": true,
         "deposited_patch_median_a2": null,
         "ratio_to_deposited_median": null,
@@ -1254,7 +1254,7 @@
           "not_the_annotated_residues_because": null,
           "residues_not_checked_because": null
         },
-        "seconds": 0.04,
+        "seconds": 0.14,
         "only_route_to_a_surface": true,
         "deposited_patch_median_a2": null,
         "ratio_to_deposited_median": null,
@@ -1502,7 +1502,7 @@
         "not_the_annotated_residues_because": null,
         "residues_not_checked_because": null
       },
-      "seconds": 0.79,
+      "seconds": 2.49,
       "patch_median_a2": 486.4,
       "patch_range_a2": [
         481.1,
@@ -1777,7 +1777,7 @@
         "not_the_annotated_residues_because": null,
         "residues_not_checked_because": null
       },
-      "seconds": 3.58,
+      "seconds": 8.3,
       "patch_median_a2": 579.7,
       "patch_range_a2": [
         365.0,
@@ -2132,7 +2132,7 @@
           "not_the_annotated_residues_because": null,
           "residues_not_checked_because": null
         },
-        "seconds": 0.08,
+        "seconds": 0.3,
         "only_route_to_a_surface": false,
         "deposited_patch_median_a2": 579.7,
         "ratio_to_deposited_median": 18.56,
@@ -2792,27 +2792,18 @@
         {
           "tool": "literature.search",
           "endpoint": "Europe PMC",
-          "status": "ok",
-          "note": null,
-          "seconds": 17.6,
-          "network_calls": 7,
-          "returned": {
-            "subject_kind": "term",
-            "scope": "title_abstract",
-            "hit_count": 582,
-            "returned": 10,
-            "hits_with_abstract": 10,
-            "preprints_returned": 2,
-            "limitations_count": 8,
-            "sources_count": 7
-          }
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 857.85,
+          "network_calls": 4,
+          "returned": {}
         },
         {
           "tool": "similarity.homologs",
           "endpoint": "EBI HMMER",
           "status": "ok",
           "note": null,
-          "seconds": 1.15,
+          "seconds": 1.9,
           "network_calls": 3,
           "returned": {
             "resolution_attempts_count": 1,
@@ -2830,49 +2821,27 @@
         {
           "tool": "families.entries",
           "endpoint": "InterPro",
-          "status": "ok",
-          "note": null,
-          "seconds": 3.57,
-          "network_calls": 8,
-          "returned": {
-            "protein_name": "Envelopment polyprotein",
-            "organism": "Dugbe virus (isolate ArD44313)",
-            "sequence_md5": "593BD0A7EB3770554D0A288A6FA64627",
-            "sequence_length": 1551,
-            "sequence_source": "uniprot",
-            "assignments_count": 6,
-            "predicted_count": 7,
-            "sequence_features_count": 13,
-            "residue_ranges_count": 5,
-            "functional_sites_count": 0
-          }
+          "status": "failed",
+          "note": "RuntimeError: https://www.ebi.ac.uk/interpro/matches/api/matches/593BD0A7EB3770554D0A288A6FA64627 could not be reached: _ssl.c:983: The handshake operation timed out",
+          "seconds": 806.08,
+          "network_calls": 2,
+          "returned": {}
         },
         {
           "tool": "structures.predicted",
           "endpoint": "AlphaFold DB, 3D-Beacons",
-          "status": "ok",
-          "note": null,
-          "seconds": 2.34,
-          "network_calls": 4,
-          "returned": {
-            "sequence_length": 1551,
-            "confident_plddt": 70.0,
-            "plddt_bands_count": 4,
-            "residue_detail": false,
-            "any_prediction_exists": true,
-            "predicted_model_count": 7,
-            "providers_queried_count": 2,
-            "providers_with_models_count": 2,
-            "alphafold_host_queried": true,
-            "alphafold_host_served_models": true
-          }
+          "status": "failed",
+          "note": "URLError: <urlopen error _ssl.c:983: The handshake operation timed out>",
+          "seconds": 375.66,
+          "network_calls": 1,
+          "returned": {}
         },
         {
           "tool": "bioactivity.prior_binders",
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 3.48,
+          "seconds": 2.94,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -2901,27 +2870,18 @@
         {
           "tool": "literature.search",
           "endpoint": "Europe PMC",
-          "status": "ok",
-          "note": null,
-          "seconds": 29.51,
-          "network_calls": 7,
-          "returned": {
-            "subject_kind": "term",
-            "scope": "title_abstract",
-            "hit_count": 271,
-            "returned": 10,
-            "hits_with_abstract": 9,
-            "preprints_returned": 0,
-            "limitations_count": 8,
-            "sources_count": 7
-          }
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 69.0,
+          "network_calls": 1,
+          "returned": {}
         },
         {
           "tool": "similarity.homologs",
           "endpoint": "EBI HMMER",
           "status": "ok",
           "note": null,
-          "seconds": 1.18,
+          "seconds": 2.21,
           "network_calls": 3,
           "returned": {
             "resolution_attempts_count": 1,
@@ -2941,7 +2901,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 4.82,
+          "seconds": 8.53,
           "network_calls": 8,
           "returned": {
             "protein_name": "Envelopment polyprotein",
@@ -2961,7 +2921,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 3.17,
+          "seconds": 6.85,
           "network_calls": 3,
           "returned": {
             "sequence_length": 1551,
@@ -2981,17 +2941,17 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 2.89,
+          "seconds": 77.56,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
             "max_molecules_applied": 50,
             "max_molecules_clamped": false,
-            "lanes_unavailable_count": 0,
-            "network_calls": 4,
-            "calls_count": 4,
+            "lanes_unavailable_count": 1,
+            "network_calls": 3,
+            "calls_count": 3,
             "sources_count": 3,
-            "urls_hit_count": 4,
+            "urls_hit_count": 3,
             "limitations_count": 13
           }
         }
@@ -3007,10 +2967,10 @@
         {
           "tool": "literature.search",
           "endpoint": "Europe PMC",
-          "status": "empty",
-          "note": "{'subject_zero': True, 'axes_zero': ('assay_availability', 'conservation', 'essentiality', 'precedent', 'public_labels'), 'means': 'A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.'}",
-          "seconds": 12.83,
-          "network_calls": 7,
+          "status": "failed",
+          "note": "TimeoutError: The read operation timed out",
+          "seconds": 1511.9,
+          "network_calls": 1,
           "returned": {}
         },
         {
@@ -3027,7 +2987,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 3.5,
+          "seconds": 19.29,
           "network_calls": 8,
           "returned": {
             "protein_name": "RNA-directed RNA polymerase L",
@@ -3047,7 +3007,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 1.15,
+          "seconds": 6.84,
           "network_calls": 2,
           "returned": {
             "sequence_length": 4036,
@@ -3055,7 +3015,7 @@
             "plddt_bands_count": 4,
             "residue_detail": false,
             "any_prediction_exists": true,
-            "predicted_model_count": 5,
+            "predicted_model_count": 7,
             "providers_queried_count": 2,
             "providers_with_models_count": 2,
             "alphafold_host_queried": true,
@@ -3067,7 +3027,7 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 2.97,
+          "seconds": 2.96,
           "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
@@ -3084,7 +3044,7 @@
       ]
     }
   ],
-  "seconds": 141.5,
+  "seconds": 6440.04,
   "coverage": {
     "chains_ranked": 4,
     "surface_rows": 4,

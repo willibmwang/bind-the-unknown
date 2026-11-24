@@ -1,0 +1,631 @@
+{
+  "experiment": "annotation",
+  "status": "complete",
+  "question": "For every shortlisted chain: what does the protein do, what does it touch, and where do its residues sit in this genome?",
+  "genome_accession": "NC_003977.2",
+  "pathogen": "Hepatitis B virus",
+  "reference_excluded_organism": "Hepatitis B virus",
+  "source_record": "runs/onset_chain_NC_003977_2.json",
+  "chains": [
+    {
+      "rank": 1,
+      "target": "HBSAG_GSHV Large envelope protein",
+      "parent": null,
+      "tier": "remote",
+      "nearest_homolog": "P03144",
+      "score": 8.1,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 2.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 1.6
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P03144",
+        "entry_id": "HBSAG_GSHV",
+        "protein_name": "Large envelope protein",
+        "organism": "Ground squirrel hepatitis virus (strain 27)",
+        "reviewed": true,
+        "molecule_asked_for": "HBSAG_GSHV Large envelope protein",
+        "molecule_matched": false,
+        "molecules_available": [
+          "Isoform L",
+          "Isoform M",
+          "Isoform S"
+        ],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "The large envelope protein exists in two topological conformations, one which is termed 'external' or Le-HBsAg and the other 'internal' or Li-HBsAg. In its external conformation the protein attaches the virus to cell receptors and thereby initiating infection. This interaction determines the species specificity and liver tropism. This attachment induces virion internalization predominantly through caveolin-mediated endocytosis. The large envelope protein also assures fusion between virion membrane and endosomal membrane. In its internal conformation the protein plays a role in virion morphogenesis and mediates the contact with the nucleocapsid like a matrix protein",
+            "The middle envelope protein plays an important role in the budding of the virion. It is involved in the induction of budding in a nucleocapsid independent way. In this process the majority of envelope proteins bud to form subviral lipoprotein particles of 22 nm of diameter that do not contain a nucleocapsid"
+          ],
+          "DOMAIN": [
+            "The large envelope protein is synthesized with the pre-S region at the cytosolic side of the endoplasmic reticulum and, hence will be within the virion after budding. Therefore the pre-S region is not N-glycosylated. Later a post-translational translocation of N-terminal pre-S and TM1 domains occur in about 50% of proteins at the virion surface. These molecules change their topology by an unknown mechanism, resulting in exposure of pre-S region at virion surface. For isoform M in contrast, the pre-S2 region is translocated cotranslationally to the endoplasmic reticulum lumen and is N-glycosylated"
+          ],
+          "PTM": [
+            "Isoform M is N-terminally acetylated by host at a ratio of 90%, and N-glycosylated by host at the pre-S2 region",
+            "Myristoylated"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "DOMAIN": "what its parts do",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Otospermophilus beecheyi",
+            "common_name": "California ground squirrel",
+            "taxon": 34862
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "InterPro": [
+            {
+              "id": "IPR000349",
+              "name": "HBV_HBSAG"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00695",
+              "name": "vMSA"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0016020",
+              "term": "membrane"
+            },
+            {
+              "id": "GO:0055036",
+              "term": "virion membrane"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0075513",
+              "term": "caveolin-mediated endocytosis of virus by host cell"
+            },
+            {
+              "id": "GO:0039654",
+              "term": "fusion of virus membrane with host endosome membrane"
+            },
+            {
+              "id": "GO:0019062",
+              "term": "virion attachment to host cell"
+            }
+          ]
+        },
+        "keywords": [
+          "Acetylation",
+          "Alternative initiation",
+          "Alternative splicing",
+          "Caveolin-mediated endocytosis of virus by host",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Glycoprotein",
+          "Host-virus interaction",
+          "Lipoprotein",
+          "Membrane",
+          "Myristate",
+          "Reference proteome",
+          "Transmembrane",
+          "Transmembrane helix",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virion",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "host_interaction_keywords": [
+          "Caveolin-mediated endocytosis of virus by host",
+          "Fusion of virus membrane with host endosomal membrane",
+          "Fusion of virus membrane with host membrane",
+          "Host-virus interaction",
+          "Viral attachment to host cell",
+          "Viral penetration into host cytoplasm",
+          "Virus endocytosis by host",
+          "Virus entry into host cell"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P03144.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 2,
+      "target": "DPOL_GSHV Protein P",
+      "parent": null,
+      "tier": "remote",
+      "nearest_homolog": "P03161",
+      "score": 6.9,
+      "score_terms": {
+        "conservation": 3.0,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 2.4
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": false,
+        "orf_rank": null,
+        "route": null,
+        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+      },
+      "chain_span_on_the_relative": null,
+      "chain_span_in_this_genome": null,
+      "chain_span_nt": null,
+      "chain_span_nt_confirmed_at": null,
+      "segment_length_nt": null,
+      "annotation": {
+        "accession": "P03161",
+        "entry_id": "DPOL_GSHV",
+        "protein_name": "Protein P",
+        "organism": "Ground squirrel hepatitis virus (strain 27)",
+        "reviewed": true,
+        "molecule_asked_for": "DPOL_GSHV Protein P",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "Multifunctional enzyme that converts the viral RNA genome into dsDNA in viral cytoplasmic capsids. This enzyme displays a DNA polymerase activity that can copy either DNA or RNA templates, and a ribonuclease H (RNase H) activity that cleaves the RNA strand of RNA-DNA heteroduplexes in a partially processive 3'- to 5'-endonucleasic mode. Neo-synthesized pregenomic RNA (pgRNA) are encapsidated together with the P protein, and reverse-transcribed inside the nucleocapsid. Initiation of reverse-transcription occurs first by binding the epsilon loop on the pgRNA genome, and is initiated by protein priming, thereby the 5'-end of (-)DNA is covalently linked to P protein. Partial (+)DNA is synthesized from the (-)DNA template and generates the relaxed circular DNA (RC-DNA) genome. After budding and infection, the RC-DNA migrates in the nucleus, and is converted into a plasmid-like covalently closed circular DNA (cccDNA). The activity of P protein does not seem to be necessary for cccDNA generation, and is presumably released from (+)DNA by host nuclear DNA repair machinery"
+          ],
+          "ACTIVITY REGULATION": [
+            "Activated by host HSP70 and HSP40 in vitro to be able to bind the epsilon loop of the pgRNA. Because deletion of the RNase H region renders the protein partly chaperone-independent, the chaperones may be needed indirectly to relieve occlusion of the RNA-binding site by this domain. Inhibited by several reverse-transcriptase inhibitors: Lamivudine, Adefovir and Entecavir"
+          ],
+          "DOMAIN": [
+            "Terminal protein domain (TP) is hepadnavirus-specific. Spacer domain is highly variable and separates the TP and RT domains. Polymerase/reverse-transcriptase domain (RT) and ribonuclease H domain (RH) are similar to retrovirus reverse transcriptase/RNase H",
+            "The polymerase/reverse transcriptase (RT) and ribonuclease H (RH) domains are structured in five subdomains: finger, palm, thumb, connection and RNase H. Within the palm subdomain, the 'primer grip' region is thought to be involved in the positioning of the primer terminus for accommodating the incoming nucleotide. The RH domain stabilizes the association of RT with primer-template"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "ACTIVITY REGULATION": "what switches it on or off",
+          "DOMAIN": "what its parts do"
+        },
+        "interactions": {
+          "chain_identifier": null,
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": "the entry names no mature chain with this description, so its interactions cannot be attributed to this chain and none are claimed for it",
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Otospermophilus beecheyi",
+            "common_name": "California ground squirrel",
+            "taxon": 34862
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "3.30.70.270",
+              "name": "-"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR043502",
+              "name": "DNA/RNA_pol_sf"
+            },
+            {
+              "id": "IPR001462",
+              "name": "DNApol_viral_C"
+            },
+            {
+              "id": "IPR000201",
+              "name": "DNApol_viral_N"
+            },
+            {
+              "id": "IPR037531",
+              "name": "HBV_DPOL"
+            },
+            {
+              "id": "IPR052055",
+              "name": "Hepadnavirus_pol/RT"
+            },
+            {
+              "id": "IPR043128",
+              "name": "Rev_trsase/Diguanyl_cyclase"
+            },
+            {
+              "id": "IPR000477",
+              "name": "RT_dom"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF00336",
+              "name": "DNA_pol_viral_C"
+            },
+            {
+              "id": "PF00242",
+              "name": "DNA_pol_viral_N"
+            },
+            {
+              "id": "PF00078",
+              "name": "RVT_1"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF56672",
+              "name": "DNA/RNA polymerases"
+            }
+          ],
+          "PROSITE": [
+            {
+              "id": "PS50878",
+              "name": "RT_POL"
+            }
+          ]
+        },
+        "go_terms": {
+          "molecular_function": [
+            {
+              "id": "GO:0003677",
+              "term": "DNA binding"
+            },
+            {
+              "id": "GO:0003887",
+              "term": "DNA-directed DNA polymerase activity"
+            },
+            {
+              "id": "GO:0046872",
+              "term": "metal ion binding"
+            },
+            {
+              "id": "GO:0003964",
+              "term": "RNA-directed DNA polymerase activity"
+            },
+            {
+              "id": "GO:0004523",
+              "term": "RNA-DNA hybrid ribonuclease activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0006260",
+              "term": "DNA replication"
+            },
+            {
+              "id": "GO:0052170",
+              "term": "symbiont-mediated suppression of host innate immune response"
+            }
+          ]
+        },
+        "keywords": [
+          "DNA replication",
+          "DNA-binding",
+          "DNA-directed DNA polymerase",
+          "Endonuclease",
+          "Host-virus interaction",
+          "Hydrolase",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host RLR pathway by virus",
+          "Magnesium",
+          "Metal-binding",
+          "Multifunctional enzyme",
+          "Nuclease",
+          "Nucleotidyltransferase",
+          "Reference proteome",
+          "RNA-directed DNA polymerase",
+          "Transferase",
+          "Viral immunoevasion"
+        ],
+        "host_interaction_keywords": [
+          "Host-virus interaction",
+          "Inhibition of host innate immune response by virus",
+          "Inhibition of host RLR pathway by virus"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P03161.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    },
+    {
+      "rank": 3,
+      "target": "External core antigen",
+      "parent": "HBEAG_GSHV External core antigen",
+      "tier": "exact",
+      "nearest_homolog": "P03153",
+      "score": 2.3613,
+      "score_terms": {
+        "conservation": 0.8613,
+        "surface_exposed": 0.0,
+        "essential_class": 1.5,
+        "structures_in_family": 0.0,
+        "druggable_class": 0.0
+      },
+      "gate": null,
+      "reading_frame": {
+        "verified": true,
+        "route": "parent",
+        "residue_agreement": {
+          "checked": true,
+          "agrees": true,
+          "identity": 0.725,
+          "confirmed_at": [
+            "the start of the chain",
+            "the end of the chain"
+          ],
+          "confirmed_at_both_ends": true,
+          "one_end_only_note": null,
+          "leading_identity": 0.725,
+          "trailing_identity": 0.7,
+          "residues_compared": 40,
+          "frame_span_residues": 193,
+          "relative_chain_residues": 197,
+          "lengths_differ": true,
+          "threshold": 0.35,
+          "what": "fraction of positions where the reading frame's residue equals the relative's, over the first and last 40 residues of each stretch, each anchored at its own end so an indel between them cannot put the comparison out of register. No re-alignment."
+        },
+        "confirmed_at": [
+          "the start of the chain",
+          "the end of the chain"
+        ],
+        "confirmed_at_both_ends": true,
+        "orf_rank": 4,
+        "strand": "+",
+        "frame": 0,
+        "nt_start": 1815,
+        "orf_length_aa": 212,
+        "segment": 0,
+        "orf_name": "HBEAG_GSHV External core antigen",
+        "reading_frame": "+0 at nt 1816",
+        "span_fits_the_frame": true,
+        "how_it_was_resolved": "the fold stage located the chain in its own parent ORF, which is the candidate the chain's parent names",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, not along the genome. Two chains in different frames can carry the same integers and share no residue."
+      },
+      "chain_span_on_the_relative": [
+        21,
+        217
+      ],
+      "chain_span_in_this_genome": [
+        20,
+        212
+      ],
+      "chain_span_nt": [
+        1873,
+        2451
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the start of the chain",
+        "the end of the chain"
+      ],
+      "segment_length_nt": 3182,
+      "annotation": {
+        "accession": "P03153",
+        "entry_id": "HBEAG_GSHV",
+        "protein_name": "External core antigen",
+        "organism": "Ground squirrel hepatitis virus (strain 27)",
+        "reviewed": true,
+        "molecule_asked_for": "External core antigen",
+        "molecule_matched": false,
+        "molecules_available": [],
+        "about_this_chain": {},
+        "about_the_whole_entry": {
+          "FUNCTION": [
+            "May regulate immune response to the intracellular capsid in acting as a T-cell tolerogen, by having an immunoregulatory effect which prevents destruction of infected cells by cytotoxic T-cells. This immune regulation may predispose to chronicity during perinatal infections and prevent severe liver injury during adult infections"
+          ],
+          "SUBUNIT": [
+            "Homodimerizes"
+          ],
+          "PTM": [
+            "Phosphorylated",
+            "Cleaved by host furin"
+          ]
+        },
+        "what_each_comment_answers": {
+          "FUNCTION": "what the protein does",
+          "SUBUNIT": "what it assembles into",
+          "PTM": "how it is modified after translation"
+        },
+        "interactions": {
+          "chain_identifier": "PRO_0000222306",
+          "with_a_host_protein": [],
+          "with_a_protein_of_this_virus": [],
+          "host_partners": 0,
+          "viral_partners": 0,
+          "entry_level_interactions_not_attributed_to_any_chain": 0,
+          "not_attributable_because": null,
+          "source": "UniProt's IntAct-derived binary interactions, carried in the entry this pipeline already downloads. No second database is contacted.",
+          "absence_note": "An empty list means no curated interaction is attributed to this chain, which for a novel pathogen is the expected case and is not evidence that the protein touches nothing."
+        },
+        "declared_hosts": [
+          {
+            "name": "Otospermophilus beecheyi",
+            "common_name": "California ground squirrel",
+            "taxon": 34862
+          }
+        ],
+        "complexes": [],
+        "signatures": {
+          "Gene3D": [
+            {
+              "id": "1.10.4090.10",
+              "name": "Viral capsid, core domain supefamily, Hepatitis B virus"
+            }
+          ],
+          "InterPro": [
+            {
+              "id": "IPR013195",
+              "name": "Hepatitis_B_virus_capsid_N"
+            },
+            {
+              "id": "IPR002006",
+              "name": "Hepatitis_core"
+            },
+            {
+              "id": "IPR036459",
+              "name": "Viral_capsid_core_dom_sf_HBV"
+            }
+          ],
+          "Pfam": [
+            {
+              "id": "PF08290",
+              "name": "Hep_core_N"
+            },
+            {
+              "id": "PF00906",
+              "name": "Hepatitis_core"
+            }
+          ],
+          "SUPFAM": [
+            {
+              "id": "SSF47852",
+              "name": "Hepatitis B viral capsid (hbcag)"
+            }
+          ]
+        },
+        "go_terms": {
+          "cellular_component": [
+            {
+              "id": "GO:0005576",
+              "term": "extracellular region"
+            },
+            {
+              "id": "GO:0043657",
+              "term": "host cell"
+            },
+            {
+              "id": "GO:0030430",
+              "term": "host cell cytoplasm"
+            },
+            {
+              "id": "GO:0042025",
+              "term": "host cell nucleus"
+            },
+            {
+              "id": "GO:0039619",
+              "term": "T=4 icosahedral viral capsid"
+            }
+          ],
+          "molecular_function": [
+            {
+              "id": "GO:0003677",
+              "term": "DNA binding"
+            },
+            {
+              "id": "GO:0003723",
+              "term": "RNA binding"
+            },
+            {
+              "id": "GO:0005198",
+              "term": "structural molecule activity"
+            }
+          ],
+          "biological_process": [
+            {
+              "id": "GO:0075521",
+              "term": "microtubule-dependent intracellular transport of viral material towards nucleus"
+            },
+            {
+              "id": "GO:0046718",
+              "term": "symbiont entry into host cell"
+            },
+            {
+              "id": "GO:0052031",
+              "term": "symbiont-mediated perturbation of host defense response"
+            },
+            {
+              "id": "GO:0075732",
+              "term": "viral penetration into host nucleus"
+            }
+          ]
+        },
+        "keywords": [
+          "Alternative initiation",
+          "Disulfide bond",
+          "Host nucleus",
+          "Host-virus interaction",
+          "Reference proteome",
+          "Repeat",
+          "Secreted",
+          "Signal",
+          "Viral immunoevasion"
+        ],
+        "host_interaction_keywords": [
+          "Host nucleus",
+          "Host-virus interaction"
+        ],
+        "structures_deposited": 0,
+        "source": "https://rest.uniprot.org/uniprotkb/P03153.json",
+        "citation": "UniProt curated annotation on the nearest reviewed relative. Every line here is transferred from that relative and none of it was measured on this pathogen."
+      },
+      "annotation_failed_because": null,
+      "not_annotated_because": null
+    }
+  ],
+  "coverage": {
+    "chains": 3,
+    "with_a_reviewed_relative": 3,
+    "with_a_function_for_this_chain": 0,
+    "with_a_verified_reading_frame": 1,
+    "with_nucleotide_coordinates": 1,
+    "host_interactions_found": 0
+  },
+  "joins_to_its_chain_record_on": [
+    "genome_accession",
+    "reference_excluded_organism"
+  ],
+  "ranks_are_copied_not_recomputed": "`chain.py` states that nothing a late stage returns may reorder a rank. Every rank and score here is copied from the chain record and this module computes neither.",
+  "limitations": [
+    "Every function, partner and family here is curated annotation on the nearest reviewed relative, transferred across a species gap. None of it was measured on this pathogen, and for a genuinely novel pathogen the nearest relative may be distant enough that the transfer is wrong.",
+    "An empty interaction list means no curated interaction exists for the relative. It is not evidence that the protein touches nothing, and it is the expected result for an understudied virus.",
+    "A nucleotide range is emitted only where the fold stage's own reading frame was recovered and its residue count matched the candidate row. Where it was not, the range is absent and the reason is named; it is never estimated.",
+    "On the minus strand a codon is read from the high nucleotide coordinate to the low one. The range is reported low coordinate first with the strand beside it, so it cannot be read as a direction.",
+    "A range covers the codons of the residues named and excludes nothing else; a chain's span in nucleotides therefore excludes the stop codon, which lies beyond the last residue."
+  ],
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T02:04:00.912364+00:00"
+  },
+  "content_sha256": "8c000229d1725687f9635bf97c76c3f5f64e3a5e8294fd33fb4405c30b65cad3"
+}

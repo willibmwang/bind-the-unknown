@@ -38,7 +38,7 @@
           "dropped": []
         }
       },
-      "seconds": 11.26,
+      "seconds": 12.05,
       "hands_to_next": "one reviewed accession and one residue range per candidate"
     },
     {
@@ -76,7 +76,7 @@
         },
         "all_decompositions_reproduce_the_score": true
       },
-      "seconds": 0.05,
+      "seconds": 0.75,
       "hands_to_next": "every chain that cleared the gate, with the accession and range its surface is measured on. 0 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them"
     },
     {
@@ -180,7 +180,7 @@
         "changes_any_rank": false,
         "read_by_later_stages": []
       },
-      "seconds": 2.72,
+      "seconds": 1.69,
       "hands_to_next": "a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 1 chains through a deposition and 0 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage's product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one"
     },
     {
@@ -236,11 +236,11 @@
         "calls_made": 5,
         "ok": 3,
         "not_ok": 2,
-        "network_calls": 25,
+        "network_calls": 21,
         "changes_any_rank": false,
         "every_target_has_every_tool": true
       },
-      "seconds": 21.81,
+      "seconds": 58.9,
       "hands_to_next": "nothing. This annotates the shortlist and never reorders it"
     }
   ],
@@ -795,7 +795,7 @@
         "not_the_annotated_residues_because": null,
         "residues_not_checked_because": null
       },
-      "seconds": 2.72,
+      "seconds": 1.69,
       "patch_median_a2": 820.3,
       "patch_range_a2": [
         617.1,
@@ -1083,7 +1083,7 @@
           "endpoint": "Europe PMC",
           "status": "empty",
           "note": "{'subject_zero': True, 'axes_zero': ('assay_availability', 'conservation', 'essentiality', 'precedent', 'public_labels'), 'means': 'A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.'}",
-          "seconds": 9.67,
+          "seconds": 43.28,
           "network_calls": 7,
           "returned": {}
         },
@@ -1101,7 +1101,7 @@
           "endpoint": "InterPro",
           "status": "ok",
           "note": null,
-          "seconds": 3.45,
+          "seconds": 7.7,
           "network_calls": 8,
           "returned": {
             "protein_name": "RNA-directed RNA polymerase L",
@@ -1121,7 +1121,7 @@
           "endpoint": "AlphaFold DB, 3D-Beacons",
           "status": "ok",
           "note": null,
-          "seconds": 1.31,
+          "seconds": 1.92,
           "network_calls": 2,
           "returned": {
             "sequence_length": 2095,
@@ -1141,25 +1141,24 @@
           "endpoint": "ChEMBL, IEDB, MaveDB",
           "status": "ok",
           "note": null,
-          "seconds": 7.37,
-          "network_calls": 8,
+          "seconds": 6.0,
+          "network_calls": 4,
           "returned": {
             "max_molecules_requested": 50,
             "max_molecules_applied": 50,
             "max_molecules_clamped": false,
-            "lanes_unavailable_count": 0,
-            "earliest_evidence_year": "2024",
-            "network_calls": 8,
-            "calls_count": 8,
+            "lanes_unavailable_count": 1,
+            "network_calls": 3,
+            "calls_count": 3,
             "sources_count": 3,
-            "urls_hit_count": 8,
+            "urls_hit_count": 3,
             "limitations_count": 13
           }
         }
       ]
     }
   ],
-  "seconds": 35.83,
+  "seconds": 73.39,
   "coverage": {
     "chains_ranked": 1,
     "surface_rows": 1,

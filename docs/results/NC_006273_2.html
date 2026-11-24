@@ -25,7 +25,7 @@
   <h1>Human cytomegalovirus</h1>
   <p class="standfirst">One genome accession went in. This is what each stage of the chain
   handed the next.</p>
-  <dl class="strip"><div><dt>Accession</dt><dd>NC_006273.2</dd></div><div><dt>Chains ranked</dt><dd>19</dd></div><div><dt>Surfaces measured</dt><dd>0 of 19</dd></div><div><dt>Nothing dropped</dt><dd>yes</dd></div><div><dt>Seconds</dt><dd>401</dd></div></dl>
+  <dl class="strip"><div><dt>Accession</dt><dd>NC_006273.2</dd></div><div><dt>Chains ranked</dt><dd>19</dd></div><div><dt>Surfaces measured</dt><dd>0 of 19</dd></div><div><dt>Nothing dropped</dt><dd>yes</dd></div><div><dt>Seconds</dt><dd>732</dd></div></dl>
   <p class="reclink"><a href="NC_006273_2.json">Download the raw record · JSON</a>
   <span>Every number on this page is read from it. Nothing here is retyped.</span></p>
 </header>
@@ -36,7 +36,7 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">1</span>
       <span class="what">Genome to candidate proteins</span>
-      <span class="secs">56.91 s</span></div>
+      <span class="secs">53.42 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>genome accession</b> NC_006273.2</li><li><b>reference excluded organism</b> Human cytomegalovirus</li></ul></div>
       <div class="out"><h3>Out</h3><ul><li><b>genome length in nucleotides</b> 235,646</li><li><b>segments</b> 1</li><li><b>ORFs found</b> 616</li><li><b>ORFs ranked</b> 24</li><li><b>reference entries</b> 17,127</li><li><b>reference entries removed</b> 402</li><li><b>identified</b> 22</li><li><b>unidentified</b> 2</li></ul></div>
@@ -46,7 +46,7 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">2</span>
       <span class="what">Polyproteins to mature chains, and the score for each</span>
-      <span class="secs">3.79 s</span></div>
+      <span class="secs">7.18 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>candidates in</b> 24</li></ul></div>
       <div class="out"><h3>Out</h3><ul><li><b>chains out</b> 19</li><li><b>chains scored before the gate</b> 22</li><li><b>every score re-adds from its parts</b> yes</li></ul></div>
@@ -56,19 +56,19 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">3</span>
       <span class="what">Every chain to coordinates, whole where it fits and by its functional regions where it does not</span>
-      <span class="secs">260.9 s</span></div>
+      <span class="secs">97.56 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>candidates in</b> 19</li><li><b>identified in</b> 19</li><li><b>gated out before this stage</b> 3</li><li><b>residue ceiling</b> 1,200</li><li><b>domain units per chain</b> 3</li><li><b>fold requests per run</b> 40</li><li><b>folding budget seconds</b> 240</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>foldable</b> 19</li><li><b>not foldable</b> 0</li><li><b>unidentified foldable</b> 0</li><li><b>chains folded</b> 6</li><li><b>folds attempted</b> 6</li><li><b>folds refused</b> 0</li><li><b>units offered</b> 19</li><li><b>units inside the ceiling</b> 16</li><li><b>units recorded</b> 19</li><li><b>units folded</b> 6</li><li><b>domain units offered</b> 0</li><li><b>domain units inside the ceiling</b> 0</li><li><b>domain units recorded</b> 0</li><li><b>domain units folded</b> 0</li><li><b>domain units attempted</b> 0</li><li><b>chains offered a domain route</b> 0</li><li><b>chains rescued by the domain route</b> 0</li><li><b>chains with coordinates</b> 6</li><li><b>chains with no coordinates</b> 13</li><li><b>domain units not folded by limit</b> 0</li><li><b>domain units not folded by budget</b> 0</li><li><b>chains not folded by limit</b> 0</li><li><b>chains not folded by budget</b> 10</li><li><b>seconds spent on refused folds</b> 0</li><li><b>chains over the ceiling</b> 3</li><li><b>changes any rank</b> no</li><li><b>folded target</b> HELI_HHV6U DNA replication helicase</li><li><b>residues</b> 981</li><li><b>mean confidence, out of 100</b> 52.4</li><li><b>at or above 70</b> 0.2926</li><li><b>sequence sha256</b> 72760d813d1fbf7bbe48251632008a862b46e2884300361ea73e742487718dc6</li><li><b>error</b> —</li></ul></div>
-    </div><div class="hands"><b>hands on</b> &nbsp;coordinates for 6 of the 19 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 3 chains over it. Plus the functional site positions, carried through the alignment into this genome&#x27;s numbering, which the surface stage anchors the patch arithmetic on. 13 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region&#x27;s surface goes under its chain&#x27;s row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2</div>
+      <div class="out"><h3>Out</h3><ul><li><b>foldable</b> 19</li><li><b>not foldable</b> 0</li><li><b>unidentified foldable</b> 0</li><li><b>chains folded</b> 16</li><li><b>folds attempted</b> 16</li><li><b>folds refused</b> 0</li><li><b>units offered</b> 19</li><li><b>units inside the ceiling</b> 16</li><li><b>units recorded</b> 19</li><li><b>units folded</b> 16</li><li><b>domain units offered</b> 0</li><li><b>domain units inside the ceiling</b> 0</li><li><b>domain units recorded</b> 0</li><li><b>domain units folded</b> 0</li><li><b>domain units attempted</b> 0</li><li><b>chains offered a domain route</b> 0</li><li><b>chains rescued by the domain route</b> 0</li><li><b>chains with coordinates</b> 16</li><li><b>chains with no coordinates</b> 3</li><li><b>domain units not folded by limit</b> 0</li><li><b>domain units not folded by budget</b> 0</li><li><b>chains not folded by limit</b> 0</li><li><b>chains not folded by budget</b> 0</li><li><b>seconds spent on refused folds</b> 0</li><li><b>chains over the ceiling</b> 3</li><li><b>changes any rank</b> no</li><li><b>folded target</b> HELI_HHV6U DNA replication helicase</li><li><b>residues</b> 981</li><li><b>mean confidence, out of 100</b> 52.4</li><li><b>at or above 70</b> 0.2926</li><li><b>sequence sha256</b> 72760d813d1fbf7bbe48251632008a862b46e2884300361ea73e742487718dc6</li><li><b>error</b> —</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;coordinates for 16 of the 19 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 3 chains over it. Plus the functional site positions, carried through the alignment into this genome&#x27;s numbering, which the surface stage anchors the patch arithmetic on. 3 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region&#x27;s surface goes under its chain&#x27;s row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">4</span>
       <span class="what">Every chain to a measured surface, and the patch at the residues that do the chemistry</span>
-      <span class="secs">4.17 s</span></div>
+      <span class="secs">3.95 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>candidates in</b> 19</li><li><b>predicted coordinates in</b> 6</li><li><b>predicted region coordinates in</b> 0</li><li><b>chains with functional site positions in</b> 5</li><li><b>macrocycle reach a</b> 13.82</li></ul></div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 19</li><li><b>predicted coordinates in</b> 16</li><li><b>predicted region coordinates in</b> 0</li><li><b>chains with functional site positions in</b> 5</li><li><b>macrocycle reach a</b> 13.82</li></ul></div>
       <div class="out"><h3>Out</h3><ul><li><b>rows out</b> 19</li><li><b>measured</b> 0</li><li><b>unmeasured</b> 19</li><li><b>nothing dropped</b> yes</li><li><b>predicted coordinates offered</b> 16</li><li><b>measured on predicted coordinates</b> 16</li><li><b>predicted was the only route</b> 16</li><li><b>no surface by either route</b> 3</li><li><b>no surface over the folding ceiling</b> 3</li><li><b>region surfaces offered</b> 0</li><li><b>region surfaces measured</b> 0</li><li><b>chains with a region surface</b> 0</li><li><b>chains with no surface and no region surface</b> 3</li><li><b>chains with functional sites</b> 5</li><li><b>functional site positions</b> 18</li><li><b>functional site positions mapped into this genome</b> 0</li><li><b>site patch measured on a deposition</b> 0</li><li><b>site patch measured on a prediction</b> 0</li><li><b>site patch on a deposition not at the annotated residues</b> 0</li><li><b>site patch on a prediction not at the annotated residues</b> 0</li><li><b>gate yes</b> 0</li><li><b>gate borderline</b> 0</li><li><b>gate no</b> 0</li><li><b>changes any rank</b> no</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 0 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage&#x27;s product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one</div>
   </div>
@@ -86,10 +86,10 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">6</span>
       <span class="what">Evidence on the highest-ranked targets</span>
-      <span class="secs">75.58 s</span></div>
+      <span class="secs">570.3 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>targets in</b> 3</li><li><b>ranked available</b> 19</li><li><b>wall budget seconds</b> 700</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>targets covered</b> 3</li><li><b>calls made</b> 15</li><li><b>OK</b> 9</li><li><b>not OK</b> 6</li><li><b>network calls</b> 66</li><li><b>changes any rank</b> no</li><li><b>every target has every tool</b> yes</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>targets covered</b> 3</li><li><b>calls made</b> 15</li><li><b>OK</b> 9</li><li><b>not OK</b> 6</li><li><b>network calls</b> 59</li><li><b>changes any rank</b> no</li><li><b>every target has every tool</b> yes</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;nothing. This annotates the shortlist and never reorders it</div>
   </div>
 </section>
@@ -319,7 +319,7 @@
 
 <section>
   <div class="sec-head"><h2>The structure it folded</h2><span class="tag">step 3</span></div>
-  <div class="sub">6 chains folded this run; this is the one the record reports in full</div>
+  <div class="sub">16 chains folded this run; this is the one the record reports in full</div>
   <div class="two">
     <div class="card acc">
       <div class="label">HELI_HHV6U DNA replication helicase</div>
@@ -400,70 +400,70 @@
         <span class="w">the ORF translation is the candidate</span></span>
       <span class="plot"><i class="thr" style="left:53.55%"></i><i class="b" style="left:0.00%;width:35.16%"></i></span>
       <span class="vl">788 aa
-        </span>
+        <span class="cf">confidence 38.0</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
         <span class="w">the ORF translation is the candidate</span></span>
       <span class="plot"><i class="thr" style="left:53.55%"></i><i class="b" style="left:0.00%;width:33.11%"></i></span>
       <span class="vl">742 aa
-        </span>
+        <span class="cf">confidence 35.4</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
         <span class="w">the ORF translation is the candidate</span></span>
       <span class="plot"><i class="thr" style="left:53.55%"></i><i class="b" style="left:0.00%;width:28.38%"></i></span>
       <span class="vl">636 aa
-        </span>
+        <span class="cf">confidence 30.3</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
         <span class="w">the ORF translation is the candidate</span></span>
       <span class="plot"><i class="thr" style="left:53.55%"></i><i class="b" style="left:0.00%;width:27.93%"></i></span>
       <span class="vl">626 aa
-        </span>
+        <span class="cf">confidence 43.2</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
         <span class="w">the ORF translation is the candidate</span></span>
       <span class="plot"><i class="thr" style="left:53.55%"></i><i class="b" style="left:0.00%;width:21.06%"></i></span>
       <span class="vl">472 aa
-        </span>
+        <span class="cf">confidence 31.2</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
         <span class="w">the ORF translation is the candidate</span></span>
       <span class="plot"><i class="thr" style="left:53.55%"></i><i class="b" style="left:0.00%;width:20.62%"></i></span>
       <span class="vl">462 aa
-        </span>
+        <span class="cf">confidence 43.7</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
         <span class="w">the ORF translation is the candidate</span></span>
       <span class="plot"><i class="thr" style="left:53.55%"></i><i class="b" style="left:0.00%;width:18.96%"></i></span>
       <span class="vl">425 aa
-        </span>
+        <span class="cf">confidence 35.1</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
         <span class="w">the ORF translation is the candidate</span></span>
       <span class="plot"><i class="thr" style="left:53.55%"></i><i class="b" style="left:0.00%;width:17.76%"></i></span>
       <span class="vl">398 aa
-        </span>
+        <span class="cf">confidence 39.9</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
         <span class="w">the ORF translation is the candidate</span></span>
       <span class="plot"><i class="thr" style="left:53.55%"></i><i class="b" style="left:0.00%;width:17.63%"></i></span>
       <span class="vl">395 aa
-        </span>
+        <span class="cf">confidence 54.0</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
         <span class="w">the ORF translation is the candidate</span></span>
       <span class="plot"><i class="thr" style="left:53.55%"></i><i class="b" style="left:0.00%;width:17.45%"></i></span>
       <span class="vl">391 aa
-        </span>
+        <span class="cf">confidence 27.9</span></span>
     </div><div class="lane-grp"><b>Too long to fold whole &middot; 3</b><span>longer than the 1200-residue ceiling, or never located in this genome at all. The length is a bar to folding the chain whole and not to reaching the target: open a row to see the functionally important regions its relative&rsquo;s entry annotates, and which of them are short enough. no region inventory has been recorded for this run</span></div>
     <div class="lr">
       <span class="who"><span class="t">LTP_EHV2 Large tegument protein deneddylase</span>
@@ -544,87 +544,87 @@
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.5</span></span>
+        <span class="w">the only surface this chain has &middot; fold confidence 27.9</span></span>
       <span class="plot"><i class="thr" style="left:4.08%"></i>
-        <i class="b pred" style="left:0.00%;width:80.63%"></i></span>
-      <span class="vl">11,850 Å²<span class="cf">predicted</span></span>
+        <i class="b pred" style="left:0.00%;width:70.18%"></i></span>
+      <span class="vl">10,315 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.5</span></span>
+        <span class="w">the only surface this chain has &middot; fold confidence 27.9</span></span>
       <span class="plot"><i class="thr" style="left:4.08%"></i>
-        <i class="b pred" style="left:0.00%;width:80.63%"></i></span>
-      <span class="vl">11,850 Å²<span class="cf">predicted</span></span>
+        <i class="b pred" style="left:0.00%;width:70.18%"></i></span>
+      <span class="vl">10,315 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.5</span></span>
+        <span class="w">the only surface this chain has &middot; fold confidence 27.9</span></span>
       <span class="plot"><i class="thr" style="left:4.08%"></i>
-        <i class="b pred" style="left:0.00%;width:80.63%"></i></span>
-      <span class="vl">11,850 Å²<span class="cf">predicted</span></span>
+        <i class="b pred" style="left:0.00%;width:70.18%"></i></span>
+      <span class="vl">10,315 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.5</span></span>
+        <span class="w">the only surface this chain has &middot; fold confidence 27.9</span></span>
       <span class="plot"><i class="thr" style="left:4.08%"></i>
-        <i class="b pred" style="left:0.00%;width:80.63%"></i></span>
-      <span class="vl">11,850 Å²<span class="cf">predicted</span></span>
+        <i class="b pred" style="left:0.00%;width:70.18%"></i></span>
+      <span class="vl">10,315 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.5</span></span>
+        <span class="w">the only surface this chain has &middot; fold confidence 27.9</span></span>
       <span class="plot"><i class="thr" style="left:4.08%"></i>
-        <i class="b pred" style="left:0.00%;width:80.63%"></i></span>
-      <span class="vl">11,850 Å²<span class="cf">predicted</span></span>
+        <i class="b pred" style="left:0.00%;width:70.18%"></i></span>
+      <span class="vl">10,315 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.5</span></span>
+        <span class="w">the only surface this chain has &middot; fold confidence 27.9</span></span>
       <span class="plot"><i class="thr" style="left:4.08%"></i>
-        <i class="b pred" style="left:0.00%;width:80.63%"></i></span>
-      <span class="vl">11,850 Å²<span class="cf">predicted</span></span>
+        <i class="b pred" style="left:0.00%;width:70.18%"></i></span>
+      <span class="vl">10,315 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.5</span></span>
+        <span class="w">the only surface this chain has &middot; fold confidence 27.9</span></span>
       <span class="plot"><i class="thr" style="left:4.08%"></i>
-        <i class="b pred" style="left:0.00%;width:80.63%"></i></span>
-      <span class="vl">11,850 Å²<span class="cf">predicted</span></span>
+        <i class="b pred" style="left:0.00%;width:70.18%"></i></span>
+      <span class="vl">10,315 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.5</span></span>
+        <span class="w">the only surface this chain has &middot; fold confidence 27.9</span></span>
       <span class="plot"><i class="thr" style="left:4.08%"></i>
-        <i class="b pred" style="left:0.00%;width:80.63%"></i></span>
-      <span class="vl">11,850 Å²<span class="cf">predicted</span></span>
+        <i class="b pred" style="left:0.00%;width:70.18%"></i></span>
+      <span class="vl">10,315 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.5</span></span>
+        <span class="w">the only surface this chain has &middot; fold confidence 27.9</span></span>
       <span class="plot"><i class="thr" style="left:4.08%"></i>
-        <i class="b pred" style="left:0.00%;width:80.63%"></i></span>
-      <span class="vl">11,850 Å²<span class="cf">predicted</span></span>
+        <i class="b pred" style="left:0.00%;width:70.18%"></i></span>
+      <span class="vl">10,315 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.5</span></span>
+        <span class="w">the only surface this chain has &middot; fold confidence 27.9</span></span>
       <span class="plot"><i class="thr" style="left:4.08%"></i>
-        <i class="b pred" style="left:0.00%;width:80.63%"></i></span>
-      <span class="vl">11,850 Å²<span class="cf">predicted</span></span>
+        <i class="b pred" style="left:0.00%;width:70.18%"></i></span>
+      <span class="vl">10,315 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.5</span></span>
+        <span class="w">the only surface this chain has &middot; fold confidence 27.9</span></span>
       <span class="plot"><i class="thr" style="left:4.08%"></i>
-        <i class="b pred" style="left:0.00%;width:80.63%"></i></span>
-      <span class="vl">11,850 Å²<span class="cf">predicted</span></span>
+        <i class="b pred" style="left:0.00%;width:70.18%"></i></span>
+      <span class="vl">10,315 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">unidentified probable surface antigen</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 39.5</span></span>
+        <span class="w">the only surface this chain has &middot; fold confidence 27.9</span></span>
       <span class="plot"><i class="thr" style="left:4.08%"></i>
-        <i class="b pred" style="left:0.00%;width:80.63%"></i></span>
-      <span class="vl">11,850 Å²<span class="cf">predicted</span></span>
+        <i class="b pred" style="left:0.00%;width:70.18%"></i></span>
+      <span class="vl">10,315 Å²<span class="cf">predicted</span></span>
     </div><div class="lane-grp"><b>No surface by either route &middot; 3</b><span>nothing is deposited for these and they are over the 1,200-residue ceiling, so this run folded none of them and has no surface to offer. It says so, and the chain keeps its row. What it is not is a statement that none of them can be reached: stage 3&rsquo;s lane above lists the functionally important regions their relatives annotate, and they are short enough</span></div>
     <div class="lr none">
       <span class="who"><span class="t">DPOL_RHCM6 DNA polymerase catalytic subunit</span>
@@ -654,6 +654,7 @@
 
 
 
+
 <section id="evidence">
   <div class="sec-head"><h2>Evidence on the top targets</h2>
     <span class="tag">15 calls</span></div>
@@ -665,7 +666,7 @@
     tool declaring exactly 600 is admitted.</li>
     <li><b>What keeps them off the path is the cost they actually run up</b>, about 210
     seconds for one target across the five, against a chain that finishes in
-    401 seconds.</li>
+    732 seconds.</li>
     <li><b>Nothing they return changes a rank.</b> Each accession below is the relative the chain identified that target through, not Human cytomegalovirus, which was deleted from the reference before the run. Every annotation here is a record of that relative.</li>
   </ul>
   
@@ -677,7 +678,7 @@
       <div class="pdbrow none">
         <span class="who">Search the literature<em>Europe PMC</em></span>
         <span class="ids">empty
-          · 3.21 s
+          · 30.18 s
           · 7 requests
           <br>A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.
           
@@ -695,7 +696,7 @@
       <div class="pdbrow">
         <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
-          · 2.47 s
+          · 4.86 s
           · 6 requests
           
           <br>protein name DNA replication helicase · organism Human herpesvirus 6A (strain Uganda-1102) · sequence md5 23872E61A17B15139B2364E4740A0E01 · sequence length 824 · sequence source uniprot · assignments count 6 · predicted count 5 · sequence features count 0 · residue ranges count 3 · functional sites count 1
@@ -704,7 +705,7 @@
       <div class="pdbrow">
         <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 1.29 s
+          · 1.47 s
           · 2 requests
           
           <br>sequence length 824 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 5 · providers queried count 2 · providers with models count 3 · alphafold host queried yes · alphafold host served models yes
@@ -713,10 +714,10 @@
       <div class="pdbrow">
         <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 25.45 s
-          · 7 requests
+          · 174.5 s
+          · 6 requests
           
-          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · earliest evidence year 1996 · network calls 7 · calls count 7 · sources count 3 · URLs hit count 7 · limitations count 13
+          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 1 · network calls 5 · calls count 5 · sources count 3 · URLs hit count 5 · limitations count 13
         </span>
       </div></div></div>
   </div>
@@ -728,7 +729,7 @@
       <div class="pdbrow none">
         <span class="who">Search the literature<em>Europe PMC</em></span>
         <span class="ids">empty
-          · 4.6 s
+          · 32.58 s
           · 7 requests
           <br>A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.
           
@@ -746,7 +747,7 @@
       <div class="pdbrow">
         <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
-          · 3.38 s
+          · 7.7 s
           · 8 requests
           
           <br>protein name Envelope glycoprotein B · organism Rhesus cytomegalovirus (strain 68-1) · sequence md5 7E75E53713E2102FCB50EF2D36698C7E · sequence length 854 · sequence source uniprot · assignments count 9 · predicted count 9 · sequence features count 12 · residue ranges count 5 · functional sites count 0
@@ -755,16 +756,16 @@
       <div class="pdbrow">
         <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 1.24 s
+          · 1.46 s
           · 2 requests
           
-          <br>sequence length 854 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 5 · providers queried count 2 · providers with models count 1 · alphafold host queried yes · alphafold host served models no
+          <br>sequence length 854 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 4 · providers queried count 2 · providers with models count 1 · alphafold host queried yes · alphafold host served models no
         </span>
       </div>
       <div class="pdbrow">
         <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 3.05 s
+          · 3.57 s
           · 4 requests
           
           <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
@@ -778,10 +779,10 @@
     <div class="tc-body"><div class="accs">
       <div class="pdbrow none">
         <span class="who">Search the literature<em>Europe PMC</em></span>
-        <span class="ids">empty
-          · 4.48 s
-          · 7 requests
-          <br>A zero is a recorded absence of indexed literature for this query at this date bound, not a failed lookup: the date bounds and the subject string were validated before dispatch and the response was checked for an in-body error code.
+        <span class="ids">failed
+          · 271.7 s
+          · 3 requests
+          <br>TimeoutError: The read operation timed out
           
         </span>
       </div>
@@ -797,7 +798,7 @@
       <div class="pdbrow">
         <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
-          · 2.74 s
+          · 6.73 s
           · 7 requests
           
           <br>protein name Large tegument protein deneddylase · organism Equine herpesvirus 1 (strain Ab4p) · sequence md5 E41F0066B71BD9502651B816B0F3E85C · sequence length 3,421 · sequence source uniprot · assignments count 8 · predicted count 6 · sequence features count 5 · residue ranges count 4 · functional sites count 0
@@ -806,7 +807,7 @@
       <div class="pdbrow">
         <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 1.39 s
+          · 2.5 s
           · 2 requests
           
           <br>sequence length 3,421 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 4 · providers queried count 2 · providers with models count 2 · alphafold host queried yes · alphafold host served models yes
@@ -815,10 +816,10 @@
       <div class="pdbrow">
         <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 22.29 s
-          · 7 requests
+          · 33.05 s
+          · 5 requests
           
-          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · earliest evidence year 2015 · network calls 7 · calls count 7 · sources count 3 · URLs hit count 7 · limitations count 13
+          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 1 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
         </span>
       </div></div></div>
   </div>

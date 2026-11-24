@@ -12,18 +12,24 @@
       "asked_about": [
         {
           "rank": 1,
-          "target": "P1",
-          "range": "2-879"
+          "target": "Protease 2A",
+          "range": "880-1028"
         },
         {
           "rank": 2,
-          "target": "P3",
-          "range": "1454-2206"
+          "target": "Protease 3C",
+          "range": "1563-1745"
+        },
+        {
+          "rank": 3,
+          "target": "RNA-directed RNA polymerase",
+          "range": "1746-2206"
         }
       ],
       "requested_ranges": [
-        "2-879",
-        "1454-2206"
+        "880-1028",
+        "1563-1745",
+        "1746-2206"
       ],
       "predicted_model_count": 5,
       "any_prediction_exists": true,
@@ -47,20 +53,28 @@
       "tools_used": [],
       "models_found_only_by_alphafold_host": [],
       "mean_confidence_by_metric": {
-        "QMEANDisCo": 0.6566
+        "QMEANDisCo": 0.6594
       },
       "ranges": [
         {
-          "range": "2-879",
-          "width": 878,
-          "models_overlapping": 4,
+          "range": "880-1028",
+          "width": 149,
+          "models_overlapping": 0,
+          "modelled": false,
+          "best_plddt_model": null,
+          "no_plddt_because": "no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply"
+        },
+        {
+          "range": "1563-1745",
+          "width": 183,
+          "models_overlapping": 1,
           "modelled": true,
           "best_plddt_model": null,
           "no_plddt_because": "no model overlapping this range carries a per-residue pLDDT document; every model here is template-based and scored on QMEANDisCo (0-1), to which the pLDDT threshold does not apply"
         },
         {
-          "range": "1454-2206",
-          "width": 753,
+          "range": "1746-2206",
+          "width": 461,
           "models_overlapping": 1,
           "modelled": true,
           "best_plddt_model": null,
@@ -70,8 +84,8 @@
       "excluded_experimental_count": 14,
       "per_residue_refusals": [],
       "network_calls": 2,
-      "bytes_received": 21499,
-      "content_sha256": "f8f008e91786ab008a7a207789f7a1aced3f8eb0d0582cf0b1a10dd5391d1f42"
+      "bytes_received": 21500,
+      "content_sha256": "0a10b460a1569cd1e4d40323769cd2629e81c0208d38a7fd01bf62af594ac979"
     }
   ],
   "predicted_model_count": 5,
@@ -89,14 +103,14 @@
     "The accessions are read out of the landing record's held-out case rather than written here, so this inventory covers the relatives the chain actually reached. It says nothing about SARS-CoV-2's own P0DTD1, whose curated entries that case deletes before the run."
   ],
   "provenance": {
-    "host": "Williams-MacBook-Pro-260.local",
+    "host": "YLS-PF5VB7HK.yu.yale.edu",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "96cf82d7cf34512bb1b5d65d37418f58f4311e6c",
+    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-11-13T17:54:51.272911+00:00"
+    "recorded_at_utc": "2026-11-22T03:02:16.888532+00:00"
   },
-  "content_sha256": "1c281c0c08b51ef6be2b0b09c2e7bd0a1faf711fc4fa69e01d58c70b7574a215"
+  "content_sha256": "a8e46393c48bb7aaee28d734b33166317f15d804c6aede3a33008c875387b6e0"
 }

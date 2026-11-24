@@ -25,7 +25,7 @@
   <h1>HIV-1</h1>
   <p class="standfirst">One genome accession went in. This is what each stage of the chain
   handed the next.</p>
-  <dl class="strip"><div><dt>Accession</dt><dd>NC_001802.1</dd></div><div><dt>Chains ranked</dt><dd>10</dd></div><div><dt>Surfaces measured</dt><dd>0 of 10</dd></div><div><dt>Nothing dropped</dt><dd>yes</dd></div><div><dt>Seconds</dt><dd>112</dd></div></dl>
+  <dl class="strip"><div><dt>Accession</dt><dd>NC_001802.1</dd></div><div><dt>Chains ranked</dt><dd>9</dd></div><div><dt>Surfaces measured</dt><dd>0 of 9</dd></div><div><dt>Nothing dropped</dt><dd>yes</dd></div><div><dt>Seconds</dt><dd>512</dd></div></dl>
   <p class="reclink"><a href="NC_001802_1.json">Download the raw record · JSON</a>
   <span>Every number on this page is read from it. Nothing here is retyped.</span></p>
 </header>
@@ -36,7 +36,7 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">1</span>
       <span class="what">Genome to candidate proteins</span>
-      <span class="secs">10.6 s</span></div>
+      <span class="secs">12.55 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>genome accession</b> NC_001802.1</li><li><b>reference excluded organism</b> Human immunodeficiency virus type 1</li></ul></div>
       <div class="out"><h3>Out</h3><ul><li><b>genome length in nucleotides</b> 9,181</li><li><b>segments</b> 1</li><li><b>ORFs found</b> 15</li><li><b>ORFs ranked</b> 12</li><li><b>reference entries</b> 17,148</li><li><b>reference entries removed</b> 381</li><li><b>identified</b> 8</li><li><b>unidentified</b> 4</li></ul></div>
@@ -46,31 +46,31 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">2</span>
       <span class="what">Polyproteins to mature chains, and the score for each</span>
-      <span class="secs">4.59 s</span></div>
+      <span class="secs">17.46 s</span></div>
     <div class="io">
       <div><h3>In</h3><ul><li><b>candidates in</b> 12</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>chains out</b> 10</li><li><b>chains scored before the gate</b> 15</li><li><b>every score re-adds from its parts</b> yes</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>chains out</b> 9</li><li><b>chains scored before the gate</b> 14</li><li><b>every score re-adds from its parts</b> yes</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;every chain that cleared the gate, with the accession and range its surface is measured on. 5 did not clear it and go no further: nothing below this line folds them, measures them or looks for literature on them</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">3</span>
       <span class="what">Every chain to coordinates, whole where it fits and by its functional regions where it does not</span>
-      <span class="secs">40.1 s</span></div>
+      <span class="secs">27.82 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>candidates in</b> 10</li><li><b>identified in</b> 10</li><li><b>gated out before this stage</b> 5</li><li><b>residue ceiling</b> 1,200</li><li><b>domain units per chain</b> 3</li><li><b>fold requests per run</b> 40</li><li><b>folding budget seconds</b> 240</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>foldable</b> 9</li><li><b>not foldable</b> 1</li><li><b>unidentified foldable</b> 0</li><li><b>chains folded</b> 9</li><li><b>folds attempted</b> 9</li><li><b>folds refused</b> 0</li><li><b>units offered</b> 36</li><li><b>units inside the ceiling</b> 17</li><li><b>units recorded</b> 9</li><li><b>units folded</b> 9</li><li><b>domain units offered</b> 27</li><li><b>domain units inside the ceiling</b> 8</li><li><b>domain units recorded</b> 0</li><li><b>domain units folded</b> 0</li><li><b>domain units attempted</b> 0</li><li><b>chains offered a domain route</b> 5</li><li><b>chains rescued by the domain route</b> 0</li><li><b>chains with coordinates</b> 9</li><li><b>chains with no coordinates</b> 1</li><li><b>domain units not folded by limit</b> 0</li><li><b>domain units not folded by budget</b> 0</li><li><b>chains not folded by limit</b> 0</li><li><b>chains not folded by budget</b> 0</li><li><b>seconds spent on refused folds</b> 0</li><li><b>chains over the ceiling</b> 0</li><li><b>changes any rank</b> no</li><li><b>folded target</b> Surface protein gp120</li><li><b>residues</b> 478</li><li><b>mean confidence, out of 100</b> 26.59</li><li><b>at or above 70</b> 0</li><li><b>sequence sha256</b> 416b88fd20abb5e43022c8b8f169beb94e0d18b34c0b126a86951efd03427ecd</li><li><b>error</b> —</li></ul></div>
-    </div><div class="hands"><b>hands on</b> &nbsp;coordinates for 9 of the 10 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 0 chains over it. Plus the functional site positions, carried through the alignment into this genome&#x27;s numbering, which the surface stage anchors the patch arithmetic on. 1 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region&#x27;s surface goes under its chain&#x27;s row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2</div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 9</li><li><b>identified in</b> 9</li><li><b>gated out before this stage</b> 5</li><li><b>residue ceiling</b> 1,200</li><li><b>domain units per chain</b> 3</li><li><b>fold requests per run</b> 40</li><li><b>folding budget seconds</b> 240</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>foldable</b> 8</li><li><b>not foldable</b> 1</li><li><b>unidentified foldable</b> 0</li><li><b>chains folded</b> 8</li><li><b>folds attempted</b> 8</li><li><b>folds refused</b> 0</li><li><b>units offered</b> 31</li><li><b>units inside the ceiling</b> 14</li><li><b>units recorded</b> 8</li><li><b>units folded</b> 8</li><li><b>domain units offered</b> 23</li><li><b>domain units inside the ceiling</b> 6</li><li><b>domain units recorded</b> 0</li><li><b>domain units folded</b> 0</li><li><b>domain units attempted</b> 0</li><li><b>chains offered a domain route</b> 4</li><li><b>chains rescued by the domain route</b> 0</li><li><b>chains with coordinates</b> 8</li><li><b>chains with no coordinates</b> 1</li><li><b>domain units not folded by limit</b> 0</li><li><b>domain units not folded by budget</b> 0</li><li><b>chains not folded by limit</b> 0</li><li><b>chains not folded by budget</b> 0</li><li><b>seconds spent on refused folds</b> 0</li><li><b>chains over the ceiling</b> 0</li><li><b>changes any rank</b> no</li><li><b>folded target</b> Surface protein gp120</li><li><b>residues</b> 478</li><li><b>mean confidence, out of 100</b> 26.59</li><li><b>at or above 70</b> 0</li><li><b>sequence sha256</b> 416b88fd20abb5e43022c8b8f169beb94e0d18b34c0b126a86951efd03427ecd</li><li><b>error</b> —</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;coordinates for 8 of the 9 chains it reported on -- whole where the chain fits the 1200-residue ceiling, and by up to 3 of its annotated functional regions where it does not, which rescued 0 of the 0 chains over it. Plus the functional site positions, carried through the alignment into this genome&#x27;s numbering, which the surface stage anchors the patch arithmetic on. 1 chains end with no coordinates by either route. The surface stage measures what it is given with the same arithmetic it uses on a deposition and reports the two apart; a region&#x27;s surface goes under its chain&#x27;s row and never as a row of its own. It reorders nothing: the ranking was final at the end of stage 2</div>
   </div>
 
   <div class="stage">
     <div class="stage-head"><span class="sn">4</span>
       <span class="what">Every chain to a measured surface, and the patch at the residues that do the chemistry</span>
-      <span class="secs">0.62 s</span></div>
+      <span class="secs">1.01 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>candidates in</b> 10</li><li><b>predicted coordinates in</b> 9</li><li><b>predicted region coordinates in</b> 0</li><li><b>chains with functional site positions in</b> 7</li><li><b>macrocycle reach a</b> 13.82</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>rows out</b> 10</li><li><b>measured</b> 0</li><li><b>unmeasured</b> 10</li><li><b>nothing dropped</b> yes</li><li><b>predicted coordinates offered</b> 9</li><li><b>measured on predicted coordinates</b> 9</li><li><b>predicted was the only route</b> 9</li><li><b>no surface by either route</b> 1</li><li><b>no surface over the folding ceiling</b> 0</li><li><b>region surfaces offered</b> 0</li><li><b>region surfaces measured</b> 0</li><li><b>chains with a region surface</b> 0</li><li><b>chains with no surface and no region surface</b> 1</li><li><b>chains with functional sites</b> 8</li><li><b>functional site positions</b> 34</li><li><b>functional site positions mapped into this genome</b> 30</li><li><b>site patch measured on a deposition</b> 0</li><li><b>site patch measured on a prediction</b> 6</li><li><b>site patch on a deposition not at the annotated residues</b> 0</li><li><b>site patch on a prediction not at the annotated residues</b> 3</li><li><b>gate yes</b> 0</li><li><b>gate borderline</b> 0</li><li><b>gate no</b> 0</li><li><b>changes any rank</b> no</li></ul></div>
-    </div><div class="hands"><b>hands on</b> &nbsp;a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 6 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage&#x27;s product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one</div>
+      <div><h3>In</h3><ul><li><b>candidates in</b> 9</li><li><b>predicted coordinates in</b> 8</li><li><b>predicted region coordinates in</b> 0</li><li><b>chains with functional site positions in</b> 6</li><li><b>macrocycle reach a</b> 13.82</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>rows out</b> 9</li><li><b>measured</b> 0</li><li><b>unmeasured</b> 9</li><li><b>nothing dropped</b> yes</li><li><b>predicted coordinates offered</b> 8</li><li><b>measured on predicted coordinates</b> 8</li><li><b>predicted was the only route</b> 8</li><li><b>no surface by either route</b> 1</li><li><b>no surface over the folding ceiling</b> 0</li><li><b>region surfaces offered</b> 0</li><li><b>region surfaces measured</b> 0</li><li><b>chains with a region surface</b> 0</li><li><b>chains with no surface and no region surface</b> 1</li><li><b>chains with functional sites</b> 7</li><li><b>functional site positions</b> 21</li><li><b>functional site positions mapped into this genome</b> 17</li><li><b>site patch measured on a deposition</b> 0</li><li><b>site patch measured on a prediction</b> 5</li><li><b>site patch on a deposition not at the annotated residues</b> 0</li><li><b>site patch on a prediction not at the annotated residues</b> 2</li><li><b>gate yes</b> 0</li><li><b>gate borderline</b> 0</li><li><b>gate no</b> 0</li><li><b>changes any rank</b> no</li></ul></div>
+    </div><div class="hands"><b>hands on</b> &nbsp;a patch median and range per chain, the residues the patch is made of, and the patch measured at the marked functional residues on 0 chains through a deposition and 5 through a prediction. No LATER STAGE reads any of it: `SURFACE_READ_BY` is empty and so is `LIBRARY_READS_FROM_SURFACE`, and stage 5 defines the same library whatever this stage found. The site figures are the stage&#x27;s product for a reader designing a binder rather than an input to anything downstream, which is a narrower claim than the one this key used to make and the honest one</div>
   </div>
 
   <div class="stage">
@@ -86,17 +86,17 @@
   <div class="stage">
     <div class="stage-head"><span class="sn">6</span>
       <span class="what">Evidence on the highest-ranked targets</span>
-      <span class="secs">56.37 s</span></div>
+      <span class="secs">452.7 s</span></div>
     <div class="io">
-      <div><h3>In</h3><ul><li><b>targets in</b> 3</li><li><b>ranked available</b> 10</li><li><b>wall budget seconds</b> 700</li></ul></div>
-      <div class="out"><h3>Out</h3><ul><li><b>targets covered</b> 3</li><li><b>calls made</b> 15</li><li><b>OK</b> 15</li><li><b>not OK</b> 0</li><li><b>network calls</b> 77</li><li><b>changes any rank</b> no</li><li><b>every target has every tool</b> yes</li></ul></div>
+      <div><h3>In</h3><ul><li><b>targets in</b> 3</li><li><b>ranked available</b> 9</li><li><b>wall budget seconds</b> 700</li></ul></div>
+      <div class="out"><h3>Out</h3><ul><li><b>targets covered</b> 3</li><li><b>calls made</b> 15</li><li><b>OK</b> 12</li><li><b>not OK</b> 3</li><li><b>network calls</b> 95</li><li><b>changes any rank</b> no</li><li><b>every target has every tool</b> yes</li></ul></div>
     </div><div class="hands"><b>hands on</b> &nbsp;nothing. This annotates the shortlist and never reorders it</div>
   </div>
 </section>
 
 <section>
   <div class="sec-head"><h2>The shortlist</h2>
-    <span class="tag">6 identified ORFs cut into 10 chains</span></div>
+    <span class="tag">6 identified ORFs cut into 9 chains</span></div>
   <ul class="pts">
     <li><b>A different list from the stage-1 candidates above, not a shorter one.</b> Stage 1
     ranks whole ORFs; stage 2 cuts the long proteins among them into the shorter chains a
@@ -154,16 +154,6 @@
       </tr>
       <tr id="chain-4">
         <td class="rk">4</td>
-        <td class="nm"><span class="t">Reverse transcriptase/ribonuclease H</span>
-          <span class="w">P17283</span>
-          <span class="w">residues 537–1,096 of the parent</span></td>
-        <td class="cut">POL_SIVMB Gag-Pol polyprotein</td>
-        <td class="h h3"><span class="pt">1.73</span><span class="rw">0.576</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">no</span></td><td class="h h5"><span class="pt">1.50</span><span class="rw">yes</span></td><td class="h h5"><span class="pt">2.40</span><span class="rw">class 3</span></td><td class="h h0"><span class="pt">0.00</span><span class="rw">0 in PDB</span></td>
-        <td class="sc"><span class="v">5.63</span>
-          <span class="tr"><i style="width:97.7%"></i></span></td>
-      </tr>
-      <tr id="chain-5">
-        <td class="rk">5</td>
         <td class="nm"><span class="t">p51 RT</span>
           <span class="w">P17283</span>
           <span class="w">residues 537–976 of the parent</span></td>
@@ -172,8 +162,8 @@
         <td class="sc"><span class="v">5.63</span>
           <span class="tr"><i style="width:97.7%"></i></span></td>
       </tr>
-      <tr id="chain-6">
-        <td class="rk">6</td>
+      <tr id="chain-5">
+        <td class="rk">5</td>
         <td class="nm"><span class="t">unidentified probable surface antigen</span>
           <span class="w"></span>
           <span class="w">the whole protein</span></td>
@@ -182,8 +172,8 @@
         <td class="sc"><span class="v">3.60</span>
           <span class="tr"><i style="width:62.5%"></i></span></td>
       </tr>
-      <tr id="chain-7">
-        <td class="rk">7</td>
+      <tr id="chain-6">
+        <td class="rk">6</td>
         <td class="nm"><span class="t">Capsid protein p24</span>
           <span class="w">P17283</span>
           <span class="w">residues 82–312 of the parent</span></td>
@@ -192,8 +182,8 @@
         <td class="sc"><span class="v">3.23</span>
           <span class="tr"><i style="width:56.0%"></i></span></td>
       </tr>
-      <tr id="chain-8">
-        <td class="rk">8</td>
+      <tr id="chain-7">
+        <td class="rk">7</td>
         <td class="nm"><span class="t">Nucleocapsid protein p7</span>
           <span class="w">P17283</span>
           <span class="w">residues 313–383 of the parent</span></td>
@@ -202,8 +192,8 @@
         <td class="sc"><span class="v">3.23</span>
           <span class="tr"><i style="width:56.0%"></i></span></td>
       </tr>
-      <tr id="chain-9">
-        <td class="rk">9</td>
+      <tr id="chain-8">
+        <td class="rk">8</td>
         <td class="nm"><span class="t">VPR_SIVMB Protein Vpr</span>
           <span class="w">Q1A265</span>
           <span class="w">the whole protein</span></td>
@@ -212,8 +202,8 @@
         <td class="sc"><span class="v">2.88</span>
           <span class="tr"><i style="width:50.0%"></i></span></td>
       </tr>
-      <tr id="chain-10">
-        <td class="rk">10</td>
+      <tr id="chain-9">
+        <td class="rk">9</td>
         <td class="nm"><span class="t">C-terminal core protein</span>
           <span class="w">Q1A260</span>
           <span class="w">residues 58–206 of the parent</span></td>
@@ -229,7 +219,7 @@
 
 <section>
   <div class="sec-head"><h2>The structure it folded</h2><span class="tag">step 3</span></div>
-  <div class="sub">9 chains folded this run; this is the one the record reports in full</div>
+  <div class="sub">8 chains folded this run; this is the one the record reports in full</div>
   <div class="two">
     <div class="card acc">
       <div class="label">Surface protein gp120</div>
@@ -254,7 +244,7 @@
     measure.</li>
   </ul>
   
-  <div class="lane"><div class="lane-grp"><b>Folded &middot; 9</b><span>at or under 1200 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
+  <div class="lane"><div class="lane-grp"><b>Folded &middot; 8</b><span>at or under 1200 residues, so the folding endpoint will take them. Every one is folded, not only the best-ranked, because a chain with no coordinates is a chain the next stage can only measure if somebody has already solved it</span></div>
     <div class="lane-axis" aria-hidden="true">
       <span></span>
       <span class="ax"><i class="lim" style="left:100.00%"></i>
@@ -262,13 +252,6 @@
         <b class="ll r" style="left:100.00%">1,200 aa the folding ceiling</b>
         <b class="lm">1,200 aa</b></span>
       <span></span>
-    </div>
-    <div class="lr">
-      <span class="who"><span class="t">Reverse transcriptase/ribonuclease H</span>
-        <span class="w">found in the ORF that matched &middot; 100 % of the relative&rsquo;s chain at 86 % identity</span></span>
-      <span class="plot"><i class="thr" style="left:100.00%"></i><i class="b" style="left:0.00%;width:46.67%"></i></span>
-      <span class="vl">560 aa
-        <span class="cf">confidence 88.6</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">Surface protein gp120</span>
@@ -340,19 +323,19 @@
 </section>
 <section>
   <div class="sec-head"><h2>Surfaces</h2><span class="tag">one row per ranked chain</span></div>
-  <div class="good"><p><b>10 answers for
-  10 chains.</b> A chain can be refused, but it cannot
+  <div class="good"><p><b>9 answers for
+  9 chains.</b> A chain can be refused, but it cannot
   disappear from the list.</p></div>
   
-  <div class="tiles" aria-hidden="true"><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile r"></span></div>
+  <div class="tiles" aria-hidden="true"><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile p"></span><span class="tile r"></span></div>
   <div class="legend">
     <span><span class="key m"></span> 0 measured on deposited structures</span>
-    <span><span class="key r"></span> 10 with none, each with a reason</span>
-    <span><span class="key p"></span> 9 of those measured on predicted coordinates instead</span>
+    <span><span class="key r"></span> 9 with none, each with a reason</span>
+    <span><span class="key p"></span> 8 of those measured on predicted coordinates instead</span>
   </div>
   
   <div class="lane">
-    <div class="lane-grp"><b>Measured on a shape a model predicted &middot; 9</b><span>nobody has ever solved these, so the shape being measured was predicted from the sequence by stage 3. The arithmetic is identical and the evidence is not, so this group stays in its own column, outside the count above and outside the ranking</span></div>
+    <div class="lane-grp"><b>Measured on a shape a model predicted &middot; 8</b><span>nobody has ever solved these, so the shape being measured was predicted from the sequence by stage 3. The arithmetic is identical and the evidence is not, so this group stays in its own column, outside the count above and outside the ranking</span></div>
     <div class="lane-axis" aria-hidden="true">
       <span></span>
       <span class="ax"><i class="lim" style="left:6.20%"></i>
@@ -381,13 +364,6 @@
       <span class="plot"><i class="thr" style="left:6.20%"></i>
         <i class="b pred" style="left:0.00%;width:18.51%"></i></span>
       <span class="vl">1,790 Å²<span class="cf">predicted</span></span>
-    </div>
-    <div class="lr">
-      <span class="who"><span class="t">Reverse transcriptase/ribonuclease H</span>
-        <span class="w">the only surface this chain has &middot; fold confidence 88.6</span></span>
-      <span class="plot"><i class="thr" style="left:6.20%"></i>
-        <i class="b pred" style="left:0.00%;width:7.18%"></i></span>
-      <span class="vl">694 Å²<span class="cf">predicted</span></span>
     </div>
     <div class="lr">
       <span class="who"><span class="t">p51 RT</span>
@@ -438,6 +414,40 @@
   
 </section>
 
+<section>
+  <div class="sec-head"><h2>Where on the protein a drug would go</h2>
+    <span class="tag">the best-ranked chain, in full</span></div>
+  <ul class="pts">
+    <li><b>One chain along an axis of its own residues.</b> The boxes are the parts the
+    pipeline could fold, the blue marks are residues a curator wrote down for the nearest
+    relative, and the solid marks are the water-repelling patch a ring-shaped peptide would
+    have to lie across.</li>
+  </ul>
+  
+    <figure class="ftrack">
+      <div class="ftrack-scroll" tabindex="0" role="group"
+           aria-label="Residue map of Surface protein gp120">
+        <svg viewBox="0 0 960 130" role="img"
+             aria-label="Surface protein gp120, 492 residues, with the parts folded, the residues
+             a curator marked and the measured patch drawn along the chain">
+          <defs>
+            <pattern id="fthatch" width="6" height="6" patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)">
+              <line class="fthl" x1="0" y1="0" x2="0" y2="6"/>
+            </pattern>
+          </defs>
+          <line class="ftg" x1="162.0" y1="22" x2="940.0" y2="22"/><line class="ftg" x1="162.0" y1="18" x2="162.0" y2="22"/><text class="ftn" x="162.0" y="16" text-anchor="start">1</text><line class="ftg" x1="287.2" y1="18" x2="287.2" y2="22"/><text class="ftn" x="287.2" y="16" text-anchor="middle">80</text><line class="ftg" x1="413.9" y1="18" x2="413.9" y2="22"/><text class="ftn" x="413.9" y="16" text-anchor="middle">160</text><line class="ftg" x1="540.7" y1="18" x2="540.7" y2="22"/><text class="ftn" x="540.7" y="16" text-anchor="middle">240</text><line class="ftg" x1="667.5" y1="18" x2="667.5" y2="22"/><text class="ftn" x="667.5" y="16" text-anchor="middle">320</text><line class="ftg" x1="794.2" y1="18" x2="794.2" y2="22"/><text class="ftn" x="794.2" y="16" text-anchor="middle">400</text><line class="ftg" x1="940.0" y1="18" x2="940.0" y2="22"/><text class="ftn" x="940.0" y="16" text-anchor="end">492</text><text class="ftl" x="150" y="16" text-anchor="end">residue</text><text class="ftl" x="150" y="43" text-anchor="end">the chain</text><rect class="ftb" x="162" y="32" width="778" height="15" rx="3"/><text class="ftl" x="150" y="66" text-anchor="end">folded parts</text><rect class="ftr" x="162.0" y="55" width="755.8" height="15" rx="3"/><text class="ftm" x="539.9" y="66" text-anchor="middle">1</text><text class="ftl" x="150" y="89" text-anchor="end">marked residues</text><rect class="ftk" x="916.8" y="78" width="2.4" height="15" rx="1"/><text class="ftl" x="150" y="112" text-anchor="end">patch, predicted</text><rect class="ftq" x="161.0" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="162.6" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="164.2" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="168.9" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="170.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="173.7" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="176.8" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="178.4" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="183.2" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="189.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="191.1" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="192.7" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="194.3" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="199.0" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="202.2" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="203.8" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="210.1" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="214.9" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="216.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="218.0" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="222.8" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="224.4" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="226.0" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="240.2" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="241.8" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="243.4" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="257.7" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="259.2" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="265.6" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="267.2" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="279.8" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="283.0" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="295.7" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="300.4" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="306.8" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="308.4" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="311.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="314.7" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="319.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="341.6" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="351.1" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="381.2" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="382.8" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="384.4" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="386.0" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="395.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="398.7" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="409.8" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="412.9" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="417.7" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="424.0" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="425.6" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="430.4" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="432.0" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="436.7" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="439.9" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="444.6" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="451.0" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="452.6" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="454.1" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="457.3" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="460.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="462.1" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="463.6" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="465.2" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="476.3" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="485.8" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="490.6" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="498.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="504.8" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="509.6" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="511.2" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="517.5" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="519.1" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="520.7" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="527.0" y="101" width="2.4" height="15" rx="1"/><rect class="ftq" x="528.6" y="101" width="2.4" height="15" rx="1"/>
+        </svg>
+      </div>
+      <p class="ftw">In the genome this chain sits at nucleotides 5,870&ndash;7,303, read +1 at nt 5771. Only one end of this range is confirmed against the relative, so the other is not quoted as exact.</p>
+      <ul class="ftkeys"><li><b class="ftkey ftkey-r"></b> 1 of 1 parts of this chain reached the folder. The chain is 492 residues long.</li><li><b>1</b> Surface protein gp120 <span class="ftd">residues 1&ndash;478 &middot; folded, confidence 26.59 out of 100</span></li><li><b class="ftkey ftkey-o"></b> 1 residues of 492 are marked on the nearest relative and carried here through the alignment: cleavage or other marked site. This is where the chemistry happens.</li><li><b class="ftkey ftkey-p"></b> the same measurement on coordinates a predictor emitted, which is the only route to a surface where nothing has been solved. 6,303 &Aring;&sup2; at a mean confidence of 26.59 out of 100. An area from a prediction compares with another prediction and not with a deposition.</li></ul>
+      <figcaption>Every mark is drawn from the run record at the residue it was measured or
+        annotated at. Purple is this virus and what was measured on it; blue is what a curator
+        wrote down for the nearest relative; a hatched box was offered to the folder and
+        refused, with the reason beside its number.</figcaption>
+    </figure>
+</section>
+
 
 
 <section id="evidence">
@@ -451,7 +461,7 @@
     tool declaring exactly 600 is admitted.</li>
     <li><b>What keeps them off the path is the cost they actually run up</b>, about 210
     seconds for one target across the five, against a chain that finishes in
-    112 seconds.</li>
+    512 seconds.</li>
     <li><b>Nothing they return changes a rank.</b> Each accession below is the relative the chain identified that target through, not Human immunodeficiency virus type 1, which was deleted from the reference before the run. Every annotation here is a record of that relative.</li>
   </ul>
   
@@ -463,7 +473,7 @@
       <div class="pdbrow">
         <span class="who">Search the literature<em>Europe PMC</em></span>
         <span class="ids">ok
-          · 3.66 s
+          · 69.2 s
           · 7 requests
           
           <br>subject kind term · scope title abstract · hit count 21 · returned 10 · hits with abstract 10 · preprints returned 0 · limitations count 8 · sources count 7
@@ -472,7 +482,7 @@
       <div class="pdbrow">
         <span class="who">Find relatives<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 1.48 s
+          · 2.74 s
           · 3 requests
           
           <br>resolution attempts count 1 · database ID swissprot · database name SwissProt · database version 2025 01 · database release date 2025-01-01 · declared databases not served count 0 · homologs count 50 · homolog count 50 · hits returned 50 · hits dropped by min identity 0
@@ -481,7 +491,7 @@
       <div class="pdbrow">
         <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
-          · 2.8 s
+          · 5.51 s
           · 7 requests
           
           <br>protein name Envelope glycoprotein gp160 · organism Simian immunodeficiency virus (isolate MB66) · sequence md5 BA6FC246F61C468021A466557256EAA1 · sequence length 880 · sequence source uniprot · assignments count 11 · predicted count 9 · sequence features count 7 · residue ranges count 4 · functional sites count 3
@@ -490,7 +500,7 @@
       <div class="pdbrow">
         <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 1.02 s
+          · 1.91 s
           · 2 requests
           
           <br>sequence length 880 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 2 · providers queried count 2 · providers with models count 1 · alphafold host queried yes · alphafold host served models no
@@ -499,10 +509,10 @@
       <div class="pdbrow">
         <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 2.94 s
+          · 32.29 s
           · 4 requests
           
-          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
+          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 1 · network calls 3 · calls count 3 · sources count 3 · URLs hit count 3 · limitations count 13
         </span>
       </div></div></div>
   </div>
@@ -511,28 +521,28 @@
       <span class="tn">Transmembrane protein gp41</span>
       <span class="db">Q1A261</span></div>
     <div class="tc-body"><div class="accs">
-      <div class="pdbrow">
+      <div class="pdbrow none">
         <span class="who">Search the literature<em>Europe PMC</em></span>
-        <span class="ids">ok
-          · 9.72 s
-          · 7 requests
+        <span class="ids">failed
+          · 30.27 s
+          · 1 requests
+          <br>TimeoutError: The read operation timed out
           
-          <br>subject kind term · scope title abstract · hit count 104 · returned 10 · hits with abstract 10 · preprints returned 0 · limitations count 8 · sources count 7
         </span>
       </div>
-      <div class="pdbrow">
+      <div class="pdbrow none">
         <span class="who">Find relatives<em>EBI HMMER</em></span>
-        <span class="ids">ok
-          · 1.08 s
-          · 3 requests
+        <span class="ids">failed
+          · 120.9 s
+          · 26 requests
+          <br>RuntimeError: job 8a085828-b42b-46b6-b0d6-bc20750f9b60 on swissprot was still &#x27;STARTED&#x27; after 24 poll(s) and 120.9s, over the 120.0s ceiling; the job id is retrievable at https://www.ebi.ac.uk/Tools/hmmer/api/v1/re
           
-          <br>resolution attempts count 1 · database ID swissprot · database name SwissProt · database version 2025 01 · database release date 2025-01-01 · declared databases not served count 0 · homologs count 50 · homolog count 50 · hits returned 50 · hits dropped by min identity 0
         </span>
       </div>
       <div class="pdbrow">
         <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
-          · 3.1 s
+          · 6.2 s
           · 7 requests
           
           <br>protein name Envelope glycoprotein gp160 · organism Simian immunodeficiency virus (isolate MB66) · sequence md5 BA6FC246F61C468021A466557256EAA1 · sequence length 880 · sequence source uniprot · assignments count 11 · predicted count 9 · sequence features count 7 · residue ranges count 4 · functional sites count 3
@@ -541,7 +551,7 @@
       <div class="pdbrow">
         <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 1.59 s
+          · 1.46 s
           · 2 requests
           
           <br>sequence length 880 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 2 · providers queried count 2 · providers with models count 1 · alphafold host queried yes · alphafold host served models no
@@ -550,7 +560,7 @@
       <div class="pdbrow">
         <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 2.94 s
+          · 18.13 s
           · 4 requests
           
           <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
@@ -562,20 +572,20 @@
       <span class="tn">Protease</span>
       <span class="db">P17283</span></div>
     <div class="tc-body"><div class="accs">
-      <div class="pdbrow">
+      <div class="pdbrow none">
         <span class="who">Search the literature<em>Europe PMC</em></span>
-        <span class="ids">ok
-          · 12.23 s
-          · 7 requests
+        <span class="ids">failed
+          · 70.19 s
+          · 3 requests
+          <br>TimeoutError: The read operation timed out
           
-          <br>subject kind term · scope title abstract · hit count 166,889 · returned 10 · hits with abstract 10 · preprints returned 1 · limitations count 8 · sources count 7
         </span>
       </div>
       <div class="pdbrow">
         <span class="who">Find relatives<em>EBI HMMER</em></span>
         <span class="ids">ok
-          · 1.09 s
-          · 3 requests
+          · 19.33 s
+          · 8 requests
           
           <br>resolution attempts count 1 · database ID swissprot · database name SwissProt · database version 2025 01 · database release date 2025-01-01 · declared databases not served count 0 · homologs count 50 · homolog count 50 · hits returned 50 · hits dropped by min identity 0
         </span>
@@ -583,7 +593,7 @@
       <div class="pdbrow">
         <span class="who">Look up protein families<em>InterPro</em></span>
         <span class="ids">ok
-          · 6.11 s
+          · 39.68 s
           · 15 requests
           
           <br>protein name Gag-Pol polyprotein · organism Simian immunodeficiency virus (isolate CPZ GAB1) · sequence md5 75C9DA20224262A76C55B14C391FBCF6 · sequence length 1,384 · sequence source uniprot · assignments count 48 · predicted count 45 · sequence features count 5 · residue ranges count 26 · functional sites count 8
@@ -592,7 +602,7 @@
       <div class="pdbrow">
         <span class="who">Check predicted structures<em>AlphaFold DB, 3D-Beacons</em></span>
         <span class="ids">ok
-          · 1.07 s
+          · 1.4 s
           · 2 requests
           
           <br>sequence length 1,384 · confidence threshold 70 · confidence bands count 4 · residue detail no · any prediction exists yes · predicted model count 8 · providers queried count 2 · providers with models count 1 · alphafold host queried yes · alphafold host served models no
@@ -601,10 +611,10 @@
       <div class="pdbrow">
         <span class="who">Find known binders<em>ChEMBL, IEDB, MaveDB</em></span>
         <span class="ids">ok
-          · 5.52 s
+          · 33.45 s
           · 4 requests
           
-          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 0 · network calls 4 · calls count 4 · sources count 3 · URLs hit count 4 · limitations count 13
+          <br>max molecules requested 50 · max molecules applied 50 · max molecules clamped no · lanes unavailable count 1 · network calls 3 · calls count 3 · sources count 3 · URLs hit count 3 · limitations count 13
         </span>
       </div></div></div>
   </div>
