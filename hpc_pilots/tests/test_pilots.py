@@ -8205,6 +8205,165 @@ def test_the_weight_map_is_diverging_and_the_control_is_drawn_beside_it():
     assert build_site._weight_band(0.01, 0.5) == "z0"
 
 
+def _row(scale, conservation, **over):
+    """One ranked row of the shape `withhold_remote_conservation` walks."""
+    from hpc_pilots.intake import rank_score
+
+    features = {"conservation": conservation, "surface_exposed": True,
+                "essential_class": False, "druggable_class": 1,
+                "structures_in_family": 0, "conservation_scale": scale,
+                "conservation_at_ceiling": conservation >= 1.0}
+    features.update(over)
+    return {"features": features, "score": rank_score(features),
+            "conservation": conservation}
+
+
+def test_a_remote_conservation_value_is_withheld_and_never_converted():
+    """The shipped repair: the remote tier's number is replaced, not rescaled.
+
+    The distinction is the whole reason this could ship. `intake` refused for a long time to
+    put the two conservation scales on one axis, on the stated ground that converting a bit
+    score into a k-mer fraction needs a divisor chosen by hand and there was nothing to
+    calibrate it against. Replacing the value with the typical exact-tier value of the same
+    genome needs no divisor: it is a median over features, it touches no label, and the term
+    abstains on that row rather than paying out a number measured by the wrong instrument.
+
+    So the test pins that the substituted value is the exact-tier median and bears no
+    arithmetic relationship to the bit score it displaced.
+    """
+    from hpc_pilots.intake import EXACT_SCALE, REMOTE_SCALE, withhold_remote_conservation
+
+    rows = [_row(EXACT_SCALE, 0.4), _row(EXACT_SCALE, 0.6), _row(EXACT_SCALE, 0.8),
+            _row(REMOTE_SCALE, 1.0)]
+    before = [r["score"] for r in rows[:3]]
+    info = withhold_remote_conservation(rows)
+
+    assert info["rows_withheld"] == 1
+    assert info["median_taken_from"] == "exact"
+    # The median of 0.4, 0.6, 0.8 -- not 1.0 scaled by anything.
+    assert info["imputed_to"] == 0.6
+    assert rows[3]["features"]["conservation"] == 0.6
+    assert rows[3]["conservation"] == 0.6
+    # The measurement survives, so the record still says what the instrument read.
+    withheld = rows[3]["features"]["conservation_withheld"]
+    assert withheld["measured"] == 1.0
+    assert withheld["on_scale"] == REMOTE_SCALE
+    assert withheld["replaced_with"] == 0.6
+    # A median is not a conversion: no constant maps 1.0 to 0.6 and also maps the other
+    # remote values this panel carries to their own medians.
+    assert "convert" not in withheld["because"]
+    # The saturation flag described the measurement, so it must not survive on the
+    # substituted value and be read as a saturated median.
+    assert rows[3]["features"]["conservation_at_ceiling"] is False
+    # Exact-tier rows are untouched, scores included.
+    assert [r["score"] for r in rows[:3]] == before
+    assert all("conservation_withheld" not in r["features"] for r in rows[:3])
+
+
+def test_on_a_single_tier_genome_the_order_cannot_depend_on_which_constant_is_used():
+    """The fallback for a genome with no exact-tier row, and the one property it must have.
+
+    This is the panel's Hepatitis C record: nine identified rows, every one matched on the
+    remote tier. There is no exact-tier median to take, so the repair falls back to the
+    genome's own remote median. That is a real change and not a no-op -- the term stops
+    discriminating, so rows previously separated by a saturated bit score get reordered by
+    their other four terms, which is the point.
+
+    What must NOT matter is which constant is chosen, because adding the same number to every
+    row leaves the order alone. `rubric_fit` measured this case with the panel's median and
+    `intake` ships the genome's own; if the choice could move a rank, the approved figure
+    would not describe the shipped code. So the two are run against each other here.
+    """
+    from hpc_pilots.intake import REMOTE_SCALE, rank_score, withhold_remote_conservation
+
+    def ordering(constant):
+        rows = [_row(REMOTE_SCALE, 1.0, essential_class=True),
+                _row(REMOTE_SCALE, 0.2, druggable_class=3),
+                _row(REMOTE_SCALE, 0.6)]
+        if constant is None:
+            info = withhold_remote_conservation(rows)
+        else:
+            info = None
+            for row in rows:
+                row["features"]["conservation"] = constant
+                row["score"] = rank_score(row["features"])
+        return info, [r["score"] for r in rows]
+
+    info, own_median = ordering(None)
+    assert info["rows_withheld"] == 3
+    assert info["median_taken_from"] == "remote"
+    assert info["imputed_to"] == 0.6
+
+    rank = lambda scores: sorted(range(len(scores)), key=lambda i: -scores[i])
+    # The panel's median, which is what the approved measurement substituted, and a value at
+    # neither end of the scale. Every one of them must produce the same ranking.
+    for other in (0.58, 0.0, 1.0):
+        assert rank(ordering(other)[1]) == rank(own_median), other
+
+
+def test_a_row_whose_conservation_was_never_measured_is_left_alone():
+    """A topology row records an absence of evidence, and imputing would make it evidence.
+
+    `intake` writes `conservation: 0.0` with `conservation_is_measured: False` and
+    `conservation_scale: None` for a row rescued by hydropathy, precisely so that a consumer
+    cannot read its zero as a measured k-mer fraction. Handing it the genome's median would
+    do exactly that, and would also hand a row with no identifiable relative the typical
+    score of rows that have one.
+    """
+    from hpc_pilots.intake import EXACT_SCALE, REMOTE_SCALE, withhold_remote_conservation
+
+    topology = _row(None, 0.0, conservation_is_measured=False)
+    rows = [_row(EXACT_SCALE, 0.5), _row(REMOTE_SCALE, 1.0), topology,
+            {"features": None, "score": None, "conservation": None}]
+    before = topology["score"]
+    withhold_remote_conservation(rows)
+
+    assert topology["features"]["conservation"] == 0.0
+    assert topology["score"] == before
+    assert "conservation_withheld" not in topology["features"]
+    # And an unidentified row, which carries no features at all, is not a crash.
+    assert rows[3]["score"] is None
+
+
+def test_the_shipped_repair_reproduces_the_gain_it_was_approved_on():
+    """The panel figure, recomputed through the function `intake` now ships.
+
+    The +6.9 points at rank 1 were measured by `rubric_fit.repaired_genomes`, a separate
+    implementation written to price the change before it was made. This asserts the shipped
+    one lands in the same place over the same panel, which is the only thing that makes the
+    measurement a statement about the pipeline rather than about a module nothing calls.
+
+    The two differ in one respect by design -- for a genome with no exact-tier row,
+    `rubric_fit` substitutes the panel's median and `intake` the genome's own -- and the
+    previous test says why that cannot move a rank. This asserts it does not move the figure.
+    """
+    import copy
+
+    from hpc_pilots import rubric_fit
+    from hpc_pilots.intake import withhold_remote_conservation
+
+    genomes, _ = _fit_genomes()
+    record = rubric_fit.conservation_repair(genomes)
+
+    repaired = copy.deepcopy(genomes)
+    withheld = 0
+    for genome in repaired:
+        withheld += withhold_remote_conservation(genome["rows"])["rows_withheld"]
+        index = rubric_fit.FEATURES.index("conservation")
+        genome["x"] = [[row["features"]["conservation"] if i == index else value
+                        for i, value in enumerate(values)]
+                       if row.get("features") else list(values)
+                       for values, row in zip(genome["x"], genome["rows"])]
+    scored = rubric_fit.aggregate(
+        [rubric_fit.score_genome(g, rubric_fit.STATED) for g in repaired])
+
+    assert withheld == record["rows_imputed"]
+    assert scored["recall_at_k"] == record["recall_after"]
+    assert scored["recall_at_k"]["top1"] > record["recall_before"]["top1"]
+    # The approval rested on this shape, not on the point estimate: nothing got worse.
+    assert record["paired"]["genomes_worse"] == 0
+
+
 def test_the_conservation_scale_split_separates_the_genomes_it_claims_to():
     """The measurement of `intake`'s own documented defect, checked for what it compares.
 

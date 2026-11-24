@@ -971,6 +971,13 @@ def enrich_with_surface(ranked, top=12):
 # block of the record, which is two statements of one rubric: an edit to the weight that
 # actually ranks could leave the published rubric asserting the old one, and the published
 # rubric is what the site renders and what a reader checks the arithmetic against.
+# The two quantities `conservation` arrives as, named once so no caller has to retype either
+# and so the repair below and the measurement in `rubric_fit` cannot drift apart on a string.
+# The exact tier returns shared 5-mers over the query's k-mer count; the remote tier returns
+# min(1, bits/200), which saturates at 200 bits.
+EXACT_SCALE = "shared_kmer_fraction_of_query"
+REMOTE_SCALE = "bits_over_200"
+
 RUBRIC = {"conservation": 3.0, "surface_exposed": 2.0, "essential_class": 1.5,
           "druggable_class": 0.8, "structures_in_family_capped": 0.5}
 
@@ -1039,6 +1046,81 @@ def rank_score(features):
     # cutoff tried. That signal is real and is too weak to improve a ranking that already
     # works. Reported as a feature so a reader can see it; not mixed into the score.
     return round(base + RUBRIC["druggable_class"] * features["druggable_class"], 4)
+
+
+def withhold_remote_conservation(ranked):
+    """Decline to read a remote-tier conservation value as though it were an exact-tier one.
+
+    **The repair for the defect the limitations used only to describe.** The two
+    identification tiers do not report the same quantity -- the exact tier a shared 5-mer
+    fraction of the query, the remote tier `min(1, bits/200)`, which saturates at 200 bits --
+    and the rubric's heaviest term, weight 3.0, reads both as if they were one scale. A
+    protein identified only through a distant relative is therefore rewarded for having been
+    hard to identify. On HCoV-229E the membrane protein reads a saturated 1.0 and so sits
+    above the main protease by 1.36 points and the polymerase by 1.44, both of which carry
+    approved antivirals, with every other term level across those rows.
+
+    **Nothing is converted, which is what makes this shippable.** Turning a bit score into a
+    k-mer fraction needs a divisor chosen by hand, and this module has refused that for want
+    of anything to calibrate against. This converts nothing. It declines to read the number:
+    a remote-tier row is given the typical value of the scale the weight was calibrated for,
+    the median of this genome's own exact-tier rows, so the term abstains on that row rather
+    than paying out. The substituted value is a median over features and never touches a
+    label, so it leaks nothing.
+
+    Where a genome has no exact-tier row there is no exact median to take, so its remote rows
+    get the median of the genome's own remote values. That is one constant across every row,
+    so the term abstains there too: it stops ordering that genome's list, which is the same
+    thing the repair does on a mixed genome and not a no-op. What it cannot do is depend on
+    *which* constant is chosen, because adding the same number to every row leaves the order
+    alone. Hepatitis C is the panel's only such genome -- 9 remote rows, no exact ones -- and
+    it ranks identically whether it is handed its own median or the panel's, which is why no
+    panel-wide number is needed here.
+
+    Rows the term was never measured on are left alone. A topology row carries
+    `conservation: 0.0` with `conservation_is_measured: False`, and imputing over that would
+    convert a recorded absence of evidence into a measurement.
+
+    Measured over the 47-genome panel with the five shipped weights unchanged: recall@1 rises
+    54.5% to 61.4% and recall@3 86.4% to 90.9% over 50 changed rows, five genomes better and
+    none worse, two-sided sign test p = 0.0625 -- the floor for five moves. `rubric_fit`
+    carries that measurement and the pair-by-pair count behind it.
+    """
+    import statistics
+
+    measured = [row for row in ranked if row.get("features")]
+    exact = [row["features"]["conservation"] for row in measured
+             if row["features"].get("conservation_scale") == EXACT_SCALE]
+    remote = [row for row in measured
+              if row["features"].get("conservation_scale") == REMOTE_SCALE]
+    if not remote:
+        return {"rows_withheld": 0, "imputed_to": None, "median_taken_from": None,
+                "why": "no row on this genome was matched on the remote tier, so the term "
+                       "was measured by one instrument throughout and nothing is withheld"}
+    taken_from = "exact" if exact else "remote"
+    typical = round(statistics.median(
+        exact or [row["features"]["conservation"] for row in remote]), 4)
+    for row in remote:
+        features = row["features"]
+        features["conservation_withheld"] = {
+            "measured": features["conservation"],
+            "on_scale": REMOTE_SCALE,
+            "replaced_with": typical,
+            "because": "the rubric's conservation weight is calibrated for "
+                       f"{EXACT_SCALE} and this row was measured on {REMOTE_SCALE}, so the "
+                       "term abstains rather than reading one instrument as the other"}
+        features["conservation"] = typical
+        # The measured value is what was at the ceiling; the substituted one is not, and a
+        # row reporting a median alongside `conservation_at_ceiling: True` would be read as
+        # a saturated measurement. The original survives under `conservation_withheld`.
+        features["conservation_at_ceiling"] = False
+        row["conservation"] = typical
+        row["score"] = rank_score(features)
+    return {"rows_withheld": len(remote), "imputed_to": typical,
+            "median_taken_from": taken_from,
+            "why": "a remote-tier value is not the quantity the conservation weight was "
+                   "calibrated for, so it is replaced by the typical value of the scale that "
+                   "is, and no bit score is converted into a k-mer fraction"}
 
 
 def topology_overlap(rows):
@@ -1583,6 +1665,9 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
                        "nearest_organism": candidate["hits"][0]["organism"],
                        "features": features, "score": rank_score(features),
                        "conservation": features["conservation"]})
+    # Before the sort, because it changes scores and therefore the order. See the function
+    # for why this is a withholding rather than a conversion, and for what it is worth.
+    withheld = withhold_remote_conservation(ranked)
     ranked.sort(key=lambda r: (r["score"] is not None, r["score"] or 0), reverse=True)
 
     payload = {
@@ -1617,6 +1702,9 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
         # the same function for exactly that reason.
         "topology_rows_above_identified": topology_overlap(ranked),
         "unidentified": sum(1 for r in ranked if not r["identified"]),
+        # What the conservation term refused to read on this genome, and what it used
+        # instead. Zero on a genome matched on one tier throughout.
+        "conservation_withheld": withheld,
         "rubric": dict(RUBRIC),
         "targets": ranked,
         "sources": [{"name": "NCBI efetch", "url": EFETCH, "licence": "NCBI public domain"},
@@ -1631,12 +1719,24 @@ def run_intake(accession, exclude_organism=None, minimum_aa=MINIMUM_AA, top=12,
             "kept because a surface antigen with no identifiable relative is still the protein "
             "antibodies would be raised against, and ordering it below every named row was "
             "measured and rejected for burying exactly the novel candidates it exists to find.",
-            "`conservation` is not comparable between tiers. The exact tier reports shared "
-            "5-mers over the query's k-mer count; the remote tier reports a bit score divided "
-            "by 200 and capped at 1.0, so it saturates at 200 bits and a hit ten times past "
-            "that reads the same as one exactly at it. Each row carries `conservation_scale` "
-            "saying which it is, and `conservation_at_ceiling` saying whether the rubric's "
-            "heaviest term is at its ceiling and therefore no longer ordering the list.",
+            "`conservation` is not comparable between tiers, and since 24 Nov 2026 the score "
+            "no longer pretends otherwise. The exact tier reports shared 5-mers over the "
+            "query's k-mer count; the remote tier reports a bit score divided by 200 and "
+            "capped at 1.0, so it saturates at 200 bits and a hit ten times past that reads "
+            "the same as one exactly at it. A remote-tier row's measurement is therefore "
+            "withheld from the score and replaced by the typical exact-tier value of its own "
+            "genome, so the term abstains instead of rewarding a protein for having been hard "
+            "to identify; `conservation_withheld` on the run says how many rows that was and "
+            "what they were given, and each such row keeps the value it actually measured. "
+            "Nothing is converted between the scales, because that would need a divisor "
+            "chosen by hand. Each row still carries `conservation_scale` saying which "
+            "instrument measured it, and `conservation_at_ceiling` saying whether the "
+            "measurement was saturated.",
+            "The withholding is a stopgap for a better measurement that does not exist yet. "
+            "The quantity that would need no abstention is one both tiers can report -- "
+            "alignment identity, which `identify_remote` already computes and discards -- and "
+            "until that is carried through, a remote-tier row contributes nothing to the "
+            "ordering under the heaviest term rather than contributing something wrong.",
             "The ranking is a stated rubric, not a fitted model. No labelled set of correct "
             "target rankings exists to fit against.",
             "`structures_in_family` is a count of deposited structures and is therefore a "

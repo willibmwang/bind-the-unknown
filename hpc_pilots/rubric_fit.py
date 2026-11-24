@@ -55,7 +55,7 @@ import sys
 from pathlib import Path
 
 from .common import ROOT, content_digest, provenance, write_json
-from .intake import DRUGGABLE, RUBRIC, TERM_CEILING
+from .intake import DRUGGABLE, EXACT_SCALE, REMOTE_SCALE, RUBRIC, TERM_CEILING
 
 # `benchmarks` is a sibling package of `hpc_pilots`, not a submodule, so the repository root has
 # to be importable. Added rather than assumed, because `python -m hpc_pilots` from elsewhere puts
@@ -73,10 +73,9 @@ FEATURES = ("conservation", "surface_exposed", "essential_class",
 # the two booleans are 0 or 1, so three of the five divide by one. The other two are the reason
 # this exists: `druggable_class` is an integer class over `DRUGGABLE`'s highest value, and
 # `structures_in_family` is a count the rubric caps at 50 before weighting it.
-# The two scales `intake` records for the conservation term, named here so a record that
-# starts carrying a third does not match either and is left alone rather than imputed.
-EXACT_SCALE = "shared_kmer_fraction_of_query"
-REMOTE_SCALE = "bits_over_200"
+# The two scales `intake` records for the conservation term. Imported rather than retyped so
+# this module and the repair that now ships in `intake` cannot drift apart on a string: a
+# record carrying some third scale matches neither and is left alone rather than imputed.
 
 STRUCTURE_CAP = 50.0
 CLASS_CAP = float(max(DRUGGABLE.values()))
@@ -604,8 +603,10 @@ def run_rubric_fit(tier="strong", epochs=8000, rate=0.08, penalty=1e-3, seed=202
         "epochs": epochs, "rate": rate, "penalty": penalty, "seed": seed,
         "cross_validation": crossed,
         "comparison": comparison,
-        "conservation_scale_split": scale_split(genomes, crossed),
-        "cross_scale_inversions": cross_scale_inversions(genomes),
+        # Both read what the instruments reported, so both run on the panel with any
+        # shipped withholding undone. See `as_measured_genomes`.
+        "conservation_scale_split": scale_split(as_measured_genomes(genomes), crossed),
+        "cross_scale_inversions": cross_scale_inversions(as_measured_genomes(genomes)),
         "conservation_repair": conservation_repair(genomes),
         "recall_gain_over_stated": comparison["fitted_minus_stated"],
         "conservation_scales": scales,
@@ -765,6 +766,44 @@ def scale_split(genomes, crossed):
     return out
 
 
+def as_measured_genomes(genomes):
+    """The panel with every withheld conservation value put back as the instrument read it.
+
+    **This exists because the repair shipped.** `intake.withhold_remote_conservation` now
+    applies the substitution before it sorts, so a record written after 24 Nov 2026 carries
+    the substituted value in `conservation` and the measurement it displaced under
+    `conservation_withheld`. Without restoring it, `conservation_repair` would compare the
+    repaired panel against itself and report a gain of zero -- a measurement that erases
+    itself the moment its subject is adopted, and reads as a refutation rather than as an
+    adoption.
+
+    The three measurements of the defect -- the scale split, the inversion count and the
+    repair's own before arm -- are all statements about what the instruments read, so they
+    all run on this. The weight fitting does not: that asks what a weighting buys on the
+    features the pipeline actually computes today, which are the repaired ones.
+
+    A record written before the repair has no `conservation_withheld` and its `conservation`
+    is already the value as measured, so it passes through untouched. Both kinds can sit in
+    `runs/benchmark/` together while a panel is part-way through a re-run, which is the
+    state this has to survive.
+    """
+    index = FEATURES.index("conservation")
+    out = []
+    for genome in genomes:
+        rows = [list(values) for values in genome["x"]]
+        restored = 0
+        for i, row in enumerate(genome["rows"]):
+            withheld = (row.get("features") or {}).get("conservation_withheld")
+            if isinstance(withheld, dict) and withheld.get("measured") is not None:
+                rows[i][index] = float(withheld["measured"])
+                restored += 1
+        copy = dict(genome)
+        copy["x"] = rows
+        copy["rows_restored_to_as_measured"] = restored
+        out.append(copy)
+    return out
+
+
 def repaired_genomes(genomes):
     """The same genomes with the remote tier's conservation value withheld, not converted.
 
@@ -822,8 +861,9 @@ def conservation_repair(genomes):
     nothing is fitted, so there is no training set to hold anything out of, and the `stated`
     arm's cross-validated figures are the same per-genome scores collected fold by fold.
     """
-    before = [score_genome(genome, STATED) for genome in genomes]
-    after = [score_genome(genome, STATED) for genome in repaired_genomes(genomes)]
+    measured = as_measured_genomes(genomes)
+    before = [score_genome(genome, STATED) for genome in measured]
+    after = [score_genome(genome, STATED) for genome in repaired_genomes(measured)]
     totals_before, totals_after = aggregate(before), aggregate(after)
     depths = sorted(totals_before["recall_at_k"], key=lambda key: int(key[3:]))
     return {
@@ -835,7 +875,7 @@ def conservation_repair(genomes):
                  for k in depths},
         "chance": totals_before["chance_at_k"],
         "paired": paired(after, before),
-        "rows_imputed": sum(g["rows_imputed"] for g in repaired_genomes(genomes)),
+        "rows_imputed": sum(g["rows_imputed"] for g in repaired_genomes(measured)),
         "weights_unchanged": True,
         "needs_no_calibration":
             "No bit score is converted into a k-mer fraction. A remote-tier row is given the "

@@ -394,16 +394,33 @@ terms not favouring the winner. On HCoV-229E the membrane protein reads a satura
 sits above the main protease and the polymerase — both carry approved antivirals — by 1.36 and
 1.44 points.
 
-**A repair is available that needs no conversion factor, and it is measured.** Rather than
+**That repair now ships, and it needed no conversion factor.** Rather than
 converting a bit score into a k-mer fraction, which would need a divisor chosen by hand,
 withhold the value where it was taken the other way: a remote-tier row gets the typical
 exact-tier value of its own genome, so the term abstains instead of rewarding a protein for
 having been hard to identify. With **the five shipped weights unchanged**, that moves recall@1
 from 54.5% to 61.4% and recall@3 from 86.4% to 90.9% over 50 changed rows, with **five genomes
-better and none worse** (sign test p = 0.0625, the floor for five moves). It is a reason to
-make the change in `intake` and measure it there — where the better quantity `intake` names,
-alignment identity on both tiers, is available from an alignment `identify_remote` already
-holds — not a result on its own.
+better and none worse** (sign test p = 0.0625, the floor for five moves).
+
+`intake.withhold_remote_conservation` is that change, applied before the ranking is sorted and
+recorded per run under `conservation_withheld`. Scored through the shipped function over the
+same panel it reproduces the figure it was approved on exactly: 54.5% to 61.4% at rank 1, 50
+rows withheld. Two things it deliberately does not do. It does not touch a row whose
+conservation was never measured — a topology row's `0.0` is an absence of evidence and
+imputing over it would make that absence into a measurement. And on a genome matched on the
+remote tier throughout, where there is no exact-tier median to take, it substitutes the
+genome's own remote median: the term abstains there too, and because the substitute is one
+constant across every row the choice of constant cannot move a rank. Hepatitis C is the only
+such genome in the panel.
+
+It remains a stopgap. The quantity that would need no abstention is one both tiers can report
+— alignment identity, which `identify_remote` already computes and discards — and until that
+is carried through, a remote-tier row contributes nothing to the ordering under the heaviest
+term rather than contributing something wrong.
+
+**The 18 genomes whose ranking this can move have not been re-run yet.** 29 of the 47 carry no
+remote-tier row, so their records and pages are unaffected; the other 18 are listed in the
+commit that shipped this and their published rankings still predate it.
 
 `runs/weights/binding.json` is the other weight vector, and that one does learn. A `ridge`
 surrogate joins the registry so there are coefficients to inspect at all, with the forest still

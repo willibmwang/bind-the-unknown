@@ -2543,6 +2543,12 @@ def _case(accession, exclude_organism, top, replicates, fold, label, evidence_to
                    "reference_entries_removed": intake["reference_entries_removed"],
                    "identified": sum(1 for r in intake["targets"] if r.get("identified")),
                    "unidentified": intake["unidentified"],
+                   # What the conservation term refused to read on this genome. Carried up
+                   # from `intake` rather than recounted here: the rows each keep the value
+                   # their instrument read under `conservation_withheld`, and this is the
+                   # one place a reader can see how much of the ranking it touched without
+                   # walking them. Zero on a genome matched on one tier throughout.
+                   "conservation_withheld": intake.get("conservation_withheld"),
                    # `identified` counts what the stage recognised and is unchanged by the
                    # gate, which runs after it. The table beside it is the kept rows, so the
                    # two numbers differ by this one and a reader is told why rather than left
