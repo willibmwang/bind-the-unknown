@@ -1,0 +1,320 @@
+{
+  "experiment": "monomer-transfer",
+  "landscape": "cycpept_len6_pampa",
+  "control": "permuted",
+  "status": "complete",
+  "seed": 20261021,
+  "budget": 128,
+  "top_fraction": 0.05,
+  "held_out_monomers": [
+    "(N->O)Tyr",
+    "(N->O)Val",
+    "Bal",
+    "Glu_NH2",
+    "I",
+    "Leu(O->S)",
+    "Lys(O->S)",
+    "Me_Ala(indol-2-yl)",
+    "Me_Cha",
+    "Me_dF",
+    "Me_dY",
+    "Mono14",
+    "Mono29",
+    "Mono31",
+    "Sar",
+    "Sta(3R,4R)",
+    "bHph",
+    "cHexCH2_Gly",
+    "dAbu",
+    "dAsn(Me2)",
+    "dAsp(pyrrol-1-yl)",
+    "dPro(O->S)",
+    "dW",
+    "meL"
+  ],
+  "held_out_count": 24,
+  "holdout_positions": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "train_members": 733,
+  "test_members": 1313,
+  "library_members": 2046,
+  "descriptors": [
+    "mw",
+    "logp",
+    "tpsa",
+    "hbd",
+    "hba",
+    "rotb",
+    "rings",
+    "aromatic",
+    "heavy",
+    "fcsp3"
+  ],
+  "results": [
+    {
+      "encoder": "vocabulary",
+      "model": "forest",
+      "columns": 249,
+      "representation": "one-hot token index",
+      "constant_columns": 0,
+      "held_out_spearman": -0.0719,
+      "seen_spearman": 0.7412,
+      "selection": {
+        "labels": 128,
+        "best_score": -4.0,
+        "top_fraction": 0.05,
+        "top_hits": 7,
+        "top_recall": 0.10144927536231885,
+        "hits_in_pool": 69,
+        "pool_candidates": 1313,
+        "threshold": -4.85,
+        "ties_at_threshold": 8,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 96,
+        "tied_predictions": 96,
+        "tied_rate": 1.0,
+        "compared": 0,
+        "concordance": null,
+        "smallest_separation": null,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer, reported so a tie can be read as a tie rather than as a margin the dtype could not hold. A gap near the dtype's resolution is round-off, not a margin: an earlier revision read gaps of about 1e-15 on the one-hot arms as a real linear separation and scored a concordance on them."
+      }
+    },
+    {
+      "encoder": "vocabulary",
+      "model": "ridge",
+      "columns": 249,
+      "representation": "one-hot token index",
+      "constant_columns": 0,
+      "held_out_spearman": -0.0478,
+      "seen_spearman": 0.1648,
+      "selection": {
+        "labels": 128,
+        "best_score": -4.0,
+        "top_fraction": 0.05,
+        "top_hits": 4,
+        "top_recall": 0.057971014492753624,
+        "hits_in_pool": 69,
+        "pool_candidates": 1313,
+        "threshold": -4.85,
+        "ties_at_threshold": 8,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 96,
+        "tied_predictions": 96,
+        "tied_rate": 1.0,
+        "compared": 0,
+        "concordance": null,
+        "smallest_separation": null,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer, reported so a tie can be read as a tie rather than as a margin the dtype could not hold. A gap near the dtype's resolution is round-off, not a margin: an earlier revision read gaps of about 1e-15 on the one-hot arms as a real linear separation and scored a concordance on them."
+      }
+    },
+    {
+      "encoder": "descriptor",
+      "model": "forest",
+      "columns": 66,
+      "representation": "10 RDKit descriptors plus an absence indicator per position",
+      "constant_columns": 6,
+      "held_out_spearman": -0.0278,
+      "seen_spearman": 0.4358,
+      "selection": {
+        "labels": 128,
+        "best_score": -4.0,
+        "top_fraction": 0.05,
+        "top_hits": 9,
+        "top_recall": 0.13043478260869565,
+        "hits_in_pool": 69,
+        "pool_candidates": 1313,
+        "threshold": -4.85,
+        "ties_at_threshold": 8,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 96,
+        "tied_predictions": 1,
+        "tied_rate": 0.0104,
+        "compared": 95,
+        "concordance": 0.5579,
+        "smallest_separation": 0.008534620761182055,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer, reported so a tie can be read as a tie rather than as a margin the dtype could not hold. A gap near the dtype's resolution is round-off, not a margin: an earlier revision read gaps of about 1e-15 on the one-hot arms as a real linear separation and scored a concordance on them."
+      }
+    },
+    {
+      "encoder": "descriptor",
+      "model": "ridge",
+      "columns": 66,
+      "representation": "10 RDKit descriptors plus an absence indicator per position",
+      "constant_columns": 6,
+      "held_out_spearman": -0.0045,
+      "seen_spearman": 0.1162,
+      "selection": {
+        "labels": 128,
+        "best_score": -4.0,
+        "top_fraction": 0.05,
+        "top_hits": 8,
+        "top_recall": 0.11594202898550725,
+        "hits_in_pool": 69,
+        "pool_candidates": 1313,
+        "threshold": -4.85,
+        "ties_at_threshold": 8,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 96,
+        "tied_predictions": 0,
+        "tied_rate": 0.0,
+        "compared": 96,
+        "concordance": 0.5833,
+        "smallest_separation": 0.00011102476837177022,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer, reported so a tie can be read as a tie rather than as a margin the dtype could not hold. A gap near the dtype's resolution is round-off, not a margin: an earlier revision read gaps of about 1e-15 on the one-hot arms as a real linear separation and scored a concordance on them."
+      }
+    },
+    {
+      "encoder": "both",
+      "model": "forest",
+      "columns": 315,
+      "representation": "one-hot token index concatenated with 10 RDKit descriptors plus an absence indicator per position",
+      "constant_columns": 6,
+      "held_out_spearman": -0.0583,
+      "seen_spearman": 0.7636,
+      "selection": {
+        "labels": 128,
+        "best_score": -4.0,
+        "top_fraction": 0.05,
+        "top_hits": 7,
+        "top_recall": 0.10144927536231885,
+        "hits_in_pool": 69,
+        "pool_candidates": 1313,
+        "threshold": -4.85,
+        "ties_at_threshold": 8,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 96,
+        "tied_predictions": 1,
+        "tied_rate": 0.0104,
+        "compared": 95,
+        "concordance": 0.4632,
+        "smallest_separation": 0.0012096354166661882,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer, reported so a tie can be read as a tie rather than as a margin the dtype could not hold. A gap near the dtype's resolution is round-off, not a margin: an earlier revision read gaps of about 1e-15 on the one-hot arms as a real linear separation and scored a concordance on them."
+      }
+    },
+    {
+      "encoder": "both",
+      "model": "ridge",
+      "columns": 315,
+      "representation": "one-hot token index concatenated with 10 RDKit descriptors plus an absence indicator per position",
+      "constant_columns": 6,
+      "held_out_spearman": -0.0078,
+      "seen_spearman": 0.1199,
+      "selection": {
+        "labels": 128,
+        "best_score": -4.0,
+        "top_fraction": 0.05,
+        "top_hits": 8,
+        "top_recall": 0.11594202898550725,
+        "hits_in_pool": 69,
+        "pool_candidates": 1313,
+        "threshold": -4.85,
+        "ties_at_threshold": 8,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 96,
+        "tied_predictions": 0,
+        "tied_rate": 0.0,
+        "compared": 96,
+        "concordance": 0.5833,
+        "smallest_separation": 8.139489701886049e-05,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer, reported so a tie can be read as a tie rather than as a margin the dtype could not hold. A gap near the dtype's resolution is round-off, not a margin: an earlier revision read gaps of about 1e-15 on the one-hot arms as a real linear separation and scored a concordance on them."
+      }
+    },
+    {
+      "encoder": "descriptor_shuffled",
+      "model": "forest",
+      "columns": 66,
+      "representation": "10 RDKit descriptors plus an absence indicator per position",
+      "constant_columns": 6,
+      "held_out_spearman": -0.0082,
+      "seen_spearman": 0.7635,
+      "selection": {
+        "labels": 128,
+        "best_score": -4.0,
+        "top_fraction": 0.05,
+        "top_hits": 4,
+        "top_recall": 0.057971014492753624,
+        "hits_in_pool": 69,
+        "pool_candidates": 1313,
+        "threshold": -4.85,
+        "ties_at_threshold": 8,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 96,
+        "tied_predictions": 0,
+        "tied_rate": 0.0,
+        "compared": 96,
+        "concordance": 0.5312,
+        "smallest_separation": 0.005001488095238926,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer, reported so a tie can be read as a tie rather than as a margin the dtype could not hold. A gap near the dtype's resolution is round-off, not a margin: an earlier revision read gaps of about 1e-15 on the one-hot arms as a real linear separation and scored a concordance on them."
+      }
+    },
+    {
+      "encoder": "descriptor_shuffled",
+      "model": "ridge",
+      "columns": 66,
+      "representation": "10 RDKit descriptors plus an absence indicator per position",
+      "constant_columns": 6,
+      "held_out_spearman": -0.0349,
+      "seen_spearman": 0.1132,
+      "selection": {
+        "labels": 128,
+        "best_score": -4.0,
+        "top_fraction": 0.05,
+        "top_hits": 7,
+        "top_recall": 0.10144927536231885,
+        "hits_in_pool": 69,
+        "pool_candidates": 1313,
+        "threshold": -4.85,
+        "ties_at_threshold": 8,
+        "hit_rule": "numpy.quantile(1 - top_fraction), linear interpolation, compared >="
+      },
+      "paired": {
+        "pairs": 96,
+        "tied_predictions": 0,
+        "tied_rate": 0.0,
+        "compared": 96,
+        "concordance": 0.4167,
+        "smallest_separation": 0.0004974623444571336,
+        "separation_note": "The smallest non-zero prediction gap between two members differing only in an unseen monomer, reported so a tie can be read as a tie rather than as a margin the dtype could not hold. A gap near the dtype's resolution is round-off, not a margin: an earlier revision read gaps of about 1e-15 on the one-hot arms as a real linear separation and scored a concordance on them."
+      }
+    }
+  ],
+  "dataset_content_sha256": "f7d51181be669e978319b575d8fd8ac48a2590914b33c340cc29326c9be61ad1",
+  "display_config_sha256": "7c7254f5607bb1a3530e4a7b1202e4545fbdf34ddffee2195b367ec9956647c3",
+  "provenance": {
+    "host": "Williams-MacBook-Pro-260.local",
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.12.4",
+    "git_commit": "a68b71fe71341576d58a0585f45af8e65bc8339c",
+    "git_dirty": true,
+    "slurm_job_id": null,
+    "slurm_array_task_id": null,
+    "recorded_at_utc": "2026-11-24T20:00:36.041637+00:00"
+  },
+  "endpoint_warning": "Enrichment is not affinity, functional inhibition or antiviral activity. Do not pool metrics across landscapes with different endpoints or geometries.",
+  "interpretation": "A monomer-wise split measures whether a surrogate can rank a library member built from a building block it has never seen measured. The tied-prediction rate is structural for a one-hot encoding, not an empirical finding. No binding, affinity, inhibition or antiviral property is predicted for any member.",
+  "limitations": [
+    "Descriptors are per-monomer. They describe the building blocks and capture nothing about the assembled macrocycle, its conformation or the ring.",
+    "The held-out monomers are drawn from one library against one target, so the comparison is within this landscape and is not a benchmark-breadth claim.",
+    "Members are not independent replicates; they are draws from one combinatorial library measured in one campaign."
+  ]
+}

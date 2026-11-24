@@ -90,6 +90,34 @@
       ],
       "source": "Zhai et al., PepExplainer: an explainable deep learning model for selection-based macrocyclic peptide bioactivity prediction and optimization, Eur J Med Chem 2024;275:116628, doi:10.1016/j.ejmech.2024.116524. Data file taken from the authors' code repository, github.com/zhaisilong/PepExplainer (MIT licence), retrieved 20 October 2026.",
       "monomer_table": "data/raw/pepexplainer/thrombin_monomer_descriptors.csv"
+    },
+    "cycpept_len6_pampa": {
+      "path": "data/raw/cycpeptmpdb/cycpept_len6_pampa.csv",
+      "sequence_column": "peptide",
+      "outcome_column": "target",
+      "monomer_separator": ".",
+      "target": "passive membrane permeability, PAMPA",
+      "modality": "cyclic hexapeptides assembled from named non-canonical monomers, pooled from 22 source publications",
+      "cyclisation": "Head-to-tail macrocycles. Only CycPeptMPDB's Circle topology is staged; its Lariat entries are excluded because a lariat carries a tail whose positions are not the ring positions, and a fixed-position encoding would align the two as if they were the same place in the molecule.",
+      "noncanonical": "Yes, and with structures. 118 distinct monomers appear across the six positions, 34 to 59 at each, and every one has an RDKit descriptor row in the release's own monomer table. The alphabet is four times the thrombin library's and is contributed by 22 laboratories rather than one.",
+      "endpoint": "log Papp as released, from a PAMPA assay",
+      "direction": "higher is better; a less negative log Papp is the more permeable peptide",
+      "censoring": "Values at an assay's detection limit are carried as released. The release records limits in separate Detection_Limit columns which this staging does not read, so a censored value is indistinguishable here from a measured one.",
+      "pool_size": 256,
+      "top_fraction": 0.05,
+      "why": "The second non-canonical landscape in the project, and the one that makes the monomer-transfer question answerable across endpoint classes rather than on a single target. Thrombin asks whether a model can rank a library member built from an unseen building block when the endpoint is molecular recognition; this asks the same of a physicochemical endpoint, where per-monomer descriptors such as logP and polar surface area have a far better prior and ought to transfer. A result that holds on both is about representation rather than about one assay.",
+      "limitations": [
+        "One assay only. The release carries PAMPA, Caco-2, MDCK and RRCK, which are four different instruments reporting the same quantity; pooling them would repeat the scale-mixing defect this project repaired in its ranking arm. PAMPA is staged because it is the largest at 7,298 entries, and no figure from this landscape may be compared with one computed on another assay.",
+        "One monomer length. The stager encodes a member as a tuple of per-position tokens, so a varying-length set has no position to encode. Length 6 is staged as the largest PAMPA set at 2,167 entries; lengths 7 and 10 are comparable in size and are not staged here.",
+        "A cyclic peptide has no canonical first residue, so the position index is the rotation the database chose to write, not a chemical fact. Positions are therefore not guaranteed to align across source publications. This weakens every positional encoding equally, so the comparison between encodings is unaffected and the absolute numbers are pessimistic.",
+        "Descriptors are per-monomer. They describe the building blocks, not the assembled macrocycle, and capture nothing about conformation or the ring.",
+        "Pooled from 22 publications with their own assay protocols and laboratories. A source effect is a plausible confounder and is not controlled here; the staged file keeps the source column so it can be.",
+        "2,077 staged rows hold 2,046 unique sequences; duplicates are collapsed by the stager and recorded in the manifest.",
+        "No licence or terms-of-use statement appears on the CycPeptMPDB download page as fetched on 24 November 2026. The data is offered for free download and the project is cited below; redistribution terms were not stated and have not been confirmed.",
+        "The monomer separator is \".\", not the \"-\" the thrombin library uses: 24 of the 118 symbols contain a hyphen in their own name, so splitting on one silently fragments them into longer pseudo-sequences. The stager caught this as a length mismatch rather than accepting it, which is why the separator is recorded per landscape."
+      ],
+      "source": "Li, Yanagisawa and colleagues, CycPeptMPDB: A Comprehensive Database of Membrane Permeability of Cyclic Peptides, Journal of Chemical Information and Modeling 2023. Files CycPeptMPDB_Peptide_All.csv and CycPeptMPDB_Monomer_All.csv downloaded from cycpeptmpdb.com on 24 November 2026; the staged subset's counts reproduce the site's own download table exactly (PAMPA 7,298 entries, monomer length 6 2,167 entries).",
+      "monomer_table": "data/raw/cycpeptmpdb/cycpept_len6_pampa_monomer_descriptors.csv"
     }
   },
   "limitations": [
