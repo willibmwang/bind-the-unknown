@@ -3418,8 +3418,8 @@
       <div><dt class="s">what it does</dt>
         <dd><span class="v">327</span><span class="u">targets described</span></dd></div>
       <div><dt class="s">genome coordinates</dt>
-        <dd><span class="v">162</span><span
-          class="u">of 186 that can have
+        <dd><span class="v">372</span><span
+          class="u">of 393 that can have
           them</span></dd></div>
     </dl>
     <ul class="pts">
@@ -3451,9 +3451,10 @@
     <li><b>Residue numbers come in two countings and both are in the file.</b> One counts along
     the protein, which is what a structure viewer wants. The other counts along the genome, and
     a row only carries it where the reading frame was checked by reading the residues back.</li>
-    <li><b>Most targets have no genome coordinate, and that is a limit of the step above.</b>
-    A protein the pipeline could not place in this genome's own translation has no stretch to
-    convert. Of the ones it did place, almost all carry coordinates.</li>
+    <li><b>372 of the 396 targets carry a genome coordinate,</b>
+    which is 95% of the 393 the pipeline could place in
+    this genome's own translation. The other 3 were never placed, so there
+    is no stretch of genome to convert and the row says so.</li>
     <li><b>Nothing in the file was measured on the pathogen.</b> What a protein does, which
     family it belongs to and which residues are marked are all copied from its nearest studied
     relative. Areas are measured on a solved structure of a relative, or on a predicted one.
@@ -3610,6 +3611,42 @@
       if the mixing were the problem rather than the term being weak.</li>
     </ul>
     
+    <div class="cmxscroll" tabindex="0" role="group"
+         aria-label="A worked case of the two conservation scales, on HCoV-229E">
+      <table class="cmx inv">
+        <caption>HCoV-229E: what each protein scored for conservation, and how far
+          apart that put them</caption>
+        <thead><tr><th scope="col">protein</th><th scope="col">conservation</th>
+          <th scope="col">measured by</th><th scope="col">points behind</th></tr></thead>
+        <tbody>
+          <tr class="won"><td>VME1_CVHNL Membrane protein</td>
+            <td class="n">1</td>
+            <td>a score that stops at full marks</td>
+            <td class="n">&mdash;</td></tr>
+          
+      <tr><td>SPIKE_CVHNL Spike glycoprotein</td>
+        <td class="n">0.2113</td>
+        <td>counts shared fragments</td>
+        <td class="n">&minus;0.7961</td></tr>
+      <tr><td>3C-like proteinase nsp5</td>
+        <td class="n">0.4204</td>
+        <td>counts shared fragments</td>
+        <td class="n">&minus;1.359</td></tr>
+      <tr><td>RNA-directed RNA polymerase nsp12</td>
+        <td class="n">0.4204</td>
+        <td>counts shared fragments</td>
+        <td class="n">&minus;1.439</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note"><b>Nothing else differs.</b> The protein on top is not a drug target.
+    It reached full marks because it was matched the second way, which stops counting once a
+    match is good enough.
+    The proteins under it are matched the first way, which keeps counting. Every other term is
+    level between them, so this ordering is the two measurements disagreeing and nothing
+    else. It happens to 16 pairs across
+    9 genomes.</p>
+    
     <div class="lane">
       <div class="lane-grp"><span class="gl">How often a drugged target comes first, split by
         whether the genome's rows were measured on one scale or two</span></div>
@@ -3642,9 +3679,47 @@
         18 points on them and 4 on the others, and once it
         is gone the two groups are indistinguishable.</p></div>
     </div>
-    <p class="note"><b>The fix is not a rescaling.</b> Converting one measure into the other
-    would need a conversion factor chosen by hand. The pipeline already holds the alignment it
-    would need to measure both the same way, and that is where this should be repaired.</p>
+    <h3>A repair that needs no conversion factor</h3>
+    <ul class="pts">
+      <li><b>Do not convert one measurement into the other.</b> That would need a factor
+      chosen by hand, which is the thing the pipeline refuses to do everywhere else.</li>
+      <li><b>Decline to read the one taken the wrong way.</b> A protein matched at a distance
+      gets the typical value of the other measurement instead, so the term stops rewarding a
+      protein for having been hard to identify.</li>
+      <li><b>Tested on the panel, every genome that moves, moves up.</b> The five weights are
+      untouched.</li>
+    </ul>
+    
+    <div class="lane">
+      <div class="lane-grp"><span class="gl">The same five weights, with the term withheld
+        where it was measured the other way</span></div>
+      <div class="lane-axis" aria-hidden="true"><span></span>
+        <span class="ax"><b class="l0">0</b><b class="lm">100%</b></span><span></span></div>
+      
+      <div class="wr">
+        <span class="who">a drugged target in the top 1</span>
+        <span class="plot"><i class="b pred" style="left:0.00%;width:61.40%"></i><i class="b" style="left:0.00%;width:54.50%"></i></span>
+        <span class="vl">54% &rarr; 61%</span>
+      </div>
+      <div class="wr">
+        <span class="who">a drugged target in the top 3</span>
+        <span class="plot"><i class="b pred" style="left:0.00%;width:90.90%"></i><i class="b" style="left:0.00%;width:86.40%"></i></span>
+        <span class="vl">86% &rarr; 91%</span>
+      </div>
+      <div class="wr">
+        <span class="who">a drugged target in the top 5</span>
+        <span class="plot"><i class="b pred" style="left:0.00%;width:97.70%"></i><i class="b" style="left:0.00%;width:95.50%"></i></span>
+        <span class="vl">96% &rarr; 98%</span>
+      </div>
+      <div class="lane-foot"><p>The solid bar is where it stands now and the outline past its
+        end is what the repair adds. 5 genomes improve and
+        0 get worse, out of 50 rows changed
+        across the panel. No weight is altered and no conversion between the two measurements
+        is invented.</p></div>
+    </div>
+    <p class="note"><b>This is a reason to make the change, not the change.</b> The repair
+    belongs in the step that measures conservation, where it can use the better quantity the
+    pipeline already has the alignment for, and be measured there.</p>
   </div>
 
   <div class="substep">

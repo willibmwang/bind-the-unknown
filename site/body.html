@@ -1080,9 +1080,10 @@
     <li><b>Residue numbers come in two countings and both are in the file.</b> One counts along
     the protein, which is what a structure viewer wants. The other counts along the genome, and
     a row only carries it where the reading frame was checked by reading the residues back.</li>
-    <li><b>Most targets have no genome coordinate, and that is a limit of the step above.</b>
-    A protein the pipeline could not place in this genome's own translation has no stretch to
-    convert. Of the ones it did place, almost all carry coordinates.</li>
+    <li><b>{{handoff_nt}} of the {{handoff_targets}} targets carry a genome coordinate,</b>
+    which is {{handoff_nt_share}}% of the {{handoff_locatable}} the pipeline could place in
+    this genome's own translation. The other {{handoff_no_span}} were never placed, so there
+    is no stretch of genome to convert and the row says so.</li>
     <li><b>Nothing in the file was measured on the pathogen.</b> What a protein does, which
     family it belongs to and which residues are marked are all copied from its nearest studied
     relative. Areas are measured on a solved structure of a relative, or on a predicted one.
@@ -1131,10 +1132,22 @@
       points on them and {{scale_drop_buys_single}} on the rest, which is what you would see
       if the mixing were the problem rather than the term being weak.</li>
     </ul>
+    <!--INVERSION-->
     <!--CONSERVATION-->
-    <p class="note"><b>The fix is not a rescaling.</b> Converting one measure into the other
-    would need a conversion factor chosen by hand. The pipeline already holds the alignment it
-    would need to measure both the same way, and that is where this should be repaired.</p>
+    <h3>A repair that needs no conversion factor</h3>
+    <ul class="pts">
+      <li><b>Do not convert one measurement into the other.</b> That would need a factor
+      chosen by hand, which is the thing the pipeline refuses to do everywhere else.</li>
+      <li><b>Decline to read the one taken the wrong way.</b> A protein matched at a distance
+      gets the typical value of the other measurement instead, so the term stops rewarding a
+      protein for having been hard to identify.</li>
+      <li><b>Tested on the panel, every genome that moves, moves up.</b> The five weights are
+      untouched.</li>
+    </ul>
+    <!--REPAIR-->
+    <p class="note"><b>This is a reason to make the change, not the change.</b> The repair
+    belongs in the step that measures conservation, where it can use the better quantity the
+    pipeline already has the alignment for, and be measured there.</p>
   </div>
 
   <div class="substep">

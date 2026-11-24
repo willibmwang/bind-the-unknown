@@ -35,11 +35,19 @@
       "gate_means": "whether this chain sits where a binder can reach it and is worth the stages below. `no` is a verdict and not a failure.",
       "chain_length_aa": 195,
       "chain_span_on_the_relative": null,
-      "chain_span_in_the_reading_frame": null,
-      "chain_span_nt": null,
-      "nt_confirmed_at": null,
-      "reading_frame": null,
-      "reading_frame_unresolved_because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation",
+      "chain_span_in_the_reading_frame": [
+        1,
+        2092
+      ],
+      "chain_span_nt": [
+        19,
+        6294
+      ],
+      "nt_confirmed_at": [
+        "the whole chain: it is this reading frame's own translation"
+      ],
+      "reading_frame": "+0 at nt 19",
+      "reading_frame_unresolved_because": null,
       "function": null,
       "function_is_about": "the whole entry",
       "function_of_the_whole_entry": "RNA-dependent RNA polymerase, which is responsible for the replication and transcription of the viral RNA genome using antigenomic RNA as an intermediate (By similarity). During transcription, synthesizes subgenomic RNAs and assures their capping by a cap-snatching mechanism, which involves the endonuclease activity cleaving the host capped pre-mRNAs (PubMed:31584100). These short capped RNAs are then used as primers for viral transcription. The 3'-end of subgenomic mRNAs molecules are not polyadenylated. During replication, the polymerase binds the 5' and 3' vRNA extremities at distinct sites (By similarity). In turn, significant conformational changes occur in the polymerase and in vRNA to initiate active RNA synthesis (By similarity). As a consequence of the use of the same enzyme for both transcription and replication, these mechanisms need to be well coordinated (By similarity)",
@@ -183,7 +191,10 @@
             1,
             2092
           ],
-          "span_in_the_chain": null,
+          "span_in_the_chain": [
+            1,
+            2092
+          ],
           "span_on_the_relative": null,
           "length_aa": 2092,
           "folded": null,
@@ -240,9 +251,71 @@
           "on_predicted_coordinates": false,
           "what_it_is": "the largest unbroken exposed water-repelling area on a deposited structure of this domain, which is the surface a macrocyclic peptide has to lie across",
           "caveat": "The area is a median over structures of the same domain and the spread is how far it moves between them. One macrocycle footprint is about 600 square angstroms, so a spread of that size means the area is not a property of the domain alone.",
-          "residues_in_the_reading_frame": null,
+          "residues_in_the_reading_frame": [
+            10,
+            12,
+            14,
+            17,
+            99,
+            100,
+            104,
+            147,
+            151,
+            154,
+            158,
+            159
+          ],
           "residue_count": 12,
-          "residues_nt": null,
+          "residues_nt": [
+            [
+              46,
+              48
+            ],
+            [
+              52,
+              54
+            ],
+            [
+              58,
+              60
+            ],
+            [
+              67,
+              69
+            ],
+            [
+              313,
+              315
+            ],
+            [
+              316,
+              318
+            ],
+            [
+              328,
+              330
+            ],
+            [
+              457,
+              459
+            ],
+            [
+              469,
+              471
+            ],
+            [
+              478,
+              480
+            ],
+            [
+              490,
+              492
+            ],
+            [
+              493,
+              495
+            ]
+          ],
           "numbering": {
             "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
             "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
@@ -264,9 +337,26 @@
           "on_predicted_coordinates": false,
           "what_it_is": "the part of the greasy patch that lies within reach of the marked residues, which is where a macrocycle would both bind the surface and block the chemistry",
           "caveat": "Read `at_the_annotated_residues` before this area. Where it is false the measurement was taken at residues that are not the ones the curator marked, and the area is about a different place.",
-          "residues_in_the_reading_frame": null,
+          "residues_in_the_reading_frame": [
+            17,
+            147,
+            151
+          ],
           "residue_count": 3,
-          "residues_nt": null,
+          "residues_nt": [
+            [
+              67,
+              69
+            ],
+            [
+              457,
+              459
+            ],
+            [
+              469,
+              471
+            ]
+          ],
           "numbering": {
             "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
             "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
@@ -284,14 +374,14 @@
     "with_a_site": 1,
     "with_a_measured_patch": 1,
     "with_a_functional_site": 0,
-    "with_nucleotide_coordinates": 0,
+    "with_nucleotide_coordinates": 1,
     "with_a_function": 1,
     "already_drugged": 1
   },
   "limitations": [
     "No row here is a measurement on the pathogen. Function, families, partners and marked residues are curated annotation on the nearest reviewed relative, transferred across a species gap. A deposited area is measured on a relative's domain; a predicted area is measured on coordinates a model emitted.",
     "An area measured on predicted coordinates is comparable with another prediction and not with a deposition. On the one chain carrying both, the prediction read several times larger. Residue positions transfer far better than areas do.",
-    "A nucleotide range appears only where the reading frame was confirmed by reading its residues back against the relative's chain. `nt_confirmed_at` says which end of the span that confirmation covered: a chain spanning a ribosomal frameshift can be exact at one end and short at the other, and that row says so rather than being dropped or trusted whole.",
+    "A nucleotide range appears only where the reading frame was settled. `nt_confirmed_at` says how. Most chains are their reading frame's whole translation, were never cut out of a polyprotein and cross no species gap, so their coordinate is exact by construction. A chain that was cut out of one is placed by alignment and its frame is confirmed by reading the residues back against the relative; there `nt_confirmed_at` names which end of the span that covered, because a chain spanning a ribosomal frameshift can be exact at one end and short at the other.",
     "`residues_in_the_chain` is 1-based within the mature chain and is the numbering for a structure viewer. `residues_in_the_reading_frame` is 1-based along one reading frame of this genome and is meaningless without the frame in the same row.",
     "A cleavage site is where this protein is cut. It is a marked residue and it is not somewhere to bind.",
     "The ranking is the pipeline's five stated weights. Fitting those weights against the proteins approved antivirals already act on does not improve them, which is recorded in runs/rubric_fit.json; the ranking is carried by the terms rather than their weighting.",
@@ -301,11 +391,11 @@
     "host": "Williams-MacBook-Pro-260.local",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "b8d9843dfa16f914427e4e00c1b81b85311b52b1",
+    "git_commit": "24eba79d20d7899d80c26983d8bf98ed6bac5e5d",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-11-24T02:58:20.118469+00:00"
+    "recorded_at_utc": "2026-11-24T04:01:48.260106+00:00"
   },
-  "content_sha256": "93ed030dd13c7a812df2a8243fd3e63ae03ed31486ce7eaa1e20f7aaad19951e"
+  "content_sha256": "cb4daf63ed279610d9e492f9d0b178075252b22b58f99cf40d8a6143e63553c1"
 }

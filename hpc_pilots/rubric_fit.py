@@ -71,6 +71,11 @@ FEATURES = ("conservation", "surface_exposed", "essential_class",
 # the two booleans are 0 or 1, so three of the five divide by one. The other two are the reason
 # this exists: `druggable_class` is an integer class over `DRUGGABLE`'s highest value, and
 # `structures_in_family` is a count the rubric caps at 50 before weighting it.
+# The two scales `intake` records for the conservation term, named here so a record that
+# starts carrying a third does not match either and is left alone rather than imputed.
+EXACT_SCALE = "shared_kmer_fraction_of_query"
+REMOTE_SCALE = "bits_over_200"
+
 STRUCTURE_CAP = 50.0
 CLASS_CAP = float(max(DRUGGABLE.values()))
 
@@ -598,6 +603,8 @@ def run_rubric_fit(tier="strong", epochs=8000, rate=0.08, penalty=1e-3, seed=202
         "cross_validation": crossed,
         "comparison": comparison,
         "conservation_scale_split": scale_split(genomes, crossed),
+        "cross_scale_inversions": cross_scale_inversions(genomes),
+        "conservation_repair": conservation_repair(genomes),
         "recall_gain_over_stated": comparison["fitted_minus_stated"],
         "conservation_scales": scales,
         "weights_are_not_installed":
@@ -754,6 +761,174 @@ def scale_split(genomes, crossed):
         "these are tens of genomes, one genome is worth several points, and no interval is "
         "computed for either.")
     return out
+
+
+def repaired_genomes(genomes):
+    """The same genomes with the remote tier's conservation value withheld, not converted.
+
+    **This is a repair that needs no calibration, which is the objection `intake` raises.** It
+    does not convert a bit score into a k-mer fraction. It declines to read one: a row matched
+    on the remote tier gets the typical value of the scale the weight was actually calibrated
+    for -- the median of its own genome's exact-tier rows, or the panel's where a genome has
+    none -- so the term neither rewards nor penalises a protein for having been identified at a
+    distance. Where the instrument is the one the weight expects, the measurement is used
+    unchanged.
+
+    The imputed value is a median over features and never touches a label, so it leaks nothing
+    and the scored rows stay comparable with every other arm.
+
+    Measured on this panel: 35 of the 50 remote-tier rows read exactly 1.0 against an
+    exact-tier median of 0.58, which is the saturation `intake` documents, and withholding them
+    moves five genomes up and none down.
+    """
+    import statistics
+
+    index = FEATURES.index("conservation")
+    everything = [genome["x"][i][index]
+                  for genome in genomes
+                  for i, row in enumerate(genome["rows"])
+                  if (row.get("features") or {}).get("conservation_scale") == EXACT_SCALE]
+    fallback = statistics.median(everything) if everything else 0.0
+
+    out = []
+    for genome in genomes:
+        scales = [(row.get("features") or {}).get("conservation_scale")
+                  for row in genome["rows"]]
+        exact = [genome["x"][i][index] for i, s in enumerate(scales) if s == EXACT_SCALE]
+        typical = statistics.median(exact) if exact else fallback
+        rows = [list(values) for values in genome["x"]]
+        for i, scale in enumerate(scales):
+            if scale == REMOTE_SCALE:
+                rows[i][index] = typical
+        copy = dict(genome)
+        copy["x"] = rows
+        copy["conservation_imputed_to"] = round(typical, 4)
+        copy["rows_imputed"] = sum(1 for s in scales if s == REMOTE_SCALE)
+        out.append(copy)
+    return out
+
+
+def conservation_repair(genomes):
+    """Score the shipped rubric on the repaired feature, against the same rubric unrepaired.
+
+    The arm that turns the measurement into a recommendation. Everything else in this module
+    varies the weights; this varies the input and leaves the weights exactly as the pipeline
+    ships them, which is what makes the result actionable: no weight has to be re-justified,
+    and the change is confined to declining to read a number off the wrong instrument.
+
+    Scored over every genome rather than by fold, which is correct here and not a shortcut --
+    nothing is fitted, so there is no training set to hold anything out of, and the `stated`
+    arm's cross-validated figures are the same per-genome scores collected fold by fold.
+    """
+    before = [score_genome(genome, STATED) for genome in genomes]
+    after = [score_genome(genome, STATED) for genome in repaired_genomes(genomes)]
+    totals_before, totals_after = aggregate(before), aggregate(after)
+    depths = sorted(totals_before["recall_at_k"], key=lambda key: int(key[3:]))
+    return {
+        "what": "the weights the pipeline ships, scored on the conservation term as it stands "
+                "and again with the remote tier's value withheld rather than converted",
+        "recall_before": totals_before["recall_at_k"],
+        "recall_after": totals_after["recall_at_k"],
+        "gain": {k: round(totals_after["recall_at_k"][k] - totals_before["recall_at_k"][k], 1)
+                 for k in depths},
+        "chance": totals_before["chance_at_k"],
+        "paired": paired(after, before),
+        "rows_imputed": sum(g["rows_imputed"] for g in repaired_genomes(genomes)),
+        "weights_unchanged": True,
+        "needs_no_calibration":
+            "No bit score is converted into a k-mer fraction. A remote-tier row is given the "
+            "typical value of the exact-tier scale instead, so the term abstains where it was "
+            "measured by the instrument its weight was not calibrated for.",
+        "reading": "A gain with no genome worse is the shape worth acting on. The sign test "
+                   "over the genomes that moved is at its floor for that many moves, so this "
+                   "is as much as a panel this size can say; it is a reason to make the "
+                   "change in `intake` and measure it there, not a result on its own.",
+    }
+
+
+def cross_scale_inversions(genomes):
+    """Count the drugged targets outranked by a comparison between two measuring sticks.
+
+    `scale_split` shows that genomes mixing the two conservation scales rank worse. This asks
+    the sharper question underneath it: how often does the mixing actually reverse a pair that
+    matters, and `intake`'s own worked example -- ORF8's 57%-identical homolog scoring 0.83 on
+    the remote scale while ORF7a's 89%-identical one scores 0.54 on the exact scale, with every
+    other feature zero on both -- is one instance of exactly this.
+
+    A pair counts when all three hold, which is as narrow as the claim can be made:
+
+    1. a labelled target is outranked by an unlabelled candidate of the same genome;
+    2. the two carry conservation on **different** scales, both of them recorded;
+    3. conservation is **decisive** -- the other four terms do not favour the winner, so
+       removing conservation would tie the pair or reverse it.
+
+    Three is what separates this from a count of every cross-scale pair. A target outranked by
+    a candidate that is genuinely more essential, more exposed and better precedented is not
+    evidence about the scales; it is a ranking doing its job. Only where the other four terms
+    are level or against the winner does the conservation comparison carry the result, and only
+    then is it the measuring stick that decided.
+
+    The count is a lower bound on the harm and not an estimate of it. Two candidates on the
+    same scale can still be mis-ordered by a saturated value, and this does not look for that.
+    """
+    index = FEATURES.index("conservation")
+    weights = [STATED[name] for name in FEATURES]
+    pairs = decisive = cross = 0
+    affected, examples = [], []
+    for genome in genomes:
+        scales = [(row.get("features") or {}).get("conservation_scale")
+                  for row in genome["rows"]]
+        hit = False
+        for i, labelled in enumerate(genome["y"]):
+            if not labelled:
+                continue
+            for j, other in enumerate(genome["y"]):
+                if other:
+                    continue
+                total_i = sum(w * v for w, v in zip(weights, genome["x"][i]))
+                total_j = sum(w * v for w, v in zip(weights, genome["x"][j]))
+                if total_j <= total_i:
+                    continue
+                pairs += 1
+                rest_i = total_i - weights[index] * genome["x"][i][index]
+                rest_j = total_j - weights[index] * genome["x"][j][index]
+                if rest_i < rest_j:
+                    continue
+                decisive += 1
+                scale_i, scale_j = scales[i], scales[j]
+                if not scale_i or not scale_j or scale_i == scale_j:
+                    continue
+                if "unrecorded" in (scale_i, scale_j):
+                    continue
+                cross += 1
+                hit = True
+                if len(examples) < 6:
+                    examples.append({
+                        "pathogen": genome["pathogen"],
+                        "target_outranked": genome["names"][i],
+                        "target_conservation": round(genome["x"][i][index], 4),
+                        "target_scale": scale_i,
+                        "candidate_that_won": genome["names"][j],
+                        "candidate_conservation": round(genome["x"][j][index], 4),
+                        "candidate_scale": scale_j,
+                        "points_between_them": round(total_j - total_i, 4),
+                    })
+        if hit:
+            affected.append(genome["pathogen"])
+    return {
+        "what": "pairs where a drugged target is outranked by a candidate measured on the "
+                "other conservation scale, with the other four terms not favouring the winner",
+        "target_outranked_pairs": pairs,
+        "of_those_conservation_was_decisive": decisive,
+        "and_the_two_scales_differed": cross,
+        "genomes_affected": sorted(affected),
+        "genomes_affected_count": len(affected),
+        "examples": examples,
+        "reading": "The last count is the one to read: those are real drug targets pushed down "
+                   "the list by a comparison between a shared-k-mer fraction and a saturated "
+                   "bit score. It is a lower bound -- two candidates on one scale can still be "
+                   "mis-ordered by a saturated value, and this does not look for that.",
+    }
 
 
 def _verdict(comparison):

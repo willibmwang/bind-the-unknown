@@ -50,6 +50,10 @@ from .common import ROOT, content_digest, provenance, write_json
 # a mismatch refuses the coordinate rather than publishing one from the wrong frame.
 FOUND_IN = re.compile(r"ORF\s+(\d+)\s+of the ranked set,\s*(\d+)\s*aa")
 
+# How the fold stage records a chain that is its whole reading frame rather than a piece cut
+# out of one. Matched as a substring of `recovered_by`, which is the only field that says so.
+WHOLE_ORF = "the ORF translation is the candidate"
+
 # Comment types worth carrying, and what each one answers. Anything else in the entry is left
 # where it is; this is a handoff and not a mirror of UniProt.
 COMMENTS = {
@@ -100,6 +104,74 @@ def reading_frame(case, foldable_row, score_row=None):
     span = (foldable_row or {}).get("span_in_this_genome")
     candidates = list(case.get("candidates") or ())
     match = FOUND_IN.search(found or "")
+
+    # **A chain that was never cut out of anything needs no alignment, and had none.** Where a
+    # candidate ORF was not a polyprotein, the whole translation is the chain, and the fold
+    # stage records that as `recovered_by: "the ORF translation is the candidate"` with no
+    # `found_in` at all -- there was no search, so there is nothing to name. That is 210 of the
+    # 396 rows on this panel, and reading the absent `found_in` as a failure left every one of
+    # them without a coordinate it could trivially have had.
+    #
+    # Resolved by the candidate's own name where that is unique, and by its residue count
+    # where the row carries no name the candidates use -- the hydropathy-class rows are all
+    # called "unidentified probable surface antigen" and cannot be told apart by name. Three
+    # rows on this panel have two candidates of the same length and no usable name, and those
+    # are refused rather than guessed.
+    # `recovered_by` is present and null on rows that never reached this branch, so the empty
+    # string has to come from `or` rather than from `get`'s default.
+    if not found and WHOLE_ORF in ((foldable_row or {}).get("recovered_by") or ""):
+        length = foldable_row.get("parent_orf_length_aa")
+        named = [row for row in candidates
+                 if row.get("name") and row["name"] == foldable_row.get("target")]
+        sized = [row for row in candidates if row.get("length_aa") == length]
+        # A name that matches is not on its own enough. The residue count has to agree too, the
+        # same key the named route checks: a candidate sharing a chain's name but not its
+        # length is not the reading frame that chain is the translation of, and taking it would
+        # put every coordinate on the row somewhere else entirely.
+        if len(named) == 1 and length is not None \
+                and named[0].get("length_aa") != length:
+            return _frame_refused(
+                f"this chain is its reading frame's whole translation and names candidate "
+                f"{named[0].get('rank')}, but that reading frame is "
+                f"{named[0].get('length_aa')} residues against the chain's {length}, so they "
+                f"are not the same thing", named[0].get("rank"), "whole_orf")
+        row = (named[0] if len(named) == 1 else sized[0] if len(sized) == 1 else None)
+        if row is None:
+            return _frame_refused(
+                f"this chain is its reading frame's whole translation, but "
+                f"{len(sized)} candidate reading frames share its {length} residues and none "
+                f"carries its name, so which one it is cannot be settled", None, "whole_orf")
+        strand, frame, start = row.get("strand"), row.get("frame"), row.get("nt_start")
+        if None in (strand, frame, start):
+            return _frame_refused(
+                "the candidate row for this reading frame carries no strand, codon offset or "
+                "nucleotide start", row.get("rank"), "whole_orf")
+        return {
+            "verified": True, "route": "whole_orf", "orf_rank": row.get("rank"),
+            "strand": strand, "frame": frame, "nt_start": start,
+            "orf_length_aa": row.get("length_aa"), "segment": row.get("segment"),
+            "orf_name": row.get("name"),
+            "reading_frame": f"{strand}{frame} at nt {start + 1}",
+            "whole_chain_span": [1, int(length)] if length else None,
+            # Nothing is transferred across a species gap here, so there is nothing to check
+            # the residues against and nothing that could be off by an offset: the sequence is
+            # this reading frame's own translation. That makes the coordinate firmer than an
+            # aligned one, not weaker, and the field says which it is rather than leaving a
+            # consumer to read an absent check as a failed one.
+            "residue_agreement": {
+                "checked": False, "agrees": None,
+                "because": "the chain is this reading frame's own translation, so there is no "
+                           "second sequence to compare it against and no alignment that could "
+                           "have shifted it"},
+            "confirmed_at": ["the whole chain: it is this reading frame's own translation"],
+            "confirmed_at_both_ends": True,
+            "how_it_was_resolved": ("the candidate's name identifies the reading frame"
+                                    if len(named) == 1 else
+                                    "the candidate's residue count identifies the reading "
+                                    "frame uniquely"),
+            "what_the_numbering_is": "positions are 1-based along this one open reading frame "
+                                     "of this genome, which for this chain is the whole of it.",
+        }
 
     if match:
         rank, declared = int(match.group(1)), int(match.group(2))
@@ -363,9 +435,14 @@ def segment_lengths(accession):
     from .intake import genome_records
 
     out, total = {}, []
-    for header, sequence in genome_records(accession):
+    for index, (header, sequence) in enumerate(genome_records(accession)):
         name = (header or "").split()[0].lstrip(">") if header else None
         out[name] = len(sequence)
+        # **Keyed by position as well as by name**, because a candidate row names its segment
+        # with an integer index and not with an accession. Keying only by accession meant
+        # every minus-strand row looked up `0`, found nothing, and lost a coordinate it had
+        # all the information for -- 85 rows on this panel.
+        out[index] = len(sequence)
         total.append(len(sequence))
     out[None] = total[0] if len(total) == 1 else None
     return out
@@ -565,10 +642,17 @@ def annotate_case(case, accession):
         surface = surfaces.get(target) or {}
         foldable = foldables.get(target) or {}
         frame = reading_frame(case, foldable, score)
+        # The whole-ORF route carries its own span: the chain is the entire translation, so it
+        # runs from residue 1 to the frame's length, and no alignment recorded it.
+        span_in_frame = (foldable.get("span_in_this_genome")
+                         or frame.get("whole_chain_span"))
         length = lengths.get(frame.get("segment")) if frame.get("verified") else None
-        if length is None and frame.get("verified") and frame.get("strand") == "+":
-            # The plus strand needs no segment length, so a single-segment genome whose header
-            # could not be keyed is still answerable there. The minus strand is not.
+        if length is None and frame.get("verified"):
+            # `segment_lengths` sets the `None` key only where the genome has exactly one
+            # segment, so falling back to it cannot pick the wrong segment of a segmented
+            # genome. It used to be restricted to the plus strand, which was the wrong guard:
+            # the plus strand does not need a length at all, and the minus strand -- the one
+            # that does -- was the only one the fallback refused to serve.
             length = lengths.get(None)
         accession_of_relative = score.get("nearest_homolog")
         annotation, failure = None, None
@@ -588,8 +672,8 @@ def annotate_case(case, accession):
             "gate": surface.get("gate"),
             "reading_frame": frame,
             "chain_span_on_the_relative": score.get("chain_range"),
-            "chain_span_in_this_genome": foldable.get("span_in_this_genome"),
-            "chain_span_nt": span_to_nt(foldable.get("span_in_this_genome"), frame, length),
+            "chain_span_in_this_genome": span_in_frame,
+            "chain_span_nt": span_to_nt(span_in_frame, frame, length),
             "chain_span_nt_confirmed_at": frame.get("confirmed_at"),
             "segment_length_nt": length,
             "annotation": annotation,

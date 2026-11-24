@@ -38570,6 +38570,126 @@
     },
     "reading": "A positive `shipped_rubric_costs_on_mixed_genomes` is how many points at rank 1 the genomes with one scale recover over the genomes with two. If `dropping_conservation_buys` is much larger on `mixed` than on `single`, the mixing is what the term is losing to rather than the term being weak everywhere. Both are over-read easily: these are tens of genomes, one genome is worth several points, and no interval is computed for either."
   },
+  "cross_scale_inversions": {
+    "what": "pairs where a drugged target is outranked by a candidate measured on the other conservation scale, with the other four terms not favouring the winner",
+    "target_outranked_pairs": 125,
+    "of_those_conservation_was_decisive": 26,
+    "and_the_two_scales_differed": 16,
+    "genomes_affected": [
+      "Crimean-Congo hemorrhagic fever virus",
+      "HCoV-229E",
+      "HIV-2",
+      "Human adenovirus 2",
+      "Human cytomegalovirus",
+      "Human papillomavirus 16",
+      "Marburg virus",
+      "Mumps virus",
+      "Varicella-zoster virus"
+    ],
+    "genomes_affected_count": 9,
+    "examples": [
+      {
+        "pathogen": "HCoV-229E",
+        "target_outranked": "SPIKE_CVHNL Spike glycoprotein",
+        "target_conservation": 0.2113,
+        "target_scale": "shared_kmer_fraction_of_query",
+        "candidate_that_won": "VME1_CVHNL Membrane protein",
+        "candidate_conservation": 1.0,
+        "candidate_scale": "bits_over_200",
+        "points_between_them": 0.7961
+      },
+      {
+        "pathogen": "HCoV-229E",
+        "target_outranked": "3C-like proteinase nsp5",
+        "target_conservation": 0.4204,
+        "target_scale": "shared_kmer_fraction_of_query",
+        "candidate_that_won": "VME1_CVHNL Membrane protein",
+        "candidate_conservation": 1.0,
+        "candidate_scale": "bits_over_200",
+        "points_between_them": 1.3588
+      },
+      {
+        "pathogen": "HCoV-229E",
+        "target_outranked": "RNA-directed RNA polymerase nsp12",
+        "target_conservation": 0.4204,
+        "target_scale": "shared_kmer_fraction_of_query",
+        "candidate_that_won": "VME1_CVHNL Membrane protein",
+        "candidate_conservation": 1.0,
+        "candidate_scale": "bits_over_200",
+        "points_between_them": 1.4388
+      },
+      {
+        "pathogen": "HIV-2",
+        "target_outranked": "Integrase",
+        "target_conservation": 0.4964,
+        "target_scale": "shared_kmer_fraction_of_query",
+        "candidate_that_won": "TAT_SIVM2 Protein Tat",
+        "candidate_conservation": 0.622,
+        "candidate_scale": "bits_over_200",
+        "points_between_them": 0.3768
+      },
+      {
+        "pathogen": "Varicella-zoster virus",
+        "target_outranked": "DPOL_EHV1B DNA polymerase catalytic subunit",
+        "target_conservation": 0.1749,
+        "target_scale": "shared_kmer_fraction_of_query",
+        "candidate_that_won": "LTP_GAHVM Large tegument protein deneddylase",
+        "candidate_conservation": 0.3582,
+        "candidate_scale": "bits_over_200",
+        "points_between_them": 0.5499
+      },
+      {
+        "pathogen": "Varicella-zoster virus",
+        "target_outranked": "DPOL_EHV1B DNA polymerase catalytic subunit",
+        "target_conservation": 0.1749,
+        "target_scale": "shared_kmer_fraction_of_query",
+        "candidate_that_won": "Papain-like protease nsp3",
+        "candidate_conservation": 0.2368,
+        "candidate_scale": "bits_over_200",
+        "points_between_them": 0.1757
+      }
+    ],
+    "reading": "The last count is the one to read: those are real drug targets pushed down the list by a comparison between a shared-k-mer fraction and a saturated bit score. It is a lower bound -- two candidates on one scale can still be mis-ordered by a saturated value, and this does not look for that."
+  },
+  "conservation_repair": {
+    "what": "the weights the pipeline ships, scored on the conservation term as it stands and again with the remote tier's value withheld rather than converted",
+    "recall_before": {
+      "top1": 54.5,
+      "top3": 86.4,
+      "top5": 95.5,
+      "top10": 100.0
+    },
+    "recall_after": {
+      "top1": 61.4,
+      "top3": 90.9,
+      "top5": 97.7,
+      "top10": 100.0
+    },
+    "gain": {
+      "top1": 6.9,
+      "top3": 4.5,
+      "top5": 2.2,
+      "top10": 0.0
+    },
+    "chance": {
+      "top1": 23.7,
+      "top3": 56.2,
+      "top5": 73.9,
+      "top10": 89.0
+    },
+    "paired": {
+      "genomes_better": 5,
+      "genomes_worse": 0,
+      "genomes_tied": 39,
+      "genomes_that_moved": 5,
+      "sign_test_p": 0.0625,
+      "what": "best rank of any label, compared per genome; p is a two-sided sign test over the genomes that moved"
+    },
+    "rows_imputed": 50,
+    "weights_unchanged": true,
+    "needs_no_calibration": "No bit score is converted into a k-mer fraction. A remote-tier row is given the typical value of the exact-tier scale instead, so the term abstains where it was measured by the instrument its weight was not calibrated for.",
+    "reading": "A gain with no genome worse is the shape worth acting on. The sign test over the genomes that moved is at its floor for that many moves, so this is as much as a panel this size can say; it is a reason to make the change in `intake` and measure it there, not a result on its own."
+  },
   "recall_gain_over_stated": {
     "top1": 0.0,
     "top3": 0.0,
@@ -38594,11 +38714,11 @@
     "host": "Williams-MacBook-Pro-260.local",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "b8d9843dfa16f914427e4e00c1b81b85311b52b1",
+    "git_commit": "24eba79d20d7899d80c26983d8bf98ed6bac5e5d",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-11-24T02:47:18.533545+00:00"
+    "recorded_at_utc": "2026-11-24T03:28:55.799655+00:00"
   },
-  "content_sha256": "d82359b70f74fbfbf9ef7b5ae27bdd3fc69e8eaba5bb7982bc60589c32ef50e4"
+  "content_sha256": "84c1185169d5b8d7d0ddaceea574380fdb30106962a89bfed7c7bda2dc217c49"
 }

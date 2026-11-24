@@ -1932,11 +1932,19 @@
       "gate_means": "whether this chain sits where a binder can reach it and is worth the stages below. `no` is a verdict and not a failure.",
       "chain_length_aa": null,
       "chain_span_on_the_relative": null,
-      "chain_span_in_the_reading_frame": null,
-      "chain_span_nt": null,
-      "nt_confirmed_at": null,
-      "reading_frame": null,
-      "reading_frame_unresolved_because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation",
+      "chain_span_in_the_reading_frame": [
+        1,
+        109
+      ],
+      "chain_span_nt": [
+        5377,
+        5703
+      ],
+      "nt_confirmed_at": [
+        "the whole chain: it is this reading frame's own translation"
+      ],
+      "reading_frame": "-0 at nt 1696",
+      "reading_frame_unresolved_because": null,
       "function": null,
       "function_is_about": null,
       "function_of_the_whole_entry": null,
@@ -1960,7 +1968,10 @@
             1,
             109
           ],
-          "span_in_the_chain": null,
+          "span_in_the_chain": [
+            1,
+            109
+          ],
           "span_on_the_relative": null,
           "length_aa": 109,
           "folded": true,
@@ -2087,9 +2098,256 @@
           "ratio_to_deposited_median": null,
           "what_it_is": "the same measurement on coordinates a predictor emitted, which is the only route to a surface for a protein nothing has solved",
           "caveat": "An area measured on a prediction is comparable with another prediction and not with a deposition; on the one chain carrying both, the prediction read several times larger. The residue positions transfer far better than the area does.",
-          "residues_in_the_reading_frame": null,
+          "residues_in_the_reading_frame": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            9,
+            10,
+            12,
+            13,
+            15,
+            16,
+            17,
+            20,
+            22,
+            23,
+            24,
+            26,
+            28,
+            30,
+            31,
+            37,
+            41,
+            44,
+            50,
+            51,
+            54,
+            55,
+            58,
+            59,
+            61,
+            63,
+            64,
+            65,
+            68,
+            70,
+            74,
+            75,
+            83,
+            84,
+            86,
+            88,
+            90,
+            93,
+            94,
+            95,
+            96,
+            98,
+            103,
+            107
+          ],
           "residue_count": 49,
-          "residues_nt": null,
+          "residues_nt": [
+            [
+              5701,
+              5703
+            ],
+            [
+              5698,
+              5700
+            ],
+            [
+              5692,
+              5694
+            ],
+            [
+              5689,
+              5691
+            ],
+            [
+              5686,
+              5688
+            ],
+            [
+              5677,
+              5679
+            ],
+            [
+              5674,
+              5676
+            ],
+            [
+              5668,
+              5670
+            ],
+            [
+              5665,
+              5667
+            ],
+            [
+              5659,
+              5661
+            ],
+            [
+              5656,
+              5658
+            ],
+            [
+              5653,
+              5655
+            ],
+            [
+              5644,
+              5646
+            ],
+            [
+              5638,
+              5640
+            ],
+            [
+              5635,
+              5637
+            ],
+            [
+              5632,
+              5634
+            ],
+            [
+              5626,
+              5628
+            ],
+            [
+              5620,
+              5622
+            ],
+            [
+              5614,
+              5616
+            ],
+            [
+              5611,
+              5613
+            ],
+            [
+              5593,
+              5595
+            ],
+            [
+              5581,
+              5583
+            ],
+            [
+              5572,
+              5574
+            ],
+            [
+              5554,
+              5556
+            ],
+            [
+              5551,
+              5553
+            ],
+            [
+              5542,
+              5544
+            ],
+            [
+              5539,
+              5541
+            ],
+            [
+              5530,
+              5532
+            ],
+            [
+              5527,
+              5529
+            ],
+            [
+              5521,
+              5523
+            ],
+            [
+              5515,
+              5517
+            ],
+            [
+              5512,
+              5514
+            ],
+            [
+              5509,
+              5511
+            ],
+            [
+              5500,
+              5502
+            ],
+            [
+              5494,
+              5496
+            ],
+            [
+              5482,
+              5484
+            ],
+            [
+              5479,
+              5481
+            ],
+            [
+              5455,
+              5457
+            ],
+            [
+              5452,
+              5454
+            ],
+            [
+              5446,
+              5448
+            ],
+            [
+              5440,
+              5442
+            ],
+            [
+              5434,
+              5436
+            ],
+            [
+              5425,
+              5427
+            ],
+            [
+              5422,
+              5424
+            ],
+            [
+              5419,
+              5421
+            ],
+            [
+              5416,
+              5418
+            ],
+            [
+              5410,
+              5412
+            ],
+            [
+              5395,
+              5397
+            ],
+            [
+              5383,
+              5385
+            ]
+          ],
           "numbering": {
             "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
             "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
@@ -4385,14 +4643,14 @@
     "with_a_site": 7,
     "with_a_measured_patch": 4,
     "with_a_functional_site": 6,
-    "with_nucleotide_coordinates": 5,
+    "with_nucleotide_coordinates": 6,
     "with_a_function": 6,
     "already_drugged": 3
   },
   "limitations": [
     "No row here is a measurement on the pathogen. Function, families, partners and marked residues are curated annotation on the nearest reviewed relative, transferred across a species gap. A deposited area is measured on a relative's domain; a predicted area is measured on coordinates a model emitted.",
     "An area measured on predicted coordinates is comparable with another prediction and not with a deposition. On the one chain carrying both, the prediction read several times larger. Residue positions transfer far better than areas do.",
-    "A nucleotide range appears only where the reading frame was confirmed by reading its residues back against the relative's chain. `nt_confirmed_at` says which end of the span that confirmation covered: a chain spanning a ribosomal frameshift can be exact at one end and short at the other, and that row says so rather than being dropped or trusted whole.",
+    "A nucleotide range appears only where the reading frame was settled. `nt_confirmed_at` says how. Most chains are their reading frame's whole translation, were never cut out of a polyprotein and cross no species gap, so their coordinate is exact by construction. A chain that was cut out of one is placed by alignment and its frame is confirmed by reading the residues back against the relative; there `nt_confirmed_at` names which end of the span that covered, because a chain spanning a ribosomal frameshift can be exact at one end and short at the other.",
     "`residues_in_the_chain` is 1-based within the mature chain and is the numbering for a structure viewer. `residues_in_the_reading_frame` is 1-based along one reading frame of this genome and is meaningless without the frame in the same row.",
     "A cleavage site is where this protein is cut. It is a marked residue and it is not somewhere to bind.",
     "The ranking is the pipeline's five stated weights. Fitting those weights against the proteins approved antivirals already act on does not improve them, which is recorded in runs/rubric_fit.json; the ranking is carried by the terms rather than their weighting.",
@@ -4402,11 +4660,11 @@
     "host": "Williams-MacBook-Pro-260.local",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "b8d9843dfa16f914427e4e00c1b81b85311b52b1",
+    "git_commit": "24eba79d20d7899d80c26983d8bf98ed6bac5e5d",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-11-24T02:58:20.200138+00:00"
+    "recorded_at_utc": "2026-11-24T04:01:48.334222+00:00"
   },
-  "content_sha256": "823b40f867213cc3cb0b0048d5f6b8d422a131ab94ff091da012269329a7cd48"
+  "content_sha256": "985bd8b006b2f88082b75bdcdcae414021f6b4be594e9d61d3762ddfda9546a4"
 }

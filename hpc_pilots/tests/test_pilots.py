@@ -7295,10 +7295,21 @@ def test_every_bar_on_a_lane_starts_at_zero_against_one_labelled_line():
 # ---------------------------------------------------------------------------
 # Fitting the five ranking weights
 # ---------------------------------------------------------------------------
+_PANEL_MATRIX = []
+
+
 def _fit_genomes():
+    """The panel's feature matrix, built once per session.
+
+    Ten tests want it and each build re-reads 47 records and re-runs the label matcher over
+    583 rows, which was costing the suite minutes. It is a pure function of files on disk, so
+    sharing it cannot let one test observe another.
+    """
     from hpc_pilots import rubric_fit
 
-    genomes, skipped = rubric_fit.panel_matrix(tier="all")
+    if not _PANEL_MATRIX:
+        _PANEL_MATRIX.append(rubric_fit.panel_matrix(tier="all"))
+    genomes, skipped = _PANEL_MATRIX[0]
     if not genomes:
         pytest.skip("runs/benchmark/ holds no panel record on this machine")
     return genomes, skipped
@@ -7914,11 +7925,21 @@ def test_a_reading_frame_whose_residues_disagree_is_refused_rather_than_used():
         frame = row["reading_frame"]
         if frame.get("verified"):
             agreement = frame["residue_agreement"]
-            # Something was compared, and it agreed at one end or both.
-            assert agreement["checked"] is True
-            assert agreement["agrees"] is True
-            assert agreement["confirmed_at"], row["target"]
-            assert agreement["residues_compared"] >= 1
+            if frame["route"] == "whole_orf":
+                # Nothing was transferred across a species gap, so there is no second
+                # sequence to compare and no alignment that could have shifted anything.
+                # An unmade check here is not a skipped one: there is nothing to check.
+                assert agreement["checked"] is False
+                assert "own translation" in agreement["because"]
+                assert frame["confirmed_at_both_ends"] is True
+                assert frame["whole_chain_span"][0] == 1
+            else:
+                # Something was compared, and it agreed at one end or both.
+                assert agreement["checked"] is True
+                assert agreement["agrees"] is True
+                assert agreement["confirmed_at"], row["target"]
+                assert agreement["residues_compared"] >= 1
+            assert frame["confirmed_at"], row["target"]
         else:
             # Every refusal names its cause, and none of them emits a coordinate anyway.
             assert frame.get("because"), row["target"]
@@ -8259,3 +8280,231 @@ def test_the_weight_prose_takes_every_number_from_the_record():
     assert drawn
     assert "genomes with both scales" in drawn and "genomes with one scale" in drawn
     assert "the weights it ships" in drawn and "without this term" in drawn
+
+
+def test_the_repair_touches_only_the_rows_measured_the_other_way():
+    """Withholding the remote tier must not disturb the tier the weight was calibrated for.
+
+    The whole defence of this repair is that it invents no conversion: it declines to read one
+    number and leaves every other untouched. A transformation that also moved the exact-tier
+    values would be a rescaling of the term, which is the thing `intake` refuses.
+    """
+    from hpc_pilots import rubric_fit
+
+    genomes, _ = _fit_genomes()
+    repaired = rubric_fit.repaired_genomes(genomes)
+    index = rubric_fit.FEATURES.index("conservation")
+    assert len(repaired) == len(genomes)
+
+    changed = untouched = 0
+    for before, after in zip(genomes, repaired):
+        assert after["pathogen"] == before["pathogen"]
+        assert after["y"] is before["y"]            # labels are not involved at all
+        scales = [(row.get("features") or {}).get("conservation_scale")
+                  for row in before["rows"]]
+        for i, scale in enumerate(scales):
+            for feature in range(len(rubric_fit.FEATURES)):
+                if feature == index and scale == rubric_fit.REMOTE_SCALE:
+                    changed += 1
+                    continue
+                # Every other cell, and every exact-tier conservation value, is identical.
+                assert after["x"][i][feature] == before["x"][i][feature], (
+                    before["pathogen"], i, rubric_fit.FEATURES[feature])
+                if feature == index:
+                    untouched += 1
+        # The value substituted is the genome's own exact-tier median, which is a statistic of
+        # the features and never of the labels, so it leaks nothing into a scored comparison.
+        exact = [before["x"][i][index] for i, s in enumerate(scales)
+                 if s == rubric_fit.EXACT_SCALE]
+        if exact and after["rows_imputed"]:
+            assert after["conservation_imputed_to"] == pytest.approx(
+                sorted(exact)[len(exact) // 2] if len(exact) % 2
+                else sum(sorted(exact)[len(exact) // 2 - 1:len(exact) // 2 + 1]) / 2,
+                abs=1e-4)
+    assert changed > 0 and untouched > changed
+    assert sum(g["rows_imputed"] for g in repaired) == changed
+
+
+def test_withholding_the_remote_tier_moves_genomes_up_and_none_down():
+    """The claim the page makes, pinned, including its direction.
+
+    A gain with no genome worse is what makes this worth acting on rather than worth noting,
+    and it is the sentence on the page. If a re-run ever reverses it the page is wrong and this
+    should fail rather than the figure quietly redrawing.
+    """
+    from hpc_pilots import rubric_fit
+
+    payload = json.loads((ROOT / "runs/rubric_fit.json").read_text())
+    repair = payload["conservation_repair"]
+    assert repair["weights_unchanged"] is True
+    assert repair["rows_imputed"] > 0
+    # Recall rises at every depth it can rise at, and falls at none.
+    for depth, gain in repair["gain"].items():
+        assert gain >= 0, (depth, gain)
+    assert repair["gain"]["top1"] > 0
+    paired = repair["paired"]
+    assert paired["genomes_worse"] == 0, paired
+    assert paired["genomes_better"] >= 1
+    # The p-value is at its floor for that many moves, so the record must not be read as
+    # significance. The reading says so.
+    assert "floor" in repair["reading"]
+    # And the record states the property the repair rests on: nothing is converted between the
+    # two scales, a value is withheld and replaced by the other scale's typical one.
+    justification = repair["needs_no_calibration"]
+    assert "converted" in justification and "typical value" in justification
+
+
+def test_a_cross_scale_inversion_is_counted_only_when_conservation_decided_it():
+    """A target outranked by a genuinely better candidate is not evidence about the scales.
+
+    The count exists to say how often the two measuring sticks reversed a pair that mattered.
+    Without the decisiveness condition it would count every cross-scale pair, most of which
+    the other four terms settle on their own, and the figure would say nothing.
+    """
+    from hpc_pilots import rubric_fit
+
+    genomes, _ = _fit_genomes()
+    found = rubric_fit.cross_scale_inversions(genomes)
+    assert found["target_outranked_pairs"] >= found["of_those_conservation_was_decisive"]
+    assert found["of_those_conservation_was_decisive"] >= found["and_the_two_scales_differed"]
+    assert found["genomes_affected_count"] == len(found["genomes_affected"])
+    assert found["genomes_affected_count"] <= len(genomes)
+    # Every example really is a pair the two scales separated, with the loser a labelled
+    # target and the winner on the other scale.
+    scales = {rubric_fit.EXACT_SCALE, rubric_fit.REMOTE_SCALE}
+    for example in found["examples"]:
+        assert example["target_scale"] != example["candidate_scale"]
+        assert {example["target_scale"], example["candidate_scale"]} <= scales
+        assert example["points_between_them"] > 0
+        assert example["pathogen"] in found["genomes_affected"]
+    # And it is named as a lower bound, because a saturated value can mis-order a pair that
+    # shares one scale and this does not look for that.
+    assert "lower bound" in found["reading"]
+
+
+def test_a_chain_that_is_its_whole_reading_frame_needs_no_alignment_to_be_placed():
+    """The third route, and the three ways it refuses rather than guesses.
+
+    A candidate ORF that was never a polyprotein has no mature chains cut out of it, so the
+    fold stage does not search for one and records no `found_in` at all. Reading that absence
+    as a failure left 210 of the panel's 396 rows without a coordinate they could trivially
+    have had: the chain is the frame's own translation, so residue 1 is the frame's first
+    codon and nothing is transferred across a species gap.
+
+    The refusals matter more than the successes here, because this route has no residue check
+    to fall back on -- it identifies the frame by name or by length and then trusts it.
+    """
+    from hpc_pilots import annotate
+
+    frames = [{"rank": 1, "name": "Membrane protein", "length_aa": 219,
+               "strand": "+", "frame": 0, "nt_start": 1000},
+              {"rank": 2, "name": None, "length_aa": 160,
+               "strand": "+", "frame": 1, "nt_start": 4000},
+              {"rank": 3, "name": None, "length_aa": 160,
+               "strand": "-", "frame": 2, "nt_start": 7000}]
+    case = {"candidates": frames, "genome_accession": "X"}
+
+    def row(target, length):
+        return {"target": target, "recovered_by": annotate.WHOLE_ORF,
+                "parent_orf_length_aa": length}
+
+    # Named, and the name is unique: resolved, and the span is the whole frame.
+    named = annotate.reading_frame(case, row("Membrane protein", 219), {})
+    assert named["verified"] is True and named["route"] == "whole_orf"
+    assert named["orf_rank"] == 1
+    assert named["whole_chain_span"] == [1, 219]
+    assert named["confirmed_at_both_ends"] is True
+    assert named["residue_agreement"]["checked"] is False
+    # Residue 1 is the frame's first codon, which is the whole claim of this route.
+    assert annotate.residue_to_nt(1, named, 20000) == [1001, 1003]
+
+    # Unnamed but a unique length: resolved on the length alone.
+    sized = annotate.reading_frame(case, row("unidentified probable surface antigen", 219), {})
+    assert sized["verified"] is True and sized["orf_rank"] == 1
+
+    # Two frames share the length and the row carries no usable name: refused, not guessed.
+    ambiguous = annotate.reading_frame(
+        case, row("unidentified probable surface antigen", 160), {})
+    assert ambiguous["verified"] is False
+    assert "cannot be settled" in ambiguous["because"]
+
+    # A name that matches a frame of a different length is not that frame. Without this the
+    # route would take the named candidate and put every coordinate somewhere else.
+    mismatched = annotate.reading_frame(case, row("Membrane protein", 500), {})
+    assert mismatched["verified"] is False
+    assert "not the same thing" in mismatched["because"]
+
+    # `recovered_by` is present and null on rows that took another path, and that must not
+    # raise on the substring test.
+    assert annotate.reading_frame(
+        case, {"target": "x", "recovered_by": None}, {})["verified"] is False
+
+
+def test_a_minus_strand_coordinate_reproduces_the_genome_it_came_from():
+    """The riskiest arithmetic here, checked against the genome rather than against itself.
+
+    `build_site` carries a standing caveat that minus-strand offsets run along the reverse
+    complement and are not converted, so this conversion had no precedent in the repository to
+    be consistent with. The unit test above pins the formula on synthetic values; this takes a
+    real minus-strand reading frame, walks residues out of its own translation, slices the
+    genome at the coordinates this module computes, reverse-complements and translates them,
+    and checks the amino acid that comes back is the one the frame says is there.
+
+    Nothing about this is circular: the expected residue comes from `intake.orfs`' translation
+    and the observed one from the genome's bases at an independently computed range. An
+    off-by-one, a wrong strand or a reflected coordinate all fail it.
+    """
+    from hpc_pilots import annotate, domain_folds
+    from hpc_pilots.intake import genome_records, revcomp, translate
+
+    accession = "NC_001437.1"
+    _needs(f"runs/onset_chain_{accession.replace('.', '_')}.json")
+    try:
+        records = genome_records(accession)
+        pool = domain_folds._orf_records(accession)
+    except Exception as failure:                                        # noqa: BLE001
+        pytest.skip(f"this genome is not readable here: {type(failure).__name__}")
+
+    minus = [orf for orf in pool if orf.get("strand") == "-"]
+    if not minus:
+        pytest.skip("no minus-strand reading frame in this genome's pool")
+    orf = minus[0]
+    sequence = records[0][1]
+    frame = {"verified": True, "strand": "-", "nt_start": orf["nt_start"]}
+    length = orf["length_aa"]
+
+    checked = 0
+    for position in (1, 2, 3, length // 2, length):
+        first, last = annotate.residue_to_nt(position, frame, len(sequence))
+        assert last - first == 2
+        assert 1 <= first and last <= len(sequence)
+        codon = revcomp(sequence[first - 1:last])
+        assert translate(codon) == orf["protein"][position - 1], (position, codon)
+        checked += 1
+    assert checked == 5
+    # Residue 1 is a start codon, which is what `intake.orfs` looks for, so a conversion that
+    # landed anywhere else would almost certainly not read ATG.
+    first, last = annotate.residue_to_nt(1, frame, len(sequence))
+    assert revcomp(sequence[first - 1:last]) == "ATG"
+    # Consecutive residues step three bases towards the start of the genome, not away from it.
+    assert annotate.residue_to_nt(2, frame, len(sequence))[0] \
+        == annotate.residue_to_nt(1, frame, len(sequence))[0] - 3
+
+
+def test_a_segment_is_found_by_its_index_as_well_as_its_accession():
+    """A candidate names its segment with an integer, and the lookup has to accept one.
+
+    Keyed only by accession, every minus-strand row looked up `0`, found nothing, and lost a
+    coordinate it had all the information for. The plus strand hid it: that strand needs no
+    segment length, so the failure was invisible on two thirds of the rows.
+    """
+    from hpc_pilots import annotate
+
+    try:
+        lengths = annotate.segment_lengths("NC_001437.1")
+    except Exception as failure:                                        # noqa: BLE001
+        pytest.skip(f"this genome is not readable here: {type(failure).__name__}")
+    assert lengths[0] == lengths["NC_001437.1"]
+    # `None` is set only for a single-segment genome, which is what makes it safe as a
+    # fallback: on a segmented genome it stays absent rather than naming the wrong segment.
+    assert lengths[None] == lengths[0]

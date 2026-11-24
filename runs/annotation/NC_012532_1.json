@@ -2088,16 +2088,45 @@
       },
       "gate": null,
       "reading_frame": {
-        "verified": false,
-        "orf_rank": null,
-        "route": null,
-        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+        "verified": true,
+        "route": "whole_orf",
+        "orf_rank": 2,
+        "strand": "-",
+        "frame": 0,
+        "nt_start": 9660,
+        "orf_length_aa": 121,
+        "segment": 0,
+        "orf_name": "unidentified probable surface antigen",
+        "reading_frame": "-0 at nt 9661",
+        "whole_chain_span": [
+          1,
+          121
+        ],
+        "residue_agreement": {
+          "checked": false,
+          "agrees": null,
+          "because": "the chain is this reading frame's own translation, so there is no second sequence to compare it against and no alignment that could have shifted it"
+        },
+        "confirmed_at": [
+          "the whole chain: it is this reading frame's own translation"
+        ],
+        "confirmed_at_both_ends": true,
+        "how_it_was_resolved": "the candidate's name identifies the reading frame",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, which for this chain is the whole of it."
       },
       "chain_span_on_the_relative": null,
-      "chain_span_in_this_genome": null,
-      "chain_span_nt": null,
-      "chain_span_nt_confirmed_at": null,
-      "segment_length_nt": null,
+      "chain_span_in_this_genome": [
+        1,
+        121
+      ],
+      "chain_span_nt": [
+        772,
+        1134
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the whole chain: it is this reading frame's own translation"
+      ],
+      "segment_length_nt": 10794,
       "annotation": null,
       "annotation_failed_because": null,
       "not_annotated_because": "this chain was identified with no reviewed relative, so there is no curated entry to read a function from"
@@ -5478,8 +5507,8 @@
     "chains": 9,
     "with_a_reviewed_relative": 8,
     "with_a_function_for_this_chain": 8,
-    "with_a_verified_reading_frame": 6,
-    "with_nucleotide_coordinates": 6,
+    "with_a_verified_reading_frame": 7,
+    "with_nucleotide_coordinates": 7,
     "host_interactions_found": 0
   },
   "joins_to_its_chain_record_on": [
@@ -5498,11 +5527,11 @@
     "host": "Williams-MacBook-Pro-260.local",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_commit": "24eba79d20d7899d80c26983d8bf98ed6bac5e5d",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-11-24T02:04:50.424698+00:00"
+    "recorded_at_utc": "2026-11-24T04:00:38.385859+00:00"
   },
-  "content_sha256": "02b764ab8e1a6a25002f1be2497cbc42c7e3634b909bea378fcf39f5ba1aec21"
+  "content_sha256": "80e4d4e40f5cd78e0cd7a73948cae412f4a84674374ead14dcb169885835ea26"
 }

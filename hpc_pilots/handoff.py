@@ -222,7 +222,12 @@ def rows_for_case(case, annotation, panel=None):
         foldable = foldables.get(target) or {}
         extra = annotated.get(target) or {}
         frame = extra.get("reading_frame") or {}
-        span = foldable.get("span_in_this_genome")
+        # From the annotation record rather than the fold row. A chain that is its whole
+        # reading frame has no alignment and so no `span_in_this_genome`; `annotate` resolves
+        # one for it (1 to the frame's length) and that is the span every residue list here
+        # has to be converted against. Reading the fold row directly left 210 targets with a
+        # chain coordinate and no per-residue ones, which is the worse half missing.
+        span = extra.get("chain_span_in_this_genome") or foldable.get("span_in_this_genome")
         length = extra.get("segment_length_nt")
         sites = _sites(surface, span, frame, length)
         annotated_entry = extra.get("annotation") or {}
@@ -556,10 +561,13 @@ LIMITATIONS = [
     "An area measured on predicted coordinates is comparable with another prediction and not "
     "with a deposition. On the one chain carrying both, the prediction read several times "
     "larger. Residue positions transfer far better than areas do.",
-    "A nucleotide range appears only where the reading frame was confirmed by reading its "
-    "residues back against the relative's chain. `nt_confirmed_at` says which end of the span "
-    "that confirmation covered: a chain spanning a ribosomal frameshift can be exact at one end "
-    "and short at the other, and that row says so rather than being dropped or trusted whole.",
+    "A nucleotide range appears only where the reading frame was settled. `nt_confirmed_at` "
+    "says how. Most chains are their reading frame's whole translation, were never cut out "
+    "of a polyprotein and cross no species gap, so their coordinate is exact by "
+    "construction. A chain that was cut out of one is placed by alignment and its frame is "
+    "confirmed by reading the residues back against the relative; there `nt_confirmed_at` "
+    "names which end of the span that covered, because a chain spanning a ribosomal "
+    "frameshift can be exact at one end and short at the other.",
     "`residues_in_the_chain` is 1-based within the mature chain and is the numbering for a "
     "structure viewer. `residues_in_the_reading_frame` is 1-based along one reading frame of "
     "this genome and is meaningless without the frame in the same row.",

@@ -3162,11 +3162,19 @@
       "gate_means": "whether this chain sits where a binder can reach it and is worth the stages below. `no` is a verdict and not a failure.",
       "chain_length_aa": null,
       "chain_span_on_the_relative": null,
-      "chain_span_in_the_reading_frame": null,
-      "chain_span_nt": null,
-      "nt_confirmed_at": null,
-      "reading_frame": null,
-      "reading_frame_unresolved_because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation",
+      "chain_span_in_the_reading_frame": [
+        1,
+        102
+      ],
+      "chain_span_nt": [
+        3909,
+        4214
+      ],
+      "nt_confirmed_at": [
+        "the whole chain: it is this reading frame's own translation"
+      ],
+      "reading_frame": "-2 at nt 6510",
+      "reading_frame_unresolved_because": null,
       "function": null,
       "function_is_about": null,
       "function_of_the_whole_entry": null,
@@ -3190,7 +3198,10 @@
             1,
             102
           ],
-          "span_in_the_chain": null,
+          "span_in_the_chain": [
+            1,
+            102
+          ],
           "span_on_the_relative": null,
           "length_aa": 102,
           "folded": true,
@@ -3299,9 +3310,211 @@
           "ratio_to_deposited_median": null,
           "what_it_is": "the same measurement on coordinates a predictor emitted, which is the only route to a surface for a protein nothing has solved",
           "caveat": "An area measured on a prediction is comparable with another prediction and not with a deposition; on the one chain carrying both, the prediction read several times larger. The residue positions transfer far better than the area does.",
-          "residues_in_the_reading_frame": null,
+          "residues_in_the_reading_frame": [
+            13,
+            14,
+            16,
+            19,
+            20,
+            22,
+            24,
+            28,
+            29,
+            30,
+            31,
+            32,
+            37,
+            41,
+            43,
+            45,
+            48,
+            49,
+            50,
+            52,
+            55,
+            58,
+            59,
+            60,
+            61,
+            64,
+            74,
+            76,
+            79,
+            81,
+            83,
+            85,
+            87,
+            89,
+            90,
+            95,
+            96,
+            97,
+            98,
+            101
+          ],
           "residue_count": 40,
-          "residues_nt": null,
+          "residues_nt": [
+            [
+              4176,
+              4178
+            ],
+            [
+              4173,
+              4175
+            ],
+            [
+              4167,
+              4169
+            ],
+            [
+              4158,
+              4160
+            ],
+            [
+              4155,
+              4157
+            ],
+            [
+              4149,
+              4151
+            ],
+            [
+              4143,
+              4145
+            ],
+            [
+              4131,
+              4133
+            ],
+            [
+              4128,
+              4130
+            ],
+            [
+              4125,
+              4127
+            ],
+            [
+              4122,
+              4124
+            ],
+            [
+              4119,
+              4121
+            ],
+            [
+              4104,
+              4106
+            ],
+            [
+              4092,
+              4094
+            ],
+            [
+              4086,
+              4088
+            ],
+            [
+              4080,
+              4082
+            ],
+            [
+              4071,
+              4073
+            ],
+            [
+              4068,
+              4070
+            ],
+            [
+              4065,
+              4067
+            ],
+            [
+              4059,
+              4061
+            ],
+            [
+              4050,
+              4052
+            ],
+            [
+              4041,
+              4043
+            ],
+            [
+              4038,
+              4040
+            ],
+            [
+              4035,
+              4037
+            ],
+            [
+              4032,
+              4034
+            ],
+            [
+              4023,
+              4025
+            ],
+            [
+              3993,
+              3995
+            ],
+            [
+              3987,
+              3989
+            ],
+            [
+              3978,
+              3980
+            ],
+            [
+              3972,
+              3974
+            ],
+            [
+              3966,
+              3968
+            ],
+            [
+              3960,
+              3962
+            ],
+            [
+              3954,
+              3956
+            ],
+            [
+              3948,
+              3950
+            ],
+            [
+              3945,
+              3947
+            ],
+            [
+              3930,
+              3932
+            ],
+            [
+              3927,
+              3929
+            ],
+            [
+              3924,
+              3926
+            ],
+            [
+              3921,
+              3923
+            ],
+            [
+              3912,
+              3914
+            ]
+          ],
           "numbering": {
             "residues_in_the_chain": "1-based within the mature chain. This is the numbering to type into a structure viewer.",
             "residues_in_the_reading_frame": "1-based along one open reading frame of this genome. Meaningless without `reading_frame`, which is on the target this site belongs to.",
@@ -8544,14 +8757,14 @@
     "with_a_site": 9,
     "with_a_measured_patch": 0,
     "with_a_functional_site": 8,
-    "with_nucleotide_coordinates": 8,
+    "with_nucleotide_coordinates": 9,
     "with_a_function": 8,
     "already_drugged": 4
   },
   "limitations": [
     "No row here is a measurement on the pathogen. Function, families, partners and marked residues are curated annotation on the nearest reviewed relative, transferred across a species gap. A deposited area is measured on a relative's domain; a predicted area is measured on coordinates a model emitted.",
     "An area measured on predicted coordinates is comparable with another prediction and not with a deposition. On the one chain carrying both, the prediction read several times larger. Residue positions transfer far better than areas do.",
-    "A nucleotide range appears only where the reading frame was confirmed by reading its residues back against the relative's chain. `nt_confirmed_at` says which end of the span that confirmation covered: a chain spanning a ribosomal frameshift can be exact at one end and short at the other, and that row says so rather than being dropped or trusted whole.",
+    "A nucleotide range appears only where the reading frame was settled. `nt_confirmed_at` says how. Most chains are their reading frame's whole translation, were never cut out of a polyprotein and cross no species gap, so their coordinate is exact by construction. A chain that was cut out of one is placed by alignment and its frame is confirmed by reading the residues back against the relative; there `nt_confirmed_at` names which end of the span that covered, because a chain spanning a ribosomal frameshift can be exact at one end and short at the other.",
     "`residues_in_the_chain` is 1-based within the mature chain and is the numbering for a structure viewer. `residues_in_the_reading_frame` is 1-based along one reading frame of this genome and is meaningless without the frame in the same row.",
     "A cleavage site is where this protein is cut. It is a marked residue and it is not somewhere to bind.",
     "The ranking is the pipeline's five stated weights. Fitting those weights against the proteins approved antivirals already act on does not improve them, which is recorded in runs/rubric_fit.json; the ranking is carried by the terms rather than their weighting.",
@@ -8561,11 +8774,11 @@
     "host": "Williams-MacBook-Pro-260.local",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "b8d9843dfa16f914427e4e00c1b81b85311b52b1",
+    "git_commit": "24eba79d20d7899d80c26983d8bf98ed6bac5e5d",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-11-24T02:58:18.545570+00:00"
+    "recorded_at_utc": "2026-11-24T04:01:46.994423+00:00"
   },
-  "content_sha256": "c74e17889ce6350045800e6c65d67163b8a5f140606f5eff302daa1f3a593fb5"
+  "content_sha256": "4f2da2494aac09567bd9e0bf7a96521c6f78a1cd94c8b1a876856c55487dea90"
 }

@@ -386,10 +386,23 @@ the exact tier and `min(1, bits/200)` on the remote one, the second mostly satur
 44 scoreable genomes carry rows on both, and under the shipped rubric those genomes rank **12
 points worse at rank 1** than the 27 carrying one scale throughout. Dropping the term buys 18
 points on the mixed group and 4 on the clean one, after which the two are indistinguishable —
-which is what you see if the mixing is the problem rather than the term being weak. The repair
-is not a rescaling, which would need a conversion factor chosen by hand; it is the one `intake`
-names itself, a single quantity on both tiers, and `identify_remote` already holds the
-alignment it would be measured from.
+which is what you see if the mixing is the problem rather than the term being weak. Underneath
+the aggregate it is visible pair by pair: **16 pairs across 9 genomes** are cases where a
+drugged target is outranked by a candidate measured on the other scale with the other four
+terms not favouring the winner. On HCoV-229E the membrane protein reads a saturated 1.0 and
+sits above the main protease and the polymerase — both carry approved antivirals — by 1.36 and
+1.44 points.
+
+**A repair is available that needs no conversion factor, and it is measured.** Rather than
+converting a bit score into a k-mer fraction, which would need a divisor chosen by hand,
+withhold the value where it was taken the other way: a remote-tier row gets the typical
+exact-tier value of its own genome, so the term abstains instead of rewarding a protein for
+having been hard to identify. With **the five shipped weights unchanged**, that moves recall@1
+from 54.5% to 61.4% and recall@3 from 86.4% to 90.9% over 50 changed rows, with **five genomes
+better and none worse** (sign test p = 0.0625, the floor for five moves). It is a reason to
+make the change in `intake` and measure it there — where the better quantity `intake` names,
+alignment identity on both tiers, is available from an alignment `identify_remote` already
+holds — not a result on its own.
 
 `runs/weights/binding.json` is the other weight vector, and that one does learn. A `ridge`
 surrogate joins the registry so there are coefficients to inspect at all, with the forest still

@@ -438,14 +438,16 @@ def build_index():
     body = body.replace("<!--TRACK-->", feature_track(holdout))
     body = body.replace("<!--HANDOFF-->", handoff_block())
     body = body.replace("<!--RUBRIC-->", rubric_block())
+    body = body.replace("<!--INVERSION-->", inversion_block())
     body = body.replace("<!--CONSERVATION-->", conservation_block())
+    body = body.replace("<!--REPAIR-->", repair_block())
     body = body.replace("<!--WEIGHTS-->", weights_block())
     body = body.replace("<!--OFFCHAIN-->", build_offchain())
     # Last, so a {{token}} introduced by any generated block above is filled too. The
     # landing page is the held-out case throughout, so its numbers come from that case.
     body = fill(body, facts(holdout) | candidate_facts(holdout) | chain_facts(holdout)
                 | picked_facts(holdout) | lane_facts(holdout)
-                | site_patch_facts(holdout) | rubric_facts())
+                | site_patch_facts(holdout) | rubric_facts() | handoff_facts())
     # The fold renderer once for the page, after every fold placeholder it draws into.
     body += FOLD_TRACE_JS
     out = (head(f"{SITE} · one pathogen genome in, every next step out",
@@ -2167,6 +2169,31 @@ def rubric_block():
     </div>"""
 
 
+def handoff_facts():
+    """The export's coverage figures, so the prose beside it cannot drift from the file.
+
+    The bullet under this section said most targets have no genome coordinate, which was true
+    when 162 of 396 did and false a commit later when 288 did. Same failure the weight prose
+    had: a number typed into a sentence beside a figure that is read from a record.
+    """
+    index = handoff_index()
+    if not index:
+        return {}
+    located = index.get("targets_located_in_a_reading_frame") or 0
+    nt = index.get("targets_with_nucleotide_coordinates") or 0
+    return {
+        "handoff_targets": index["targets"],
+        "handoff_genomes": index["genomes"],
+        "handoff_rows": index["site_rows"],
+        "handoff_nt": nt,
+        "handoff_locatable": located,
+        "handoff_no_span": index.get("targets_with_no_span_to_convert") or 0,
+        "handoff_nt_share": f"{(100 * nt / located):.0f}" if located else "0",
+        "handoff_function": index.get("targets_with_a_function") or 0,
+        "handoff_drugged": index.get("targets_already_drugged") or 0,
+    }
+
+
 def rubric_facts():
     """The numbers the weight-fitting prose quotes, so none of them is typed into the page.
 
@@ -2204,6 +2231,97 @@ def rubric_facts():
         "scale_drop_buys_mixed": f"{(split.get('dropping_conservation_buys') or {}).get('mixed', 0):.0f}",
         "scale_drop_buys_single": f"{(split.get('dropping_conservation_buys') or {}).get('single', 0):.0f}",
     }
+
+
+def inversion_block():
+    """One worked case of the scale defect, because the aggregate does not argue it.
+
+    "Genomes with two scales rank twelve points worse" is a true sentence a reader has to take
+    on trust. One pair of rows, with the numbers that produced it, can be checked: a protein
+    nobody has a drug for scoring full marks on the saturated scale, and a protein two approved
+    antivirals bind scoring half that on the other one, with every other term level between
+    them.
+    """
+    record = rubric_fit_record()
+    inversions = (record or {}).get("cross_scale_inversions") or {}
+    examples = inversions.get("examples") or []
+    if not examples:
+        return ""
+    # The genome contributing the most, so the row shown is the clearest rather than the first.
+    counts = {}
+    for row in examples:
+        counts[row["pathogen"]] = counts.get(row["pathogen"], 0) + 1
+    worst = max(counts, key=lambda name: counts[name])
+    shown = [row for row in examples if row["pathogen"] == worst]
+    winner = shown[0]
+
+    losers = "".join(f"""
+      <tr><td>{esc(row['target_outranked'])}</td>
+        <td class="n">{num(row['target_conservation'])}</td>
+        <td>counts shared fragments</td>
+        <td class="n">&minus;{num(row['points_between_them'])}</td></tr>"""
+                     for row in shown)
+    return f"""
+    <div class="cmxscroll" tabindex="0" role="group"
+         aria-label="A worked case of the two conservation scales, on {esc(worst)}">
+      <table class="cmx inv">
+        <caption>{esc(worst)}: what each protein scored for conservation, and how far
+          apart that put them</caption>
+        <thead><tr><th scope="col">protein</th><th scope="col">conservation</th>
+          <th scope="col">measured by</th><th scope="col">points behind</th></tr></thead>
+        <tbody>
+          <tr class="won"><td>{esc(winner['candidate_that_won'])}</td>
+            <td class="n">{num(winner['candidate_conservation'])}</td>
+            <td>a score that stops at full marks</td>
+            <td class="n">&mdash;</td></tr>
+          {losers}
+        </tbody>
+      </table>
+    </div>
+    <p class="note"><b>Nothing else differs.</b> The protein on top is not a drug target.
+    It reached full marks because it was matched the second way, which stops counting once a
+    match is good enough.
+    The proteins under it are matched the first way, which keeps counting. Every other term is
+    level between them, so this ordering is the two measurements disagreeing and nothing
+    else. It happens to {inversions['and_the_two_scales_differed']} pairs across
+    {inversions['genomes_affected_count']} genomes.</p>"""
+
+
+def repair_block():
+    """The shipped weights on a repaired input, against the same weights unrepaired.
+
+    The only arm on this page that is a recommendation rather than a diagnosis, so it is drawn
+    last and plainly: two bars per depth, the same five weights behind both, and the one count
+    that matters under them -- how many genomes moved, and how many moved the wrong way.
+    """
+    record = rubric_fit_record()
+    repair = (record or {}).get("conservation_repair") or {}
+    if not repair:
+        return ""
+    rows = []
+    for depth in ("top1", "top3", "top5"):
+        before = repair["recall_before"][depth]
+        after = repair["recall_after"][depth]
+        rows.append(f"""
+      <div class="wr">
+        <span class="who">a drugged target in the top {depth[3:]}</span>
+        <span class="plot">{_bar(after, cls="b pred")}{_bar(before, cls="b")}</span>
+        <span class="vl">{before:.0f}% &rarr; {after:.0f}%</span>
+      </div>""")
+    paired = repair["paired"]
+    return f"""
+    <div class="lane">
+      <div class="lane-grp"><span class="gl">The same five weights, with the term withheld
+        where it was measured the other way</span></div>
+      <div class="lane-axis" aria-hidden="true"><span></span>
+        <span class="ax"><b class="l0">0</b><b class="lm">100%</b></span><span></span></div>
+      {''.join(rows)}
+      <div class="lane-foot"><p>The solid bar is where it stands now and the outline past its
+        end is what the repair adds. {paired['genomes_better']} genomes improve and
+        {paired['genomes_worse']} get worse, out of {repair['rows_imputed']} rows changed
+        across the panel. No weight is altered and no conversion between the two measurements
+        is invented.</p></div>
+    </div>"""
 
 
 def conservation_block():

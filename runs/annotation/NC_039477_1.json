@@ -931,16 +931,45 @@
       },
       "gate": null,
       "reading_frame": {
-        "verified": false,
-        "orf_rank": null,
-        "route": null,
-        "because": "the fold stage recorded no reading frame for this chain, so it was never located in this genome's translation"
+        "verified": true,
+        "route": "whole_orf",
+        "orf_rank": 3,
+        "strand": "+",
+        "frame": 1,
+        "nt_start": 6706,
+        "orf_length_aa": 268,
+        "segment": 0,
+        "orf_name": "VP2_LORDV Minor capsid protein VP2",
+        "reading_frame": "+1 at nt 6707",
+        "whole_chain_span": [
+          1,
+          268
+        ],
+        "residue_agreement": {
+          "checked": false,
+          "agrees": null,
+          "because": "the chain is this reading frame's own translation, so there is no second sequence to compare it against and no alignment that could have shifted it"
+        },
+        "confirmed_at": [
+          "the whole chain: it is this reading frame's own translation"
+        ],
+        "confirmed_at_both_ends": true,
+        "how_it_was_resolved": "the candidate's name identifies the reading frame",
+        "what_the_numbering_is": "positions are 1-based along this one open reading frame of this genome, which for this chain is the whole of it."
       },
       "chain_span_on_the_relative": null,
-      "chain_span_in_this_genome": null,
-      "chain_span_nt": null,
-      "chain_span_nt_confirmed_at": null,
-      "segment_length_nt": null,
+      "chain_span_in_this_genome": [
+        1,
+        268
+      ],
+      "chain_span_nt": [
+        6707,
+        7510
+      ],
+      "chain_span_nt_confirmed_at": [
+        "the whole chain: it is this reading frame's own translation"
+      ],
+      "segment_length_nt": 7567,
       "annotation": {
         "accession": "P54636",
         "entry_id": "VP2_LORDV",
@@ -1034,8 +1063,8 @@
     "chains": 4,
     "with_a_reviewed_relative": 4,
     "with_a_function_for_this_chain": 3,
-    "with_a_verified_reading_frame": 3,
-    "with_nucleotide_coordinates": 3,
+    "with_a_verified_reading_frame": 4,
+    "with_nucleotide_coordinates": 4,
     "host_interactions_found": 0
   },
   "joins_to_its_chain_record_on": [
@@ -1054,11 +1083,11 @@
     "host": "Williams-MacBook-Pro-260.local",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "1bde2afa3a67a85c220e76993579892651df112e",
+    "git_commit": "24eba79d20d7899d80c26983d8bf98ed6bac5e5d",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-11-24T02:05:02.820670+00:00"
+    "recorded_at_utc": "2026-11-24T04:00:53.232916+00:00"
   },
-  "content_sha256": "d9c8205cdf6eec597c70589971d5c5ed7478634e2ac5350d0a7f124c9d446edd"
+  "content_sha256": "5bf17ec734f35c482715ab5738be9562fc05220d8666cd533180afe46be3cf14"
 }
