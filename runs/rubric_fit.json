@@ -1,7 +1,7 @@
 {
   "experiment": "rubric_fit",
   "status": "complete",
-  "question": "Does fitting the five ranking weights on 20 virus families rank the twenty-first better than the hand-set rubric does?",
+  "question": "Does fitting the five ranking weights on every virus family but one rank the family that was held out better than the hand-set rubric does?",
   "answer": "Fitting does not improve the ranking. The fitted weights gain +0.0 points at rank 1 over the rubric the pipeline ships, which is less than 2.3 points per genome buys, and the same fit on shuffled labels scores +2.2 against the fitted arm rather than falling below it. A margin a shuffled-label control can match is not evidence that anything was learned. What the comparison does establish is that the five-term ranking beats chance by a wide margin whatever the weights are: every arm recovers between 52.3% and 63.6% of labels at rank 1 against a 23.7% chance baseline, and the whole spread between arms is 11.3 points. The ranking is carried by the terms and not by their weighting. `intake.RUBRIC` is unchanged.",
   "tier": "all",
   "genomes_scored": 44,
@@ -38714,11 +38714,11 @@
     "host": "Williams-MacBook-Pro-260.local",
     "platform": "macOS-27.0.1-arm64-arm-64bit",
     "python": "3.12.4",
-    "git_commit": "24eba79d20d7899d80c26983d8bf98ed6bac5e5d",
+    "git_commit": "5b8df60452d9e416364747c0521310ea6bca4d73",
     "git_dirty": true,
     "slurm_job_id": null,
     "slurm_array_task_id": null,
-    "recorded_at_utc": "2026-11-24T03:28:55.799655+00:00"
+    "recorded_at_utc": "2026-11-24T17:55:54.324453+00:00"
   },
-  "content_sha256": "84c1185169d5b8d7d0ddaceea574380fdb30106962a89bfed7c7bda2dc217c49"
+  "content_sha256": "234eddae59dced8aab8d86259ea5a95f7e26fafaca0e4ae5a228704f8192e919"
 }

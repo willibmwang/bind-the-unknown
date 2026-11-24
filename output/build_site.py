@@ -2405,6 +2405,19 @@ def weights_block():
     if not trained:
         return ""
 
+    # The grids and the bars are ONE sub-landscape, because a coefficient table is only
+    # readable as a table and averaging five of them would draw a surface none of them has.
+    # What that costs is a reader taking pool zero for the result, so the endpoint across
+    # every trained arm is printed under the bars. The record's own headline made exactly
+    # that mistake until 24 Nov 2026, quoting this arm's 0.36 as the figure when the mean
+    # over the five is 0.28.
+    finals = sorted(a["steps"][-1]["ridge"]["skill"]["spearman_pred_truth"] or 0.0
+                    for a in arms.values() if a["policy"] == "greedy" and not a["control"])
+    across = (f"This is one of {len(finals)} sub-landscapes of the same assay. Across all "
+              f"{len(finals)} the final figure averages {sum(finals) / len(finals):+.2f} "
+              f"and spans {finals[0]:+.2f} to {finals[-1]:+.2f}."
+              if len(finals) > 1 else "")
+
     def grid(arm, caption):
         last = arm["steps"][-1]
         rows = last["ridge"]["coefficients"]
@@ -2449,12 +2462,14 @@ def weights_block():
       </div>""")
 
     return f"""
-    {grid(trained, "What the model learned from 128 measurements")}
+    {grid(trained, "What the model learned from 128 measurements, on one sub-landscape")}
     <div class="bars">
       <div class="bi"><div class="bi-top"><span class="nm"><b>How well it ranks molecules it
         has never been shown</b><span class="cut">1.00 would be a perfect ordering, 0.00 no
         better than guessing</span></span></div></div>
       {''.join(steps)}
+      <div class="bi"><div class="bi-top"><span class="nm"><span
+        class="cut">{esc(across)}</span></span></div></div>
     </div>
     {grid(control, "The same procedure on shuffled answers, where there is nothing to learn")
      if control else ""}"""

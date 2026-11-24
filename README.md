@@ -15,7 +15,8 @@ measures the surface a macrocyclic peptide would have to bind, and defines a foc
 thioether-macrocycle library for that molecule class. The library definition does not yet read
 the measured surface, which the flowchart below names as the missing arrow it is. It runs today
 against public endpoints at NCBI, UniProt, Europe PMC, EBI HMMER, InterPro, PDBe, 3D-Beacons,
-AlphaFold DB, ESMFold, RCSB and ChEMBL, and it has been run across three virus families.
+AlphaFold DB, ESMFold, RCSB and ChEMBL, and it has been run end to end on a 47-genome panel
+spanning 21 virus families, each genome with a published page and the record it was built from.
 
 **Start with the notebook.** [notebooks/double_arm_mvp.ipynb](notebooks/double_arm_mvp.ipynb)
 runs the whole path in one sitting and computes every number it shows when the cell executes. It
@@ -374,7 +375,7 @@ python3 output/measure_track_labels.py --all              # check no figure labe
 
 **What comes out of the last four.** `runs/rubric_fit.json` answers a question
 `intake.rank_score` had closed: it refused to fit the five weights because no labelled set of
-correct target rankings existed, and the 46-genome panel is now that set. Fitted under
+correct target rankings existed, and the 47-genome panel is now that set. Fitted under
 leave-one-family-out, the weights gain nothing at rank 1 over the ones the pipeline ships, and
 the same fit on shuffled labels scores in the same band, so nothing was learned. Every
 weighting beats chance by at least 29 points, so the ranking rests on the five terms rather
@@ -408,8 +409,11 @@ holds — not a result on its own.
 surrogate joins the registry so there are coefficients to inspect at all, with the forest still
 the default so every recorded replay reproduces. On the four-site GB1 library the design matrix
 is 4 positions by 20 residues, so the fitted vector is a table: glycine at position 267 reads
-+0.47 from 128 measurements, agreement with held-back answers rises from 0.17 to 0.36, and the
-same procedure on permuted outcomes ends at −0.01.
++0.47 from 128 measurements, agreement with held-back answers rises from 0.16 to 0.28 averaged
+over the five sub-landscapes — 0.22 to 0.36 taken one at a time — and the same procedure on
+permuted outcomes ends at 0.00, spanning −0.01 to +0.02. Until 24 November the record's own
+headline quoted the first sub-landscape alone, 0.17 to 0.36, as though it were the result;
+`_verdict` now averages over every trained arm and prints the spread beside it.
 
 `runs/handoff/targets.csv` is the export: 396 targets over 46 genomes, 641 rows, one per
 proposed binding site. Each row carries the residues in the chain's own numbering, the reading

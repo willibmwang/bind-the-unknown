@@ -4,12 +4,14 @@
 'correct target rankings for a novel pathogen' to fit against ... so a learned weighting here
 would be fitted to whatever its author already believed." That was true when it was written.
 
-It is no longer true. The 46-genome panel supplies the missing set: `runs/benchmark/*.json`
+It is no longer true. The 47-genome panel supplies the missing set: `runs/benchmark/*.json`
 holds one record per genome, each ranked chain carrying the same five features
 `intake.score_candidate` scores, and `data/benchmark_panel.json` names the protein an approved
 antiviral acts on. So the question the comment closed can now be opened and *measured* rather
-than argued: does fitting the five weights on 20 virus families rank the twenty-first better
-than the hand-set rubric does?
+than argued: does fitting the five weights on every virus family but one rank the family that was
+held out better than the hand-set rubric does? How many families that is depends on how many
+of the panel's genomes carry a matched label, so the count is computed and recorded rather
+than written here -- at the time of writing it is 19 of the panel's 21.
 
 **The stated rubric remains the default, whatever this module finds.** Nothing here writes a
 weight back into `intake.RUBRIC`. The fitted vector is a reported quantity, because installing
@@ -21,7 +23,7 @@ Three things the design is arranged to produce, because a weight vector nobody c
 is not much better than a constant:
 
 **A trajectory.** The fit is plain projected gradient descent and not a closed-form solve. A
-ridge solve would give the same answer faster and leave nothing to look at; fifteen hundred
+ridge solve would give the same answer faster and leave nothing to look at; eight thousand
 gradient steps leave a path, and the path is what shows a reader that the weights settle rather
 than wander. `fit_weights` returns every step it took.
 
@@ -566,8 +568,8 @@ def run_rubric_fit(tier="strong", epochs=8000, rate=0.08, penalty=1e-3, seed=202
     payload = {
         "experiment": "rubric_fit",
         "status": "complete",
-        "question": "Does fitting the five ranking weights on 20 virus families rank the "
-                    "twenty-first better than the hand-set rubric does?",
+        "question": "Does fitting the five ranking weights on every virus family but one rank "
+                    "the family that was held out better than the hand-set rubric does?",
         "answer": _verdict(comparison),
         "tier": tier,
         "genomes_scored": len(genomes),

@@ -377,24 +377,42 @@ def run_weights(pools=(0,), policies=("greedy", "random"), controls=True, record
 
 
 def _verdict(trained, shuffled):
-    """One sentence contrasting the trained arm's learning curve with the control's."""
+    """One sentence contrasting the trained arms' learning curves with the controls'.
+
+    Averaged over every trained arm rather than read off the first one. The arms are
+    independent sub-landscapes of the same assay and their endpoints differ by more than the
+    movement being reported -- quoting arm zero as "the" figure overstates whichever pool
+    happened to be run first, which is the same under-reporting this project corrects
+    elsewhere. The spread is printed beside the mean so a reader can see it.
+    """
     if not trained:
         return "No trained arm was run."
+
+    def spread(arms, index):
+        values = [arm["steps"][index]["ridge"]["skill"]["spearman_pred_truth"] for arm in arms]
+        return round(sum(values) / len(values), 4), round(min(values), 4), round(max(values), 4)
+
+    def norm(arms, index):
+        values = [arm["steps"][index]["ridge"]["l2_norm"] for arm in arms]
+        return round(sum(values) / len(values), 4)
+
     first = trained[0]["steps"][0]
     last = trained[0]["steps"][-1]
-    start = first["ridge"]["skill"]["spearman_pred_truth"]
-    end = last["ridge"]["skill"]["spearman_pred_truth"]
-    norm_start = first["ridge"]["l2_norm"]
-    norm_end = last["ridge"]["l2_norm"]
-    control = (shuffled[0]["steps"][-1]["ridge"]["skill"]["spearman_pred_truth"]
-               if shuffled else None)
+    start, _, _ = spread(trained, 0)
+    end, end_low, end_high = spread(trained, -1)
+    control = ""
+    if shuffled:
+        mean, low, high = spread(shuffled, -1)
+        control = (f" On outcomes permuted before the episode the same procedure ends at "
+                   f"{mean} over {len(shuffled)} control arm(s), spanning {low} to {high}, "
+                   f"which is what this fit produces when there is nothing to learn.")
     return (
         f"Training moves the weights and the movement buys prediction. Over "
-        f"{first['labels']} to {last['labels']} labels the ridge arm's coefficient vector grows "
-        f"from an L2 norm of {norm_start} to {norm_end}, and its correlation with the hidden "
-        f"scores on candidates it has not been shown rises from {start} to {end}. On outcomes "
-        f"permuted before the episode the same procedure ends at {control}, which is what this "
-        f"fit produces when there is nothing to learn."
+        f"{first['labels']} to {last['labels']} labels, averaged over {len(trained)} "
+        f"sub-landscape(s) of one assay, the ridge arm's coefficient vector grows from an L2 "
+        f"norm of {norm(trained, 0)} to {norm(trained, -1)}, and its correlation with the "
+        f"hidden scores on candidates it has not been shown rises from {start} to {end}, with "
+        f"the per-landscape endpoint spanning {end_low} to {end_high}.{control}"
     )
 
 

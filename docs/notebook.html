@@ -12368,23 +12368,24 @@ the ones it never saw measured.</p>
       <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">own</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">fixture</span><span class="p">)</span><span class="si">}</span><span class="s2"> of them also a tool-registry test), </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">fixture</span><span class="p">)</span><span class="si">}</span><span class="s2"> using its "</span>
       <span class="sa">f</span><span class="s2">"tool name as a registry fixture, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">landscape</span><span class="p">)</span><span class="si">}</span><span class="s2"> naming </span><span class="si">{</span><span class="n">noncanon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="n">FAILING</span> <span class="o">=</span> <span class="s2">"test_a_vocabulary_encoding_cannot_tell_two_unseen_monomers_apart"</span>
-<span class="n">body</span> <span class="o">=</span> <span class="n">bodies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">FAILING</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+<span class="n">PINNED</span> <span class="o">=</span> <span class="s2">"test_a_vocabulary_encoding_cannot_tell_two_unseen_monomers_apart"</span>
+<span class="n">body</span> <span class="o">=</span> <span class="n">bodies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">PINNED</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
 <span class="n">held</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"held_count=(\d+)"</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
 <span class="k">if</span> <span class="ow">not</span> <span class="n">body</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="n">FAILING</span><span class="si">}</span><span class="s2"> is no longer in the suite; the README's known failure has moved."</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="n">PINNED</span><span class="si">}</span><span class="s2"> is no longer in the suite; the claim below has lost its guard."</span><span class="p">)</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">the suite's one known failing test is in this area, </span><span class="si">{</span><span class="n">FAILING</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">Its first "</span>
-          <span class="sa">f</span><span class="s2">"failing assertion, read out of the test file rather than quoted from memory:"</span><span class="p">)</span>
-    <span class="c1"># The test binds `linear` to the vocabulary-plus-ridge cell, so these are its assertions.</span>
-    <span class="c1"># Only the first is reported as the failure because pytest stops there; the two after it</span>
-    <span class="c1"># read `smallest_separation` and `concordance`, which the record stores as null, so they</span>
-    <span class="c1"># would not pass either. The sibling assertions on the forest cell and on the three</span>
-    <span class="c1"># descriptor arms all hold.</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">the blindness below is pinned by a test rather than argued here, </span><span class="si">{</span><span class="n">PINNED</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+          <span class="sa">f</span><span class="s2">"Its assertions on the vocabulary arm, read out of the test file rather than "</span>
+          <span class="sa">f</span><span class="s2">"quoted from memory:"</span><span class="p">)</span>
+    <span class="c1"># Read from the file so this cannot drift from the test. An earlier revision of this cell</span>
+    <span class="c1"># called the same test the suite's one known failure, quoting an assertion on a `linear`</span>
+    <span class="c1"># binding that no longer exists. That was stale twice over: the test was rewritten to</span>
+    <span class="c1"># assert a tied rate of exactly 1.0 across both model classes, and it passes. The</span>
+    <span class="c1"># withdrawn reading -- separations of about 1e-15 that looked like discrimination -- was</span>
+    <span class="c1"># solver round-off and is recorded as such in the test's own comment.</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">body</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"assert\s.*linear\["</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"assert paired\["</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">"   "</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-            <span class="k">break</span>
 
 <span class="c1"># The holdout size comes out of the test too, so the record shown is the one the test scores.</span>
 <span class="n">rec</span> <span class="o">=</span> <span class="p">(</span><span class="n">RUNS</span> <span class="o">/</span> <span class="s2">"monomers"</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">noncanon</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">_held</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">held</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">.json"</span>
@@ -12573,15 +12574,19 @@ SHOW_BLOCK = 'ClAc-D-Tyr', every field it carries:
    rosetta_params             null
    rotamer_library            null
 
-wired into : 1 of 10 registered tools (chemistry.library_spec), reached by the invoke_design_tool action
+wired into : 1 of 13 registered tools (chemistry.library_spec), reached by the invoke_design_tool action
 it returns : a definition over 25 elongators admitting 158,945,703,125 sequences, produces_evidence=False
 
 datasets   : 10 staged, 3 declaring a noncanonical field, 1 answering yes (thrombin_cyclic)
-tests      : 191 in the suite, 3 calling the chemistry module (1 of them also a tool-registry test), 24 using its tool name as a registry fixture, 5 naming thrombin_cyclic
+tests      : 270 in the suite, 3 calling the chemistry module (1 of them also a tool-registry test), 25 using its tool name as a registry fixture, 5 naming thrombin_cyclic
 
-the suite's one known failing test is in this area, test_a_vocabulary_encoding_cannot_tell_two_unseen_monomers_apart.
-Its first failing assertion, read out of the test file rather than quoted from memory:
-    assert linear["tied_rate"] &lt; 0.01, linear["tied_rate"]
+the blindness below is pinned by a test rather than argued here, test_a_vocabulary_encoding_cannot_tell_two_unseen_monomers_apart.
+Its assertions on the vocabulary arm, read out of the test file rather than quoted from memory:
+    assert paired["pairs"] &gt; 500, f"too few discriminating pairs to pin the claim ({model})"
+    assert paired["tied_rate"] == 1.0, (model, paired["tied_rate"])
+    assert paired["tied_predictions"] == paired["pairs"], model
+    assert paired["concordance"] is None, "an all-tied arm has nothing to be concordant on"
+    assert paired["smallest_separation"] is None, (model, paired["smallest_separation"])
 
 monomer-transfer on thrombin_cyclic: 6 monomers held out, 8448 members, 10 descriptors per block
 </pre>
