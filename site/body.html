@@ -1080,6 +1080,9 @@
     <li><b>Residue numbers come in two countings and both are in the file.</b> One counts along
     the protein, which is what a structure viewer wants. The other counts along the genome, and
     a row only carries it where the reading frame was checked by reading the residues back.</li>
+    <li><b>Most targets have no genome coordinate, and that is a limit of the step above.</b>
+    A protein the pipeline could not place in this genome's own translation has no stretch to
+    convert. Of the ones it did place, almost all carry coordinates.</li>
     <li><b>Nothing in the file was measured on the pathogen.</b> What a protein does, which
     family it belongs to and which residues are marked are all copied from its nearest studied
     relative. Areas are measured on a solved structure of a relative, or on a predicted one.
@@ -1097,19 +1100,41 @@
     <h3>The five weights that pick the target</h3>
     <ul class="pts">
       <li><b>They were never fitted to anything, and the reason given was that there was
-      nothing to fit them against.</b> There is now: 46 genomes whose real drug target is
-      known.</li>
-      <li><b>So they were fitted, holding out one virus family at a time.</b> Fit on twenty
-      families, rank the twenty-first, and compare against the weights the pipeline ships.</li>
-      <li><b>It does not help.</b> Fitting gains two points, which is one genome out of
-      forty-four, and the same fit on deliberately shuffled answers scores just as well. What
-      the comparison does show is that any sensible weighting beats chance by more than twenty
-      points, so the ranking rests on the five terms and not on their weighting.</li>
+      nothing to fit them against.</b> There is now: {{fit_genomes}} genomes whose real drug
+      target is known, across {{fit_families}} virus families and {{fit_rows}} candidate
+      proteins.</li>
+      <li><b>So they were fitted, holding out one virus family at a time.</b> Fit on the other
+      families, rank the held-out one, and compare against the weights the pipeline ships.</li>
+      <li><b>It does not help.</b> Fitting gains {{fit_gain_in_words}} at rank 1, against
+      {{fit_one_genome_worth}} points for a single genome, and the same fit on deliberately
+      shuffled answers scores in the same band. What the comparison does show is that every
+      weighting beats chance by at least {{fit_lift_over_chance}} points, so the ranking rests
+      on the five terms and not on their weighting.</li>
     </ul>
     <!--RUBRIC-->
     <p class="note"><b>The weights the pipeline uses are unchanged.</b> A fitted weighting would
     be fitted toward proteins that already carry a drug, which are the best-studied proteins of
     the best-studied viruses. A new pathogen's real target is not in that set.</p>
+
+    <h3>One of the five terms is measured two different ways</h3>
+    <ul class="pts">
+      <li><b>The heaviest term asks how conserved a protein is, and it is not one number.</b>
+      Where a close relative is found it counts shared fragments of sequence. Where only a
+      distant one is found it uses a different quantity that saturates, so most distant
+      matches score full marks.</li>
+      <li><b>Both numbers go into the same slot and are multiplied by the same weight.</b> On a
+      genome where some proteins were measured one way and some the other, the ranking is
+      comparing quantities that are not comparable.</li>
+      <li><b>That costs real accuracy, and this is the measurement.</b>
+      {{scale_mixed_genomes}} of the {{fit_genomes}} genomes are measured both ways, and they
+      rank {{scale_cost}} points worse. Removing the term buys {{scale_drop_buys_mixed}}
+      points on them and {{scale_drop_buys_single}} on the rest, which is what you would see
+      if the mixing were the problem rather than the term being weak.</li>
+    </ul>
+    <!--CONSERVATION-->
+    <p class="note"><b>The fix is not a rescaling.</b> Converting one measure into the other
+    would need a conversion factor chosen by hand. The pipeline already holds the alignment it
+    would need to measure both the same way, and that is where this should be repaired.</p>
   </div>
 
   <div class="substep">

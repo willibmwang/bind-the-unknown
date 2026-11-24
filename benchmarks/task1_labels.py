@@ -157,6 +157,45 @@ ALIAS_OVERRIDE = {
     # pointing at.
     ("Hepatitis C virus", "NS5B"): ("ns5b", "non structural protein 5b",
                                     "rna directed rna polymerase"),
+
+    # The four below were added on 23 Nov 2026 after auditing all 23 unmatched labels against
+    # the candidates the ranker actually produced. Nineteen of the twenty-three are real
+    # misses -- no thymidine kinase, terminase, UL97 or p37 appears anywhere in the relevant
+    # candidate list, and those stay unmatched. These four are the opposite case: the ranker
+    # found the protein and put it near the top, and the matcher could not see it because
+    # UniProt names the mature products rather than the protein the panel names. That is the
+    # same correction `("HIV-1", "Envelope")` above already makes, scoped the same way.
+    #
+    # Each is the panel UNDER-reporting itself, so adding them is not the loosening
+    # `matches` warns about; the aliases name the same molecule and are scoped to one
+    # pathogen, so none of them can reach another genome's list.
+
+    # Ebola's GP is cleaved by furin into GP1 and GP2, and the record names the two products.
+    # The approved monoclonals this row is graded on -- ansuvimab, and the
+    # atoltivimab-maftivimab-odesivimab combination -- bind GP. GP1 is rank 1 and GP2 rank 6 of
+    # nine candidates, so the ranker had the target first and scored zero for it. **This is the
+    # only one of the four that is `approved`, so it is the only one that moves the strong
+    # tier, and with it Filoviridae goes from contributing no p-value to contributing one.**
+    ("Ebola virus Zaire", "Envelope glycoprotein"): (
+        "envelope glycoprotein", "glycoprotein", "spike glycoprotein", "gp1", "gp2"),
+
+    # A rhabdovirus L protein is the RNA-directed RNA polymerase; UniProt calls the entry
+    # "Large structural protein" and never uses the functional name. Rank 1 of five. Graded
+    # `research target` -- no agent binds L -- so this does not reach the strong tier.
+    ("Rabies virus", "RNA-directed RNA polymerase"): (
+        "rna directed rna polymerase", "rna dependent rna polymerase", "rdrp",
+        "large structural protein"),
+
+    # An alphavirus envelope is E1 and E2, and E2 arrives as the E3/E2 precursor the record
+    # names. Scoped per pathogen rather than added to the shared `Envelope` pattern, because
+    # `E1` means something else in the flaviviruses that share it. Graded `vaccine_antigen`
+    # and `class_effect`, so neither reaches the strong tier.
+    ("Chikungunya virus", "Envelope"): (
+        "envelope", "envelope protein", "envelope glycoprotein",
+        "spike glycoprotein e1", "precursor of protein e3 e2"),
+    ("Venezuelan equine encephalitis virus", "Envelope"): (
+        "envelope", "envelope protein", "envelope glycoprotein",
+        "spike glycoprotein e1", "precursor of protein e3 e2"),
 }
 
 

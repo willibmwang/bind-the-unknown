@@ -578,13 +578,41 @@ def run_panel(tier="strong", directory=PANEL_RUNS):
         })
 
     across = stouffer([f["combined_p"]["p"] for f in per_family])
+    # **A family that contributed no p-value is not an independent instance.** `stouffer` drops
+    # a `None`, so combining ten families can yield a k of nine, and reporting ten instances
+    # beside a k of nine states two different counts of the same thing. The dropped family is
+    # one whose labels matched no candidate the ranker produced -- a statement about
+    # identification, not about the ranking -- so it contributed no test rather than a failed
+    # one, and is named here rather than folded into the denominator.
+    # Two different things make a family contribute nothing, and the field says which. A family
+    # none of whose labels matched never had its ranking tested at all. A family whose p is
+    # exactly 0 or 1 -- Rift Valley fever, with one identified candidate and that candidate the
+    # label -- was tested and the test cannot discriminate, which `stouffer` excludes by the
+    # same rule. Neither is a failed test and neither belongs in the instance count.
+    silent = []
+    for f in per_family:
+        if f["combined_p"].get("p") is not None:
+            continue
+        silent.append({
+            "family": f["family"], "pathogens": f["pathogens"],
+            "labels": f["labels"], "matched": f["matched"],
+            "because": (
+                "no label matched any candidate the ranker produced, so this family's ranking "
+                "was never tested" if not f["matched"] else
+                "its labels matched, and every p-value it produced was exactly 0 or 1, which "
+                "carries no information. A genome with one identified candidate that is itself "
+                "the label cannot rank it wrongly, so there is nothing for the combination to "
+                "read"),
+        })
     all_ranks = [r for row in rows for r in row["ranks"]]
     return {
         "benchmark": "task1-drugged-target-retrieval",
         "tier": tier,
         "labels": task1_labels.counts(),
         "genomes_scored": len(rows), "genomes_without_a_record": missing,
-        "independent_instances": len(per_family),
+        "independent_instances": len(per_family) - len(silent),
+        "families_scored": len(per_family),
+        "families_without_a_usable_p": silent,
         "labels_total": sum(r["labels"] for r in rows),
         "labels_matched": sum(r["matched"] for r in rows),
         "unmatched": [(r["pathogen"], u) for r in rows for u in r["unmatched"]],

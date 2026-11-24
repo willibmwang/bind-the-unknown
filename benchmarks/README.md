@@ -156,32 +156,53 @@ match counts spike once at rank 1, where counting matching *chains* made S1/S2/S
 
 ### What it found
 
-Scored over the 13 genomes carrying a strong label, 9 families, 24 strong labels:
+Scored over the 14 genomes carrying a strong label, 10 families, 27 strong labels:
 
 | | observed | chance | lift |
 |---|---|---|---|
-| recall@1 | 46.2% | 13.1% | **+33.1** |
-| recall@3 | 84.6% | 36.5% | **+48.1** |
-| recall@5 | 100.0% | 55.3% | **+44.7** |
-| recall@10 | 100.0% | 88.2% | +11.8 |
+| recall@1 | 50.0% | 12.0% | **+38.0** |
+| recall@3 | 64.3% | 32.7% | **+31.6** |
+| recall@5 | 85.7% | 48.0% | **+37.7** |
+| recall@10 | 100.0% | 71.7% | **+28.3** |
 
-Combined across families by Stouffer: **p = 2.1 × 10⁻⁴**, MRR 0.52, 20 of 24 labels matched.
+Combined across families by Stouffer: **p = 1.6 × 10⁻⁵**, MRR 0.50, 22 of 27 labels matched.
 
-**But the aggregate rests on three genomes.** Only SARS-CoV-2 (p = 0.0035), HIV-1 (0.039) and RSV
-(0.046) individually beat chance. Nine are **underpowered** — most carry a single strong label, and
-with one label among eleven candidates the best attainable p is 0.09, so even a perfect ranking is
-weak evidence. One genome **does not** beat chance: HCV at p = 0.36, with NS5A — an approved
-ledipasvir target — ranked 12th of 12. That is the kind of specific failure a bare recall figure
-hides.
+**Recomputed 23 Nov 2026, and two of the figures moved down.** The panel gained Hepatitis B,
+whose run had died on a DNS failure, and its per-genome records were regenerated, which changed
+both the numerator and the chance baseline. recall@3 fell from 84.6% to 64.3% and recall@5 from
+100% to 85.7%; recall@1 rose from 46.2% to 50.0% and every lift over chance grew. `runs/benchmark/`
+is untracked, so when each record was regenerated cannot be recovered from git. The figures above
+are what the records on disk now produce.
 
-**Four strong labels go unmatched, and all four are real candidate-stage gaps rather than alias
-bugs.** HCMV's terminase and UL97 kinase, and the poxvirus p37, in both monkeypox and vaccinia:
-the ranker proposed none of them. The distinction was checked chain name by chain name, because a
-missing alias and a protein never proposed arrive identically in the output — four of the eight
-first-pass misses were name gaps and four were absences, and widening aliases until everything
-matches is how the second kind gets quietly converted into the first.
+**The aggregate rests on one genome.** Only SARS-CoV-2 (p = 0.0013) individually beats chance.
+Eleven are **underpowered** — most carry a single strong label, and with one label among eleven
+candidates the best attainable p is 0.09, so even a perfect ranking is weak evidence. Two genomes
+**do not** beat chance: HIV-1 at p = 0.094 and HCV at p = 0.33, the latter with NS5A — an approved
+ledipasvir target — ranked last of its candidates. That is the kind of specific failure a bare
+recall figure hides, and the per-genome column is where to look for it rather than the headline.
 
-### Status: reconciliation with `output/run_benchmark.py`, agreed with its author
+**Five strong labels go unmatched, and all five are real candidate-stage gaps rather than alias
+bugs.** HCMV's terminase and UL97 kinase, the poxvirus p37 in both monkeypox and vaccinia, and
+influenza's M2 — the amantadine target, a 97-residue product of a spliced transcript that
+identification never proposed. The ranker named none of the five. Note that the matcher refuses
+`Matrix protein 1` for `Matrix protein 2`, which is the token-run rule doing exactly what it was
+written for: influenza's M1 is rank 7 and is not the target.
+
+**A sixth was an alias bug, and it was corrected on 23 Nov 2026.** All 23 unmatched labels across
+both tiers were audited against the candidates the ranker produced. Nineteen are absences. Four
+are cases where the protein was found, ranked near the top, and named by its mature products, so
+the matcher could not see it: Ebola's GP as `GP1` and `GP2` at ranks 1 and 6, rabies's polymerase
+as `Large structural protein` at rank 1, and the alphavirus envelope as `Spike glycoprotein E1`
+and `Precursor of protein E3/E2` in chikungunya and VEEV. Each is now a per-pathogen entry in
+`ALIAS_OVERRIDE`, the same correction `("HIV-1", "Envelope")` already made, and
+`test_an_alias_override_names_the_same_molecule_and_reaches_no_other_genome` pins each one to the
+chain it was written for and checks it reaches no other.
+
+Only Ebola's is `approved`, so only Ebola moves the strong tier: Filoviridae went from
+contributing no p-value to contributing one, and the panel's ten families now all reach the
+combination. **Widening aliases until everything matches is how an absence gets quietly converted
+into a name gap**, which is why the nineteen absences were left alone and why the audit is
+recorded here by name rather than as a count.
 
 ### Status: reconciliation with `output/run_benchmark.py`, agreed with its author
 

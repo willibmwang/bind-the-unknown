@@ -8182,3 +8182,80 @@ def test_the_weight_map_is_diverging_and_the_control_is_drawn_beside_it():
     assert build_site._weight_band(-0.5, 0.5) == "n4"
     assert build_site._weight_band(0.0, 0.5) == "z0"
     assert build_site._weight_band(0.01, 0.5) == "z0"
+
+
+def test_the_conservation_scale_split_separates_the_genomes_it_claims_to():
+    """The measurement of `intake`'s own documented defect, checked for what it compares.
+
+    `intake` records that the heaviest term arrives on two incomparable scales and refuses to
+    rescale, because calibrating one against the other needs a labelled set of correct
+    rankings. That set exists now, so the cost is measurable: the genomes carrying both scales
+    against the genomes carrying one. The split is only worth reading if every genome lands in
+    exactly one group and the groups are the ones the names say.
+    """
+    from hpc_pilots import rubric_fit
+
+    genomes, _ = _fit_genomes()
+    crossed = rubric_fit.leave_one_family_out(genomes, epochs=100)
+    split = rubric_fit.scale_split(genomes, crossed)
+
+    mixed = set(split["mixed_scale_genomes"])
+    assert split["counts"]["mixed"] == len(mixed)
+    assert split["counts"]["mixed"] + split["counts"]["single"] == len(genomes)
+    # Every named genome really does carry two scales, and no unnamed one does. "unrecorded"
+    # is not a scale and must not make a genome look mixed.
+    for genome in genomes:
+        scales = {s for s, n in genome["conservation_scales"].items()
+                  if n and s != "unrecorded"}
+        assert (genome["pathogen"] in mixed) == (len(scales) > 1), genome["pathogen"]
+    # Both groups are scored for every arm, over disjoint sets that exhaust the panel.
+    for arm, groups in split["arms"].items():
+        assert set(groups) == {"mixed", "single"}, arm
+        assert groups["mixed"]["genomes"] + groups["single"]["genomes"] == len(genomes), arm
+    # And the reading travels with it, because both figures are over tens of genomes and
+    # neither carries an interval.
+    assert "over-read" in split["reading"]
+
+
+def test_the_weight_prose_takes_every_number_from_the_record():
+    """No figure in this section is typed into the page.
+
+    Added because one was. The prose said fitting gains two points; the labels were corrected,
+    the gain went to zero, and the sentence stayed. `fill` raises on a token it cannot
+    resolve, so the tokens themselves are safe -- what this checks is that the facts are
+    present and that the round numbers quoted in words agree with the record they came from.
+    """
+    import sys as _sys
+
+    _sys.path.insert(0, str(ROOT / "output"))
+    import build_site                                       # noqa: PLC0415
+
+    _needs("runs/rubric_fit.json")
+    facts = build_site.rubric_facts()
+    record = build_site.rubric_fit_record()
+    comparison = record["comparison"]
+    assert facts["fit_genomes"] == record["genomes_scored"]
+    assert facts["fit_families"] == record["families"]
+    assert facts["fit_rows"] == record["candidate_rows"]
+    # The lift quoted as a floor really is a floor: every arm clears it.
+    floor = float(facts["fit_lift_over_chance"])
+    for arm, recall in comparison["recall_by_arm"].items():
+        assert recall["top1"] - comparison["chance"]["top1"] >= floor - 1, arm
+    # "nothing at all" is claimed only when the gain is smaller than one genome, which is the
+    # resolution of the figure it is describing.
+    gain = abs(comparison["fitted_minus_stated"]["top1"])
+    if facts["fit_gain_in_words"] == "nothing at all":
+        assert gain < comparison["one_genome_is_worth"]
+    else:
+        assert gain >= comparison["one_genome_is_worth"]
+    # The scale-split figures match the record too.
+    split = record["conservation_scale_split"]
+    assert facts["scale_mixed_genomes"] == split["counts"]["mixed"]
+    assert (facts["scale_mixed_genomes"] + facts["scale_single_genomes"]
+            == record["genomes_scored"])
+
+    # The block names both groups and both arms, so a reader can tell which bar is which.
+    drawn = build_site.conservation_block()
+    assert drawn
+    assert "genomes with both scales" in drawn and "genomes with one scale" in drawn
+    assert "the weights it ships" in drawn and "without this term" in drawn

@@ -438,13 +438,14 @@ def build_index():
     body = body.replace("<!--TRACK-->", feature_track(holdout))
     body = body.replace("<!--HANDOFF-->", handoff_block())
     body = body.replace("<!--RUBRIC-->", rubric_block())
+    body = body.replace("<!--CONSERVATION-->", conservation_block())
     body = body.replace("<!--WEIGHTS-->", weights_block())
     body = body.replace("<!--OFFCHAIN-->", build_offchain())
     # Last, so a {{token}} introduced by any generated block above is filled too. The
     # landing page is the held-out case throughout, so its numbers come from that case.
     body = fill(body, facts(holdout) | candidate_facts(holdout) | chain_facts(holdout)
                 | picked_facts(holdout) | lane_facts(holdout)
-                | site_patch_facts(holdout))
+                | site_patch_facts(holdout) | rubric_facts())
     # The fold renderer once for the page, after every fold placeholder it draws into.
     body += FOLD_TRACE_JS
     out = (head(f"{SITE} · one pathogen genome in, every next step out",
@@ -2166,6 +2167,91 @@ def rubric_block():
     </div>"""
 
 
+def rubric_facts():
+    """The numbers the weight-fitting prose quotes, so none of them is typed into the page.
+
+    Added after the prose said "fitting gains two points" and a re-run with corrected labels
+    made it gain none. The page's rule is that a number comes from the record; this section
+    had four that did not, and they drifted the first time the record moved.
+    """
+    record = rubric_fit_record()
+    if not record:
+        return {}
+    comparison = record["comparison"]
+    gain = comparison["fitted_minus_stated"]["top1"]
+    recall = comparison["recall_by_arm"]
+    split = record.get("conservation_scale_split") or {}
+    return {
+        "fit_genomes": record["genomes_scored"],
+        "fit_families": record["families"],
+        "fit_rows": record["candidate_rows"],
+        "fit_gain_at_1": f"{gain:+g}",
+        # Said in words, because "gains +0.0 points" reads as a rounding artefact rather than
+        # as the finding. The threshold is one genome: below that the figure cannot resolve.
+        "fit_gain_in_words": (
+            "nothing at all" if abs(gain) < comparison["one_genome_is_worth"] else
+            f"{abs(gain):.0f} points, and loses them again at other depths" if gain > 0 else
+            f"{abs(gain):.0f} points worse"),
+        "fit_one_genome_worth": f"{comparison['one_genome_is_worth']:.1f}",
+        "fit_spread": f"{comparison['spread_across_arms']['top1']:.0f}",
+        "fit_chance": f"{comparison['chance']['top1']:.0f}",
+        "fit_best_arm": f"{max(r['top1'] for r in recall.values()):.0f}",
+        "fit_worst_arm": f"{min(r['top1'] for r in recall.values()):.0f}",
+        "fit_lift_over_chance": f"{min(r['top1'] for r in recall.values()) - comparison['chance']['top1']:.0f}",
+        "scale_mixed_genomes": (split.get("counts") or {}).get("mixed", 0),
+        "scale_single_genomes": (split.get("counts") or {}).get("single", 0),
+        "scale_cost": f"{split.get('shipped_rubric_costs_on_mixed_genomes', 0):.0f}",
+        "scale_drop_buys_mixed": f"{(split.get('dropping_conservation_buys') or {}).get('mixed', 0):.0f}",
+        "scale_drop_buys_single": f"{(split.get('dropping_conservation_buys') or {}).get('single', 0):.0f}",
+    }
+
+
+def conservation_block():
+    """What the heaviest term's two incomparable scales cost, measured rather than argued.
+
+    `intake` has recorded this defect for some time and refused to repair it, on the ground
+    that converting one scale into the other needs a labelled set of correct rankings and none
+    existed. One exists now, so the cost is a measurement: the genomes carrying both scales
+    rank worse than the ones carrying one, and removing the term closes the gap between them.
+    """
+    record = rubric_fit_record()
+    if not record or "conservation_scale_split" not in record:
+        return ""
+    split = record["conservation_scale_split"]
+    arms = split["arms"]
+    rows = []
+    for arm, label in (("stated", "the weights it ships"),
+                       ("fitted_without_conservation", "the same, without this term")):
+        for group, name in (("mixed", "genomes with both scales"),
+                            ("single", "genomes with one scale")):
+            value = (arms[arm][group].get("recall_at_k") or {}).get("top1")
+            if value is None:
+                continue
+            rows.append(f"""
+      <div class="wr">
+        <span class="who">{esc(label)}, {esc(name)}</span>
+        <span class="plot">{_bar(value, cls="b" if arm == "stated" else "b pred")}</span>
+        <span class="vl">{value:.0f}%</span>
+      </div>""")
+    if not rows:
+        return ""
+    costs = split["shipped_rubric_costs_on_mixed_genomes"]
+    buys = split["dropping_conservation_buys"]
+    return f"""
+    <div class="lane">
+      <div class="lane-grp"><span class="gl">How often a drugged target comes first, split by
+        whether the genome's rows were measured on one scale or two</span></div>
+      <div class="lane-axis" aria-hidden="true"><span></span>
+        <span class="ax"><b class="l0">0</b><b class="lm">100%</b></span><span></span></div>
+      {''.join(rows)}
+      <div class="lane-foot"><p>{split['counts']['mixed']} of
+        {split['counts']['mixed'] + split['counts']['single']} genomes are measured on both
+        scales. They rank {costs:.0f} points worse than the rest. Dropping the term buys
+        {buys['mixed']:.0f} points on them and {buys['single']:.0f} on the others, and once it
+        is gone the two groups are indistinguishable.</p></div>
+    </div>"""
+
+
 ARM_NAME = {
     "stated": "the five weights it ships",
     "uniform": "every term weighted alike",
@@ -2275,7 +2361,9 @@ def handoff_block():
       <div><dt class="s">what it does</dt>
         <dd><span class="v">{num(index['targets_with_a_function'])}</span><span class="u">targets described</span></dd></div>
       <div><dt class="s">genome coordinates</dt>
-        <dd><span class="v">{num(index['targets_with_nucleotide_coordinates'])}</span><span class="u">targets located</span></dd></div>
+        <dd><span class="v">{num(index['targets_with_nucleotide_coordinates'])}</span><span
+          class="u">of {num(index.get('targets_located_in_a_reading_frame'))} that can have
+          them</span></dd></div>
     </dl>
     <ul class="pts">
       <li><b>{num(kinds.get('hydrophobic_patch', 0) + kinds.get('hydrophobic_patch_predicted', 0))}
@@ -2291,6 +2379,12 @@ def handoff_block():
       <li><b>{num(index['targets_already_drugged'])} targets already carry an approved
       antiviral.</b> That column is how the list reads as a check on itself rather than only as
       a proposal.</li>
+      <li><b>{num(index['targets_with_a_function'])} targets say what the protein does</b>, and
+      the row says where the description came from.
+      {num(index['targets_with_a_function_for_this_chain'])} are written about that chain
+      specifically; the other {num(index['targets_with_only_the_entrys_function'])} are written
+      about the whole protein it was cut from, which is the same protein where nothing was cut.
+      </li>
     </ul>
     <p class="acts">
       <a class="btn" href="handoff/targets.csv">Download the target list (CSV)</a>

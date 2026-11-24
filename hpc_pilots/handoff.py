@@ -154,7 +154,9 @@ def _sites(surface, span, frame, segment_length):
             "site_types": sorted({s.get("type") for s in sites if s.get("type")}),
             "site_descriptions": [s.get("description") for s in sites if s.get("description")],
             "ligands": sorted({s.get("ligand") for s in sites if s.get("ligand")}),
-            "on_predicted_coordinates": None,
+            # Not a measurement on coordinates at all, so neither True nor False is right and
+            # a blank would be read as False beside the rows that are.
+            "on_predicted_coordinates": "not a structural measurement",
             "what_it_is": "residues a curator marked on the nearest relative as an active "
                           "site, a binding site or a cleavage site, carried into this genome's "
                           "numbering through the alignment",
@@ -172,7 +174,11 @@ def _sites(surface, span, frame, segment_length):
             "measured_on": site_surface.get("measured_on"),
             "shares_the_largest_patch": site_surface.get("site_shares_the_patch"),
             "at_the_annotated_residues": site_surface.get("measured_at_the_annotated_residues"),
-            "on_predicted_coordinates": None,
+            # This one is read off the deposited lane -- `predicted_surface` carries its own
+            # `site_surface` for the other -- so it is a deposited measurement and says so.
+            # Left as None it printed as a blank cell, which on a column whose other values
+            # are True and False reads as False rather than as "not recorded".
+            "on_predicted_coordinates": False,
             "what_it_is": "the part of the greasy patch that lies within reach of the marked "
                           "residues, which is where a macrocycle would both bind the surface "
                           "and block the chemistry",
@@ -458,6 +464,9 @@ def run_handoff(accession=None, record=True, annotate_missing=True):
                     if any(s["site_kind"] == "functional_site" for s in t["sites"])),
                 "with_nucleotide_coordinates": sum(
                     1 for t in targets if t.get("chain_span_nt")),
+                "with_a_function": sum(
+                    1 for t in targets
+                    if t.get("function") or t.get("function_of_the_whole_entry")),
                 "already_drugged": sum(1 for t in targets if t.get("already_drugged")),
             },
             "limitations": LIMITATIONS,
@@ -480,11 +489,39 @@ def run_handoff(accession=None, record=True, annotate_missing=True):
             "rows_by_site_kind": {kind: sum(1 for r in rows if r["site_kind"] == kind)
                                   for kind in SITE_KINDS + ("none",)},
             "targets_already_drugged": sum(1 for t in everything if t.get("already_drugged")),
-            "targets_with_a_function": sum(1 for t in everything if t.get("function")),
+            # **Counted as the file carries it, not as the chain-level field alone.** An entry
+            # that describes only itself -- 166 of the relatives here are single-chain entries
+            # with no per-molecule annotation at all, and a few more name the molecule without
+            # giving it its own FUNCTION -- still says what the protein does, and the CSV's
+            # `function` column already falls back to it. Counting only `function` reported 146
+            # where the file holds 327, which understated the export by more than half.
+            "targets_with_a_function": sum(
+                1 for t in everything
+                if t.get("function") or t.get("function_of_the_whole_entry")),
+            "targets_with_a_function_for_this_chain": sum(
+                1 for t in everything if t.get("function")),
+            "targets_with_only_the_entrys_function": sum(
+                1 for t in everything
+                if not t.get("function") and t.get("function_of_the_whole_entry")),
+            "what_the_two_function_counts_mean":
+                "A polyprotein entry carries one FUNCTION paragraph per mature chain, and that "
+                "is the better answer where it exists. A single-chain entry carries one for "
+                "itself, which describes the same protein. Both are in the file and the row "
+                "says which it got; only the first is attributable to one product of a "
+                "polyprotein.",
             "targets_with_a_host_interaction": sum(
                 1 for t in everything if t.get("interacts_with_host")),
             "targets_with_nucleotide_coordinates": sum(
                 1 for t in everything if t.get("chain_span_nt")),
+            # **The denominator that makes the coverage readable.** A chain the fold stage
+            # never located in this genome's translation has no span, so no reading frame and
+            # no coordinate are possible for it -- that is a limit of identification, not of
+            # this conversion. Against all 396 targets the coverage looks poor; against the
+            # ones that have a span at all it is most of them.
+            "targets_located_in_a_reading_frame": sum(
+                1 for t in everything if t.get("chain_span_in_the_reading_frame")),
+            "targets_with_no_span_to_convert": sum(
+                1 for t in everything if not t.get("chain_span_in_the_reading_frame")),
             "columns": list(COLUMNS),
             "limitations": LIMITATIONS,
             "provenance": provenance(),

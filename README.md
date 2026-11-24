@@ -375,10 +375,21 @@ python3 output/measure_track_labels.py --all              # check no figure labe
 **What comes out of the last four.** `runs/rubric_fit.json` answers a question
 `intake.rank_score` had closed: it refused to fit the five weights because no labelled set of
 correct target rankings existed, and the 46-genome panel is now that set. Fitted under
-leave-one-family-out, the weights gain 2.2 points at rank 1 over the ones the pipeline ships,
-which is one genome of 44, and the same fit on shuffled labels scores in the same band, so
-nothing was learned. Every weighting beats chance by more than twenty points, so the ranking
-rests on the five terms rather than on their weighting, and `intake.RUBRIC` is unchanged.
+leave-one-family-out, the weights gain nothing at rank 1 over the ones the pipeline ships, and
+the same fit on shuffled labels scores in the same band, so nothing was learned. Every
+weighting beats chance by at least 29 points, so the ranking rests on the five terms rather
+than on their weighting, and `intake.RUBRIC` is unchanged.
+
+**The same record localises a defect `intake` had already documented and declined to repair.**
+The heaviest term, conservation, arrives on two incomparable scales: a shared-k-mer fraction on
+the exact tier and `min(1, bits/200)` on the remote one, the second mostly saturated. 17 of the
+44 scoreable genomes carry rows on both, and under the shipped rubric those genomes rank **12
+points worse at rank 1** than the 27 carrying one scale throughout. Dropping the term buys 18
+points on the mixed group and 4 on the clean one, after which the two are indistinguishable —
+which is what you see if the mixing is the problem rather than the term being weak. The repair
+is not a rescaling, which would need a conversion factor chosen by hand; it is the one `intake`
+names itself, a single quantity on both tiers, and `identify_remote` already holds the
+alignment it would be measured from.
 
 `runs/weights/binding.json` is the other weight vector, and that one does learn. A `ridge`
 surrogate joins the registry so there are coefficients to inspect at all, with the forest still

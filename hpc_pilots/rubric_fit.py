@@ -597,6 +597,7 @@ def run_rubric_fit(tier="strong", epochs=8000, rate=0.08, penalty=1e-3, seed=202
         "epochs": epochs, "rate": rate, "penalty": penalty, "seed": seed,
         "cross_validation": crossed,
         "comparison": comparison,
+        "conservation_scale_split": scale_split(genomes, crossed),
         "recall_gain_over_stated": comparison["fitted_minus_stated"],
         "conservation_scales": scales,
         "weights_are_not_installed":
@@ -686,6 +687,73 @@ def compare_arms(crossed):
         "paired_against_stated": {arm: paired(per_genome[arm], per_genome["stated"])
                                   for arm in held if arm != "stated"},
     }
+
+
+def scale_split(genomes, crossed):
+    """Does mixing the two conservation scales inside one genome cost ranking accuracy?
+
+    `intake` records the defect and refuses to repair it: the exact tier reports shared k-mers
+    over the query's k-mer count, the remote tier reports `min(1, bits/200)`, both land in the
+    heaviest term, and the remote one is mostly saturated. The comment gives a worked inversion
+    -- ORF8's 57%-identical homolog outscoring ORF7a's 89%-identical one, with every other
+    feature zero on both rows -- and refuses a rescaling on the ground that calibrating one
+    scale against the other needs a labelled set of correct rankings, which did not exist.
+
+    It exists now, and it is the set this module already uses, so the claim can be measured
+    instead of argued. **17 of the 44 scoreable genomes carry rows on both scales**, and inside
+    those a single ranking compares two incomparable numbers. The other 26 carry one scale
+    throughout and have no mixing to suffer from, so they are the control.
+
+    Two readings, from the same held-out rows:
+
+    * the shipped rubric on mixed-scale genomes against single-scale ones, which is the direct
+      cost if there is one;
+    * how much dropping conservation entirely buys on each group. If the term is simply weak
+      the two should gain alike, and if the *mixing* is what hurts then dropping it should buy
+      far more on the mixed group than on the clean one.
+
+    This measures the defect; it does not repair it. The repair `intake` names is one quantity
+    on both tiers -- alignment identity, which `identify_remote` already holds the alignment
+    for -- and that belongs in `intake` beside the instrument it would be measured against,
+    not in a weighting experiment.
+    """
+    mixed = set()
+    for genome in genomes:
+        scales = {s for s, n in genome["conservation_scales"].items()
+                  if n and s != "unrecorded"}
+        if len(scales) > 1:
+            mixed.add(genome["pathogen"])
+
+    out = {
+        "what": "genomes whose candidate rows carry conservation on both scales, against "
+                "those carrying one throughout",
+        "mixed_scale_genomes": sorted(mixed),
+        "counts": {"mixed": len(mixed), "single": len(genomes) - len(mixed)},
+        "arms": {},
+    }
+    for arm, rows in crossed["per_genome"].items():
+        groups = {"mixed": [r for r in rows if r["pathogen"] in mixed],
+                  "single": [r for r in rows if r["pathogen"] not in mixed]}
+        out["arms"][arm] = {name: aggregate(group) for name, group in groups.items()}
+
+    stated, without = out["arms"]["stated"], out["arms"]["fitted_without_conservation"]
+    def at(block, group, depth="top1"):
+        return (block[group].get("recall_at_k") or {}).get(depth)
+    out["shipped_rubric_costs_on_mixed_genomes"] = (
+        None if at(stated, "mixed") is None or at(stated, "single") is None
+        else round(at(stated, "single") - at(stated, "mixed"), 1))
+    out["dropping_conservation_buys"] = {
+        group: (None if at(without, group) is None or at(stated, group) is None
+                else round(at(without, group) - at(stated, group), 1))
+        for group in ("mixed", "single")}
+    out["reading"] = (
+        "A positive `shipped_rubric_costs_on_mixed_genomes` is how many points at rank 1 the "
+        "genomes with one scale recover over the genomes with two. If `dropping_conservation_"
+        "buys` is much larger on `mixed` than on `single`, the mixing is what the term is "
+        "losing to rather than the term being weak everywhere. Both are over-read easily: "
+        "these are tens of genomes, one genome is worth several points, and no interval is "
+        "computed for either.")
+    return out
 
 
 def _verdict(comparison):
