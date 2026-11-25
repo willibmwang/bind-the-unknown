@@ -68,13 +68,13 @@ ALPHABET = {"thrombin_cyclic": 30, "cycpept_len6_pampa": 118}
 # wrote them and a reader should see what was excluded.
 UNDERPOWERED = {"cycpept_len6_pampa": (2, 4)}
 
-LABEL = {"thrombin_cyclic": "Thrombin library, 30 monomers, target binding",
-         "cycpept_len6_pampa": "CycPeptMPDB length 6, 118 monomers, membrane permeability"}
+LABEL = {"thrombin_cyclic": "Does it stick to its target?\nthrombin, 30 blocks, one laboratory",
+         "cycpept_len6_pampa": "Does it get through a membrane?\nCycPeptMPDB, 118 blocks, 22 laboratories"}
 
 # Where each line carries its own name: the point to anchor on, how far off the line, and
 # which side. Direct labels rather than a legend box, so identity is never a colour lookup.
-ANCHOR = {"thrombin_cyclic": (3, 0.135, "bottom"),
-          "cycpept_len6_pampa": (6, 0.135, "bottom")}
+ANCHOR = {"thrombin_cyclic": (3, 0.105, "bottom"),
+          "cycpept_len6_pampa": (6, 0.115, "bottom")}
 
 
 def style(mode):
@@ -504,10 +504,17 @@ def figure_transfer(c, mode):
                 "uninterpretable.\nDrawn because it ran them.",
                 (25.5, 0.66), ha="left", va="top", fontsize=8.5, color=c["muted"],
                 linespacing=1.45)
-    ax.set_xlabel("monomers held out, % of the landscape's own alphabet", fontsize=10,
-                  color=c["secondary"])
-    ax.set_ylabel("held-out Spearman, real descriptors minus shuffled", fontsize=10,
-                  color=c["secondary"])
+    ax.set_xlabel("share of that library's own building blocks hidden from the model, %",
+                  fontsize=10, color=c["secondary"])
+    # The y quantity is the whole argument and reads as an abstraction without the direction
+    # said out loud. It goes in the axis label rather than in a margin arrow, which collided
+    # with the label and the tick numbers at every position that was also legible.
+    ax.set_ylabel("real chemistry minus scrambled chemistry\n"
+                  "held-out Spearman · higher means the structures helped",
+                  fontsize=10, color=c["secondary"], linespacing=1.6)
+    ax.annotate("0 = the real structures\nwere worth nothing", (0.995, 0.055),
+                xycoords="axes fraction", ha="right", va="bottom", fontsize=8.5,
+                color=c["secondary"], linespacing=1.4)
     ax.set_xlim(0, 43)
     ax.set_ylim(-0.17, 0.72)
 
@@ -515,9 +522,10 @@ def figure_transfer(c, mode):
         fig, c,
         "The monomer-transfer null does not hold on a second landscape",
         "On the thrombin library, grounding a held-out monomer in measured structure adds no "
-        "ranking skill over a vocabulary encoding. That was one assay, one target, one "
-        "laboratory. On membrane permeability over four times the alphabet, the same "
-        "advantage is there at every size.",
+        "ranking skill over a vocabulary encoding: the real structures are worth no more "
+        "than structures shuffled between blocks. That was one assay, one target, one "
+        "laboratory. On membrane permeability over four times the alphabet they are worth a "
+        "great deal, at every size.",
         "runs/monomers/thrombin_cyclic_sweep.json and cycpept_len6_pampa_sweep.json, random "
         "forest arm, five draws a size, bars are the draw-to-draw deviation of the "
         "real-descriptor arm and not an interval. Endpoint is confounded with library "
